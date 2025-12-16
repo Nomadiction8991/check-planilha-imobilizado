@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rg = trim($_POST['rg'] ?? '');
     $rg_igual_cpf = isset($_POST['rg_igual_cpf']) ? 1 : 0;
     $telefone = trim($_POST['telefone'] ?? '');
-    $assinatura = trim($_POST['assinatura'] ?? '');
+
     
     // Estado civil e cÃ´njuge
     $casado = isset($_POST['casado']) ? 1 : 0;
@@ -126,10 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Todos os campos de endereço (CEP, logradouro, número, bairro, cidade e estado) são obrigatórios.');
         }
 
-        // Assinatura obrigatÃ³ria
-        if (empty($assinatura)) {
-            throw new Exception('A assinatura do usuário é obrigatória.');
-        }
+
 
         // Se casado, apenas formatar RG se fornecido (dados do cônjuge são opcionais)
         if ($casado) {
@@ -139,25 +136,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rg_conjuge = $formatarRg($rg_conjuge);
             }
         } else {
-            // Se nÃ£o casado, limpar campos de cÃ´njuge para evitar dados Ã³rfÃ£os
-            $nome_conjuge = $cpf_conjuge = $rg_conjuge = $telefone_conjuge = $assinatura_conjuge = '';
-            $rg_conjuge_igual_cpf = 0;
-        }
+            // Se não casado, limpar campos de cônjuge para evitar dados órfãos
+            $nome_conjuge = $cpf_conjuge = $rg_conjuge = $telefone_conjuge = '';
 
-        // Criptografar senha
-        $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-
-        // Inserir usuÃ¡rio com todos os campos (nota: coluna `tipo` removida do schema)
+        // INSERT: campos atualizados (removidas colunas de assinatura)
         $sql = "INSERT INTO usuarios (
-                    nome, email, senha, ativo, cpf, rg, rg_igual_cpf, telefone, assinatura,
+                    nome, email, senha, ativo, cpf, rg, rg_igual_cpf, telefone,
                     endereco_cep, endereco_logradouro, endereco_numero, endereco_complemento,
                     endereco_bairro, endereco_cidade, endereco_estado,
-                    casado, nome_conjuge, cpf_conjuge, rg_conjuge, rg_conjuge_igual_cpf, telefone_conjuge, assinatura_conjuge
+                    casado, nome_conjuge, cpf_conjuge, rg_conjuge, rg_conjuge_igual_cpf, telefone_conjuge
                 ) VALUES (
-                    :nome, :email, :senha, :ativo, :cpf, :rg, :rg_igual_cpf, :telefone, :assinatura,
+                    :nome, :email, :senha, :ativo, :cpf, :rg, :rg_igual_cpf, :telefone,
                     :endereco_cep, :endereco_logradouro, :endereco_numero, :endereco_complemento,
                     :endereco_bairro, :endereco_cidade, :endereco_estado,
-                    :casado, :nome_conjuge, :cpf_conjuge, :rg_conjuge, :rg_conjuge_igual_cpf, :telefone_conjuge, :assinatura_conjuge
+                    :casado, :nome_conjuge, :cpf_conjuge, :rg_conjuge, :rg_conjuge_igual_cpf, :telefone_conjuge
                 )";
         
         $stmt = $conexao->prepare($sql);
@@ -169,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindValue(':rg', $rg);
     $stmt->bindValue(':rg_igual_cpf', $rg_igual_cpf, PDO::PARAM_INT);
         $stmt->bindValue(':telefone', $telefone);
-        $stmt->bindValue(':assinatura', $assinatura);
         $stmt->bindValue(':endereco_cep', $endereco_cep);
         $stmt->bindValue(':endereco_logradouro', $endereco_logradouro);
         $stmt->bindValue(':endereco_numero', $endereco_numero);
@@ -183,7 +174,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindValue(':rg_conjuge', $rg_conjuge);
     $stmt->bindValue(':rg_conjuge_igual_cpf', $rg_conjuge_igual_cpf, PDO::PARAM_INT);
     $stmt->bindValue(':telefone_conjuge', $telefone_conjuge);
-    $stmt->bindValue(':assinatura_conjuge', $assinatura_conjuge);
         $stmt->execute();
 
         $mensagem = 'Usuário cadastrado com sucesso!';

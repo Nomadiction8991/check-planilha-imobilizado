@@ -47,14 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rg = trim($_POST['rg'] ?? '');
     $rg_igual_cpf = isset($_POST['rg_igual_cpf']) ? 1 : 0;
     $telefone = trim($_POST['telefone'] ?? '');
-    $assinatura = trim($_POST['assinatura'] ?? '');
     $casado = isset($_POST['casado']) ? 1 : 0;
     $nome_conjuge = trim($_POST['nome_conjuge'] ?? '');
     $cpf_conjuge = trim($_POST['cpf_conjuge'] ?? '');
     $rg_conjuge = trim($_POST['rg_conjuge'] ?? '');
     $rg_conjuge_igual_cpf = isset($_POST['rg_conjuge_igual_cpf']) ? 1 : 0;
     $telefone_conjuge = trim($_POST['telefone_conjuge'] ?? '');
-    $assinatura_conjuge = trim($_POST['assinatura_conjuge'] ?? '');
     
     // Endereço
     $endereco_cep = trim($_POST['endereco_cep'] ?? '');
@@ -127,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rg_conjuge = $formatarRg($rg_conjuge); 
             }
         } else {
-            $nome_conjuge = $cpf_conjuge = $rg_conjuge = $telefone_conjuge = $assinatura_conjuge = '';
+            $nome_conjuge = $cpf_conjuge = $rg_conjuge = $telefone_conjuge = '';
             $rg_conjuge_igual_cpf = 0;
         }
 
@@ -161,7 +159,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     rg = :rg,
                     rg_igual_cpf = :rg_igual_cpf,
                     telefone = :telefone,
-                    assinatura = :assinatura,
                     endereco_cep = :endereco_cep,
                     endereco_logradouro = :endereco_logradouro,
                     endereco_numero = :endereco_numero,
@@ -174,7 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     cpf_conjuge = :cpf_conjuge,
                     rg_conjuge = :rg_conjuge,
                     telefone_conjuge = :telefone_conjuge,
-                    assinatura_conjuge = :assinatura_conjuge,
                     rg_conjuge_igual_cpf = :rg_conjuge_igual_cpf
                     WHERE id = :id";
             $stmt = $conexao->prepare($sql);
@@ -189,7 +185,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     rg = :rg,
                     rg_igual_cpf = :rg_igual_cpf,
                     telefone = :telefone,
-                    assinatura = :assinatura,
                     endereco_cep = :endereco_cep,
                     endereco_logradouro = :endereco_logradouro,
                     endereco_numero = :endereco_numero,
@@ -202,7 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     cpf_conjuge = :cpf_conjuge,
                     rg_conjuge = :rg_conjuge,
                     telefone_conjuge = :telefone_conjuge,
-                    assinatura_conjuge = :assinatura_conjuge,
                     rg_conjuge_igual_cpf = :rg_conjuge_igual_cpf
                     WHERE id = :id";
             $stmt = $conexao->prepare($sql);
@@ -215,7 +209,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindValue(':rg', $rg);
         $stmt->bindValue(':rg_igual_cpf', $rg_igual_cpf, PDO::PARAM_INT);
         $stmt->bindValue(':telefone', $telefone);
-        $stmt->bindValue(':assinatura', $assinatura);
         $stmt->bindValue(':endereco_cep', $endereco_cep);
         $stmt->bindValue(':endereco_logradouro', $endereco_logradouro);
         $stmt->bindValue(':endereco_numero', $endereco_numero);
@@ -228,7 +221,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindValue(':cpf_conjuge', $cpf_conjuge);
         $stmt->bindValue(':rg_conjuge', $rg_conjuge);
         $stmt->bindValue(':telefone_conjuge', $telefone_conjuge);
-        $stmt->bindValue(':assinatura_conjuge', $assinatura_conjuge);
         $stmt->bindValue(':rg_conjuge_igual_cpf', $rg_conjuge_igual_cpf, PDO::PARAM_INT);
         $stmt->bindValue(':id', $id);
         $stmt->execute();
