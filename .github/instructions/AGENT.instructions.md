@@ -29,6 +29,8 @@ Regras obrigatórias ao finalizar uma alteração:
   Ref: #42
   ```
 
+- **Idioma**: as mensagens de commit devem ser escritas em **português** (resumo e corpo). Use linguagem clara e objetiva.
+
 - **Conteúdo do commit**: prefira commits atômicos (um propósito por commit). Se necessário, crie múltiplos commits na mesma branch (`dev`) antes do push.
 
 - **Checklist antes do push** (obrigatório):

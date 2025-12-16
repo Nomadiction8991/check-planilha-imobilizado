@@ -20,6 +20,8 @@ Comportamento de commit/push (após `SIM`):
 
 - Commits devem ir para a branch `dev` (`git push origin dev`).
 - A mensagem de commit deve conter resumo, corpo explicativo, seção `Testes:` e `Ref:` quando aplicável.
+
+- Idioma: as mensagens de commit devem ser escritas em **português** (resumo e corpo). Use linguagem clara e objetiva.
 - Após push bem-sucedido, confirmar sucesso internamente e preparar o resumo final ao usuário.
 
 Relato final ao usuário (após execução):
