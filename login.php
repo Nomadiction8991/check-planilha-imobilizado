@@ -127,10 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <form method="POST">
                     <div class="mb-3">
-                        <h4 class="text-center mb-4">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>
-                            LOGIN
-                        </h4>
                         <label for="email" class="form-label">
                             <i class="bi bi-envelope me-1"></i>
                             EMAIL
