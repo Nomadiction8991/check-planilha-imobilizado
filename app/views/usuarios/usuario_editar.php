@@ -49,8 +49,7 @@ ob_start();
 
 <?php if (isset($usuario)): ?>
 <form method="POST" id="formUsuario">
-    <!-- CAMPO OCULTO: tipo de usuÃ¡rio -->
-    <input type="hidden" name="tipo" value="<?php echo htmlspecialchars($usuario['tipo'] ?? 'Administrador/Acessor'); ?>">
+
     
     <!-- Card 1: DADOS BÁSICOS -->
     <div class="card mb-3">
@@ -81,7 +80,6 @@ ob_start();
                         <input class="form-check-input" type="checkbox" id="rg_igual_cpf" name="rg_igual_cpf" value="1" <?php echo !empty($usuario['rg_igual_cpf']) ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="rg_igual_cpf">RG IGUAL AO CPF</label>
                     </div>
-                    <small class="text-muted">FORMATAÇÃO AUTOMÁTICA: HÍFEN ANTES DO ÚLTIMO DÍGITO. EX: 1234-5</small>
                 </div>
                 <div class="col-12">
                     <label for="telefone" class="form-label">TELEFONE <span class="text-danger">*</span></label>
@@ -115,13 +113,7 @@ ob_start();
                 </div>
             </div>
 
-            <div class="form-check mt-3">
-                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" value="1" 
-                       <?php echo $usuario['ativo'] ? 'checked' : ''; ?>>
-                <label class="form-check-label" for="ativo">
-                    USUÁRIO ATIVO
-                </label>
-            </div>
+
         </div>
     </div>
 

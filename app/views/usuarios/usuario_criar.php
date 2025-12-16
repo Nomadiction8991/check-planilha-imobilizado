@@ -95,7 +95,7 @@ ob_start();
                         <input class="form-check-input" type="checkbox" id="rg_igual_cpf" name="rg_igual_cpf" value="1">
                         <label class="form-check-label" for="rg_igual_cpf">RG igual ao CPF</label>
                     </div>
-                    <small class="text-muted">FormataÃ§Ã£o automÃ¡tica: hÃ­fen antes do Ãºltimo dÃ­gito. Ex: 1234-5</small>
+
                 </div>
                 <div class="col-12">
                     <label for="telefone" class="form-label">TELEFONE <span class="text-danger">*</span></label>
@@ -126,23 +126,9 @@ ob_start();
                 </div>
             </div>
 
-            <div class="form-check mt-3">
-                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" value="1" 
-                       <?php echo (isset($_POST['ativo']) || !isset($_POST['nome'])) ? 'checked' : ''; ?>>
-                <label class="form-check-label" for="ativo">
-                    UsuÃ¡rio Ativo
-                </label>
-            </div>
 
-            <?php if (!defined('PUBLIC_REGISTER')): ?>
-            <div class="mb-3 mt-3">
-                <label for="tipo" class="form-label">Tipo de UsuÃ¡rio <span class="text-danger">*</span></label>
-                <select class="form-select" id="tipo" name="tipo" required>
-                    <option value="Administrador/Acessor" <?php echo ($_POST['tipo'] ?? 'Administrador/Acessor') === 'Administrador/Acessor' ? 'selected' : ''; ?>>Administrador/Acessor</option>
-                    <option value="Doador/CÃ´njuge" <?php echo ($_POST['tipo'] ?? '') === 'Doador/CÃ´njuge' ? 'selected' : ''; ?>>Doador/CÃ´njuge</option>
-                </select>
-            </div>
-            <?php endif; ?>
+
+
         </div>
     </div>
 
