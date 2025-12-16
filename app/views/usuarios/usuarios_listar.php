@@ -10,10 +10,10 @@ if (!isAdmin()) {
 
 include __DIR__ . '/../../../app/controllers/read/UsuarioListController.php';
 
-$pageTitle = 'Usuários';
+$pageTitle = 'USUÁRIOS';
 $backUrl = '../../../index.php';
 $headerActions = '
-    <a href="./usuario_criar.php" class="btn-header-action" title="Novo Usuário"><i class="bi bi-plus-lg"></i></a>
+    <a href="./usuario_criar.php" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>
 ';
 
 ob_start();
@@ -21,14 +21,14 @@ ob_start();
 
 <?php if (isset($_GET['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show">
-        Usuário cadastrado com sucesso!
+        USUÁRIO CADASTRADO COM SUCESSO!
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
 <?php if (isset($_GET['updated'])): ?>
     <div class="alert alert-success alert-dismissible fade show">
-        Usuário atualizado com sucesso!
+        USUÁRIO ATUALIZADO COM SUCESSO!
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
@@ -36,30 +36,30 @@ ob_start();
 <!-- Filtros de Pesquisa -->
 <form method="get" class="card mb-3" aria-label="Formulário de busca">
     <div class="card-header">
-        <i class="bi bi-search me-2"></i>Pesquisar
+        <i class="bi bi-search me-2"></i>PESQUISAR
     </div>
     <div class="card-body">
         <input type="hidden" name="pagina" value="1">
         <div class="mb-3">
             <label for="filtroNome" class="form-label">
                 <i class="bi bi-person me-1"></i>
-                Buscar por nome ou e-mail
+                BUSCAR POR NOME OU E-MAIL
             </label>
             <input type="text" class="form-control" id="filtroNome" name="busca" value="<?php echo htmlspecialchars($filtroNome ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         </div>
         <div class="mb-2">
             <label for="filtroStatus" class="form-label">
                 <i class="bi bi-funnel me-1"></i>
-                Status
+                STATUS
             </label>
             <select class="form-select" id="filtroStatus" name="status">
-                <option value=""<?php echo ($filtroStatus === '') ? ' selected' : ''; ?>>Todos</option>
-                <option value="1"<?php echo ($filtroStatus === '1') ? ' selected' : ''; ?>>Ativos</option>
-                <option value="0"<?php echo ($filtroStatus === '0') ? ' selected' : ''; ?>>Inativos</option>
+                <option value=""<?php echo ($filtroStatus === '') ? ' selected' : ''; ?>>TODOS</option>
+                <option value="1"<?php echo ($filtroStatus === '1') ? ' selected' : ''; ?>>ATIVOS</option>
+                <option value="0"<?php echo ($filtroStatus === '0') ? ' selected' : ''; ?>>INATIVOS</option>
             </select>
         </div>
         <div class="mb-3">
-            <button type="submit" id="btnBuscarUsuarios" class="btn btn-primary btn-lg w-100 mt-2">Buscar</button>
+            <button type="submit" id="btnBuscarUsuarios" class="btn btn-primary btn-lg w-100 mt-2">BUSCAR</button>
         </div>
     </div>
 </form>
@@ -68,22 +68,22 @@ ob_start();
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>
             <i class="bi bi-people me-2"></i>
-            Lista de Usuários
+            LISTA DE USUÁRIOS
         </span>
-        <span class="badge bg-white text-dark"><?php echo $total_registros; ?> itens (pág. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
+        <span class="badge bg-white text-dark"><?php echo $total_registros; ?> ITENS (PÁG. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
     </div>
     <div class="card-body p-0">
         <?php if (empty($usuarios)): ?>
             <div class="p-4 text-center text-muted">
                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                Nenhum usuário cadastrado
+                NENHUM USUÁRIO CADASTRADO
             </div>
         <?php else: ?>
             <div class="table-responsive">
                 <table class="table table-hover mb-0" id="tabelaUsuarios">
                     <thead>
                         <tr>
-                            <th>Usuário</th>
+                            <th>USUÁRIO</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -105,18 +105,18 @@ ob_start();
                                         <div class="small text-muted text-wrap"><?php echo htmlspecialchars($usuario['email']); ?></div>
                                         <div class="mt-2 d-flex gap-1 flex-wrap justify-content-end">
                                             <a href="./usuario_ver.php?id=<?php echo $usuario['id']; ?>"
-                                               class="btn btn-sm btn-outline-secondary" title="Visualizar">
+                                               class="btn btn-sm btn-outline-secondary" title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <?php if ($is_self): ?>
                                                 <a href="./usuario_editar.php?id=<?php echo $usuario['id']; ?>"
-                                                   class="btn btn-sm btn-outline-primary" title="Editar meu perfil">
+                                                   class="btn btn-sm btn-outline-primary" title="EDITAR MEU PERFIL">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
                                             <?php endif; ?>
                                             <?php if ($wa_link): ?>
                                                 <a href="<?php echo $wa_link; ?>" target="_blank" rel="noopener" 
-                                                   class="btn btn-sm btn-outline-success" title="WhatsApp">
+                                                   class="btn btn-sm btn-outline-success" title="WHATSAPP">
                                                     <i class="bi bi-whatsapp"></i>
                                                 </a>
                                             <?php endif; ?>
@@ -133,7 +133,7 @@ ob_start();
 </div>
 
 <?php if($total_paginas > 1): ?>
-<nav class="mt-3" aria-label="Paginação usuários">
+<nav class="mt-3" aria-label="PAGINAÇÃO USUÁRIOS">
   <ul class="pagination pagination-sm justify-content-center mb-0">
     <?php if($pagina > 1): ?>
     <li class="page-item"><a class="page-link" href="?<?php echo http_build_query(array_merge($_GET,['pagina'=>$pagina-1])); ?>">&laquo;</a></li>
@@ -153,7 +153,7 @@ ob_start();
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     window.excluirUsuario = function(id, nome) {
-        if (!confirm('Tem certeza que deseja excluir o usuário "' + nome + '"?')) {
+        if (!confirm('TEM CERTEZA QUE DESEJA EXCLUIR O USUÁRIO "' + nome + '"?')) {
             return;
         }
 
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            alert('Erro ao excluir usuário');
+            alert('ERRO AO EXCLUIR USUÁRIO');
             console.error(error);
         });
     }
