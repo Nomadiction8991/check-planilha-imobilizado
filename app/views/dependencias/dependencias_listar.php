@@ -21,7 +21,13 @@ try {
 
 $pageTitle = 'Dependencias';
 $backUrl = '../../../index.php';
-$headerActions = '<a href="./dependencia_criar.php" class="btn-header-action" title="Nova Dependencia"><i class="bi bi-plus-lg"></i></a>';
+// Preserve current filters when navigating to create/edit pages
+$qsArr = [];
+if (!empty($busca)) { $qsArr['busca'] = $busca; }
+if (!empty($pagina) && $pagina > 1) { $qsArr['pagina'] = $pagina; }
+$qs = http_build_query($qsArr);
+$createHref = './dependencia_criar.php' . ($qs ? ('?' . $qs) : '');
+$headerActions = '<a href="' . $createHref . '" class="btn-header-action" title="Nova Dependencia"><i class="bi bi-plus-lg"></i></a>';
 
 
 if (!function_exists('dep_corrigir_encoding')) {
@@ -109,7 +115,7 @@ ob_start();
                                 <td><?php echo htmlspecialchars(to_uppercase(dep_corrigir_encoding($dependencia['descricao'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="./dependencia_editar.php?id=<?php echo $dependencia['id']; ?>"
+                                        <a href="./dependencia_editar.php?id=<?php echo $dependencia['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
                                            class="btn btn-sm btn-outline-primary" title="EDITAR">
                                             <i class="bi bi-pencil"></i>
                                         </a>
@@ -168,8 +174,28 @@ function showFlash(type, message) {
 }
 
 function deletarDependencia(id) {
-    if (!confirm('Tem certeza que deseja excluir esta dependência?')) return;
+    // Open confirm modal and attach id to confirm button
+    const modal = document.getElementById('confirmModalDependencia');
+    if (!modal) {
+        // fallback to prompt if modal not available
+        if (!confirm('Tem certeza que deseja excluir esta dependência?')) return;
+        performDelete(id);
+        return;
+    }
+    const confirmBtn = modal.querySelector('.confirm-delete');
+    modal.querySelector('.modal-body span').textContent = 'Deseja realmente excluir esta dependência?';
+    confirmBtn.setAttribute('data-delete-id', id);
+    // show modal using Bootstrap API if available
+    if (typeof bootstrap !== 'undefined') {
+        const bs = new bootstrap.Modal(modal);
+        bs.show();
+    } else {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+    }
+}
 
+function performDelete(id) {
     fetch('../../../app/controllers/delete/DependenciaDeleteController.php', {
         method: 'POST',
         headers: {
@@ -198,7 +224,42 @@ function deletarDependencia(id) {
         showFlash('danger', 'Erro na requisição: ' + String(error));
     });
 }
+
+// Bind modal confirm button
+(function(){
+    document.addEventListener('DOMContentLoaded', function(){
+        const modal = document.getElementById('confirmModalDependencia');
+        if (!modal) return;
+        modal.querySelector('.confirm-delete').addEventListener('click', function(e){
+            const id = this.getAttribute('data-delete-id');
+            // hide modal
+            if (typeof bootstrap !== 'undefined') {
+                bootstrap.Modal.getInstance(modal)?.hide();
+            } else {
+                modal.classList.remove('show'); modal.style.display = 'none';
+            }
+            if (id) performDelete(id);
+        });
+    });
+})();
 </script>
+
+<!-- Confirm modal for deleting dependencia -->
+<div class="modal fade" id="confirmModalDependencia" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body"><span></span></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger confirm-delete">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <?php
 $contentHtml = ob_get_clean();

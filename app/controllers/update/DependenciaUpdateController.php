@@ -49,9 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt->execute();
 
-        $mensagem = 'DependÃƒÂªncia atualizada com sucesso!';
+        $mensagem = 'Dependência atualizada com sucesso!';
         $tipo_mensagem = 'success';
-        header('Location: ../../views/dependencias/dependencias_listar.php?success=1');
+        // Preserve filters when returning to list
+        $retQ = [];
+        if (!empty($_GET['busca'])) { $retQ['busca'] = $_GET['busca']; }
+        if (!empty($_GET['pagina'])) { $retQ['pagina'] = $_GET['pagina']; }
+        $retQ['success'] = 1;
+        header('Location: ../../views/dependencias/dependencias_listar.php?' . http_build_query($retQ));
         exit;
     } catch (Throwable $e) {
         $mensagem = 'Erro: ' . $e->getMessage();
