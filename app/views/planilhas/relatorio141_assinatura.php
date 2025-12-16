@@ -9,37 +9,37 @@ if (!$id_planilha) {
     exit;
 }
 
-// Buscar produtos que podem ser assinados (imprimir_14_1 = 1)
+// BUSCAR PRODUTOS que podem ser assinados (imprimir_14_1 = 1)
 $sql = "SELECT 
-            p.id_produto,
+            p.id_PRODUTO,
             p.descricao_completa,
             p.tipo_bem_id,
             p.condicao_14_1,
             p.doador_conjugue_id,
             tb.descricao as tipo_descricao,
             u.nome as doador_nome
-        FROM produtos p
+        FROM PRODUTOS p
         LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
         LEFT JOIN usuarios u ON p.doador_conjugue_id = u.id
         WHERE p.planilha_id = :id_planilha 
         AND p.imprimir_14_1 = 1
-        ORDER BY p.id_produto ASC";
+        ORDER BY p.id_PRODUTO ASC";
 
 $stmt = $conexao->prepare($sql);
 $stmt->bindValue(':id_planilha', $id_planilha);
 $stmt->execute();
-$produtos = $stmt->fetchAll();
+$PRODUTOS = $stmt->fetchAll();
 
 // Calcular estatÃƒÂ­sticas
-$total_produtos = count($produtos);
-$produtos_assinados = 0;
+$total_PRODUTOS = count($PRODUTOS);
+$PRODUTOS_assinados = 0;
 $doacoes_por_pessoa = [];
 
-foreach ($produtos as $produto) {
+foreach ($PRODUTOS as $PRODUTO) {
     // Verificar se estÃƒÂ¡ assinado: doador_conjugue_id diferente de NULL e diferente de 0
-    if (!is_null($produto['doador_conjugue_id']) && $produto['doador_conjugue_id'] > 0) {
-        $produtos_assinados++;
-        $nome_doador = $produto['doador_nome'] ?? 'Sem nome';
+    if (!is_null($PRODUTO['doador_conjugue_id']) && $PRODUTO['doador_conjugue_id'] > 0) {
+        $PRODUTOS_assinados++;
+        $nome_doador = $PRODUTO['doador_nome'] ?? 'Sem nome';
         if (!isset($doacoes_por_pessoa[$nome_doador])) {
             $doacoes_por_pessoa[$nome_doador] = 0;
         }
@@ -58,7 +58,7 @@ ob_start();
 ?>
 
 <style>
-.produto-card {
+.PRODUTO-card {
     transition: all 0.2s;
     border: 1px solid #dee2e6;
     border-left: 4px solid #dee2e6;
@@ -66,19 +66,19 @@ ob_start();
     cursor: pointer;
 }
 
-.produto-card:hover {
+.PRODUTO-card:hover {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.produto-card.assinado {
+.PRODUTO-card.assinado {
     border-left-color: #28a745;
 }
 
-.produto-card.pendente {
+.PRODUTO-card.pendente {
     border-left-color: #ffc107;
 }
 
-.produto-card.selected {
+.PRODUTO-card.selected {
     background-color: #e7f3ff;
     border-color: #007bff !important;
     border-left-color: #007bff !important;
@@ -150,25 +150,25 @@ ob_start();
     </h5>
     
     <div class="mb-3">
-        <strong>Total de produtos nesta planilha:</strong> <?php echo $total_produtos; ?> 
-        (<?php echo $produtos_assinados; ?> assinados, <?php echo $total_produtos - $produtos_assinados; ?> pendentes)
+        <strong>Total de PRODUTOS nesta planilha:</strong> <?php echo $total_PRODUTOS; ?> 
+        (<?php echo $PRODUTOS_assinados; ?> assinados, <?php echo $total_PRODUTOS - $PRODUTOS_assinados; ?> pendentes)
     </div>
     
     <?php if (!empty($doacoes_por_pessoa)): ?>
     <div class="mb-2">
-        <strong>Produtos jÃƒÂ¡ assinados por:</strong>
+        <strong>PRODUTOS jÃƒÂ¡ assinados por:</strong>
     </div>
     <ul class="mb-0">
         <?php foreach ($doacoes_por_pessoa as $nome => $quantidade): ?>
         <li>
             <strong><?php echo htmlspecialchars($nome); ?></strong> - 
-            <?php echo $quantidade; ?> <?php echo $quantidade == 1 ? 'produto' : 'produtos'; ?>
+            <?php echo $quantidade; ?> <?php echo $quantidade == 1 ? 'PRODUTO' : 'PRODUTOS'; ?>
         </li>
         <?php endforeach; ?>
     </ul>
     <?php else: ?>
     <div class="text-muted">
-        <em>Nenhum produto foi assinado ainda.</em>
+        <em>Nenhum PRODUTO foi assinado ainda.</em>
     </div>
     <?php endif; ?>
 </div>
@@ -176,24 +176,24 @@ ob_start();
 <div class="card mb-3">
     <div class="card-header bg-primary text-white">
         <i class="bi bi-pen me-2"></i>
-        Produtos para Assinar
+        PRODUTOS para Assinar
     </div>
     <div class="card-body">
         <p class="mb-2">
             <i class="bi bi-info-circle me-1"></i>
-            <strong>Selecione</strong> um ou mais produtos e clique em "Assinar Selecionados" para assinar todos de uma vez.
+            <strong>Selecione</strong> um ou mais PRODUTOS e clique em "Assinar Selecionados" para assinar todos de uma vez.
         </p>
         <p class="mb-0 text-muted small">
-            Ou clique diretamente em um produto individual para assinÃƒÂ¡-lo separadamente.
+            Ou clique diretamente em um PRODUTO individual para assinÃƒÂ¡-lo separadamente.
         </p>
     </div>
 </div>
 
-<!-- Barra de aÃƒÂ§ÃƒÂµes para produtos selecionados -->
+<!-- Barra de aÃƒÂ§ÃƒÂµes para PRODUTOS selecionados -->
 <div class="alert alert-success mb-3" id="toolbarSelecao" style="display: none;">
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <strong><span id="contadorSelecionados">0</span> produto(s) selecionado(s)</strong>
+            <strong><span id="contadorSelecionados">0</span> PRODUTO(s) selecionado(s)</strong>
         </div>
         <div>
             <button type="button" class="btn btn-success btn-sm" id="btnAssinarSelecionados" onclick="assinarSelecionados()">
@@ -206,51 +206,51 @@ ob_start();
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="limparSelecao()">
                 <i class="bi bi-x-lg me-1"></i>
-                Limpar SeleÃƒÂ§ÃƒÂ£o
+                LIMPAR SeleÃƒÂ§ÃƒÂ£o
             </button>
         </div>
     </div>
 </div>
 
-<?php if (count($produtos) > 0): ?>
+<?php if (count($PRODUTOS) > 0): ?>
     <div class="row g-3">
-        <?php foreach ($produtos as $produto): 
+        <?php foreach ($PRODUTOS as $PRODUTO): 
             // Verificar se estÃƒÂ¡ assinado: doador_conjugue_id diferente de NULL e diferente de 0
-            $assinado = (!is_null($produto['doador_conjugue_id']) && $produto['doador_conjugue_id'] > 0);
-            $status_class = $assinado ? 'assinado' : 'pendente';
+            $assinado = (!is_null($PRODUTO['doador_conjugue_id']) && $PRODUTO['doador_conjugue_id'] > 0);
+            $STATUS_class = $assinado ? 'assinado' : 'pendente';
         ?>
             <div class="col-12">
-                <div class="card produto-card <?php echo $status_class; ?>" 
-                     data-produto-id="<?php echo $produto['id_produto']; ?>">
+                <div class="card PRODUTO-card <?php echo $STATUS_class; ?>" 
+                     data-PRODUTO-id="<?php echo $PRODUTO['id_PRODUTO']; ?>">
                     <div class="card-body">
                         <div class="d-flex gap-3">
                             <!-- Checkbox de seleÃƒÂ§ÃƒÂ£o -->
                             <div class="form-check">
                                 <input class="form-check-input" 
                                        type="checkbox" 
-                                       id="check_<?php echo $produto['id_produto']; ?>"
-                                       value="<?php echo $produto['id_produto']; ?>"
+                                       id="check_<?php echo $PRODUTO['id_PRODUTO']; ?>"
+                                       value="<?php echo $PRODUTO['id_PRODUTO']; ?>"
                                        data-assinado="<?php echo $assinado ? '1' : '0'; ?>"
                                        onchange="atualizarSelecao()"
                                        style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
                             </div>
                             
-                            <!-- ConteÃƒÂºdo do produto -->
-                            <div class="flex-grow-1" onclick="abrirAssinatura(<?php echo $produto['id_produto']; ?>)" style="cursor: pointer;">
+                            <!-- ConteÃƒÂºdo do PRODUTO -->
+                            <div class="flex-grow-1" onclick="abrirAssinatura(<?php echo $PRODUTO['id_PRODUTO']; ?>)" style="cursor: pointer;">
                                 <?php if ($assinado): ?>
                                 <div class="doador-tag">
                                     <i class="bi bi-check-circle-fill me-1"></i>
-                                    Doado por: <?php echo htmlspecialchars($produto['doador_nome']); ?>
+                                    Doado por: <?php echo htmlspecialchars($PRODUTO['doador_nome']); ?>
                                 </div>
                                 <?php endif; ?>
                                 
                                 <h6 class="card-title mb-2">
                                     <i class="bi bi-box-seam me-1"></i>
-                                    <?php echo htmlspecialchars($produto['tipo_descricao'] ?? 'Produto'); ?>
+                                    <?php echo htmlspecialchars($PRODUTO['tipo_descricao'] ?? 'PRODUTO'); ?>
                                 </h6>
                                 <p class="card-text small text-muted mb-0">
-                                    <?php echo htmlspecialchars(substr($produto['descricao_completa'], 0, 150)); ?>
-                                    <?php if (strlen($produto['descricao_completa']) > 150): ?>...<?php endif; ?>
+                                    <?php echo htmlspecialchars(substr($PRODUTO['descricao_completa'], 0, 150)); ?>
+                                    <?php if (strlen($PRODUTO['descricao_completa']) > 150): ?>...<?php endif; ?>
                                 </p>
                             </div>
                         </div>
@@ -263,21 +263,21 @@ ob_start();
     <div class="card">
         <div class="card-body text-center py-5">
             <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-            <h5 class="text-muted">Nenhum produto para assinar</h5>
+            <h5 class="text-muted">Nenhum PRODUTO para assinar</h5>
             <p class="text-muted small mb-0">
-                Certifique-se de que existem produtos marcados para impressÃƒÂ£o no relatÃƒÂ³rio 14.1
+                Certifique-se de que existem PRODUTOS marcados para impressÃƒÂ£o no relatÃƒÂ³rio 14.1
             </p>
         </div>
     </div>
 <?php endif; ?>
 
 <script>
-let produtosSelecionados = new Set();
+let PRODUTOSSelecionados = new Set();
 
 function atualizarSelecao() {
-    produtosSelecionados.clear();
+    PRODUTOSSelecionados.clear();
     document.querySelectorAll('.form-check-input:checked').forEach(checkbox => {
-        produtosSelecionados.add(parseInt(checkbox.value));
+        PRODUTOSSelecionados.add(parseInt(checkbox.value));
     });
     
     const toolbar = document.getElementById('toolbarSelecao');
@@ -285,9 +285,9 @@ function atualizarSelecao() {
     const btnAssinar = document.getElementById('btnAssinarSelecionados');
     const btnDesfazer = document.getElementById('btnDesfazerSelecionados');
     
-    contador.textContent = produtosSelecionados.size;
+    contador.textContent = PRODUTOSSelecionados.size;
     
-    if (produtosSelecionados.size > 0) {
+    if (PRODUTOSSelecionados.size > 0) {
         toolbar.style.display = 'block';
         // Se todos selecionados estÃƒÂ£o assinados, mostra apenas Desfazer; caso contrÃƒÂ¡rio, mostra Assinar
         const todosAssinados = Array.from(document.querySelectorAll('.form-check-input:checked'))
@@ -314,12 +314,12 @@ function limparSelecao() {
 }
 
 function assinarSelecionados() {
-    if (produtosSelecionados.size === 0) {
-        alert('Selecione pelo menos um produto para assinar.');
+    if (PRODUTOSSelecionados.size === 0) {
+        alert('Selecione pelo menos um PRODUTO para assinar.');
         return;
     }
     
-    const ids = Array.from(produtosSelecionados).join(',');
+    const ids = Array.from(PRODUTOSSelecionados).join(',');
     window.location.href = 'relatorio141_assinatura_form.php?ids=' + ids + '&id_planilha=<?php echo $id_planilha; ?>';
 }
 
@@ -328,13 +328,13 @@ function abrirAssinatura(id) {
 }
 
 function desfazerSelecionados(){
-    if (produtosSelecionados.size === 0) return;
+    if (PRODUTOSSelecionados.size === 0) return;
     if (!confirm('Deseja desfazer a assinatura dos itens selecionados e limpar os dados de nota?')) return;
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '../../../app/controllers/update/ProdutoDesassinar141Controller.php';
-    produtosSelecionados.forEach(id=>{
-        const inp = document.createElement('input'); inp.type='hidden'; inp.name='ids_produtos[]'; inp.value=id; form.appendChild(inp);
+    form.action = '../../../app/controllers/update/PRODUTODesassinar141Controller.php';
+    PRODUTOSSelecionados.forEach(id=>{
+        const inp = document.createElement('input'); inp.type='hidden'; inp.name='ids_PRODUTOS[]'; inp.value=id; form.appendChild(inp);
     });
     const pid = document.createElement('input'); pid.type='hidden'; pid.name='id_planilha'; pid.value='<?php echo htmlspecialchars($id_planilha, ENT_QUOTES); ?>'; form.appendChild(pid);
     document.body.appendChild(form);

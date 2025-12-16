@@ -14,18 +14,18 @@ if ($id <= 0) {
 
 $comum = obter_comum_por_id($conexao, $id);
 if (!$comum) {
-    $_SESSION['mensagem'] = 'Comum não encontrada.';
+    $_SESSION['mensagem'] = 'Comum NÃO encontrada.';
     $_SESSION['tipo_mensagem'] = 'danger';
     header('Location: ../../../index.php');
     exit;
 }
 
-$pageTitle = 'Editar Comum';
+$pageTitle = 'EDITAR Comum';
 $backUrl = '../../../index.php';
 
 $comumDescricao = mb_strtoupper((string) ($comum['descricao'] ?? ''), 'UTF-8');
 $comumAdm = mb_strtoupper((string) ($comum['administracao'] ?? ''), 'UTF-8');
-$comumCidade = mb_strtoupper((string) ($comum['cidade'] ?? ''), 'UTF-8');
+$comumCIDADE = mb_strtoupper((string) ($comum['cidade'] ?? ''), 'UTF-8');
 $comumSetor = mb_strtoupper((string) ($comum['setor'] ?? ''), 'UTF-8');
 
 $mt_cidades = [
@@ -191,20 +191,20 @@ ob_start();
 <div class="container py-4">
     <div class="card">
         <div class="card-header">
-            <i class="bi bi-pencil-square me-2"></i>Editar Comum
+            <i class="bi bi-pencil-square me-2"></i>EDITAR Comum
         </div>
         <div class="card-body">
             <form method="POST" action="../../../app/controllers/update/ComumUpdateController.php" novalidate>
                 <input type="hidden" name="id" value="<?php echo (int) $comum['id']; ?>">
 
                 <div class="mb-3">
-                    <label class="form-label">Código</label>
+                    <label class="form-label">CÓDIGO</label>
                     <input type="text" class="form-control text-uppercase" value="<?php echo htmlspecialchars($comum['codigo']); ?>" disabled>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="descricao" class="form-label">Descrição <span class="text-danger">*</span></label>
+                        <label for="descricao" class="form-label">DESCRIÇÃO <span class="text-danger">*</span></label>
                         <input type="text" id="descricao" name="descricao" class="form-control text-uppercase" required
                                value="<?php echo htmlspecialchars($comumDescricao); ?>">
                     </div>
@@ -228,11 +228,11 @@ ob_start();
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="cidade" class="form-label">Cidade <span class="text-danger">*</span></label>
+                        <label for="cidade" class="form-label">CIDADE <span class="text-danger">*</span></label>
                         <select id="cidade" name="cidade" class="form-select text-uppercase" required>
                             <option value="">Selecione</option>
                             <?php foreach ($mt_cidades as $op): ?>
-                                <option value="<?php echo htmlspecialchars($op); ?>" <?php echo $comumCidade === $op ? 'selected' : ''; ?>>
+                                <option value="<?php echo htmlspecialchars($op); ?>" <?php echo $comumCIDADE === $op ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($op); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -250,7 +250,7 @@ ob_start();
 
                 <div class="mt-4 d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-2"></i>Salvar
+                        <i class="bi bi-save me-2"></i>SALVAR
                     </button>
                 </div>
             </form>

@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
-// Endpoint pÃºblico para processar o check do produto
+ // AUTENTICAÇÃO
+// Endpoint pÃºblico para processar o check do PRODUTO
 // Inclui a lÃ³gica do CRUD e ajusta os redirecionamentos para o contexto correto
 
 // Capturar dados antes de incluir
@@ -11,7 +11,7 @@ $_REQUEST_METHOD = $_SERVER['REQUEST_METHOD'];
 // Incluir conexÃ£o
 
 if ($_REQUEST_METHOD === 'POST') {
-    $produto_id = $_POST_BACKUP['produto_id'] ?? null;
+    $PRODUTO_id = $_POST_BACKUP['PRODUTO_id'] ?? null;
     $id_planilha = $_POST_BACKUP['id_planilha'] ?? null;
     $checado = $_POST_BACKUP['checado'] ?? 0;
     
@@ -21,42 +21,42 @@ if ($_REQUEST_METHOD === 'POST') {
         'nome' => $_POST_BACKUP['nome'] ?? '',
         'dependencia' => $_POST_BACKUP['dependencia'] ?? '',
         'codigo' => $_POST_BACKUP['codigo'] ?? '',
-        'status' => $_POST_BACKUP['status'] ?? ''
+        'STATUS' => $_POST_BACKUP['STATUS'] ?? ''
     ];
     
-    if (!$produto_id || !$id_planilha) {
+    if (!$PRODUTO_id || !$id_planilha) {
         $query_string = http_build_query(array_merge(['id' => $id_planilha], $filtros));
         header('Location: ./planilha_visualizar.php?' . $query_string);
         exit;
     }
     
     try {
-        // Buscar status atual no novo schema (produtos) - USANDO id_produto
-        $stmt_status = $conexao->prepare('SELECT checado, imprimir_etiqueta, imprimir_14_1 FROM produtos WHERE id_produto = :id_produto AND planilha_id = :planilha_id');
-        $stmt_status->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
-        $stmt_status->bindValue(':planilha_id', $id_planilha, PDO::PARAM_INT);
-        $stmt_status->execute();
-        $status = $stmt_status->fetch(PDO::FETCH_ASSOC);
+        // BUSCAR STATUS atual no novo schema (PRODUTOS) - USANDO id_PRODUTO
+        $stmt_STATUS = $conexao->prepare('SELECT checado, imprimir_etiqueta, imprimir_14_1 FROM PRODUTOS WHERE id_PRODUTO = :id_PRODUTO AND planilha_id = :planilha_id');
+        $stmt_STATUS->bindValue(':id_PRODUTO', $PRODUTO_id, PDO::PARAM_INT);
+        $stmt_STATUS->bindValue(':planilha_id', $id_planilha, PDO::PARAM_INT);
+        $stmt_STATUS->execute();
+        $STATUS = $stmt_STATUS->fetch(PDO::FETCH_ASSOC);
 
-        if (!$status) {
-            throw new Exception('Produto nÃ£o encontrado.');
+        if (!$STATUS) {
+            throw new Exception('PRODUTO NÃO encontrado.');
         }
 
-        // Regra: nÃ£o pode desmarcar checado se estiver marcado para impressÃ£o
-        if ((int)$checado === 0 && (($status['imprimir_etiqueta'] ?? 0) == 1 || ($status['imprimir_14_1'] ?? 0) == 1)) {
+        // Regra: NÃO pode desmarcar checado se estiver marcado para impressÃ£o
+        if ((int)$checado === 0 && (($STATUS['imprimir_etiqueta'] ?? 0) == 1 || ($STATUS['imprimir_14_1'] ?? 0) == 1)) {
             $query_string = http_build_query(array_merge(
                 ['id' => $id_planilha], 
                 $filtros,
-                ['erro' => 'NÃ£o Ã© possÃ­vel desmarcar o check se o produto estiver marcado para impressÃ£o.']
+                ['erro' => 'NÃ£o Ã© possÃ­vel desmarcar o check se o PRODUTO estiver marcado para impressÃ£o.']
             ));
             header('Location: ./planilha_visualizar.php?' . $query_string);
             exit;
         }
 
-        // Atualizar flag no prÃ³prio produto - USANDO id_produto
-        $stmt_up = $conexao->prepare('UPDATE produtos SET checado = :checado WHERE id_produto = :id_produto AND planilha_id = :planilha_id');
+        // ATUALIZAR flag no prÃ³prio PRODUTO - USANDO id_PRODUTO
+        $stmt_up = $conexao->prepare('UPDATE PRODUTOS SET checado = :checado WHERE id_PRODUTO = :id_PRODUTO AND planilha_id = :planilha_id');
         $stmt_up->bindValue(':checado', (int)$checado, PDO::PARAM_INT);
-        $stmt_up->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
+        $stmt_up->bindValue(':id_PRODUTO', $PRODUTO_id, PDO::PARAM_INT);
         $stmt_up->bindValue(':planilha_id', $id_planilha, PDO::PARAM_INT);
         $stmt_up->execute();
         

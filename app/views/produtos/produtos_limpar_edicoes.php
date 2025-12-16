@@ -3,7 +3,7 @@ require_once dirname(__DIR__, 2) . '/bootstrap.php';
  // AutenticaÃƒÂ§ÃƒÂ£o
 
 // ParÃƒÂ¢metros
-$id_produto = $_GET['id_produto'] ?? null;
+$id_PRODUTO = $_GET['id_PRODUTO'] ?? null;
 $id_planilha = $_GET['id'] ?? null;
 
 // Filtros para retorno
@@ -11,7 +11,7 @@ $pagina = $_GET['pagina'] ?? 1;
 $filtro_nome = $_GET['nome'] ?? '';
 $filtro_dependencia = $_GET['dependencia'] ?? '';
 $filtro_codigo = $_GET['filtro_codigo'] ?? '';
-$filtro_status = $_GET['status'] ?? '';
+$filtro_STATUS = $_GET['STATUS'] ?? '';
 
 function redirectBack($params) {
     $qs = http_build_query($params);
@@ -19,22 +19,22 @@ function redirectBack($params) {
     exit;
 }
 
-if (!$id_produto || !$id_planilha) {
+if (!$id_PRODUTO || !$id_planilha) {
     redirectBack([
         'id' => $id_planilha,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
         'codigo' => $filtro_codigo,
-        'status' => $filtro_status,
+        'STATUS' => $filtro_STATUS,
         'erro' => 'ParÃƒÂ¢metros invÃƒÂ¡lidos'
     ]);
 }
 
 try {
-    // Limpar campos de ediÃƒÂ§ÃƒÂ£o na tabela produtos - USANDO id_produto
+    // LIMPAR campos de ediÃƒÂ§ÃƒÂ£o na tabela PRODUTOS - USANDO id_PRODUTO
     // Importante: usar valores padrÃƒÂ£o vÃƒÂ¡lidos ('' ou 0) pois colunas sÃƒÂ£o NOT NULL em alguns bancos
-    $sql_update = "UPDATE produtos 
+    $sql_update = "UPDATE PRODUTOS 
                    SET editado_tipo_bem_id = 0,
                        editado_bem = '',
                        editado_complemento = '',
@@ -42,11 +42,11 @@ try {
                        editado_descricao_completa = '',
                        imprimir_etiqueta = 0,
                        editado = 0
-                   WHERE id_produto = :id_produto 
+                   WHERE id_PRODUTO = :id_PRODUTO 
                      AND planilha_id = :planilha_id";
     
     $stmt_update = $conexao->prepare($sql_update);
-    $stmt_update->bindValue(':id_produto', $id_produto);
+    $stmt_update->bindValue(':id_PRODUTO', $id_PRODUTO);
     $stmt_update->bindValue(':planilha_id', $id_planilha);
     $stmt_update->execute();
     
@@ -58,7 +58,7 @@ try {
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
         'codigo' => $filtro_codigo,
-        'status' => $filtro_status,
+        'STATUS' => $filtro_STATUS,
         'sucesso' => $msg
     ]);
 
@@ -69,7 +69,7 @@ try {
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
         'codigo' => $filtro_codigo,
-        'status' => $filtro_status,
+        'STATUS' => $filtro_STATUS,
         'erro' => 'Erro ao limpar ediÃƒÂ§ÃƒÂµes: ' . $e->getMessage()
     ]);
 }

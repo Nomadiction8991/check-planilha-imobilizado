@@ -5,7 +5,7 @@ require_once dirname(__DIR__, 2) . '/bootstrap.php';
 $id_planilha = $_GET['id'] ?? null;
 if (!$id_planilha) { header('Location: ../../index.php'); exit; }
 
-// Buscar dados da planilha
+// BUSCAR dados da planilha
 try {
     $sql_planilha = "SELECT * FROM planilhas WHERE id = :id";
     $stmt_planilha = $conexao->prepare($sql_planilha);
@@ -20,7 +20,7 @@ try {
 // DependÃƒÂªncias disponÃƒÂ­veis
 try {
     $sql_dependencias = "
-        SELECT DISTINCT d.descricao as dependencia FROM produtos p
+        SELECT DISTINCT d.descricao as dependencia FROM PRODUTOS p
         LEFT JOIN dependencias d ON COALESCE(p.editado_dependencia_id, p.dependencia_id) = d.id
         WHERE p.planilha_id = :id_planilha AND d.descricao IS NOT NULL
         ORDER BY dependencia
@@ -33,29 +33,29 @@ try {
 
 $dependencia_selecionada = $_GET['dependencia'] ?? '';
 
-// Produtos marcados para imprimir (produtos checados)
+// PRODUTOS marcados para imprimir (PRODUTOS checados)
 try {
-    $sql_produtos = "SELECT p.codigo, COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia
-                     FROM produtos p 
+    $sql_PRODUTOS = "SELECT p.codigo, COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia
+                     FROM PRODUTOS p 
                      LEFT JOIN dependencias d_orig ON p.dependencia_id = d_orig.id
                      LEFT JOIN dependencias d_edit ON p.editado_dependencia_id = d_edit.id
                      WHERE p.planilha_id = :id_planilha AND COALESCE(p.imprimir_etiqueta, 0) = 1";
     if (!empty($dependencia_selecionada)) {
-        $sql_produtos .= " AND (
+        $sql_PRODUTOS .= " AND (
             (COALESCE(d_edit.descricao, d_orig.descricao) = :dependencia)
         )";
     }
-    $sql_produtos .= " ORDER BY p.codigo";
-    $stmt_produtos = $conexao->prepare($sql_produtos);
-    $stmt_produtos->bindValue(':id_planilha', $id_planilha);
-    if (!empty($dependencia_selecionada)) { $stmt_produtos->bindValue(':dependencia', $dependencia_selecionada); }
-    $stmt_produtos->execute();
-    $produtos = $stmt_produtos->fetchAll(PDO::FETCH_ASSOC);
+    $sql_PRODUTOS .= " ORDER BY p.codigo";
+    $stmt_PRODUTOS = $conexao->prepare($sql_PRODUTOS);
+    $stmt_PRODUTOS->bindValue(':id_planilha', $id_planilha);
+    if (!empty($dependencia_selecionada)) { $stmt_PRODUTOS->bindValue(':dependencia', $dependencia_selecionada); }
+    $stmt_PRODUTOS->execute();
+    $PRODUTOS = $stmt_PRODUTOS->fetchAll(PDO::FETCH_ASSOC);
     
-    // Buscar tambÃƒÂ©m produtos cadastrados (novos) com cÃƒÂ³digo preenchido
-    // Nota: tabela produtos_cadastro nÃƒÂ£o existe no schema atual, entÃƒÂ£o comentado
+    // BUSCAR tambÃƒÂ©m PRODUTOS cadastrados (novos) com cÃƒÂ³digo preenchido
+    // Nota: tabela PRODUTOS_cadastro nÃƒÂ£o existe no schema atual, entÃƒÂ£o comentado
     // $sql_novos = "SELECT pc.codigo, d.descricao as dependencia
-    // FROM produtos_cadastro pc
+    // FROM PRODUTOS_cadastro pc
     // LEFT JOIN dependencias d ON pc.id_dependencia = d.id
     // WHERE pc.id_planilha = :id_planilha 
     // AND pc.codigo IS NOT NULL 
@@ -68,20 +68,20 @@ try {
     // $stmt_novos->bindValue(':id_planilha', $id_planilha);
     // if (!empty($dependencia_selecionada)) { $stmt_novos->bindValue(':dependencia', $dependencia_selecionada); }
     // $stmt_novos->execute();
-    // $produtos_novos = $stmt_novos->fetchAll(PDO::FETCH_ASSOC);
+    // $PRODUTOS_novos = $stmt_novos->fetchAll(PDO::FETCH_ASSOC);
     
-    $produtos_novos = []; // Temporariamente vazio atÃƒÂ© tabela existir
+    $PRODUTOS_novos = []; // Temporariamente vazio atÃƒÂ© tabela existir
     
-    // Combinar produtos checados e novos
-    $produtos = array_merge($produtos, $produtos_novos);
+    // Combinar PRODUTOS checados e novos
+    $PRODUTOS = array_merge($PRODUTOS, $PRODUTOS_novos);
     
-    $codigos = array_column($produtos, 'codigo');
-    $produtos_sem_espacos = array_map(fn($c) => str_replace(' ', '', $c), $codigos);
-    $codigos_concatenados = implode(',', $produtos_sem_espacos);
+    $codigos = array_column($PRODUTOS, 'codigo');
+    $PRODUTOS_sem_espacos = array_map(fn($c) => str_replace(' ', '', $c), $codigos);
+    $codigos_concatenados = implode(',', $PRODUTOS_sem_espacos);
 } catch (Exception $e) {
     $codigos_concatenados = '';
-    $produtos = [];
-    $mensagem = 'Erro ao carregar produtos: ' . $e->getMessage();
+    $PRODUTOS = [];
+    $mensagem = 'Erro ao carregar PRODUTOS: ' . $e->getMessage();
 }
 
 $pageTitle = 'Copiar Etiquetas';
@@ -94,7 +94,7 @@ $headerActions = '
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuEtiquetas">
             <li>
                 <a class="dropdown-item" href="../planilhas/planilha_visualizar.php?id=' . $id_planilha . '">
-                    <i class="bi bi-eye me-2"></i>Visualizar Planilha
+                    <i class="bi bi-eye me-2"></i>VISUALIZAR Planilha
                 </a>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -121,7 +121,7 @@ ob_start();
   </div>
   <div class="card-body">
     <p class="text-muted small mb-3">
-      Lista com os cÃƒÂ³digos dos produtos marcados como "Para Imprimir" e dos produtos novos cadastrados com cÃƒÂ³digo preenchido.
+      Lista com os cÃƒÂ³digos dos PRODUTOS marcados como "Para Imprimir" e dos PRODUTOS novos cadastrados com cÃƒÂ³digo preenchido.
     </p>
 
     <?php if (!empty($dependencias)): ?>
@@ -140,22 +140,22 @@ ob_start();
       <div class="col-6">
         <div class="card shadow-sm-custom">
           <div class="card-body text-center">
-            <div class="h4 mb-0"><?php echo count($produtos); ?></div>
-            <div class="text-muted">Produtos</div>
+            <div class="h4 mb-0"><?php echo count($PRODUTOS); ?></div>
+            <div class="text-muted">PRODUTOS</div>
           </div>
         </div>
       </div>
       <div class="col-6">
         <div class="card shadow-sm-custom">
           <div class="card-body text-center">
-            <div class="h4 mb-0"><?php echo count(array_unique($produtos_sem_espacos ?? [])); ?></div>
+            <div class="h4 mb-0"><?php echo count(array_unique($PRODUTOS_sem_espacos ?? [])); ?></div>
             <div class="text-muted">CÃƒÂ³digos ÃƒÂºnicos</div>
           </div>
         </div>
       </div>
     </div>
 
-    <?php if (!empty($produtos)): ?>
+    <?php if (!empty($PRODUTOS)): ?>
       <div class="mt-3 position-relative">
         <label for="codigosField" class="form-label">CÃƒÂ³digos</label>
         <textarea id="codigosField" class="form-control" rows="6" readonly onclick="this.select()"><?php echo htmlspecialchars($codigos_concatenados); ?></textarea>
@@ -167,11 +167,11 @@ ob_start();
       </div>
     <?php else: ?>
       <div class="alert alert-warning mt-3 text-center">
-        <strong>Nenhum produto disponÃƒÂ­vel para etiquetas.</strong>
+        <strong>Nenhum PRODUTO disponÃƒÂ­vel para etiquetas.</strong>
         <?php if (!empty($dependencia_selecionada)): ?>
-          <div class="small">NÃƒÂ£o hÃƒÂ¡ produtos marcados ou cadastrados com cÃƒÂ³digo na dependÃƒÂªncia "<?php echo htmlspecialchars($dependencia_selecionada); ?>".</div>
+          <div class="small">NÃƒÂ£o hÃƒÂ¡ PRODUTOS marcados ou cadastrados com cÃƒÂ³digo na dependÃƒÂªncia "<?php echo htmlspecialchars($dependencia_selecionada); ?>".</div>
         <?php else: ?>
-          <div class="small">Marque produtos com o ÃƒÂ­cone de etiqueta Ã°Å¸ÂÂ·Ã¯Â¸Â ou cadastre produtos com cÃƒÂ³digo preenchido.</div>
+          <div class="small">Marque PRODUTOS com o ÃƒÂ­cone de etiqueta Ã°Å¸ÂÂ·Ã¯Â¸Â ou cadastre PRODUTOS com cÃƒÂ³digo preenchido.</div>
         <?php endif; ?>
       </div>
     <?php endif; ?>

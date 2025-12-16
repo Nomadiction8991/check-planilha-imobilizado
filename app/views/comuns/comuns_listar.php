@@ -80,15 +80,15 @@ ob_start();
                             <tr>
                                 <th width="15%">CÃƒÂ³digo</th>
                                 <th width="60%">DescriÃƒÂ§ÃƒÂ£o</th>
-                                <th width="15%" class="text-center">Produtos</th>
+                                <th width="15%" class="text-center">PRODUTOS</th>
                                 <th width="10%" class="text-center">AÃƒÂ§ÃƒÂµes</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($comuns as $comum): ?>
                                 <?php 
-                                    $total_produtos = contar_produtos_por_comum($conexao, $comum['id']);
-                                    $badge_class = $total_produtos > 0 ? 'badge-success' : 'badge-secondary';
+                                    $total_PRODUTOS = contar_PRODUTOS_por_comum($conexao, $comum['id']);
+                                    $badge_class = $total_PRODUTOS > 0 ? 'badge-success' : 'badge-secondary';
                                 ?>
                                 <tr>
                                     <td>
@@ -99,19 +99,19 @@ ob_start();
                                     </td>
                                     <td class="text-center">
                                         <span class="badge <?php echo $badge_class; ?>">
-                                            <?php echo $total_produtos; ?>
+                                            <?php echo $total_PRODUTOS; ?>
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="./comum_editar.php?id=<?php echo $comum['id']; ?>" 
                                                class="btn btn-outline-primary" 
-                                               title="Editar">
+                                               title="EDITAR">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <a href="./configuracoes_importacao.php?comum_id=<?php echo $comum['id']; ?>" 
                                                class="btn btn-outline-secondary" 
-                                               title="Visualizar">
+                                               title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                         </div>

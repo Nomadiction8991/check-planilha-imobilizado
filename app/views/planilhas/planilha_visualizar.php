@@ -12,7 +12,7 @@ require_once dirname(__DIR__, 2) . '/controllers/read/PlanilhaViewController.php
 
 // Configuracoes da pagina
 $id_planilha = $comum_id; // compatibilidade com cÃƒÂ³digo legado
-$pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'Visualizar Planilha');
+$pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'VISUALIZAR Planilha');
 $backUrl = '../../../index.php';
 
 // Bloqueio por data de importaÃƒÂ§ÃƒÂ£o (UTC-4)
@@ -61,8 +61,8 @@ $headerActions = '
 if (isAdmin()) {
     $headerActions .= '
             <li>
-                <a class="dropdown-item" href="../produtos/produtos_listar.php?comum_id=' . $comum_id . '">
-                    <i class="bi bi-list-ul me-2"></i>Listagem de Produtos
+                <a class="dropdown-item" href="../PRODUTOS/PRODUTOS_listar.php?comum_id=' . $comum_id . '">
+                    <i class="bi bi-list-ul me-2"></i>Listagem de PRODUTOS
                 </a>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -72,7 +72,7 @@ if (isAdmin()) {
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="../planilhas/produto_copiar_etiquetas.php?id=' . $id_planilha . '&comum_id=' . $comum_id . '">
+                <a class="dropdown-item" href="../planilhas/PRODUTO_copiar_etiquetas.php?id=' . $id_planilha . '&comum_id=' . $comum_id . '">
                     <i class="bi bi-tags me-2"></i>Copiar Etiquetas
                 </a>
             </li>
@@ -180,7 +180,7 @@ ob_start();
     font-size: 20px !important;
 }
 
-/* Cores das linhas baseadas no status - Paleta marcante e diferenciada */
+/* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
 .linha-pendente { 
     background-color: #ffffff; 
     border-left: none; 
@@ -222,7 +222,7 @@ ob_start();
     border-left: 3px solid #9c27b0;
 }
 
-.observacao-produto {
+.observacao-PRODUTO {
     background: #fff3e0;
     padding: 0.5rem;
     border-radius: 0.25rem;
@@ -230,12 +230,12 @@ ob_start();
     border-left: 3px solid #ff9800;
 }
 
-.info-produto {
+.info-PRODUTO {
     font-size: 0.9rem;
     color: #555;
 }
 
-.codigo-produto {
+.codigo-PRODUTO {
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
     color: #333;
@@ -258,9 +258,9 @@ ob_start();
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
-<?php if (!empty($erro_produtos)): ?>
+<?php if (!empty($erro_PRODUTOS)): ?>
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    Erro ao carregar produtos: <?php echo htmlspecialchars($erro_produtos); ?>
+    Erro ao carregar PRODUTOS: <?php echo htmlspecialchars($erro_PRODUTOS); ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 <?php endif; ?>
@@ -278,7 +278,7 @@ ob_start();
             <div class="mb-3">
                 <label class="form-label" for="codigo">
                     <i class="bi bi-upc-scan me-1"></i>
-                    CÃ¢â€Å“Ã¢â€â€šdigo do Produto
+                    CÃ¢â€Å“Ã¢â€â€šdigo do PRODUTO
                 </label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="codigo" name="codigo" 
@@ -328,14 +328,14 @@ ob_start();
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label" for="status">Status</label>
-                                <select class="form-select" id="status" name="status">
+                                <label class="form-label" for="STATUS">STATUS</label>
+                                <select class="form-select" id="STATUS" name="STATUS">
                                     <option value="">Todos</option>
-                                    <option value="checado" <?php echo ($filtro_status ?? '')==='checado'?'selected':''; ?>>Checados</option>
-                                    <option value="observacao" <?php echo ($filtro_status ?? '')==='observacao'?'selected':''; ?>>Com ObservaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo</option>
-                                    <option value="etiqueta" <?php echo ($filtro_status ?? '')==='etiqueta'?'selected':''; ?>>Etiqueta para Imprimir</option>
-                                    <option value="pendente" <?php echo ($filtro_status ?? '')==='pendente'?'selected':''; ?>>Pendentes</option>
-                                    <option value="editado" <?php echo ($filtro_status ?? '')==='editado'?'selected':''; ?>>Editados</option>
+                                    <option value="checado" <?php echo ($filtro_STATUS ?? '')==='checado'?'selected':''; ?>>Checados</option>
+                                    <option value="observacao" <?php echo ($filtro_STATUS ?? '')==='observacao'?'selected':''; ?>>Com ObservaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo</option>
+                                    <option value="etiqueta" <?php echo ($filtro_STATUS ?? '')==='etiqueta'?'selected':''; ?>>Etiqueta para Imprimir</option>
+                                    <option value="pendente" <?php echo ($filtro_STATUS ?? '')==='pendente'?'selected':''; ?>>Pendentes</option>
+                                    <option value="editado" <?php echo ($filtro_STATUS ?? '')==='editado'?'selected':''; ?>>Editados</option>
                                 </select>
                             </div>
                             
@@ -390,19 +390,19 @@ ob_start();
     </div>
 </div>
 
-<!-- Listagem de Produtos -->
+<!-- Listagem de PRODUTOS -->
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>
             <i class="bi bi-box-seam me-2"></i>
-            Produtos
+            PRODUTOS
         </span>
-        <span class="badge bg-white text-dark"><?php echo count($produtos ?? []); ?> itens</span>
+        <span class="badge bg-white text-dark"><?php echo count($PRODUTOS ?? []); ?> itens</span>
     </div>
     <div class="list-group list-group-flush">
-        <?php if ($produtos): ?>
-            <?php foreach ($produtos as $p): 
-                // Determinar a classe com base nos status
+        <?php if ($PRODUTOS): ?>
+            <?php foreach ($PRODUTOS as $p): 
+                // Determinar a classe com base nos STATUS
                 $classe = '';
                 $tem_edicao = $p['editado'] == 1;
                 
@@ -441,7 +441,7 @@ ob_start();
             ?>
             <div 
                 class="list-group-item <?php echo $classe; ?><?php echo $tipo_invalido ? ' tipo-nao-identificado' : ''; ?>" 
-                data-produto-id="<?php echo $p['id_produto']; ?>"
+                data-PRODUTO-id="<?php echo $p['id_PRODUTO']; ?>"
                 data-ativo="<?php echo (int) $p['ativo']; ?>"
                 data-checado="<?php echo (int) $p['checado']; ?>"
                 data-imprimir="<?php echo (int) $p['imprimir']; ?>"
@@ -450,7 +450,7 @@ ob_start();
                 <?php echo $tipo_invalido ? 'title="Tipo de bem nÃ¢â€Å“ÃƒÂºo identificado"' : ''; ?>
             >
                 <!-- CÃ¢â€Å“Ã¢â€â€šdigo -->
-                <div class="codigo-produto">
+                <div class="codigo-PRODUTO">
                     <?php echo htmlspecialchars($p['codigo']); ?>
                 </div>
                 
@@ -500,14 +500,14 @@ ob_start();
                 
                 <!-- ObservaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo -->
                 <?php if (!empty($p['observacao'])): ?>
-                <div class="observacao-produto">
+                <div class="observacao-PRODUTO">
                     <strong>ObservaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo:</strong><br>
                     <?php echo htmlspecialchars($p['observacao']); ?><br>
                 </div>
                 <?php endif; ?>
                 
                 <!-- InformaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂes -->
-                <div class="info-produto">
+                <div class="info-PRODUTO">
                     <?php echo htmlspecialchars($p['descricao_completa']); ?><br>
                 </div>
                 
@@ -515,59 +515,59 @@ ob_start();
                 <?php if (isAdmin()): ?>
                 <div class="acao-container">
                     <!-- Check -->
-                    <form method="POST" action="../../../app/controllers/update/ProdutoCheckController.php" style="display: <?php echo $show_check ? 'inline' : 'none'; ?>;" class="produto-action-form action-check" data-action="check" data-produto-id="<?php echo $p['id_produto']; ?>">
-                        <input type="hidden" name="produto_id" value="<?php echo $p['id_produto']; ?>">
+                    <form method="POST" action="../../../app/controllers/update/PRODUTOCheckController.php" style="display: <?php echo $show_check ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-check" data-action="check" data-PRODUTO-id="<?php echo $p['id_PRODUTO']; ?>">
+                        <input type="hidden" name="PRODUTO_id" value="<?php echo $p['id_PRODUTO']; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="checado" value="<?php echo $p['checado'] ? '0' : '1'; ?>">
                         <input type="hidden" name="pagina" value="<?php echo $pagina ?? 1; ?>">
                         <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>">
                         <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? ''); ?>">
                         <input type="hidden" name="codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>">
-                        <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_status ?? ''); ?>">
+                        <input type="hidden" name="STATUS" value="<?php echo htmlspecialchars($filtro_STATUS ?? ''); ?>">
                         <button type="submit" class="btn btn-outline-success btn-sm <?php echo $p['checado'] == 1 ? 'active' : ''; ?>" title="<?php echo $p['checado'] ? 'Desmarcar checado' : 'Marcar como checado'; ?>">
                             <i class="bi bi-check-circle-fill"></i>
                         </button>
                     </form>
                     
                     <!-- Etiqueta -->
-                    <form method="POST" action="../../../app/controllers/update/ProdutoEtiquetaController.php" style="display: <?php echo $show_imprimir ? 'inline' : 'none'; ?>;" class="produto-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $p['id_produto']; ?>" data-confirm="<?php echo $p['imprimir'] ? 'Deseja desmarcar este produto para etiqueta?' : 'Deseja marcar este produto para etiqueta?'; ?>">
-                        <input type="hidden" name="produto_id" value="<?php echo $p['id_produto']; ?>">
+                    <form method="POST" action="../../../app/controllers/update/PRODUTOEtiquetaController.php" style="display: <?php echo $show_imprimir ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-PRODUTO-id="<?php echo $p['id_PRODUTO']; ?>" data-confirm="<?php echo $p['imprimir'] ? 'Deseja desmarcar este PRODUTO para etiqueta?' : 'Deseja marcar este PRODUTO para etiqueta?'; ?>">
+                        <input type="hidden" name="PRODUTO_id" value="<?php echo $p['id_PRODUTO']; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="imprimir" value="<?php echo $p['imprimir'] ? '0' : '1'; ?>">
                         <input type="hidden" name="pagina" value="<?php echo $pagina ?? 1; ?>">
                         <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>">
                         <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? ''); ?>">
                         <input type="hidden" name="codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>">
-                        <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_status ?? ''); ?>">
+                        <input type="hidden" name="STATUS" value="<?php echo htmlspecialchars($filtro_STATUS ?? ''); ?>">
                         <button type="submit" class="btn btn-outline-info btn-sm <?php echo $p['imprimir'] == 1 ? 'active' : ''; ?>" title="Etiqueta">
                             <i class="bi bi-printer-fill"></i>
                         </button>
                     </form>
                     
                     <!-- Observa??o -->
-                    <a href="../produtos/produto_observacao.php?id_produto=<?php echo $p['id_produto']; ?>&comum_id=<?php echo $comum_id; ?>&pagina=<?php echo $pagina ?? 1; ?>&nome=<?php echo urlencode($filtro_nome ?? ''); ?>&dependencia=<?php echo urlencode($filtro_dependencia ?? ''); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo ?? ''); ?>&status=<?php echo urlencode($filtro_status ?? ''); ?>"
+                    <a href="../PRODUTOS/PRODUTO_observacao.php?id_PRODUTO=<?php echo $p['id_PRODUTO']; ?>&comum_id=<?php echo $comum_id; ?>&pagina=<?php echo $pagina ?? 1; ?>&nome=<?php echo urlencode($filtro_nome ?? ''); ?>&dependencia=<?php echo urlencode($filtro_dependencia ?? ''); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo ?? ''); ?>&STATUS=<?php echo urlencode($filtro_STATUS ?? ''); ?>"
                        class="btn btn-outline-warning btn-sm action-observacao <?php echo !empty($p['observacao']) ? 'active' : ''; ?>" style="display: <?php echo $show_obs ? 'inline-block' : 'none'; ?>;" title="Observa??o">
                         <i class="bi bi-chat-square-text-fill"></i>
                     </a>
                     
-                    <!-- Editar -->
-                    <a href="../produtos/produto_editar.php?id_produto=<?php echo $p['id_produto']; ?>&comum_id=<?php echo $comum_id; ?>&pagina=<?php echo $pagina ?? 1; ?>&nome=<?php echo urlencode($filtro_nome ?? ''); ?>&dependencia=<?php echo urlencode($filtro_dependencia ?? ''); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo ?? ''); ?>&status=<?php echo urlencode($filtro_status ?? ''); ?>"
-                       class="btn btn-outline-primary btn-sm action-editar <?php echo $tem_edicao ? 'active' : ''; ?>" style="display: <?php echo $show_edit ? 'inline-block' : 'none'; ?>;" title="Editar">
+                    <!-- EDITAR -->
+                    <a href="../PRODUTOS/PRODUTO_editar.php?id_PRODUTO=<?php echo $p['id_PRODUTO']; ?>&comum_id=<?php echo $comum_id; ?>&pagina=<?php echo $pagina ?? 1; ?>&nome=<?php echo urlencode($filtro_nome ?? ''); ?>&dependencia=<?php echo urlencode($filtro_dependencia ?? ''); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo ?? ''); ?>&STATUS=<?php echo urlencode($filtro_STATUS ?? ''); ?>"
+                       class="btn btn-outline-primary btn-sm action-editar <?php echo $tem_edicao ? 'active' : ''; ?>" style="display: <?php echo $show_edit ? 'inline-block' : 'none'; ?>;" title="EDITAR">
                         <i class="bi bi-pencil-fill"></i>
                     </a>
                     
                     <!-- DR -->
                     <?php if ($show_dr): ?>
-                    <?php $drConfirm = $p['ativo'] == 0 ? 'Tem certeza que deseja desmarcar este produto do DR?' : 'Tem certeza que deseja marcar este produto como DR? Esta aÃƒÂ§ÃƒÂ£o irÃƒÂ¡ limpar observaÃƒÂ§ÃƒÂµes e desmarcar para impressÃƒÂ£o.'; ?>
-                    <form method="POST" action="../../../app/controllers/update/ProdutoDrUpdateController.php" style="display: inline;" class="produto-action-form action-dr" data-action="dr" data-produto-id="<?php echo $p['id_produto']; ?>" data-confirm="<?php echo htmlspecialchars($drConfirm, ENT_QUOTES, 'UTF-8'); ?>">
-                        <input type="hidden" name="produto_id" value="<?php echo $p['id_produto']; ?>">
+                    <?php $drConfirm = $p['ativo'] == 0 ? 'Tem certeza que deseja desmarcar este PRODUTO do DR?' : 'Tem certeza que deseja marcar este PRODUTO como DR? Esta aÃƒÂ§ÃƒÂ£o irÃƒÂ¡ limpar observaÃƒÂ§ÃƒÂµes e desmarcar para impressÃƒÂ£o.'; ?>
+                    <form method="POST" action="../../../app/controllers/update/PRODUTODrUpdateController.php" style="display: inline;" class="PRODUTO-action-form action-dr" data-action="dr" data-PRODUTO-id="<?php echo $p['id_PRODUTO']; ?>" data-confirm="<?php echo htmlspecialchars($drConfirm, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="PRODUTO_id" value="<?php echo $p['id_PRODUTO']; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="dr" value="<?php echo $p['ativo'] == 0 ? '0' : '1'; ?>">
                         <input type="hidden" name="pagina" value="<?php echo $pagina ?? 1; ?>">
                         <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>">
                         <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? ''); ?>">
                         <input type="hidden" name="codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>">
-                        <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_status ?? ''); ?>">
+                        <input type="hidden" name="STATUS" value="<?php echo htmlspecialchars($filtro_STATUS ?? ''); ?>">
                         <button type="submit" class="btn btn-outline-danger btn-sm <?php echo $p['ativo'] == 0 ? 'active' : ''; ?>" title="DR">
                             <i class="bi bi-exclamation-triangle-fill"></i>
                         </button>
@@ -580,7 +580,7 @@ ob_start();
         <?php else: ?>
             <div class="list-group-item text-center py-4">
                 <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
-                <span class="text-muted">Nenhum produto encontrado</span>
+                <span class="text-muted">Nenhum PRODUTO encontrado</span>
             </div>
         <?php endif; ?>
     </div>
@@ -624,17 +624,17 @@ ob_start();
 <script>
 function confirmarDR(form, drAtual) {
     if (drAtual == 0) {
-        return confirm('Tem certeza que deseja marcar este produto como DR? Esta aÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo irÃ¢â€Å“ÃƒÂ­ limpar as observaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂes e desmarcar para impressÃ¢â€Å“ÃƒÂºo.');
+        return confirm('Tem certeza que deseja marcar este PRODUTO como DR? Esta aÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo irÃ¢â€Å“ÃƒÂ­ limpar as observaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂes e desmarcar para impressÃ¢â€Å“ÃƒÂºo.');
     } else {
-        return confirm('Tem certeza que deseja desmarcar este produto do DR?');
+        return confirm('Tem certeza que deseja desmarcar este PRODUTO do DR?');
     }
 }
 
 function confirmarImprimir(form, imprimirAtual) {
     if (imprimirAtual == 0) {
-        return confirm('Tem certeza que deseja marcar este produto para impressÃ¢â€Å“ÃƒÂºo?');
+        return confirm('Tem certeza que deseja marcar este PRODUTO para impressÃ¢â€Å“ÃƒÂºo?');
     } else {
-        return confirm('Tem certeza que deseja desmarcar este produto da impressÃ¢â€Å“ÃƒÂºo?');
+        return confirm('Tem certeza que deseja desmarcar este PRODUTO da impressÃ¢â€Å“ÃƒÂºo?');
     }
 }
 
@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i>
                 <span>${message}</span>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="FECHAR"></button>
         `;
         alertHost.appendChild(wrapper);
         setTimeout(() => {
@@ -708,15 +708,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActionButtons(row, state);
     };
 
-    document.querySelectorAll('.list-group-item[data-produto-id]').forEach(row => {
+    document.querySelectorAll('.list-group-item[data-PRODUTO-id]').forEach(row => {
         updateActionButtons(row, getRowState(row));
     });
 
-    document.querySelectorAll('.produto-action-form').forEach(form => {
+    document.querySelectorAll('.PRODUTO-action-form').forEach(form => {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const action = form.dataset.action;
-            const produtoId = form.dataset.produtoId;
+            const PRODUTOId = form.dataset.PRODUTOId;
             const confirmMsg = form.dataset.confirm;
             if (confirmMsg && !confirm(confirmMsg)) {
                 return;
@@ -746,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
 
-                const row = document.querySelector(`.list-group-item[data-produto-id="${produtoId}"]`);
+                const row = document.querySelector(`.list-group-item[data-PRODUTO-id="${PRODUTOId}"]`);
                 const stateUpdates = {};
 
                 if (action === 'check') {
@@ -780,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     applyState(row, stateUpdates);
                 }
 
-                showAlert('success', data.message || 'Status atualizado.');
+                showAlert('success', data.message || 'STATUS atualizado.');
             })
             .catch(err => {
                 showAlert('danger', err.message || 'Erro ao processar aÃƒÂ§ÃƒÂ£o.');
@@ -947,7 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="scanner-container" style="width:100%; height:100%; background:#000; position:relative; overflow:hidden;"></div>
                 
                 <!-- BotÃ¢â€Å“ÃƒÂºo X para fechar -->
-                <button type="button" class="btn-close-scanner" aria-label="Fechar scanner">
+                <button type="button" class="btn-close-scanner" aria-label="FECHAR scanner">
                     <i class="bi bi-x-lg"></i>
                 </button>
                 
@@ -1218,7 +1218,7 @@ function initBarcodeScanner() {
             
             console.log(`Ã‚Â­Ã†â€™ÃƒÂ´Ã¢â€¢Â£ ${availableCameras.length} cÃ¢â€Å“ÃƒÂ³mera(s) encontrada(s)`);
             
-            // Limpar e popular dropdown
+            // LIMPAR e popular dropdown
             cameraSelect.innerHTML = '';
             availableCameras.forEach((camera, index) => {
                 const option = document.createElement('option');
@@ -1288,7 +1288,7 @@ function initBarcodeScanner() {
             }
             currentTrack = null;
             
-            // Limpar canvas/video elements
+            // LIMPAR canvas/video elements
             if(scannerContainer) {
                 while (scannerContainer.firstChild) {
                     scannerContainer.removeChild(scannerContainer.firstChild);
@@ -1501,7 +1501,7 @@ $contentFile = $tempFile;
 // Renderizar o layout
 include __DIR__ . '/../layouts/app_wrapper.php';
 
-// Limpar arquivo temporÃ¢â€Å“ÃƒÂ­rio
+// LIMPAR arquivo temporÃ¢â€Å“ÃƒÂ­rio
 unlink($tempFile);
 ?>
 

@@ -1,6 +1,6 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
+ // AUTENTICAÇÃO
 require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 // Carregar template completo com CSS inline
@@ -53,7 +53,7 @@ $headerActions = '
     </div>
 ';
 
-// CSS customizado para a interface da aplicaÃ§Ã£o (nÃ£o do formulÃ¡rio)
+// CSS customizado para a interface da aplicaÃ§Ã£o (NÃO do formulÃ¡rio)
 $customCss = '';
 $customCssPath = __DIR__ . '/style/relatorio141.css';
 if (file_exists($customCssPath)) {
@@ -104,7 +104,7 @@ if (!function_exists('r141_fillFieldById')) {
             return r141_inner_html($doc->getElementsByTagName('body')->item(0));
         }
 
-        // 3) NÃ£o modificar se nÃ£o encontrou elementos alvo
+        // 3) NÃ£o modificar se NÃO encontrou elementos alvo
         libxml_clear_errors();
         libxml_use_internal_errors($prev);
         return $html;
@@ -161,7 +161,7 @@ if (!function_exists('r141_insertSignatureImage')) {
 ob_start();
 ?>
 
-<?php if (count($produtos) > 0): ?>
+<?php if (count($PRODUTOS) > 0): ?>
 <?php
       // Descobrir imagem de fundo, se existir
     $bgCandidates = [
@@ -185,21 +185,21 @@ ob_start();
 
 <!-- Container de pÃ¡ginas -->
 <div class="paginas-container">
-    <?php foreach($produtos as $index => $row): ?>
+    <?php foreach($PRODUTOS as $index => $row): ?>
         <div class="pagina-card">
             <div class="pagina-header">
                 <span class="pagina-numero">
-                    <i class="bi bi-file-earmark-text"></i> PÃ¡gina <?php echo $index + 1; ?> de <?php echo count($produtos); ?>
+                    <i class="bi bi-file-earmark-text"></i> PÃ¡gina <?php echo $index + 1; ?> de <?php echo count($PRODUTOS); ?>
                 </span>
                 <div class="pagina-actions">
-                    <!-- Visualizar removido conforme solicitado -->
+                    <!-- VISUALIZAR removido conforme solicitado -->
                 </div>
             </div>
             
             <div class="a4-viewport">
                 <div class="a4-scaled">
                     <?php
-                        // Preencher dados do produto no template
+                        // Preencher dados do PRODUTO no template
                         $htmlPreenchido = $a4Block;
                         if (!empty($htmlPreenchido)) {
                             // Preencher Data EmissÃ£o automaticamente com a data atual
@@ -219,7 +219,7 @@ ob_start();
                             // Injetar valores nos campos por ID (textarea/input)
                             // Preencher campo de Data EmissÃ£o com a data atual
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input1', $dataEmissao);
-                            // Preencher AdministraÃ§Ã£o e Cidade dos novos campos da planilha
+                            // Preencher AdministraÃ§Ã£o e CIDADE dos novos campos da planilha
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input2', $administracao_planilha ?? '');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input3', $cidade_planilha ?? '');
                             // NÃƒO preencher automaticamente o setor (input4) por solicitaÃ§Ã£o do usuÃ¡rio
@@ -231,7 +231,7 @@ ob_start();
                             $local_data_with_placeholder = trim(($local_data_auto ?? '') . ' ' . '___/___/_____');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input16', $local_data_with_placeholder);
 
-                            // Preencher campos do administrador/acessor diretamente do produto (administrador_acessor_id)
+                            // Preencher campos do administrador/acessor diretamente do PRODUTO (administrador_acessor_id)
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input27', (string)($row['administrador_nome'] ?? ''));
                             
                             // Assinatura do administrador
@@ -244,7 +244,7 @@ ob_start();
                                 $htmlPreenchido = r141_insertSignatureImage($htmlPreenchido, 'input28', $sigAdmin);
                             }
 
-                            // Preencher campos do doador/cÃ´njuge diretamente do produto (doador_conjugue_id)
+                            // Preencher campos do doador/cÃ´njuge diretamente do PRODUTO (doador_conjugue_id)
                             // Montagem de endereÃ§o completo do doador: logradouro, nÃºmero, complemento, bairro - cidade/UF - CEP
                             $end_doador = trim(implode(' ', array_filter([
                                 $row['doador_endereco_logradouro'] ?? '',
@@ -262,14 +262,14 @@ ob_start();
                             // FormataÃ§Ã£o amigÃ¡vel: Partes principais separadas por vÃ­rgula; cidade-UF agrupadas; CEP no final se existir.
                             $partesEnd = [];
                             if ($end_doador) $partesEnd[] = $end_doador; // Rua + nÃºmero
-                            if ($end_doador_comp) $partesEnd[] = $end_doador_comp; // Complemento - Bairro
-                            if ($end_doador_local) $partesEnd[] = $end_doador_local; // Cidade - UF
+                            if ($end_doador_comp) $partesEnd[] = $end_doador_comp; // COMPLEMENTO - BAIRRO
+                            if ($end_doador_local) $partesEnd[] = $end_doador_local; // CIDADE - UF
                             $endereco_doador_final = implode(', ', $partesEnd);
                             if ($end_doador_cep) {
                                 $endereco_doador_final = rtrim($endereco_doador_final, ', ');
                                 $endereco_doador_final .= ($endereco_doador_final ? ' - ' : '') . $end_doador_cep;
                             } else {
-                                // Se nÃ£o houver CEP, remover traÃ§o final se existir
+                                // Se NÃO houver CEP, remover traÃ§o final se existir
                                 $endereco_doador_final = rtrim($endereco_doador_final, ' -');
                             }
 
@@ -337,7 +337,7 @@ ob_start();
                                     $endereco_conjuge_final = rtrim($endereco_conjuge_final, ', ');
                                     $endereco_conjuge_final .= ($endereco_conjuge_final ? ' - ' : '') . $end_conj_cep;
                                 } else {
-                                    // Se nÃ£o houver CEP, remover traÃ§o final se existir
+                                    // Se NÃO houver CEP, remover traÃ§o final se existir
                                     $endereco_conjuge_final = rtrim($endereco_conjuge_final, ' -');
                                 }
                                 if (!empty($endereco_conjuge_final)) {
@@ -381,12 +381,12 @@ ob_start();
                             // Nota: removida gravaÃ§Ã£o de debug em disco (ambiente remoto).
                             // Implementamos fallback de preview abaixo no helper quando necessÃ¡rio.
 
-                            // Gerar iframe de preview (Visualizar removido â€” iframe permanece como miniatura)
+                            // Gerar iframe de preview (VISUALIZAR removido â€” iframe permanece como miniatura)
                             $title = 'VisualizaÃ§Ã£o da pÃ¡gina ' . ($index + 1);
                             // adicionar allow-modals no sandbox para permitir que o iframe dispare dialogs/print em alguns navegadores
                             echo '<iframe class="a4-frame" data-page-index="' . $index . '" title="' . htmlspecialchars($title, ENT_QUOTES) . '" aria-label="' . htmlspecialchars($title, ENT_QUOTES) . '" tabindex="0" sandbox="allow-same-origin allow-scripts allow-forms allow-modals" style="width:210mm;height:297mm;" srcdoc="' . htmlspecialchars($srcdoc, ENT_QUOTES) . '"></iframe>';
                         } else {
-                            echo '<div class="r141-root"><div class="a4"><p style="padding:10mm;color:#900">Template 14-1 nÃ£o encontrado.</p></div></div>';
+                            echo '<div class="r141-root"><div class="a4"><p style="padding:10mm;color:#900">Template 14-1 NÃO encontrado.</p></div></div>';
                         }
                     ?>
                 </div>
@@ -398,17 +398,17 @@ ob_start();
 <?php else: ?>
 <div class="alert alert-warning">
     <i class="bi bi-exclamation-triangle me-2"></i>
-    Nenhum produto encontrado para impressÃ£o do relatÃ³rio 14.1.
+    Nenhum PRODUTO encontrado para impressÃ£o do relatÃ³rio 14.1.
 </div>
 <?php endif;
 
-// Preparar dados dos produtos para JavaScript
-  $produtosDataJS = json_encode(array_map(function($p){ 
+// Preparar dados dos PRODUTOS para JavaScript
+  $PRODUTOSDataJS = json_encode(array_map(function($p){ 
      return [
-         'id_produto' => (int)($p['id_produto'] ?? ($p['id'] ?? 0)),
+         'id_PRODUTO' => (int)($p['id_PRODUTO'] ?? ($p['id'] ?? 0)),
          'condicao_14_1' => isset($p['condicao_14_1']) ? (int)$p['condicao_14_1'] : 0
      ]; 
- }, $produtos));
+ }, $PRODUTOS));
 
 $script = <<<JS
 <script>
@@ -444,7 +444,7 @@ $script = <<<JS
             const paddingTop = parseFloat(style.paddingTop) || 0;
             const targetH = Math.round(a4h * scale + paddingTop + 4); // +4px folga
             vp.style.height = targetH + 'px';
-            // assegurar overflow hidden para nÃ£o mostrar fundo alÃ©m do A4
+            // assegurar overflow hidden para NÃO mostrar fundo alÃ©m do A4
             vp.style.overflow = 'hidden';
         });
     }
@@ -456,8 +456,8 @@ $script = <<<JS
 
     // PaginaÃ§Ã£o removida - todas as pÃ¡ginas serÃ£o exibidas em scroll
 
-    // Marcar checkboxes 14.1 baseado em condicao_141 de cada produto
-    const produtosData = PRODUTOS_DATA_PLACEHOLDER;
+    // Marcar checkboxes 14.1 baseado em condicao_141 de cada PRODUTO
+    const PRODUTOSData = PRODUTOS_DATA_PLACEHOLDER;
     
     function marcarCheckboxes(){
         document.querySelectorAll('iframe.a4-frame').forEach((iframe, idx) => {
@@ -466,7 +466,7 @@ $script = <<<JS
                 if(!iframeDoc) return;
                 
                 // Ajuste para novo nome da condiÃ§Ã£o
-                const condicao = produtosData[idx]?.condicao_14_1;
+                const condicao = PRODUTOSData[idx]?.condicao_14_1;
                 if(!condicao) return;
                 
                 // IDs dos checkboxes no template: input13, input14, input15
@@ -518,9 +518,9 @@ $script = <<<JS
 JS;
 
 // Substituir o placeholder pelos dados reais
-$script = str_replace('PRODUTOS_DATA_PLACEHOLDER', $produtosDataJS, $script);
+$script = str_replace('PRODUTOS_DATA_PLACEHOLDER', $PRODUTOSDataJS, $script);
 
-// Garantir que o botÃ£o de imprimir chame a funÃ§Ã£o (listener delegado, mais robusto)
+// Garantir que o botÃ£o de imprimir chame a FUNÇÃO (listener delegado, mais robusto)
 echo "<script>document.addEventListener('click', function(e){ var btn = e.target && e.target.closest && e.target.closest('#btnPrint'); if(btn){ e.preventDefault(); try{ console && console.log && console.log('print button clicked'); if(typeof window.validarEImprimir==='function'){ window.validarEImprimir(); } else { window.print(); } }catch(err){ console && console.error && console.error('print handler error', err); window.print(); } } });</script>\n";
 
 echo $script;

@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
-// Autenticação
+// AUTENTICAÇÃO
 // Apenas admins podem acessar gestão de usuários
 if (!isAdmin()) {
     header('Location: ../../../index.php');
@@ -48,18 +48,18 @@ ob_start();
             <input type="text" class="form-control" id="filtroNome" name="busca" value="<?php echo htmlspecialchars($filtroNome ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         </div>
         <div class="mb-2">
-            <label for="filtroStatus" class="form-label">
+            <label for="filtroSTATUS" class="form-label">
                 <i class="bi bi-funnel me-1"></i>
                 STATUS
             </label>
-            <select class="form-select" id="filtroStatus" name="status">
-                <option value=""<?php echo ($filtroStatus === '') ? ' selected' : ''; ?>>TODOS</option>
-                <option value="1"<?php echo ($filtroStatus === '1') ? ' selected' : ''; ?>>ATIVOS</option>
-                <option value="0"<?php echo ($filtroStatus === '0') ? ' selected' : ''; ?>>INATIVOS</option>
+            <select class="form-select" id="filtroSTATUS" name="STATUS">
+                <option value=""<?php echo ($filtroSTATUS === '') ? ' selected' : ''; ?>>TODOS</option>
+                <option value="1"<?php echo ($filtroSTATUS === '1') ? ' selected' : ''; ?>>ATIVOS</option>
+                <option value="0"<?php echo ($filtroSTATUS === '0') ? ' selected' : ''; ?>>INATIVOS</option>
             </select>
         </div>
         <div class="mb-3">
-            <button type="submit" id="btnBuscarUsuarios" class="btn btn-primary btn-lg w-100 mt-2">BUSCAR</button>
+            <button type="submit" id="btnBUSCARUsuarios" class="btn btn-primary btn-lg w-100 mt-2">BUSCAR</button>
         </div>
     </div>
 </form>
@@ -98,7 +98,7 @@ ob_start();
                             ?>
                             <tr data-nome="<?php echo strtolower(htmlspecialchars($usuario['nome'])); ?>" 
                                 data-email="<?php echo strtolower(htmlspecialchars($usuario['email'])); ?>"
-                                data-status="<?php echo $usuario['ativo']; ?>">
+                                data-STATUS="<?php echo $usuario['ativo']; ?>">
                                 <td>
                                     <div class="d-flex flex-column">
                                         <div class="fw-semibold text-wrap"><?php echo htmlspecialchars($usuario['nome']); ?></div>

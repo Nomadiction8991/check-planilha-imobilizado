@@ -16,7 +16,7 @@ if ($idParam <= 0) {
 
 include __DIR__ . '/../../../app/controllers/update/DependenciaUpdateController.php';
 
-$pageTitle = 'Editar DependÃªncia';
+$pageTitle = 'EDITAR DEPENDÊNCIA';
 $backUrl = './dependencias_listar.php';
 
 ob_start();
@@ -34,20 +34,20 @@ ob_start();
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-pencil-square me-2"></i>
-            Editar DependÃªncia
+            EDITAR DEPENDÊNCIA
         </div>
         <div class="card-body">
             <div class="mb-3">
-                <label for="codigo" class="form-label">CÃ³digo</label>
+                <label for="codigo" class="form-label">CÓDIGO</label>
                 <input type="text" class="form-control" id="codigo" name="codigo" 
                        value="<?php echo htmlspecialchars($dependencia['codigo']); ?>" maxlength="50">
-                <small class="text-muted">CÃ³digo Ãºnico da dependÃªncia (opcional)</small>
+                <small class="text-muted">CÓDIGO Ãºnico da DEPENDÊNCIA (opcional)</small>
             </div>
 
             <div class="mb-3">
                 <label for="descricao" class="form-label">DescriÃ§Ã£o <span class="text-danger">*</span></label>
                 <textarea class="form-control" id="descricao" name="descricao" rows="3" required><?php echo htmlspecialchars($dependencia['descricao']); ?></textarea>
-                <small class="text-muted">DescriÃ§Ã£o da dependÃªncia</small>
+                <small class="text-muted">DescriÃ§Ã£o da DEPENDÊNCIA</small>
             </div>
         </div>
     </div>
@@ -55,7 +55,7 @@ ob_start();
     <div class="d-grid gap-2">
         <button type="submit" class="btn btn-primary w-100">
             <i class="bi bi-check-lg me-1"></i>
-            Atualizar DependÃªncia
+            ATUALIZAR DEPENDÊNCIA
         </button>
     </div>
 </form>
@@ -67,7 +67,7 @@ document.getElementById('formDependencia').addEventListener('submit', function(e
     
     if (!descricao) {
         e.preventDefault();
-        alert('A descriÃ§Ã£o Ã© obrigatÃ³ria!');
+        alert('A DESCRIÇÃO Ã© obrigatÃ³ria!');
         return false;
     }
 });

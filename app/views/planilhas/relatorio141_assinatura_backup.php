@@ -9,26 +9,26 @@ if (!$id_planilha) {
     exit;
 }
 
-// Buscar produtos que podem ser assinados (imprimir_14_1 = 1)
+// BUSCAR PRODUTOS que podem ser assinados (imprimir_14_1 = 1)
 $sql = "SELECT 
-            p.id_produto as id,
+            p.id_PRODUTO as id,
             p.descricao_completa,
             p.bem as tipo_ben,
             tb.descricao as tipo_descricao,
-            COALESCE(a.status, 'pendente') as status_assinatura,
+            COALESCE(a.STATUS, 'pendente') as STATUS_assinatura,
             a.token,
             a.id as id_assinatura
-        FROM produtos p
+        FROM PRODUTOS p
         LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
-        LEFT JOIN assinaturas_14_1 a ON a.id_produto = p.id_produto
+        LEFT JOIN assinaturas_14_1 a ON a.id_PRODUTO = p.id_PRODUTO
         WHERE p.planilha_id = :id_planilha 
         AND p.imprimir_14_1 = 1
-        ORDER BY p.id_produto ASC";
+        ORDER BY p.id_PRODUTO ASC";
 
 $stmt = $conexao->prepare($sql);
 $stmt->bindValue(':id_planilha', $id_planilha);
 $stmt->execute();
-$produtos = $stmt->fetchAll();
+$PRODUTOS = $stmt->fetchAll();
 
 $pageTitle = 'Assinar Documentos 14.1';
 $backUrl = '../planilhas/relatorio141_view.php?id=' . urlencode($id_planilha);
@@ -57,32 +57,32 @@ ob_start();
 ?>
 
 <style>
-.produto-card {
+.PRODUTO-card {
     transition: all 0.2s;
     border: 3px solid #dee2e6;
     border-radius: 0.375rem;
     cursor: pointer;
 }
 
-.produto-card:hover {
+.PRODUTO-card:hover {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.produto-card.status-pendente {
+.PRODUTO-card.STATUS-pendente {
     border-color: #ffc107;
 }
 
-.produto-card.status-assinado {
+.PRODUTO-card.STATUS-assinado {
     border-color: #28a745;
 }
 
-.produto-card.selected {
+.PRODUTO-card.selected {
     background-color: #e7f3ff;
     border-color: #007bff !important;
     box-shadow: 0 0 0 2px #007bff;
 }
 
-.checkbox-produto {
+.checkbox-PRODUTO {
     width: 1.25rem;
     height: 1.25rem;
     cursor: pointer;
@@ -103,7 +103,7 @@ ob_start();
 .selection-toolbar.active {
     display: block;
 }
- .legenda-status {
+ .legenda-STATUS {
      display: flex;
      gap: 1.5rem;
      flex-wrap: wrap;
@@ -162,15 +162,15 @@ ob_start();
 <div class="card mb-3">
     <div class="card-header bg-primary text-white">
         <i class="bi bi-pen me-2"></i>
-        Selecione os Produtos para Assinar
+        Selecione os PRODUTOS para Assinar
     </div>
     <div class="card-body">
         <p class="mb-3">
             <i class="bi bi-info-circle me-1"></i>
-            Clique no produto para selecionÃƒÂ¡-lo. VocÃƒÂª pode selecionar vÃƒÂ¡rios produtos para assinar todos de uma vez.
+            Clique no PRODUTO para selecionÃƒÂ¡-lo. VocÃƒÂª pode selecionar vÃƒÂ¡rios PRODUTOS para assinar todos de uma vez.
         </p>
-        <!-- Legenda de Status -->
-        <div class="legenda-status">
+        <!-- Legenda de STATUS -->
+        <div class="legenda-STATUS">
             <div class="legenda-item">
                 <div class="legenda-cor pendente"></div>
                 <span>Pendente</span>
@@ -187,7 +187,7 @@ ob_start();
 <div class="selection-toolbar" id="selectionToolbar">
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <strong><span id="countSelected">0</span> produto(s) selecionado(s)</strong>
+            <strong><span id="countSelected">0</span> PRODUTO(s) selecionado(s)</strong>
         </div>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-success" onclick="assinarSelecionados()">
@@ -196,41 +196,41 @@ ob_start();
             </button>
             <button type="button" class="btn btn-outline-secondary" onclick="limparSelecao()">
                 <i class="bi bi-x me-1"></i>
-                Cancelar
+                CANCELAR
             </button>
         </div>
     </div>
 </div>
 
-<?php if (count($produtos) > 0): ?>
+<?php if (count($PRODUTOS) > 0): ?>
     <div class="row g-3">
-        <?php foreach ($produtos as $produto): ?>
+        <?php foreach ($PRODUTOS as $PRODUTO): ?>
             <div class="col-12">
-                <div class="card produto-card status-<?php echo $produto['status_assinatura']; ?>" 
-                     data-produto-id="<?php echo $produto['id']; ?>"
-                     onclick="toggleProduto(<?php echo $produto['id']; ?>)">
+                <div class="card PRODUTO-card STATUS-<?php echo $PRODUTO['STATUS_assinatura']; ?>" 
+                     data-PRODUTO-id="<?php echo $PRODUTO['id']; ?>"
+                     onclick="togglePRODUTO(<?php echo $PRODUTO['id']; ?>)">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="d-flex align-items-start gap-3 flex-grow-1">
                                 <div class="form-check">
-                                    <input class="form-check-input checkbox-produto" 
+                                    <input class="form-check-input checkbox-PRODUTO" 
                                            type="checkbox" 
-                                           id="produto_<?php echo $produto['id']; ?>"
-                                           value="<?php echo $produto['id']; ?>"
+                                           id="PRODUTO_<?php echo $PRODUTO['id']; ?>"
+                                           value="<?php echo $PRODUTO['id']; ?>"
                                            onclick="event.stopPropagation();">
                                 </div>
                                 <div class="flex-grow-1">
                                     <h6 class="card-title mb-2">
                                         <i class="bi bi-box-seam me-1"></i>
-                                        Produto #<?php echo $produto['id']; ?>
+                                        PRODUTO #<?php echo $PRODUTO['id']; ?>
                                     </h6>
                                     <p class="card-text small mb-2">
                                         <strong>Tipo:</strong> 
-                                        <?php echo htmlspecialchars($produto['tipo_descricao'] ?? 'N/A'); ?>
+                                        <?php echo htmlspecialchars($PRODUTO['tipo_descricao'] ?? 'N/A'); ?>
                                     </p>
                                     <p class="card-text small text-muted mb-0" style="max-height: 3em; overflow: hidden;">
-                                        <?php echo htmlspecialchars(substr($produto['descricao_completa'], 0, 150)); ?>
-                                        <?php if (strlen($produto['descricao_completa']) > 150): ?>...<?php endif; ?>
+                                        <?php echo htmlspecialchars(substr($PRODUTO['descricao_completa'], 0, 150)); ?>
+                                        <?php if (strlen($PRODUTO['descricao_completa']) > 150): ?>...<?php endif; ?>
                                     </p>
                                 </div>
                             </div>
@@ -245,24 +245,24 @@ ob_start();
     </div>
 <?php else: ?>
     <div class="alert alert-warning">
-        <i class="bi bi-info-circle me-2"></i> Nenhum produto encontrado para assinatura.
+        <i class="bi bi-info-circle me-2"></i> Nenhum PRODUTO encontrado para assinatura.
     </div>
 <?php endif; ?>
 
 <script>
-let produtosSelecionados = new Set();
+let PRODUTOSSelecionados = new Set();
 
-function toggleProduto(id) {
-    const checkbox = document.getElementById('produto_' + id);
-    const card = document.querySelector(`[data-produto-id="${id}"]`);
+function togglePRODUTO(id) {
+    const checkbox = document.getElementById('PRODUTO_' + id);
+    const card = document.querySelector(`[data-PRODUTO-id="${id}"]`);
     
     if (checkbox.checked) {
         checkbox.checked = false;
-        produtosSelecionados.delete(id);
+        PRODUTOSSelecionados.delete(id);
         card.classList.remove('selected');
     } else {
         checkbox.checked = true;
-        produtosSelecionados.add(id);
+        PRODUTOSSelecionados.add(id);
         card.classList.add('selected');
     }
     
@@ -272,7 +272,7 @@ function toggleProduto(id) {
 function atualizarToolbar() {
     const toolbar = document.getElementById('selectionToolbar');
     const counter = document.getElementById('countSelected');
-    const count = produtosSelecionados.size;
+    const count = PRODUTOSSelecionados.size;
     
     counter.textContent = count;
     
@@ -284,51 +284,51 @@ function atualizarToolbar() {
 }
 
 function selecionarTodos() {
-    const checkboxes = document.querySelectorAll('.checkbox-produto');
+    const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
     checkboxes.forEach(cb => {
         const id = parseInt(cb.value);
         cb.checked = true;
-        produtosSelecionados.add(id);
-        const card = document.querySelector(`[data-produto-id="${id}"]`);
+        PRODUTOSSelecionados.add(id);
+        const card = document.querySelector(`[data-PRODUTO-id="${id}"]`);
         if (card) card.classList.add('selected');
     });
     atualizarToolbar();
 }
 
 function limparSelecao() {
-    const checkboxes = document.querySelectorAll('.checkbox-produto');
+    const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
     checkboxes.forEach(cb => {
         cb.checked = false;
-        const card = document.querySelector(`[data-produto-id="${cb.value}"]`);
+        const card = document.querySelector(`[data-PRODUTO-id="${cb.value}"]`);
         if (card) card.classList.remove('selected');
     });
-    produtosSelecionados.clear();
+    PRODUTOSSelecionados.clear();
     atualizarToolbar();
 }
 
 function assinarSelecionados() {
-    if (produtosSelecionados.size === 0) {
-        alert('Selecione pelo menos um produto para assinar.');
+    if (PRODUTOSSelecionados.size === 0) {
+        alert('Selecione pelo menos um PRODUTO para assinar.');
         return;
     }
     
-    const ids = Array.from(produtosSelecionados).join(',');
+    const ids = Array.from(PRODUTOSSelecionados).join(',');
     window.location.href = './relatorio141_assinatura_form.php?ids=' + ids + '&id_planilha=<?php echo $id_planilha; ?>';
 }
 
 // Listener nos checkboxes para sincronizar com a seleÃƒÂ§ÃƒÂ£o
 document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.checkbox-produto');
+    const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
     checkboxes.forEach(cb => {
         cb.addEventListener('change', function(e) {
             const id = parseInt(this.value);
-            const card = document.querySelector(`[data-produto-id="${id}"]`);
+            const card = document.querySelector(`[data-PRODUTO-id="${id}"]`);
             
             if (this.checked) {
-                produtosSelecionados.add(id);
+                PRODUTOSSelecionados.add(id);
                 if (card) card.classList.add('selected');
             } else {
-                produtosSelecionados.delete(id);
+                PRODUTOSSelecionados.delete(id);
                 if (card) card.classList.remove('selected');
             }
             

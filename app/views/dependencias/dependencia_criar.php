@@ -10,7 +10,7 @@ if (!isAdmin()) {
 
 include __DIR__ . '/../../../app/controllers/create/DependenciaCreateController.php';
 
-$pageTitle = 'Nova DependÃªncia';
+$pageTitle = 'Nova DEPENDÊNCIA';
 $backUrl = './dependencias_listar.php';
 
 ob_start();
@@ -26,7 +26,7 @@ ob_start();
 <div class="card">
     <div class="card-header">
         <i class="bi bi-plus-circle me-2"></i>
-        Cadastrar Nova DependÃªncia
+        Cadastrar Nova DEPENDÊNCIA
     </div>
     <div class="card-body">
         <form method="POST" action="">
@@ -35,13 +35,13 @@ ob_start();
                 <div class="col-md-6">
                     <label for="descricao" class="form-label">DescriÃ§Ã£o <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="descricao" name="descricao" required
-                           placeholder="Digite a descriÃ§Ã£o">
+                           placeholder="Digite a DESCRIÇÃO">
                 </div>
             </div>
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-check-lg me-2"></i>
-                    Cadastrar DependÃªncia
+                    Cadastrar DEPENDÊNCIA
                 </button>
                 <!-- botÃ£o Voltar removido conforme solicitado -->
             </div>

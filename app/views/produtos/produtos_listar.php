@@ -1,21 +1,21 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
-include __DIR__ . '/../../../app/controllers/read/ProdutoListController.php';
+ // AUTENTICAÇÃO
+include __DIR__ . '/../../../app/controllers/read/PRODUTOListController.php';
 
-$id_planilha = $comum_id; // compatibilidade com cÃ³digo legado
+$id_planilha = $comum_id; // compatibilidade com CÓDIGO legado
 
-$pageTitle = 'Visualizar Produtos';
+$pageTitle = 'VISUALIZAR PRODUTOS';
 $backUrl = '../../index.php';
 $headerActions = '
     <div class="dropdown">
-        <button class="btn-header-action" type="button" id="menuProdutos" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn-header-action" type="button" id="menuPRODUTOS" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-list fs-5"></i>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuProdutos">
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPRODUTOS">
             <li>
-                <a href="./produto_criar.php?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro(true) . '" class="dropdown-item">
-                    <i class="bi bi-plus-lg me-2"></i>Novo Produto
+                <a href="./PRODUTO_criar.php?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro(true) . '" class="dropdown-item">
+                    <i class="bi bi-plus-lg me-2"></i>Novo PRODUTO
                 </a>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -49,7 +49,7 @@ ob_start();
       <input type="hidden" name="comum_id" value="<?php echo htmlspecialchars($comum_id); ?>">
       <input type="hidden" name="comum_id" value="<?php echo htmlspecialchars($comum_id); ?>">
 
-      <!-- Campo principal de busca por descriÃ§Ã£o -->
+      <!-- Campo principal de busca por DESCRIÇÃO -->
       <div class="mb-3">
         <label for="filtro_complemento" class="form-label">
           <i class="bi bi-search me-1"></i>
@@ -99,7 +99,7 @@ ob_start();
               </div>
 
               <div class="mb-3">
-                <label for="filtro_dependencia" class="form-label">DependÃªncia</label>
+                <label for="filtro_dependencia" class="form-label">DEPENDÊNCIA</label>
                 <select id="filtro_dependencia" name="filtro_dependencia" class="form-select">
                   <option value="">Todas</option>
                   <?php foreach ($dependencias as $dep): ?>
@@ -111,12 +111,12 @@ ob_start();
               </div>
 
               <div class="mb-3">
-                <label for="filtro_status" class="form-label">Status</label>
-                <select id="filtro_status" name="filtro_status" class="form-select">
+                <label for="filtro_STATUS" class="form-label">STATUS</label>
+                <select id="filtro_STATUS" name="filtro_STATUS" class="form-select">
                   <option value="">Todos</option>
-                  <option value="com_nota" <?php echo $filtro_status === 'com_nota' ? 'selected' : ''; ?>>Com Nota</option>
-                  <option value="com_14_1" <?php echo $filtro_status === 'com_14_1' ? 'selected' : ''; ?>>Com 14.1</option>
-                  <option value="sem_status" <?php echo $filtro_status === 'sem_status' ? 'selected' : ''; ?>>Sem Status</option>
+                  <option value="com_nota" <?php echo $filtro_STATUS === 'com_nota' ? 'selected' : ''; ?>>Com Nota</option>
+                  <option value="com_14_1" <?php echo $filtro_STATUS === 'com_14_1' ? 'selected' : ''; ?>>Com 14.1</option>
+                  <option value="sem_STATUS" <?php echo $filtro_STATUS === 'sem_STATUS' ? 'selected' : ''; ?>>Sem STATUS</option>
                 </select>
               </div>
             </div>
@@ -142,9 +142,9 @@ ob_start();
     <form method="POST" id="deleteForm">
       <input type="hidden" name="id_planilha" value="<?php echo htmlspecialchars($id_planilha); ?>">
       <div id="selectedProducts"></div>
-      <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Tem certeza que deseja excluir os produtos selecionados?');">
+      <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Tem certeza que deseja excluir os PRODUTOS selecionados?');">
         <i class="bi bi-trash me-2"></i>
-        Excluir <span id="countSelected">0</span> Produto(s) Selecionado(s)
+        Excluir <span id="countSelected">0</span> PRODUTO(s) Selecionado(s)
       </button>
     </form>
   </div>
@@ -154,7 +154,7 @@ ob_start();
   <div class="card-header d-flex justify-content-between align-items-center">
     <span>
       <i class="bi bi-box-seam me-2"></i>
-      Produtos
+      PRODUTOS
     </span>
     <span class="badge bg-white text-dark"><?php echo $total_registros ?? 0; ?> itens (pÃ¡g. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
   </div>
@@ -162,38 +162,38 @@ ob_start();
     <table class="table align-middle mb-0">
       <thead>
         <tr>
-          <th>Produtos</th>
+          <th>PRODUTOS</th>
         </tr>
       </thead>
       <tbody>
-        <?php if (!empty($produtos)): ?>
-          <?php foreach ($produtos as $produto): ?>
+        <?php if (!empty($PRODUTOS)): ?>
+          <?php foreach ($PRODUTOS as $PRODUTO): ?>
             <tr>
               <td>
                 <div class="d-flex gap-2">
                   <div class="form-check mt-1">
-                    <input class="form-check-input produto-checkbox" type="checkbox" value="<?php echo $produto['id']; ?>" id="produto_<?php echo $produto['id']; ?>">
+                    <input class="form-check-input PRODUTO-checkbox" type="checkbox" value="<?php echo $PRODUTO['id']; ?>" id="PRODUTO_<?php echo $PRODUTO['id']; ?>">
                   </div>
                   <div class="flex-grow-1">
                     <!-- Linha 1: DescriÃ§Ã£o -->
                     <div class="fw-semibold mb-2">
-                      <?php echo htmlspecialchars($produto['descricao_completa']); ?>
+                      <?php echo htmlspecialchars($PRODUTO['descricao_completa']); ?>
                     </div>
-                    <!-- Linha 2: Status e AÃ§Ãµes -->
+                    <!-- Linha 2: STATUS e AÃ§Ãµes -->
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="d-flex gap-1 flex-wrap">
-                        <?php if (!empty($produto['codigo'])): ?>
-                          <span class="badge bg-info text-dark"><?php echo htmlspecialchars($produto['codigo']); ?></span>
+                        <?php if (!empty($PRODUTO['codigo'])): ?>
+                          <span class="badge bg-info text-dark"><?php echo htmlspecialchars($PRODUTO['codigo']); ?></span>
                         <?php endif; ?>
-                        <?php if (isset($produto['condicao_141']) && ($produto['condicao_141'] == 1 || $produto['condicao_141'] == 3)): ?>
+                        <?php if (isset($PRODUTO['condicao_141']) && ($PRODUTO['condicao_141'] == 1 || $PRODUTO['condicao_141'] == 3)): ?>
                           <span class="badge bg-warning text-dark">Nota</span>
                         <?php endif; ?>
-                        <?php if ($produto['imprimir_14_1'] == 1): ?>
+                        <?php if ($PRODUTO['imprimir_14_1'] == 1): ?>
                           <span class="badge bg-primary">14.1</span>
                         <?php endif; ?>
                       </div>
                       <div class="btn-group btn-group-sm">
-                        <a class="btn btn-outline-primary btn-sm" title="Editar" href="./produto_atualizar.php?id_produto=<?php echo $produto['id']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
+                        <a class="btn btn-outline-primary btn-sm" title="EDITAR" href="./PRODUTO_atualizar.php?id_PRODUTO=<?php echo $PRODUTO['id']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
                           <i class="bi bi-pencil-fill"></i>
                         </a>
                       </div>
@@ -207,9 +207,9 @@ ob_start();
           <tr>
             <td class="text-center text-muted py-4">
               <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-              <?php echo ($pesquisa_id || $filtro_tipo_ben || $filtro_bem || $filtro_complemento || $filtro_dependencia || $filtro_status)
-                ? 'Nenhum produto encontrado com os filtros aplicados.'
-                : 'Nenhum produto cadastrado para esta planilha.'; ?>
+              <?php echo ($pesquisa_id || $filtro_tipo_ben || $filtro_bem || $filtro_complemento || $filtro_dependencia || $filtro_STATUS)
+                ? 'Nenhum PRODUTO encontrado com os filtros aplicados.'
+                : 'Nenhum PRODUTO cadastrado para esta planilha.'; ?>
             </td>
           </tr>
         <?php endif; ?>
@@ -258,14 +258,14 @@ ob_start();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const checkboxes = document.querySelectorAll('.produto-checkbox');
+  const checkboxes = document.querySelectorAll('.PRODUTO-checkbox');
   const deleteButtonContainer = document.getElementById('deleteButtonContainer');
   const selectedProductsDiv = document.getElementById('selectedProducts');
   const countSelected = document.getElementById('countSelected');
   const deleteForm = document.getElementById('deleteForm');
 
   function atualizarContagem() {
-    const checados = document.querySelectorAll('.produto-checkbox:checked').length;
+    const checados = document.querySelectorAll('.PRODUTO-checkbox:checked').length;
     countSelected.textContent = checados;
     
     // Mostrar/ocultar container de exclusÃ£o
@@ -275,12 +275,12 @@ document.addEventListener('DOMContentLoaded', function() {
       deleteButtonContainer.style.display = 'none';
     }
     
-    // Atualizar inputs ocultos com IDs selecionados
+    // ATUALIZAR inputs ocultos com IDs selecionados
     selectedProductsDiv.innerHTML = '';
-    document.querySelectorAll('.produto-checkbox:checked').forEach(checkbox => {
+    document.querySelectorAll('.PRODUTO-checkbox:checked').forEach(checkbox => {
       const input = document.createElement('input');
       input.type = 'hidden';
-      input.name = 'ids_produtos[]';
+      input.name = 'ids_PRODUTOS[]';
       input.value = checkbox.value;
       selectedProductsDiv.appendChild(input);
     });
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Enviar via AJAX ou formulÃ¡rio tradicional
     const formData = new FormData(deleteForm);
     
-    fetch('./produtos_excluir.php', {
+    fetch('./PRODUTOS_excluir.php', {
       method: 'POST',
       body: formData
     })
@@ -308,12 +308,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Recarregar a pÃ¡gina
         location.reload();
       } else {
-        alert('Erro ao excluir produtos: ' + (data.message || 'Erro desconhecido'));
+        alert('Erro ao excluir PRODUTOS: ' + (data.message || 'Erro desconhecido'));
       }
     })
     .catch(error => {
       console.error('Erro:', error);
-      alert('Erro ao excluir produtos');
+      alert('Erro ao excluir PRODUTOS');
     });
   });
 });
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php
 $contentHtml = ob_get_clean();
-$tempFile = __DIR__ . '/../../../temp_read_produto_' . uniqid() . '.php';
+$tempFile = __DIR__ . '/../../../temp_read_PRODUTO_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';

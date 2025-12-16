@@ -1,7 +1,7 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
-// Autenticação
+// AUTENTICAÇÃO
 // Apenas admins podem visualizar usuários
 if (!isAdmin()) {
     header('Location: ../../../index.php');
@@ -24,7 +24,7 @@ if (!$usuario) {
     exit;
 }
 
-$pageTitle = 'Visualizar Usuário';
+$pageTitle = 'VISUALIZAR Usuário';
 $backUrl = './usuarios_listar.php';
 
 function format_usuario_valor($valor)
@@ -39,7 +39,7 @@ function format_usuario_valor($valor)
 ob_start();
 ?>
 
-<!-- jQuery e InputMask -->
+<!-- JQUERY e INPUTMASK -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
 
@@ -72,12 +72,12 @@ ob_start();
 
 <div class="card mb-3 shadow-sm">
     <div class="card-header card-header-contrast border-bottom-0">
-        <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Dados Básicos</h5>
+        <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>DADOS BÁSICOS</h5>
     </div>
     <div class="card-body border-top">
         <div class="row g-4">
             <div class="col-md-6">
-                <div class="info-label">Nome Completo</div>
+                <div class="info-label">NOME COMPLETO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['nome']); ?></div>
                 <div class="info-label">CPF</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['cpf'] ?? ''); ?></div>
@@ -85,9 +85,9 @@ ob_start();
                 <div class="info-value"><?php echo format_usuario_valor($usuario['rg'] ?? ''); ?></div>
             </div>
             <div class="col-md-6">
-                <div class="info-label">Telefone</div>
+                <div class="info-label">TELEFONE</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['telefone'] ?? ''); ?></div>
-                <div class="info-label">Email</div>
+                <div class="info-label">EMAIL</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['email']); ?></div>
             </div>
         </div>
@@ -97,7 +97,7 @@ ob_start();
 <?php if (!empty($usuario['casado'])): ?>
 <div class="card mb-3 shadow-sm">
     <div class="card-header card-header-contrast border-bottom-0">
-        <h5 class="mb-0"><i class="bi bi-person-hearts me-2"></i>Estado Civil</h5>
+        <h5 class="mb-0"><i class="bi bi-person-hearts me-2"></i>ESTADO Civil</h5>
     </div>
     <div class="card-body border-top">
         <div class="info-value">
@@ -110,12 +110,12 @@ ob_start();
 <?php if (!empty($usuario['casado'])): ?>
 <div class="card mb-3 shadow-sm">
     <div class="card-header card-header-contrast border-bottom-0">
-        <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Dados do Cônjuge</h5>
+        <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Dados do CÔNJUGE</h5>
     </div>
     <div class="card-body border-top">
         <div class="row g-3">
             <div class="col-md-6">
-                <div class="info-label">Nome Completo</div>
+                <div class="info-label">NOME COMPLETO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['nome_conjuge'] ?? ''); ?></div>
                 <div class="info-label">CPF</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['cpf_conjuge'] ?? ''); ?></div>
@@ -123,7 +123,7 @@ ob_start();
             <div class="col-md-6">
                 <div class="info-label">RG</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['rg_conjuge'] ?? ''); ?></div>
-                <div class="info-label">Telefone</div>
+                <div class="info-label">TELEFONE</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['telefone_conjuge'] ?? ''); ?></div>
             </div>
         </div>
@@ -133,7 +133,7 @@ ob_start();
 
 <div class="card mb-3 shadow-sm">
     <div class="card-header card-header-contrast border-bottom-0">
-        <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Endereço</h5>
+        <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>ENDEREÇO</h5>
     </div>
     <div class="card-body border-top">
         <div class="row g-3">
@@ -142,27 +142,27 @@ ob_start();
                 <div class="info-value"><?php echo format_usuario_valor($usuario['endereco_cep'] ?? ''); ?></div>
             </div>
             <div class="col-md-9">
-                <div class="info-label">Logradouro</div>
+                <div class="info-label">LOGRADOURO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['endereco_logradouro'] ?? ''); ?></div>
             </div>
             <div class="col-md-3">
-                <div class="info-label">Número</div>
+                <div class="info-label">NÚMERO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['endereco_numero'] ?? ''); ?></div>
             </div>
             <div class="col-md-9">
-                <div class="info-label">Complemento</div>
+                <div class="info-label">COMPLEMENTO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['endereco_complemento'] ?? ''); ?></div>
             </div>
             <div class="col-md-6">
-                <div class="info-label">Bairro</div>
+                <div class="info-label">BAIRRO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['endereco_bairro'] ?? ''); ?></div>
             </div>
             <div class="col-md-6">
-                <div class="info-label">Cidade</div>
+                <div class="info-label">CIDADE</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['endereco_cidade'] ?? ''); ?></div>
             </div>
             <div class="col-md-12">
-                <div class="info-label">Estado</div>
+                <div class="info-label">ESTADO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['endereco_estado'] ?? ''); ?></div>
             </div>
         </div>

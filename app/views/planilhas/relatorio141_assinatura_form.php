@@ -2,45 +2,45 @@
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 
-$id_produto = $_GET['id'] ?? null;
-$ids_produtos = $_GET['ids'] ?? null;
+$id_PRODUTO = $_GET['id'] ?? null;
+$ids_PRODUTOS = $_GET['ids'] ?? null;
 $id_planilha = $_GET['id_planilha'] ?? null;
 
 // Determinar se ÃƒÂ© mÃƒÂºltiplo ou ÃƒÂºnico
-$produtos_ids = [];
-if ($ids_produtos) {
-    $produtos_ids = array_map('intval', explode(',', $ids_produtos));
-} elseif ($id_produto) {
-    $produtos_ids = [intval($id_produto)];
+$PRODUTOS_ids = [];
+if ($ids_PRODUTOS) {
+    $PRODUTOS_ids = array_map('intval', explode(',', $ids_PRODUTOS));
+} elseif ($id_PRODUTO) {
+    $PRODUTOS_ids = [intval($id_PRODUTO)];
 }
 
-if (empty($produtos_ids) || !$id_planilha) {
+if (empty($PRODUTOS_ids) || !$id_planilha) {
     header('Location: ../../../index.php');
     exit;
 }
 
-$multiplo = count($produtos_ids) > 1;
+$multiplo = count($PRODUTOS_ids) > 1;
 
-// Buscar dados dos produtos
-$placeholders = implode(',', array_fill(0, count($produtos_ids), '?'));
-$sql = "SELECT p.id_produto, p.descricao_completa, p.condicao_14_1, p.nota_numero, p.nota_data, p.nota_valor, p.nota_fornecedor, p.doador_conjugue_id, tb.descricao as tipo_descricao, u.nome as doador_nome FROM produtos p LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id LEFT JOIN usuarios u ON p.doador_conjugue_id = u.id WHERE p.id_produto IN ($placeholders)";
+// BUSCAR dados dos PRODUTOS
+$placeholders = implode(',', array_fill(0, count($PRODUTOS_ids), '?'));
+$sql = "SELECT p.id_PRODUTO, p.descricao_completa, p.condicao_14_1, p.nota_numero, p.nota_data, p.nota_valor, p.nota_fornecedor, p.doador_conjugue_id, tb.descricao as tipo_descricao, u.nome as doador_nome FROM PRODUTOS p LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id LEFT JOIN usuarios u ON p.doador_conjugue_id = u.id WHERE p.id_PRODUTO IN ($placeholders)";
 $stmt = $conexao->prepare($sql);
-$stmt->execute($produtos_ids);
-$produtos = $stmt->fetchAll();
+$stmt->execute($PRODUTOS_ids);
+$PRODUTOS = $stmt->fetchAll();
 
-if (empty($produtos)) {
+if (empty($PRODUTOS)) {
     header('Location: relatorio141_assinatura.php?id=' . urlencode($id_planilha));
     exit;
 }
 
-$todos_assinados = !empty($produtos) && array_reduce($produtos, function($carry, $p){
+$todos_assinados = !empty($PRODUTOS) && array_reduce($PRODUTOS, function($carry, $p){
     return $carry && !is_null($p['doador_conjugue_id']) && $p['doador_conjugue_id'] > 0;
 }, true);
 
 // Ajustar tÃƒÂ­tulo conforme estado (todos assinados => desfazer)
 $pageTitle = $todos_assinados
-    ? ($multiplo ? 'Desfazer Assinatura de ' . count($produtos) . ' Produtos' : 'Desfazer Assinatura do Produto')
-    : ($multiplo ? 'Assinar ' . count($produtos) . ' Produtos' : 'Assinar Produto');
+    ? ($multiplo ? 'Desfazer Assinatura de ' . count($PRODUTOS) . ' PRODUTOS' : 'Desfazer Assinatura do PRODUTO')
+    : ($multiplo ? 'Assinar ' . count($PRODUTOS) . ' PRODUTOS' : 'Assinar PRODUTO');
 $backUrl = 'relatorio141_assinatura.php?id=' . urlencode($id_planilha);
 ob_start();
 ?>
@@ -54,49 +54,49 @@ ob_start();
 .campos-nota { display: none; animation: fadeIn 0.3s; }
 .campos-nota.show { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-.produto-info { background: #e9ecef; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; border-left: 4px solid #007bff; }
+.PRODUTO-info { background: #e9ecef; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; border-left: 4px solid #007bff; }
 </style>
 
 <?php if ($multiplo && !$todos_assinados): ?>
 <div class="alert alert-info mb-3">
     <h5 class="mb-2"><i class="bi bi-info-circle-fill me-2"></i>Assinatura MÃƒÂºltipla</h5>
-    <p class="mb-0">VocÃƒÂª estÃƒÂ¡ assinando <strong><?php echo count($produtos); ?> produtos</strong> de uma vez. As mesmas condiÃƒÂ§ÃƒÂµes serÃƒÂ£o aplicadas a todos.</p>
+    <p class="mb-0">VocÃƒÂª estÃƒÂ¡ assinando <strong><?php echo count($PRODUTOS); ?> PRODUTOS</strong> de uma vez. As mesmas condiÃƒÂ§ÃƒÂµes serÃƒÂ£o aplicadas a todos.</p>
 </div>
 
 <div class="card mb-3">
     <div class="card-header bg-light">
-        <strong>Produtos Selecionados:</strong>
+        <strong>PRODUTOS Selecionados:</strong>
     </div>
     <div class="card-body">
         <ul class="mb-0">
-            <?php foreach ($produtos as $p): ?>
+            <?php foreach ($PRODUTOS as $p): ?>
             <li><?php echo htmlspecialchars($p['tipo_descricao'] . ' - ' . substr($p['descricao_completa'], 0, 80)); ?><?php if (strlen($p['descricao_completa']) > 80): ?>...<?php endif; ?></li>
             <?php endforeach; ?>
         </ul>
     </div>
 </div>
 <?php elseif(!$multiplo && !$todos_assinados): ?>
-<?php $produto = $produtos[0]; ?>
-<div class="produto-info">
-    <h6 class="mb-2"><i class="bi bi-box-seam me-2"></i><?php echo htmlspecialchars($produto['tipo_descricao']); ?></h6>
-    <p class="mb-0 small"><?php echo htmlspecialchars($produto['descricao_completa']); ?></p>
+<?php $PRODUTO = $PRODUTOS[0]; ?>
+<div class="PRODUTO-info">
+    <h6 class="mb-2"><i class="bi bi-box-seam me-2"></i><?php echo htmlspecialchars($PRODUTO['tipo_descricao']); ?></h6>
+    <p class="mb-0 small"><?php echo htmlspecialchars($PRODUTO['descricao_completa']); ?></p>
 </div>
 <?php endif; ?>
 <?php if($todos_assinados && $multiplo): ?>
 <div class="alert alert-warning mb-3">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>
-    Todos os produtos selecionados jÃƒÂ¡ estÃƒÂ£o assinados. VocÃƒÂª pode desfazer a assinatura abaixo.
+    Todos os PRODUTOS selecionados jÃƒÂ¡ estÃƒÂ£o assinados. VocÃƒÂª pode desfazer a assinatura abaixo.
 </div>
 <?php elseif($todos_assinados && !$multiplo): ?>
 <div class="alert alert-warning mb-3">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>
-    Este produto jÃƒÂ¡ estÃƒÂ¡ assinado. VocÃƒÂª pode desfazer a assinatura abaixo.
+    Este PRODUTO jÃƒÂ¡ estÃƒÂ¡ assinado. VocÃƒÂª pode desfazer a assinatura abaixo.
 </div>
 <?php endif; ?>
 
-<form id="formAssinatura" method="POST" action="../../../app/controllers/update/<?php echo $todos_assinados ? 'ProdutoDesassinar141Controller.php' : 'ProdutoAssinar141Controller.php'; ?>">
-    <?php foreach ($produtos_ids as $pid): ?>
-    <input type="hidden" name="ids_produtos[]" value="<?php echo $pid; ?>">
+<form id="formAssinatura" method="POST" action="../../../app/controllers/update/<?php echo $todos_assinados ? 'PRODUTODesassinar141Controller.php' : 'PRODUTOAssinar141Controller.php'; ?>">
+    <?php foreach ($PRODUTOS_ids as $pid): ?>
+    <input type="hidden" name="ids_PRODUTOS[]" value="<?php echo $pid; ?>">
     <?php endforeach; ?>
     <input type="hidden" name="id_planilha" value="<?php echo $id_planilha; ?>">
     
@@ -152,17 +152,17 @@ ob_start();
     
     <?php if(!$todos_assinados): ?>
         <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success flex-fill"><i class="bi bi-check-lg me-2"></i>Salvar e Assinar</button>
-            <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-2"></i>Cancelar</a>
+            <button type="submit" class="btn btn-success flex-fill"><i class="bi bi-check-lg me-2"></i>SALVAR e Assinar</button>
+            <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-2"></i>CANCELAR</a>
         </div>
     <?php else: ?>
         <div class="alert alert-warning mb-3">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Estes produto(s) jÃƒÂ¡ estÃƒÂ£o assinados. Clique abaixo para desfazer a assinatura e limpar os dados de nota.
+            Estes PRODUTO(s) jÃƒÂ¡ estÃƒÂ£o assinados. Clique abaixo para desfazer a assinatura e limpar os dados de nota.
         </div>
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-danger flex-fill"><i class="bi bi-arrow-counterclockwise me-2"></i>Desfazer Assinatura</button>
-            <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-2"></i>Cancelar</a>
+            <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-2"></i>CANCELAR</a>
         </div>
     <?php endif; ?>
 </form>

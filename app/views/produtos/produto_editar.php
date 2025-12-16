@@ -1,10 +1,10 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
-require_once __DIR__ . '/../../../app/controllers/update/ProdutoUpdateController.php';
+ // AUTENTICAÇÃO
+require_once __DIR__ . '/../../../app/controllers/update/PRODUTOUpdateController.php';
 
-$pageTitle = "Editar Produto";
-$backUrl = getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status);
+$pageTitle = "EDITAR PRODUTO";
+$backUrl = getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
 
 ob_start();
 ?>
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome); ?>">
     <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia); ?>">
     <input type="hidden" name="filtro_codigo" value="<?php echo htmlspecialchars($filtro_codigo); ?>">
-    <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_status); ?>">
+    <input type="hidden" name="STATUS" value="<?php echo htmlspecialchars($filtro_STATUS); ?>">
 
     <div class="card mb-3">
         <div class="card-body">
@@ -154,18 +154,18 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="mb-3">
                 <label for="novo_complemento" class="form-label">
                     <i class="bi bi-card-text me-1"></i>
-                    Complemento
+                    COMPLEMENTO
                 </label>
                 <textarea class="form-control text-uppercase-input" id="novo_complemento" name="novo_complemento" 
                           rows="3" placeholder="CARACTERÃSTICA + MARCA + MEDIDAS"><?php echo htmlspecialchars($novo_complemento ?? ''); ?></textarea>
-                <div class="form-text">Deixe em branco para nÃ£o alterar. Ex: COR PRETA + MARCA XYZ + 1,80M X 0,80M</div>
+                <div class="form-text">Deixe em branco para NÃO alterar. Ex: COR PRETA + MARCA XYZ + 1,80M X 0,80M</div>
             </div>
 
             <!-- DEPENDÃŠNCIA -->
             <div class="mb-3">
                 <label for="nova_dependencia_id" class="form-label">
                     <i class="bi bi-building me-1"></i>
-                    DependÃªncia
+                    DEPENDÊNCIA
                 </label>
                 <select class="form-select" id="nova_dependencia_id" name="nova_dependencia_id">
                     <option value="">-- NÃ£o alterar --</option>
@@ -182,23 +182,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <button type="submit" class="btn btn-primary w-100">
         <i class="bi bi-check-lg me-2"></i>
-        Salvar AlteraÃ§Ãµes
+        SALVAR AlteraÃ§Ãµes
     </button>
 </form>
 
 <div class="mt-3">
-    <a href="./produtos_limpar_edicoes.php?id=<?php echo $id_planilha; ?>&id_produto=<?php echo $id_produto; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&status=<?php echo urlencode($filtro_status); ?>"
+    <a href="./PRODUTOS_limpar_edicoes.php?id=<?php echo $id_planilha; ?>&id_PRODUTO=<?php echo $id_PRODUTO; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&STATUS=<?php echo urlencode($filtro_STATUS); ?>"
        class="btn btn-outline-danger w-100"
-       onclick="return confirm('Tem certeza que deseja limpar as ediÃ§Ãµes deste produto?');">
+       onclick="return confirm('Tem certeza que deseja limpar as ediÃ§Ãµes deste PRODUTO?');">
         <i class="bi bi-trash3 me-2"></i>
-        Limpar EdiÃ§Ãµes
+        LIMPAR EdiÃ§Ãµes
     </a>
     <div class="form-text mt-1">Remove todos os campos editados e desmarca para impressÃ£o.</div>
 </div>
 
 <?php
 $contentHtml = ob_get_clean();
-$tempFile = __DIR__ . '/../../../temp_editar_produto_' . uniqid() . '.php';
+$tempFile = __DIR__ . '/../../../temp_editar_PRODUTO_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';

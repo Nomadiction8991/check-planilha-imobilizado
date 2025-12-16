@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $setor = isset($_POST['setor']) && $_POST['setor'] !== '' ? (int)$_POST['setor'] : null;
 
         if ($administracao === '' || $cidade === '') {
-            throw new Exception('AdministraÃƒÂ§ÃƒÂ£o e Cidade sÃƒÂ£o obrigatÃƒÂ³rios.');
+            throw new Exception('AdministraÃƒÂ§ÃƒÂ£o e CIDADE sÃƒÂ£o obrigatÃƒÂ³rios.');
         }
 
         // Obter comum_id pela planilha
@@ -44,13 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $conexao->beginTransaction();
 
-        // Atualizar status da planilha
+        // ATUALIZAR STATUS da planilha
         $up1 = $conexao->prepare('UPDATE planilhas SET ativo = :ativo WHERE id = :id');
         $up1->bindValue(':ativo', $ativo, PDO::PARAM_INT);
         $up1->bindValue(':id', $id_planilha, PDO::PARAM_INT);
         $up1->execute();
 
-        // Atualizar dados do comum relacionado
+        // ATUALIZAR dados do comum relacionado
         $up2 = $conexao->prepare('UPDATE comums SET administracao = :adm, cidade = :cid, setor = :setor WHERE id = :cid_comum');
         $up2->bindValue(':adm', $administracao);
         $up2->bindValue(':cid', $cidade);
@@ -79,7 +79,7 @@ if (!$planilha) {
     die('Planilha nÃƒÂ£o encontrada.');
 }
 
-$pageTitle = 'Editar Planilha';
+$pageTitle = 'EDITAR Planilha';
 $backUrl = '../comuns/configuracoes_importacao.php?comum_id=' . urlencode((string)$planilha['comum_id']);
 
 ob_start();
@@ -104,7 +104,7 @@ ob_start();
                 <div class="col-md-6">
                     <label for="administracao" class="form-label">AdministraÃƒÂ§ÃƒÂ£o <span class="text-danger">*</span></label>
                     <?php 
-                        // AdministraÃƒÂ§ÃƒÂ£o e cidade armazenadas como 'MT - NomeDaCidade'
+                        // AdministraÃƒÂ§ÃƒÂ£o e cidade armazenadas como 'MT - NomeDaCIDADE'
                         $administracao_atual = $planilha['administracao'] ?? '';
                         $cidade_atual = $planilha['cidade'] ?? '';
                         // Extrair somente nome apÃƒÂ³s ' - '
@@ -139,7 +139,7 @@ ob_start();
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="cidade" class="form-label">Cidade <span class="text-danger">*</span></label>
+                    <label for="cidade" class="form-label">CIDADE <span class="text-danger">*</span></label>
                     <select id="cidade" name="cidade" class="form-select" required>
                         <?php if ($cidade_atual !== ''): ?>
                             <option value="<?php echo htmlspecialchars($cidade_atual); ?>" selected><?php echo htmlspecialchars($cidade_atual); ?></option>
@@ -182,7 +182,7 @@ ob_start();
 
     <button type="submit" class="btn btn-primary w-100">
         <i class="bi bi-check-lg me-2"></i>
-        Atualizar Planilha
+        ATUALIZAR Planilha
     </button>
 </form>
 

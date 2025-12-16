@@ -89,7 +89,7 @@ ob_start();
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a href="./dependencia_editar.php?id=<?php echo $dependencia['id']; ?>"
-                                           class="btn btn-sm btn-outline-primary" title="Editar">
+                                           class="btn btn-sm btn-outline-primary" title="EDITAR">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger"

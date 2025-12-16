@@ -14,27 +14,27 @@ require_once dirname(__DIR__, 2) . '/bootstrap.php';
     
     Variáveis disponíveis para preenchimento:
     {{CNPJ}} - CNPJ da planilha
-    {{NUMERO_RELATORIO}} - Número do relatório
+    {{NUMERO_RELATORIO}} - NÚMERO do relatório
     {{CASA_ORACAO}} - Nome da casa de oração
-    {{PRODUTOS}} - Array de produtos com:
-        - codigo: Código do produto
-        - descricao: Descrição do produto
+    {{PRODUTOS}} - Array de PRODUTOS com:
+        - codigo: CÓDIGO do PRODUTO
+        - descricao: DESCRIÇÃO do PRODUTO
         - obs: Observações
         
-    Cada produto gera uma página A4 completa
+    Cada PRODUTO gera uma página A4 completa
 -->
 
 <?php
- // Autenticação
-// Se $produtos não foi definido, usar array vazio
-$produtos = $produtos ?? [];
+ // AUTENTICAÇÃO
+// Se $PRODUTOS NÃO foi definido, usar array vazio
+$PRODUTOS = $PRODUTOS ?? [];
 $cnpj = $cnpj ?? '{{CNPJ}}';
 $numero_relatorio = $numero_relatorio ?? '{{NUMERO_RELATORIO}}';
 $casa_oracao = $casa_oracao ?? '{{CASA_ORACAO}}';
 
-// Se não houver produtos, criar uma página em branco como exemplo
-if (empty($produtos)) {
-    $produtos = [
+// Se NÃO houver PRODUTOS, criar uma página em branco como exemplo
+if (empty($PRODUTOS)) {
+    $PRODUTOS = [
         [
             'codigo' => '',
             'descricao' => '',
@@ -44,10 +44,10 @@ if (empty($produtos)) {
 }
 
 // Contador de páginas
-$total_paginas = count($produtos);
+$total_paginas = count($PRODUTOS);
 $pagina_atual = 0;
 
-foreach ($produtos as $produto):
+foreach ($PRODUTOS as $PRODUTO):
     $pagina_atual++;
 ?>
 
@@ -96,7 +96,7 @@ foreach ($produtos as $produto):
                     </td>
                 </tr>
 
-                <!-- Linha 2: Número do Relatório -->
+                <!-- Linha 2: NÚMERO do Relatório -->
                 <tr class="row2">
                     <td class="col1">
                         <input type="text" value="<?php echo htmlspecialchars($numero_relatorio); ?>" data-field="numero_relatorio">
@@ -142,14 +142,14 @@ foreach ($produtos as $produto):
                     <td class="col2">IDENTIFICAÇÃO DO BEM PATRIMONIAL</td>
                 </tr>
 
-                <!-- Linha 9: Código e Descrição -->
+                <!-- Linha 9: CÓDIGO e DESCRIÇÃO -->
                 <tr class="row9">
                     <td colspan="3">
-                        <strong>07 Código:</strong> 
-                        <input type="text" value="<?php echo htmlspecialchars($produto['codigo'] ?? ''); ?>" data-field="codigo" style="width: 30%;">
+                        <strong>07 CÓDIGO:</strong> 
+                        <input type="text" value="<?php echo htmlspecialchars($PRODUTO['codigo'] ?? ''); ?>" data-field="codigo" style="width: 30%;">
                         &nbsp;&nbsp;&nbsp;
-                        <strong>08 Descrição:</strong> 
-                        <input type="text" value="<?php echo htmlspecialchars($produto['descricao'] ?? ''); ?>" data-field="descricao" style="width: 50%;">
+                        <strong>08 DESCRIÇÃO:</strong> 
+                        <input type="text" value="<?php echo htmlspecialchars($PRODUTO['descricao'] ?? ''); ?>" data-field="descricao" style="width: 50%;">
                     </td>
                 </tr>
 
@@ -173,7 +173,7 @@ foreach ($produtos as $produto):
                 <tr class="row12">
                     <td class="col1">
                         <p><strong>13 Observações:</strong></p>
-                        <textarea rows="8" data-field="observacoes"><?php echo htmlspecialchars($produto['obs'] ?? ''); ?></textarea>
+                        <textarea rows="8" data-field="observacoes"><?php echo htmlspecialchars($PRODUTO['obs'] ?? ''); ?></textarea>
                         <br><br>
                         <label>
                             <input type="checkbox" data-field="check_conforme"> 
@@ -198,10 +198,10 @@ foreach ($produtos as $produto):
                     <td class="col2">RESPONSÁVEL PELO PREENCHIMENTO</td>
                 </tr>
 
-                <!-- Linha 14: Rótulos Nome/Função/Data -->
+                <!-- Linha 14: Rótulos Nome/FUNÇÃO/Data -->
                 <tr class="row14">
                     <td class="col1">17 Nome</td>
-                    <td class="col2">18 Função</td>
+                    <td class="col2">18 FUNÇÃO</td>
                     <td class="col3">19 Data</td>
                 </tr>
 
@@ -246,10 +246,10 @@ foreach ($produtos as $produto):
                     </td>
                 </tr>
 
-                <!-- Linha 22: Rótulos Nome/Função/Data (Comissão) -->
+                <!-- Linha 22: Rótulos Nome/FUNÇÃO/Data (Comissão) -->
                 <tr class="row22">
                     <td class="col1">21 Nome</td>
-                    <td class="col2">22 Função</td>
+                    <td class="col2">22 FUNÇÃO</td>
                     <td class="col3">23 Data</td>
                 </tr>
 

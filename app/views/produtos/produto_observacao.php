@@ -1,10 +1,10 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
-include __DIR__ . '/../../../app/controllers/update/ProdutoObservacaoController.php';
+ // AUTENTICAÇÃO
+include __DIR__ . '/../../../app/controllers/update/PRODUTOObservacaoController.php';
 
 $pageTitle = "ObservaÃ§Ãµes";
-$backUrl = getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status);
+$backUrl = getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
 
 ob_start();
 ?>
@@ -19,12 +19,12 @@ ob_start();
 <div class="card mb-3">
     <div class="card-header">
         <i class="bi bi-box-seam me-2"></i>
-        Produto
+        PRODUTO
     </div>
     <div class="card-body">
         <div class="row g-2 small">
-            <div class="col-12"><?php echo htmlspecialchars($produto['codigo'] ?? ''); ?></div>
-            <div class="col-12"><?php echo htmlspecialchars($produto['descricao_completa'] ?? ''); ?></div>
+            <div class="col-12"><?php echo htmlspecialchars($PRODUTO['codigo'] ?? ''); ?></div>
+            <div class="col-12"><?php echo htmlspecialchars($PRODUTO['descricao_completa'] ?? ''); ?></div>
         </div>
         
         <div class="mt-2">
@@ -46,7 +46,7 @@ ob_start();
     <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome); ?>">
     <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia); ?>">
     <input type="hidden" name="filtro_codigo" value="<?php echo htmlspecialchars($filtro_codigo); ?>">
-    <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_status); ?>">
+    <input type="hidden" name="STATUS" value="<?php echo htmlspecialchars($filtro_STATUS); ?>">
 
     <div class="card mb-3">
         <div class="card-body">
@@ -55,20 +55,20 @@ ob_start();
                 ObservaÃ§Ãµes
             </label>
             <textarea class="form-control" id="observacoes" name="observacoes" rows="6" 
-                      placeholder="Digite as observaÃ§Ãµes do produto..."><?php echo htmlspecialchars($check['observacoes'] ?? ''); ?></textarea>
+                      placeholder="Digite as observaÃ§Ãµes do PRODUTO..."><?php echo htmlspecialchars($check['observacoes'] ?? ''); ?></textarea>
             <div class="form-text">Deixe em branco para remover as observaÃ§Ãµes</div>
         </div>
     </div>
 
     <button type="submit" class="btn btn-primary w-100">
         <i class="bi bi-save me-2"></i>
-        Salvar ObservaÃ§Ãµes
+        SALVAR ObservaÃ§Ãµes
     </button>
 </form>
 
 <?php
 $contentHtml = ob_get_clean();
-$tempFile = __DIR__ . '/../../../temp_obs_produto_' . uniqid() . '.php';
+$tempFile = __DIR__ . '/../../../temp_obs_PRODUTO_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';

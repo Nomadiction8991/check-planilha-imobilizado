@@ -1,10 +1,10 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
-include __DIR__ . '/../../../app/controllers/update/ProdutoPartialUpdateController.php';
+ // AUTENTICAÇÃO
+include __DIR__ . '/../../../app/controllers/update/PRODUTOPartialUpdateController.php';
 
-$pageTitle = 'Editar Produto';
-$backUrl = './produtos_listar.php?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
+$pageTitle = 'EDITAR PRODUTO';
+$backUrl = './PRODUTOS_listar.php?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
 
 ob_start();
 ?>
@@ -20,61 +20,61 @@ ob_start();
   </div>
 <?php endif; ?>
 
-<form method="POST" id="form-produto" class="needs-validation" novalidate>
+<form method="POST" id="form-PRODUTO" class="needs-validation" novalidate>
   <div class="card mb-3">
     <div class="card-body">
       <div class="mb-3">
-        <label for="codigo" class="form-label">CÃ³digo <span class="text-muted">(opcional)</span></label>
-        <input type="text" id="codigo" name="codigo" class="form-control" value="<?php echo htmlspecialchars($produto['codigo'] ?? ''); ?>" placeholder="CÃ³digo gerado por outro sistema">
-        <div class="form-text">Campo opcional. CÃ³digo externo que nÃ£o serÃ¡ incluÃ­do na descriÃ§Ã£o completa.</div>
+        <label for="codigo" class="form-label">CÓDIGO <span class="text-muted">(opcional)</span></label>
+        <input type="text" id="codigo" name="codigo" class="form-control" value="<?php echo htmlspecialchars($PRODUTO['codigo'] ?? ''); ?>" placeholder="CÓDIGO gerado por outro sistema">
+        <div class="form-text">Campo opcional. CÓDIGO externo que NÃO SERÁ INCLUÍDO na DESCRIÇÃO completa.</div>
       </div>
 
       <div class="mb-3">
         <label for="id_tipo_ben" class="form-label">Tipos de Bens</label>
         <select id="id_tipo_ben" name="id_tipo_ben" class="form-select" required>
-          <option value="">Selecione um tipo de bem</option>
+          <option value="">SELECIONE UM TIPO DE BEM</option>
           <?php foreach ($tipos_bens as $tipo): ?>
             <option value="<?php echo $tipo['id']; ?>" data-descricao="<?php echo htmlspecialchars($tipo['descricao']); ?>"
-              <?php echo ($produto['tipo_bem_id'] == $tipo['id']) ? 'selected' : ''; ?>>
+              <?php echo ($PRODUTO['tipo_bem_id'] == $tipo['id']) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($tipo['codigo'] . ' - ' . $tipo['descricao']); ?>
             </option>
           <?php endforeach; ?>
         </select>
-        <div class="invalid-feedback">Selecione um tipo de bem.</div>
+        <div class="invalid-feedback">SELECIONE UM TIPO DE BEM.</div>
       </div>
 
       <div class="mb-3">
         <label for="tipo_ben" class="form-label">Bem</label>
         <select id="tipo_ben" name="tipo_ben" class="form-select" required>
-          <option value="">Primeiro selecione um tipo de bem</option>
+          <option value="">PRIMEIRO SELECIONE UM TIPO DE BEM</option>
         </select>
-        <div class="invalid-feedback">Selecione um bem.</div>
+        <div class="invalid-feedback">SELECIONE UM BEM.</div>
       </div>
 
       <div class="mb-3">
-        <label for="complemento" class="form-label">Complemento</label>
-        <textarea id="complemento" name="complemento" class="form-control" rows="3" placeholder="Digite o complemento do produto" required><?php echo htmlspecialchars($produto['complemento'] ?? ''); ?></textarea>
+        <label for="complemento" class="form-label">COMPLEMENTO</label>
+        <textarea id="complemento" name="complemento" class="form-control" rows="3" placeholder="Digite o complemento do PRODUTO" required><?php echo htmlspecialchars($PRODUTO['complemento'] ?? ''); ?></textarea>
         <div class="invalid-feedback">Informe o complemento.</div>
       </div>
 
       <div class="mb-3">
-        <label for="id_dependencia" class="form-label">DependÃªncia</label>
+        <label for="id_dependencia" class="form-label">DEPENDÊNCIA</label>
         <select id="id_dependencia" name="id_dependencia" class="form-select" required>
-          <option value="">Selecione uma dependÃªncia</option>
+          <option value="">Selecione uma DEPENDÊNCIA</option>
           <?php foreach ($dependencias as $dep): ?>
-            <option value="<?php echo $dep['id']; ?>" <?php echo ($produto['dependencia_id'] == $dep['id']) ? 'selected' : ''; ?>>
+            <option value="<?php echo $dep['id']; ?>" <?php echo ($PRODUTO['dependencia_id'] == $dep['id']) ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($dep['descricao']); ?>
             </option>
           <?php endforeach; ?>
         </select>
-        <div class="invalid-feedback">Selecione a dependÃªncia.</div>
+        <div class="invalid-feedback">Selecione a DEPENDÊNCIA.</div>
       </div>
 
       <div class="mb-2">
-        <label class="form-label">Status</label>
+        <label class="form-label">STATUS</label>
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="imprimir_14_1" name="imprimir_14_1" value="1" <?php echo ($produto['imprimir_14_1'] == 1) ? 'checked' : ''; ?>>
-          <label class="form-check-label" for="imprimir_14_1">Imprimir 14.1</label>
+          <input class="form-check-input" type="checkbox" id="imprimir_14_1" name="imprimir_14_1" value="1" <?php echo ($PRODUTO['imprimir_14_1'] == 1) ? 'checked' : ''; ?>>
+          <label class="form-check-label" for="imprimir_14_1">IMPRIMIR 14.1</label>
         </div>
       </div>
     </div>
@@ -82,14 +82,14 @@ ob_start();
 
   <button type="submit" class="btn btn-primary w-100">
     <i class="bi bi-save me-2"></i>
-    Atualizar Produto
+    ATUALIZAR PRODUTO
   </button>
 </form>
 
 <script>
   const selectTipoBen = document.getElementById('id_tipo_ben');
   const selectBem = document.getElementById('tipo_ben');
-  const produtoBem = <?php echo json_encode($produto['bem'] ?? ''); ?>;
+  const PRODUTOBem = <?php echo json_encode($PRODUTO['bem'] ?? ''); ?>;
 
   function separarOpcoesPorBarra(descricao) {
     return descricao.split('/').map(item => item.trim()).filter(item => item !== '');
@@ -103,20 +103,20 @@ ob_start();
       const opcoes = separarOpcoesPorBarra(descricao);
       const optionPadrao = document.createElement('option');
       optionPadrao.value = '';
-      optionPadrao.textContent = 'Selecione um bem';
+      optionPadrao.textContent = 'SELECIONE UM BEM';
       selectBem.appendChild(optionPadrao);
       opcoes.forEach(opcao => {
         const option = document.createElement('option');
         option.value = opcao;
         option.textContent = opcao;
-        if (opcao === produtoBem) option.selected = true;
+        if (opcao === PRODUTOBem) option.selected = true;
         selectBem.appendChild(option);
       });
       selectBem.disabled = false;
     } else {
       const option = document.createElement('option');
       option.value = '';
-      option.textContent = 'Primeiro selecione um tipo de bem';
+      option.textContent = 'PRIMEIRO SELECIONE UM TIPO DE BEM';
       selectBem.appendChild(option);
       selectBem.disabled = true;
     }
@@ -143,7 +143,7 @@ ob_start();
 
 <?php
 $contentHtml = ob_get_clean();
-$tempFile = __DIR__ . '/../../../temp_update_produto_' . uniqid() . '.php';
+$tempFile = __DIR__ . '/../../../temp_update_PRODUTO_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';

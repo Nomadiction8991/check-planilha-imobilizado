@@ -32,7 +32,7 @@ $headerActions = '
 ';
 
 // ===== Consulta de planilhas (aplicando filtros) =====
-$fs = $_GET['filtro_status'] ?? 'todas';
+$fs = $_GET['filtro_STATUS'] ?? 'todas';
 $data_inicio_str = trim($_GET['data_inicio'] ?? '');
 $data_fim_str = trim($_GET['data_fim'] ?? '');
 
@@ -140,8 +140,8 @@ ob_start();
                     <div id="collapseFiltros" class="accordion-collapse collapse" data-bs-parent="#filtrosAvancados">
                         <div class="accordion-body">
                             <div class="mb-3">
-                                <label class="form-label" for="filtro_status">Status</label>
-                                <select id="filtro_status" name="filtro_status" class="form-select">
+                                <label class="form-label" for="filtro_STATUS">STATUS</label>
+                                <select id="filtro_STATUS" name="filtro_STATUS" class="form-select">
                                     <option value="todas" <?php echo $fs==='todas'?'selected':''; ?>>Todas</option>
                                     <option value="ativas" <?php echo $fs==='ativas'?'selected':''; ?>>Ativas</option>
                                     <option value="inativas" <?php echo $fs==='inativas'?'selected':''; ?>>Inativas</option>
@@ -190,15 +190,15 @@ ob_start();
                             <tr>
                                 <th style="width: 80px">ID</th>
                                 <th>Data</th>
-                                <th>Status</th>
+                                <th>STATUS</th>
                                 <th style="width: 120px">AÃƒÂ§ÃƒÂµes</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($planilhas as $planilha): ?>
                                 <?php
-                                    $status_badge = $planilha['ativo'] ? 'bg-success' : 'bg-secondary';
-                                    $status_texto = $planilha['ativo'] ? 'Ativa' : 'Inativa';
+                                    $STATUS_badge = $planilha['ativo'] ? 'bg-success' : 'bg-secondary';
+                                    $STATUS_texto = $planilha['ativo'] ? 'Ativa' : 'Inativa';
                                     
                                     // Formatar data para dd/mm/yyyy independente do formato de origem
                                     $data_formatada = '-';
@@ -224,14 +224,14 @@ ob_start();
                                 <tr>
                                     <td><strong><?php echo $planilha['id']; ?></strong></td>
                                     <td><?php echo $data_formatada; ?></td>
-                                    <td><span class="badge <?php echo $status_badge; ?>"><?php echo $status_texto; ?></span></td>
+                                    <td><span class="badge <?php echo $STATUS_badge; ?>"><?php echo $STATUS_texto; ?></span></td>
                                     <td>
                                         <div class="d-flex justify-content-center gap-2">
-                                            <a href="../planilhas/planilha_visualizar.php?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="Visualizar">
+                                            <a href="../planilhas/planilha_visualizar.php?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                                 <?php if (isAdmin()): ?>
-                                                <a href="../planilhas/configuracao_importacao_editar.php?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="Editar">
+                                                <a href="../planilhas/configuracao_importacao_editar.php?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="EDITAR">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
                                                 <?php endif; ?>
@@ -275,7 +275,7 @@ file_put_contents($contentFile, $contentHtml);
 // Incluir layout app-wrapper (padronizado)
 require_once __DIR__ . '/../layouts/app_wrapper.php';
 
-// Limpar arquivo temporÃƒÂ¡rio
+// LIMPAR arquivo temporÃƒÂ¡rio
 @unlink($contentFile);
 ?>
 

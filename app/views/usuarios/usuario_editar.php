@@ -1,11 +1,11 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
+ // AUTENTICAÇÃO
 
-// Visualizar / Editar lÃ³gica:
-// - Qualquer usuÃ¡rio acessa sua prÃ³pria pÃ¡gina em modo ediÃ§Ã£o
-// - Administrador pode visualizar outros usuÃ¡rios em modo somente leitura
-// - Doador/CÃ´njuge nÃ£o tem listagem, entÃ£o sÃ³ verÃ¡ seu prÃ³prio usuÃ¡rio
+// VISUALIZAR / EDITAR LÓGICA:
+// - Qualquer usuário acessa sua própria página em modo edição
+// - Administrador pode visualizar outros usuários em modo somente leitura
+// - Doador/CÔNJUGE NÃO tem listagem, então só verá seu próprio usuário
 $idParam = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $loggedId = isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 0;
 $isSelf = ($idParam && $loggedId && $idParam === $loggedId);
@@ -13,7 +13,7 @@ if (!$idParam) {
     header('Location: ../../../index.php');
     exit;
 }
-// Se nÃ£o for self e nÃ£o for admin, bloquear
+// Se NÃO for self e NÃO for admin, bloquear
 if (!$isSelf && !isAdmin()) {
     header('Location: ../../../index.php');
     exit;
@@ -21,8 +21,8 @@ if (!$isSelf && !isAdmin()) {
 
 include __DIR__ . '/../../../app/controllers/update/UsuarioUpdateController.php';
 
-$pageTitle = $isSelf ? 'Editar UsuÃ¡rio' : 'Visualizar UsuÃ¡rio';
-// Voltar: self e admin vÃ£o para listagem; outros vÃ£o para index
+$pageTitle = $isSelf ? 'EDITAR USUÁRIO' : 'VISUALIZAR USUÁRIO';
+// Voltar: self e admin vão para listagem; outros vão para index
 $backUrl = (isAdmin() || $isSelf) ? './usuarios_listar.php' : '../../../index.php';
 
 ob_start();
@@ -35,10 +35,10 @@ ob_start();
     </div>
 <?php endif; ?>
 
-<!-- jQuery e InputMask -->
+<!-- JQUERY E INPUTMASK -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
-<!-- SignaturePad -->
+<!-- SIGNATUREPAD -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
 <style>
@@ -49,18 +49,18 @@ ob_start();
 
 <?php if (isset($usuario)): ?>
 <form method="POST" id="formUsuario">
-    <!-- Campo oculto: tipo de usuÃ¡rio -->
+    <!-- CAMPO OCULTO: tipo de usuÃ¡rio -->
     <input type="hidden" name="tipo" value="<?php echo htmlspecialchars($usuario['tipo'] ?? 'Administrador/Acessor'); ?>">
     
-    <!-- Card 1: Dados BÃ¡sicos -->
+    <!-- Card 1: DADOS BÁSICOS -->
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-person-plus me-2"></i>
-            Dados BÃ¡sicos
+            DADOS BÁSICOS
         </div>
         <div class="card-body">
             <div class="mb-3">
-                <label for="nome" class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                <label for="nome" class="form-label">NOME COMPLETO <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="nome" name="nome" 
                        value="<?php echo htmlspecialchars($usuario['nome']); ?>" required>
             </div>
@@ -76,15 +76,15 @@ ob_start();
                     <label for="rg" class="form-label">RG <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="rg" name="rg" 
                            value="<?php echo htmlspecialchars($usuario['rg'] ?? ''); ?>" 
-                           placeholder="Digite os dÃ­gitos do RG" required <?php echo !empty($usuario['rg_igual_cpf']) ? 'disabled' : ''; ?>>
+                           placeholder="DIGITE OS DÍGITOS DO RG" required <?php echo !empty($usuario['rg_igual_cpf']) ? 'disabled' : ''; ?>>
                     <div class="form-check mt-1">
                         <input class="form-check-input" type="checkbox" id="rg_igual_cpf" name="rg_igual_cpf" value="1" <?php echo !empty($usuario['rg_igual_cpf']) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="rg_igual_cpf">RG igual ao CPF</label>
+                        <label class="form-check-label" for="rg_igual_cpf">RG IGUAL AO CPF</label>
                     </div>
-                    <small class="text-muted">FormataÃ§Ã£o automÃ¡tica: hÃ­fen antes do Ãºltimo dÃ­gito. Ex: 1234-5</small>
+                    <small class="text-muted">FORMATAÇÃO AUTOMÁTICA: HÍFEN ANTES DO ÚLTIMO DÍGITO. EX: 1234-5</small>
                 </div>
                 <div class="col-12">
-                    <label for="telefone" class="form-label">Telefone <span class="text-danger">*</span></label>
+                    <label for="telefone" class="form-label">TELEFONE <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="telefone" name="telefone" 
                            value="<?php echo htmlspecialchars($usuario['telefone'] ?? ''); ?>" 
                            placeholder="(00) 00000-0000" required>
@@ -92,25 +92,25 @@ ob_start();
             </div>
 
             <div class="mb-3 mt-3">
-                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                <label for="email" class="form-label">EMAIL <span class="text-danger">*</span></label>
                 <input type="email" class="form-control" id="email" name="email" 
                        value="<?php echo htmlspecialchars($usuario['email']); ?>" required>
             </div>
 
             <div class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>
-                Deixe os campos de senha em branco para manter a senha atual
+                DEIXE OS CAMPOS DE SENHA EM BRANCO PARA MANTER A SENHA ATUAL
             </div>
 
             <div class="row g-3">
                 <div class="col-12">
-                    <label for="senha" class="form-label">Nova Senha</label>
+                    <label for="senha" class="form-label">NOVA SENHA</label>
                     <input type="password" class="form-control" id="senha" name="senha" minlength="6">
-                    <small class="text-muted">MÃ­nimo de 6 caracteres</small>
+                    <small class="text-muted">MÍNIMO DE 6 CARACTERES</small>
                 </div>
 
                 <div class="col-12">
-                    <label for="confirmar_senha" class="form-label">Confirmar Nova Senha</label>
+                    <label for="confirmar_senha" class="form-label">CONFIRMAR NOVA SENHA</label>
                     <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" minlength="6">
                 </div>
             </div>
@@ -119,22 +119,22 @@ ob_start();
                 <input class="form-check-input" type="checkbox" id="ativo" name="ativo" value="1" 
                        <?php echo $usuario['ativo'] ? 'checked' : ''; ?>>
                 <label class="form-check-label" for="ativo">
-                    UsuÃ¡rio Ativo
+                    USUÁRIO ATIVO
                 </label>
             </div>
         </div>
     </div>
 
-    <!-- Card 2: Assinatura Digital -->
+    <!-- Card 2: ASSINATURA DIGITAL -->
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-pen me-2"></i>
-            Assinatura Digital
+            ASSINATURA DIGITAL
         </div>
         <div class="card-body">
             <p class="text-muted small mb-3">
                 <i class="bi bi-info-circle me-1"></i>
-                Clique no botÃ£o abaixo para atualizar sua assinatura digital.
+                CLIQUE NO BOTÃO ABAIXO PARA ATUALIZAR SUA ASSINATURA DIGITAL.
             </p>
             
             <!-- Container de Preview da Assinatura -->
@@ -145,7 +145,7 @@ ob_start();
             <!-- BotÃ£o para abrir modal -->
             <button type="button" class="btn btn-primary w-100" onclick="abrirModalAssinatura('usuario')">
                 <i class="bi bi-pen me-2"></i>
-                Fazer Assinatura
+                FAZER ASSINATURA
             </button>
             
             <!-- Campo hidden para armazenar assinatura em base64 -->
@@ -153,11 +153,11 @@ ob_start();
         </div>
     </div>
 
-    <!-- Card 3: Estado civil -->
+    <!-- Card 3: ESTADO civil -->
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-person-hearts me-2"></i>
-            Estado civil
+            ESTADO civil
         </div>
         <div class="card-body">
             <div class="form-check">
@@ -175,7 +175,7 @@ ob_start();
         </div>
         <div class="card-body">
             <div class="mb-3">
-                <label for="nome_conjuge" class="form-label">Nome Completo do CÃ´njuge</label>
+                <label for="nome_conjuge" class="form-label">NOME COMPLETO do CÃ´njuge</label>
                 <input type="text" class="form-control" id="nome_conjuge" name="nome_conjuge" value="<?php echo htmlspecialchars($usuario['nome_conjuge'] ?? ''); ?>">
             </div>
             <div class="row g-3">
@@ -192,13 +192,13 @@ ob_start();
                     </div>
                 </div>
                 <div class="col-12">
-                    <label for="telefone_conjuge" class="form-label">Telefone do CÃ´njuge</label>
+                    <label for="telefone_conjuge" class="form-label">TELEFONE do CÃ´njuge</label>
                     <input type="text" class="form-control" id="telefone_conjuge" name="telefone_conjuge" value="<?php echo htmlspecialchars($usuario['telefone_conjuge'] ?? ''); ?>" placeholder="(00) 00000-0000">
                 </div>
             </div>
 
             <hr>
-            <div class="mb-2 fw-semibold">Assinatura Digital do CÃ´njuge</div>
+            <div class="mb-2 fw-semibold">ASSINATURA DIGITAL do CÃ´njuge</div>
             <div class="signature-preview-container mb-3">
                 <canvas id="canvas_conjuge" width="800" height="160" class="signature-preview-canvas" style="border:1px solid #dee2e6; border-radius:0.375rem; width:100%; height:auto; background:#f8f9fa;"></canvas>
             </div>
@@ -226,7 +226,7 @@ ob_start();
                     <small class="text-muted">Preencha para buscar automaticamente</small>
                 </div>
                 <div class="col-12">
-                    <label for="logradouro" class="form-label">Logradouro</label>
+                    <label for="logradouro" class="form-label">LOGRADOURO</label>
                     <input type="text" class="form-control" id="logradouro" name="endereco_logradouro" 
                            value="<?php echo htmlspecialchars($usuario['endereco_logradouro'] ?? ''); ?>">
                 </div>
@@ -239,13 +239,13 @@ ob_start();
                            value="<?php echo htmlspecialchars($usuario['endereco_numero'] ?? ''); ?>">
                 </div>
                 <div class="col-12">
-                    <label for="complemento" class="form-label">Complemento</label>
+                    <label for="complemento" class="form-label">COMPLEMENTO</label>
                     <input type="text" class="form-control" id="complemento" name="endereco_complemento" 
                            value="<?php echo htmlspecialchars($usuario['endereco_complemento'] ?? ''); ?>" 
                            placeholder="Apto, bloco, etc">
                 </div>
                 <div class="col-12">
-                    <label for="bairro" class="form-label">Bairro</label>
+                    <label for="bairro" class="form-label">BAIRRO</label>
                     <input type="text" class="form-control" id="bairro" name="endereco_bairro" 
                            value="<?php echo htmlspecialchars($usuario['endereco_bairro'] ?? ''); ?>">
                 </div>
@@ -253,12 +253,12 @@ ob_start();
 
             <div class="row g-3 mt-2">
                 <div class="col-12">
-                    <label for="cidade" class="form-label">Cidade</label>
+                    <label for="cidade" class="form-label">CIDADE</label>
                     <input type="text" class="form-control" id="cidade" name="endereco_cidade" 
                            value="<?php echo htmlspecialchars($usuario['endereco_cidade'] ?? ''); ?>">
                 </div>
                 <div class="col-12">
-                    <label for="estado" class="form-label">Estado</label>
+                    <label for="estado" class="form-label">ESTADO</label>
                     <select class="form-select" id="estado" name="endereco_estado">
                         <option value="">Selecione</option>
                         <?php
@@ -278,7 +278,7 @@ ob_start();
     <div class="d-grid gap-2">
         <button type="submit" class="btn btn-primary w-100">
             <i class="bi bi-check-lg me-1"></i>
-            Atualizar
+            ATUALIZAR
         </button>
     </div>
     <?php else: ?>
@@ -294,11 +294,11 @@ ob_start();
         <div style="background:#fff; width:100%; height:100%; padding:12px; box-sizing:border-box; position:relative;">
             <div class="d-flex justify-content-between mb-2">
                 <div>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="limparModalAssinatura()">Limpar</button>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="limparModalAssinatura()">LIMPAR</button>
                 </div>
                 <div>
-                    <button type="button" class="btn btn-success btn-sm" onclick="salvarModalAssinatura()">Salvar</button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="fecharModalAssinatura()">Fechar</button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="salvarModalAssinatura()">SALVAR</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="fecharModalAssinatura()">FECHAR</button>
                 </div>
             </div>
             <div style="width:100%; height:calc(100% - 48px); overflow:auto; -webkit-overflow-scrolling:touch; display:flex; align-items:center; justify-content:center;">
@@ -370,7 +370,7 @@ document.getElementById('cep').addEventListener('blur', function() {
     
     if (cep.length !== 8) return;
     
-    // Limpar campos antes de buscar
+    // LIMPAR campos antes de buscar
     document.getElementById('logradouro').value = 'Buscando...';
     document.getElementById('bairro').value = '';
     document.getElementById('cidade').value = '';
@@ -380,7 +380,7 @@ document.getElementById('cep').addEventListener('blur', function() {
         .then(response => response.json())
         .then(data => {
             if (data.erro) {
-                alert('CEP nÃ£o encontrado!');
+                alert('CEP NÃO encontrado!');
                 document.getElementById('logradouro').value = '';
                 return;
             }
@@ -432,7 +432,7 @@ function drawImageOnCanvas(canvasId, dataUrl) {
     img.src = dataUrl;
 }
 
-// Limpar canvas de preview
+// LIMPAR canvas de preview
 function clearPreviewCanvas(id) {
     const c = document.getElementById('canvas_' + id);
     const ctx = c.getContext('2d');
@@ -476,15 +476,15 @@ function setModalLandscape() {
     try { modalCtx.strokeStyle = '#000000'; } catch(e){}
 }
 
-// Iniciar SignaturePad
-function startSignaturePad(keepExisting=false){
+// Iniciar SIGNATUREPAD
+function startSIGNATUREPAD(keepExisting=false){
     if (!modalCanvas) initModalCanvas();
     if (!keepExisting) {
         try { modalCtx.clearRect(0,0,modalCanvas.width, modalCanvas.height); } catch(e){}
     }
-    if (typeof SignaturePad !== 'undefined') {
+    if (typeof SIGNATUREPAD !== 'undefined') {
         disablePointerDrawing();
-        signaturePad = new SignaturePad(modalCanvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
+        signaturePad = new SIGNATUREPAD(modalCanvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
         if (!keepExisting) signaturePad.clear();
     } else {
         signaturePad = null;
@@ -580,7 +580,7 @@ window.abrirModalAssinatura = async function(fieldId){
     
     // Carregar assinatura existente se houver
     const existing = document.getElementById('assinatura_' + fieldId).value;
-    startSignaturePad(true);
+    startSIGNATUREPAD(true);
     if (existing) {
         const img = new Image();
         img.onload = function(){
@@ -601,7 +601,7 @@ window.abrirModalAssinatura = async function(fieldId){
     window.addEventListener('orientationchange', resizeModalIfVisible);
 };
 
-// Limpar modal
+// LIMPAR modal
 window.limparModalAssinatura = function(){
     if (!modalCanvas) return;
     if (signaturePad) {
@@ -610,7 +610,7 @@ window.limparModalAssinatura = function(){
     try { modalCtx.clearRect(0,0,modalCanvas.width, modalCanvas.height); } catch(e){}
 };
 
-// Salvar assinatura do modal
+// SALVAR assinatura do modal
 window.salvarModalAssinatura = function(){
     let data = null;
     if (signaturePad) {
@@ -643,7 +643,7 @@ window.salvarModalAssinatura = function(){
     }
 };
 
-// Fechar modal
+// FECHAR modal
 window.fecharModalAssinatura = async function(){
     document.getElementById('signatureModal').style.display='none';
     try{ 
@@ -669,7 +669,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (existingSignature) drawImageOnCanvas('canvas_usuario', existingSignature);
     const existingConjuge = document.getElementById('assinatura_conjuge').value;
     if (existingConjuge) drawImageOnCanvas('canvas_conjuge', existingConjuge);
-    // Se nÃ£o Ã© o prÃ³prio usuÃ¡rio, desabilitar todos campos
+    // Se NÃO Ã© o prÃ³prio usuÃ¡rio, desabilitar todos campos
     <?php if (!$isSelf): ?>
     Array.from(document.querySelectorAll('#formUsuario input, #formUsuario select, #formUsuario button.btn-primary')).forEach(el => {
         // Manter botÃµes de fechar modal ocultos caso abram; impedir abrir modal
@@ -695,7 +695,7 @@ document.getElementById('formUsuario').addEventListener('submit', function(e) {
     if (senha || confirmar) {
         if (senha !== confirmar) {
             e.preventDefault();
-            alert('As senhas nÃ£o conferem!');
+            alert('As senhas NÃO conferem!');
             return false;
         }
     }

@@ -56,7 +56,7 @@ ob_start();
                     <input type="text" class="form-control text-center fw-bold" id="mapeamento_codigo" name="mapeamento_codigo" value="A" maxlength="2" required>
                 </div>
                 <div class="col-md-4">
-                    <label for="mapeamento_complemento" class="form-label">Complemento <span class="text-danger">*</span></label>
+                    <label for="mapeamento_complemento" class="form-label">COMPLEMENTO <span class="text-danger">*</span></label>
                     <input type="text" class="form-control text-center fw-bold" id="mapeamento_complemento" name="mapeamento_complemento" value="D" maxlength="2" required>
                 </div>
                 <div class="col-md-4">

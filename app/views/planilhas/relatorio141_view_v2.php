@@ -1,6 +1,6 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
+ // AUTENTICAÇÃO
 require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 $pageTitle = 'RelatÃ³rio 14.1';
@@ -130,18 +130,18 @@ $customCss = '
 ob_start();
 ?>
 
-<?php if (count($produtos) > 0): ?>
+<?php if (count($PRODUTOS) > 0): ?>
 
 <!-- FormulÃ¡rio de valores comuns -->
 <div class="valores-comuns">
-    <h6><i class="bi bi-ui-checks me-1"></i> Valores Comuns para Todos (<?php echo count($produtos); ?> pÃ¡ginas)</h6>
+    <h6><i class="bi bi-ui-checks me-1"></i> Valores Comuns para Todos (<?php echo count($PRODUTOS); ?> pÃ¡ginas)</h6>
     <div class="form-grid">
         <div>
             <label>AdministraÃ§Ã£o</label>
             <input type="text" id="admin_geral" onchange="atualizarTodos('admin')">
         </div>
         <div>
-            <label>Cidade</label>
+            <label>CIDADE</label>
             <input type="text" id="cidade_geral" onchange="atualizarTodos('cidade')">
         </div>
         <div>
@@ -157,11 +157,11 @@ ob_start();
 
 <!-- Container de pÃ¡ginas -->
 <div class="paginas-container">
-    <?php foreach($produtos as $index => $row): ?>
+    <?php foreach($PRODUTOS as $index => $row): ?>
         <div class="pagina-card">
             <div class="pagina-header">
                 <span class="pagina-numero">
-                    <i class="bi bi-file-earmark-text"></i> PÃ¡gina <?php echo $index + 1; ?> de <?php echo count($produtos); ?>
+                    <i class="bi bi-file-earmark-text"></i> PÃ¡gina <?php echo $index + 1; ?> de <?php echo count($PRODUTOS); ?>
                 </span>
                 <span class="pagina-info"><?php echo htmlspecialchars($row['descricao_completa']); ?></span>
             </div>
@@ -223,7 +223,7 @@ ob_start();
                                 <table>
                                     <tr class="row4">
                                         <td class="col1">AdministraÃ§Ã£o</td>
-                                        <td class="col2">Cidade</td>
+                                        <td class="col2">CIDADE</td>
                                         <td class="col3">Setor</td>
                                     </tr>
                                     <tr class="row5">
@@ -393,7 +393,7 @@ ob_start();
 <?php else: ?>
 <div class="alert alert-warning">
     <i class="bi bi-exclamation-triangle me-2"></i>
-    Nenhum produto encontrado para impressÃ£o do relatÃ³rio 14.1.
+    Nenhum PRODUTO encontrado para impressÃ£o do relatÃ³rio 14.1.
 </div>
 <?php endif; ?>
 
@@ -432,7 +432,7 @@ function inicializarDeteccaoEdicao() {
     });
 }
 
-// Atualizar todos os campos
+// ATUALIZAR todos os campos
 function atualizarTodos(tipo) {
     const valor = document.getElementById(tipo + '_geral').value;
     let selector;

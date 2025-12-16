@@ -1,16 +1,16 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
-include __DIR__ . '/../../../app/controllers/delete/ProdutoDeleteController.php';
+ // AUTENTICAÇÃO
+include __DIR__ . '/../../../app/controllers/delete/PRODUTODeleteController.php';
 
-$pageTitle = 'Excluir Produto';
-$backUrl = './produtos_listar.php?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
+$pageTitle = 'Excluir PRODUTO';
+$backUrl = './PRODUTOS_listar.php?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
 
 ob_start();
 ?>
 
 <div class="alert alert-warning">
-  <strong>AtenÃ§Ã£o:</strong> Tem certeza que deseja excluir este produto? Esta aÃ§Ã£o nÃ£o pode ser desfeita.
+  <strong>AtenÃ§Ã£o:</strong> Tem certeza que deseja excluir este PRODUTO? Esta aÃ§Ã£o NÃO pode ser desfeita.
   <?php if (!empty($erros)): ?>
     <ul class="mb-0 mt-2">
       <?php foreach ($erros as $erro): ?>
@@ -21,41 +21,41 @@ ob_start();
   
 </div>
 
-<form method="POST" id="form-produto">
+<form method="POST" id="form-PRODUTO">
   <div class="card mb-3">
     <div class="card-body">
-      <?php if (!empty($produto['codigo'])): ?>
+      <?php if (!empty($PRODUTO['codigo'])): ?>
       <div class="mb-3">
-        <label class="form-label">CÃ³digo</label>
-        <input type="text" class="form-control" value="<?php echo htmlspecialchars($produto['codigo']); ?>" disabled>
+        <label class="form-label">CÓDIGO</label>
+        <input type="text" class="form-control" value="<?php echo htmlspecialchars($PRODUTO['codigo']); ?>" disabled>
       </div>
       <?php endif; ?>
 
       <div class="mb-3">
         <label class="form-label">Tipos de Bens</label>
-        <input type="text" class="form-control" value="<?php echo htmlspecialchars(($produto['tipo_codigo'] ?? '') . ' - ' . ($produto['tipo_descricao'] ?? '')); ?>" disabled>
+        <input type="text" class="form-control" value="<?php echo htmlspecialchars(($PRODUTO['tipo_codigo'] ?? '') . ' - ' . ($PRODUTO['tipo_descricao'] ?? '')); ?>" disabled>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Bem</label>
-        <input type="text" class="form-control" value="<?php echo htmlspecialchars($produto['tipo_ben'] ?? ''); ?>" disabled>
+        <input type="text" class="form-control" value="<?php echo htmlspecialchars($PRODUTO['tipo_ben'] ?? ''); ?>" disabled>
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Complemento</label>
-        <textarea class="form-control" rows="3" disabled><?php echo htmlspecialchars($produto['complemento'] ?? ''); ?></textarea>
+        <label class="form-label">COMPLEMENTO</label>
+        <textarea class="form-control" rows="3" disabled><?php echo htmlspecialchars($PRODUTO['complemento'] ?? ''); ?></textarea>
       </div>
 
       <div class="mb-3">
-        <label class="form-label">DependÃªncia</label>
-        <input type="text" class="form-control" value="<?php echo htmlspecialchars($produto['dependencia_descricao'] ?? $produto['dependencia'] ?? ''); ?>" disabled>
+        <label class="form-label">DEPENDÊNCIA</label>
+        <input type="text" class="form-control" value="<?php echo htmlspecialchars($PRODUTO['dependencia_descricao'] ?? $PRODUTO['dependencia'] ?? ''); ?>" disabled>
       </div>
 
       <div class="mb-2">
-        <label class="form-label">Status</label>
+        <label class="form-label">STATUS</label>
         <div class="d-flex gap-2">
-          <span class="badge bg-<?php echo (isset($produto['condicao_141']) && ($produto['condicao_141'] == 1 || $produto['condicao_141'] == 3)) ? 'warning text-dark' : 'secondary'; ?>">Nota</span>
-          <span class="badge bg-<?php echo ($produto['imprimir_14_1'] == 1) ? 'primary' : 'secondary'; ?>">14.1</span>
+          <span class="badge bg-<?php echo (isset($PRODUTO['condicao_141']) && ($PRODUTO['condicao_141'] == 1 || $PRODUTO['condicao_141'] == 3)) ? 'warning text-dark' : 'secondary'; ?>">Nota</span>
+          <span class="badge bg-<?php echo ($PRODUTO['imprimir_14_1'] == 1) ? 'primary' : 'secondary'; ?>">14.1</span>
         </div>
       </div>
     </div>
@@ -69,7 +69,7 @@ ob_start();
 
 <?php
 $contentHtml = ob_get_clean();
-$tempFile = __DIR__ . '/../../../temp_delete_produto_' . uniqid() . '.php';
+$tempFile = __DIR__ . '/../../../temp_delete_PRODUTO_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';

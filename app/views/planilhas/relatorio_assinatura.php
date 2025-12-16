@@ -1,6 +1,6 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
+ // AUTENTICAÇÃO
 // PÃ¡gina dedicada para captura de assinatura em modo paisagem.
 // Salva o resultado em localStorage['signature_temp'] e retorna via history.back()
 
@@ -12,9 +12,9 @@ ob_start();
         <h5>Assinatura (modo paisagem)</h5>
         <div>
             <button id="btnFull" class="btn btn-primary btn-sm">Iniciar em paisagem</button>
-            <button id="btnSave" class="btn btn-success btn-sm">Salvar</button>
-            <button id="btnClear" class="btn btn-warning btn-sm">Limpar</button>
-            <button id="btnCancel" class="btn btn-danger btn-sm">Cancelar</button>
+            <button id="btnSave" class="btn btn-success btn-sm">SALVAR</button>
+            <button id="btnClear" class="btn btn-warning btn-sm">LIMPAR</button>
+            <button id="btnCancel" class="btn btn-danger btn-sm">CANCELAR</button>
         </div>
     </div>
 
@@ -22,7 +22,7 @@ ob_start();
         <canvas id="sign_canvas" style="background:#fff; border:1px solid #ddd; display:block;"></canvas>
     </div>
 
-    <div class="mt-2 small text-muted">Dica: apÃ³s salvar vocÃª serÃ¡ levado de volta Ã  pÃ¡gina anterior.</div>
+    <div class="mt-2 small text-muted">Dica: apÃ³s salvar vocÃª SERÁ levado de volta Ã  pÃ¡gina anterior.</div>
 </div>
 
 <script>
@@ -54,16 +54,16 @@ ob_start();
         ctx.lineWidth = 2; ctx.lineCap = 'round';
     }
 
-    function initSignaturePad() {
-        if (typeof SignaturePad === 'undefined') {
+    function initSIGNATUREPAD() {
+        if (typeof SIGNATUREPAD === 'undefined') {
             const s = document.createElement('script');
             s.src = 'https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js';
             s.onload = function(){
-                signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
+                signaturePad = new SIGNATUREPAD(canvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
             };
             document.head.appendChild(s);
         } else {
-            signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
+            signaturePad = new SIGNATUREPAD(canvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
         }
     }
 
@@ -80,7 +80,7 @@ ob_start();
     btnFull.addEventListener('click', async function(){
         await enterFullscreenAndLock();
         resizeCanvasForLandscape();
-        initSignaturePad();
+        initSIGNATUREPAD();
         // scroll to center
         try{ wrapper.scrollLeft = Math.max(0, (canvas.clientWidth - wrapper.clientWidth)/2); }catch(e){}
     });
@@ -111,7 +111,7 @@ ob_start();
     // initial layout
     resizeCanvasForLandscape();
     // initialize signature pad immediately (non-fullscreen) for convenience
-    initSignaturePad();
+    initSIGNATUREPAD();
 })();
 </script>
 

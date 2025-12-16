@@ -1,6 +1,6 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃ§Ã£o
+ // AUTENTICAÇÃO
 require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 $pageTitle = 'RelatÃ³rio 14.1';
@@ -42,7 +42,7 @@ $customCss = '
 ob_start();
 ?>
 
-<?php if (count($produtos) > 0): ?>
+<?php if (count($PRODUTOS) > 0): ?>
 
 <!-- NavegaÃ§Ã£o do carrossel -->
 <div class="carousel-nav">
@@ -50,7 +50,7 @@ ob_start();
         <i class="bi bi-chevron-left"></i> Anterior
     </button>
     <div class="carousel-info">
-        <span id="paginaAtual">1</span> / <span id="totalPaginas"><?php echo count($produtos); ?></span>
+        <span id="paginaAtual">1</span> / <span id="totalPaginas"><?php echo count($PRODUTOS); ?></span>
     </div>
     <button id="btnNext" onclick="navegarCarrossel(1)">
         PrÃ³ximo <i class="bi bi-chevron-right"></i>
@@ -66,7 +66,7 @@ ob_start();
             <input type="text" id="admin_geral" onchange="atualizarTodos('admin')">
         </div>
         <div>
-            <label>Cidade</label>
+            <label>CIDADE</label>
             <input type="text" id="cidade_geral" onchange="atualizarTodos('cidade')">
         </div>
         <div>
@@ -83,7 +83,7 @@ ob_start();
 <!-- Carrossel de pÃ¡ginas -->
 <div class="carousel-container">
     <div class="carousel-track" id="carrosselTrack">
-        <?php foreach($produtos as $index => $row): ?>
+        <?php foreach($PRODUTOS as $index => $row): ?>
             <div class="carousel-page">
                 <div class="a4-wrapper">
                     <div class="a4-content">
@@ -142,7 +142,7 @@ ob_start();
                                     <table>
                                         <tr class="row4">
                                             <td class="col1">AdministraÃ§Ã£o</td>
-                                            <td class="col2">Cidade</td>
+                                            <td class="col2">CIDADE</td>
                                             <td class="col3">Setor</td>
                                         </tr>
                                         <tr class="row5">
@@ -313,13 +313,13 @@ ob_start();
 <?php else: ?>
 <div class="alert alert-warning">
     <i class="bi bi-exclamation-triangle me-2"></i>
-    Nenhum produto encontrado para impressÃ£o do relatÃ³rio 14.1.
+    Nenhum PRODUTO encontrado para impressÃ£o do relatÃ³rio 14.1.
 </div>
 <?php endif; ?>
 
 <script>
 let paginaAtual = 0;
-const totalPaginas = <?php echo count($produtos); ?>;
+const totalPaginas = <?php echo count($PRODUTOS); ?>;
 
 function navegarCarrossel(direcao) {
     paginaAtual += direcao;
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (totalPaginas <= 1) document.getElementById('btnNext').disabled = true;
 });
 
-// Atualizar todos os campos
+// ATUALIZAR todos os campos
 function atualizarTodos(tipo) {
     const valor = document.getElementById(tipo + '_geral').value;
     let selector;
