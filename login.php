@@ -17,12 +17,13 @@ if (isset($_GET['registered'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
+    // Email pode ser buscado em CAIXA ALTA; senha nunca deve ser alterada
+    $email = to_uppercase(trim($_POST['email'] ?? ''));
     $senha = trim($_POST['senha'] ?? '');
 
     try {
         if (empty($email) || empty($senha)) {
-            throw new Exception('Email e senha sÃ£o obrigatÃ³rios.');
+            throw new Exception('E-mail e senha são obrigatórios.');
         }
 
         // Buscar usuÃ¡rio por email
@@ -32,12 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $usuario = $stmt->fetch();
 
         if (!$usuario) {
-            throw new Exception('Email ou senha invÃ¡lidos.');
+            throw new Exception('E-mail ou senha inválidos.');
         }
 
         // Verificar senha
         if (!password_verify($senha, $usuario['senha'])) {
-            throw new Exception('Email ou senha invÃ¡lidos.');
+            throw new Exception('E-mail ou senha inválidos.');
         }
 
         // Login bem-sucedido
@@ -102,7 +103,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if ($sucesso): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="bi bi-check-circle me-2"></i>
-                        <?php echo to_uppercase(htmlspecialchars($sucesso)); ?>
+                        <?php 
+                            // Corrige possíveis problemas de codificação e então aplica uppercase
+                            echo to_uppercase(htmlspecialchars(\voku\helper\UTF8::fix_utf8($sucesso), ENT_QUOTES, 'UTF-8')); 
+                        ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
@@ -110,7 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if ($erro): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <?php echo to_uppercase(htmlspecialchars($erro)); ?>
+                        <?php 
+                            echo to_uppercase(htmlspecialchars(\voku\helper\UTF8::fix_utf8($erro), ENT_QUOTES, 'UTF-8'));
+                        ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>

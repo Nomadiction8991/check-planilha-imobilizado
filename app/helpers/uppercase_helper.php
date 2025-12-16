@@ -17,7 +17,8 @@ function to_uppercase($value) {
         return $value;
     }
 
-    // Usa a biblioteca voku/portable-utf8 para conversão robusta
+    // Corrige strings mal codificadas e converte para maiúsculas
+    $value = UTF8::fix_utf8($value);
     return UTF8::strtoupper($value);
 }
 
@@ -100,6 +101,7 @@ function get_uppercase_fields($table = null) {
     $fields_by_table = [
         'usuarios' => [
             'nome',
+            'email',
             'tipo',
             'assinatura',
             'nome_conjuge',
