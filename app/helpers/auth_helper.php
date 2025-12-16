@@ -71,19 +71,31 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
     exit;
 }
 
-// Ensure basic session keys exist to avoid undefined notices and help debugging
-if (!isset($_SESSION['usuario_tipo'])) {
-    $_SESSION['usuario_tipo'] = '';
-}
+// NOTE: `usuario_tipo` column may be removed; prefer using `is_admin` / `is_doador` session flags set at login.
 
-// Verifica se o usuario e Administrador/Acessor
+// Verifica se o usuario é Administrador/Acessor
 function isAdmin(): bool {
-    $tipo = $_SESSION['usuario_tipo'] ?? '';
-    return $tipo === 'Administrador/Acessor' || stripos($tipo, 'administrador') !== false;
+    // Prefer explicit session flag set at login
+    if (isset($_SESSION['is_admin'])) {
+        return (bool) $_SESSION['is_admin'];
+    }
+    // Fallback to legacy 'usuario_tipo' if present
+    if (isset($_SESSION['usuario_tipo'])) {
+        $tipo = (string) $_SESSION['usuario_tipo'];
+        return $tipo === 'Administrador/Acessor' || stripos($tipo, 'administrador') !== false;
+    }
+    // Default: not admin
+    return false;
 }
 
-// Verifica se o usuario e Doador/Conjuge
+// Verifica se o usuario é Doador/Cônjuge
 function isDoador(): bool {
-    return isset($_SESSION['usuario_tipo']) && $_SESSION['usuario_tipo'] === 'Doador/Conjuge';
+    if (isset($_SESSION['is_doador'])) {
+        return (bool) $_SESSION['is_doador'];
+    }
+    if (isset($_SESSION['usuario_tipo'])) {
+        return $_SESSION['usuario_tipo'] === 'Doador/Conjuge' || stripos($_SESSION['usuario_tipo'], 'doador') !== false;
+    }
+    return false;
 }
 

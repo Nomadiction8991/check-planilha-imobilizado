@@ -22,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rg = trim($_POST['rg'] ?? '');
     $rg_igual_cpf = isset($_POST['rg_igual_cpf']) ? 1 : 0;
     $telefone = trim($_POST['telefone'] ?? '');
-    $tipo = trim($_POST['tipo'] ?? 'Administrador/Acessor');
     $assinatura = trim($_POST['assinatura'] ?? '');
     
     // Estado civil e cÃ´njuge
@@ -148,14 +147,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Criptografar senha
         $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
-        // Inserir usuÃ¡rio com todos os campos
+        // Inserir usuÃ¡rio com todos os campos (nota: coluna `tipo` removida do schema)
         $sql = "INSERT INTO usuarios (
-                    nome, email, senha, ativo, cpf, rg, rg_igual_cpf, telefone, tipo, assinatura,
+                    nome, email, senha, ativo, cpf, rg, rg_igual_cpf, telefone, assinatura,
                     endereco_cep, endereco_logradouro, endereco_numero, endereco_complemento,
                     endereco_bairro, endereco_cidade, endereco_estado,
                     casado, nome_conjuge, cpf_conjuge, rg_conjuge, rg_conjuge_igual_cpf, telefone_conjuge, assinatura_conjuge
                 ) VALUES (
-                    :nome, :email, :senha, :ativo, :cpf, :rg, :rg_igual_cpf, :telefone, :tipo, :assinatura,
+                    :nome, :email, :senha, :ativo, :cpf, :rg, :rg_igual_cpf, :telefone, :assinatura,
                     :endereco_cep, :endereco_logradouro, :endereco_numero, :endereco_complemento,
                     :endereco_bairro, :endereco_cidade, :endereco_estado,
                     :casado, :nome_conjuge, :cpf_conjuge, :rg_conjuge, :rg_conjuge_igual_cpf, :telefone_conjuge, :assinatura_conjuge
@@ -170,7 +169,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindValue(':rg', $rg);
     $stmt->bindValue(':rg_igual_cpf', $rg_igual_cpf, PDO::PARAM_INT);
         $stmt->bindValue(':telefone', $telefone);
-        $stmt->bindValue(':tipo', $tipo);
         $stmt->bindValue(':assinatura', $assinatura);
         $stmt->bindValue(':endereco_cep', $endereco_cep);
         $stmt->bindValue(':endereco_logradouro', $endereco_logradouro);

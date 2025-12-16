@@ -10,7 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $usuario_id = isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 0;
-$usuario_tipo = isset($_SESSION['usuario_tipo']) ? $_SESSION['usuario_tipo'] : '';
+$is_admin = isAdmin();
+$is_doador = isDoador();
 
 if (!$usuario_id) {
     echo json_encode(['success' => false, 'message' => 'UsuÃ¡rio nÃ£o autenticado']);
@@ -27,9 +28,9 @@ if (empty($produtos_ids) || !is_array($produtos_ids)) {
 
 // Determinar qual coluna atualizar baseado no tipo de usuÃ¡rio
 $coluna_assinatura = '';
-if ($usuario_tipo === 'Administrador/Acessor') {
+if ($is_admin) {
     $coluna_assinatura = 'administrador_acessor_id';
-} elseif ($usuario_tipo === 'Doador/CÃ´njuge') {
+} elseif ($is_doador) {
     $coluna_assinatura = 'doador_conjugue_id';
 } else {
     echo json_encode(['success' => false, 'message' => 'Tipo de usuÃ¡rio invÃ¡lido']);

@@ -54,7 +54,8 @@ try {
 echo "<h3>Dados da SessÃ£o:</h3>";
 echo "<pre>";
 echo "ID UsuÃ¡rio: " . ($_SESSION['usuario_id'] ?? 'NÃƒO DEFINIDO') . "\n";
-echo "Tipo UsuÃ¡rio: " . ($_SESSION['usuario_tipo'] ?? 'NÃƒO DEFINIDO') . "\n";
+echo "is_admin: " . (!empty($_SESSION['is_admin']) ? '1' : '0') . "\n";
+echo "is_doador: " . (!empty($_SESSION['is_doador']) ? '1' : '0') . "\n";
 echo "Nome UsuÃ¡rio: " . ($_SESSION['usuario_nome'] ?? 'NÃƒO DEFINIDO') . "\n";
 echo "</pre>";
 ?>

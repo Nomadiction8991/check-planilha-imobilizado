@@ -20,15 +20,15 @@ if (!defined('PUBLIC_REGISTER')) {
         session_start();
     }
     
-    // Definir funÃ§Ãµes auxiliares caso NÃO estejam disponÃ­veis
+    // Definir funÃ§Ãµes auxiliares caso NÃO estejam disponÃ­veis (compatÃ­vel com novo esquema sem coluna `tipo`)
     if (!function_exists('isAdmin')) {
         function isAdmin() {
-            return isset($_SESSION['usuario_tipo']) && $_SESSION['usuario_tipo'] === 'Administrador/Acessor';
+            return !empty($_SESSION['is_admin']);
         }
     }
     if (!function_exists('isDoador')) {
         function isDoador() {
-              return isset($_SESSION['usuario_tipo']) && $_SESSION['usuario_tipo'] === 'Doador/CÃ´njuge';
+            return !empty($_SESSION['is_doador']);
         }
     }
 }

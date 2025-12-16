@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rg = trim($_POST['rg'] ?? '');
     $rg_igual_cpf = isset($_POST['rg_igual_cpf']) ? 1 : 0;
     $telefone = trim($_POST['telefone'] ?? '');
-    $tipo = trim($_POST['tipo'] ?? 'Administrador/Acessor');
     $assinatura = trim($_POST['assinatura'] ?? '');
     $casado = isset($_POST['casado']) ? 1 : 0;
     $nome_conjuge = trim($_POST['nome_conjuge'] ?? '');
@@ -153,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-            $sql = "UPDATE usuarios SET 
+                $sql = "UPDATE usuarios SET 
                     nome = :nome, 
                     email = :email, 
                     senha = :senha, 
@@ -162,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     rg = :rg,
                     rg_igual_cpf = :rg_igual_cpf,
                     telefone = :telefone,
-                    tipo = :tipo,
                     assinatura = :assinatura,
                     endereco_cep = :endereco_cep,
                     endereco_logradouro = :endereco_logradouro,
@@ -183,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindValue(':senha', $senha_hash);
         } else {
             // Sem alteração de senha
-            $sql = "UPDATE usuarios SET 
+                $sql = "UPDATE usuarios SET 
                     nome = :nome, 
                     email = :email, 
                     ativo = :ativo,
@@ -191,7 +189,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     rg = :rg,
                     rg_igual_cpf = :rg_igual_cpf,
                     telefone = :telefone,
-                    tipo = :tipo,
                     assinatura = :assinatura,
                     endereco_cep = :endereco_cep,
                     endereco_logradouro = :endereco_logradouro,
@@ -218,7 +215,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindValue(':rg', $rg);
         $stmt->bindValue(':rg_igual_cpf', $rg_igual_cpf, PDO::PARAM_INT);
         $stmt->bindValue(':telefone', $telefone);
-        $stmt->bindValue(':tipo', $tipo);
         $stmt->bindValue(':assinatura', $assinatura);
         $stmt->bindValue(':endereco_cep', $endereco_cep);
         $stmt->bindValue(':endereco_logradouro', $endereco_logradouro);

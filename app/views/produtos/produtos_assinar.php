@@ -9,15 +9,11 @@ if (!$id_planilha) {
 }
 
 $usuario_id = isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 0;
-$usuario_tipo = isset($_SESSION['usuario_tipo']) ? $_SESSION['usuario_tipo'] : '';
+$is_admin = isAdmin();
+$is_doador = isDoador();
 
 // Determinar coluna de assinatura baseado no tipo de usuÃƒÂ¡rio
-$coluna_assinatura = '';
-if ($usuario_tipo === 'Administrador/Acessor') {
-    $coluna_assinatura = 'administrador_acessor_id';
-} elseif ($usuario_tipo === 'Doador/CÃƒÂ´njuge') {
-    $coluna_assinatura = 'doador_conjugue_id';
-}
+$coluna_assinatura = $is_admin ? 'administrador_acessor_id' : 'doador_conjugue_id';
 
 // BUSCAR PRODUTOS da planilha
 $sql = "SELECT 
@@ -66,10 +62,10 @@ ob_start();
 <div class="alert alert-info">
     <i class="bi bi-info-circle me-2"></i>
     <strong>InstruÃƒÂ§ÃƒÂµes:</strong> Selecione os PRODUTOS que deseja assinar. 
-    <?php if ($usuario_tipo === 'Administrador/Acessor'): ?>
-        VocÃƒÂª estÃƒÂ¡ assinando como <strong>Administrador/Acessor</strong>.
+    <?php if ($is_admin): ?>
+        VocÃª estÃ¡ assinando como <strong>Administrador/Acessor</strong>.
     <?php else: ?>
-        VocÃƒÂª estÃƒÂ¡ assinando como <strong>Doador/CÃƒÂ´njuge</strong>.
+        VocÃª estÃ¡ assinando como <strong>Doador/Cônjuge</strong>.
     <?php endif; ?>
 </div>
 

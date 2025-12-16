@@ -11,7 +11,8 @@ echo "--- Dados da SessÃ£o ---\n";
 echo "usuario_id: " . (isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 'NÃƒO DEFINIDO') . "\n";
 echo "usuario_nome: " . (isset($_SESSION['usuario_nome']) ? $_SESSION['usuario_nome'] : 'NÃƒO DEFINIDO') . "\n";
 echo "usuario_email: " . (isset($_SESSION['usuario_email']) ? $_SESSION['usuario_email'] : 'NÃƒO DEFINIDO') . "\n";
-echo "usuario_tipo: " . (isset($_SESSION['usuario_tipo']) ? $_SESSION['usuario_tipo'] : 'NÃƒO DEFINIDO') . "\n";
+echo "is_admin: " . (!empty($_SESSION['is_admin']) ? '1' : '0') . "\n";
+echo "is_doador: " . (!empty($_SESSION['is_doador']) ? '1' : '0') . "\n";
 
 echo "\n--- VerificaÃ§Ã£o de AutenticaÃ§Ã£o ---\n";
 if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_id'] > 0) {

@@ -53,7 +53,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['usuario_nome'] = $usuario['nome'];
         $_SESSION['usuario_email'] = $usuario['email'];
-        $_SESSION['usuario_tipo'] = $usuario['tipo'] ?? 'Administrador/Acessor';
+        // Set role flags without relying on old 'tipo' column
+        if (isset($usuario['tipo'])) {
+            $t = (string) $usuario['tipo'];
+            $_SESSION['is_admin'] = (stripos($t, 'administrador') !== false || stripos($t, 'acessor') !== false);
+            $_SESSION['is_doador'] = (stripos($t, 'doador') !== false || stripos($t, 'conjuge') !== false);
+        } elseif (isset($usuario['is_admin']) || isset($usuario['is_doador'])) {
+            $_SESSION['is_admin'] = !empty($usuario['is_admin']);
+            $_SESSION['is_doador'] = !empty($usuario['is_doador']);
+        } else {
+            // Fallback: treat user id=1 as admin for backward compatibility
+            $_SESSION['is_admin'] = ((int)$usuario['id'] === 1);
+            $_SESSION['is_doador'] = false;
+        }
 
         // Log debug info for session persistence issues
         error_log(sprintf('LOGIN_SUCCESS: user_id=%s session_id=%s client=%s', $usuario['id'], session_id(), $_SERVER['REMOTE_ADDR'] ?? 'cli'));
