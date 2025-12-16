@@ -191,7 +191,7 @@ ob_start();
                     <input type="text" class="form-control" id="cep" name="endereco_cep" 
                            value="<?php echo htmlspecialchars($_POST['endereco_cep'] ?? ''); ?>" 
                            placeholder="00000-000">
-                    <small class="text-muted">Preencha para buscar automaticamente</small>
+                    <small class="text-muted">PREENCHA PARA BUSCAR AUTOMATICAMENTE</small>
                 </div>
                 <div class="col-12">
                     <label for="logradouro" class="form-label">LOGRADOURO</label>
