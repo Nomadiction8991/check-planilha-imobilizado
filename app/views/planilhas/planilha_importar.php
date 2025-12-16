@@ -43,6 +43,12 @@ ob_start();
 </div>
 <?php endif; ?>
 
+<?php if ($jobEmExecucao): ?>
+    <p class="text-muted small mb-3">
+        Há uma importação em andamento. <a href="<?php echo htmlspecialchars(base_url('app/views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
+    </p>
+<?php endif; ?>
+
 <form action="../../../app/controllers/create/ImportacaoPlanilhaController.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
     <!-- Arquivo CSV -->
     <div class="card mb-3">
