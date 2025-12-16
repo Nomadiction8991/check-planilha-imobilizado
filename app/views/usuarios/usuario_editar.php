@@ -375,7 +375,6 @@ document.getElementById('cep').addEventListener('blur', function() {
 window.limparModalAssinatura = function(){ /* assinatura removida */ };
 window.salvarModalAssinatura = function(){ /* assinatura removida */ };
 window.fecharModalAssinatura = async function(){ /* assinatura removida */ };
-};
 
 // Se NÃO é o próprio usuário, desabilitar todos campos
 document.addEventListener('DOMContentLoaded', function() {
