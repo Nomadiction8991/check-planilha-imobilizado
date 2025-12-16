@@ -131,31 +131,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('A assinatura do usuÃ¡rio Ã© obrigatÃ³ria.');
         }
 
-        // Se casado, validar dados completos do cÃ´njuge (nome, cpf, telefone, assinatura) e RG formatado se fornecido
+        // Se casado, apenas formatar RG se fornecido (dados do cônjuge são opcionais)
         if ($casado) {
-            if (empty($nome_conjuge)) {
-                throw new Exception('O nome do cÃ´njuge Ã© obrigatÃ³rio.');
-            }
-            $cpf_conjuge_num = preg_replace('/\D/','', $cpf_conjuge);
-            if (strlen($cpf_conjuge_num) !== 11) {
-                throw new Exception('CPF do cÃ´njuge invÃ¡lido.');
-            }
-            $tel_conj_num = preg_replace('/\D/','', $telefone_conjuge);
-            if (strlen($tel_conj_num) < 10 || strlen($tel_conj_num) > 11) {
-                throw new Exception('Telefone do cÃ´njuge invÃ¡lido.');
-            }
-
-            // RG do cÃ´njuge
-            if ($rg_conjuge_igual_cpf) {
-                $rg_conjuge = $cpf_conjuge; // mantÃ©m mÃ¡scara de CPF no RG do cÃ´njuge
+            if ($rg_conjuge_igual_cpf && !empty($cpf_conjuge)) {
+                $rg_conjuge = $cpf_conjuge; // mantém máscara de CPF no RG do cônjuge
             } else if (!empty($rg_conjuge)) {
                 $rg_conjuge = $formatarRg($rg_conjuge);
-            }
-            if (!empty($rg_conjuge)) {
-                $rg_conj_nums = preg_replace('/\D/','', $rg_conjuge);
-                if (strlen($rg_conj_nums) < 2) {
-                    throw new Exception('O RG do cÃ´njuge deve ter ao menos 2 dÃ­gitos.');
-                }
             }
         } else {
             // Se nÃ£o casado, limpar campos de cÃ´njuge para evitar dados Ã³rfÃ£os
