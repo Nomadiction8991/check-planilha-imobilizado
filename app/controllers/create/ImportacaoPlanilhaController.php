@@ -8,47 +8,48 @@ require_once dirname(__DIR__, 2) . '/services/produto_parser_service.php';
 // Configuracao do parser (formato, sinonimos, etc.)
 $pp_config = require dirname(__DIR__, 2) . '/config/parser/produto_parser_config.php';
 
-// Helpers para correcao de encoding
+// Usar biblioteca voku/portable-utf8 para correção de encoding
+use voku\helper\UTF8;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+/**
+ * Corrige encoding usando a biblioteca voku/portable-utf8
+ * Mais robusta que as funções manuais anteriores
+ */
 function ip_corrige_encoding($texto) {
     if ($texto === null) return '';
     $texto = trim((string)$texto);
     if ($texto === '') return '';
 
-    $enc = mb_detect_encoding($texto, ['UTF-8', 'ISO-8859-1', 'Windows-1252', 'ASCII'], true);
-    if ($enc && $enc !== 'UTF-8') {
-        $texto = mb_convert_encoding($texto, 'UTF-8', $enc);
-    } else {
-        $converted = @iconv('Windows-1252', 'UTF-8//IGNORE', $texto);
-        if ($converted !== false && $converted !== '') {
-            $texto = $converted;
-        }
-        $texto = str_replace("\xEF\xBF\xBD", '', $texto); // remove replacement chars
-    }
-
-    $texto = preg_replace('/[\x00-\x1F\x7F]/', '', $texto);
+    // Usa a biblioteca para corrigir UTF-8 quebrado
+    $texto = UTF8::fix_utf8($texto);
+    // Remove caracteres de controle
+    $texto = UTF8::remove_invisible_characters($texto);
+    // Normaliza espaços
     $texto = preg_replace('/\s+/', ' ', $texto);
-    return $texto;
+    return trim($texto);
 }
 
+/**
+ * Corrige mojibake (double-encoding) usando voku/portable-utf8
+ */
 function ip_fix_mojibake($texto) {
     if ($texto === null) return '';
     $texto = (string)$texto;
     if ($texto === '') return '';
-    if (preg_match('/Ãƒ|Ã‚|\xEF\xBF\xBD/', $texto)) {
-        $t1 = @utf8_decode($texto);
-        if ($t1 !== false && mb_detect_encoding($t1, 'UTF-8', true)) {
-            return $t1;
-        }
-        $t2 = @utf8_encode($texto);
-        if ($t2 !== false && mb_detect_encoding($t2, 'UTF-8', true)) {
-            return $t2;
-        }
-    }
-    return $texto;
+    
+    // A biblioteca fix_utf8 já trata a maioria dos casos de mojibake
+    return UTF8::fix_utf8($texto);
 }
 
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Symfony\Component\String\UnicodeString;
+/**
+ * Converte para uppercase usando a biblioteca (mantém acentos corretos)
+ */
+function ip_to_uppercase($texto) {
+    if ($texto === null || $texto === '') return '';
+    $texto = UTF8::fix_utf8((string)$texto);
+    return UTF8::strtoupper($texto);
+}
 
 // Redirecionamento apÃ³s sucesso
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -152,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Garantir cadastro das dependencias distintas encontradas (apenas descricao)
         foreach ($dependencias_unicas as $dep_desc) {
             try {
-                $dep_desc_upper = mb_strtoupper($dep_desc, 'UTF-8');
+                $dep_desc_upper = ip_to_uppercase($dep_desc);
                 $stmtDep = $conexao->prepare("SELECT id FROM dependencias WHERE descricao = :descricao");
                 $stmtDep->bindValue(':descricao', $dep_desc_upper);
                 $stmtDep->execute();
@@ -291,8 +292,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 [$ben_raw, $comp_raw] = pp_extrair_ben_complemento($texto_pos_tipo, $aliases_tipo_atual ?: [], $aliases_originais, $tipo_bem_desc);
-                $ben = strtoupper(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($ben_raw)))));
-                $complemento_limpo = strtoupper(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($comp_raw)))));
+                $ben = ip_to_uppercase(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($ben_raw)))));
+                $complemento_limpo = ip_to_uppercase(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($comp_raw)))));
                 
                 // ValidaÃ§Ã£o: BEM deve ser um dos aliases do tipo (com fuzzy match)
                 $ben_valido = false;
@@ -315,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $tokens = array_map('trim', preg_split('/\s*\/\s*/', $tipo_bem_desc));
                             foreach ($tokens as $tok) {
                                 if (pp_normaliza($tok) === $alias_norm) {
-                                    $ben = strtoupper(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($tok)))));
+                                    $ben = ip_to_uppercase(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($tok)))));
                                     $ben_valido = true;
                                     break 2;
                                 }
@@ -326,9 +327,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Fallback completo: se ainda vazio, usar todo texto no complemento
                 if ($ben === '' && $complemento_limpo === '') {
-                    $complemento_limpo = strtoupper(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($texto_sem_prefixo)))));
+                    $complemento_limpo = ip_to_uppercase(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($texto_sem_prefixo)))));
                     if ($complemento_limpo === '') {
-                        $complemento_limpo = strtoupper(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($complemento_original)))));
+                        $complemento_limpo = ip_to_uppercase(preg_replace('/\s+/', ' ', trim(ip_fix_mojibake(ip_corrige_encoding($complemento_original)))));
                     }
                 }
                 
@@ -337,7 +338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $complemento_limpo = pp_remover_ben_do_complemento($ben, $complemento_limpo);
                 }
                 // 4) DependÃªncia: obter ID por descriÃ§Ã£o
-                $dependencia_rotulo = ip_fix_mojibake(ip_corrige_encoding($dependencia_original));
+                $dependencia_rotulo = ip_to_uppercase(ip_fix_mojibake(ip_corrige_encoding($dependencia_original)));
                 $dependencia_id = 0;
                 $dep_key = pp_normaliza($dependencia_rotulo);
                 if ($dep_key !== '') {
@@ -389,9 +390,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            comum_id = :comum_id
                                         WHERE id_produto = :id_produto";
                     $stmtUp = $conexao->prepare($sql_update_prod);
-                    $stmtUp->bindValue(':descricao_completa', mb_strtoupper($descricao_completa_calc, 'UTF-8'));
-                    $stmtUp->bindValue(':complemento', mb_strtoupper($complemento_limpo, 'UTF-8'));
-                    $stmtUp->bindValue(':bem', mb_strtoupper($ben, 'UTF-8'));
+                    $stmtUp->bindValue(':descricao_completa', ip_to_uppercase($descricao_completa_calc));
+                    $stmtUp->bindValue(':complemento', ip_to_uppercase($complemento_limpo));
+                    $stmtUp->bindValue(':bem', ip_to_uppercase($ben));
                     $stmtUp->bindValue(':dependencia_id', $dependencia_id, PDO::PARAM_INT);
                     $stmtUp->bindValue(':tipo_bem_id', $tipo_bem_id, PDO::PARAM_INT);
                     $stmtUp->bindValue(':comum_id', $comum_processado_id, PDO::PARAM_INT);
@@ -423,10 +424,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_prod->bindValue(':comum_id', $comum_processado_id, PDO::PARAM_INT);
                     $stmt_prod->bindValue(':id_produto', $id_produto_sequencial, PDO::PARAM_INT);
                     $stmt_prod->bindValue(':codigo', $codigo);
-                    $stmt_prod->bindValue(':descricao_completa', mb_strtoupper($descricao_completa_calc, 'UTF-8'));
+                    $stmt_prod->bindValue(':descricao_completa', ip_to_uppercase($descricao_completa_calc));
                     $stmt_prod->bindValue(':tipo_bem_id', $tipo_bem_id, PDO::PARAM_INT);
-                    $stmt_prod->bindValue(':bem', mb_strtoupper($ben, 'UTF-8'));
-                    $stmt_prod->bindValue(':complemento', mb_strtoupper($complemento_limpo, 'UTF-8'));
+                    $stmt_prod->bindValue(':bem', ip_to_uppercase($ben));
+                    $stmt_prod->bindValue(':complemento', ip_to_uppercase($complemento_limpo));
                     $stmt_prod->bindValue(':dependencia_id', $dependencia_id, PDO::PARAM_INT);
                     $stmt_prod->bindValue(':imprimir_14_1', 0, PDO::PARAM_INT);
                     $stmt_prod->bindValue(':observacao', mb_strtoupper($obs_prefix, 'UTF-8'));

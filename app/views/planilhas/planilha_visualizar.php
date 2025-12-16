@@ -17,35 +17,63 @@ $backUrl = '../../../index.php';
 
 // Bloqueio por data de importaÃƒÂ§ÃƒÂ£o (UTC-4)
 if (!empty($acesso_bloqueado)) {
+    $mensagemBloqueio = $mensagem_bloqueio ?: 'A planilha precisa ser importada novamente para continuar.';
+    
+    // Usa o layout padrão do sistema com modal igual ao index
+    $pageTitle = 'Importação Desatualizada';
+    $backUrl = '../../../index.php';
+    
+    ob_start();
     ?>
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ImportaÃƒÂ§ÃƒÂ£o necessÃƒÂ¡ria</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    </head>
-    <body class="bg-light d-flex align-items-center justify-content-center" style="min-height:100vh;">
-        <div class="card shadow-lg" style="max-width: 480px; width: 100%;">
-            <div class="card-body text-center p-4">
-                <div class="mb-3 text-danger">
-                    <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+    <!-- Conteúdo vazio - apenas o modal será exibido -->
+    <div class="text-center py-5">
+        <div class="text-muted">
+            <i class="bi bi-arrow-clockwise fs-1"></i>
+            <p class="mt-3">Verificando importação...</p>
+        </div>
+    </div>
+    
+    <!-- Modal importação desatualizada (mesmo estilo do index) -->
+    <div class="modal fade" id="importacaoDesatualizadaModal" tabindex="-1" aria-labelledby="importacaoDesatualizadaLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-uppercase" id="importacaoDesatualizadaLabel">IMPORTAÇÃO DESATUALIZADA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar" onclick="window.location.href='../../../index.php'"></button>
                 </div>
-                <h5 class="card-title mb-3">ImportaÃƒÂ§ÃƒÂ£o desatualizada</h5>
-                <p class="card-text text-muted mb-4">
-                    <?php echo htmlspecialchars($mensagem_bloqueio ?: 'A planilha precisa ser importada novamente para continuar.'); ?>
-                </p>
-                <a href="../planilhas/planilha_importar.php" class="btn btn-primary w-100">
-                    Importar planilha atualizada
-                </a>
+                <div class="modal-body text-center">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                    </div>
+                    <p class="text-uppercase"><?php echo htmlspecialchars($mensagemBloqueio, ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="../../../index.php" class="btn btn-outline-secondary w-47">
+                        <i class="bi bi-arrow-left me-1"></i>VOLTAR
+                    </a>
+                    <a href="../planilhas/planilha_importar.php" class="btn btn-primary w-47">
+                        <i class="bi bi-upload me-1"></i>IMPORTAR
+                    </a>
+                </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-    </html>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var modalEl = document.getElementById('importacaoDesatualizadaModal');
+        if (modalEl) {
+            var modal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+            modal.show();
+        }
+    });
+    </script>
     <?php
+    $contentHtml = ob_get_clean();
+    $contentFile = __DIR__ . '/../../../temp_bloqueio_' . uniqid() . '.php';
+    file_put_contents($contentFile, $contentHtml);
+    include __DIR__ . '/../layouts/app_wrapper.php';
+    @unlink($contentFile);
     exit;
 }
 

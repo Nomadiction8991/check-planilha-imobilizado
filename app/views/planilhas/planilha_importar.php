@@ -7,7 +7,7 @@ $backUrl = '../../../index.php';
 ob_start();
 ?>
  
-<form action="../../../app/controllers/create/ImportacaoPlanilhaController.php" method="POST" enctype="multipart/form-data">
+<form action="../../../app/controllers/create/ImportacaoPlanilhaController.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
     <!-- Arquivo CSV -->
     <div class="card mb-3">
         <div class="card-header">
@@ -17,6 +17,7 @@ ob_start();
         <div class="card-body">
             <label for="arquivo_csv" class="form-label text-uppercase">Arquivo CSV <span class="text-danger">*</span></label>
             <input type="file" class="form-control text-uppercase" id="arquivo_csv" name="arquivo_csv" accept=".csv" required>
+            <div class="invalid-feedback">Selecione um arquivo CSV válido.</div>
         </div>
     </div>
  
@@ -30,10 +31,12 @@ ob_start();
             <div class="mb-3">
                 <label for="pulo_linhas" class="form-label text-uppercase">Linhas iniciais a pular <span class="text-danger">*</span></label>
                 <input type="number" class="form-control text-uppercase" id="pulo_linhas" name="pulo_linhas" value="25" min="0" required>
+                <div class="invalid-feedback">Informe quantas linhas devem ser ignoradas.</div>
             </div>
             <div class="mb-3">
                 <label for="posicao_data" class="form-label text-uppercase">Célula data <span class="text-danger">*</span></label>
                 <input type="text" class="form-control text-uppercase" id="posicao_data" name="posicao_data" value="D13" required>
+                <div class="invalid-feedback">Informe a localização da célula da data.</div>
             </div>
         </div>
     </div>
@@ -49,20 +52,24 @@ ob_start();
                 <div class="col-md-6">
                     <label for="mapeamento_codigo" class="form-label text-uppercase">Código <span class="text-danger">*</span></label>
                     <input type="text" class="form-control text-center text-uppercase" id="mapeamento_codigo" name="mapeamento_codigo" value="A" maxlength="2" required>
+                    <div class="invalid-feedback">Informe a coluna do código.</div>
                 </div>
                 <div class="col-md-6">
                     <label for="mapeamento_complemento" class="form-label text-uppercase">Complemento <span class="text-danger">*</span></label>
                     <input type="text" class="form-control text-center text-uppercase" id="mapeamento_complemento" name="mapeamento_complemento" value="D" maxlength="2" required>
+                    <div class="invalid-feedback">Informe a coluna do complemento.</div>
                 </div>
             </div>
             <div class="row g-3 mt-2">
                 <div class="col-md-6">
                     <label for="mapeamento_dependencia" class="form-label text-uppercase">Dependência <span class="text-danger">*</span></label>
                     <input type="text" class="form-control text-center text-uppercase" id="mapeamento_dependencia" name="mapeamento_dependencia" value="P" maxlength="2" required>
+                    <div class="invalid-feedback">Informe a coluna da dependência.</div>
                 </div>
                 <div class="col-md-6">
                     <label for="coluna_localidade" class="form-label text-uppercase">Localidade <span class="text-danger">*</span></label>
                     <input type="text" class="form-control text-center text-uppercase" id="coluna_localidade" name="coluna_localidade" value="K" maxlength="2" required>
+                    <div class="invalid-feedback">Informe a coluna com o código de localidade.</div>
                 </div>
             </div>
         </div>
@@ -73,6 +80,22 @@ ob_start();
         <?php echo htmlspecialchars(to_uppercase('Importar Planilha'), ENT_QUOTES, 'UTF-8'); ?>
     </button>
 </form>
+
+<script>
+    (() => {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
  
 <?php
 $contentHtml = ob_get_clean();
