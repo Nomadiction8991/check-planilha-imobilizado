@@ -311,7 +311,10 @@ ob_start();
             const casadoCb = document.getElementById('casado');
             const card = document.getElementById('cardConjuge');
             if (!casadoCb || !card) return;
-            const setVisibility = () => { card.style.display = casadoCb.checked ? '' : 'none'; };
+            const setVisibility = () => {
+                card.style.display = casadoCb.checked ? '' : 'none';
+                try { console.debug('usuario_editar: casado = ' + (casadoCb.checked ? 'true' : 'false')); } catch(e){}
+            };
             casadoCb.addEventListener('change', setVisibility);
             setVisibility();
         })();
