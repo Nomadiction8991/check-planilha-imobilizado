@@ -7,11 +7,9 @@ if (isset($_GET['public']) && $_GET['public'] == '1') {
 
 // Apenas incluir AUTENTICAÇÃO se NÃƒO for registro pÃºblico
 if (!defined('PUBLIC_REGISTER')) {
-     // AUTENTICAÇÃO
-    
-    // Apenas admins podem criar usuÃ¡rios via sistema interno
-    if (!isAdmin()) {
-        header('Location: ../../../index.php');
+    // Require login (any authenticated user)
+    if (!function_exists('isLoggedIn') || !isLoggedIn()) {
+        header('Location: ../../../login.php');
         exit;
     }
 } else {

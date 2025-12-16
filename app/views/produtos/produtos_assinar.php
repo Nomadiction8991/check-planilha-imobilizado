@@ -64,8 +64,10 @@ ob_start();
     <strong>InstruÃƒÂ§ÃƒÂµes:</strong> Selecione os PRODUTOS que deseja assinar. 
     <?php if ($is_admin): ?>
         VocÃª estÃ¡ assinando como <strong>Administrador/Acessor</strong>.
-    <?php else: ?>
+    <?php elseif ($is_doador): ?>
         VocÃª estÃ¡ assinando como <strong>Doador/Cônjuge</strong>.
+    <?php else: ?>
+        VocÃª estÃ¡ assinando como <strong>Usuário</strong>.
     <?php endif; ?>
 </div>
 

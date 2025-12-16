@@ -99,3 +99,8 @@ function isDoador(): bool {
     return false;
 }
 
+// Verifica se o usuario esta autenticado
+function isLoggedIn(): bool {
+    return isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] > 0;
+}
+

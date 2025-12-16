@@ -11,8 +11,8 @@ $headerActions = '
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPrincipal">';
 
-// Mostrar "Listagem de Usuários" apenas para Administrador/Acessor
-if (isAdmin()) {
+// Mostrar "Listagem de Usuários" para qualquer usuário autenticado
+if (isLoggedIn()) {
     $headerActions .= '
             <li>
                 <a class="dropdown-item" href="app/views/usuarios/usuarios_listar.php">
@@ -36,8 +36,8 @@ if (isDoador() && isset($_SESSION['usuario_id'])) {
             </li>';
 }
 
-// Mostrar "Importar Planilha" apenas para Administrador/Acessor
-if (isAdmin()) {
+// Mostrar "Importar Planilha" para qualquer usuário autenticado
+if (isLoggedIn()) {
     $headerActions .= '
             <li>
                 <a class="dropdown-item" href="app/views/planilhas/planilha_importar.php">
