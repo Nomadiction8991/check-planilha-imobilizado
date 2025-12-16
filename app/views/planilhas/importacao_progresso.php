@@ -2,13 +2,13 @@
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 $pageTitle = 'Progresso da Importação';
-$backUrl = '../../../index.php';
+$backUrl = base_url('index.php');
 $jobId = $_GET['job'] ?? '';
 
 if ($jobId === '') {
     $_SESSION['mensagem'] = 'Job de importação não informado.';
     $_SESSION['tipo_mensagem'] = 'danger';
-    header('Location: /app/views/planilhas/planilha_importar.php');
+    header('Location: ' . base_url('app/views/planilhas/planilha_importar.php'));
     exit;
 }
 
@@ -56,6 +56,7 @@ ob_start();
 
 <script>
 (function() {
+    const baseUrl = <?php echo json_encode(base_url()); ?>;
     const jobId = <?php echo json_encode($jobId); ?>;
     const progressBar = document.getElementById('progress-bar');
     const processedEl = document.getElementById('processed');
@@ -105,7 +106,7 @@ ob_start();
         cancelBtn.disabled = true;
         canceled = true;
         try {
-            const resp = await fetch('/app/controllers/create/ImportacaoPlanilhaController.php?action=cancel&job=' + encodeURIComponent(jobId), {
+            const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=cancel&job=' + encodeURIComponent(jobId), {
                 method: 'POST',
                 headers: { 'Accept': 'application/json' }
             });
@@ -117,7 +118,7 @@ ob_start();
                 return;
             }
             showAlert('warning', 'Importação cancelada. Redirecionando...');
-            const redirect = data.redirect || '/app/views/planilhas/planilha_importar.php';
+            const redirect = data.redirect || (baseUrl + 'app/views/planilhas/planilha_importar.php');
             setTimeout(() => { window.location.href = redirect; }, 800);
         } catch (err) {
             showAlert('danger', 'Erro ao cancelar: ' + err);
@@ -131,7 +132,7 @@ ob_start();
             return;
         }
         try {
-            const resp = await fetch('/app/controllers/create/ImportacaoPlanilhaController.php?action=process&job=' + encodeURIComponent(jobId), {
+            const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=process&job=' + encodeURIComponent(jobId), {
                 headers: { 'Accept': 'application/json' }
             });
             if (!resp.ok) {
@@ -163,7 +164,7 @@ ob_start();
             if (data.done) {
                 setProgress(100);
                 const message = data.message || 'Importação finalizada.';
-                const redirect = data.redirect || '/app/views/planilhas/planilha_importar.php';
+                const redirect = data.redirect || (baseUrl + 'app/views/planilhas/planilha_importar.php');
                 if (data.errors && data.errors.length > 0) {
                     showAlert('warning', message + ' Verifique as linhas com erro.');
                     pushErrors(data.errors);

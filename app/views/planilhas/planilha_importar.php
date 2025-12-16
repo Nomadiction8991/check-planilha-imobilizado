@@ -35,7 +35,7 @@ ob_start();
                 Já existe uma importação em progresso (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>). Conclua ou cancele antes de iniciar uma nova.
             </div>
             <div class="modal-footer">
-                <a class="btn btn-primary" href="/app/views/planilhas/importacao_progresso.php?job=<?php echo urlencode($jobEmExecucao); ?>">Ver progresso</a>
+                <a class="btn btn-primary" href="<?php echo htmlspecialchars(base_url('app/views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>

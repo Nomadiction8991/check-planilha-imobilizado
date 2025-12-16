@@ -547,7 +547,7 @@ SQL;
                 'success' => empty($erros_produtos),
                 'message' => $mensagem,
                 'errors' => $erros_produtos,
-                'redirect' => '/app/views/planilhas/planilha_importar.php'
+                'redirect' => base_url('app/views/planilhas/planilha_importar.php')
             ]);
         }
 
@@ -633,20 +633,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'start') {
 
         ip_save_job($job);
 
-        header('Location: /app/views/planilhas/importacao_progresso.php?job=' . urlencode($jobId));
+        header('Location: ' . base_url('app/views/planilhas/importacao_progresso.php?job=' . urlencode($jobId)));
         exit;
     } catch (Exception $e) {
         $_SESSION['mensagem'] = 'Erro: ' . $e->getMessage();
         $_SESSION['tipo_mensagem'] = 'danger';
-        header('Location: /app/views/planilhas/planilha_importar.php');
+        header('Location: ' . base_url('app/views/planilhas/planilha_importar.php'));
         exit;
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /app/views/planilhas/planilha_importar.php');
-    echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=/app/views/planilhas/planilha_importar.php"></head><body>';
-    echo '<p>Redirecionando para o formulário de importação... Se não for redirecionado automaticamente, <a href="/app/views/planilhas/planilha_importar.php">clique aqui</a>.</p>';
+    $importUrl = base_url('app/views/planilhas/planilha_importar.php');
+    header('Location: ' . $importUrl);
+    echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=' . $importUrl . '"></head><body>';
+    echo '<p>Redirecionando para o formulário de importação... Se não for redirecionado automaticamente, <a href="' . $importUrl . '">clique aqui</a>.</p>';
     echo '</body></html>';
     exit;
 }
@@ -667,7 +668,7 @@ if ($action === 'cancel') {
 
     ip_response_json([
         'canceled' => true,
-        'redirect' => '/app/views/planilhas/planilha_importar.php'
+        'redirect' => base_url('app/views/planilhas/planilha_importar.php')
     ]);
 }
 
