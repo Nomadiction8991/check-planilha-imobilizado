@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/app/bootstrap.php';
 
-$pageTitle = 'Comuns';
+$pageTitle = 'COMUNS';
 $backUrl = null;
 
 $headerActions = '
@@ -16,12 +16,12 @@ if (isAdmin()) {
     $headerActions .= '
             <li>
                 <a class="dropdown-item" href="app/views/usuarios/usuarios_listar.php">
-                    <i class="bi bi-people me-2"></i>Listagem de Usuários
+                    <i class="bi bi-people me-2"></i>LISTAGEM DE USUÁRIOS
                 </a>
             </li>
             <li>
                 <a class="dropdown-item" href="app/views/dependencias/dependencias_listar.php">
-                    <i class="bi bi-diagram-3 me-2"></i>Listagem de Dependências
+                    <i class="bi bi-diagram-3 me-2"></i>LISTAGEM DE DEPENDÊNCIAS
                 </a>
             </li>';
 }
@@ -31,7 +31,7 @@ if (isDoador() && isset($_SESSION['usuario_id'])) {
     $headerActions .= '
             <li>
                 <a class="dropdown-item" href="app/views/usuarios/usuario_editar.php?id=' . (int)$_SESSION['usuario_id'] . '">
-                    <i class="bi bi-pencil-square me-2"></i>Editar Meu Usuário
+                    <i class="bi bi-pencil-square me-2"></i>EDITAR MEU USUÁRIO
                 </a>
             </li>';
 }
@@ -41,7 +41,7 @@ if (isAdmin()) {
     $headerActions .= '
             <li>
                 <a class="dropdown-item" href="app/views/planilhas/planilha_importar.php">
-                    <i class="bi bi-upload me-2"></i>Importar Planilha
+                    <i class="bi bi-upload me-2"></i>IMPORTAR PLANILHA
                 </a>
             </li>';
 }
@@ -50,7 +50,7 @@ $headerActions .= '
             <li><hr class="dropdown-divider"></li>
             <li>
                 <a class="dropdown-item" href="logout.php">
-                    <i class="bi bi-box-arrow-right me-2"></i>Sair
+                    <i class="bi bi-box-arrow-right me-2"></i>SAIR
                 </a>
             </li>
         </ul>
@@ -87,7 +87,7 @@ if (isset($_GET['ajax'])) {
 
     $rowsHtml = '';
     if (empty($comums_page)) {
-        $rowsHtml = '<tr><td colspan="3" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-3 d-block mb-2"></i>Nenhum comum encontrado</td></tr>';
+        $rowsHtml = '<tr><td colspan="3" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-3 d-block mb-2"></i>NENHUM COMUM ENCONTRADO</td></tr>';
     } else {
         foreach ($comums_page as $comum) {
             $cadastro_ok = trim((string) $comum['descricao']) !== ''
@@ -145,44 +145,44 @@ ob_start();
 
 <div class="card mb-3">
     <div class="card-header">
-        <i class="bi bi-search me-2"></i>Pesquisar Comum
+        <i class="bi bi-search me-2"></i>PESQUISAR COMUM
     </div>
     <div class="card-body">
-        <form method="GET" class="row g-2 align-items-end">
+        <form method="GET" class="row g-2">
             <div class="col-12">
-                <label for="busca" class="form-label">Código ou descrição</label>
+                <label for="busca" class="form-label">CÓDIGO OU DESCRIÇÃO</label>
                 <div class="input-group">
                     <input type="text" name="busca" id="busca" class="form-control text-uppercase"
                            value="<?php echo htmlspecialchars($buscaDisplay); ?>">
                 </div>
             </div>
-            <div class="col-12">
+            <div class="col-12 pt-3">
                 <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-search me-2"></i>Buscar
+                    <i class="bi bi-search me-2"></i>BUSCAR
                 </button>
             </div>
         </form>
     </div>
     <div id="comumCount" class="card-footer text-muted small">
-        <?php echo count($comums); ?> comum(ns) encontrado(s)
+        <?php echo count($comums); ?> COMUM(NS) ENCONTRADA(S)
     </div>
 </div>
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>
-            <i class="bi bi-building me-2"></i>Comuns cadastrados
+            <i class="bi bi-building me-2"></i>COMUNS
         </span>
-        <span id="comumBadge" class="badge bg-white text-dark"><?php echo count($comums); ?> itens</span>
+        <span id="comumBadge" class="badge bg-white text-dark"><?php echo count($comums); ?> ITENS</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover table-striped table-center mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th style="width: 40%">Código</th>
-                        <th>Descrição</th>
-                        <th style="width: 140px">Ação</th>
+                        <th style="width: 40%">CÓDIGO</th>
+                        <th>DESCRIÇÃO</th>
+                        <th style="width: 140px">AÇÃO</th>
                     </tr>
                 </thead>
                 <tbody id="comunsTbody">
@@ -190,7 +190,7 @@ ob_start();
                         <tr>
                             <td colspan="3" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                                Nenhum comum encontrado
+                                NENHUMA COMUM ENCONTRADA
                             </td>
                         </tr>
                     <?php else: ?>
@@ -231,7 +231,7 @@ ob_start();
     </div>
 </div>
 
-<nav id="comumPagination" class="mt-3" aria-label="Paginação comuns">
+<nav id="comumPagination" class="mt-3" aria-label="PAGINAÇÃO COMUNS">
     <ul class="pagination pagination-sm justify-content-center mb-0">
         <?php if($pagina > 1): ?>
         <li class="page-item"><a class="page-link" href="#" data-page="<?php echo $pagina-1; ?>">&laquo;</a></li>
@@ -262,16 +262,16 @@ require_once __DIR__ . '/app/views/layouts/app_wrapper.php';
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="cadastroIncompletoLabel">Cadastro incompleto</h5>
+                <h5 class="modal-title" id="cadastroIncompletoLabel">CADASTRO INCOMPLETO</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <p>Complete os dados da comum (descrição, CNPJ, administração e cidade) para visualizar a planilha.</p>
+                <p>COMPLETE OS DADOS DA COMUM (DESCRIÇÃO, CNPJ, ADMINISTRAÇÃO E CIDADE) PARA VISUALIZAR A PLANILHA.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary w-47" data-bs-dismiss="modal">Deixar para depois</button>
+                <button type="button" class="btn btn-outline-secondary w-47" data-bs-dismiss="modal">DEIXAR PARA DEPOIS</button>
                 <a href="#" class="btn btn-primary btn-edit-agora w-47">
-                    <i class="bi bi-pencil-square me-1"></i>Editar agora
+                    <i class="bi bi-pencil-square me-1"></i>EDITAR AGORA
                 </a>
             </div>
         </div>
@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 var countEl = document.getElementById('comumCount');
                 var badge = document.getElementById('comumBadge');
                 if (tbody) tbody.innerHTML = data.rows;
-                if (countEl) countEl.textContent = data.count + ' comum(ns) encontrado(s)';
-                if (badge) badge.textContent = data.count + ' itens';
+                if (countEl) countEl.textContent = data.count + ' COMUM(NS) ENCONTRADA(S)';
+                if (badge) badge.textContent = data.count + ' ITENS';
                 // rebuild pagination
                 var pagination = document.getElementById('comumPagination');
                 if (pagination && data.total_pages) {
