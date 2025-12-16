@@ -155,34 +155,48 @@ ob_start();
 <?php endif; ?>
 
 <script>
+function showFlash(type, message) {
+    const el = document.createElement('div');
+    el.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    el.setAttribute('role', 'alert');
+    const icon = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
+    el.innerHTML = '<i class="bi bi-' + icon + ' me-2"></i><span></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    el.querySelector('span').textContent = message;
+    // Insert at top of main content area if available
+    const container = document.querySelector('.app-content .container-fluid') || document.querySelector('.app-content') || document.body;
+    container.insertBefore(el, container.firstChild);
+}
+
 function deletarDependencia(id) {
-    if (confirm('Tem certeza que deseja excluir esta dependencia?')) {
-        fetch('../../../app/controllers/delete/DependenciaDeleteController.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'id=' + id
-        })
-        .then(response => response.text())
-        .then(text => {
-            try {
-                const data = JSON.parse(text);
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert('Erro: ' + data.message);
-                }
-            } catch (e) {
-                console.error('Invalid JSON response:', text);
-                alert('Erro na requisição: resposta inválida do servidor. Verifique o console para detalhes.');
+    if (!confirm('Tem certeza que deseja excluir esta dependência?')) return;
+
+    fetch('../../../app/controllers/delete/DependenciaDeleteController.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'id=' + id
+    })
+    .then(response => response.text())
+    .then(text => {
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                showFlash('success', data.message);
+                // Give user a moment to see the flash before reloading
+                setTimeout(function(){ location.reload(); }, 900);
+            } else {
+                showFlash('danger', data.message);
             }
-        })
-        .catch(error => {
-            alert('Erro na requisiÃ§Ã£o: ' + error);
-        });
-    }
+        } catch (e) {
+            console.error('Invalid JSON response:', text);
+            showFlash('danger', 'Erro na requisição: resposta inválida do servidor. Verifique o console para detalhes.');
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        showFlash('danger', 'Erro na requisição: ' + String(error));
+    });
 }
 </script>
 
