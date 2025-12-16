@@ -71,7 +71,9 @@ $pagina = isset($_GET['pagina']) ? max(1, (int) $_GET['pagina']) : 1;
 $limite = 10;
 $offset = ($pagina - 1) * $limite;
 
+// Count filtered and global totals
 $total_count = contar_comuns($conexao, $busca);
+$total_count_all = contar_comuns($conexao, '');
 $total_paginas = $total_count > 0 ? (int) ceil($total_count / $limite) : 1;
 $comums = buscar_comuns_paginated($conexao, $busca, $limite, $offset);
 
@@ -109,11 +111,13 @@ if (isset($_GET['ajax'])) {
     }
 
     $total_count_ajax = contar_comuns($conexao, $busca);
+    $total_count_all_ajax = contar_comuns($conexao, '');
     $total_pages_ajax = $total_count_ajax > 0 ? (int) ceil($total_count_ajax / $limite_ajax) : 1;
 
     echo json_encode([
         'rows' => $rowsHtml,
         'count' => $total_count_ajax,
+        'count_all' => $total_count_all_ajax,
         'rows_count' => count($comums_page),
         'page' => $pagina_ajax,
         'total_pages' => $total_pages_ajax
@@ -165,7 +169,7 @@ ob_start();
         </form>
     </div>
     <div id="comumCount" class="card-footer text-muted small">
-        <?php echo (int)$total_count; ?> COMUM(NS) ENCONTRADA(S)
+        <?php echo (int)$total_count_all; ?> COMUM(NS) ENCONTRADA(S)
     </div>
 </div>
 
@@ -315,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var countEl = document.getElementById('comumCount');
                 var badge = document.getElementById('comumBadge');
                 if (tbody) tbody.innerHTML = data.rows;
-                if (countEl) countEl.textContent = data.count + ' COMUM(NS) ENCONTRADA(S)';
+                if (countEl) countEl.textContent = (typeof data.count_all !== 'undefined' ? data.count_all : data.count) + ' COMUM(NS) ENCONTRADA(S)';
                 var rowsCount = (typeof data.rows_count !== 'undefined') ? data.rows_count : (tbody ? tbody.querySelectorAll('tr').length : 0);
                 if (badge) badge.textContent = rowsCount + ' ITENS';
                 // rebuild pagination

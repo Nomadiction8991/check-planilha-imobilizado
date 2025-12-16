@@ -21,7 +21,15 @@ if (!$comum) {
 }
 
 $pageTitle = 'EDITAR Comum';
-$backUrl = '../../../index.php';
+// Preserve filters when returning to the list (if present)
+$backQs = [];
+if (!empty($_GET['busca'])) { $backQs['busca'] = $_GET['busca']; }
+if (!empty($_GET['pagina'])) { $backQs['pagina'] = $_GET['pagina']; }
+if ($backQs) {
+    $backUrl = './comuns_listar.php?' . http_build_query($backQs);
+} else {
+    $backUrl = '../../../index.php';
+}
 
 $comumDescricao = mb_strtoupper((string) ($comum['descricao'] ?? ''), 'UTF-8');
 $comumAdm = mb_strtoupper((string) ($comum['administracao'] ?? ''), 'UTF-8');
@@ -196,6 +204,9 @@ ob_start();
         <div class="card-body">
             <form method="POST" action="../../../app/controllers/update/ComumUpdateController.php" novalidate>
                 <input type="hidden" name="id" value="<?php echo (int) $comum['id']; ?>">
+                <?php // Preserve list filters when submitting the edit form ?>
+                <input type="hidden" name="busca" value="<?php echo htmlspecialchars($_GET['busca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="pagina" value="<?php echo htmlspecialchars($_GET['pagina'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
 
                 <div class="mb-3">
                     <label class="form-label">CÓDIGO</label>

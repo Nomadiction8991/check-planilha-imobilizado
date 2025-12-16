@@ -69,16 +69,21 @@ try {
 
     $_SESSION['mensagem'] = 'Comum atualizada com sucesso!';
     $_SESSION['tipo_mensagem'] = 'success';
-    // Return to list preserving pagination/search filters if present
+    // Return to list preserving pagination/search filters if present. Accept values from GET or POST via REQUEST.
     $retQ = [];
-    if (!empty($_GET['busca'])) { $retQ['busca'] = $_GET['busca']; }
-    if (!empty($_GET['pagina'])) { $retQ['pagina'] = $_GET['pagina']; }
+    if (!empty($_REQUEST['busca'])) { $retQ['busca'] = $_REQUEST['busca']; }
+    if (!empty($_REQUEST['pagina'])) { $retQ['pagina'] = $_REQUEST['pagina']; }
     $retQ['success'] = 1;
     header('Location: ../../views/comuns/comuns_listar.php?' . http_build_query($retQ));
     exit;
 } catch (Throwable $e) {
     $_SESSION['mensagem'] = 'Erro ao salvar: ' . $e->getMessage();
     $_SESSION['tipo_mensagem'] = 'danger';
-    header('Location: ../../views/comuns/comum_editar.php?id=' . urlencode((string) $id));
+    // Redirect back to the edit page preserving incoming filters if provided
+    $backQ = [];
+    if (!empty($_REQUEST['busca'])) { $backQ['busca'] = $_REQUEST['busca']; }
+    if (!empty($_REQUEST['pagina'])) { $backQ['pagina'] = $_REQUEST['pagina']; }
+    $backUrl = '../../views/comuns/comum_editar.php?id=' . urlencode((string) $id) . ($backQ ? ('?' . http_build_query($backQ)) : '');
+    header('Location: ' . $backUrl);
     exit;
 }
