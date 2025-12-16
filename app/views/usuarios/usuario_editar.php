@@ -91,8 +91,8 @@ ob_start();
 
             <div class="mb-3 mt-3">
                 <label for="email" class="form-label">EMAIL <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" id="email" name="email" 
-                       value="<?php echo htmlspecialchars($usuario['email']); ?>" required>
+                <input type="email" class="form-control text-uppercase" id="email" name="email" 
+                       value="<?php echo htmlspecialchars(to_uppercase($usuario['email']), ENT_QUOTES, 'UTF-8'); ?>" required>
             </div>
 
             <div class="alert alert-info">
