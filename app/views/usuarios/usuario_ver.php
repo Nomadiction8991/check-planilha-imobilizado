@@ -75,18 +75,24 @@ ob_start();
         <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>DADOS BÁSICOS</h5>
     </div>
     <div class="card-body border-top">
-        <div class="row g-4">
-            <div class="col-md-6">
+        <div class="row g-3">
+            <div class="col-12">
                 <div class="info-label">NOME COMPLETO</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['nome']); ?></div>
+            </div>
+            <div class="col-12">
                 <div class="info-label">CPF</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['cpf'] ?? ''); ?></div>
+            </div>
+            <div class="col-12">
                 <div class="info-label">RG</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['rg'] ?? ''); ?></div>
             </div>
-            <div class="col-md-6">
+            <div class="col-12">
                 <div class="info-label">TELEFONE</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['telefone'] ?? ''); ?></div>
+            </div>
+            <div class="col-12">
                 <div class="info-label">EMAIL</div>
                 <div class="info-value"><?php echo format_usuario_valor($usuario['email']); ?></div>
             </div>
