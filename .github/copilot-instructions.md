@@ -9,7 +9,7 @@
 - **Frontend**: Bootstrap 5 + Vanilla JS (AJAX requests)
 - **Entry Points**: Top-level `.php` files + `app/` directory
 - **Controllers**: Located in `app/controllers/{create,read,update,delete}/`
-- **Views**: Located in `app/views/{planilhas,produtos,usuarios,dependencias}/`
+- **Views**: Located in `app/views/{planilhas,produtos,usuarios,dependencias}/`a
 
 ---
 
