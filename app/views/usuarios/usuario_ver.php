@@ -115,18 +115,7 @@ ob_start();
     </div>
 </div>
 
-<?php if (!empty($usuario['casado'])): ?>
-<div class="card mb-3 shadow-sm">
-    <div class="card-header card-header-contrast border-bottom-0">
-        <h5 class="mb-0"><i class="bi bi-person-hearts me-2"></i>ESTADO Civil</h5>
-    </div>
-    <div class="card-body border-top">
-        <div class="info-value">
-            <span class="badge bg-success text-uppercase px-3 py-2">CASADO(A)</span>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
+<!-- ESTADO CIVIL: removido do layout de visualização conforme solicitado. Mantido apenas o cartão de Dados do CÔNJUGE. -->
 
 <?php if (!empty($usuario['casado'])): ?>
 <div class="card mb-3 shadow-sm">
