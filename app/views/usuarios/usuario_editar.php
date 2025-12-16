@@ -244,65 +244,80 @@ ob_start();
 <!-- Assinaturas removidas do formulário (modal e preview removidos) -->
 
 <script>
-// ========== MÃSCARAS COM INPUTMASK ==========
+// ========== MÁSCARAS COM INPUTMASK (PROTEGIDAS) ==========
 $(document).ready(function() {
-    // MÃ¡scara CPF / Fone / CEP
-    Inputmask('999.999.999-99').mask('#cpf');
-    Inputmask('999.999.999-99').mask('#cpf_conjuge');
-    Inputmask(['(99) 99999-9999', '(99) 9999-9999']).mask('#telefone');
-    Inputmask(['(99) 99999-9999', '(99) 9999-9999']).mask('#telefone_conjuge');
-    Inputmask('99999-999').mask('#cep');
-
-    // RG dinÃ¢mico (sem limitar tamanho)
-    function formatRgDigits(raw) {
-        const digits = raw.replace(/\D/g,'');
-        if (digits.length <= 1) return digits; // 1 dÃ­gito sem hÃ­fen
-        return digits.slice(0,-1) + '-' + digits.slice(-1);
-    }
-    const rgInput = document.getElementById('rg');
-    function aplicarRgIgualCpf(aplicar) {
-        if (aplicar) {
-            Inputmask('999.999.999-99').mask('#rg');
-            const cpfMasked = document.getElementById('cpf').value;
-            rgInput.value = cpfMasked;
-            rgInput.setAttribute('disabled','disabled');
-        } else {
-            rgInput.removeAttribute('disabled');
-            Inputmask.remove('#rg');
-            rgInput.value = formatRgDigits('<?php echo preg_replace('/\D/','', $usuario['rg'] ?? ''); ?>');
+    try {
+        // Se a biblioteca de Inputmask não estiver carregada, ignorar as máscaras
+        if (typeof Inputmask !== 'undefined') {
+            Inputmask('999.999.999-99').mask('#cpf');
+            Inputmask('999.999.999-99').mask('#cpf_conjuge');
+            Inputmask(['(99) 99999-9999', '(99) 9999-9999']).mask('#telefone');
+            Inputmask(['(99) 99999-9999', '(99) 9999-9999']).mask('#telefone_conjuge');
+            Inputmask('99999-999').mask('#cep');
         }
-    }
-    rgInput.addEventListener('input', function(){ if (!document.getElementById('rg_igual_cpf').checked) this.value = formatRgDigits(this.value); });
-    document.getElementById('rg_igual_cpf').addEventListener('change', function(){ aplicarRgIgualCpf(this.checked); });
-    document.getElementById('cpf').addEventListener('input', function(){ if (document.getElementById('rg_igual_cpf').checked) aplicarRgIgualCpf(true); });
-    aplicarRgIgualCpf(document.getElementById('rg_igual_cpf').checked);
 
-    const rgConjInput = document.getElementById('rg_conjuge');
-    function aplicarRgConjugeIgualCpf(aplicar) {
-        if (aplicar) {
-            Inputmask('999.999.999-99').mask('#rg_conjuge');
-            const cpfMasked = document.getElementById('cpf_conjuge').value;
-            rgConjInput.value = cpfMasked;
-            rgConjInput.setAttribute('disabled','disabled');
-        } else {
-            rgConjInput.removeAttribute('disabled');
-            Inputmask.remove('#rg_conjuge');
-            rgConjInput.value = formatRgDigits('<?php echo preg_replace('/\D/','', $usuario['rg_conjuge'] ?? ''); ?>');
+        // RG dinâmico (aplica apenas se os elementos existirem)
+        function formatRgDigits(raw) {
+            const digits = raw.replace(/\D/g,'');
+            if (digits.length <= 1) return digits;
+            return digits.slice(0,-1) + '-' + digits.slice(-1);
         }
-    }
-    rgConjInput.addEventListener('input', function(){ if (!document.getElementById('rg_conjuge_igual_cpf').checked) this.value = formatRgDigits(this.value); });
-    document.getElementById('rg_conjuge_igual_cpf').addEventListener('change', function(){ aplicarRgConjugeIgualCpf(this.checked); });
-    document.getElementById('cpf_conjuge').addEventListener('input', function(){ if (document.getElementById('rg_conjuge_igual_cpf').checked) aplicarRgConjugeIgualCpf(true); });
-    aplicarRgConjugeIgualCpf(document.getElementById('rg_conjuge_igual_cpf').checked);
 
-    (function(){
-        const casadoCb = document.getElementById('casado');
-        const card = document.getElementById('cardConjuge');
-        if (!casadoCb || !card) return;
-        const setVisibility = () => { card.style.display = casadoCb.checked ? '' : 'none'; };
-        casadoCb.addEventListener('change', setVisibility);
-        setVisibility();
-    })();
+        const rgInput = document.getElementById('rg');
+        if (rgInput) {
+            const rgIgualEl = document.getElementById('rg_igual_cpf');
+            const cpfEl = document.getElementById('cpf');
+            function aplicarRgIgualCpf(aplicar) {
+                if (aplicar) {
+                    if (typeof Inputmask !== 'undefined') Inputmask('999.999.999-99').mask('#rg');
+                    rgInput.value = cpfEl ? cpfEl.value : rgInput.value;
+                    rgInput.setAttribute('disabled','disabled');
+                } else {
+                    rgInput.removeAttribute('disabled');
+                    if (typeof Inputmask !== 'undefined') Inputmask.remove('#rg');
+                    rgInput.value = formatRgDigits('<?php echo preg_replace('/\D/','', $usuario['rg'] ?? ''); ?>');
+                }
+            }
+            if (rgIgualEl) rgInput.addEventListener('input', function(){ if (!rgIgualEl.checked) this.value = formatRgDigits(this.value); });
+            if (rgIgualEl) rgIgualEl.addEventListener('change', function(){ aplicarRgIgualCpf(this.checked); });
+            if (cpfEl) cpfEl.addEventListener('input', function(){ if (rgIgualEl && rgIgualEl.checked) aplicarRgIgualCpf(true); });
+            aplicarRgIgualCpf(rgIgualEl ? rgIgualEl.checked : false);
+        }
+
+        const rgConjInput = document.getElementById('rg_conjuge');
+        if (rgConjInput) {
+            const rgConjIgualEl = document.getElementById('rg_conjuge_igual_cpf');
+            const cpfConjEl = document.getElementById('cpf_conjuge');
+            function aplicarRgConjugeIgualCpf(aplicar) {
+                if (aplicar) {
+                    if (typeof Inputmask !== 'undefined') Inputmask('999.999.999-99').mask('#rg_conjuge');
+                    rgConjInput.value = cpfConjEl ? cpfConjEl.value : rgConjInput.value;
+                    rgConjInput.setAttribute('disabled','disabled');
+                } else {
+                    rgConjInput.removeAttribute('disabled');
+                    if (typeof Inputmask !== 'undefined') Inputmask.remove('#rg_conjuge');
+                    rgConjInput.value = formatRgDigits('<?php echo preg_replace('/\D/','', $usuario['rg_conjuge'] ?? ''); ?>');
+                }
+            }
+            if (rgConjIgualEl) rgConjInput.addEventListener('input', function(){ if (!rgConjIgualEl.checked) this.value = formatRgDigits(this.value); });
+            if (rgConjIgualEl) rgConjIgualEl.addEventListener('change', function(){ aplicarRgConjugeIgualCpf(this.checked); });
+            if (cpfConjEl) cpfConjEl.addEventListener('input', function(){ if (rgConjIgualEl && rgConjIgualEl.checked) aplicarRgConjugeIgualCpf(true); });
+            aplicarRgConjugeIgualCpf(rgConjIgualEl ? rgConjIgualEl.checked : false);
+        }
+
+        // Toggle do bloco do cônjuge (IIFE garante execução isolada)
+        (function(){
+            const casadoCb = document.getElementById('casado');
+            const card = document.getElementById('cardConjuge');
+            if (!casadoCb || !card) return;
+            const setVisibility = () => { card.style.display = casadoCb.checked ? '' : 'none'; };
+            casadoCb.addEventListener('change', setVisibility);
+            setVisibility();
+        })();
+
+    } catch (e) {
+        console.error('Erro ao inicializar máscaras/inputs em usuario_editar:', e);
+    }
 });
 
 // ========== VIACEP: BUSCA AUTOMÃTICA DE ENDEREÃ‡O ==========
