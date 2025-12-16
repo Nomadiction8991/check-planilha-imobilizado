@@ -81,18 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             overflow: hidden;
         }
-        .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-        }
-        .login-header i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
         .login-body {
-            padding: 2rem;
+            padding: 1.25rem 2rem 1.25rem; /* less top/bottom space */
         }
         .btn-login {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -136,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                value="<?php echo htmlspecialchars($email ?? ''); ?>">
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="senha" class="form-label">
                             <i class="bi bi-lock me-1"></i>
                             SENHA
