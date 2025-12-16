@@ -34,7 +34,11 @@ if ($filtroStatus !== '' && in_array($filtroStatus, ['0', '1'], true)) {
 
 $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';
 
-// Contagem com filtros aplicados
+// Global total (independent of current filters)
+$sql_all_count = 'SELECT COUNT(*) FROM usuarios';
+$total_registros_all = (int) $conexao->query($sql_all_count)->fetchColumn();
+
+// Contagem com filtros aplicados (usada para paginação)
 $sql_count = "SELECT COUNT(*) FROM usuarios" . $whereSql;
 try {
 	error_log('DEBUG UsuarioListController: SQL_COUNT=' . $sql_count . ' PARAMS=' . json_encode($params) . ' SQL=' . ($sql ?? 'N/A'));
@@ -63,6 +67,8 @@ try {
 	$total_paginas = 1;
 	$usuarios = [];
 	$erro = 'Erro ao buscar usuários. Verifique os logs e tente novamente.';
+	// Ensure global total exists even on error
+	$total_registros_all = 0;
 }
 
 ?>

@@ -31,8 +31,7 @@ if (!empty($_GET['busca'])) { $qsArr['busca'] = $_GET['busca']; }
 if (isset($_GET['status']) && $_GET['status'] !== '') { $qsArr['status'] = $_GET['status']; }
 if (!empty($_GET['pagina'])) { $qsArr['pagina'] = $_GET['pagina']; }
 $backUrl = './usuarios_listar.php' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
-// Optional: provide an Edit link that preserves filters (for the current user)
-$editHref = './usuario_editar.php?id=' . urlencode($idParam) . ($qsArr ? ('&' . http_build_query($qsArr)) : '');
+
 
 function format_usuario_valor($valor)
 {
@@ -93,14 +92,8 @@ ob_start();
 </style>
 
 <div class="card mb-3 shadow-sm">
-    <div class="card-header card-header-contrast border-bottom-0 d-flex justify-content-between align-items-center">
+    <div class="card-header card-header-contrast border-bottom-0">
         <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>DADOS BÁSICOS</h5>
-        <div>
-            <?php if (($loggedId && $loggedId === $idParam) || isAdmin()): ?>
-                <a href="<?php echo $editHref; ?>" class="btn btn-sm btn-outline-primary me-1" title="EDITAR"><i class="bi bi-pencil"></i></a>
-            <?php endif; ?>
-            <a href="<?php echo $backUrl; ?>" class="btn btn-sm btn-outline-secondary" title="VOLTAR"><i class="bi bi-arrow-left"></i></a>
-        </div>
     </div>
     <div class="card-body border-top">
         <div class="row g-3">

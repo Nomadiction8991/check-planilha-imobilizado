@@ -77,7 +77,7 @@ ob_start();
         </form>
     </div>
     <div id="usuarioCount" class="card-footer text-muted small">
-        <?php echo (int)$total_registros; ?> <?php echo htmlspecialchars(to_uppercase('USUÁRIO(S) ENCONTRADO(S)'), ENT_QUOTES, 'UTF-8'); ?>
+        <?php echo (int)$total_registros_all; ?> <?php echo htmlspecialchars(to_uppercase('USUÁRIO(S) ENCONTRADO(S)'), ENT_QUOTES, 'UTF-8'); ?>
     </div>
 </div>
 
@@ -168,6 +168,16 @@ ob_start();
 <?php endif; ?>
 
 <script>
+function showFlash(type, message) {
+    const el = document.createElement('div');
+    el.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    el.setAttribute('role', 'alert');
+    const icon = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
+    el.innerHTML = '<i class="bi bi-' + icon + ' me-2"></i><span></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    el.querySelector('span').textContent = message;
+    const container = document.querySelector('.app-content .container-fluid') || document.querySelector('.app-content') || document.body;
+    container.insertBefore(el, container.firstChild);
+}
 document.addEventListener('DOMContentLoaded', function() {
     window.excluirUsuario = function(id, nome) {
         if (!confirm('TEM CERTEZA QUE DESEJA EXCLUIR O USUÁRIO "' + nome + '"?')) {
@@ -184,14 +194,14 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
-                location.reload();
+                showFlash('success', data.message);
+                setTimeout(function(){ location.reload(); }, 900);
             } else {
-                alert(data.message);
+                showFlash('danger', data.message);
             }
         })
         .catch(error => {
-            alert('ERRO AO EXCLUIR USUÁRIO');
+            showFlash('danger', 'ERRO AO EXCLUIR USUÁRIO');
             console.error(error);
         });
     }

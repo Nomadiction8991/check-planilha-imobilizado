@@ -117,8 +117,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('TODOS OS CAMPOS DE ENDEREÇO (CEP, LOGRADOURO, NÚMERO, BAIRRO, CIDADE E ESTADO) SÃO OBRIGATÓRIOS.');
         }
 
-        // Se casado, apenas formatar RG se fornecido (dados do cônjuge são opcionais)
+        // Se casado, validar e formatar dados do cônjuge (agora obrigatórios quando casado)
         if ($casado) {
+            if (empty($nome_conjuge)) {
+                throw new Exception('O nome do cônjuge é obrigatório.');
+            }
+            if (empty($cpf_conjuge)) {
+                throw new Exception('O CPF do cônjuge é obrigatório.');
+            }
+            $cpf_conjuge_numeros = preg_replace('/\D/', '', $cpf_conjuge);
+            if (strlen($cpf_conjuge_numeros) !== 11) {
+                throw new Exception('CPF do cônjuge inválido. Deve conter 11 dígitos.');
+            }
+            if (empty($telefone_conjuge)) {
+                throw new Exception('O telefone do cônjuge é obrigatório.');
+            }
+            $telefone_conjuge_numeros = preg_replace('/\D/', '', $telefone_conjuge);
+            if (strlen($telefone_conjuge_numeros) < 10 || strlen($telefone_conjuge_numeros) > 11) {
+                throw new Exception('Telefone do cônjuge inválido. Deve conter 10 ou 11 dígitos.');
+            }
+
             if ($rg_conjuge_igual_cpf && !empty($cpf_conjuge)) { 
                 $rg_conjuge = $cpf_conjuge; 
             } else if (!empty($rg_conjuge)) { 

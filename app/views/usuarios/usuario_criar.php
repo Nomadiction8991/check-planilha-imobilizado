@@ -371,7 +371,46 @@ $(document).ready(function() {
         const casadoCb = document.getElementById('casado');
         const card = document.getElementById('cardConjuge');
         if (!casadoCb || !card) return;
-        const setVisibility = () => { card.style.display = casadoCb.checked ? '' : 'none'; };
+
+        function setRequiredOnConjuge(aplicar) {
+            const ids = ['nome_conjuge','cpf_conjuge','telefone_conjuge'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (aplicar) {
+                    el.setAttribute('required','required');
+                } else {
+                    el.removeAttribute('required');
+                }
+            });
+
+            // add/remove asterisks on labels
+            const labels = {
+                nome_conjuge: 'NOME COMPLETO DO CÔNJUGE',
+                cpf_conjuge: 'CPF DO CÔNJUGE',
+                telefone_conjuge: 'TELEFONE DO CÔNJUGE'
+            };
+            for (const id in labels) {
+                const label = document.querySelector('label[for="' + id + '"]');
+                if (!label) continue;
+                if (aplicar) {
+                    if (!label.querySelector('.required-asterisk')) {
+                        const span = document.createElement('span');
+                        span.className = 'text-danger required-asterisk ms-1';
+                        span.textContent = '*';
+                        label.appendChild(span);
+                    }
+                } else {
+                    const star = label.querySelector('.required-asterisk');
+                    if (star) star.remove();
+                }
+            }
+        }
+
+        const setVisibility = () => {
+            card.style.display = casadoCb.checked ? '' : 'none';
+            setRequiredOnConjuge(casadoCb.checked);
+        };
         casadoCb.addEventListener('change', setVisibility);
         // inicializa baseado no estado atual
         setVisibility();
@@ -394,7 +433,7 @@ document.getElementById('cep').addEventListener('blur', function() {
         .then(response => response.json())
         .then(data => {
             if (data.erro) {
-                alert('CEP NÃO encontrado!');
+                showFlash('danger', 'CEP NÃO encontrado!');
                 document.getElementById('logradouro').value = '';
                 return;
             }
@@ -409,10 +448,22 @@ document.getElementById('cep').addEventListener('blur', function() {
         })
         .catch(error => {
             console.error('Erro ao buscar CEP:', error);
-            alert('Erro ao buscar CEP. Tente novamente.');
+            showFlash('danger', 'Erro ao buscar CEP. Tente novamente.');
             document.getElementById('logradouro').value = '';
         });
 });
+
+// ========== HELPER: showFlash (local copy) ==========
+function showFlash(type, message) {
+    const el = document.createElement('div');
+    el.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    el.setAttribute('role', 'alert');
+    const icon = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
+    el.innerHTML = '<i class="bi bi-' + icon + ' me-2"></i><span></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    el.querySelector('span').textContent = message;
+    const container = document.querySelector('.app-content .container-fluid') || document.querySelector('.app-content') || document.body;
+    container.insertBefore(el, container.firstChild);
+}
 
 // ========== VALIDAÇÃO E ENVIO DO FORMULÁRIO ==========
 document.getElementById('formUsuario').addEventListener('submit', function(e) {
@@ -422,7 +473,7 @@ document.getElementById('formUsuario').addEventListener('submit', function(e) {
     // Validar senhas
     if (senha !== confirmar) {
         e.preventDefault();
-        alert('As senhas NÃO conferem!');
+        showFlash('danger', 'AS SENHAS NÃO CONFEREM!');
         return false;
     }
     
@@ -430,14 +481,14 @@ document.getElementById('formUsuario').addEventListener('submit', function(e) {
     const enderecoObrigatorios = ['cep','logradouro','numero','bairro','cidade','estado'];
     for (let id of enderecoObrigatorios) {
         const el = document.getElementById(id);
-        if (!el.value.trim()) { e.preventDefault(); alert('Todos os campos de endereço são obrigatórios.'); return false; }
+        if (!el.value.trim()) { e.preventDefault(); showFlash('danger', 'TODOS OS CAMPOS DE ENDEREÇO SÃO OBRIGATÓRIOS.'); return false; }
     }
 
     if (document.getElementById('casado').checked) {
         const obrigatoriosConjuge = ['nome_conjuge','cpf_conjuge','telefone_conjuge'];
         for (let id of obrigatoriosConjuge) {
             const el = document.getElementById(id);
-            if (!el.value.trim()) { e.preventDefault(); alert('Preencha todos os dados obrigatórios do cônjuge.'); return false; }
+            if (!el.value.trim()) { e.preventDefault(); showFlash('danger', 'PREENCHA TODOS OS DADOS OBRIGATÓRIOS DO CÔNJUGE.'); return false; }
         }
     }
 });
