@@ -45,37 +45,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // ValidaÃ§Ãµes
         if (empty($nome)) {
-            throw new Exception('O nome Ã© obrigatÃ³rio.');
+            throw new Exception('O NOME Ã© OBRIGATÃ³RIO.');
         }
 
         if (empty($email)) {
-            throw new Exception('O email Ã© obrigatÃ³rio.');
+            throw new Exception('O EMAIL Ã© OBRIGATÃ³RIO.');
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('Email invÃ¡lido.');
+            throw new Exception('EMAIL INVÃ¡LIDO.');
         }
 
         if (empty($senha)) {
-            throw new Exception('A senha Ã© obrigatÃ³ria.');
+            throw new Exception('A SENHA Ã© OBRIGATÃ³RIA.');
         }
 
         if (strlen($senha) < 6) {
-            throw new Exception('A senha deve ter no mÃ­nimo 6 caracteres.');
+            throw new Exception('A SENHA DEVE TER NO MÃ­NIMO 6 CARACTERES.');
         }
 
         if ($senha !== $confirmar_senha) {
-            throw new Exception('As senhas nÃ£o conferem.');
+            throw new Exception('AS SENHAS NÃ£O CONFEREM.');
         }
         
         // Validar CPF (bÃ¡sico: apenas formato)
         if (empty($cpf)) {
-            throw new Exception('O CPF Ã© obrigatÃ³rio.');
+            throw new Exception('O CPF Ã© OBRIGATÃ³RIO.');
         }
         
         $cpf_numeros = preg_replace('/\D/', '', $cpf);
         if (strlen($cpf_numeros) !== 11) {
-            throw new Exception('CPF invÃ¡lido. Deve conter 11 dÃ­gitos.');
+            throw new Exception('CPF INVÃ¡LIDO. DEVE CONTER 11 DÃ­GITOS.');
         }
         
         // FunÃ§Ã£o para formatar RG (todos menos Ãºltimo + '-' + Ãºltimo)
@@ -92,17 +92,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $rg_numeros = preg_replace('/\D/','', $rg);
         if (strlen($rg_numeros) < 2) {
-            throw new Exception('O RG Ã© obrigatÃ³rio e deve ter ao menos 2 dÃ­gitos.');
+            throw new Exception('O RG Ã© OBRIGATÃ³RIO E DEVE TER AO MENOS 2 DÃ­GITOS.');
         }
 
         // Validar telefone (bÃ¡sico: formato)
         if (empty($telefone)) {
-            throw new Exception('O telefone Ã© obrigatÃ³rio.');
+            throw new Exception('O TELEFONE Ã© OBRIGATÃ³RIO.');
         }
         
         $telefone_numeros = preg_replace('/\D/', '', $telefone);
         if (strlen($telefone_numeros) < 10 || strlen($telefone_numeros) > 11) {
-            throw new Exception('Telefone invÃ¡lido.');
+            throw new Exception('TELEFONE INVÃ¡LIDO.');
         }
 
         // Verificar se email jÃ¡ existe
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindValue(':email', $email);
         $stmt->execute();
         if ($stmt->fetch()) {
-            throw new Exception('Este email jÃ¡ estÃ¡ cadastrado.');
+            throw new Exception('ESTE EMAIL JÃ¡ ESTÃ¡ CADASTRADO.');
         }
         
         // Verificar se CPF jÃ¡ existe
@@ -118,17 +118,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindValue(':cpf', $cpf);
         $stmt->execute();
         if ($stmt->fetch()) {
-            throw new Exception('Este CPF jÃ¡ estÃ¡ cadastrado.');
+            throw new Exception('ESTE CPF JÃ¡ ESTÃ¡ CADASTRADO.');
         }
 
         // EndereÃ§o obrigatÃ³rio (CEP, logradouro, numero, bairro, cidade, estado)
         if (empty($endereco_cep) || empty($endereco_logradouro) || empty($endereco_numero) || empty($endereco_bairro) || empty($endereco_cidade) || empty($endereco_estado)) {
-            throw new Exception('Todos os campos de endereÃ§o (CEP, logradouro, nÃºmero, bairro, cidade e estado) sÃ£o obrigatÃ³rios.');
+            throw new Exception('TODOS OS CAMPOS DE ENDEREÃ§O (CEP, LOGRADOURO, NÃºMERO, BAIRRO, CIDADE E ESTADO) SÃ£O OBRIGATÃ³RIOS.');
         }
 
         // Assinatura obrigatÃ³ria
         if (empty($assinatura)) {
-            throw new Exception('A assinatura do usuÃ¡rio Ã© obrigatÃ³ria.');
+            throw new Exception('A ASSINATURA DO USUÃ¡RIO Ã© OBRIGATÃ³RIA.');
         }
 
         // Se casado, apenas formatar RG se fornecido (dados do cônjuge são opcionais)
