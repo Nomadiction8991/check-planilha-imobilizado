@@ -40,35 +40,40 @@ ob_start();
 <?php endif; ?>
 
 <!-- Filtros de Pesquisa -->
-<form method="get" class="card mb-3" aria-label="Formulário de busca">
+<div class="card mb-3">
     <div class="card-header">
         <i class="bi bi-search me-2"></i>PESQUISAR
     </div>
     <div class="card-body">
-        <input type="hidden" name="pagina" value="1">
-        <div class="mb-3">
-            <label for="filtroNome" class="form-label">
-                <i class="bi bi-person me-1"></i>
-                BUSCAR POR NOME OU E-MAIL
-            </label>
-            <input type="text" class="form-control" id="filtroNome" name="busca" value="<?php echo htmlspecialchars($filtroNome ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-        </div>
-        <div class="mb-2">
-            <label for="filtroSTATUS" class="form-label">
-                <i class="bi bi-funnel me-1"></i>
-                STATUS
-            </label>
-            <select class="form-select" id="filtroSTATUS" name="status">
-                <option value=""<?php echo ($filtroStatus === '') ? ' selected' : ''; ?>>TODOS</option>
-                <option value="1"<?php echo ($filtroStatus === '1') ? ' selected' : ''; ?>>ATIVOS</option>
-                <option value="0"<?php echo ($filtroStatus === '0') ? ' selected' : ''; ?>>INATIVOS</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <button type="submit" id="btnBUSCARUsuarios" class="btn btn-primary btn-lg w-100 mt-2">BUSCAR</button>
-        </div>
+        <form method="get" aria-label="Formulário de busca">
+            <input type="hidden" name="pagina" value="1">
+            <div class="mb-3">
+                <label for="filtroNome" class="form-label">
+                    <i class="bi bi-person me-1"></i>
+                    BUSCAR POR NOME OU E-MAIL
+                </label>
+                <input type="text" class="form-control" id="filtroNome" name="busca" value="<?php echo htmlspecialchars($filtroNome ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+            </div>
+            <div class="mb-2">
+                <label for="filtroSTATUS" class="form-label">
+                    <i class="bi bi-funnel me-1"></i>
+                    STATUS
+                </label>
+                <select class="form-select" id="filtroSTATUS" name="status">
+                    <option value=""<?php echo ($filtroStatus === '') ? ' selected' : ''; ?>>TODOS</option>
+                    <option value="1"<?php echo ($filtroStatus === '1') ? ' selected' : ''; ?>>ATIVOS</option>
+                    <option value="0"<?php echo ($filtroStatus === '0') ? ' selected' : ''; ?>>INATIVOS</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <button type="submit" id="btnBUSCARUsuarios" class="btn btn-primary w-100 mt-2"><i class="bi bi-search me-2"></i>BUSCAR</button>
+            </div>
+        </form>
     </div>
-</form>
+    <div id="usuarioCount" class="card-footer text-muted small">
+        <?php echo (int)$total_registros; ?> <?php echo htmlspecialchars(to_uppercase('USUÁRIO(S) ENCONTRADO(S)'), ENT_QUOTES, 'UTF-8'); ?>
+    </div>
+</div>
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -76,7 +81,7 @@ ob_start();
             <i class="bi bi-people me-2"></i>
             LISTA DE USUÁRIOS
         </span>
-        <span class="badge bg-white text-dark"><?php echo $total_registros; ?> ITENS (PÁG. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
+        <span class="badge bg-white text-dark"><?php echo count($usuarios); ?> ITENS</span>
     </div>
     <div class="card-body p-0">
         <?php if (empty($usuarios)): ?>

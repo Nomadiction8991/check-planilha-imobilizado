@@ -114,6 +114,7 @@ if (isset($_GET['ajax'])) {
     echo json_encode([
         'rows' => $rowsHtml,
         'count' => $total_count_ajax,
+        'rows_count' => count($comums_page),
         'page' => $pagina_ajax,
         'total_pages' => $total_pages_ajax
     ]);
@@ -164,7 +165,7 @@ ob_start();
         </form>
     </div>
     <div id="comumCount" class="card-footer text-muted small">
-        <?php echo count($comums); ?> COMUM(NS) ENCONTRADA(S)
+        <?php echo (int)$total_count; ?> COMUM(NS) ENCONTRADA(S)
     </div>
 </div>
 
@@ -315,7 +316,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 var badge = document.getElementById('comumBadge');
                 if (tbody) tbody.innerHTML = data.rows;
                 if (countEl) countEl.textContent = data.count + ' COMUM(NS) ENCONTRADA(S)';
-                if (badge) badge.textContent = data.count + ' ITENS';
+                var rowsCount = (typeof data.rows_count !== 'undefined') ? data.rows_count : (tbody ? tbody.querySelectorAll('tr').length : 0);
+                if (badge) badge.textContent = rowsCount + ' ITENS';
                 // rebuild pagination
                 var pagination = document.getElementById('comumPagination');
                 if (pagination && data.total_pages) {

@@ -48,9 +48,9 @@ ob_start();
         <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
             <span>
             <i class="bi bi-building me-2"></i>
-            Lista de Comuns
+            <?php echo htmlspecialchars(to_uppercase('Lista de Comuns'), ENT_QUOTES, 'UTF-8'); ?>
             </span>
-            <span class="badge bg-white text-dark"><?php echo $total_registros; ?> itens (pÃƒÂ¡g. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
+            <span class="badge bg-white text-dark"><?php echo (int)$total_registros; ?> ITENS (PÁG. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
         </div>
         <div class="card-body">
             <?php if (!empty($_SESSION['mensagem'])): ?>
@@ -125,7 +125,7 @@ ob_start();
                 <div class="mt-3 text-muted small d-flex justify-content-between align-items-center">
                     <span>
                         <i class="bi bi-info-circle me-1"></i>
-                        PÃƒÂ¡gina <?php echo $pagina; ?> de <?php echo $total_paginas; ?> | Exibindo <strong><?php echo count($comuns); ?></strong> de <strong><?php echo $total_registros; ?></strong>
+                        <?php echo htmlspecialchars(to_uppercase("Página {$pagina} de {$total_paginas} | Exibindo"), ENT_QUOTES, 'UTF-8'); ?> <strong><?php echo count($comuns); ?></strong> <?php echo htmlspecialchars(to_uppercase('de'), ENT_QUOTES, 'UTF-8'); ?> <strong><?php echo $total_registros; ?></strong>
                     </span>
                 </div>
 

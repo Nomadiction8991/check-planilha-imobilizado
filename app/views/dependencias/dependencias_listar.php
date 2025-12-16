@@ -58,13 +58,34 @@ ob_start();
     </div>
 <?php endif; ?>
 
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="bi bi-search me-2"></i> PESQUISAR DEPENDÊNCIA
+    </div>
+    <div class="card-body">
+        <form method="get">
+            <input type="hidden" name="pagina" value="1">
+            <div class="mb-3">
+                <label for="busca_dep" class="form-label"><i class="bi bi-list me-1"></i> CÓDIGO OU DESCRIÇÃO</label>
+                <input id="busca_dep" name="busca" type="text" class="form-control" value="<?php echo htmlspecialchars($busca ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-2"></i>BUSCAR</button>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer text-muted small">
+        <?php echo (int)$total_registros; ?> <?php echo htmlspecialchars(to_uppercase('dependência(s) encontrada(s)'), ENT_QUOTES, 'UTF-8'); ?>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>
             <i class="bi bi-list me-2"></i>
-            Lista de Dependencias
+            <?php echo htmlspecialchars(to_uppercase('Lista de Dependências'), ENT_QUOTES, 'UTF-8'); ?>
         </span>
-        <span class="badge bg-white text-dark"><?php echo $total_registros; ?> itens (pag. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
+        <span class="badge bg-white text-dark"><?php echo count($dependencias); ?> ITENS (PÁG. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
     </div>
     <div class="card-body p-0">
         <?php if (empty($dependencias)): ?>
@@ -78,14 +99,14 @@ ob_start();
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Descricao</th>
-                            <th>Acoes</th>
+                            <th><?php echo htmlspecialchars(to_uppercase('Descrição'), ENT_QUOTES, 'UTF-8'); ?></th>
+                            <th><?php echo htmlspecialchars(to_uppercase('Ações'), ENT_QUOTES, 'UTF-8'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($dependencias as $dependencia): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars(dep_corrigir_encoding($dependencia['descricao'] ?? '')); ?></td>
+                                    <tr>
+                                <td><?php echo htmlspecialchars(to_uppercase(dep_corrigir_encoding($dependencia['descricao'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a href="./dependencia_editar.php?id=<?php echo $dependencia['id']; ?>"
