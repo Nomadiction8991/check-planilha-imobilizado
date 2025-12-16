@@ -61,7 +61,8 @@ ob_start();
     letter-spacing: 0.08em;
 }
 .card-header-contrast {
-    background: linear-gradient(135deg, #4f46e5, #6366f1 60%, #2563eb);
+    /* Use same gradient as the main app header for visual consistency */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
 }
 .card-header-contrast h5,
