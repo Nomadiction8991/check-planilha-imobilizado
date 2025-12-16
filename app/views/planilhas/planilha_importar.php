@@ -21,12 +21,26 @@ if ($jobDir !== false) {
  
 ob_start();
 ?>
- 
+
 <?php if ($jobEmExecucao): ?>
-    <p class="text-muted small mb-3">
-        Importação em andamento (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>).
-        <a class="btn btn-link p-0 align-baseline" href="/app/views/planilhas/importacao_progresso.php?job=<?php echo urlencode($jobEmExecucao); ?>">Ver progresso</a>
-    </p>
+<!-- Modal: job em andamento (mostra imediatamente e bloqueia nova importação) -->
+<div class="modal fade" id="job-active-modal" tabindex="-1" aria-labelledby="job-active-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="job-active-title">Importação em andamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                Já existe uma importação em progresso (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>). Conclua ou cancele antes de iniciar uma nova.
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" href="/app/views/planilhas/importacao_progresso.php?job=<?php echo urlencode($jobEmExecucao); ?>">Ver progresso</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <?php endif; ?>
 
 <form action="../../../app/controllers/create/ImportacaoPlanilhaController.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
@@ -98,56 +112,22 @@ ob_start();
         </div>
     </div>
  
-    <button type="submit" class="btn btn-primary w-100 text-uppercase" <?php echo $jobEmExecucao ? 'disabled' : ''; ?>>
+    <button type="submit" class="btn btn-primary w-100 text-uppercase">
         <i class="bi bi-upload me-2"></i>
         <?php echo htmlspecialchars(to_uppercase('Importar Planilha'), ENT_QUOTES, 'UTF-8'); ?>
     </button>
 </form>
-
-<?php if ($jobEmExecucao): ?>
-<!-- Modal: job em andamento -->
-<div class="modal fade" id="job-active-modal" tabindex="-1" aria-labelledby="job-active-title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="job-active-title">Importação em andamento</h5>
-            </div>
-            <div class="modal-body">
-                Já existe uma importação em progresso (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>). Conclua ou cancele antes de iniciar uma nova.
-            </div>
-            <div class="modal-footer">
-                <a class="btn btn-primary" href="/app/views/planilhas/importacao_progresso.php?job=<?php echo urlencode($jobEmExecucao); ?>">Ver progresso</a>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
 
 <script>
     (() => {
         'use strict';
         const jobActive = <?php echo $jobEmExecucao ? 'true' : 'false'; ?>;
         const jobModalEl = document.getElementById('job-active-modal');
-        const jobModal = jobModalEl ? new bootstrap.Modal(jobModalEl, { backdrop: 'static', keyboard: false }) : null;
+        const jobModal = jobModalEl ? new bootstrap.Modal(jobModalEl) : null;
         const forms = document.querySelectorAll('.needs-validation');
-
-        function blockSubmit(event) {
-            if (jobActive) {
-                event.preventDefault();
-                event.stopPropagation();
-                if (jobModal) {
-                    jobModal.show();
-                }
-                return true;
-            }
-            return false;
-        }
 
         Array.from(forms).forEach(form => {
             form.addEventListener('submit', event => {
-                if (blockSubmit(event)) {
-                    return;
-                }
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
