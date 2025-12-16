@@ -125,35 +125,7 @@ ob_start();
         </div>
     </div>
 
-    <!-- Card 2: ASSINATURA DIGITAL -->
-    <div class="card mb-3">
-        <div class="card-header">
-            <i class="bi bi-pen me-2"></i>
-            ASSINATURA DIGITAL
-        </div>
-        <div class="card-body">
-            <p class="text-muted small mb-3">
-                <i class="bi bi-info-circle me-1"></i>
-                CLIQUE NO BOTÃO ABAIXO PARA ATUALIZAR SUA ASSINATURA DIGITAL.
-            </p>
-            
-            <!-- Container de Preview da Assinatura -->
-            <div class="signature-preview-container mb-3">
-                <canvas id="canvas_usuario" width="800" height="160" class="signature-preview-canvas" style="border:1px solid #dee2e6; border-radius:0.375rem; width:100%; height:auto; background:#f8f9fa;"></canvas>
-            </div>
-            
-            <!-- BotÃ£o para abrir modal -->
-            <button type="button" class="btn btn-primary w-100" onclick="abrirModalAssinatura('usuario')">
-                <i class="bi bi-pen me-2"></i>
-                FAZER ASSINATURA
-            </button>
-            
-            <!-- Campo hidden para armazenar assinatura em base64 -->
-            <input type="hidden" id="assinatura_usuario" name="assinatura" value="<?php echo htmlspecialchars($usuario['assinatura'] ?? ''); ?>">
-        </div>
-    </div>
-
-    <!-- Card 3: ESTADO civil -->
+    <!-- Card 2: ESTADO civil -->
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-person-hearts me-2"></i>
@@ -196,21 +168,10 @@ ob_start();
                     <input type="text" class="form-control" id="telefone_conjuge" name="telefone_conjuge" value="<?php echo htmlspecialchars($usuario['telefone_conjuge'] ?? ''); ?>" placeholder="(00) 00000-0000">
                 </div>
             </div>
-
-            <hr>
-            <div class="mb-2 fw-semibold">ASSINATURA DIGITAL do CÃ´njuge</div>
-            <div class="signature-preview-container mb-3">
-                <canvas id="canvas_conjuge" width="800" height="160" class="signature-preview-canvas" style="border:1px solid #dee2e6; border-radius:0.375rem; width:100%; height:auto; background:#f8f9fa;"></canvas>
-            </div>
-            <button type="button" class="btn btn-primary w-100" onclick="abrirModalAssinatura('conjuge')">
-                <i class="bi bi-pen me-2"></i>
-                Fazer Assinatura do CÃ´njuge
-            </button>
-            <input type="hidden" id="assinatura_conjuge" name="assinatura_conjuge" value="<?php echo htmlspecialchars($usuario['assinatura_conjuge'] ?? ''); ?>">
         </div>
     </div>
 
-    <!-- Card 5: EndereÃ§o -->
+    <!-- Card 4: ENDEREÇO -->
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-geo-alt me-2"></i>
