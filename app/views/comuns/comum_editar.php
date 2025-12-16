@@ -21,15 +21,15 @@ if (!$comum) {
 }
 
 $pageTitle = 'EDITAR COMUM';
-// Preserve filters when returning to the list (if present)
-$backQs = [];
-if (!empty($_GET['busca'])) { $backQs['busca'] = $_GET['busca']; }
-if (!empty($_GET['pagina'])) { $backQs['pagina'] = $_GET['pagina']; }
-if ($backQs) {
-    $backUrl = './comuns_listar.php?' . http_build_query($backQs);
-} else {
-    $backUrl = '../../../index.php';
-}
+
+// Capture the filter query string so we can reuse it on the back button and in the form
+$filterParams = $_GET;
+unset($filterParams['id'], $filterParams['success'], $filterParams['ajax']);
+$filterQueryString = http_build_query($filterParams);
+$backUrl = '../../../index.php' . ($filterQueryString !== '' ? ('?' . $filterQueryString) : '');
+$filtersHiddenValue = htmlspecialchars($filterQueryString, ENT_QUOTES, 'UTF-8');
+$buscaValue = $_REQUEST['busca'] ?? ($filterParams['busca'] ?? '');
+$paginaValue = $_REQUEST['pagina'] ?? ($filterParams['pagina'] ?? '');
 
 $comumDescricao = mb_strtoupper((string) ($comum['descricao'] ?? ''), 'UTF-8');
 $comumAdm = mb_strtoupper((string) ($comum['administracao'] ?? ''), 'UTF-8');
@@ -199,14 +199,15 @@ ob_start();
 <div class="container py-4">
     <div class="card">
         <div class="card-header">
-            <i class="bi bi-pencil-square me-2"></i>EDITAR Comum
+            <i class="bi bi-pencil-square me-2"></i><?php echo htmlspecialchars(to_uppercase('Editar Comum'), ENT_QUOTES, 'UTF-8'); ?>
         </div>
         <div class="card-body">
             <form method="POST" action="../../../app/controllers/update/ComumUpdateController.php" novalidate>
                 <input type="hidden" name="id" value="<?php echo (int) $comum['id']; ?>">
-                <?php // Preserve list filters when submitting the edit form ?>
-                <input type="hidden" name="busca" value="<?php echo htmlspecialchars($_GET['busca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-                <input type="hidden" name="pagina" value="<?php echo htmlspecialchars($_GET['pagina'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="filters" value="<?php echo $filtersHiddenValue; ?>">
+                <?php // Preserve list filters when submitting the edit form (accept GET or POST) ?>
+                <input type="hidden" name="busca" value="<?php echo htmlspecialchars($buscaValue, ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="pagina" value="<?php echo htmlspecialchars($paginaValue, ENT_QUOTES, 'UTF-8'); ?>">
 
                 <div class="mb-3">
                     <label class="form-label"><?php echo htmlspecialchars(to_uppercase('CÓDIGO'), ENT_QUOTES, 'UTF-8'); ?></label>
@@ -284,6 +285,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<?php if ($filterQueryString !== ''): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const backBtn = document.querySelector('.btn-back');
+    if (!backBtn) return;
+    const base = backBtn.getAttribute('href').split('?')[0];
+    backBtn.setAttribute('href', base + '?' + <?php echo json_encode($filterQueryString); ?>);
+});
+</script>
+<?php endif; ?>
 
 <?php
 $contentHtml = ob_get_clean();

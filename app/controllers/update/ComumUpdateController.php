@@ -20,6 +20,17 @@ $administracao = trim((string) ($_POST['administracao'] ?? ''));
 $cidade = trim((string) ($_POST['cidade'] ?? ''));
 $setor = trim((string) ($_POST['setor'] ?? ''));
 
+$paginaParam = isset($_REQUEST['pagina']) ? max(1, (int) $_REQUEST['pagina']) : 1;
+$submittedBusca = trim((string) ($_REQUEST['busca'] ?? ''));
+$filterString = trim((string) ($_REQUEST['filters'] ?? ''));
+$filters = [];
+if ($filterString !== '') {
+    parse_str($filterString, $filters);
+}
+foreach (['success', 'ajax'] as $exclude) {
+    unset($filters[$exclude]);
+}
+
 try {
     if ($id <= 0) {
         throw new Exception('ID inválido.');
@@ -69,22 +80,30 @@ try {
 
     $_SESSION['mensagem'] = 'Comum atualizada com sucesso!';
     $_SESSION['tipo_mensagem'] = 'success';
-    // Return to list preserving pagination/search filters if present. Accept values from GET or POST via REQUEST.
-    $retQ = [];
-    if (!empty($_REQUEST['busca'])) { $retQ['busca'] = $_REQUEST['busca']; }
-    if (!empty($_REQUEST['pagina'])) { $retQ['pagina'] = $_REQUEST['pagina']; }
-    $retQ['success'] = 1;
-    // Redirect back to the main Comuns index which supports search filters (index.php)
-    header('Location: ../../index.php?' . http_build_query($retQ));
+    // Rebuild the return query string while reusing the serialized filters
+    $retParams = $filters;
+    if (!array_key_exists('busca', $retParams) && $submittedBusca !== '') {
+        $retParams['busca'] = $submittedBusca;
+    }
+    if (!array_key_exists('pagina', $retParams) && $paginaParam > 1) {
+        $retParams['pagina'] = $paginaParam;
+    }
+    $retParams['success'] = 1;
+    header('Location: ../../../index.php?' . http_build_query($retParams));
     exit;
 } catch (Throwable $e) {
     $_SESSION['mensagem'] = 'Erro ao salvar: ' . $e->getMessage();
     $_SESSION['tipo_mensagem'] = 'danger';
     // Redirect back to the edit page preserving incoming filters if provided
-    $backQ = [];
-    if (!empty($_REQUEST['busca'])) { $backQ['busca'] = $_REQUEST['busca']; }
-    if (!empty($_REQUEST['pagina'])) { $backQ['pagina'] = $_REQUEST['pagina']; }
-    $backUrl = '../../views/comuns/comum_editar.php?id=' . urlencode((string) $id) . ($backQ ? ('?' . http_build_query($backQ)) : '');
+    $backParams = $filters;
+    if (!array_key_exists('busca', $backParams) && $submittedBusca !== '') {
+        $backParams['busca'] = $submittedBusca;
+    }
+    if (!array_key_exists('pagina', $backParams) && $paginaParam > 1) {
+        $backParams['pagina'] = $paginaParam;
+    }
+    $backQuery = $backParams ? ('?' . http_build_query($backParams)) : '';
+    $backUrl = '../../views/comuns/comum_editar.php?id=' . urlencode((string) $id) . $backQuery;
     header('Location: ' . $backUrl);
     exit;
 }

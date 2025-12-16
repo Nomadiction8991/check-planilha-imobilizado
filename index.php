@@ -65,16 +65,17 @@ $customCss = '
 
 $busca = trim($_GET['busca'] ?? '');
 $buscaDisplay = mb_strtoupper($busca, 'UTF-8');
-// Build query string for preserving filters when linking to edit/create
-$qsArr = [];
-if ($busca !== '') { $qsArr['busca'] = $busca; }
-if (!empty($pagina) && $pagina > 1) { $qsArr['pagina'] = $pagina; }
-$qs = http_build_query($qsArr);
 
 // Paginação: 10 por página
 $pagina = isset($_GET['pagina']) ? max(1, (int) $_GET['pagina']) : 1;
 $limite = 10;
 $offset = ($pagina - 1) * $limite;
+
+// Build query string for preserving filters when linking to edit/create
+$qsArr = [];
+if ($busca !== '') { $qsArr['busca'] = $busca; }
+if (!empty($pagina) && $pagina > 1) { $qsArr['pagina'] = $pagina; }
+$qs = http_build_query($qsArr);
 
 // Count filtered and global totals
 $total_count = contar_comuns($conexao, $busca);
