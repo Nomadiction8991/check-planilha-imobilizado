@@ -66,8 +66,8 @@ ob_start();
         <form method="get">
             <input type="hidden" name="pagina" value="1">
             <div class="mb-3">
-                <label for="busca_dep" class="form-label"><i class="bi bi-list me-1"></i> CÓDIGO OU DESCRIÇÃO</label>
-                <input id="busca_dep" name="busca" type="text" class="form-control" value="<?php echo htmlspecialchars($busca ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                <label for="busca_dep" class="form-label"><i class="bi bi-list me-1"></i> <?php echo htmlspecialchars(to_uppercase('Descrição'), ENT_QUOTES, 'UTF-8'); ?></label>
+                <input id="busca_dep" name="busca" type="text" class="form-control" placeholder="<?php echo htmlspecialchars(to_uppercase('Digite parte da descrição'), ENT_QUOTES, 'UTF-8'); ?>" value="<?php echo htmlspecialchars($busca ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             </div>
             <div class="mb-3">
                 <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-2"></i>BUSCAR</button>
@@ -83,7 +83,7 @@ ob_start();
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>
             <i class="bi bi-list me-2"></i>
-            <?php echo htmlspecialchars(to_uppercase('Lista de Dependências'), ENT_QUOTES, 'UTF-8'); ?>
+            <?php echo htmlspecialchars(to_uppercase('Dependências'), ENT_QUOTES, 'UTF-8'); ?>
         </span>
         <span class="badge bg-white text-dark"><?php echo count($dependencias); ?> ITENS (PÁG. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
     </div>
@@ -164,13 +164,19 @@ function deletarDependencia(id) {
             },
             body: 'id=' + id
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert('Erro: ' + data.message);
+        .then(response => response.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Erro: ' + data.message);
+                }
+            } catch (e) {
+                console.error('Invalid JSON response:', text);
+                alert('Erro na requisição: resposta inválida do servidor. Verifique o console para detalhes.');
             }
         })
         .catch(error => {

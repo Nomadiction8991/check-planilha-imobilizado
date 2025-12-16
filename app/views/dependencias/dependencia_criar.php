@@ -26,24 +26,25 @@ ob_start();
 <div class="card">
     <div class="card-header">
         <i class="bi bi-plus-circle me-2"></i>
-        Cadastrar Nova DEPENDÊNCIA
+        <?php echo htmlspecialchars(to_uppercase('Cadastrar nova dependência'), ENT_QUOTES, 'UTF-8'); ?>
     </div>
     <div class="card-body">
         <form method="POST" action="">
             <div class="row g-3">
                 <!-- campo codigo removido conforme solicitado -->
-                <div class="col-md-6">
-                    <label for="descricao" class="form-label">DescriÃ§Ã£o <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="descricao" name="descricao" required
-                           placeholder="Digite a DESCRIÇÃO">
+                <div class="col-12">
+                    <label for="descricao" class="form-label"><?php echo htmlspecialchars(to_uppercase('Descrição'), ENT_QUOTES, 'UTF-8'); ?> <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control text-uppercase" id="descricao" name="descricao" required
+                           placeholder="<?php echo htmlspecialchars(to_uppercase('Digite a descrição'), ENT_QUOTES, 'UTF-8'); ?>"
+                           value="<?php echo htmlspecialchars($_POST['descricao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
             </div>
             <div class="mt-4">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-check-lg me-2"></i>
-                    Cadastrar DEPENDÊNCIA
+                    <?php echo htmlspecialchars(to_uppercase('Cadastrar dependência'), ENT_QUOTES, 'UTF-8'); ?>
                 </button>
-                <!-- botÃ£o Voltar removido conforme solicitado -->
+                <!-- botão Voltar removido conforme solicitado -->
             </div>
         </form>
     </div>
@@ -57,7 +58,5 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-<parameter name="filePath">/home/weverton/Documentos/Github-Gitlab/GitHub/checkplanilha.anvy.com.br/app/views/dependencias/dependencia_criar.php
-
 
 

@@ -37,17 +37,12 @@ ob_start();
             EDITAR DEPENDÊNCIA
         </div>
         <div class="card-body">
-            <div class="mb-3">
-                <label for="codigo" class="form-label">CÓDIGO</label>
-                <input type="text" class="form-control" id="codigo" name="codigo" 
-                       value="<?php echo htmlspecialchars($dependencia['codigo']); ?>" maxlength="50">
-                <small class="text-muted">CÓDIGO Ãºnico da DEPENDÊNCIA (opcional)</small>
-            </div>
+            <!-- Campo 'codigo' removido conforme alteração de schema (coluna será excluída) -->
 
             <div class="mb-3">
-                <label for="descricao" class="form-label">DescriÃ§Ã£o <span class="text-danger">*</span></label>
-                <textarea class="form-control" id="descricao" name="descricao" rows="3" required><?php echo htmlspecialchars($dependencia['descricao']); ?></textarea>
-                <small class="text-muted">DescriÃ§Ã£o da DEPENDÊNCIA</small>
+                <label for="descricao" class="form-label"><?php echo htmlspecialchars(to_uppercase('Descrição'), ENT_QUOTES, 'UTF-8'); ?> <span class="text-danger">*</span></label>
+                <textarea class="form-control text-uppercase" id="descricao" name="descricao" rows="3" required><?php echo htmlspecialchars($dependencia['descricao'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                <small class="text-muted"><?php echo htmlspecialchars(to_uppercase('Descrição da dependência'), ENT_QUOTES, 'UTF-8'); ?></small>
             </div>
         </div>
     </div>
@@ -67,7 +62,7 @@ document.getElementById('formDependencia').addEventListener('submit', function(e
     
     if (!descricao) {
         e.preventDefault();
-        alert('A DESCRIÇÃO Ã© obrigatÃ³ria!');
+        alert('<?php echo htmlspecialchars(to_uppercase("A descrição é obrigatória!"), ENT_QUOTES, 'UTF-8'); ?>');
         return false;
     }
 });
