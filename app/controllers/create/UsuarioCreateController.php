@@ -144,9 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (strlen($tel_conj_num) < 10 || strlen($tel_conj_num) > 11) {
                 throw new Exception('Telefone do cÃ´njuge invÃ¡lido.');
             }
-            if (empty($assinatura_conjuge)) {
-                throw new Exception('A assinatura do cÃ´njuge Ã© obrigatÃ³ria.');
-            }
+
             // RG do cÃ´njuge
             if ($rg_conjuge_igual_cpf) {
                 $rg_conjuge = $cpf_conjuge; // mantÃ©m mÃ¡scara de CPF no RG do cÃ´njuge

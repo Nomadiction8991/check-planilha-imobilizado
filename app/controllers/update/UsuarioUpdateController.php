@@ -119,10 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Todos os campos de endereÃ§o (CEP, logradouro, nÃºmero, bairro, cidade e estado) sÃ£o obrigatÃ³rios.');
         }
 
-        // Assinatura obrigatÃ³ria
-        if (empty($assinatura)) {
-            throw new Exception('A assinatura do usuÃ¡rio Ã© obrigatÃ³ria.');
-        }
 
         // Se casado, validar dados completos do cÃ´njuge
         if ($casado) {
@@ -137,9 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (strlen($tel_conj_num) < 10 || strlen($tel_conj_num) > 11) {
                 throw new Exception('Telefone do cÃ´njuge invÃ¡lido.');
             }
-            if (empty($assinatura_conjuge)) {
-                throw new Exception('A assinatura do cÃ´njuge Ã© obrigatÃ³ria.');
-            }
+
             if ($rg_conjuge_igual_cpf) { $rg_conjuge = $cpf_conjuge; } else if (!empty($rg_conjuge)) { $rg_conjuge = $formatarRg($rg_conjuge); }
             if (!empty($rg_conjuge)) {
                 $rnums = preg_replace('/\D/','', $rg_conjuge);
