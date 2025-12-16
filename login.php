@@ -26,20 +26,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('E-mail e senha são obrigatórios.');
         }
 
-        // Buscar usuÃ¡rio por email (comparacao em UPPER para ser robusto a case)
-        $stmt = $conexao->prepare('SELECT * FROM usuarios WHERE UPPER(email) = :email AND ativo = 1');
-        $stmt->bindValue(':email', to_uppercase($email));
+            // Buscar usuÃ¡rio por email (comparacao em UPPER para ser robusto a case)
+            // Não filtramos por ativo aqui para permitir mostrar mensagem específica quando inativo
+            $stmt = $conexao->prepare('SELECT * FROM usuarios WHERE UPPER(email) = :email LIMIT 1');
+            $stmt->bindValue(':email', to_uppercase($email));
         $stmt->execute();
         $usuario = $stmt->fetch();
 
-        if (!$usuario) {
-            throw new Exception('E-mail ou senha inválidos.');
-        }
+            if (!$usuario) {
+                throw new Exception('E-mail ou senha inválidos.');
+            }
 
-        // Verificar senha
-        if (!password_verify($senha, $usuario['senha'])) {
-            throw new Exception('E-mail ou senha inválidos.');
-        }
+            // Se usuário existe mas está inativo, informar especificamente
+            if ((int)($usuario['ativo'] ?? 0) !== 1) {
+                throw new Exception('Usuário inativo. Entre em contato com o administrador.');
+            }
+
+            // Verificar senha
+            if (!password_verify($senha, $usuario['senha'])) {
+                throw new Exception('E-mail ou senha inválidos.');
+            }
 
         // Login bem-sucedido
         $_SESSION['usuario_id'] = $usuario['id'];
@@ -125,9 +131,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="bi bi-envelope me-1"></i>
                             EMAIL
                         </label>
-                        <input type="email" class="form-control" id="email" name="email" 
+                        <input type="email" class="form-control text-uppercase" id="email" name="email" 
                                placeholder="SEU@EMAIL.COM" required autofocus
-                               value="<?php echo htmlspecialchars($email ?? ''); ?>">
+                               value="<?php echo htmlspecialchars($email ?? ''); ?>" style="text-transform:uppercase;">
                     </div>
 
                     <div class="mb-3">
