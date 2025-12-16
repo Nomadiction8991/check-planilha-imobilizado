@@ -10,6 +10,17 @@ if (!defined('APP_BOOTSTRAPPED')) {
         define('BASE_PATH', dirname(__DIR__));
     }
 
+    // ⚠️ IMPORTANTE: session_start() DEVE vir ANTES de qualquer header()!
+    // Caso contrário, auth_helper não consegue fazer redirect (headers already sent).
+    // Sessoes mais seguras
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start([
+            'cookie_httponly' => true,
+            'cookie_secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+            'cookie_samesite' => 'Lax',
+        ]);
+    }
+
     // Forcar UTF-8 em todas as saídas
     if (!headers_sent()) {
         header('Content-Type: text/html; charset=UTF-8');
@@ -35,15 +46,6 @@ if (!defined('APP_BOOTSTRAPPED')) {
     // Carrega helpers utilitarios
     require_once BASE_PATH . '/app/helpers/auth_helper.php';
     require_once BASE_PATH . '/app/helpers/uppercase_helper.php';
-
-    // Sessoes mais seguras
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start([
-            'cookie_httponly' => true,
-            'cookie_secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-            'cookie_samesite' => 'Lax',
-        ]);
-    }
 
     // Log em arquivo local (cria pasta se necessario)
     $logDir = BASE_PATH . '/storage/logs';
