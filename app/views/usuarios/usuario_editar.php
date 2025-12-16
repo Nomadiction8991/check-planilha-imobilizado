@@ -117,46 +117,46 @@ ob_start();
         </div>
     </div>
 
-    <!-- Card 2: ESTADO civil -->
+    <!-- Card 2: ESTADO CIVIL -->
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-person-hearts me-2"></i>
-            ESTADO civil
+            ESTADO CIVIL
         </div>
         <div class="card-body">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="casado" name="casado" value="1" <?php echo !empty($usuario['casado']) ? 'checked' : ''; ?>>
-                <label class="form-check-label" for="casado">Sou casado(a)</label>
+                <label class="form-check-label" for="casado">SOU CASADO(A)</label>
             </div>
         </div>
     </div>
 
-    <!-- Card 4: Dados do CÃ´njuge (condicional) -->
+    <!-- Card 4: DADOS DO CÔNJUGE (condicional) -->
     <div id="cardConjuge" class="card mb-3" style="display: <?php echo !empty($usuario['casado']) ? '' : 'none'; ?>;">
         <div class="card-header">
             <i class="bi bi-people-fill me-2"></i>
-            Dados do CÃ´njuge
+            DADOS DO CÔNJUGE
         </div>
         <div class="card-body">
             <div class="mb-3">
-                <label for="nome_conjuge" class="form-label">NOME COMPLETO do CÃ´njuge</label>
+                <label for="nome_conjuge" class="form-label">NOME COMPLETO DO CÔNJUGE</label>
                 <input type="text" class="form-control" id="nome_conjuge" name="nome_conjuge" value="<?php echo htmlspecialchars($usuario['nome_conjuge'] ?? ''); ?>">
             </div>
             <div class="row g-3">
                 <div class="col-12">
-                    <label for="cpf_conjuge" class="form-label">CPF do CÃ´njuge</label>
+                    <label for="cpf_conjuge" class="form-label">CPF DO CÔNJUGE</label>
                     <input type="text" class="form-control" id="cpf_conjuge" name="cpf_conjuge" value="<?php echo htmlspecialchars($usuario['cpf_conjuge'] ?? ''); ?>" placeholder="000.000.000-00">
                 </div>
                 <div class="col-12">
-                    <label for="rg_conjuge" class="form-label">RG do CÃ´njuge</label>
-                    <input type="text" class="form-control" id="rg_conjuge" name="rg_conjuge" value="<?php echo htmlspecialchars($usuario['rg_conjuge'] ?? ''); ?>" placeholder="Digite os dÃ­gitos do RG">
+                    <label for="rg_conjuge" class="form-label">RG DO CÔNJUGE</label>
+                    <input type="text" class="form-control" id="rg_conjuge" name="rg_conjuge" value="<?php echo htmlspecialchars($usuario['rg_conjuge'] ?? ''); ?>" placeholder="Digite os dígitos do RG">
                     <div class="form-check mt-1">
                         <input class="form-check-input" type="checkbox" id="rg_conjuge_igual_cpf" name="rg_conjuge_igual_cpf" value="1" <?php echo !empty($usuario['rg_conjuge_igual_cpf']) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="rg_conjuge_igual_cpf">RG do cÃ´njuge igual ao CPF do cÃ´njuge</label>
+                        <label class="form-check-label" for="rg_conjuge_igual_cpf">RG DO CÔNJUGE IGUAL AO CPF DO CÔNJUGE</label>
                     </div>
                 </div>
                 <div class="col-12">
-                    <label for="telefone_conjuge" class="form-label">TELEFONE do CÃ´njuge</label>
+                    <label for="telefone_conjuge" class="form-label">TELEFONE DO CÔNJUGE</label>
                     <input type="text" class="form-control" id="telefone_conjuge" name="telefone_conjuge" value="<?php echo htmlspecialchars($usuario['telefone_conjuge'] ?? ''); ?>" placeholder="(00) 00000-0000">
                 </div>
             </div>
@@ -167,7 +167,7 @@ ob_start();
     <div class="card mb-3">
         <div class="card-header">
             <i class="bi bi-geo-alt me-2"></i>
-            EndereÃ§o
+            ENDEREÇO
         </div>
         <div class="card-body">
             <div class="row g-3">
@@ -187,7 +187,7 @@ ob_start();
 
             <div class="row g-3 mt-2">
                 <div class="col-12">
-                    <label for="numero" class="form-label">NÃºmero</label>
+                    <label for="numero" class="form-label">NÚMERO</label>
                     <input type="text" class="form-control" id="numero" name="endereco_numero" 
                            value="<?php echo htmlspecialchars($usuario['endereco_numero'] ?? ''); ?>">
                 </div>
