@@ -120,7 +120,7 @@ ob_start();
 <?php if (!empty($usuario['casado'])): ?>
 <div class="card mb-3 shadow-sm">
     <div class="card-header card-header-contrast border-bottom-0">
-        <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Dados do CÔNJUGE</h5>
+        <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>DADOS DO CÔNJUGE</h5>
     </div>
     <div class="card-body border-top">
         <div class="row g-3">
