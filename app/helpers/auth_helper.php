@@ -22,6 +22,11 @@ function getLoginUrl(): string {
 
 // Modo publico: permitir acesso restrito a algumas paginas com base em sessao publica
 $isPublic = !empty($_SESSION['public_acesso']) && !empty($_SESSION['public_planilha_id']);
+// Debug: for localhost requests, log session cookie and session state to help diagnose redirect loops
+if (in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])) {
+    $cookie = $_COOKIE[session_name()] ?? '(none)';
+    error_log('SESSION_DEBUG: remote=' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ' cookie=' . $cookie . ' session_id=' . session_id() . ' keys=' . implode(',', array_keys($_SESSION ?? [])));
+}
 if (!isset($_SESSION['usuario_id'])) {
     if ($isPublic) {
         // Lista de paginas publicas permitidas (entrada do script)
