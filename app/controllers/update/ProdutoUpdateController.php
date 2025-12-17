@@ -6,7 +6,7 @@ require_once dirname(__DIR__, 2) . '/services/produto_parser_service.php';
 
 // Receber parÃ¢metros
 $id_produto = $_GET['id_produto'] ?? null;
-$id_planilha = $_GET['id'] ?? null;
+$comum_id = $_GET['comum_id'] ?? $_GET['id'] ?? null;
 
 // Receber filtros para redirecionamento
 $pagina = $_GET['pagina'] ?? 1;
@@ -16,15 +16,16 @@ $filtro_codigo = $_GET['filtro_codigo'] ?? '';
 $filtro_status = $_GET['status'] ?? '';
 
 // ValidaÃ§Ã£o
-if (!$id_produto || !$id_planilha) {
+if (!$id_produto || !$comum_id) {
     $query_string = http_build_query([
-        'id' => $id_planilha,
+        'id' => $comum_id,
+        'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
         'codigo' => $filtro_codigo,
         'status' => $filtro_status,
-        'erro' => 'ParÃ¢metros invÃ¡lidos'
+        'erro' => 'Parâmetros inválidos'
     ]);
     header('Location: ../planilhas/planilha_visualizar.php?' . $query_string);
     exit;
@@ -43,10 +44,10 @@ try {
     $sql_produto = "SELECT p.*, d.descricao as dependencia_descricao
                     FROM produtos p
                     LEFT JOIN dependencias d ON p.dependencia_id = d.id
-                    WHERE p.id_produto = :id_produto AND p.planilha_id = :planilha_id";
+                    WHERE p.id_produto = :id_produto AND p.comum_id = :comum_id";
     $stmt_produto = $conexao->prepare($sql_produto);
     $stmt_produto->bindValue(':id_produto', $id_produto);
-    $stmt_produto->bindValue(':planilha_id', $id_planilha);
+    $stmt_produto->bindValue(':comum_id', $comum_id);
     $stmt_produto->execute();
     $produto = $stmt_produto->fetch();
     
@@ -129,12 +130,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$houve_alteracao) {
             // Nada mudou, retorna sem marcar ediÃ§Ã£o
-            header('Location: ' . getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status));
+            header('Location: ' . getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status));
             exit;
         }
 
         $sql_update = "UPDATE produtos SET imprimir_etiqueta = 1, editado = 1, administrador_acessor_id = :administrador_acessor_id";
-        $params = [':id_produto' => $id_produto, ':planilha_id' => $id_planilha, ':administrador_acessor_id' => isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : null];
+        $params = [':id_produto' => $id_produto, ':comum_id' => $comum_id, ':administrador_acessor_id' => isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : null];
 
         // Persistir tipo de bem editado
         if ($novo_tipo_bem_id !== '') {
@@ -187,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql_update .= ", editado_descricao_completa = :editado_desc";
         $params[':editado_desc'] = strtoupper($descricao_editada);
 
-        $sql_update .= " WHERE id_produto = :id_produto AND planilha_id = :planilha_id";
+        $sql_update .= " WHERE id_produto = :id_produto AND comum_id = :comum_id";
         $stmt_update = $conexao->prepare($sql_update);
         foreach ($params as $key => $value) {
             if ($key === ':administrador_acessor_id') {
@@ -198,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $stmt_update->execute();
 
-        header('Location: ' . getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status));
+        header('Location: ' . getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status));
         exit;
     } catch (Exception $e) {
         $mensagem = "Erro ao salvar alteraÃ§Ãµes: " . $e->getMessage();
@@ -207,9 +208,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // FunÃ§Ã£o para gerar URL de retorno com filtros
-function getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status) {
+function getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status) {
     $params = [
-        'id' => $id_planilha,
+        'id' => $comum_id,
+        'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
@@ -219,5 +221,3 @@ function getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, 
     return '../planilhas/planilha_visualizar.php?' . http_build_query($params);
 }
 ?>
-
-

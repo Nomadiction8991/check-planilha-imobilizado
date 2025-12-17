@@ -4,7 +4,7 @@ require_once dirname(__DIR__, 2) . '/bootstrap.php';
 include __DIR__ . '/../../../app/controllers/update/PRODUTOObservacaoController.php';
 
 $pageTitle = "ObservaÃ§Ãµes";
-$backUrl = getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
+$backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
 
 ob_start();
 ?>
@@ -74,6 +74,5 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
 
 

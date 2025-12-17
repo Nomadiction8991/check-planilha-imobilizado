@@ -4,7 +4,7 @@ require_once dirname(__DIR__, 2) . '/bootstrap.php';
 require_once __DIR__ . '/../../../app/controllers/update/PRODUTOUpdateController.php';
 
 $pageTitle = "EDITAR PRODUTO";
-$backUrl = getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
+$backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
 
 ob_start();
 ?>
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </form>
 
 <div class="mt-3">
-    <a href="./PRODUTOS_limpar_edicoes.php?id=<?php echo $id_planilha; ?>&id_PRODUTO=<?php echo $id_PRODUTO; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&STATUS=<?php echo urlencode($filtro_STATUS); ?>"
+    <a href="./PRODUTOS_limpar_edicoes.php?id=<?php echo $comum_id; ?>&comum_id=<?php echo $comum_id; ?>&id_PRODUTO=<?php echo $id_PRODUTO; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&STATUS=<?php echo urlencode($filtro_STATUS); ?>"
        class="btn btn-outline-danger w-100"
        onclick="return confirm('Tem certeza que deseja limpar as ediÃ§Ãµes deste PRODUTO?');">
         <i class="bi bi-trash3 me-2"></i>
@@ -204,5 +204,4 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
 

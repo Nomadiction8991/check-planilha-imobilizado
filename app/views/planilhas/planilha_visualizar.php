@@ -549,7 +549,7 @@ ob_start();
                 <div class="acao-container">
                     <!-- Check -->
                     <form method="POST" action="../../../app/controllers/update/PRODUTOCheckController.php" style="display: <?php echo $show_check ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-check" data-action="check" data-PRODUTO-id="<?php echo $p['id_PRODUTO']; ?>">
-                        <input type="hidden" name="PRODUTO_id" value="<?php echo $p['id_PRODUTO']; ?>">
+                        <input type="hidden" name="produto_id" value="<?php echo $p['id_PRODUTO']; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="checado" value="<?php echo $p['checado'] ? '0' : '1'; ?>">
                         <input type="hidden" name="pagina" value="<?php echo $pagina ?? 1; ?>">
@@ -564,7 +564,7 @@ ob_start();
                     
                     <!-- Etiqueta -->
                     <form method="POST" action="../../../app/controllers/update/PRODUTOEtiquetaController.php" style="display: <?php echo $show_imprimir ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-PRODUTO-id="<?php echo $p['id_PRODUTO']; ?>" data-confirm="<?php echo $p['imprimir'] ? 'Deseja desmarcar este PRODUTO para etiqueta?' : 'Deseja marcar este PRODUTO para etiqueta?'; ?>">
-                        <input type="hidden" name="PRODUTO_id" value="<?php echo $p['id_PRODUTO']; ?>">
+                        <input type="hidden" name="produto_id" value="<?php echo $p['id_PRODUTO']; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="imprimir" value="<?php echo $p['imprimir'] ? '0' : '1'; ?>">
                         <input type="hidden" name="pagina" value="<?php echo $pagina ?? 1; ?>">
@@ -587,26 +587,7 @@ ob_start();
                     <a href="../PRODUTOS/PRODUTO_editar.php?id_PRODUTO=<?php echo $p['id_PRODUTO']; ?>&comum_id=<?php echo $comum_id; ?>&pagina=<?php echo $pagina ?? 1; ?>&nome=<?php echo urlencode($filtro_nome ?? ''); ?>&dependencia=<?php echo urlencode($filtro_dependencia ?? ''); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo ?? ''); ?>&status=<?php echo urlencode($filtro_STATUS ?? ''); ?>"
                        class="btn btn-outline-primary btn-sm action-editar <?php echo $tem_edicao ? 'active' : ''; ?>" style="display: <?php echo $show_edit ? 'inline-block' : 'none'; ?>;" title="EDITAR">
                         <i class="bi bi-pencil-fill"></i>
-                    </a>
-                    
-                    <!-- DR -->
-                    <?php if ($show_dr): ?>
-                    <?php $drConfirm = $p['ativo'] == 0 ? 'Tem certeza que deseja desmarcar este PRODUTO do DR?' : 'Tem certeza que deseja marcar este PRODUTO como DR? Esta aÃƒÂ§ÃƒÂ£o irÃƒÂ¡ limpar observaÃƒÂ§ÃƒÂµes e desmarcar para impressÃƒÂ£o.'; ?>
-                    <form method="POST" action="../../../app/controllers/update/PRODUTODrUpdateController.php" style="display: inline;" class="PRODUTO-action-form action-dr" data-action="dr" data-PRODUTO-id="<?php echo $p['id_PRODUTO']; ?>" data-confirm="<?php echo htmlspecialchars($drConfirm, ENT_QUOTES, 'UTF-8'); ?>">
-                        <input type="hidden" name="PRODUTO_id" value="<?php echo $p['id_PRODUTO']; ?>">
-                        <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
-                        <input type="hidden" name="dr" value="<?php echo $p['ativo'] == 0 ? '0' : '1'; ?>">
-                        <input type="hidden" name="pagina" value="<?php echo $pagina ?? 1; ?>">
-                        <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>">
-                        <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? ''); ?>">
-                        <input type="hidden" name="codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>">
-                        <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_STATUS ?? ''); ?>">
-                        <button type="submit" class="btn btn-outline-danger btn-sm <?php echo $p['ativo'] == 0 ? 'active' : ''; ?>" title="DR">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                        </button>
-                    </form>
-                    <?php endif; ?>
-                </div>
+                    </a></div>
                 <?php endif; // fim do if isAdmin() ?>
             </div>
             <?php endforeach; ?>
@@ -655,23 +636,7 @@ ob_start();
 <?php endif; ?>
 
 <script>
-function confirmarDR(form, drAtual) {
-    if (drAtual == 0) {
-        return confirm('Tem certeza que deseja marcar este PRODUTO como DR? Esta aÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo irÃ¢â€Å“ÃƒÂ­ limpar as observaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂes e desmarcar para impressÃ¢â€Å“ÃƒÂºo.');
-    } else {
-        return confirm('Tem certeza que deseja desmarcar este PRODUTO do DR?');
-    }
-}
-
-function confirmarImprimir(form, imprimirAtual) {
-    if (imprimirAtual == 0) {
-        return confirm('Tem certeza que deseja marcar este PRODUTO para impressÃ¢â€Å“ÃƒÂºo?');
-    } else {
-        return confirm('Tem certeza que deseja desmarcar este PRODUTO da impressÃ¢â€Å“ÃƒÂºo?');
-    }
-}
-
-// ======== AÃ¢â€Å“ÃƒÂ§Ã¢â€Å“ÃƒÂºES AJAX (check/etiqueta/DR) ========
+// ======== AÃ¢â€Å“ÃƒÂ§Ã¢â€Å“ÃƒÂºES AJAX (check/etiqueta) ========
 document.addEventListener('DOMContentLoaded', () => {
     const alertHost = document.createElement('div');
     alertHost.id = 'ajaxAlerts';
@@ -723,7 +688,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         row.querySelectorAll('.action-check').forEach(el => el.style.display = showCheck ? 'inline-block' : 'none');
         row.querySelectorAll('.action-imprimir').forEach(el => el.style.display = showImprimir ? 'inline-block' : 'none');
-        row.querySelectorAll('.action-dr').forEach(el => el.style.display = 'inline-block');
         row.querySelectorAll('.btn-outline-warning').forEach(el => el.style.display = showObs ? 'inline-block' : 'none');
         row.querySelectorAll('.btn-outline-primary').forEach(el => el.style.display = showEdit ? 'inline-block' : 'none');
     };
@@ -796,17 +760,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (input) { input.value = newVal ? '0' : '1'; }
                     const btn = form.querySelector('button');
                     if (btn) { btn.classList.toggle('active', newVal === 1); }
-                } else if (action === 'dr') {
-                    const newVal = Number(formData.get('dr') || 0);
-                    const ativo = newVal === 1 ? 0 : 1;
-                    stateUpdates.ativo = ativo;
-                    stateUpdates.checado = ativo === 0 ? 0 : getRowState(row).checado;
-                    stateUpdates.imprimir = ativo === 0 ? 0 : getRowState(row).imprimir;
-                    stateUpdates.observacao = ativo === 0 ? '' : getRowState(row).observacao;
-                    const input = form.querySelector('input[name=\"dr\"]');
-                    if (input) { input.value = newVal === 1 ? '0' : '1'; }
-                    const btn = form.querySelector('button');
-                    if (btn) { btn.classList.toggle('active', ativo === 0); }
                 }
 
                 if (row) {
@@ -1537,5 +1490,4 @@ include __DIR__ . '/../layouts/app_wrapper.php';
 // LIMPAR arquivo temporÃ¢â€Å“ÃƒÂ­rio
 unlink($tempFile);
 ?>
-
 

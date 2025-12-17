@@ -17,6 +17,7 @@ $filtro_status = $_GET['status'] ?? '';
 if (!$id_produto || !$comum_id) {
     $query_string = http_build_query([
         'id' => $comum_id,
+        'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
@@ -87,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // REDIRECIONAR PARA view-planilha.php APÃ“S SALVAR
         $query_string = http_build_query([
             'id' => $comum_id,
+            'comum_id' => $comum_id,
             'pagina' => $pagina,
             'nome' => $filtro_nome,
             'dependencia' => $filtro_dependencia,
@@ -105,9 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // FunÃ§Ã£o para gerar URL de retorno com filtros - CORRIGIDA
-function getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status) {
+function getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status) {
     $params = [
-        'id' => $id_planilha, // CORRETO: view-planilha.php usa 'id' como parÃ¢metro
+        'id' => $comum_id, // CORRETO: view-planilha.php usa 'id' como par?metro
+        'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
@@ -117,6 +120,5 @@ function getReturnUrl($id_planilha, $pagina, $filtro_nome, $filtro_dependencia, 
     return '../planilhas/planilha_visualizar.php?' . http_build_query($params);
 }
 ?>
-
 
 

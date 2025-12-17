@@ -4,7 +4,7 @@ require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 // ParÃƒÂ¢metros
 $id_PRODUTO = $_GET['id_PRODUTO'] ?? null;
-$id_planilha = $_GET['id'] ?? null;
+$comum_id = $_GET['comum_id'] ?? $_GET['id'] ?? null;
 
 // Filtros para retorno
 $pagina = $_GET['pagina'] ?? 1;
@@ -19,15 +19,16 @@ function redirectBack($params) {
     exit;
 }
 
-if (!$id_PRODUTO || !$id_planilha) {
+if (!$id_PRODUTO || !$comum_id) {
     redirectBack([
-        'id' => $id_planilha,
+        'id' => $comum_id,
+        'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
         'codigo' => $filtro_codigo,
         'STATUS' => $filtro_STATUS,
-        'erro' => 'ParÃƒÂ¢metros invÃƒÂ¡lidos'
+        'erro' => 'Par?metros inv?lidos'
     ]);
 }
 
@@ -43,17 +44,18 @@ try {
                        imprimir_etiqueta = 0,
                        editado = 0
                    WHERE id_PRODUTO = :id_PRODUTO 
-                     AND planilha_id = :planilha_id";
+                     AND comum_id = :comum_id";
     
     $stmt_update = $conexao->prepare($sql_update);
     $stmt_update->bindValue(':id_PRODUTO', $id_PRODUTO);
-    $stmt_update->bindValue(':planilha_id', $id_planilha);
+    $stmt_update->bindValue(':comum_id', $comum_id);
     $stmt_update->execute();
     
     $msg = 'EdiÃƒÂ§ÃƒÂµes limpas com sucesso!';
 
     redirectBack([
-        'id' => $id_planilha,
+        'id' => $comum_id,
+        'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
@@ -64,7 +66,8 @@ try {
 
 } catch (Exception $e) {
     redirectBack([
-        'id' => $id_planilha,
+        'id' => $comum_id,
+        'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
         'dependencia' => $filtro_dependencia,
@@ -74,5 +77,3 @@ try {
     ]);
 }
 ?>
-
-
