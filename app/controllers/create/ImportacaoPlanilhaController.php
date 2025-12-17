@@ -180,6 +180,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $registros_candidatos = 0;
     $dependencias_unicas = [];
     $localidades_unicas = [];
+    $codigos_unicos_norm = [];
 
     $idx_codigo = pp_colunaParaIndice($mapeamento_codigo);
     $idx_complemento = pp_colunaParaIndice($mapeamento_complemento);
@@ -191,7 +192,13 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
         if ($linha_atual <= $pulo_linhas) { continue; }
         if (empty(array_filter($linha))) { continue; }
         $codigo_tmp = isset($linha[$idx_codigo]) ? trim((string)$linha[$idx_codigo]) : '';
-        if ($codigo_tmp !== '') { $registros_candidatos++; }
+        if ($codigo_tmp !== '') {
+            $registros_candidatos++;
+            $cod_norm = pp_normaliza($codigo_tmp);
+            if ($cod_norm !== '') {
+                $codigos_unicos_norm[$cod_norm] = true;
+            }
+        }
 
         if (isset($linha[$idx_dependencia])) {
             $dep_raw = ip_fix_mojibake(ip_corrige_encoding($linha[$idx_dependencia]));
@@ -301,12 +308,12 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
 
     $produtos_existentes = [];
     $produtos_existentes_por_codigo = [];
-    $map_comum_ids_values = array_values($map_comum_ids);
-    if (!empty($map_comum_ids_values)) {
-        $placeholders = implode(',', array_fill(0, count($map_comum_ids_values), '?'));
-        $stmtProdExist = $conexao->prepare('SELECT * FROM produtos WHERE comum_id IN (' . $placeholders . ')');
-        foreach ($map_comum_ids_values as $i => $cid) {
-            $stmtProdExist->bindValue($i + 1, $cid, PDO::PARAM_INT);
+    $codigos_busca = array_keys($codigos_unicos_norm);
+    if (!empty($codigos_busca)) {
+        $placeholders = implode(',', array_fill(0, count($codigos_busca), '?'));
+        $stmtProdExist = $conexao->prepare('SELECT * FROM produtos WHERE codigo IN (' . $placeholders . ')');
+        foreach ($codigos_busca as $i => $cod) {
+            $stmtProdExist->bindValue($i + 1, $cod);
         }
         $stmtProdExist->execute();
         while ($p = $stmtProdExist->fetch(PDO::FETCH_ASSOC)) {
