@@ -300,6 +300,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     }
 
     $produtos_existentes = [];
+    $produtos_existentes_por_codigo = [];
     $map_comum_ids_values = array_values($map_comum_ids);
     if (!empty($map_comum_ids_values)) {
         $placeholders = implode(',', array_fill(0, count($map_comum_ids_values), '?'));
@@ -309,8 +310,13 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
         }
         $stmtProdExist->execute();
         while ($p = $stmtProdExist->fetch(PDO::FETCH_ASSOC)) {
-            $key = ($p['comum_id'] ?? 0) . '|' . pp_normaliza((string)$p['codigo']);
+            $codigo_norm = pp_normaliza((string)$p['codigo']);
+            $key = ($p['comum_id'] ?? 0) . '|' . $codigo_norm;
             $produtos_existentes[$key] = $p;
+            $produtos_existentes_por_codigo[$codigo_norm][] = [
+                'key' => $key,
+                'produto' => $p,
+            ];
         }
     }
 
@@ -329,6 +335,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $job['dep_map'] = $dep_map;
     $job['tipos_bens'] = $tipos_bens;
     $job['produtos_existentes'] = $produtos_existentes;
+    $job['produtos_existentes_por_codigo'] = $produtos_existentes_por_codigo;
     $job['id_produto_sequencial'] = $id_produto_sequencial;
     $job['codigos_processados'] = [];
     $job['stats'] = [
@@ -398,6 +405,7 @@ if ($action === 'process') {
 
         $codigos_processados = $job['codigos_processados'] ?? [];
         $produtos_existentes = $job['produtos_existentes'] ?? [];
+        $produtos_existentes_por_codigo = $job['produtos_existentes_por_codigo'] ?? [];
         $dep_map = $job['dep_map'] ?? [];
         $id_produto_sequencial = (int)$job['id_produto_sequencial'];
         $stats = $job['stats'];
@@ -422,6 +430,8 @@ if ($action === 'process') {
                     continue;
                 }
 
+                $codigo_norm = pp_normaliza($codigo);
+
                 $localidade_raw = isset($linha[$idx_localidade]) ? (string)$linha[$idx_localidade] : '';
                 $localidade_num = preg_replace('/\D+/', '', $localidade_raw);
                 $comum_destino_id = $comum_processado_id;
@@ -429,7 +439,16 @@ if ($action === 'process') {
                     $comum_destino_id = (int)$map_comum_ids[$localidade_num];
                 }
 
-                $codigo_key = $comum_destino_id . '|' . pp_normaliza($codigo);
+                $codigo_key = $comum_destino_id . '|' . $codigo_norm;
+                $codigo_key_original = $codigo_key;
+                $prodExist = null;
+                if (isset($produtos_existentes[$codigo_key])) {
+                    $prodExist = $produtos_existentes[$codigo_key];
+                } elseif (isset($produtos_existentes_por_codigo[$codigo_norm]) && !empty($produtos_existentes_por_codigo[$codigo_norm])) {
+                    $fallbackProd = $produtos_existentes_por_codigo[$codigo_norm][0];
+                    $prodExist = $fallbackProd['produto'];
+                    $codigo_key_original = $fallbackProd['key'];
+                }
 
                 $complemento_original = isset($linha[$idx_complemento]) ? trim((string)$linha[$idx_complemento]) : '';
                 $dependencia_original = isset($linha[$idx_dependencia]) ? ip_fix_mojibake(ip_corrige_encoding($linha[$idx_dependencia])) : '';
@@ -515,9 +534,11 @@ if ($action === 'process') {
                 $tem_erro_parsing = ($tipo_bem_id === 0 && $codigo_detectado !== null) || ($tipo_bem_id > 0 && $ben !== '' && !$ben_valido);
 
                 $codigos_processados[$codigo_key] = true;
+                if ($codigo_key_original !== $codigo_key) {
+                    $codigos_processados[$codigo_key_original] = true; // evita exclusão de produtos movidos entre comuns
+                }
 
-                if (isset($produtos_existentes[$codigo_key])) {
-                    $prodExist = $produtos_existentes[$codigo_key];
+                if ($prodExist) {
                     $sql_update_prod = 'UPDATE produtos SET '
                         . 'descricao_completa = :descricao_completa, '
                         . 'complemento = :complemento, '
