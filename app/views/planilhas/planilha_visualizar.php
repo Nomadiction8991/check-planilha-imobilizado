@@ -297,7 +297,7 @@ ob_start();
 <div class="card mb-3">
     <div class="card-header">
         <i class="bi bi-funnel me-2"></i>
-        Filtros
+        <?php echo htmlspecialchars(to_uppercase('Filtros'), ENT_QUOTES, 'UTF-8'); ?>
     </div>
     <div class="card-body">
         <form method="GET" action="">
@@ -306,16 +306,16 @@ ob_start();
             <div class="mb-3">
                 <label class="form-label" for="codigo">
                     <i class="bi bi-upc-scan me-1"></i>
-                    CÃ¢â€Å“Ã¢â€â€šdigo do PRODUTO
+                    <?php echo htmlspecialchars(to_uppercase('Código do Produto'), ENT_QUOTES, 'UTF-8'); ?>
                 </label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="codigo" name="codigo" 
                            value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>" 
-                           placeholder="Digite, fale ou escaneie o cÃ¢â€Å“Ã¢â€â€šdigo...">
-                    <button id="btnMic" class="btn btn-primary mic-btn" type="button" title="Falar cÃ¢â€Å“Ã¢â€â€šdigo (Ctrl+M)" aria-label="Falar cÃ¢â€Å“Ã¢â€â€šdigo" aria-pressed="false">
+                           placeholder="<?php echo htmlspecialchars(to_uppercase('Digite, fale ou escaneie o código...'), ENT_QUOTES, 'UTF-8'); ?>">
+                    <button id="btnMic" class="btn btn-primary mic-btn" type="button" title="<?php echo htmlspecialchars(to_uppercase('Falar código (Ctrl+M)'), ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars(to_uppercase('Falar código'), ENT_QUOTES, 'UTF-8'); ?>" aria-pressed="false">
                         <span class="material-icons-round" aria-hidden="true">mic</span>
                     </button>
-                    <button id="btnCam" class="btn btn-primary" type="button" title="Escanear cÃ¢â€Å“Ã¢â€â€šdigo de barras" aria-label="Escanear cÃ¢â€Å“Ã¢â€â€šdigo de barras">
+                    <button id="btnCam" class="btn btn-primary" type="button" title="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>">
                         <i class="bi bi-camera-video-fill" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -326,22 +326,22 @@ ob_start();
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiltros">
                             <i class="bi bi-sliders me-2"></i>
-                            Filtros AvanÃ¢â€Å“Ã‚Âºados
+                            <?php echo htmlspecialchars(to_uppercase('Filtros Avançados'), ENT_QUOTES, 'UTF-8'); ?>
                         </button>
                     </h2>
                     <div id="collapseFiltros" class="accordion-collapse collapse" data-bs-parent="#filtrosAvancados">
                         <div class="accordion-body">
                             <div class="mb-3">
-                                <label class="form-label" for="nome">Nome</label>
+                                <label class="form-label" for="nome"><?php echo htmlspecialchars(to_uppercase('Nome'), ENT_QUOTES, 'UTF-8'); ?></label>
                                 <input type="text" class="form-control" id="nome" name="nome" 
                                        value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>" 
-                                       placeholder="Pesquisar nome...">
+                                       placeholder="<?php echo htmlspecialchars(to_uppercase('Pesquisar nome...'), ENT_QUOTES, 'UTF-8'); ?>">
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label" for="dependencia">DependÃ¢â€Å“Ã‚Â¬ncia</label>
+                                <label class="form-label" for="dependencia"><?php echo htmlspecialchars(to_uppercase('Dependência'), ENT_QUOTES, 'UTF-8'); ?></label>
                                 <select class="form-select" id="dependencia" name="dependencia">
-                                    <option value="">Todas</option>
+                                    <option value=""><?php echo htmlspecialchars(to_uppercase('Todas'), ENT_QUOTES, 'UTF-8'); ?></option>
                                     <?php foreach ($dependencia_options as $dep): ?>
                                     <?php 
                                         $depId = $dep['id'] ?? '';
@@ -349,7 +349,7 @@ ob_start();
                                     ?>
                                     <option value="<?php echo htmlspecialchars($depId); ?>" 
                                         <?php echo ($filtro_dependencia ?? '') == $depId ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($depDesc); ?>
+                                        <?php echo htmlspecialchars(to_uppercase($depDesc), ENT_QUOTES, 'UTF-8'); ?>
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -358,12 +358,12 @@ ob_start();
                             <div class="mb-3">
                                 <label class="form-label" for="STATUS">STATUS</label>
                                 <select class="form-select" id="STATUS" name="STATUS">
-                                    <option value="">Todos</option>
-                                    <option value="checado" <?php echo ($filtro_STATUS ?? '')==='checado'?'selected':''; ?>>Checados</option>
-                                    <option value="observacao" <?php echo ($filtro_STATUS ?? '')==='observacao'?'selected':''; ?>>Com ObservaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo</option>
-                                    <option value="etiqueta" <?php echo ($filtro_STATUS ?? '')==='etiqueta'?'selected':''; ?>>Etiqueta para Imprimir</option>
-                                    <option value="pendente" <?php echo ($filtro_STATUS ?? '')==='pendente'?'selected':''; ?>>Pendentes</option>
-                                    <option value="editado" <?php echo ($filtro_STATUS ?? '')==='editado'?'selected':''; ?>>Editados</option>
+                                    <option value=""><?php echo htmlspecialchars(to_uppercase('Todos'), ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <option value="checado" <?php echo ($filtro_STATUS ?? '')==='checado'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Checados'), ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <option value="observacao" <?php echo ($filtro_STATUS ?? '')==='observacao'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Com Observação'), ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <option value="etiqueta" <?php echo ($filtro_STATUS ?? '')==='etiqueta'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Etiqueta para Imprimir'), ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <option value="pendente" <?php echo ($filtro_STATUS ?? '')==='pendente'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Pendentes'), ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <option value="editado" <?php echo ($filtro_STATUS ?? '')==='editado'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Editados'), ENT_QUOTES, 'UTF-8'); ?></option>
                                 </select>
                             </div>
                             
@@ -374,7 +374,7 @@ ob_start();
             </div>
             <button type="submit" class="btn btn-primary w-100 mt-2">
                 <i class="bi bi-search me-2"></i>
-                Filtrar
+                <?php echo htmlspecialchars(to_uppercase('Filtrar'), ENT_QUOTES, 'UTF-8'); ?>
             </button>
         </form>
     </div>
