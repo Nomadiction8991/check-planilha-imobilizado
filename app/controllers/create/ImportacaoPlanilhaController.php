@@ -124,9 +124,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     }
 
     $hoje = date('Y-m-d');
-    if ($data_mysql !== $hoje) {
-        throw new Exception('Data da planilha (' . $data_mysql . ') difere da data de hoje (' . $hoje . '). Importação cancelada.');
-    }
+    $data_mismatch = ($data_mysql !== $hoje);
 
     $linhas = $aba->toArray();
     $linha_atual = 0;
@@ -238,6 +236,10 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $stmtCfg->bindValue(':pulo_linhas', $pulo_linhas);
     $stmtCfg->bindValue(':data_importacao', $data_mysql);
     $stmtCfg->execute();
+
+    if ($data_mismatch) {
+        throw new Exception('Data da planilha (' . $data_mysql . ') difere da data de hoje (' . $hoje . '). Importação cancelada.');
+    }
 
     $tipos_bens = [];
     $stmtTipos = $conexao->prepare('SELECT id, codigo, descricao FROM tipos_bens ORDER BY LENGTH(descricao) DESC');
