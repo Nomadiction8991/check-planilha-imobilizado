@@ -248,6 +248,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $comuns_existentes = 0;
     $comuns_cadastradas = 0;
     $comuns_falha = [];
+    $map_comum_ids = [];
 
     foreach ($localidades_unicas as $codLoc) {
         try {
@@ -257,12 +258,14 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
             $comumEncontrado = $stmtBuscaComum->fetch(PDO::FETCH_ASSOC);
 
             if ($comumEncontrado) {
+                $map_comum_ids[$codLoc] = (int)$comumEncontrado['id'];
                 if ($comum_processado_id === null) {
                     $comum_processado_id = (int)$comumEncontrado['id'];
                 }
                 $comuns_existentes++;
             } else {
                 $novoId = garantir_comum_por_codigo($conexao, $codLoc);
+                $map_comum_ids[$codLoc] = (int)$novoId;
                 if ($comum_processado_id === null) {
                     $comum_processado_id = (int)$novoId;
                 }
@@ -296,13 +299,19 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
         $tipos_bens = $stmtTipos->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    $stmtProdExist = $conexao->prepare('SELECT * FROM produtos WHERE comum_id = :comum_id');
-    $stmtProdExist->bindValue(':comum_id', $comum_processado_id, PDO::PARAM_INT);
-    $stmtProdExist->execute();
     $produtos_existentes = [];
-    while ($p = $stmtProdExist->fetch(PDO::FETCH_ASSOC)) {
-        $key = pp_normaliza((string)$p['codigo']);
-        $produtos_existentes[$key] = $p;
+    $map_comum_ids_values = array_values($map_comum_ids);
+    if (!empty($map_comum_ids_values)) {
+        $placeholders = implode(',', array_fill(0, count($map_comum_ids_values), '?'));
+        $stmtProdExist = $conexao->prepare('SELECT * FROM produtos WHERE comum_id IN (' . $placeholders . ')');
+        foreach ($map_comum_ids_values as $i => $cid) {
+            $stmtProdExist->bindValue($i + 1, $cid, PDO::PARAM_INT);
+        }
+        $stmtProdExist->execute();
+        while ($p = $stmtProdExist->fetch(PDO::FETCH_ASSOC)) {
+            $key = ($p['comum_id'] ?? 0) . '|' . pp_normaliza((string)$p['codigo']);
+            $produtos_existentes[$key] = $p;
+        }
     }
 
     $stmtMaxId = $conexao->query('SELECT COALESCE(MAX(id_produto), 0) AS max_id FROM produtos');
@@ -331,6 +340,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $job['erros_produtos'] = [];
     $job['status'] = 'ready';
     $job['data_mysql'] = $data_mysql;
+    $job['map_comum_ids'] = $map_comum_ids;
 
     ip_append_log($job, 'info', 'Leitura inicial concluída. Total estimado de linhas úteis: ' . $registros_candidatos . '.');
 
@@ -393,6 +403,7 @@ if ($action === 'process') {
         $stats = $job['stats'];
         $erros_produtos = $job['erros_produtos'] ?? [];
         $comum_processado_id = (int)$job['comum_processado_id'];
+        $map_comum_ids = $job['map_comum_ids'] ?? [];
 
         for ($i = $inicio; $i < $fim; $i++) {
             $linhaNumero = $i + 1;
@@ -410,7 +421,15 @@ if ($action === 'process') {
                 if ($codigo === '') {
                     continue;
                 }
-                $codigo_key = pp_normaliza($codigo);
+
+                $localidade_raw = isset($linha[$idx_localidade]) ? (string)$linha[$idx_localidade] : '';
+                $localidade_num = preg_replace('/\D+/', '', $localidade_raw);
+                $comum_destino_id = $comum_processado_id;
+                if ($localidade_num !== '' && isset($map_comum_ids[$localidade_num])) {
+                    $comum_destino_id = (int)$map_comum_ids[$localidade_num];
+                }
+
+                $codigo_key = $comum_destino_id . '|' . pp_normaliza($codigo);
 
                 $complemento_original = isset($linha[$idx_complemento]) ? trim((string)$linha[$idx_complemento]) : '';
                 $dependencia_original = isset($linha[$idx_dependencia]) ? ip_fix_mojibake(ip_corrige_encoding($linha[$idx_dependencia])) : '';
@@ -514,7 +533,7 @@ if ($action === 'process') {
                     $stmtUp->bindValue(':bem', ip_to_uppercase($ben));
                     $stmtUp->bindValue(':dependencia_id', $dependencia_id, PDO::PARAM_INT);
                     $stmtUp->bindValue(':tipo_bem_id', $tipo_bem_id, PDO::PARAM_INT);
-                    $stmtUp->bindValue(':comum_id', $comum_processado_id, PDO::PARAM_INT);
+                    $stmtUp->bindValue(':comum_id', $comum_destino_id, PDO::PARAM_INT);
                     $stmtUp->bindValue(':id_produto', $prodExist['id_produto'], PDO::PARAM_INT);
                     if ($stmtUp->execute()) {
                         $stats['atualizados']++;
@@ -542,7 +561,7 @@ INSERT INTO produtos (
 )
 SQL;
                     $stmt_prod = $conexao->prepare($sql_produto);
-                    $stmt_prod->bindValue(':comum_id', $comum_processado_id, PDO::PARAM_INT);
+                    $stmt_prod->bindValue(':comum_id', $comum_destino_id, PDO::PARAM_INT);
                     $stmt_prod->bindValue(':id_produto', $id_produto_sequencial, PDO::PARAM_INT);
                     $stmt_prod->bindValue(':codigo', $codigo);
                     $stmt_prod->bindValue(':descricao_completa', ip_to_uppercase($descricao_completa_calc));

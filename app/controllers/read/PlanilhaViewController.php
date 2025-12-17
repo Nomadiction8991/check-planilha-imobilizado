@@ -87,7 +87,7 @@ $sql_base = "SELECT
                  LEFT JOIN tipos_bens t1 ON p.tipo_bem_id = t1.id
                  LEFT JOIN dependencias d1 ON p.dependencia_id = d1.id
                  LEFT JOIN dependencias d2 ON p.editado_dependencia_id = d2.id
-                 WHERE p.comum_id = :comum_id AND COALESCE(p.novo,0) = 0";
+                 WHERE p.comum_id = :comum_id";
 
 $params = [':comum_id' => $comum_id];
 
@@ -137,7 +137,7 @@ if ($filtro_status !== '') {
 // Total de registros para paginaÃ§Ã£o - query COUNT simplificada
 $sql_count = "SELECT COUNT(*) AS total 
               FROM produtos p 
-              WHERE p.comum_id = :comum_id AND COALESCE(p.novo,0) = 0";
+              WHERE p.comum_id = :comum_id";
 
 // Aplicar os mesmos filtros do $sql_base na query de contagem
 if ($filtro_nome !== '') {
