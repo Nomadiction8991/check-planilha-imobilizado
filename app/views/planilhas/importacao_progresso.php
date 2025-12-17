@@ -86,6 +86,7 @@ ob_start();
     const errorsAccum = new Set();
 
     let canceled = false;
+    let fatal = false;
 
     function setProgress(percent) {
         const pct = Math.max(0, Math.min(100, percent));
@@ -156,15 +157,19 @@ ob_start();
         if (canceled) {
             return;
         }
+        if (fatal) {
+            return;
+        }
         try {
             const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=process&job=' + encodeURIComponent(jobId), {
                 headers: { 'Accept': 'application/json' }
             });
             if (!resp.ok) {
                 const text = await resp.text();
-                showAlert('danger', 'Erro ao processar: ' + text);
-                appendLog('erro', 'Erro ao processar: ' + text);
-                setTimeout(poll, 3000);
+                const msg = 'Erro ao processar: ' + text;
+                showAlert('danger', msg);
+                appendLog('erro', msg);
+                fatal = true;
                 return;
             }
             const data = await resp.json();
