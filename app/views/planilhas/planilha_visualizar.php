@@ -301,7 +301,8 @@ ob_start();
     </div>
     <div class="card-body">
         <form method="GET" action="">
-            <input type="hidden" name="id" value="<?php echo $id_planilha; ?>">
+            <input type="hidden" name="id" value="<?php echo $comum_id; ?>">
+            <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
             
             <div class="mb-3">
                 <label class="form-label" for="codigo">
