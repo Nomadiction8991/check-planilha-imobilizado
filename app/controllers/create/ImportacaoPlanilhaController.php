@@ -280,21 +280,29 @@ function ip_ensure_processed_table(PDO $conexao): void {
 }
 
 function ip_track_processed_ids(PDO $conexao, string $jobId, array $ids, int $comumId): void {
+    $ids = array_values(array_filter(array_unique($ids), fn($pid) => (int)$pid > 0));
     if (empty($ids)) {
         return;
     }
+
     ip_ensure_processed_table($conexao);
-    $placeholders = [];
-    $params = [];
-    foreach ($ids as $i => $pid) {
-        $placeholders[] = '(?,?,?)';
-        $params[] = $jobId;
-        $params[] = (int)$pid;
-        $params[] = (int)$comumId;
+    $chunkSize = 120;
+    foreach (array_chunk($ids, $chunkSize) as $chunk) {
+        $placeholders = implode(',', array_fill(0, count($chunk), '(?,?,?)'));
+        $params = [];
+        foreach ($chunk as $pid) {
+            $params[] = $jobId;
+            $params[] = (int)$pid;
+            $params[] = (int)$comumId;
+        }
+        $sql = 'INSERT IGNORE INTO import_job_processed (job_id, id_produto, comum_id) VALUES ' . $placeholders;
+        $stmt = $conexao->prepare($sql);
+        try {
+            $stmt->execute($params);
+        } catch (\PDOException $e) {
+            error_log('[Importação] Falha ao registrar produtos processados (comum ' . $comumId . '): ' . $e->getMessage());
+        }
     }
-    $sql = 'INSERT IGNORE INTO import_job_processed (job_id, id_produto, comum_id) VALUES ' . implode(',', $placeholders);
-    $stmt = $conexao->prepare($sql);
-    $stmt->execute($params);
 }
 
 function ip_cleanup_processed_ids(PDO $conexao, string $jobId): void {
