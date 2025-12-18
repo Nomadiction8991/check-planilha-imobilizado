@@ -164,6 +164,317 @@ function ip_response_json(array $payload, int $status = 200): void {
     json_response($payload, $status);
 }
 
+function ip_is_csv(string $filePath): bool {
+    return strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) === 'csv';
+}
+
+function ip_detect_csv_delimiter(string $filePath): string {
+    $delimiters = [',', ';', '\t', '|'];
+    $handle = fopen($filePath, 'r');
+    if (!$handle) {
+        return ',';
+    }
+    $line = '';
+    while (($line = fgets($handle)) !== false) {
+        $line = trim($line);
+        if ($line !== '') {
+            break;
+        }
+    }
+    fclose($handle);
+    if ($line === '') {
+        return ',';
+    }
+    $bestDelimiter = ',';
+    $bestCount = -1;
+    foreach ($delimiters as $delim) {
+        $c = substr_count($line, $delim === '\\t' ? "\t" : $delim);
+        if ($c > $bestCount) {
+            $bestCount = $c;
+            $bestDelimiter = $delim === '\\t' ? "\t" : $delim;
+        }
+    }
+    return $bestDelimiter;
+}
+
+function ip_ensure_processed_table(PDO $conexao): void {
+    $conexao->exec('CREATE TABLE IF NOT EXISTS import_job_processed (
+        job_id VARCHAR(128) NOT NULL,
+        id_produto INT NOT NULL,
+        comum_id INT NOT NULL,
+        PRIMARY KEY (job_id, id_produto),
+        KEY idx_comum (comum_id, id_produto)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+}
+
+function ip_track_processed_ids(PDO $conexao, string $jobId, array $ids, int $comumId): void {
+    if (empty($ids)) {
+        return;
+    }
+    $placeholders = [];
+    $params = [];
+    foreach ($ids as $i => $pid) {
+        $placeholders[] = '(?,?,?)';
+        $params[] = $jobId;
+        $params[] = (int)$pid;
+        $params[] = (int)$comumId;
+    }
+    $sql = 'INSERT IGNORE INTO import_job_processed (job_id, id_produto, comum_id) VALUES ' . implode(',', $placeholders);
+    $stmt = $conexao->prepare($sql);
+    $stmt->execute($params);
+}
+
+function ip_cleanup_processed_ids(PDO $conexao, string $jobId): void {
+    $stmt = $conexao->prepare('DELETE FROM import_job_processed WHERE job_id = :job');
+    $stmt->bindValue(':job', $jobId);
+    $stmt->execute();
+}
+
+function ip_read_csv_batch(string $filePath, string $delimiter, int $startLine, int $batchSize): array {
+    $file = new SplFileObject($filePath, 'r');
+    $file->setFlags(SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE);
+    $file->setCsvControl($delimiter);
+    if ($startLine > 0) {
+        $file->seek($startLine);
+    } else {
+        $file->rewind();
+    }
+    $rows = [];
+    $current = $file->key();
+    while (!$file->eof() && count($rows) < $batchSize) {
+        $row = $file->fgetcsv();
+        // Php's fgetcsv returns [null] on blank lines sometimes
+        if ($row === null || $row === [null]) {
+            $current++;
+            continue;
+        }
+        $rows[] = $row;
+        $current++;
+    }
+    $nextLine = $file->key();
+    return [$rows, $nextLine];
+}
+
+function ip_bulk_upsert_produtos(PDO $conexao, array $rows): void {
+    if (empty($rows)) {
+        return;
+    }
+
+    $cols = [
+        'comum_id','id_produto','codigo','descricao_completa','editado_descricao_completa',
+        'tipo_bem_id','editado_tipo_bem_id','bem','editado_bem',
+        'complemento','editado_complemento','dependencia_id','editado_dependencia_id',
+        'checado','editado','imprimir_etiqueta','imprimir_14_1',
+        'observacao','ativo','novo','condicao_14_1',
+        'administrador_acessor_id','doador_conjugue_id'
+    ];
+
+    $placeholders = [];
+    $params = [];
+    foreach ($rows as $row) {
+        $placeholders[] = '(' . implode(',', array_fill(0, count($cols), '?')) . ')';
+        foreach ($cols as $c) {
+            $params[] = $row[$c];
+        }
+    }
+
+    $sql = 'INSERT INTO produtos (' . implode(',', $cols) . ')
+            VALUES ' . implode(',', $placeholders) . '
+            ON DUPLICATE KEY UPDATE 
+                descricao_completa = VALUES(descricao_completa),
+                complemento = VALUES(complemento),
+                bem = VALUES(bem),
+                dependencia_id = VALUES(dependencia_id),
+                editado_dependencia_id = VALUES(editado_dependencia_id),
+                tipo_bem_id = VALUES(tipo_bem_id),
+                comum_id = VALUES(comum_id),
+                editado_descricao_completa = VALUES(editado_descricao_completa),
+                editado_bem = VALUES(editado_bem),
+                editado_complemento = VALUES(editado_complemento)';
+
+    $stmt = $conexao->prepare($sql);
+    $stmt->execute($params);
+}
+
+function ip_delete_unprocessed(PDO $conexao, string $jobId): int {
+    $sql = 'DELETE p FROM produtos p
+            JOIN (SELECT DISTINCT comum_id FROM import_job_processed WHERE job_id = :job) c ON c.comum_id = p.comum_id
+            LEFT JOIN import_job_processed t ON t.job_id = :job AND t.id_produto = p.id_produto
+            WHERE t.id_produto IS NULL';
+    $stmt = $conexao->prepare($sql);
+    $stmt->bindValue(':job', $jobId);
+    $stmt->execute();
+    return (int)$stmt->rowCount();
+}
+
+function ip_fetch_existentes_batch(PDO $conexao, array $codigos_norm, array $comum_ids): array {
+    if (empty($codigos_norm)) {
+        return [];
+    }
+    $codigos_norm = array_values(array_unique($codigos_norm));
+    $comum_ids = array_values(array_unique($comum_ids));
+
+    $placeCodes = implode(',', array_fill(0, count($codigos_norm), '?'));
+    $placeComum = implode(',', array_fill(0, max(1, count($comum_ids)), '?'));
+    $sql = 'SELECT * FROM produtos WHERE codigo IN (' . $placeCodes . ')';
+    $params = $codigos_norm;
+    if (!empty($comum_ids)) {
+        $sql .= ' AND comum_id IN (' . $placeComum . ')';
+        $params = array_merge($params, $comum_ids);
+    }
+    $stmt = $conexao->prepare($sql);
+    foreach ($params as $i => $v) {
+        $stmt->bindValue($i + 1, $v);
+    }
+    $stmt->execute();
+    $map = [];
+    while ($p = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $codigo_norm = pp_normaliza((string)$p['codigo']);
+        $key = ($p['comum_id'] ?? 0) . '|' . $codigo_norm;
+        $map[$key] = $p;
+    }
+    return $map;
+}
+
+function ip_prescan_csv(array $job, PDO $conexao, array $pp_config): array {
+    $filePath = $job['file_path'];
+    $delimiter = ip_detect_csv_delimiter($filePath);
+    $pulo_linhas = (int)($job['pulo_linhas'] ?? 25);
+    $posicao_data = strtoupper(trim($job['posicao_data'] ?? 'D13'));
+    if (!preg_match('/^([A-Z]+)(\d+)$/', $posicao_data, $matches)) {
+        $matches = ['', 'D', '13'];
+    }
+    $data_column = $matches[1] ?: 'D';
+    $data_row = max(1, (int)$matches[2]);
+
+    $idx_codigo = pp_colunaParaIndice($job['mapeamento_codigo']);
+    $idx_complemento = pp_colunaParaIndice($job['mapeamento_complemento']);
+    $idx_dependencia = pp_colunaParaIndice($job['mapeamento_dependencia']);
+    $idx_localidade = pp_colunaParaIndice($job['coluna_localidade']);
+    $idx_data = pp_colunaParaIndice($data_column);
+
+    $dep_norm_unicas = [];
+    $dep_raw_unicas = [];
+    $localidades_unicas = [];
+    $registros_candidatos = 0;
+    $total_linhas = 0;
+    $valor_data = '';
+
+    $file = new SplFileObject($filePath, 'r');
+    $file->setFlags(SplFileObject::READ_CSV | SplFileObject::DROP_NEW_LINE);
+    $file->setCsvControl($delimiter);
+
+    foreach ($file as $linha_idx => $linha) {
+        if ($linha === null) { continue; }
+        $total_linhas++;
+        $linha_num = $linha_idx + 1; // 1-based
+        if ($linha_num === $data_row && isset($linha[$idx_data])) {
+            $valor_data = $linha[$idx_data];
+        }
+        if ($linha_num <= $pulo_linhas) { continue; }
+        if (empty(array_filter((array)$linha, fn($v) => trim((string)$v) !== ''))) { continue; }
+
+        $codigo_tmp = isset($linha[$idx_codigo]) ? trim((string)$linha[$idx_codigo]) : '';
+        if ($codigo_tmp !== '') {
+            $registros_candidatos++;
+        }
+
+        if (isset($linha[$idx_dependencia])) {
+            $dep_raw = ip_fix_mojibake(ip_corrige_encoding($linha[$idx_dependencia]));
+            $dep_norm = pp_normaliza($dep_raw);
+            if ($dep_norm !== '' && !isset($dep_norm_unicas[$dep_norm])) {
+                $dep_norm_unicas[$dep_norm] = true;
+                $dep_raw_unicas[] = $dep_raw;
+            }
+        }
+
+        if (isset($linha[$idx_localidade])) {
+            $codigo_localidade = ip_obter_codigo_comum($linha[$idx_localidade]);
+            if ($codigo_localidade > 0 && !in_array($codigo_localidade, $localidades_unicas, true)) {
+                $localidades_unicas[] = $codigo_localidade;
+            }
+        }
+    }
+
+    if ($registros_candidatos === 0) {
+        throw new Exception('Nenhuma linha de produto encontrada após o cabeçalho. Verifique o mapeamento de colunas e o número de linhas a pular.');
+    }
+
+    $data_mysql = ip_parse_planilha_data($valor_data);
+    $hoje = date('Y-m-d');
+    if ($data_mysql === null || $data_mysql === '') {
+        throw new Exception('Data da planilha não encontrada na posição ' . $posicao_data . '. Valor lido: "' . trim((string)$valor_data) . '".');
+    }
+    if ($data_mysql !== $hoje) {
+        throw new Exception('Data da planilha (' . $data_mysql . ') difere da data de hoje (' . $hoje . '). Importação cancelada.');
+    }
+
+    foreach ($dep_raw_unicas as $dep_desc) {
+        try {
+            $dep_desc_upper = ip_to_uppercase($dep_desc);
+            $stmtDep = $conexao->prepare('SELECT id FROM dependencias WHERE descricao = :descricao');
+            $stmtDep->bindValue(':descricao', $dep_desc_upper);
+            $stmtDep->execute();
+            $existeDep = $stmtDep->fetch(PDO::FETCH_ASSOC);
+            if (!$existeDep) {
+                $stmtInsertDep = $conexao->prepare('INSERT INTO dependencias (descricao) VALUES (:descricao)');
+                $stmtInsertDep->bindValue(':descricao', $dep_desc_upper);
+                $stmtInsertDep->execute();
+            }
+        } catch (Throwable $e) {
+            // ignora duplicidade e segue
+        }
+    }
+
+    $dep_map = [];
+    $stmtDepAll = $conexao->query('SELECT id, descricao FROM dependencias');
+    foreach ($stmtDepAll->fetchAll(PDO::FETCH_ASSOC) as $d) {
+        $dep_map[pp_normaliza($d['descricao'])] = (int)$d['id'];
+    }
+
+    $comum_processado_id = null;
+    $map_comum_ids = [];
+    foreach ($localidades_unicas as $codLoc) {
+        try {
+            $stmtBuscaComum = $conexao->prepare('SELECT id FROM comums WHERE codigo = :codigo');
+            $stmtBuscaComum->bindValue(':codigo', $codLoc, PDO::PARAM_INT);
+            $stmtBuscaComum->execute();
+            $comumEncontrado = $stmtBuscaComum->fetch(PDO::FETCH_ASSOC);
+
+            if ($comumEncontrado) {
+                $map_comum_ids[$codLoc] = (int)$comumEncontrado['id'];
+                if ($comum_processado_id === null) {
+                    $comum_processado_id = (int)$comumEncontrado['id'];
+                }
+            } else {
+                $novoId = garantir_comum_por_codigo($conexao, $codLoc);
+                $map_comum_ids[$codLoc] = (int)$novoId;
+                if ($comum_processado_id === null) {
+                    $comum_processado_id = (int)$novoId;
+                }
+            }
+        } catch (Throwable $e) {
+            // ignora, tentativa seguinte
+        }
+    }
+
+    if (empty($comum_processado_id)) {
+        throw new Exception('Nenhum comum válido encontrado ou criado a partir da coluna de localidade.');
+    }
+
+    $job['delimiter'] = $delimiter;
+    $job['data_mysql'] = $data_mysql;
+    $job['dep_map'] = $dep_map;
+    $job['map_comum_ids'] = $map_comum_ids;
+    $job['comum_processado_id'] = $comum_processado_id;
+    $job['registros_candidatos'] = $registros_candidatos;
+    $job['total_linhas'] = $total_linhas;
+    $job['cursor'] = $pulo_linhas; // próxima linha útil a processar (0-based)
+    $job['status'] = 'ready';
+
+    return $job;
+}
+
 function ip_purge_old_jobs(): void {
     if (!is_dir(IP_JOB_DIR)) {
         return;
@@ -198,157 +509,181 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
 
     ip_normalizar_csv_encoding($job['file_path']);
 
-    $posicao_data_ref = strtoupper(trim($posicao_data));
-    if (!preg_match('/^([A-Z]+)(\d+)$/', $posicao_data_ref, $matches)) {
-        $matches = ['','D','13'];
-    }
-    $data_column = $matches[1] ?: 'D';
-    $data_row = max(1, (int)$matches[2]);
-
-    $columns_para_ler = array_unique(array_filter([
-        $mapeamento_codigo,
-        $mapeamento_complemento,
-        $mapeamento_dependencia,
-        $coluna_localidade,
-        $data_column,
-    ]));
-
-    $reader = IOFactory::createReaderForFile($job['file_path']);
-    $reader->setReadDataOnly(true);
-    $reader->setReadFilter(new ImportacaoReadFilter($columns_para_ler, $data_column, $data_row));
-    $planilha = $reader->load($job['file_path']);
-    $aba = $planilha->getActiveSheet();
-
-    $valor_data_cell = $aba->getCell($posicao_data);
-    $valor_data = '';
-    if ($valor_data_cell) {
-        $valor_data = $valor_data_cell->getFormattedValue();
-        if ($valor_data === '') {
-            $valor_data = $valor_data_cell->getCalculatedValue();
-        }
-    }
-
-    $data_mysql = ip_parse_planilha_data($valor_data);
-
-    if ($data_mysql === null || $data_mysql === '') {
-        $valor_debug = trim((string)$valor_data);
-        throw new Exception('Data da planilha não encontrada na célula ' . $posicao_data . '. Valor lido: "' . $valor_debug . '". Importação cancelada.');
-    }
-
-    $hoje = date('Y-m-d');
-    $data_mismatch = ($data_mysql !== $hoje);
-
-    $linhas = $aba->toArray();
-    $linha_atual = 0;
+    $isCsv = ip_is_csv($job['file_path']);
+    $data_mismatch = false;
+    $linhas = [];
     $registros_candidatos = 0;
     $dependencias_unicas = [];
     $localidades_unicas = [];
     $codigos_unicos_norm = [];
-
     $idx_codigo = pp_colunaParaIndice($mapeamento_codigo);
     $idx_complemento = pp_colunaParaIndice($mapeamento_complemento);
     $idx_dependencia = pp_colunaParaIndice($mapeamento_dependencia);
     $idx_localidade = pp_colunaParaIndice($coluna_localidade);
-
-    foreach ($linhas as $linha) {
-        $linha_atual++;
-        if ($linha_atual <= $pulo_linhas) { continue; }
-        if (empty(array_filter($linha))) { continue; }
-        $codigo_tmp = isset($linha[$idx_codigo]) ? trim((string)$linha[$idx_codigo]) : '';
-        if ($codigo_tmp !== '') {
-            $registros_candidatos++;
-            $cod_norm = pp_normaliza($codigo_tmp);
-            if ($cod_norm !== '') {
-                $codigos_unicos_norm[$cod_norm] = true;
-            }
-        }
-
-        if (isset($linha[$idx_dependencia])) {
-            $dep_raw = ip_fix_mojibake(ip_corrige_encoding($linha[$idx_dependencia]));
-            $dep_norm = pp_normaliza($dep_raw);
-            if ($dep_norm !== '' && !array_key_exists($dep_norm, $dependencias_unicas)) {
-                $dependencias_unicas[$dep_norm] = $dep_raw;
-            }
-        }
-
-        if (isset($linha[$idx_localidade])) {
-            $codigo_localidade = ip_obter_codigo_comum($linha[$idx_localidade]);
-            if ($codigo_localidade > 0 && !in_array($codigo_localidade, $localidades_unicas, true)) {
-                $localidades_unicas[] = $codigo_localidade;
-            }
-        }
-    }
-
-    if ($registros_candidatos === 0) {
-        throw new Exception('Nenhuma linha de produto encontrada após o cabeçalho. Verifique o mapeamento de colunas e o número de linhas a pular.');
-    }
-
-    if (empty($localidades_unicas)) {
-        throw new Exception('Nenhum código de localidade encontrado na coluna ' . $coluna_localidade . '.');
-    }
-
-    foreach ($dependencias_unicas as $dep_desc) {
-        try {
-            $dep_desc_upper = ip_to_uppercase($dep_desc);
-            $stmtDep = $conexao->prepare('SELECT id FROM dependencias WHERE descricao = :descricao');
-            $stmtDep->bindValue(':descricao', $dep_desc_upper);
-            $stmtDep->execute();
-            $existeDep = $stmtDep->fetch(PDO::FETCH_ASSOC);
-            if (!$existeDep) {
-                $stmtInsertDep = $conexao->prepare('INSERT INTO dependencias (descricao) VALUES (:descricao)');
-                $stmtInsertDep->bindValue(':descricao', $dep_desc_upper);
-                $stmtInsertDep->execute();
-            }
-        } catch (Throwable $e) {
-            // ignora duplicidade e segue
-        }
-    }
-
     $dep_map = [];
-    $stmtDepAll = $conexao->query('SELECT id, descricao FROM dependencias');
-    foreach ($stmtDepAll->fetchAll(PDO::FETCH_ASSOC) as $d) {
-        $dep_map[pp_normaliza($d['descricao'])] = (int)$d['id'];
-    }
-
     $comum_processado_id = null;
-    $comuns_existentes = 0;
-    $comuns_cadastradas = 0;
-    $comuns_falha = [];
     $map_comum_ids = [];
+    $produtos_existentes = [];
+    $produtos_existentes_por_codigo = [];
 
-    foreach ($localidades_unicas as $codLoc) {
-        try {
-            $stmtBuscaComum = $conexao->prepare('SELECT id FROM comums WHERE codigo = :codigo');
-            $stmtBuscaComum->bindValue(':codigo', $codLoc, PDO::PARAM_INT);
-            $stmtBuscaComum->execute();
-            $comumEncontrado = $stmtBuscaComum->fetch(PDO::FETCH_ASSOC);
-
-            if ($comumEncontrado) {
-                $map_comum_ids[$codLoc] = (int)$comumEncontrado['id'];
-                if ($comum_processado_id === null) {
-                    $comum_processado_id = (int)$comumEncontrado['id'];
-                }
-                $comuns_existentes++;
-            } else {
-                $novoId = garantir_comum_por_codigo($conexao, $codLoc);
-                $map_comum_ids[$codLoc] = (int)$novoId;
-                if ($comum_processado_id === null) {
-                    $comum_processado_id = (int)$novoId;
-                }
-                $comuns_cadastradas++;
-            }
-        } catch (Throwable $e) {
-            $comuns_falha[] = $codLoc;
+    if ($isCsv) {
+        $job = ip_prescan_csv($job, $conexao, $pp_config);
+        $data_mysql = $job['data_mysql'];
+        $dep_map = $job['dep_map'];
+        $map_comum_ids = $job['map_comum_ids'];
+        $comum_processado_id = $job['comum_processado_id'];
+        $registros_candidatos = $job['registros_candidatos'];
+        $linhas = [];
+    } else {
+        $posicao_data_ref = strtoupper(trim($posicao_data));
+        if (!preg_match('/^([A-Z]+)(\d+)$/', $posicao_data_ref, $matches)) {
+            $matches = ['','D','13'];
         }
-    }
+        $data_column = $matches[1] ?: 'D';
+        $data_row = max(1, (int)$matches[2]);
 
-    if (empty($comum_processado_id)) {
-        throw new Exception('Nenhum comum válido encontrado ou criado a partir da coluna de localidade.');
+        $columns_para_ler = array_unique(array_filter([
+            $mapeamento_codigo,
+            $mapeamento_complemento,
+            $mapeamento_dependencia,
+            $coluna_localidade,
+            $data_column,
+        ]));
+
+        $reader = IOFactory::createReaderForFile($job['file_path']);
+        $reader->setReadDataOnly(true);
+        $reader->setReadFilter(new ImportacaoReadFilter($columns_para_ler, $data_column, $data_row));
+        $planilha = $reader->load($job['file_path']);
+        $aba = $planilha->getActiveSheet();
+
+        $valor_data_cell = $aba->getCell($posicao_data);
+        $valor_data = '';
+        if ($valor_data_cell) {
+            $valor_data = $valor_data_cell->getFormattedValue();
+            if ($valor_data === '') {
+                $valor_data = $valor_data_cell->getCalculatedValue();
+            }
+        }
+
+        $data_mysql = ip_parse_planilha_data($valor_data);
+
+        if ($data_mysql === null || $data_mysql === '') {
+            $valor_debug = trim((string)$valor_data);
+            throw new Exception('Data da planilha não encontrada na célula ' . $posicao_data . '. Valor lido: "' . $valor_debug . '". Importação cancelada.');
+        }
+
+        $hoje = date('Y-m-d');
+        $data_mismatch = ($data_mysql !== $hoje);
+
+        $linhas = $aba->toArray();
+        $total_linhas = count($linhas);
+        $linha_atual = 0;
+        $registros_candidatos = 0;
+        $dependencias_unicas = [];
+        $localidades_unicas = [];
+        $codigos_unicos_norm = [];
+
+        foreach ($linhas as $linha) {
+            $linha_atual++;
+            if ($linha_atual <= $pulo_linhas) { continue; }
+            if (empty(array_filter($linha))) { continue; }
+            $codigo_tmp = isset($linha[$idx_codigo]) ? trim((string)$linha[$idx_codigo]) : '';
+            if ($codigo_tmp !== '') {
+                $registros_candidatos++;
+                $cod_norm = pp_normaliza($codigo_tmp);
+                if ($cod_norm !== '') {
+                    $codigos_unicos_norm[$cod_norm] = true;
+                }
+            }
+
+            if (isset($linha[$idx_dependencia])) {
+                $dep_raw = ip_fix_mojibake(ip_corrige_encoding($linha[$idx_dependencia]));
+                $dep_norm = pp_normaliza($dep_raw);
+                if ($dep_norm !== '' && !array_key_exists($dep_norm, $dependencias_unicas)) {
+                    $dependencias_unicas[$dep_norm] = $dep_raw;
+                }
+            }
+
+            if (isset($linha[$idx_localidade])) {
+                $codigo_localidade = ip_obter_codigo_comum($linha[$idx_localidade]);
+                if ($codigo_localidade > 0 && !in_array($codigo_localidade, $localidades_unicas, true)) {
+                    $localidades_unicas[] = $codigo_localidade;
+                }
+            }
+        }
+
+        if ($registros_candidatos === 0) {
+            throw new Exception('Nenhuma linha de produto encontrada após o cabeçalho. Verifique o mapeamento de colunas e o número de linhas a pular.');
+        }
+
+        if (empty($localidades_unicas)) {
+            throw new Exception('Nenhum código de localidade encontrado na coluna ' . $coluna_localidade . '.');
+        }
+
+        foreach ($dependencias_unicas as $dep_desc) {
+            try {
+                $dep_desc_upper = ip_to_uppercase($dep_desc);
+                $stmtDep = $conexao->prepare('SELECT id FROM dependencias WHERE descricao = :descricao');
+                $stmtDep->bindValue(':descricao', $dep_desc_upper);
+                $stmtDep->execute();
+                $existeDep = $stmtDep->fetch(PDO::FETCH_ASSOC);
+                if (!$existeDep) {
+                    $stmtInsertDep = $conexao->prepare('INSERT INTO dependencias (descricao) VALUES (:descricao)');
+                    $stmtInsertDep->bindValue(':descricao', $dep_desc_upper);
+                    $stmtInsertDep->execute();
+                }
+            } catch (Throwable $e) {
+                // ignora duplicidade e segue
+            }
+        }
+
+        $dep_map = [];
+        $stmtDepAll = $conexao->query('SELECT id, descricao FROM dependencias');
+        foreach ($stmtDepAll->fetchAll(PDO::FETCH_ASSOC) as $d) {
+            $dep_map[pp_normaliza($d['descricao'])] = (int)$d['id'];
+        }
+
+        $comum_processado_id = null;
+        $comuns_existentes = 0;
+        $comuns_cadastradas = 0;
+        $comuns_falha = [];
+        $map_comum_ids = [];
+
+        foreach ($localidades_unicas as $codLoc) {
+            try {
+                $stmtBuscaComum = $conexao->prepare('SELECT id FROM comums WHERE codigo = :codigo');
+                $stmtBuscaComum->bindValue(':codigo', $codLoc, PDO::PARAM_INT);
+                $stmtBuscaComum->execute();
+                $comumEncontrado = $stmtBuscaComum->fetch(PDO::FETCH_ASSOC);
+
+                if ($comumEncontrado) {
+                    $map_comum_ids[$codLoc] = (int)$comumEncontrado['id'];
+                    if ($comum_processado_id === null) {
+                        $comum_processado_id = (int)$comumEncontrado['id'];
+                    }
+                    $comuns_existentes++;
+                } else {
+                    $novoId = garantir_comum_por_codigo($conexao, $codLoc);
+                    $map_comum_ids[$codLoc] = (int)$novoId;
+                    if ($comum_processado_id === null) {
+                        $comum_processado_id = (int)$novoId;
+                    }
+                    $comuns_cadastradas++;
+                }
+            } catch (Throwable $e) {
+                $comuns_falha[] = $codLoc;
+            }
+        }
+
+        if (empty($comum_processado_id)) {
+            throw new Exception('Nenhum comum válido encontrado ou criado a partir da coluna de localidade.');
+        }
+
     }
 
     $mapeamento_colunas_str = 'codigo=' . $mapeamento_codigo . ';complemento=' . $mapeamento_complemento . ';dependencia=' . $mapeamento_dependencia . ';localidade=' . $coluna_localidade;
 
-    // Garantir que apenas a última configuração seja mantida após remover a coluna id
+    // Garantir que apenas a última configuração seja mantida
     $conexao->exec('DELETE FROM configuracoes');
     $stmtCfg = $conexao->prepare('INSERT INTO configuracoes (mapeamento_colunas, posicao_data, pulo_linhas, data_importacao) VALUES (:mapeamento_colunas, :posicao_data, :pulo_linhas, :data_importacao)');
     $stmtCfg->bindValue(':mapeamento_colunas', $mapeamento_colunas_str);
@@ -393,33 +728,35 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $id_produto_sequencial = (int)($stmtMaxId->fetchColumn() ?? 0) + 1;
 
     $job['linhas'] = $linhas;
-    $job['cursor'] = 0;
+    $job['cursor'] = $job['cursor'] ?? 0;
     $job['pulo_linhas'] = $pulo_linhas;
     $job['idx_codigo'] = $idx_codigo;
     $job['idx_complemento'] = $idx_complemento;
     $job['idx_dependencia'] = $idx_dependencia;
     $job['idx_localidade'] = $idx_localidade;
-    $job['registros_candidatos'] = $registros_candidatos;
-    $job['comum_processado_id'] = $comum_processado_id;
-    $job['dep_map'] = $dep_map;
+    $job['registros_candidatos'] = $job['registros_candidatos'] ?? $registros_candidatos;
+    $job['comum_processado_id'] = $job['comum_processado_id'] ?? $comum_processado_id;
+    $job['dep_map'] = $job['dep_map'] ?? $dep_map;
     $job['tipos_bens'] = $tipos_bens;
     $job['tipos_aliases'] = $tipos_aliases_calculados;
     $job['produtos_existentes'] = $produtos_existentes;
     $job['produtos_existentes_por_codigo'] = $produtos_existentes_por_codigo;
     $job['id_produto_sequencial'] = $id_produto_sequencial;
-    $job['codigos_processados'] = [];
-    $job['stats'] = [
+    $job['codigos_processados'] = $job['codigos_processados'] ?? [];
+    $job['stats'] = $job['stats'] ?? [
         'novos' => 0,
         'atualizados' => 0,
         'excluidos' => 0,
         'processados' => 0,
     ];
-    $job['erros_produtos'] = [];
+    $job['erros_produtos'] = $job['erros_produtos'] ?? [];
     $job['status'] = 'ready';
     $job['data_mysql'] = $data_mysql;
-    $job['map_comum_ids'] = $map_comum_ids;
+    $job['map_comum_ids'] = $job['map_comum_ids'] ?? $map_comum_ids;
+    $job['is_csv'] = $isCsv;
+    $job['total_linhas'] = $job['total_linhas'] ?? ($total_linhas ?? 0);
 
-    ip_append_log($job, 'info', 'Leitura inicial concluída. Total estimado de linhas úteis: ' . $registros_candidatos . '.');
+    ip_append_log($job, 'info', 'Leitura inicial concluída. Total estimado de linhas úteis: ' . $job['registros_candidatos'] . '.');
 
     ip_save_job($job);
     return $job;
