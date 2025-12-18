@@ -880,6 +880,7 @@ if ($action === 'process') {
                 ip_cleanup_job_resources($job);
                 ip_release_import_lock($lock);
                 ip_response_json(['message' => 'Falha ao preparar importação: ' . $prepEx->getMessage()], 500);
+                return;
             }
         }
 
