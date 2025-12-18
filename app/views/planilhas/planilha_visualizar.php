@@ -763,7 +763,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const showCheck = !(state.ativo === 0) && !(state.imprimir === 1 || state.editado === 1);
         const showImprimir = state.ativo === 1 && state.checado === 1 && state.editado === 0;
         const showObs = state.ativo === 1;
-        const showEdit = state.ativo === 1 && state.checado === 0;
+        // Permitir editar quando o item estiver ativo — também será liberado ao marcar como checado
+        const showEdit = state.ativo === 1;
 
         row.querySelectorAll('.action-check').forEach(el => {
             el.style.display = 'inline-block';
