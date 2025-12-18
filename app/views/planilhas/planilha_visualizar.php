@@ -583,7 +583,7 @@ ob_start();
                     </form>
                     
                     <!-- Etiqueta -->
-                    <form method="POST" action="../../../app/controllers/update/ProdutoEtiquetaController.php" style="display: <?php echo $show_imprimir ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $produtoId; ?>" data-confirm="<?php echo $p['imprimir'] ? 'Deseja desmarcar este PRODUTO para etiqueta?' : 'Deseja marcar este PRODUTO para etiqueta?'; ?>">
+                    <form method="POST" action="../../../app/controllers/update/ProdutoEtiquetaController.php" style="display: <?php echo $show_imprimir ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $produtoId; ?>">
                         <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="imprimir" value="<?php echo $p['imprimir'] ? '0' : '1'; ?>">
