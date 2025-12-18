@@ -574,7 +574,7 @@ ob_start();
                 <!-- EdiÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo Pendente -->
                 <?php if ($tem_edicao): ?>
                 <div class="edicao-pendente">
-                    <strong>EdiÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo:</strong><br>
+                    <strong>Edição:</strong><br>
                     <?php
                     // Mostrar editado_descricao_completa se existir; caso contrÃ¢â€Å“ÃƒÂ­rio montar uma versÃ¢â€Å“ÃƒÂºo dinÃ¢â€Å“ÃƒÂ³mica
                     $desc_editada_visivel = trim($p['editado_descricao_completa'] ?? '');
@@ -588,14 +588,14 @@ ob_start();
                         // Montagem simples (similar a funcao pp_montar_descricao, mas sem quantidade)
                         $partes = [];
                         if ($tipo_codigo_final && $tipo_desc_final) {
-                            $partes[] = strtoupper($tipo_codigo_final . ' - ' . $tipo_desc_final);
+                            $partes[] = mb_strtoupper($tipo_codigo_final . ' - ' . $tipo_desc_final, 'UTF-8');
                         }
                         if ($ben_final !== '') {
-                            $partes[] = strtoupper($ben_final);
+                            $partes[] = mb_strtoupper($ben_final, 'UTF-8');
                         }
                         if ($comp_final !== '') {
                             // Evitar duplicacao do bem no complemento (basico)
-                            $comp_tmp = strtoupper($comp_final);
+                            $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
                             if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
                                 $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
                                 $comp_tmp = preg_replace('/^[\s\-\/]+/','',$comp_tmp);
@@ -604,7 +604,7 @@ ob_start();
                         }
                         $desc_editada_visivel = implode(' - ', $partes);
                         if ($dep_final) {
-                            $desc_editada_visivel .= ' (' . strtoupper($dep_final) . ')';
+                            $desc_editada_visivel .= ' (' . mb_strtoupper($dep_final, 'UTF-8') . ')';
                         }
                         if ($desc_editada_visivel === '') {
                             $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
@@ -700,7 +700,7 @@ ob_start();
 
 <!-- PaginaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo -->
 <?php if (isset($total_paginas) && $total_paginas > 1): ?>
-<nav aria-label="NavegaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo de pÃ¢â€Å“ÃƒÂ­gina" class="mt-3">
+<nav aria-label="Navegação de página" class="mt-3">
     <ul class="pagination pagination-sm justify-content-center mb-0">
         <?php if ($pagina > 1): ?>
         <li class="page-item">
@@ -971,7 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // resposta nÃƒÂ£o era JSON
                 }
                 if (!response.ok || data.success === false) {
-                    throw new Error(data.message || 'NÃƒÂ£o foi possÃƒÂ­vel atualizar.');
+                    throw new Error(data.message || 'NÃO FOI POSSÍVEL ATUALIZAR.');
                 }
                 return data;
             })
@@ -1022,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.querySelector(`input[name="${name}"]`);
       if(el) return el;
     }
-    const el = document.querySelector('input[placeholder*="cÃ¢â€Å“Ã¢â€â€šdigo" i],input[placeholder*="codigo" i]');
+    const el = document.querySelector('input[placeholder*="código" i],input[placeholder*="codigo" i]');
     return el || null;
   }
   
@@ -1040,11 +1040,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){
         micBtn.setAttribute('aria-disabled', 'true');
-        micBtn.title = 'Reconhecimento de voz nÃ¢â€Å“ÃƒÂºo suportado neste navegador';
+        micBtn.title = 'Reconhecimento de voz não suportado neste navegador';
         const iconNF = micBtn.querySelector('.material-icons-round');
         if(iconNF){ iconNF.textContent = 'mic_off'; }
         micBtn.addEventListener('click', () => {
-            alert('Reconhecimento de voz nÃ¢â€Å“ÃƒÂºo Ã¢â€Å“Ã‚Â® suportado neste navegador. Use o botÃ¢â€Å“ÃƒÂºo de cÃ¢â€Å“ÃƒÂ³mera ou digite o cÃ¢â€Å“Ã¢â€â€šdigo.');
+            alert('Reconhecimento de voz não suportado neste navegador. Use o botão de câmera ou digite o código.');
         });
         return;
   }
@@ -1132,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const codigo = extraiCodigoFalado(best);
     stopListening();
     if(!codigo){
-      alert('NÃ¢â€Å“ÃƒÂºo entendi o cÃ¢â€Å“Ã¢â€â€šdigo. Tente soletrar: "um dois trÃ¢â€Å“Ã‚Â¬s"Ãƒâ€Ãƒâ€¡Ã‚Âª');
+      alert('Não entendi o código. Tente soletrar: "um dois três"');
       return;
     }
     preencherEEnviar(codigo);
@@ -1174,7 +1174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Controles de cÃ¢â€Å“ÃƒÂ³mera e zoom -->
                 <div class="scanner-controls">
                     <select id="cameraSelect" class="form-select form-select-sm">
-                        <option value="">Carregando cÃ¢â€Å“ÃƒÂ³meras...</option>
+                        <option value="">Carregando câmeras...</option>
                     </select>
                     <div class="zoom-control">
                         <i class="bi bi-zoom-out"></i>
@@ -1186,8 +1186,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Overlay com moldura e dica -->
                 <div class="scanner-overlay">
                     <div class="scanner-frame"></div>
-                    <div class="scanner-hint">Posicione o cÃ¢â€Å“Ã¢â€â€šdigo de barras dentro da moldura</div>
-                    <div class="scanner-info" id="scannerInfo">Inicializando cÃ¢â€Å“ÃƒÂ³mera...</div>
+                    <div class="scanner-hint">Posicione o código de barras dentro da moldura</div>
+                    <div class="scanner-info" id="scannerInfo">Inicializando câmera...</div>
                 </div>
             </div>
         </div>
@@ -1443,7 +1443,7 @@ function initBarcodeScanner() {
             availableCameras.forEach((camera, index) => {
                 const option = document.createElement('option');
                 option.value = camera.deviceId;
-                option.textContent = camera.label || `CÃ¢â€Å“ÃƒÂ³mera ${index + 1}`;
+                option.textContent = camera.label || `Câmera ${index + 1}`;
                 cameraSelect.appendChild(option);
             });
             

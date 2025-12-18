@@ -186,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Usar funÃ§Ã£o de montagem (quantidade padrÃ£o 1)
         $descricao_editada = pp_montar_descricao(1, $tipo_codigo, $tipo_desc, $final_ben, $final_comp, $dep_desc, []);
         $sql_update .= ", editado_descricao_completa = :editado_desc";
-        $params[':editado_desc'] = strtoupper($descricao_editada);
+        $params[':editado_desc'] = mb_strtoupper($descricao_editada, 'UTF-8');
 
         $sql_update .= " WHERE id_produto = :id_produto AND comum_id = :comum_id";
         $stmt_update = $conexao->prepare($sql_update);

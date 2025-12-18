@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // PrÃ©-preencher BEM usando o valor jÃ¡ processado pelo controller (editado ou original)
-    const bemPrefill = '<?php echo !empty($novo_bem) ? strtoupper(addslashes($novo_bem)) : ''; ?>';
+    const bemPrefill = '<?php echo !empty($novo_bem) ? addslashes(mb_strtoupper($novo_bem, 'UTF-8')) : ''; ?>';
     if (bemPrefill) {
         if (selectTipoBEM.value) {
             atualizarOpcoesBEM();
