@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $sql_update = "UPDATE produtos SET imprimir_etiqueta = 1, editado = 1, administrador_acessor_id = :administrador_acessor_id";
+        $sql_update = "UPDATE produtos SET imprimir_etiqueta = 1, editado = 1, checado = 1, administrador_acessor_id = :administrador_acessor_id";
         $params = [':id_produto' => $id_produto, ':comum_id' => $comum_id, ':administrador_acessor_id' => isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : null];
 
         // Persistir tipo de bem editado

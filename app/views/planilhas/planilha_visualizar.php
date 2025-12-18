@@ -810,6 +810,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const applyState = (row, updates = {}) => {
         const state = { ...getRowState(row), ...updates };
+        // Se o produto estiver marcado como editado, forçar checado = 1
+        if (Number(state.editado) === 1) state.checado = 1;
         row.dataset.ativo = state.ativo;
         row.dataset.checado = state.checado;
         row.dataset.imprimir = state.imprimir;

@@ -39,7 +39,7 @@ if ($produto_id <= 0 || $comum_id <= 0) {
 
 try {
     // Buscar status atual do produto
-    $sql_verifica = "SELECT COALESCE(p.ativo, 1) AS ativo, COALESCE(p.imprimir_etiqueta, 0) AS imprimir 
+    $sql_verifica = "SELECT COALESCE(p.ativo, 1) AS ativo, COALESCE(p.imprimir_etiqueta, 0) AS imprimir, COALESCE(p.editado, 0) AS editado 
                      FROM produtos p 
                      WHERE p.id_produto = :produto_id";
     $stmt_verifica = $conexao->prepare($sql_verifica);
@@ -57,8 +57,8 @@ try {
         exit;
     }
 
-    if ($checado === 0 && $status && ($status['ativo'] == 0 || $status['imprimir'] == 1)) {
-        $msg = 'NÃO É POSSÍVEL DESMARCAR O CHECK SE O PRODUTO ESTIVER NO DR OU MARCADO PARA IMPRESSÃO';
+    if ($checado === 0 && $status && ($status['ativo'] == 0 || $status['imprimir'] == 1 || $status['editado'] == 1)) {
+        $msg = 'NÃO É POSSÍVEL DESMARCAR O CHECK SE O PRODUTO ESTIVER NO DR, MARCADO PARA IMPRESSÃO OU COM ALTERAÇÕES EDITADAS (REMOVA AS ALTERAÇÕES PARA DESMARCAR)';
         if (is_ajax_request()) {
             json_response(['success' => false, 'message' => $msg], 422);
         }
