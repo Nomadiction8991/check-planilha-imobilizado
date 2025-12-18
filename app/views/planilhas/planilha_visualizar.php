@@ -444,10 +444,6 @@ ob_start();
                     <span class="legend-color legend-editado"></span>
                     <?php echo htmlspecialchars(to_uppercase('Editado'), ENT_QUOTES, 'UTF-8'); ?>
                 </li>
-                <li class="legend-item">
-                    <span class="legend-color legend-tipo-invalido"></span>
-                    <?php echo htmlspecialchars(to_uppercase('Tipo de bem não identificado'), ENT_QUOTES, 'UTF-8'); ?>
-                </li>
             </ul>
         </div>
     </div>
