@@ -230,12 +230,21 @@ ob_start();
     border-left: 4px solid #1976d2; 
 }
 .linha-dr { 
-    background-color: #ffebee; 
-    border-left: 4px solid #e53935; 
+    background-color: #F1F3F5; 
+    border-left: 4px solid #6C757D; 
 }
 .linha-editado { 
-    background-color: #f3e5f5; 
-    border-left: 4px solid #8e24aa; 
+    background-color: #F3E5F5; 
+    border-left: 4px solid #8E24AA; 
+}
+.linha-checado {
+    background-color: #E9F7EF;
+}
+.linha-imprimir {
+    background-color: #E8F4FF;
+}
+.linha-observacao {
+    background-color: #FFF8E1;
 }
 
 /* Aviso de tipo nÃ¢â€Å“ÃƒÂºo identificado - amarelo ouro forte */
@@ -256,12 +265,12 @@ ob_start();
     justify-content: center;
     font-size: 1.2rem;
     border-radius: 0.85rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
 }
 
 .acao-container .btn:not([disabled]):not(.disabled):hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
 }
 
 .acao-container .btn[disabled],
@@ -274,11 +283,22 @@ ob_start();
 .acao-container .btn.disabled-visually {
     pointer-events: auto;
     opacity: 0.45;
-    filter: grayscale(0.2);
+    filter: grayscale(0.18);
 }
-.acao-container .btn.disabled-visually:hover {
-    transform: none;
-}
+.acao-container .btn.disabled-visually:hover { transform: none; box-shadow: none; }
+
+/* Cores dos botões (paleta coerente com tema) */
+.acao-container .action-check button { border-color: #28A745; color: #28A745; }
+.acao-container .action-check button.active, .acao-container .action-check button:hover { background: #28A745; color: #fff; }
+
+.acao-container .action-imprimir button { border-color: #0D6EFD; color: #0D6EFD; }
+.acao-container .action-imprimir button.active, .acao-container .action-imprimir button:hover { background: #0D6EFD; color: #fff; }
+
+.acao-container .action-observacao { border-color: #FB8C00 !important; color: #FB8C00 !important; }
+.acao-container .action-observacao.active, .acao-container .action-observacao:hover { background: #FB8C00; color: #fff; }
+
+.acao-container .action-editar { border-color: #6F42C1 !important; color: #6F42C1 !important; }
+.acao-container .action-editar.active, .acao-container .action-editar:hover { background: #6F42C1; color: #fff; }
 
 .acao-container form,
 .acao-container a {
@@ -341,10 +361,10 @@ ob_start();
     display: inline-block;
 }
 
-.legend-checked { background-color: #10b759; }
-.legend-observacao { background-color: #fb8c00; }
-.legend-imprimir { background-color: #1976d2; }
-.legend-editado { background-color: #8e24aa; }
+.legend-checked { background-color: #28A745; }
+.legend-observacao { background-color: #FB8C00; }
+.legend-imprimir { background-color: #0D6EFD; }
+.legend-editado { background-color: #8E24AA; }
 </style>
 
 <!-- Link para Material Icons -->
