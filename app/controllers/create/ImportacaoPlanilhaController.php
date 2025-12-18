@@ -8,10 +8,34 @@ $pp_config = require dirname(__DIR__, 3) . '/config/parser/produto_parser_config
 
 use voku\helper\UTF8;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\IReadFilter;
 
 const IP_BATCH_SIZE = 200;
 const IP_JOB_DIR = __DIR__ . '/../../../storage/tmp';
 const IP_LOG_LIMIT = 300;
+
+class ImportacaoReadFilter implements IReadFilter
+{
+    private array $columns;
+    private string $dataColumn;
+    private int $dataRow;
+
+    public function __construct(array $columns, string $dataColumn, int $dataRow)
+    {
+        $this->columns = array_map('strtoupper', array_values(array_filter($columns, fn($col) => $col !== '')));
+        $this->dataColumn = strtoupper($dataColumn) ?: 'A';
+        $this->dataRow = max(1, $dataRow);
+    }
+
+    public function readCell($column, $row, $worksheetName = ''): bool
+    {
+        $column = strtoupper($column);
+        if ($column === $this->dataColumn && $row === $this->dataRow) {
+            return true;
+        }
+        return in_array($column, $this->columns, true);
+    }
+}
 
 // --- Funções utilitárias ---
 function ip_corrige_encoding($texto) {
@@ -173,7 +197,26 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $mapeamento_dependencia = strtoupper(trim($job['mapeamento_dependencia'] ?? 'P'));
 
     ip_normalizar_csv_encoding($job['file_path']);
-    $planilha = IOFactory::load($job['file_path']);
+
+    $posicao_data_ref = strtoupper(trim($posicao_data));
+    if (!preg_match('/^([A-Z]+)(\d+)$/', $posicao_data_ref, $matches)) {
+        $matches = ['','D','13'];
+    }
+    $data_column = $matches[1] ?: 'D';
+    $data_row = max(1, (int)$matches[2]);
+
+    $columns_para_ler = array_unique(array_filter([
+        $mapeamento_codigo,
+        $mapeamento_complemento,
+        $mapeamento_dependencia,
+        $coluna_localidade,
+        $data_column,
+    ]));
+
+    $reader = IOFactory::createReaderForFile($job['file_path']);
+    $reader->setReadDataOnly(true);
+    $reader->setReadFilter(new ImportacaoReadFilter($columns_para_ler, $data_column, $data_row));
+    $planilha = $reader->load($job['file_path']);
     $aba = $planilha->getActiveSheet();
 
     $valor_data_cell = $aba->getCell($posicao_data);
