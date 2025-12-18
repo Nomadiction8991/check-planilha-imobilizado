@@ -366,6 +366,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     if ($stmtTipos->execute()) {
         $tipos_bens = $stmtTipos->fetchAll(PDO::FETCH_ASSOC);
     }
+    $tipos_aliases_calculados = pp_construir_aliases_tipos($tipos_bens);
 
     $produtos_existentes = [];
     $produtos_existentes_por_codigo = [];
@@ -402,6 +403,7 @@ function ip_prepare_job(array $job, PDO $conexao, array $pp_config): array {
     $job['comum_processado_id'] = $comum_processado_id;
     $job['dep_map'] = $dep_map;
     $job['tipos_bens'] = $tipos_bens;
+    $job['tipos_aliases'] = $tipos_aliases_calculados;
     $job['produtos_existentes'] = $produtos_existentes;
     $job['produtos_existentes_por_codigo'] = $produtos_existentes_por_codigo;
     $job['id_produto_sequencial'] = $id_produto_sequencial;
@@ -464,8 +466,7 @@ if ($action === 'process') {
         $idx_dependencia = (int)$job['idx_dependencia'];
         $idx_localidade = (int)$job['idx_localidade'];
 
-        $tipos_bens = $job['tipos_bens'];
-        $tipos_aliases = pp_construir_aliases_tipos($tipos_bens);
+        $tipos_aliases = $job['tipos_aliases'] ?? [];
 
         $conexao->beginTransaction();
 
