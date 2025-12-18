@@ -494,7 +494,7 @@ ob_start();
             ?>
             <div 
                 class="list-group-item <?php echo $classe; ?><?php echo $tipo_invalido ? ' tipo-nao-identificado' : ''; ?>" 
-                data-PRODUTO-id="<?php echo $produtoId; ?>"
+                data-produto-id="<?php echo $produtoId; ?>"
                 data-ativo="<?php echo (int) $p['ativo']; ?>"
                 data-checado="<?php echo (int) $p['checado']; ?>"
                 data-imprimir="<?php echo (int) $p['imprimir']; ?>"
@@ -568,7 +568,7 @@ ob_start();
                 <?php if (isAdmin()): ?>
                 <div class="acao-container">
                     <!-- Check -->
-                    <form method="POST" action="../../../app/controllers/update/ProdutoCheckController.php" style="display: <?php echo $show_check ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-check" data-action="check" data-PRODUTO-id="<?php echo $produtoId; ?>">
+                    <form method="POST" action="../../../app/controllers/update/ProdutoCheckController.php" style="display: <?php echo $show_check ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-check" data-action="check" data-produto-id="<?php echo $produtoId; ?>">
                         <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="checado" value="<?php echo $p['checado'] ? '0' : '1'; ?>">
@@ -583,7 +583,7 @@ ob_start();
                     </form>
                     
                     <!-- Etiqueta -->
-                    <form method="POST" action="../../../app/controllers/update/ProdutoEtiquetaController.php" style="display: <?php echo $show_imprimir ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-PRODUTO-id="<?php echo $produtoId; ?>" data-confirm="<?php echo $p['imprimir'] ? 'Deseja desmarcar este PRODUTO para etiqueta?' : 'Deseja marcar este PRODUTO para etiqueta?'; ?>">
+                    <form method="POST" action="../../../app/controllers/update/ProdutoEtiquetaController.php" style="display: <?php echo $show_imprimir ? 'inline' : 'none'; ?>;" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $produtoId; ?>" data-confirm="<?php echo $p['imprimir'] ? 'Deseja desmarcar este PRODUTO para etiqueta?' : 'Deseja marcar este PRODUTO para etiqueta?'; ?>">
                         <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                         <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                         <input type="hidden" name="imprimir" value="<?php echo $p['imprimir'] ? '0' : '1'; ?>">
@@ -725,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActionButtons(row, state);
     };
 
-    document.querySelectorAll('.list-group-item[data-PRODUTO-id]').forEach(row => {
+    document.querySelectorAll('.list-group-item[data-produto-id]').forEach(row => {
         updateActionButtons(row, getRowState(row));
     });
 
@@ -733,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             const action = form.dataset.action;
-            const PRODUTOId = form.dataset.PRODUTOId;
+            const PRODUTOId = form.dataset.produtoId;
             const confirmMsg = form.dataset.confirm;
             if (confirmMsg && !confirm(confirmMsg)) {
                 return;
@@ -763,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
 
-                const row = document.querySelector(`.list-group-item[data-PRODUTO-id="${PRODUTOId}"]`);
+                const row = document.querySelector(`.list-group-item[data-produto-id="${PRODUTOId}"]`);
                 const stateUpdates = {};
 
                 if (action === 'check') {
