@@ -283,6 +283,7 @@ function ip_track_processed_ids(PDO $conexao, string $jobId, array $ids, int $co
     if (empty($ids)) {
         return;
     }
+    ip_ensure_processed_table($conexao);
     $placeholders = [];
     $params = [];
     foreach ($ids as $i => $pid) {
@@ -373,6 +374,7 @@ function ip_bulk_upsert_produtos(PDO $conexao, array $rows, int $chunkSize = 500
 }
 
 function ip_delete_unprocessed(PDO $conexao, string $jobId): int {
+    ip_ensure_processed_table($conexao);
     $sql = 'DELETE p FROM produtos p
             JOIN (SELECT DISTINCT comum_id FROM import_job_processed WHERE job_id = :job) c ON c.comum_id = p.comum_id
             LEFT JOIN import_job_processed t ON t.job_id = :job AND t.id_produto = p.id_produto
