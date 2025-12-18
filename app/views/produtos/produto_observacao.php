@@ -28,7 +28,6 @@ ob_start();
     </div>
     <div class="card-body">
         <div class="row g-2 small">
-            <div class="col-12"><?php echo htmlspecialchars($codigoProduto, ENT_QUOTES, 'UTF-8'); ?></div>
             <div class="col-12"><?php echo htmlspecialchars($descricaoCompleta, ENT_QUOTES, 'UTF-8'); ?></div>
         </div>
     </div>
