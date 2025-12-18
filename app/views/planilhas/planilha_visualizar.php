@@ -243,8 +243,19 @@ ob_start();
     border-left: 4px solid #fdd835 !important;
 }
 
-/* AÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂes: usar padrÃ¢â€Å“ÃƒÂºo Bootstrap para botÃ¢â€Å“ÃƒÂes */
-.acao-container .btn { padding: 0.25rem 0.5rem; }
+/* Ações: usar padrão Bootstrap para botões e manter largura proporcional */
+.acao-container .btn {
+    padding: 0.25rem 0.5rem;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    /* Garantir que cada botão ocupe proporcionalmente o mesmo espaço (igual a .input-group > .btn) */
+    flex: 0 0 15% !important;
+    min-width: 45px !important;
+    max-width: 60px !important;
+    padding: 0.375rem 0.25rem !important;
+    font-size: 1.1rem !important;
+}
 
 .edicao-pendente {
     background: #f3e5f5;
@@ -392,7 +403,7 @@ ob_start();
                                 <select class="form-select" id="status" name="status">
                                     <option value=""><?php echo htmlspecialchars(to_uppercase('Todos'), ENT_QUOTES, 'UTF-8'); ?></option>
                                     <option value="checado" <?php echo ($filtro_STATUS ?? '')==='checado'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Checados'), ENT_QUOTES, 'UTF-8'); ?></option>
-                                    <option value="observacao" <?php echo ($filtro_STATUS ?? '')==='observacao'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Com Observação'), ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <option value="observacao" <?php echo ($filtro_STATUS ?? '')==='observacao'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Com observacao'), ENT_QUOTES, 'UTF-8'); ?></option>
                                     <option value="etiqueta" <?php echo ($filtro_STATUS ?? '')==='etiqueta'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Etiqueta para Imprimir'), ENT_QUOTES, 'UTF-8'); ?></option>
                                     <option value="pendente" <?php echo ($filtro_STATUS ?? '')==='pendente'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Pendentes'), ENT_QUOTES, 'UTF-8'); ?></option>
                                     <option value="editado" <?php echo ($filtro_STATUS ?? '')==='editado'?'selected':''; ?>><?php echo htmlspecialchars(to_uppercase('Editados'), ENT_QUOTES, 'UTF-8'); ?></option>
@@ -521,7 +532,7 @@ ob_start();
                         $ben_final = ($p['editado_bem'] !== '' ? $p['editado_bem'] : $p['bem']);
                         $comp_final = ($p['editado_complemento'] !== '' ? $p['editado_complemento'] : $p['complemento']);
                         $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
-                        // Montagem simples (similar Ã¢â€Å“ÃƒÂ¡ funÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo pp_montar_descricao mas sem quantidade)
+                        // Montagem simples (similar a funcao pp_montar_descricao, mas sem quantidade)
                         $partes = [];
                         if ($tipo_codigo_final && $tipo_desc_final) {
                             $partes[] = strtoupper($tipo_codigo_final . ' - ' . $tipo_desc_final);
@@ -530,7 +541,7 @@ ob_start();
                             $partes[] = strtoupper($ben_final);
                         }
                         if ($comp_final !== '') {
-                            // Evitar duplicaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo do ben no complemento (bÃ¢â€Å“ÃƒÂ­sico)
+                            // Evitar duplicacao do bem no complemento (basico)
                             $comp_tmp = strtoupper($comp_final);
                             if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
                                 $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
@@ -543,7 +554,7 @@ ob_start();
                             $desc_editada_visivel .= ' (' . strtoupper($dep_final) . ')';
                         }
                         if ($desc_editada_visivel === '') {
-                            $desc_editada_visivel = 'EDIÃ¢â€Å“ÃƒÂ§Ã¢â€Å“ÃƒÂ¢O SEM DESCRIÃ¢â€Å“ÃƒÂ§Ã¢â€Å“ÃƒÂ¢O';
+                            $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
                         }
                     }
                     echo htmlspecialchars($desc_editada_visivel);
@@ -551,10 +562,10 @@ ob_start();
                 </div>
                 <?php endif; ?>
                 
-                <!-- ObservaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo -->
+                <!-- Observacao -->
                 <?php if (!empty($p['observacao'])): ?>
                 <div class="observacao-PRODUTO">
-                    <strong>ObservaÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂºo:</strong><br>
+                    <strong><?php echo htmlspecialchars(to_uppercase('observacao'), ENT_QUOTES, 'UTF-8'); ?>:</strong><br>
                     <?php echo htmlspecialchars($p['observacao']); ?><br>
                 </div>
                 <?php endif; ?>
@@ -597,9 +608,9 @@ ob_start();
                         </button>
                     </form>
                     
-                    <!-- Observa??o -->
+                    <!-- Observacao -->
                     <a href="../produtos/produto_observacao.php?id_produto=<?php echo $produtoId; ?>&comum_id=<?php echo $comum_id; ?>&pagina=<?php echo $pagina ?? 1; ?>&nome=<?php echo urlencode($filtro_nome ?? ''); ?>&dependencia=<?php echo urlencode($filtro_dependencia ?? ''); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo ?? ''); ?>&status=<?php echo urlencode($filtro_STATUS ?? ''); ?>"
-                       class="btn btn-outline-warning btn-sm action-observacao <?php echo !empty($p['observacao']) ? 'active' : ''; ?>" style="display: <?php echo $show_obs ? 'inline-block' : 'none'; ?>;" title="Observa??o">
+                       class="btn btn-outline-warning btn-sm action-observacao <?php echo !empty($p['observacao']) ? 'active' : ''; ?>" style="display: <?php echo $show_obs ? 'inline-block' : 'none'; ?>;" title="<?php echo htmlspecialchars(to_uppercase('observacao'), ENT_QUOTES, 'UTF-8'); ?>">
                         <i class="bi bi-chat-square-text-fill"></i>
                     </a>
                     
