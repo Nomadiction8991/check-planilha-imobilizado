@@ -930,7 +930,9 @@ if ($action === 'process') {
         $map_comum_ids = $job['map_comum_ids'] ?? [];
         $processedByComum = [];
 
+        $transactionStarted = false;
         $conexao->beginTransaction();
+        $transactionStarted = true;
         ip_append_log($job, 'info', 'Processando lote a partir da linha ' . ($inicio + 1) . '. Items: ' . count($batchItems) . '.');
 
         foreach ($batchItems as $item) {
@@ -1219,7 +1221,7 @@ SQL;
         ]);
         return;
     } catch (Throwable $e) {
-        if ($conexao->inTransaction()) {
+        if ($transactionStarted && $conexao->inTransaction()) {
             $conexao->rollBack();
         }
         ip_release_import_lock($lock);
@@ -1239,6 +1241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'start') {
     $debug_import = isset($_POST['debug_import']);
 
     $lock = null;
+    $transactionStarted = false;
     try {
         $lock = ip_acquire_import_lock(true);
         if (!$lock) {
