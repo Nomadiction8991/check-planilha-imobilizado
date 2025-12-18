@@ -589,7 +589,7 @@ ob_start();
                 <?php if (!empty($p['observacao'])): ?>
                 <div class="observacao-PRODUTO">
                     <strong><?php echo htmlspecialchars(to_uppercase('observacao'), ENT_QUOTES, 'UTF-8'); ?>:</strong><br>
-                    <?php echo htmlspecialchars($p['observacao']); ?><br>
+                    <?php echo htmlspecialchars(to_uppercase($p['observacao']), ENT_QUOTES, 'UTF-8'); ?><br>
                 </div>
                 <?php endif; ?>
                 

@@ -42,7 +42,17 @@ $check = [
 
 // Buscar dados do produto POR ID
 try {
-    $sql_produto = "SELECT * FROM produtos WHERE id_produto = :id_produto AND comum_id = :comum_id";
+    $sql_produto = "SELECT
+                        p.*,
+                        t1.codigo AS tipo_codigo,
+                        t1.descricao AS tipo_desc,
+                        d1.descricao AS dependencia_desc,
+                        d2.descricao AS editado_dependencia_desc
+                    FROM produtos p
+                    LEFT JOIN tipos_bens t1 ON p.tipo_bem_id = t1.id
+                    LEFT JOIN dependencias d1 ON p.dependencia_id = d1.id
+                    LEFT JOIN dependencias d2 ON p.editado_dependencia_id = d2.id
+                    WHERE id_produto = :id_produto AND comum_id = :comum_id";
     $stmt_produto = $conexao->prepare($sql_produto);
     $stmt_produto->bindValue(':id_produto', $id_produto);
     $stmt_produto->bindValue(':comum_id', $comum_id);
@@ -59,6 +69,8 @@ try {
         'observacoes' => $produto['observacao'] ?? '',
         'imprimir' => $produto['imprimir_etiqueta'] ?? 0
     ];
+
+    $descricaoCompleta = montarDescricaoCompletaProduto($produto);
     
 } catch (Exception $e) {
     $mensagem = "Erro ao carregar produto: " . $e->getMessage();
@@ -107,10 +119,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// FunÃ§Ã£o para gerar URL de retorno com filtros - CORRIGIDA
+
+
+function montarDescricaoCompletaProduto(array $produto): string {
+    $descricaoEdicao = trim($produto['editado_descricao_completa'] ?? '');
+    $descricaoBase = trim($produto['descricao_completa'] ?? '');
+    $descricaoOriginal = trim($produto['descricao'] ?? '');
+
+    $descricao = $descricaoEdicao ?: $descricaoBase ?: $descricaoOriginal;
+    if ($descricao !== '') {
+        return to_uppercase($descricao);
+    }
+
+    $partes = [];
+    $tipoCodigo = trim($produto['tipo_codigo'] ?? '');
+    $tipoDesc = trim($produto['tipo_desc'] ?? '');
+    if ($tipoCodigo !== '' && $tipoDesc !== '') {
+        $partes[] = strtoupper(trim("{$tipoCodigo} - {$tipoDesc}"));
+    } elseif ($tipoDesc !== '') {
+        $partes[] = strtoupper($tipoDesc);
+    } elseif ($tipoCodigo !== '') {
+        $partes[] = strtoupper($tipoCodigo);
+    }
+
+    $bem = trim($produto['bem'] ?? '');
+    if ($bem !== '') {
+        $partes[] = strtoupper($bem);
+    }
+
+    $complemento = trim($produto['complemento'] ?? '');
+    if ($complemento !== '') {
+        $complementoTmp = strtoupper($complemento);
+        if ($bem !== '' && strpos($complementoTmp, strtoupper($bem)) === 0) {
+            $complementoTmp = trim(substr($complementoTmp, strlen(strtoupper($bem))));
+            $complementoTmp = preg_replace('/^[\s\-\/]+/', '', $complementoTmp);
+        }
+        if ($complementoTmp !== '') {
+            $partes[] = $complementoTmp;
+        }
+    }
+
+    $dependencia = trim($produto['editado_dependencia_desc'] ?? $produto['dependencia_desc'] ?? '');
+    if ($dependencia !== '') {
+        $partes[] = '(' . strtoupper($dependencia) . ')';
+    }
+
+    if (!empty($partes)) {
+        return to_uppercase(implode(' - ', $partes));
+    }
+
+    $fallback = trim($produto['codigo'] ?? $produto['bem'] ?? '');
+    return to_uppercase($fallback ?: 'PRODUTO');
+}
+
+// Função para gerar URL de retorno com filtros - CORRIGIDA
 function getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status) {
     $params = [
-        'id' => $comum_id, // CORRETO: view-planilha.php usa 'id' como par?metro
+        'id' => $comum_id, // CORRETO: view-planilha.php usa 'id' como parâmetro
         'comum_id' => $comum_id,
         'pagina' => $pagina,
         'nome' => $filtro_nome,
@@ -121,5 +186,3 @@ function getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $fi
     return '../planilhas/planilha_visualizar.php?' . http_build_query($params);
 }
 ?>
-
-

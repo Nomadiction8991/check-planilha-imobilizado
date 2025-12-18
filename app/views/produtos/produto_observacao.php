@@ -8,7 +8,7 @@ $filtroStatus = $filtro_status ?? ($filtro_STATUS ?? '');
 $backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtroStatus);
 
 $produtoDados = $produto ?? [];
-$descricaoCompleta = trim($produtoDados['editado_descricao_completa'] ?? $produtoDados['descricao_completa'] ?? $produtoDados['descricao'] ?? '');
+$descricaoCompleta = isset($descricaoCompleta) ? $descricaoCompleta : trim($produtoDados['editado_descricao_completa'] ?? $produtoDados['descricao_completa'] ?? $produtoDados['descricao'] ?? '');
 $codigoProduto = $produtoDados['codigo'] ?? '';
 
 ob_start();
