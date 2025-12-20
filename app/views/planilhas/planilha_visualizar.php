@@ -886,7 +886,8 @@ ob_start();
             const checkDisabled = isEdited || state.imprimir === 1 || !active;
 
             const imprimirActive = state.imprimir === 1;
-            const imprimirDisabled = false; // sempre disponível para clicar
+            // Desabilitar o botão de imprimir quando o produto estiver editado ou quando não estiver ativo
+            const imprimirDisabled = isEdited || !active;
 
             const showObs = true; // Observação sempre disponível
             const showEdit = true; // Editar sempre disponível
@@ -915,9 +916,15 @@ ob_start();
                 if (btn) {
                     btn.disabled = imprimirDisabled;
                     btn.classList.toggle('active', imprimirActive);
-                    btn.classList.remove('disabled-visually');
-                    btn.removeAttribute('aria-disabled');
-                    btn.title = btn.title || 'Etiqueta';
+                    if (imprimirDisabled) {
+                        btn.setAttribute('aria-disabled', 'true');
+                        btn.classList.add('disabled-visually');
+                        btn.title = 'Etiqueta indisponível enquanto o produto estiver editado';
+                    } else {
+                        btn.removeAttribute('aria-disabled');
+                        btn.classList.remove('disabled-visually');
+                        btn.title = btn.title || 'Etiqueta';
+                    }
                 }
             });
 
