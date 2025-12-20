@@ -348,7 +348,13 @@ ob_start();
     .acao-container .action-observacao.active,
     .acao-container .action-observacao:hover {
         background: #FB8C00;
-        color: #fff;
+        color: #fff !important;
+    }
+
+    /* Garantir que o ícone dentro do botão de observação fique branco quando ativo */
+    .acao-container .action-observacao.active i,
+    .acao-container .action-observacao:hover i {
+        color: #fff !important;
     }
 
     .acao-container .action-editar {
