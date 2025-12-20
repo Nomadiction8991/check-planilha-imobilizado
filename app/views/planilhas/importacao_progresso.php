@@ -67,227 +67,237 @@ ob_start();
 </div>
 
 <script>
-(function() {
-    const baseUrl = <?php echo json_encode(base_url()); ?>;
-    const jobId = <?php echo json_encode($jobId); ?>;
-    const progressBar = document.getElementById('progress-bar');
-    const processedEl = document.getElementById('processed');
-    const totalEl = document.getElementById('total');
-    const novosEl = document.getElementById('novos');
-    const atualizadosEl = document.getElementById('atualizados');
-    const excluidosEl = document.getElementById('excluidos');
-    const alertArea = document.getElementById('alert-area');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const errorsNote = document.getElementById('errors-note');
-    const errorsList = document.getElementById('errors-list');
-    const doneActions = document.getElementById('done-actions');
-    const goComuns = document.getElementById('go-comuns');
-    const processingNote = document.getElementById('processing-note');
-    const logBox = document.getElementById('log-box');
+    (function() {
+        const baseUrl = <?php echo json_encode(base_url()); ?>;
+        const jobId = <?php echo json_encode($jobId); ?>;
+        const progressBar = document.getElementById('progress-bar');
+        const processedEl = document.getElementById('processed');
+        const totalEl = document.getElementById('total');
+        const novosEl = document.getElementById('novos');
+        const atualizadosEl = document.getElementById('atualizados');
+        const excluidosEl = document.getElementById('excluidos');
+        const alertArea = document.getElementById('alert-area');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const errorsNote = document.getElementById('errors-note');
+        const errorsList = document.getElementById('errors-list');
+        const doneActions = document.getElementById('done-actions');
+        const goComuns = document.getElementById('go-comuns');
+        const processingNote = document.getElementById('processing-note');
+        const logBox = document.getElementById('log-box');
 
-    const errorsAccum = new Set();
+        const errorsAccum = new Set();
 
-    let canceled = false;
-    let fatal = false;
+        let canceled = false;
+        let fatal = false;
 
-    function setProgress(percent) {
-        const pct = Math.max(0, Math.min(100, percent));
-        progressBar.style.width = pct + '%';
-        progressBar.setAttribute('aria-valuenow', pct);
-        progressBar.textContent = pct.toFixed(2) + '%';
-    }
-
-    function showAlert(type, message) {
-        alertArea.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + message + '</div>';
-    }
-
-    function formatLogEntry(entry) {
-        const ts = entry.ts ? new Date(entry.ts * 1000) : new Date();
-        const stamp = ts.toLocaleTimeString('pt-BR');
-        const lvl = (entry.level || 'info').toUpperCase();
-        const msg = entry.message || '';
-        return '[' + stamp + '] ' + lvl + ': ' + msg;
-    }
-
-    function renderLog(entries) {
-        if (!logBox) return;
-        logBox.innerHTML = '';
-        entries.forEach(e => {
-            const div = document.createElement('div');
-            div.textContent = formatLogEntry(e);
-            logBox.appendChild(div);
-        });
-        logBox.scrollTop = logBox.scrollHeight;
-    }
-
-    function appendLog(level, message) {
-        if (!logBox) return;
-        const entry = { ts: Math.floor(Date.now() / 1000), level, message };
-        const div = document.createElement('div');
-        div.textContent = formatLogEntry(entry);
-        logBox.appendChild(div);
-        logBox.scrollTop = logBox.scrollHeight;
-    }
-
-    function pushErrors(errs) {
-        if (!errs || !errs.length) return;
-        errs.forEach(e => {
-            if (!errorsAccum.has(e)) {
-                errorsAccum.add(e);
-                const li = document.createElement('li');
-                li.textContent = e;
-                errorsList.appendChild(li);
-            }
-        });
-        if (errorsAccum.size > 0) {
-            errorsNote.style.display = '';
+        function setProgress(percent) {
+            const pct = Math.max(0, Math.min(100, percent));
+            progressBar.style.width = pct + '%';
+            progressBar.setAttribute('aria-valuenow', pct);
+            progressBar.textContent = pct.toFixed(2) + '%';
         }
-    }
 
-    async function cancelImport() {
-        if (!confirm('Cancelar esta importação?')) {
-            return;
+        function showAlert(type, message) {
+            alertArea.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + message + '</div>';
         }
-        cancelBtn.disabled = true;
-        canceled = true;
-        try {
-            const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=cancel&job=' + encodeURIComponent(jobId), {
-                method: 'POST',
-                headers: { 'Accept': 'application/json' }
+
+        function formatLogEntry(entry) {
+            const ts = entry.ts ? new Date(entry.ts * 1000) : new Date();
+            const stamp = ts.toLocaleTimeString('pt-BR');
+            const lvl = (entry.level || 'info').toUpperCase();
+            const msg = entry.message || '';
+            return '[' + stamp + '] ' + lvl + ': ' + msg;
+        }
+
+        function renderLog(entries) {
+            if (!logBox) return;
+            logBox.innerHTML = '';
+            entries.forEach(e => {
+                const div = document.createElement('div');
+                div.textContent = formatLogEntry(e);
+                logBox.appendChild(div);
             });
-            const data = await resp.json();
-            if (!resp.ok) {
-                showAlert('danger', data.message || 'Falha ao cancelar importação.');
-                appendLog('erro', data.message || 'Falha ao cancelar importação.');
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function appendLog(level, message) {
+            if (!logBox) return;
+            const entry = {
+                ts: Math.floor(Date.now() / 1000),
+                level,
+                message
+            };
+            const div = document.createElement('div');
+            div.textContent = formatLogEntry(entry);
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function pushErrors(errs) {
+            if (!errs || !errs.length) return;
+            errs.forEach(e => {
+                if (!errorsAccum.has(e)) {
+                    errorsAccum.add(e);
+                    const li = document.createElement('li');
+                    li.textContent = e;
+                    errorsList.appendChild(li);
+                }
+            });
+            if (errorsAccum.size > 0) {
+                errorsNote.style.display = '';
+            }
+        }
+
+        async function cancelImport() {
+            if (!confirm('Cancelar esta importação?')) {
+                return;
+            }
+            cancelBtn.disabled = true;
+            canceled = true;
+            try {
+                const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=cancel&job=' + encodeURIComponent(jobId), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    showAlert('danger', data.message || 'Falha ao cancelar importação.');
+                    appendLog('erro', data.message || 'Falha ao cancelar importação.');
+                    cancelBtn.disabled = false;
+                    canceled = false;
+                    return;
+                }
+                const msg = 'Importação cancelada.';
+                showAlert('warning', msg);
+                appendLog('aviso', msg);
+            } catch (err) {
+                showAlert('danger', 'Erro ao cancelar: ' + err);
+                appendLog('erro', 'Erro ao cancelar: ' + err);
                 cancelBtn.disabled = false;
                 canceled = false;
-                return;
             }
-            const msg = 'Importação cancelada.';
-            showAlert('warning', msg);
-            appendLog('aviso', msg);
-        } catch (err) {
-            showAlert('danger', 'Erro ao cancelar: ' + err);
-            appendLog('erro', 'Erro ao cancelar: ' + err);
-            cancelBtn.disabled = false;
-            canceled = false;
         }
-    }
 
-    async function concludeImport() {
-        const concludeBtn = document.getElementById('conclude-btn');
-        concludeBtn.disabled = true;
-        try {
-            const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=finish&job=' + encodeURIComponent(jobId), {
-                method: 'POST',
-                headers: { 'Accept': 'application/json' }
-            });
-            const data = await resp.json();
-            if (!resp.ok) {
-                showAlert('danger', data.message || 'Falha ao finalizar importação.');
-                appendLog('erro', data.message || 'Falha ao finalizar importação.');
-                concludeBtn.disabled = false;
-                return;
-            }
-            const redirect = data.redirect || (baseUrl + 'index.php');
-            window.location.href = redirect;
-        } catch (err) {
-            showAlert('danger', 'Erro ao finalizar: ' + err);
-            appendLog('erro', 'Erro ao finalizar: ' + err);
-            concludeBtn.disabled = false;
-        }
-    }
-
-    async function poll() {
-        if (canceled) {
-            return;
-        }
-        if (fatal) {
-            return;
-        }
-        try {
-            const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=process&job=' + encodeURIComponent(jobId), {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (!resp.ok) {
-                const text = await resp.text();
-                const msg = 'Erro ao processar: ' + text;
-                showAlert('danger', msg);
-                appendLog('erro', msg);
-                fatal = true;
-                return;
-            }
-            const data = await resp.json();
-
-            if (data.total !== undefined) {
-                totalEl.textContent = data.total;
-            }
-            if (data.stats) {
-                processedEl.textContent = data.stats.processados ?? 0;
-                novosEl.textContent = data.stats.novos ?? 0;
-                atualizadosEl.textContent = data.stats.atualizados ?? 0;
-                excluidosEl.textContent = data.stats.excluidos ?? 0;
-            }
-            if (data.progress !== undefined) {
-                setProgress(data.progress);
-            }
-
-            if (data.log && Array.isArray(data.log)) {
-                renderLog(data.log);
-            }
-
-            if (data.errors && data.errors.length > 0) {
-                showAlert('warning', 'Erros até agora: ' + data.errors.slice(-3).join(' | '));
-                pushErrors(data.errors);
-                appendLog('aviso', 'Erros recebidos: ' + data.errors.slice(-3).join(' | '));
-            }
-
-            if (data.done) {
-                setProgress(100);
-                const message = data.message || 'Importação finalizada.';
-                const redirect = data.redirect || (baseUrl + 'index.php');
-                if (data.errors && data.errors.length > 0) {
-                    showAlert('warning', message + ' Verifique as linhas com erro.');
-                    pushErrors(data.errors);
-                    appendLog('aviso', 'Finalizada com erros: ' + data.errors.length + ' ocorrência(s).');
-                } else {
-                    showAlert('success', message);
-                    appendLog('ok', 'Finalizada com sucesso.');
-                }
-                if (processingNote) processingNote.style.display = 'none';
-                if (doneActions) doneActions.style.display = '';
-                // esconder botão cancelar e exibir botão Concluir
-                try {
-                    if (cancelBtn) cancelBtn.style.display = 'none';
-                    const concludeBtn = document.getElementById('conclude-btn');
-                    if (concludeBtn) {
-                        concludeBtn.style.display = '';
-                        concludeBtn.addEventListener('click', concludeImport);
+        async function concludeImport() {
+            const concludeBtn = document.getElementById('conclude-btn');
+            concludeBtn.disabled = true;
+            try {
+                const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=finish&job=' + encodeURIComponent(jobId), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
                     }
-                } catch (e) {
-                    // noop
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    showAlert('danger', data.message || 'Falha ao finalizar importação.');
+                    appendLog('erro', data.message || 'Falha ao finalizar importação.');
+                    concludeBtn.disabled = false;
+                    return;
                 }
-                if (goComuns) {
-                    goComuns.setAttribute('href', redirect);
-                    goComuns.style.display = 'inline-block';
-                    goComuns.addEventListener('click', () => {
-                        window.location.href = redirect;
-                    });
-                }
+                const redirect = data.redirect || (baseUrl + 'index.php');
+                window.location.href = redirect;
+            } catch (err) {
+                showAlert('danger', 'Erro ao finalizar: ' + err);
+                appendLog('erro', 'Erro ao finalizar: ' + err);
+                concludeBtn.disabled = false;
+            }
+        }
+
+        async function poll() {
+            if (canceled) {
                 return;
             }
+            if (fatal) {
+                return;
+            }
+            try {
+                const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=process&job=' + encodeURIComponent(jobId), {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    const msg = 'Erro ao processar: ' + text;
+                    showAlert('danger', msg);
+                    appendLog('erro', msg);
+                    fatal = true;
+                    return;
+                }
+                const data = await resp.json();
 
-            setTimeout(poll, 400);
-        } catch (err) {
-            showAlert('danger', 'Falha na requisição: ' + err);
-            appendLog('erro', 'Falha na requisição: ' + err);
-            setTimeout(poll, 3000);
+                if (data.total !== undefined) {
+                    totalEl.textContent = data.total;
+                }
+                if (data.stats) {
+                    processedEl.textContent = data.stats.processados ?? 0;
+                    novosEl.textContent = data.stats.novos ?? 0;
+                    atualizadosEl.textContent = data.stats.atualizados ?? 0;
+                    excluidosEl.textContent = data.stats.excluidos ?? 0;
+                }
+                if (data.progress !== undefined) {
+                    setProgress(data.progress);
+                }
+
+                if (data.log && Array.isArray(data.log)) {
+                    renderLog(data.log);
+                }
+
+                if (data.errors && data.errors.length > 0) {
+                    showAlert('warning', 'Erros até agora: ' + data.errors.slice(-3).join(' | '));
+                    pushErrors(data.errors);
+                    appendLog('aviso', 'Erros recebidos: ' + data.errors.slice(-3).join(' | '));
+                }
+
+                if (data.done) {
+                    setProgress(100);
+                    const message = data.message || 'Importação finalizada.';
+                    const redirect = data.redirect || (baseUrl + 'index.php');
+                    if (data.errors && data.errors.length > 0) {
+                        showAlert('warning', message + ' Verifique as linhas com erro.');
+                        pushErrors(data.errors);
+                        appendLog('aviso', 'Finalizada com erros: ' + data.errors.length + ' ocorrência(s).');
+                    } else {
+                        showAlert('success', message);
+                        appendLog('ok', 'Finalizada com sucesso.');
+                    }
+                    if (processingNote) processingNote.style.display = 'none';
+                    if (doneActions) doneActions.style.display = '';
+                    // esconder botão cancelar e exibir botão Concluir
+                    try {
+                        if (cancelBtn) cancelBtn.style.display = 'none';
+                        const concludeBtn = document.getElementById('conclude-btn');
+                        if (concludeBtn) {
+                            concludeBtn.style.display = '';
+                            concludeBtn.addEventListener('click', concludeImport);
+                        }
+                    } catch (e) {
+                        // noop
+                    }
+                    if (goComuns) {
+                        goComuns.setAttribute('href', redirect);
+                        goComuns.style.display = 'inline-block';
+                        goComuns.addEventListener('click', () => {
+                            window.location.href = redirect;
+                        });
+                    }
+                    return;
+                }
+
+                setTimeout(poll, 400);
+            } catch (err) {
+                showAlert('danger', 'Falha na requisição: ' + err);
+                appendLog('erro', 'Falha na requisição: ' + err);
+                setTimeout(poll, 3000);
+            }
         }
-    }
 
-    cancelBtn.addEventListener('click', cancelImport);
-    poll();
-})();
+        cancelBtn.addEventListener('click', cancelImport);
+        poll();
+    })();
 </script>
 
 <?php
