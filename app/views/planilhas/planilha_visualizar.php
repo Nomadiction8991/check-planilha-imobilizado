@@ -359,7 +359,13 @@ ob_start();
     .acao-container .action-editar.active,
     .acao-container .action-editar:hover {
         background: #6F42C1;
-        color: #fff;
+        color: #fff !important;
+    }
+
+    /* Garantir que o ícone dentro do botão também fique branco quando ativo */
+    .acao-container .action-editar.active i,
+    .acao-container .action-editar:hover i {
+        color: #fff !important;
     }
 
     .acao-container form,
