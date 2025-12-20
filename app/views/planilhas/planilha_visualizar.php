@@ -767,6 +767,8 @@ ob_start();
                             <!-- Observacao -->
                             <a href="<?php echo $obsDisabled ? '#' : $observacaoUrl; ?>"
                                 class="btn btn-outline-warning btn-sm action-observacao <?php echo !empty($p['observacao']) ? 'active' : ''; ?> <?php echo $obsDisabled ? 'disabled' : ''; ?>"
+                                data-produto-id="<?php echo $produtoId; ?>"
+                                data-comum-id="<?php echo htmlspecialchars($comum_id ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                 title="<?php echo htmlspecialchars(to_uppercase('observacao'), ENT_QUOTES, 'UTF-8'); ?>"
                                 <?php if ($obsDisabled): ?>tabindex="-1" aria-disabled="true" onclick="event.preventDefault();" <?php endif; ?>>
                                 <i class="bi bi-chat-square-text-fill"></i>
@@ -1087,6 +1089,19 @@ ob_start();
 
                 const formData = new FormData(form);
 
+                // Sincronizar o valor dos inputs escondidos antes do submit (redundante, mas garante consistência)
+                if (action === 'imprimir') {
+                    const imprimirInput = form.querySelector('input[name="imprimir"]');
+                    if (imprimirInput) {
+                        // garantir valor coerente (já é atualizado em outros pontos do script)
+                        imprimirInput.value = imprimirInput.value;
+                    }
+                }
+                if (action === 'check') {
+                    const checkInput = form.querySelector('input[name="checado"]');
+                    if (checkInput) checkInput.value = checkInput.value;
+                }
+
                 fetch(form.action, {
                         method: 'POST',
                         body: formData,
@@ -1149,6 +1164,84 @@ ob_start();
                     });
             });
         });
+
+        // Observação via modal + AJAX
+        (function setupObservacao() {
+            const modalEl = document.getElementById('observacaoModal');
+            if (!modalEl) return;
+            const obsModal = new bootstrap.Modal(modalEl, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            const ta = modalEl.querySelector('#observacaoText');
+            const saveBtn = modalEl.querySelector('#observacaoSaveBtn');
+            let current = null; // {row, prodId, comumId, anchor}
+
+            function openModalFor(anchor) {
+                if (!anchor) return;
+                if (anchor.classList.contains('disabled') || anchor.getAttribute('aria-disabled') === 'true') return;
+                const prodId = anchor.dataset.produtoId || anchor.closest('.list-group-item')?.dataset.produtoId;
+                const comumId = anchor.dataset.comumId || <?php echo json_encode($comum_id ?? ''); ?>;
+                const row = document.querySelector(`.list-group-item[data-produto-id="${prodId}"]`);
+                const curObs = row ? (row.dataset.observacao || '') : '';
+                ta.value = curObs;
+                current = {
+                    row,
+                    prodId,
+                    comumId,
+                    anchor
+                };
+                obsModal.show();
+                ta.focus();
+            }
+
+            document.querySelectorAll('.action-observacao').forEach(a => {
+                a.addEventListener('click', function(ev) {
+                    // leave default if link disabled or has href to external page and user used modifier keys
+                    if (a.classList.contains('disabled') || a.getAttribute('aria-disabled') === 'true') return;
+                    ev.preventDefault();
+                    openModalFor(a);
+                });
+            });
+
+            saveBtn.addEventListener('click', function() {
+                if (!current) return;
+                saveBtn.disabled = true;
+                const formData = new FormData();
+                formData.set('id_produto', current.prodId);
+                formData.set('comum_id', current.comumId);
+                formData.set('observacoes', ta.value.trim()); // controller expects 'observacoes'
+
+                fetch('<?php echo '../../../app/controllers/update/ProdutoObservacaoController.php'; ?>', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                }).then(async resp => {
+                    let data = {};
+                    try {
+                        data = await resp.json();
+                    } catch (e) {}
+                    if (!resp.ok || data.success === false) throw new Error(data.message || 'Falha ao salvar observação');
+                    // Atualizar UI
+                    const newObs = ta.value.trim();
+                    if (current.row) {
+                        applyState(current.row, {
+                            observacao: newObs
+                        });
+                    }
+                    current.anchor.classList.toggle('active', newObs !== '');
+                    showAlert('success', data.message || 'Observação atualizada');
+                    obsModal.hide();
+                }).catch(err => {
+                    showAlert('danger', err.message || 'Erro ao salvar observação');
+                }).finally(() => {
+                    saveBtn.disabled = false;
+                });
+            });
+        })();
     });
 
     // ======== RECONHECIMENTO DE VOZ ========
@@ -1364,6 +1457,28 @@ ob_start();
                     <div class="scanner-hint">Posicione o código de barras dentro da moldura</div>
                     <div class="scanner-info" id="scannerInfo">Inicializando câmera...</div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Observação (edição rápida via AJAX) -->
+<div class="modal fade" id="observacaoModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Observação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label for="observacaoText" class="form-label">Observação</label>
+                    <textarea id="observacaoText" class="form-control" rows="4" placeholder="Digite a observação..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="observacaoSaveBtn">Salvar</button>
             </div>
         </div>
     </div>

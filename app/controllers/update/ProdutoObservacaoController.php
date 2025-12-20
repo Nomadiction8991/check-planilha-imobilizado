@@ -1,5 +1,5 @@
 ﻿<?php
- // AutenticaÃ§Ã£o
+// AutenticaÃ§Ã£o
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 // Receber parÃ¢metros via GET - AGORA USANDO ID
@@ -58,11 +58,11 @@ try {
     $stmt_produto->bindValue(':comum_id', $comum_id);
     $stmt_produto->execute();
     $produto = $stmt_produto->fetch();
-    
+
     if (!$produto) {
         throw new Exception('Produto nÃ£o encontrado na planilha.');
     }
-    
+
     // Preencher informaÃ§Ãµes do check com dados da prÃ³pria tabela produtos
     $check = [
         'checado' => $produto['checado'] ?? 0,
@@ -71,7 +71,6 @@ try {
     ];
 
     $descricaoCompleta = montarDescricaoCompletaProduto($produto);
-    
 } catch (Exception $e) {
     $mensagem = "Erro ao carregar produto: " . $e->getMessage();
     $tipo_mensagem = 'error';
@@ -81,14 +80,14 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $observacoes = trim($_POST['observacoes'] ?? '');
     $observacoes = to_uppercase($observacoes);
-    
+
     // Receber filtros do POST
     $pagina = $_POST['pagina'] ?? 1;
     $filtro_nome = $_POST['nome'] ?? '';
     $filtro_dependencia = $_POST['dependencia'] ?? '';
     $filtro_codigo = $_POST['filtro_codigo'] ?? '';
     $filtro_status = $_POST['status'] ?? '';
-    
+
     try {
         // Atualizar observaÃ§Ãµes diretamente na tabela produtos - USANDO id_produto
         $sql_update = "UPDATE produtos SET observacao = :observacao WHERE id_produto = :id_produto AND comum_id = :comum_id";
@@ -97,8 +96,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_update->bindValue(':id_produto', $id_produto, PDO::PARAM_INT);
         $stmt_update->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
         $stmt_update->execute();
-        
-        // REDIRECIONAR PARA view-planilha.php APÃ“S SALVAR
+
+        // Se requisição AJAX, retornar JSON, senão redirecionar para a view tradicional
+        if (is_ajax_request()) {
+            json_response([
+                'success' => true,
+                'produto_id' => $id_produto,
+                'observacao' => $observacoes,
+                'message' => 'Observações salvas com sucesso'
+            ]);
+            exit;
+        }
+
+        // REDIRECIONAR PARA view-planilha.php APÓS SALVAR (fallback para não-JS)
         $query_string = http_build_query([
             'id' => $comum_id,
             'comum_id' => $comum_id,
@@ -109,9 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'status' => $filtro_status,
             'sucesso' => 'ObservaÃ§Ãµes salvas com sucesso!'
         ]);
-    header('Location: ../planilhas/planilha_visualizar.php?' . $query_string);
+        header('Location: ../planilhas/planilha_visualizar.php?' . $query_string);
         exit;
-        
     } catch (Exception $e) {
         $mensagem = "Erro ao salvar observaÃ§Ãµes: " . $e->getMessage();
         $tipo_mensagem = 'error';
@@ -121,7 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-function montarDescricaoCompletaProduto(array $produto): string {
+function montarDescricaoCompletaProduto(array $produto): string
+{
     $descricaoEdicao = trim($produto['editado_descricao_completa'] ?? '');
     $descricaoBase = trim($produto['descricao_completa'] ?? '');
     $descricaoOriginal = trim($produto['descricao'] ?? '');
@@ -173,7 +183,8 @@ function montarDescricaoCompletaProduto(array $produto): string {
 }
 
 // Função para gerar URL de retorno com filtros - CORRIGIDA
-function getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status) {
+function getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status)
+{
     $params = [
         'id' => $comum_id, // CORRETO: view-planilha.php usa 'id' como parâmetro
         'comum_id' => $comum_id,
@@ -185,4 +196,3 @@ function getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $fi
     ];
     return '../planilhas/planilha_visualizar.php?' . http_build_query($params);
 }
-?>
