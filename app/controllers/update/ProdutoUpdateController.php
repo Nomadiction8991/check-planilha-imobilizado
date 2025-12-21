@@ -120,15 +120,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ? (int)$produto['editado_dependencia_id']
             : (int)($produto['dependencia_id'] ?? 0);
 
-        // Verificar se houve realmente alguma alteraÃ§Ã£o
+        // Verificar se houve realmente alguma alteração
         $houve_alteracao = false;
-        if ($novo_tipo_bem_id !== '' && (int)$novo_tipo_bem_id !== $orig_tipo_id) $houve_alteracao = true;
-        if ($novo_bem !== '' && $novo_bem !== strtoupper($orig_bem)) $houve_alteracao = true;
-        if ($novo_complemento !== '' && $novo_complemento !== strtoupper($orig_comp)) $houve_alteracao = true;
-        if ($nova_dependencia_id !== '' && (int)$nova_dependencia_id !== $orig_dep_id) $houve_alteracao = true;
+        $changed_fields = [];
+        if ($novo_tipo_bem_id !== '' && (int)$novo_tipo_bem_id !== $orig_tipo_id) {
+            $houve_alteracao = true;
+            $changed_fields[] = 'tipo_bem_id';
+        }
+        if ($novo_bem !== '' && $novo_bem !== strtoupper($orig_bem)) {
+            $houve_alteracao = true;
+            $changed_fields[] = 'bem';
+        }
+        if ($novo_complemento !== '' && $novo_complemento !== strtoupper($orig_comp)) {
+            $houve_alteracao = true;
+            $changed_fields[] = 'complemento';
+        }
+        if ($nova_dependencia_id !== '' && (int)$nova_dependencia_id !== $orig_dep_id) {
+            $houve_alteracao = true;
+            $changed_fields[] = 'dependencia';
+        }
 
         if (!$houve_alteracao) {
-            // Nada mudou, retorna sem marcar ediÃ§Ã£o
+            // Nada mudou, retorna sem marcar edição
             header('Location: ' . getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status));
             exit;
         }
@@ -198,6 +211,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         $stmt_update->execute();
+
+        // Log para auditoria quando marca como editado (ajuda a depurar marcações indevidas)
+        try {
+            $admin_id = isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 0;
+            $fields = !empty($changed_fields) ? implode(',', $changed_fields) : 'unknown';
+            error_log(sprintf("[EDIT] produto=%d comum=%d marcado editado por usuario=%d campos=%s", $id_produto, $comum_id, $admin_id, $fields));
+        } catch (Exception $e) {
+            // não interromper fluxo por conta de log
+        }
 
         // Garantir consistência: se o produto ficou marcado como editado, certificar que os flags de impressão e checado também foram ajustados
         $stmt_reconcile = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = 1, checado = 1 WHERE id_produto = :id_produto AND comum_id = :comum_id AND editado = 1');
