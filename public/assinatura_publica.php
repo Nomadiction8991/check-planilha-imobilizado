@@ -34,18 +34,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Redirecionar para o menu com contexto da planilha (somente relatÃ³rios)
         header('Location: ../app/views/shared/menu_unificado.php?contexto=planilha&id=' . urlencode($planilha['id']) . '&publico=1');
         exit;
-
     } catch (Exception $e) {
         $erro = $e->getMessage();
     }
 }
 
 // Carregar lista de comuns ativas
-$stmt = $conexao->query('SELECT id, comum FROM planilhas WHERE (ativo = 1 OR ativo IS NULL) ORDER BY comum ASC');
-$comuns = $stmt->fetchAll();
+try {
+    $stmt = $conexao->query('SELECT id, comum FROM planilhas WHERE (ativo = 1 OR ativo IS NULL) ORDER BY comum ASC');
+    $comuns = $stmt->fetchAll();
+} catch (PDOException $e) {
+    if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
+        $erro = "Erro: tabela 'planilhas' não encontrada no banco de dados. Importe `anvycomb_checkplanilha.sql` (raiz do projeto) ou verifique `config/database.php`.";
+        $comuns = [];
+    } else {
+        throw $e;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,12 +62,38 @@ $comuns = $stmt->fetchAll();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:16px; }
-        .box { max-width: 420px; width:100%; background:#fff; border:1px solid rgba(0,0,0,0.08); border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.2); overflow:hidden; }
-        .box-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#fff; padding:1.5rem; text-align:center; }
-        .box-body { padding:1.25rem 1.25rem 1.5rem; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .box {
+            max-width: 420px;
+            width: 100%;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .2);
+            overflow: hidden;
+        }
+
+        .box-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .box-body {
+            padding: 1.25rem 1.25rem 1.5rem;
+        }
     </style>
 </head>
+
 <body>
     <div class="box">
         <div class="box-header">
@@ -101,6 +136,5 @@ $comuns = $stmt->fetchAll();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
-
-

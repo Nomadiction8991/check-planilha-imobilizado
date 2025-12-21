@@ -1,87 +1,99 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃƒÂ§ÃƒÂ£o
+// AutenticaÃƒÂ§ÃƒÂ£o
 
 $id_planilha = $_GET['id'] ?? null;
-if (!$id_planilha) { header('Location: ../../index.php'); exit; }
+if (!$id_planilha) {
+  header('Location: ../../index.php');
+  exit;
+}
 
 // BUSCAR dados da planilha
 try {
-    $sql_planilha = "SELECT * FROM planilhas WHERE id = :id";
-    $stmt_planilha = $conexao->prepare($sql_planilha);
-    $stmt_planilha->bindValue(':id', $id_planilha);
-    $stmt_planilha->execute();
-    $planilha = $stmt_planilha->fetch();
-    if (!$planilha) throw new Exception('Planilha nÃƒÂ£o encontrada.');
+  $sql_planilha = "SELECT * FROM planilhas WHERE id = :id";
+  $stmt_planilha = $conexao->prepare($sql_planilha);
+  $stmt_planilha->bindValue(':id', $id_planilha);
+  $stmt_planilha->execute();
+  $planilha = $stmt_planilha->fetch();
+  if (!$planilha) throw new Exception('Planilha não encontrada.');
+} catch (PDOException $e) {
+  if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
+    die("Erro: tabela 'planilhas' não encontrada no banco de dados. Importe `anvycomb_checkplanilha.sql` (raiz do projeto) ou verifique `config/database.php`.");
+  }
+  die('Erro ao carregar planilha: ' . $e->getMessage());
 } catch (Exception $e) {
-    die('Erro ao carregar planilha: ' . $e->getMessage());
+  die('Erro ao carregar planilha: ' . $e->getMessage());
 }
 
 // DependÃƒÂªncias disponÃƒÂ­veis
 try {
-    $sql_dependencias = "
+  $sql_dependencias = "
         SELECT DISTINCT d.descricao as dependencia FROM PRODUTOS p
         LEFT JOIN dependencias d ON COALESCE(p.editado_dependencia_id, p.dependencia_id) = d.id
         WHERE p.comum_id = :comum_id AND d.descricao IS NOT NULL
         ORDER BY dependencia
     ";
-    $stmt_dependencias = $conexao->prepare($sql_dependencias);
-    $stmt_dependencias->bindValue(':comum_id', $id_planilha);
-    $stmt_dependencias->execute();
-    $dependencias = $stmt_dependencias->fetchAll(PDO::FETCH_COLUMN);
-} catch (Exception $e) { $dependencias = []; }
+  $stmt_dependencias = $conexao->prepare($sql_dependencias);
+  $stmt_dependencias->bindValue(':comum_id', $id_planilha);
+  $stmt_dependencias->execute();
+  $dependencias = $stmt_dependencias->fetchAll(PDO::FETCH_COLUMN);
+} catch (Exception $e) {
+  $dependencias = [];
+}
 
 $dependencia_selecionada = $_GET['dependencia'] ?? '';
 
 // PRODUTOS marcados para imprimir (PRODUTOS checados)
 try {
-    $sql_PRODUTOS = "SELECT p.codigo, COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia
+  $sql_PRODUTOS = "SELECT p.codigo, COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia
                      FROM PRODUTOS p 
                      LEFT JOIN dependencias d_orig ON p.dependencia_id = d_orig.id
                      LEFT JOIN dependencias d_edit ON p.editado_dependencia_id = d_edit.id
                      WHERE p.comum_id = :comum_id AND COALESCE(p.imprimir_etiqueta, 0) = 1";
-    if (!empty($dependencia_selecionada)) {
-        $sql_PRODUTOS .= " AND (
+  if (!empty($dependencia_selecionada)) {
+    $sql_PRODUTOS .= " AND (
             (COALESCE(d_edit.descricao, d_orig.descricao) = :dependencia)
         )";
-    }
-    $sql_PRODUTOS .= " ORDER BY p.codigo";
-    $stmt_PRODUTOS = $conexao->prepare($sql_PRODUTOS);
-    $stmt_PRODUTOS->bindValue(':comum_id', $id_planilha);
-    if (!empty($dependencia_selecionada)) { $stmt_PRODUTOS->bindValue(':dependencia', $dependencia_selecionada); }
-    $stmt_PRODUTOS->execute();
-    $PRODUTOS = $stmt_PRODUTOS->fetchAll(PDO::FETCH_ASSOC);
-    
-    // BUSCAR tambÃƒÂ©m PRODUTOS cadastrados (novos) com cÃƒÂ³digo preenchido
-    // Nota: tabela PRODUTOS_cadastro nÃƒÂ£o existe no schema atual, entÃƒÂ£o comentado
-    // $sql_novos = "SELECT pc.codigo, d.descricao as dependencia
-    // FROM PRODUTOS_cadastro pc
-    // LEFT JOIN dependencias d ON pc.id_dependencia = d.id
-    // WHERE pc.id_planilha = :comum_id 
-    // AND pc.codigo IS NOT NULL 
-    // AND pc.codigo != ''";
-    // if (!empty($dependencia_selecionada)) {
-    //     $sql_novos .= " AND d.descricao = :dependencia";
-    // }
-    // $sql_novos .= " ORDER BY pc.codigo";
-    // $stmt_novos = $conexao->prepare($sql_novos);
-    // $stmt_novos->bindValue(':comum_id', $id_planilha);
-    // if (!empty($dependencia_selecionada)) { $stmt_novos->bindValue(':dependencia', $dependencia_selecionada); }
-    // $stmt_novos->execute();
-    // $PRODUTOS_novos = $stmt_novos->fetchAll(PDO::FETCH_ASSOC);
-    
-    $PRODUTOS_novos = []; // Temporariamente vazio atÃƒÂ© tabela existir
-    
-    // Combinar PRODUTOS checados e novos
-    $PRODUTOS = array_merge($PRODUTOS, $PRODUTOS_novos);
-    
-    $codigos = array_column($PRODUTOS, 'codigo');
-    $PRODUTOS_sem_espacos = array_map(fn($c) => str_replace(' ', '', $c), $codigos);
-    $codigos_concatenados = implode(',', $PRODUTOS_sem_espacos);
+  }
+  $sql_PRODUTOS .= " ORDER BY p.codigo";
+  $stmt_PRODUTOS = $conexao->prepare($sql_PRODUTOS);
+  $stmt_PRODUTOS->bindValue(':comum_id', $id_planilha);
+  if (!empty($dependencia_selecionada)) {
+    $stmt_PRODUTOS->bindValue(':dependencia', $dependencia_selecionada);
+  }
+  $stmt_PRODUTOS->execute();
+  $PRODUTOS = $stmt_PRODUTOS->fetchAll(PDO::FETCH_ASSOC);
+
+  // BUSCAR tambÃƒÂ©m PRODUTOS cadastrados (novos) com cÃƒÂ³digo preenchido
+  // Nota: tabela PRODUTOS_cadastro nÃƒÂ£o existe no schema atual, entÃƒÂ£o comentado
+  // $sql_novos = "SELECT pc.codigo, d.descricao as dependencia
+  // FROM PRODUTOS_cadastro pc
+  // LEFT JOIN dependencias d ON pc.id_dependencia = d.id
+  // WHERE pc.id_planilha = :comum_id 
+  // AND pc.codigo IS NOT NULL 
+  // AND pc.codigo != ''";
+  // if (!empty($dependencia_selecionada)) {
+  //     $sql_novos .= " AND d.descricao = :dependencia";
+  // }
+  // $sql_novos .= " ORDER BY pc.codigo";
+  // $stmt_novos = $conexao->prepare($sql_novos);
+  // $stmt_novos->bindValue(':comum_id', $id_planilha);
+  // if (!empty($dependencia_selecionada)) { $stmt_novos->bindValue(':dependencia', $dependencia_selecionada); }
+  // $stmt_novos->execute();
+  // $PRODUTOS_novos = $stmt_novos->fetchAll(PDO::FETCH_ASSOC);
+
+  $PRODUTOS_novos = []; // Temporariamente vazio atÃƒÂ© tabela existir
+
+  // Combinar PRODUTOS checados e novos
+  $PRODUTOS = array_merge($PRODUTOS, $PRODUTOS_novos);
+
+  $codigos = array_column($PRODUTOS, 'codigo');
+  $PRODUTOS_sem_espacos = array_map(fn($c) => str_replace(' ', '', $c), $codigos);
+  $codigos_concatenados = implode(',', $PRODUTOS_sem_espacos);
 } catch (Exception $e) {
-    $codigos_concatenados = '';
-    $PRODUTOS = [];
-    $mensagem = 'Erro ao carregar PRODUTOS: ' . $e->getMessage();
+  $codigos_concatenados = '';
+  $PRODUTOS = [];
+  $mensagem = 'Erro ao carregar PRODUTOS: ' . $e->getMessage();
 }
 
 $pageTitle = 'Copiar Etiquetas';
@@ -179,20 +191,22 @@ ob_start();
 </div>
 
 <script>
-function copiarCodigos() {
-  const codigosField = document.getElementById('codigosField');
-  codigosField.select();
-  codigosField.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(codigosField.value).then(() => {
-    const btn = document.activeElement;
-  });
-}
-function filtrarPorDependencia() {
-  const dependencia = document.getElementById('filtroDependencia').value;
-  const url = new URL(window.location);
-  if (dependencia) url.searchParams.set('dependencia', dependencia); else url.searchParams.delete('dependencia');
-  window.location.href = url.toString();
-}
+  function copiarCodigos() {
+    const codigosField = document.getElementById('codigosField');
+    codigosField.select();
+    codigosField.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(codigosField.value).then(() => {
+      const btn = document.activeElement;
+    });
+  }
+
+  function filtrarPorDependencia() {
+    const dependencia = document.getElementById('filtroDependencia').value;
+    const url = new URL(window.location);
+    if (dependencia) url.searchParams.set('dependencia', dependencia);
+    else url.searchParams.delete('dependencia');
+    window.location.href = url.toString();
+  }
 </script>
 
 <?php
@@ -204,5 +218,3 @@ $headerActions = '';
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
-
