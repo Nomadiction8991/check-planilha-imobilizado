@@ -2,8 +2,9 @@
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 // AutenticaÃƒÂ§ÃƒÂ£o
 
-// ParÃƒÂ¢metros
-$id_PRODUTO = $_GET['id_PRODUTO'] ?? null;
+// Parâmetros
+// Aceitar tanto id_PRODUTO (legacy) quanto id_produto (mais comum) para compatibilidade
+$id_PRODUTO = $_GET['id_PRODUTO'] ?? $_GET['id_produto'] ?? null;
 $comum_id = $_GET['comum_id'] ?? $_GET['id'] ?? null;
 
 // Filtros para retorno

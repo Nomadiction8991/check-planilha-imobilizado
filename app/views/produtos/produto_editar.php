@@ -190,7 +190,7 @@ ob_start();
 </form>
 
 <div class="mt-3">
-    <a href="./produtos_limpar_edicoes.php?id=<?php echo $comum_id; ?>&comum_id=<?php echo $comum_id; ?>&id_PRODUTO=<?php echo $id_PRODUTO; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&status=<?php echo urlencode($filtro_STATUS); ?>"
+    <a href="./produtos_limpar_edicoes.php?id=<?php echo $comum_id; ?>&comum_id=<?php echo $comum_id; ?>&id_PRODUTO=<?php echo $id_produto; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&status=<?php echo urlencode($filtro_STATUS); ?>"
         class="btn btn-outline-danger w-100">
         <i class="bi bi-trash3 me-2"></i>
         <?php echo htmlspecialchars(to_uppercase('Limpar Edições'), ENT_QUOTES, 'UTF-8'); ?>
