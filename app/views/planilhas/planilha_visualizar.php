@@ -1166,12 +1166,15 @@ ob_start();
                 ta.focus();
             }
 
+            // Restaurar comportamento original: clique em Observação navega para a página de observação (não abrir modal).
+            // Se o link estiver desabilitado, impedir a navegação.
             document.querySelectorAll('.action-observacao').forEach(a => {
                 a.addEventListener('click', function(ev) {
-                    // leave default if link disabled or has href to external page and user used modifier keys
-                    if (a.classList.contains('disabled') || a.getAttribute('aria-disabled') === 'true') return;
-                    ev.preventDefault();
-                    openModalFor(a);
+                    if (a.classList.contains('disabled') || a.getAttribute('aria-disabled') === 'true') {
+                        ev.preventDefault();
+                        return;
+                    }
+                    // Permitir comportamento padrão: navegador seguirá o href para a página de observação.
                 });
             });
 
