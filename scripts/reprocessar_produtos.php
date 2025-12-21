@@ -1,4 +1,5 @@
 ﻿<?php
+
 /**
  * Script de MigraÃ§Ã£o: Reprocessar Produtos com Parser Atualizado
  * 
@@ -8,12 +9,12 @@
  * - ExtraÃ§Ã£o precisa de complemento
  * 
  * USO:
- *   php scripts/reprocessar_produtos.php [--dry-run] [--limit=N] [--planilha-id=N]
+ *   php scripts/reprocessar_produtos.php [--dry-run] [--limit=N] [--comum-id=N]
  * 
  * OPÃ‡Ã•ES:
  *   --dry-run          Simula sem salvar no banco (apenas mostra o que seria alterado)
  *   --limit=N          Processa apenas N produtos
- *   --planilha-id=N    Processa apenas produtos da planilha especÃ­fica
+ *   --comum-id=N       Processa apenas produtos da comum especÃ­fica (aceita --planilha-id por compatibilidade)
  *   --verbose          Mostra detalhes de cada produto processado
  */
 
@@ -30,7 +31,7 @@ $options = [
     'dry_run' => in_array('--dry-run', $argv),
     'verbose' => in_array('--verbose', $argv),
     'limit' => null,
-    'planilha_id' => null,
+    'comum_id' => null,
     'codigo' => null,
 ];
 
@@ -38,8 +39,12 @@ foreach ($argv as $arg) {
     if (preg_match('/^--limit=(\d+)$/', $arg, $m)) {
         $options['limit'] = (int)$m[1];
     }
+    if (preg_match('/^--comum-id=(\d+)$/', $arg, $m)) {
+        $options['comum_id'] = (int)$m[1];
+    }
     if (preg_match('/^--planilha-id=(\d+)$/', $arg, $m)) {
-        $options['planilha_id'] = (int)$m[1];
+        // compatibilidade com flag antiga
+        $options['comum_id'] = (int)$m[1];
     }
     if (preg_match('/^--codigo=(.+)$/', $arg, $m)) {
         $options['codigo'] = trim($m[1], '"\'');
@@ -49,7 +54,7 @@ foreach ($argv as $arg) {
 echo "=== REPROCESSAMENTO DE PRODUTOS ===\n";
 echo "Modo: " . ($options['dry_run'] ? "DRY-RUN (simulaÃ§Ã£o)" : "PRODUÃ‡ÃƒO (vai salvar)") . "\n";
 if ($options['limit']) echo "Limite: {$options['limit']} produtos\n";
-if ($options['planilha_id']) echo "Planilha ID: {$options['planilha_id']}\n";
+if (!empty($options['comum_id'])) echo "Comum ID: {$options['comum_id']}\n";
 echo "\n";
 
 // Carregar configuraÃ§Ã£o do parser
@@ -69,7 +74,7 @@ echo "âœ“ Aliases construÃ­dos\n\n";
 $sql_produtos = "
     SELECT 
         p.id_produto as id,
-        p.planilha_id,
+        p.comum_id,
         p.codigo,
         p.tipo_bem_id,
         p.bem,
@@ -85,8 +90,8 @@ $sql_produtos = "
     WHERE p.tipo_bem_id > 0
 ";
 
-if ($options['planilha_id']) {
-    $sql_produtos .= " AND p.planilha_id = " . (int)$options['planilha_id'];
+if (!empty($options['comum_id'])) {
+    $sql_produtos .= " AND p.comum_id = " . (int)$options['comum_id'];
 }
 
 if ($options['codigo']) {
@@ -117,7 +122,7 @@ $stats = [
 // Processar cada produto
 foreach ($produtos as $produto) {
     $stats['processados']++;
-    
+
     $produto_id = $produto['id'];
     $tipo_bem_id = (int)$produto['tipo_bem_id'];
     $tipo_codigo = $produto['tipo_codigo'];
@@ -126,14 +131,14 @@ foreach ($produtos as $produto) {
     $complemento_atual = $produto['complemento'] ?? '';
     $descricao_atual = $produto['descricao'] ?? '';
     $dependencia_nome = $produto['dependencia_nome'] ?? '';
-    
+
     if ($options['verbose']) {
-        echo "Produto ID: $produto_id (Planilha: {$produto['planilha_id']})\n";
+        echo "Produto ID: $produto_id (Comum: " . ($produto['comum_id'] ?? $produto['planilha_id'] ?? 'N/A') . ")\n";
         echo "  Tipo: [$tipo_codigo] $tipo_descricao\n";
         echo "  BEN atual: '$bem_atual'\n";
         echo "  Complemento atual: '$complemento_atual'\n";
     }
-    
+
     // Pegar aliases do tipo
     $aliases_tipo_atual = null;
     $aliases_originais = null;
@@ -144,39 +149,39 @@ foreach ($produtos as $produto) {
             break;
         }
     }
-    
+
     if (!$aliases_tipo_atual) {
         echo "  âš  AVISO: Tipo nÃ£o encontrado nos aliases\n\n";
         $stats['erros']++;
         continue;
     }
-    
+
     // Reprocessar: usar COMPLEMENTO como texto base (Ã© o mais prÃ³ximo do texto original do CSV)
     // porque BEN pode estar errado. Se o tipo desc aparecer no inÃ­cio do complemento, o parser vai lidar com isso.
     $texto_completo = trim($complemento_atual);
-    
+
     // Fallback: se complemento vazio mas tem BEN, usar BEN
     if ($texto_completo === '' && $ben_atual !== '') {
         $texto_completo = trim($ben_atual);
     }
-    
+
     if ($texto_completo === '') {
         if ($options['verbose']) echo "  âŠ˜ Produto sem texto para processar\n\n";
         $stats['sem_mudanca']++;
         continue;
     }
-    
+
     // Extrair BEN e complemento com o parser atualizado
     [$ben_novo_raw, $comp_novo_raw] = pp_extrair_ben_complemento(
-        $texto_completo, 
-        $aliases_tipo_atual, 
-        $aliases_originais, 
+        $texto_completo,
+        $aliases_tipo_atual,
+        $aliases_originais,
         $tipo_descricao
     );
-    
+
     $ben_novo = strtoupper(preg_replace('/\s+/', ' ', trim($ben_novo_raw)));
     $comp_novo = strtoupper(preg_replace('/\s+/', ' ', trim($comp_novo_raw)));
-    
+
     // Validar BEN
     $ben_valido = false;
     if ($ben_novo !== '') {
@@ -188,7 +193,7 @@ foreach ($produtos as $produto) {
             }
         }
     }
-    
+
     // Se BEN invÃ¡lido, forÃ§ar para um dos aliases
     if (!$ben_valido && !empty($aliases_tipo_atual)) {
         foreach ($aliases_tipo_atual as $alias_norm) {
@@ -199,7 +204,7 @@ foreach ($produtos as $produto) {
             }
         }
     }
-    
+
     // Montar descriÃ§Ã£o nova
     $descricao_nova = pp_montar_descricao(
         1, // quantidade
@@ -210,39 +215,39 @@ foreach ($produtos as $produto) {
         $dependencia_nome,
         $pp_config
     );
-    
+
     // Verificar se houve mudanÃ§a
     $mudou = (
-        $ben_novo !== $ben_atual || 
-        $comp_novo !== $complemento_atual || 
+        $ben_novo !== $ben_atual ||
+        $comp_novo !== $complemento_atual ||
         $descricao_nova !== $descricao_atual
     );
-    
+
     if ($mudou) {
         $stats['alterados']++;
-        
+
         echo "â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n";
         echo "Produto ID: $produto_id\n";
         echo "Tipo: [$tipo_codigo] $tipo_descricao\n\n";
-        
+
         if ($ben_novo !== $ben_atual) {
             echo "BEN:\n";
             echo "  Antes: '$ben_atual'\n";
             echo "  Depois: '$ben_novo'\n\n";
         }
-        
+
         if ($comp_novo !== $complemento_atual) {
             echo "COMPLEMENTO:\n";
             echo "  Antes: '$complemento_atual'\n";
             echo "  Depois: '$comp_novo'\n\n";
         }
-        
+
         if ($descricao_nova !== $descricao_atual) {
             echo "DESCRIÃ‡ÃƒO:\n";
             echo "  Antes: $descricao_atual\n";
             echo "  Depois: $descricao_nova\n\n";
         }
-        
+
         // Atualizar no banco (se nÃ£o for dry-run)
         if (!$options['dry_run']) {
             $sql_update = "
@@ -257,7 +262,7 @@ foreach ($produtos as $produto) {
                     editado_dependencia_id = dependencia_id
                 WHERE id = :id
             ";
-            
+
             try {
                 $stmt = $conexao->prepare($sql_update);
                 $stmt->execute([
@@ -274,7 +279,6 @@ foreach ($produtos as $produto) {
         } else {
             echo "âŠ˜ NÃ£o salvo (modo dry-run)\n\n";
         }
-        
     } else {
         $stats['sem_mudanca']++;
         if ($options['verbose']) {
@@ -302,5 +306,3 @@ if ($options['dry_run']) {
 }
 
 // Fechar conexÃ£o nÃ£o Ã© necessÃ¡rio com PDO (fecha automaticamente)
-
-

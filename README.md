@@ -25,7 +25,7 @@ Projeto PHP focado em gestÃ£o de planilhas com importaÃ§Ã£o e conferÃªnc
 ## Notas de implementaÃ§Ã£o
 - **UTF-8 garantido**: `bootstrap.php` forÃ§a cabeÃ§alhos, charset padrÃ£o e logging; `PDO` usa `utf8mb4` com `SET NAMES`.
 - **SessÃµes seguras**: cookies `HttpOnly` e `SameSite=Lax`.
-- **Mapeamento correto de IDs**: telas agora usam `planilha_id` (tabela `planilhas`) para ler/atualizar produtos, evitando confusÃ£o com `comum_id`.
+- **Mapeamento correto de IDs**: telas agora usam `comum_id` (coluna `comum_id` em `produtos`) para ler/atualizar produtos, evitando confusão com legados `planilha_id`.
 - **AÃ§Ãµes assÃ­ncronas**: marcar check, etiqueta e DR agora funciona via AJAX com feedback visual imediato. As rotas em `app/controllers/update/*.php` retornam JSON quando a requisiÃ§Ã£o aceita `application/json`.
 - **Logs**: erros sÃ£o gravados em `storage/logs/app.log` (criado automaticamente).
 

@@ -16,8 +16,8 @@ $filtro_data_fim = isset($_GET['data_fim']) ? $_GET['data_fim'] : '';
 
 // Construir a query base
 $sql = "SELECT p.*, 
-    (SELECT COUNT(*) FROM produtos pr WHERE pr.planilha_id = p.id) AS total_produtos,
-    (SELECT COUNT(*) FROM produtos pr WHERE pr.planilha_id = p.id AND COALESCE(pr.checado, 0) = 0) AS total_pendentes
+    (SELECT COUNT(*) FROM produtos pr WHERE pr.comum_id = p.id) AS total_produtos,
+    (SELECT COUNT(*) FROM produtos pr WHERE pr.comum_id = p.id AND COALESCE(pr.checado, 0) = 0) AS total_pendentes
     FROM comums p WHERE 1=1"; // NOTE: substituído para usar 'comums' como fonte primária (refactor para remover dependência de 'planilhas')
 $params = [];
 

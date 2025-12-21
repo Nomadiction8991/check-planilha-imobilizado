@@ -66,7 +66,7 @@ try {
                      FROM PRODUTOS p 
                      LEFT JOIN dependencias d_orig ON p.dependencia_id = d_orig.id
                      LEFT JOIN dependencias d_edit ON p.editado_dependencia_id = d_edit.id
-                     WHERE p.planilha_id = :comum_id AND COALESCE(p.imprimir_etiqueta, 0) = 1"; // usar planilha_id (coluna real da tabela) para filtrar os produtos
+                     WHERE p.comum_id = :comum_id AND COALESCE(p.imprimir_etiqueta, 0) = 1"; // usar comum_id (coluna real da tabela) para filtrar os produtos
   if (!empty($dependencia_selecionada)) {
     $sql_PRODUTOS .= " AND (
             (COALESCE(d_edit.descricao, d_orig.descricao) = :dependencia)
@@ -130,7 +130,7 @@ $headerActions = '
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuEtiquetas">
             <li>
                 <a class="dropdown-item" href="../planilhas/planilha_visualizar.php?id=' . $id_planilha . '&comum_id=' . $id_planilha . '">
-                    <i class="bi bi-eye me-2"></i>VISUALIZAR PLANILHA
+                    <i class="bi bi-eye me-2"></i>VISUALIZAR COMUM
                 </a>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -155,7 +155,8 @@ ob_start();
     <i class="bi bi-tag me-2"></i>
     <?php echo htmlspecialchars(to_uppercase('Códigos para impressão de etiquetas'), ENT_QUOTES, 'UTF-8'); ?>
     <?php if (!empty($_GET['debug'])): ?>
-      <div class="small text-muted mt-1">DEBUG: COMUM_ID = <?php echo htmlspecialchars($comum_id, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="small text-muted mt-1">DEBUG: COMUM_ID =
+        <?php echo htmlspecialchars($comum_id, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
   </div>
   <div class="card-body">
@@ -165,11 +166,15 @@ ob_start();
 
     <?php if (!empty($dependencias)): ?>
       <div class="mb-3">
-        <label for="filtroDependencia" class="form-label"><?php echo htmlspecialchars(to_uppercase('Filtrar por dependência'), ENT_QUOTES, 'UTF-8'); ?></label>
+        <label for="filtroDependencia"
+          class="form-label"><?php echo htmlspecialchars(to_uppercase('Filtrar por dependência'), ENT_QUOTES, 'UTF-8'); ?></label>
         <select class="form-select" id="filtroDependencia" onchange="filtrarPorDependencia()">
-          <option value=""><?php echo htmlspecialchars(to_uppercase('Todas as dependências'), ENT_QUOTES, 'UTF-8'); ?></option>
+          <option value="">
+            <?php echo htmlspecialchars(to_uppercase('Todas as dependências'), ENT_QUOTES, 'UTF-8'); ?></option>
           <?php foreach ($dependencias as $dep): ?>
-            <option value="<?php echo htmlspecialchars($dep); ?>" <?php echo ($dependencia_selecionada === $dep) ? 'selected' : ''; ?>><?php echo htmlspecialchars($dep); ?></option>
+            <option value="<?php echo htmlspecialchars($dep); ?>"
+              <?php echo ($dependencia_selecionada === $dep) ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($dep); ?></option>
           <?php endforeach; ?>
         </select>
       </div>
@@ -180,7 +185,8 @@ ob_start();
         <div class="card shadow-sm-custom">
           <div class="card-body text-center">
             <div class="h4 mb-0"><?php echo count($PRODUTOS); ?></div>
-            <div class="text-muted"><?php echo htmlspecialchars(to_uppercase('Produtos'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <div class="text-muted">
+              <?php echo htmlspecialchars(to_uppercase('Produtos'), ENT_QUOTES, 'UTF-8'); ?></div>
           </div>
         </div>
       </div>
@@ -188,7 +194,8 @@ ob_start();
         <div class="card shadow-sm-custom">
           <div class="card-body text-center">
             <div class="h4 mb-0"><?php echo count(array_unique($PRODUTOS_sem_espacos ?? [])); ?></div>
-            <div class="text-muted"><?php echo htmlspecialchars(to_uppercase('Códigos únicos'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <div class="text-muted">
+              <?php echo htmlspecialchars(to_uppercase('Códigos únicos'), ENT_QUOTES, 'UTF-8'); ?></div>
           </div>
         </div>
       </div>
@@ -196,21 +203,29 @@ ob_start();
 
     <?php if (!empty($PRODUTOS)): ?>
       <div class="mt-3 position-relative">
-        <label for="codigosField" class="form-label"><?php echo htmlspecialchars(to_uppercase('Códigos'), ENT_QUOTES, 'UTF-8'); ?></label>
-        <textarea id="codigosField" class="form-control" rows="6" readonly onclick="this.select()"><?php echo htmlspecialchars($codigos_concatenados, ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <label for="codigosField"
+          class="form-label"><?php echo htmlspecialchars(to_uppercase('Códigos'), ENT_QUOTES, 'UTF-8'); ?></label>
+        <textarea id="codigosField" class="form-control" rows="6" readonly
+          onclick="this.select()"><?php echo htmlspecialchars($codigos_concatenados, ENT_QUOTES, 'UTF-8'); ?></textarea>
         <button class="btn btn-primary btn-sm mt-2 w-100" onclick="copiarCodigos()">
           <i class="bi bi-clipboard-check me-2"></i>
           <?php echo htmlspecialchars(to_uppercase('Copiar para área de transferência'), ENT_QUOTES, 'UTF-8'); ?>
         </button>
-        <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Clique no campo para selecionar tudo rapidamente.'), ENT_QUOTES, 'UTF-8'); ?></div>
+        <div class="form-text">
+          <?php echo htmlspecialchars(to_uppercase('Clique no campo para selecionar tudo rapidamente.'), ENT_QUOTES, 'UTF-8'); ?>
+        </div>
       </div>
     <?php else: ?>
       <div class="alert alert-warning mt-3 text-center">
         <strong><?php echo htmlspecialchars(to_uppercase('Nenhum produto disponível para etiquetas.'), ENT_QUOTES, 'UTF-8'); ?></strong>
         <?php if (!empty($dependencia_selecionada)): ?>
-          <div class="small"><?php echo htmlspecialchars(to_uppercase('Não há produtos marcados ou cadastrados com código na dependência "' . $dependencia_selecionada . '".'), ENT_QUOTES, 'UTF-8'); ?></div>
+          <div class="small">
+            <?php echo htmlspecialchars(to_uppercase('Não há produtos marcados ou cadastrados com código na dependência "' . $dependencia_selecionada . '".'), ENT_QUOTES, 'UTF-8'); ?>
+          </div>
         <?php else: ?>
-          <div class="small"><?php echo htmlspecialchars(to_uppercase('Marque produtos com o ícone de etiqueta ou cadastre produtos com código preenchido.'), ENT_QUOTES, 'UTF-8'); ?></div>
+          <div class="small">
+            <?php echo htmlspecialchars(to_uppercase('Marque produtos com o ícone de etiqueta ou cadastre produtos com código preenchido.'), ENT_QUOTES, 'UTF-8'); ?>
+          </div>
         <?php endif; ?>
       </div>
     <?php endif; ?>

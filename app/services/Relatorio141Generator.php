@@ -23,22 +23,22 @@ class Relatorio141Generator
      * @param int $id_planilha ID da planilha
      * @return array Dados formatados para o template
      */
-    public function gerarRelatorio($id_planilha)
+    public function gerarRelatorio($id_comum)
     {
-        // Buscar dados da planilha
-        $planilha = $this->buscarPlanilha($id_planilha);
+        // Buscar dados da comum
+        $planilha = $this->buscarPlanilha($id_comum);
 
         if (!$planilha) {
-            throw new Exception("Planilha nÃ£o encontrada");
+            throw new Exception("Comum nÃ£o encontrada");
         }
 
-        // Buscar produtos da planilha
-        $produtos = $this->buscarProdutos($id_planilha);
+        // Buscar produtos da comum
+        $produtos = $this->buscarProdutos($id_comum);
 
         // Formatar dados para o template
         return [
             'cnpj' => $planilha['cnpj'] ?? '',
-            'numero_relatorio' => $planilha['numero_relatorio'] ?? $id_planilha,
+            'numero_relatorio' => $planilha['numero_relatorio'] ?? $id_comum,
             'casa_oracao' => $planilha['casa_oracao'] ?? '',
             'produtos' => $produtos
         ];
@@ -66,7 +66,7 @@ class Relatorio141Generator
     /**
      * Busca produtos da planilha
      */
-    private function buscarProdutos($id_planilha)
+    private function buscarProdutos($id_comum)
     {
         $sql = "SELECT 
                     p.codigo,
@@ -77,11 +77,11 @@ class Relatorio141Generator
                     p.num_serie,
                     p.ano_fabric
                 FROM produtos p
-                WHERE p.planilha_id = :id_planilha
-                ORDER BY p.codigo"; // Ajustado para usar colunas atuais e 'planilha_id'
+                WHERE p.comum_id = :id_comum
+                ORDER BY p.codigo"; // Ajustado para usar coluna comum_id
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute(['id_planilha' => $id_planilha]);
+        $stmt->execute(['id_comum' => $id_comum]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

@@ -101,10 +101,10 @@ $sql = "SELECT
         LEFT JOIN dependencias d ON p.dependencia_id = d.id
         LEFT JOIN usuarios admin ON p.administrador_acessor_id = admin.id
         LEFT JOIN usuarios doador ON p.doador_conjugue_id = doador.id
-        WHERE p.imprimir_14_1 = 1 AND p.planilha_id = :id_planilha
+        WHERE p.imprimir_14_1 = 1 AND p.comum_id = :id_comum
         ORDER BY p.id_produto ASC";
 $stmt = $conexao->prepare($sql);
-$stmt->bindValue(':id_planilha', $id_planilha);
+$stmt->bindValue(':id_comum', $id_planilha);
 $stmt->execute();
 $produtos = $stmt->fetchAll();
 

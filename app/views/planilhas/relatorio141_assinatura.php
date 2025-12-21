@@ -21,12 +21,12 @@ $sql = "SELECT
         FROM PRODUTOS p
         LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
         LEFT JOIN usuarios u ON p.doador_conjugue_id = u.id
-        WHERE p.planilha_id = :id_planilha 
+        WHERE p.comum_id = :id_comum 
         AND p.imprimir_14_1 = 1
         ORDER BY p.id_PRODUTO ASC";
 
 $stmt = $conexao->prepare($sql);
-$stmt->bindValue(':id_planilha', $id_planilha);
+$stmt->bindValue(':id_comum', $id_planilha);
 $stmt->execute();
 $PRODUTOS = $stmt->fetchAll();
 
@@ -51,7 +51,7 @@ foreach ($PRODUTOS as $PRODUTO) {
 arsort($doacoes_por_pessoa);
 
 $pageTitle = 'Assinar Documentos 14.1';
-$backUrl = 'relatorio141_view.php?id=' . urlencode($id_planilha);
+$backUrl = 'relatorio141_view.php?id=' . urlencode($id_planilha) . '&comum_id=' . urlencode($id_planilha);
 $headerActions = '';
 
 ob_start();

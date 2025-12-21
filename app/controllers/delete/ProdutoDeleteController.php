@@ -1,5 +1,5 @@
 ﻿<?php
- // AutenticaÃ§Ã£o
+// AutenticaÃ§Ã£o
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 $id_produto = $_GET['id_produto'] ?? null;
@@ -16,13 +16,13 @@ try {
                    FROM produtos p
                    LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
                    LEFT JOIN dependencias d ON p.dependencia_id = d.id
-                   WHERE p.id_produto = :id AND p.planilha_id = :id_planilha";
+                   WHERE p.id_produto = :id AND p.comum_id = :id_comum";
     $stmt_produto = $conexao->prepare($sql_produto);
     $stmt_produto->bindValue(':id', $id_produto);
-    $stmt_produto->bindValue(':id_planilha', $id_planilha);
+    $stmt_produto->bindValue(':id_comum', $id_planilha);
     $stmt_produto->execute();
     $produto = $stmt_produto->fetch();
-    
+
     if (!$produto) {
         header('Location: ../../views/produtos/produtos_listar.php?id=' . $id_planilha);
         exit;
@@ -34,28 +34,28 @@ try {
 // Processar a exclusÃ£o quando confirmada
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-    $sql_excluir = "DELETE FROM produtos WHERE id_produto = :id AND planilha_id = :id_planilha";
+        $sql_excluir = "DELETE FROM produtos WHERE id_produto = :id AND comum_id = :id_comum";
         $stmt_excluir = $conexao->prepare($sql_excluir);
         $stmt_excluir->bindValue(':id', $id_produto);
-        $stmt_excluir->bindValue(':id_planilha', $id_planilha);
+        $stmt_excluir->bindValue(':id_comum', $id_planilha);
         $stmt_excluir->execute();
-        
+
         // Gerar parÃ¢metros de retorno para manter os filtros
         $parametros_retorno = gerarParametrosFiltro();
-        
+
         // Redirecionar de volta para a lista (caminho relativo ao document root)
         header('Location: ../../views/produtos/produtos_listar.php?id=' . $id_planilha . ($parametros_retorno ? '&' . $parametros_retorno : ''));
         exit;
-        
     } catch (Exception $e) {
         $erros[] = "Erro ao excluir produto: " . $e->getMessage();
     }
 }
 
 // FunÃ§Ã£o para gerar parÃ¢metros de filtro
-function gerarParametrosFiltro() {
+function gerarParametrosFiltro()
+{
     $params = '';
-    
+
     if (!empty($_GET['pesquisa_id'])) {
         $params .= '&pesquisa_id=' . urlencode($_GET['pesquisa_id']);
     }
@@ -77,10 +77,6 @@ function gerarParametrosFiltro() {
     if (!empty($_GET['pagina'])) {
         $params .= '&pagina=' . urlencode($_GET['pagina']);
     }
-    
+
     return $params;
 }
-?>
-
-
-

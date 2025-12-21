@@ -1,5 +1,5 @@
 ﻿<?php
- // AutenticaÃ§Ã£o
+// AutenticaÃ§Ã£o
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 $id_produto = $_GET['id_produto'] ?? null;
@@ -12,13 +12,13 @@ if (!$id_produto || !$id_planilha) {
 
 // Buscar dados do produto
 try {
-    $sql_produto = "SELECT * FROM produtos WHERE id_produto = :id AND planilha_id = :id_planilha";
+    $sql_produto = "SELECT * FROM produtos WHERE id_produto = :id AND comum_id = :id_comum";
     $stmt_produto = $conexao->prepare($sql_produto);
     $stmt_produto->bindValue(':id', $id_produto);
-    $stmt_produto->bindValue(':id_planilha', $id_planilha);
+    $stmt_produto->bindValue(':id_comum', $id_planilha);
     $stmt_produto->execute();
     $produto = $stmt_produto->fetch();
-    
+
     if (!$produto) {
         header('Location: ../../views/produtos/produtos_listar.php?id=' . $id_planilha);
         exit;
@@ -46,28 +46,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipo_ben = $_POST['tipo_ben'] ?? '';
     $complemento = $_POST['complemento'] ?? '';
     $id_dependencia = $_POST['id_dependencia'] ?? '';
-    
+
     $imprimir_14_1 = isset($_POST['imprimir_14_1']) ? 1 : 0;
-    
+
     // ValidaÃ§Ãµes bÃ¡sicas
     $erros = [];
-    
+
     if (empty($id_tipo_ben)) {
         $erros[] = "O tipo de bem Ã© obrigatÃ³rio";
     }
-    
+
     if (empty($tipo_ben)) {
         $erros[] = "O bem Ã© obrigatÃ³rio";
     }
-    
+
     if (empty($complemento)) {
         $erros[] = "O complemento Ã© obrigatÃ³rio";
     }
-    
+
     if (empty($id_dependencia)) {
         $erros[] = "A dependÃªncia Ã© obrigatÃ³ria";
     }
-    
+
     // Se nÃ£o hÃ¡ erros, atualizar no banco
     if (empty($erros)) {
         try {
@@ -77,16 +77,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_tipo->bindValue(':id_tipo_ben', $id_tipo_ben);
             $stmt_tipo->execute();
             $tipo_bem = $stmt_tipo->fetch();
-            
+
             $sql_dep = "SELECT descricao FROM dependencias WHERE id = :id_dependencia";
             $stmt_dep = $conexao->prepare($sql_dep);
             $stmt_dep->bindValue(':id_dependencia', $id_dependencia);
             $stmt_dep->execute();
             $dependencia = $stmt_dep->fetch();
-            
+
             // Montar descriÃ§Ã£o completa (mantendo quantidade = 1)
             $descricao_completa = "1x [" . $tipo_bem['codigo'] . " - " . $tipo_bem['descricao'] . "] " . $tipo_ben . " - " . $complemento . " - (" . $dependencia['descricao'] . ")";
-            
+
             $sql_atualizar = "UPDATE produtos 
                              SET codigo = :codigo,
                                  tipo_bem_id = :tipo_bem_id,
@@ -95,8 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                  dependencia_id = :dependencia_id,
                                  descricao_completa = :descricao_completa,
                                  imprimir_14_1 = :imprimir_14_1
-                             WHERE id_produto = :id AND planilha_id = :id_planilha";
-            
+                             WHERE id_produto = :id AND comum_id = :id_comum";
+
             $stmt_atualizar = $conexao->prepare($sql_atualizar);
             $stmt_atualizar->bindValue(':codigo', !empty($codigo) ? $codigo : null);
             $stmt_atualizar->bindValue(':tipo_bem_id', $id_tipo_ben);
@@ -106,17 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_atualizar->bindValue(':descricao_completa', mb_strtoupper($descricao_completa, 'UTF-8'));
             $stmt_atualizar->bindValue(':imprimir_14_1', $imprimir_14_1);
             $stmt_atualizar->bindValue(':id', $id_produto);
-            $stmt_atualizar->bindValue(':id_planilha', $id_planilha);
-            
+            $stmt_atualizar->bindValue(':id_comum', $id_planilha);
+
             $stmt_atualizar->execute();
-            
+
             // Gerar parÃ¢metros de retorno para manter os filtros
             $parametros_retorno = gerarParametrosFiltro();
-            
+
             // Redirecionar de volta para a lista (caminho relativo ao document root)
             header('Location: ../../views/produtos/produtos_listar.php?id=' . $id_planilha . ($parametros_retorno ? '&' . $parametros_retorno : ''));
             exit;
-            
         } catch (Exception $e) {
             $erros[] = "Erro ao atualizar produto: " . $e->getMessage();
         }
@@ -124,9 +123,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // FunÃ§Ã£o para gerar parÃ¢metros de filtro
-function gerarParametrosFiltro() {
+function gerarParametrosFiltro()
+{
     $params = '';
-    
+
     if (!empty($_GET['pesquisa_id'])) {
         $params .= '&pesquisa_id=' . urlencode($_GET['pesquisa_id']);
     }
@@ -148,10 +148,6 @@ function gerarParametrosFiltro() {
     if (!empty($_GET['pagina'])) {
         $params .= '&pagina=' . urlencode($_GET['pagina']);
     }
-    
+
     return $params;
 }
-?>
-
-
-

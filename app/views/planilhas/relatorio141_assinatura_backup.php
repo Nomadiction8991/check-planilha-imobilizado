@@ -1,6 +1,6 @@
 ﻿<?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AutenticaÃƒÂ§ÃƒÂ£o
+// AutenticaÃƒÂ§ÃƒÂ£o
 
 $id_planilha = $_GET['id'] ?? null;
 
@@ -21,12 +21,12 @@ $sql = "SELECT
         FROM PRODUTOS p
         LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
         LEFT JOIN assinaturas_14_1 a ON a.id_PRODUTO = p.id_PRODUTO
-        WHERE p.planilha_id = :id_planilha 
+        WHERE p.comum_id = :id_comum 
         AND p.imprimir_14_1 = 1
         ORDER BY p.id_PRODUTO ASC";
 
 $stmt = $conexao->prepare($sql);
-$stmt->bindValue(':id_planilha', $id_planilha);
+$stmt->bindValue(':id_comum', $id_planilha);
 $stmt->execute();
 $PRODUTOS = $stmt->fetchAll();
 
@@ -57,80 +57,81 @@ ob_start();
 ?>
 
 <style>
-.PRODUTO-card {
-    transition: all 0.2s;
-    border: 3px solid #dee2e6;
-    border-radius: 0.375rem;
-    cursor: pointer;
-}
+    .PRODUTO-card {
+        transition: all 0.2s;
+        border: 3px solid #dee2e6;
+        border-radius: 0.375rem;
+        cursor: pointer;
+    }
 
-.PRODUTO-card:hover {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+    .PRODUTO-card:hover {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-.PRODUTO-card.STATUS-pendente {
-    border-color: #ffc107;
-}
+    .PRODUTO-card.STATUS-pendente {
+        border-color: #ffc107;
+    }
 
-.PRODUTO-card.STATUS-assinado {
-    border-color: #28a745;
-}
+    .PRODUTO-card.STATUS-assinado {
+        border-color: #28a745;
+    }
 
-.PRODUTO-card.selected {
-    background-color: #e7f3ff;
-    border-color: #007bff !important;
-    box-shadow: 0 0 0 2px #007bff;
-}
+    .PRODUTO-card.selected {
+        background-color: #e7f3ff;
+        border-color: #007bff !important;
+        box-shadow: 0 0 0 2px #007bff;
+    }
 
-.checkbox-PRODUTO {
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-}
+    .checkbox-PRODUTO {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+    }
 
-.selection-toolbar {
-    position: sticky;
-    top: 60px;
-    z-index: 100;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    padding: 1rem;
-    border-radius: 0.375rem;
-    margin-bottom: 1rem;
-    display: none;
-}
+    .selection-toolbar {
+        position: sticky;
+        top: 60px;
+        z-index: 100;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+        display: none;
+    }
 
-.selection-toolbar.active {
-    display: block;
-}
- .legenda-STATUS {
-     display: flex;
-     gap: 1.5rem;
-     flex-wrap: wrap;
-     align-items: center;
- }
- 
- .legenda-item {
-     display: flex;
-     align-items: center;
-     gap: 0.5rem;
-     font-size: 0.875rem;
- }
- 
- .legenda-cor {
-     width: 30px;
-     height: 20px;
-     border-radius: 3px;
-     border: 3px solid;
- }
- 
- .legenda-cor.pendente {
-     border-color: #ffc107;
- }
- 
- .legenda-cor.assinado {
-     border-color: #28a745;
- }
+    .selection-toolbar.active {
+        display: block;
+    }
+
+    .legenda-STATUS {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .legenda-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .legenda-cor {
+        width: 30px;
+        height: 20px;
+        border-radius: 3px;
+        border: 3px solid;
+    }
+
+    .legenda-cor.pendente {
+        border-color: #ffc107;
+    }
+
+    .legenda-cor.assinado {
+        border-color: #28a745;
+    }
 </style>
 
 <!-- Card com Link de Compartilhamento da PÃƒÂ¡gina -->
@@ -156,7 +157,7 @@ ob_start();
             O link abre esta pÃƒÂ¡gina para seleÃƒÂ§ÃƒÂ£o e assinatura.
         </small>
     </div>
-    
+
 </div>
 
 <div class="card mb-3">
@@ -206,18 +207,18 @@ ob_start();
     <div class="row g-3">
         <?php foreach ($PRODUTOS as $PRODUTO): ?>
             <div class="col-12">
-                <div class="card PRODUTO-card STATUS-<?php echo $PRODUTO['STATUS_assinatura']; ?>" 
-                     data-PRODUTO-id="<?php echo $PRODUTO['id']; ?>"
-                     onclick="togglePRODUTO(<?php echo $PRODUTO['id']; ?>)">
+                <div class="card PRODUTO-card STATUS-<?php echo $PRODUTO['STATUS_assinatura']; ?>"
+                    data-PRODUTO-id="<?php echo $PRODUTO['id']; ?>"
+                    onclick="togglePRODUTO(<?php echo $PRODUTO['id']; ?>)">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="d-flex align-items-start gap-3 flex-grow-1">
                                 <div class="form-check">
-                                    <input class="form-check-input checkbox-PRODUTO" 
-                                           type="checkbox" 
-                                           id="PRODUTO_<?php echo $PRODUTO['id']; ?>"
-                                           value="<?php echo $PRODUTO['id']; ?>"
-                                           onclick="event.stopPropagation();">
+                                    <input class="form-check-input checkbox-PRODUTO"
+                                        type="checkbox"
+                                        id="PRODUTO_<?php echo $PRODUTO['id']; ?>"
+                                        value="<?php echo $PRODUTO['id']; ?>"
+                                        onclick="event.stopPropagation();">
                                 </div>
                                 <div class="flex-grow-1">
                                     <h6 class="card-title mb-2">
@@ -225,7 +226,7 @@ ob_start();
                                         PRODUTO #<?php echo $PRODUTO['id']; ?>
                                     </h6>
                                     <p class="card-text small mb-2">
-                                        <strong>Tipo:</strong> 
+                                        <strong>Tipo:</strong>
                                         <?php echo htmlspecialchars($PRODUTO['tipo_descricao'] ?? 'N/A'); ?>
                                     </p>
                                     <p class="card-text small text-muted mb-0" style="max-height: 3em; overflow: hidden;">
@@ -250,109 +251,109 @@ ob_start();
 <?php endif; ?>
 
 <script>
-let PRODUTOSSelecionados = new Set();
+    let PRODUTOSSelecionados = new Set();
 
-function togglePRODUTO(id) {
-    const checkbox = document.getElementById('PRODUTO_' + id);
-    const card = document.querySelector(`[data-PRODUTO-id="${id}"]`);
-    
-    if (checkbox.checked) {
-        checkbox.checked = false;
-        PRODUTOSSelecionados.delete(id);
-        card.classList.remove('selected');
-    } else {
-        checkbox.checked = true;
-        PRODUTOSSelecionados.add(id);
-        card.classList.add('selected');
-    }
-    
-    atualizarToolbar();
-}
-
-function atualizarToolbar() {
-    const toolbar = document.getElementById('selectionToolbar');
-    const counter = document.getElementById('countSelected');
-    const count = PRODUTOSSelecionados.size;
-    
-    counter.textContent = count;
-    
-    if (count > 0) {
-        toolbar.classList.add('active');
-    } else {
-        toolbar.classList.remove('active');
-    }
-}
-
-function selecionarTodos() {
-    const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
-    checkboxes.forEach(cb => {
-        const id = parseInt(cb.value);
-        cb.checked = true;
-        PRODUTOSSelecionados.add(id);
+    function togglePRODUTO(id) {
+        const checkbox = document.getElementById('PRODUTO_' + id);
         const card = document.querySelector(`[data-PRODUTO-id="${id}"]`);
-        if (card) card.classList.add('selected');
-    });
-    atualizarToolbar();
-}
 
-function limparSelecao() {
-    const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
-    checkboxes.forEach(cb => {
-        cb.checked = false;
-        const card = document.querySelector(`[data-PRODUTO-id="${cb.value}"]`);
-        if (card) card.classList.remove('selected');
-    });
-    PRODUTOSSelecionados.clear();
-    atualizarToolbar();
-}
+        if (checkbox.checked) {
+            checkbox.checked = false;
+            PRODUTOSSelecionados.delete(id);
+            card.classList.remove('selected');
+        } else {
+            checkbox.checked = true;
+            PRODUTOSSelecionados.add(id);
+            card.classList.add('selected');
+        }
 
-function assinarSelecionados() {
-    if (PRODUTOSSelecionados.size === 0) {
-        alert('Selecione pelo menos um PRODUTO para assinar.');
-        return;
+        atualizarToolbar();
     }
-    
-    const ids = Array.from(PRODUTOSSelecionados).join(',');
-    window.location.href = './relatorio141_assinatura_form.php?ids=' + ids + '&id_planilha=<?php echo $id_planilha; ?>';
-}
 
-// Listener nos checkboxes para sincronizar com a seleÃƒÂ§ÃƒÂ£o
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', function(e) {
-            const id = parseInt(this.value);
+    function atualizarToolbar() {
+        const toolbar = document.getElementById('selectionToolbar');
+        const counter = document.getElementById('countSelected');
+        const count = PRODUTOSSelecionados.size;
+
+        counter.textContent = count;
+
+        if (count > 0) {
+            toolbar.classList.add('active');
+        } else {
+            toolbar.classList.remove('active');
+        }
+    }
+
+    function selecionarTodos() {
+        const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
+        checkboxes.forEach(cb => {
+            const id = parseInt(cb.value);
+            cb.checked = true;
+            PRODUTOSSelecionados.add(id);
             const card = document.querySelector(`[data-PRODUTO-id="${id}"]`);
-            
-            if (this.checked) {
-                PRODUTOSSelecionados.add(id);
-                if (card) card.classList.add('selected');
-            } else {
-                PRODUTOSSelecionados.delete(id);
-                if (card) card.classList.remove('selected');
-            }
-            
-            atualizarToolbar();
+            if (card) card.classList.add('selected');
+        });
+        atualizarToolbar();
+    }
+
+    function limparSelecao() {
+        const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            const card = document.querySelector(`[data-PRODUTO-id="${cb.value}"]`);
+            if (card) card.classList.remove('selected');
+        });
+        PRODUTOSSelecionados.clear();
+        atualizarToolbar();
+    }
+
+    function assinarSelecionados() {
+        if (PRODUTOSSelecionados.size === 0) {
+            alert('Selecione pelo menos um PRODUTO para assinar.');
+            return;
+        }
+
+        const ids = Array.from(PRODUTOSSelecionados).join(',');
+        window.location.href = './relatorio141_assinatura_form.php?ids=' + ids + '&id_planilha=<?php echo $id_planilha; ?>';
+    }
+
+    // Listener nos checkboxes para sincronizar com a seleÃƒÂ§ÃƒÂ£o
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.checkbox-PRODUTO');
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function(e) {
+                const id = parseInt(this.value);
+                const card = document.querySelector(`[data-PRODUTO-id="${id}"]`);
+
+                if (this.checked) {
+                    PRODUTOSSelecionados.add(id);
+                    if (card) card.classList.add('selected');
+                } else {
+                    PRODUTOSSelecionados.delete(id);
+                    if (card) card.classList.remove('selected');
+                }
+
+                atualizarToolbar();
+            });
         });
     });
-});
 
-function copiarLinkSelecao() {
-    const input = document.getElementById('linkCompartilharSelecao');
-    input.select();
-    input.setSelectionRange(0, 99999);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(input.value).then(() => {
-            alert('Link copiado!');
-        }).catch(() => {
+    function copiarLinkSelecao() {
+        const input = document.getElementById('linkCompartilharSelecao');
+        input.select();
+        input.setSelectionRange(0, 99999);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).then(() => {
+                alert('Link copiado!');
+            }).catch(() => {
+                document.execCommand('copy');
+                alert('Link copiado!');
+            });
+        } else {
             document.execCommand('copy');
             alert('Link copiado!');
-        });
-    } else {
-        document.execCommand('copy');
-        alert('Link copiado!');
+        }
     }
-}
 </script>
 
 <?php
@@ -363,5 +364,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
-

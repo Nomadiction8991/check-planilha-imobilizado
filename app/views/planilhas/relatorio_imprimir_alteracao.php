@@ -65,10 +65,10 @@ try {
                      CAST(p.editado AS SIGNED) as editado, 
                      p.editado_descricao_completa as nome_editado, 
                      p.editado_dependencia_id as dependencia_editada,
-                     'planilha' as origem
+                     'comum' as origem
                      FROM PRODUTOS p 
-                     WHERE p.planilha_id = :id_planilha";
-  $params = [':id_planilha' => $id_planilha];
+                     WHERE p.comum_id = :id_comum";
+  $params = [':id_comum' => $id_planilha];
   if (!empty($filtro_dependencia)) {
     $sql_PRODUTOS .= " AND (
             (CAST(p.editado AS SIGNED) = 1 AND p.editado_dependencia_id = :dependencia) OR
@@ -107,15 +107,15 @@ try {
 try {
   // BUSCAR depend+Ã¯Â¿Â½ncias originais + depend+Ã¯Â¿Â½ncias editadas
   $sql_dependencias = "
-        SELECT DISTINCT p.dependencia_id as dependencia FROM PRODUTOS p WHERE p.planilha_id = :id_planilha1
+        SELECT DISTINCT p.dependencia_id as dependencia FROM PRODUTOS p WHERE p.comum_id = :id_comum1
         UNION
         SELECT DISTINCT p.editado_dependencia_id as dependencia FROM PRODUTOS p
-        WHERE p.planilha_id = :id_planilha2 AND p.editado = 1 AND p.editado_dependencia_id IS NOT NULL
+        WHERE p.comum_id = :id_comum2 AND p.editado = 1 AND p.editado_dependencia_id IS NOT NULL
         ORDER BY dependencia
     ";
   $stmt_dependencias = $conexao->prepare($sql_dependencias);
-  $stmt_dependencias->bindValue(':id_planilha1', $id_planilha);
-  $stmt_dependencias->bindValue(':id_planilha2', $id_planilha);
+  $stmt_dependencias->bindValue(':id_comum1', $id_planilha);
+  $stmt_dependencias->bindValue(':id_comum2', $id_planilha);
   $stmt_dependencias->execute();
   $dependencia_options = $stmt_dependencias->fetchAll(PDO::FETCH_COLUMN);
 } catch (Exception $e) {

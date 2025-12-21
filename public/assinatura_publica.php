@@ -9,16 +9,16 @@ unset($_SESSION['public_acesso'], $_SESSION['public_planilha_id'], $_SESSION['pu
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $planilha_id = (int)($_POST['planilha_id'] ?? 0);
+    $comum_id = (int)($_POST['comum_id'] ?? $_POST['planilha_id'] ?? 0);
 
     try {
-        if ($planilha_id <= 0) {
-            throw new Exception('Selecione uma Comum vÃ¡lida.');
+        if ($comum_id <= 0) {
+            throw new Exception('Selecione uma Comum válida.');
         }
 
         // Validar se a comum existe e está ativa (substituímos 'planilhas' por 'comums')
         $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comums WHERE id = :id');
-        $stmt->bindValue(':id', $planilha_id, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $comum_id, PDO::PARAM_INT);
         $stmt->execute();
         $planilha = $stmt->fetch();
 
@@ -28,11 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Habilitar modo público com contexto da comum
         $_SESSION['public_acesso'] = true;
+        // manter chave legada por compatibilidade e adicionar a nova
         $_SESSION['public_planilha_id'] = $planilha['id'];
+        $_SESSION['public_comum_id'] = $planilha['id'];
         $_SESSION['public_comum'] = $planilha['comum'];
 
-        // Redirecionar para o menu com contexto da planilha (somente relatórios)
-        header('Location: ../app/views/shared/menu_unificado.php?contexto=planilha&id=' . urlencode($planilha['id']) . '&publico=1');
+        // Redirecionar para o menu com contexto da comum (somente relatórios)
+        header('Location: ../app/views/shared/menu_unificado.php?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
         exit;
     } catch (Exception $e) {
         $erro = $e->getMessage();
@@ -108,8 +110,8 @@ try {
 
             <form method="POST">
                 <div class="mb-3">
-                    <label for="planilha_id" class="form-label">Selecione sua Comum <span class="text-danger">*</span></label>
-                    <select id="planilha_id" name="planilha_id" class="form-select" required>
+                    <label for="comum_id" class="form-label">Selecione sua Comum <span class="text-danger">*</span></label>
+                    <select id="comum_id" name="comum_id" class="form-select" required>
                         <option value="">-- Escolha --</option>
                         <?php foreach ($comuns as $c): ?>
                             <option value="<?php echo (int)$c['id']; ?>"><?php echo htmlspecialchars($c['comum']); ?></option>

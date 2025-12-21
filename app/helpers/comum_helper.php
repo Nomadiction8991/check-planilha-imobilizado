@@ -407,32 +407,12 @@ function contar_planilhas_por_comum($conexao, $comum_id)
 function contar_produtos_por_comum($conexao, $comum_id)
 {
     try {
-        $sql = "SELECT COUNT(p.id_produto) as total 
-                FROM produtos p 
-                INNER JOIN planilhas pl ON p.planilha_id = pl.id 
-                WHERE pl.comum_id = :comum_id";
+        $sql = "SELECT COUNT(id_produto) as total FROM produtos WHERE comum_id = :comum_id";
         $stmt = $conexao->prepare($sql);
         $stmt->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
         $stmt->execute();
         $resultado = $stmt->fetch();
         return $resultado['total'] ?? 0;
-    } catch (PDOException $e) {
-        // Se tabela 'planilhas' não existir, contar diretamente por planilha_id assumindo que foi gravado o comum id em planilha_id
-        if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
-            try {
-                $sql2 = "SELECT COUNT(id_produto) as total FROM produtos WHERE planilha_id = :comum_id";
-                $stmt2 = $conexao->prepare($sql2);
-                $stmt2->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
-                $stmt2->execute();
-                $r2 = $stmt2->fetch();
-                return $r2['total'] ?? 0;
-            } catch (Exception $ex) {
-                error_log("Fallback contar produtos falhou: " . $ex->getMessage());
-                return 0;
-            }
-        }
-        error_log("Erro ao contar produtos: " . $e->getMessage());
-        return 0;
     } catch (Exception $e) {
         error_log("Erro ao contar produtos: " . $e->getMessage());
         return 0;
@@ -452,7 +432,7 @@ function obter_planilhas_por_comum($conexao, $comum_id)
         $sql = "SELECT p.id, p.comum_id, p.data_posicao, p.ativo, 
                        COUNT(pr.id_produto) as total_produtos
                 FROM planilhas p
-                LEFT JOIN produtos pr ON p.id = pr.planilha_id
+                LEFT JOIN produtos pr ON p.id = pr.comum_id
                 WHERE p.comum_id = :comum_id
                 GROUP BY p.id, p.comum_id, p.data_posicao, p.ativo
                 ORDER BY p.data_posicao DESC";

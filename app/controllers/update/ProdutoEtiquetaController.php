@@ -8,8 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $produto_id = (int) ($_POST['produto_id'] ?? 0);
-// Aceitar 'planilha_id' preferencialmente; caso contrário aceitar 'comum_id' para compatibilidade
-$planilha_id = (int) ($_POST['planilha_id'] ?? $_POST['comum_id'] ?? 0);
+// Aceitar 'comum_id' preferencialmente; caso contrário aceitar 'planilha_id' para compatibilidade
+$comum_id = (int) ($_POST['comum_id'] ?? $_POST['planilha_id'] ?? 0);
 $imprimir = (int) ($_POST['imprimir'] ?? 0);
 
 $filtros = [
@@ -21,15 +21,15 @@ $filtros = [
 ];
 
 $redirectBase = '../../views/planilhas/planilha_visualizar.php';
-$buildRedirect = function (string $erro = '') use ($redirectBase, $planilha_id, $filtros): string {
-    $params = array_merge(['id' => $planilha_id, 'comum_id' => $planilha_id], $filtros);
+$buildRedirect = function (string $erro = '') use ($redirectBase, $comum_id, $filtros): string {
+    $params = array_merge(['id' => $comum_id, 'comum_id' => $comum_id], $filtros);
     if ($erro !== '') {
         $params['erro'] = $erro;
     }
     return $redirectBase . '?' . http_build_query($params);
 };
 
-if ($produto_id <= 0 || $planilha_id <= 0) {
+if ($produto_id <= 0 || $comum_id <= 0) {
     $msg = 'PARÂMETROS INVÁLIDOS PARA MARCAR ETIQUETA';
     if (is_ajax_request()) {
         json_response(['success' => false, 'message' => $msg], 400);
@@ -40,9 +40,9 @@ if ($produto_id <= 0 || $planilha_id <= 0) {
 
 try {
     // Impedir remoção da etiqueta se produto estiver editado
-    $stmt_check = $conexao->prepare('SELECT COALESCE(editado,0) AS editado FROM produtos WHERE id_produto = :id_produto AND planilha_id = :planilha_id');
+    $stmt_check = $conexao->prepare('SELECT COALESCE(editado,0) AS editado FROM produtos WHERE id_produto = :id_produto AND comum_id = :comum_id');
     $stmt_check->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
-    $stmt_check->bindValue(':planilha_id', $planilha_id, PDO::PARAM_INT);
+    $stmt_check->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
     $stmt_check->execute();
     $info = $stmt_check->fetch(PDO::FETCH_ASSOC);
     if (($info['editado'] ?? 0) == 1 && $imprimir === 0) {
@@ -57,14 +57,14 @@ try {
     // Se for marcar para imprimir, garantir que o produto fique marcado como checado automaticamente.
     // Se for desmarcar, não alterar o campo 'checado' (permanece como está).
     if ($imprimir === 1) {
-        $stmt = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = 1, checado = 1 WHERE id_produto = :id_produto AND planilha_id = :planilha_id');
+        $stmt = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = 1, checado = 1 WHERE id_produto = :id_produto AND comum_id = :comum_id');
         $stmt->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
-        $stmt->bindValue(':planilha_id', $planilha_id, PDO::PARAM_INT);
+        $stmt->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
         $stmt->execute();
     } else {
-        $stmt = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = 0 WHERE id_produto = :id_produto AND planilha_id = :planilha_id');
+        $stmt = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = 0 WHERE id_produto = :id_produto AND comum_id = :comum_id');
         $stmt->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
-        $stmt->bindValue(':planilha_id', $planilha_id, PDO::PARAM_INT);
+        $stmt->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
         $stmt->execute();
     }
 

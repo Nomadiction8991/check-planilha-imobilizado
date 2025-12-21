@@ -14,7 +14,8 @@ ini_set('display_errors', '0');
 // Incluir este arquivo no inicio de todas as paginas que precisam de autenticacao
 
 // URL de login baseada na profundidade do diretorio
-function getLoginUrl(): string {
+function getLoginUrl(): string
+{
     $prefix = '';
     if (defined('BASE_PATH')) {
         $docRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
@@ -30,7 +31,7 @@ function getLoginUrl(): string {
 }
 
 // Modo publico: permitir acesso restrito a algumas paginas com base em sessao publica
-$isPublic = !empty($_SESSION['public_acesso']) && !empty($_SESSION['public_planilha_id']);
+$isPublic = !empty($_SESSION['public_acesso']) && (!empty($_SESSION['public_comum_id']) || !empty($_SESSION['public_planilha_id']));
 if (!isset($_SESSION['usuario_id'])) {
     if ($isPublic) {
         // Lista de paginas publicas permitidas (entrada do script)
@@ -83,7 +84,8 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
 // NOTE: `usuario_tipo` column may be removed; prefer using `is_admin` / `is_doador` session flags set at login.
 
 // Verifica se o usuario é Administrador/Acessor
-function isAdmin(): bool {
+function isAdmin(): bool
+{
     // Prefer explicit session flag set at login
     if (isset($_SESSION['is_admin'])) {
         return (bool) $_SESSION['is_admin'];
@@ -98,7 +100,8 @@ function isAdmin(): bool {
 }
 
 // Verifica se o usuario é Doador/Cônjuge
-function isDoador(): bool {
+function isDoador(): bool
+{
     if (isset($_SESSION['is_doador'])) {
         return (bool) $_SESSION['is_doador'];
     }
@@ -109,6 +112,7 @@ function isDoador(): bool {
 }
 
 // Verifica se o usuario esta autenticado
-function isLoggedIn(): bool {
+function isLoggedIn(): bool
+{
     return isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] > 0;
 }
