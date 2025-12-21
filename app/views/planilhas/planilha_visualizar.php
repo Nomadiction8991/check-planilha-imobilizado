@@ -984,45 +984,14 @@ ob_start();
         });
 
 
-        // Interceptar cliques em editar para garantir checado antes de redirecionar
+        // Clique em EDITAR: não marcar como checado automaticamente — permitir que a edição seja feita e só marcar ao salvar
         document.addEventListener('click', function(ev) {
             const a = ev.target.closest && ev.target.closest('.action-editar');
             if (!a) return;
             // Se estiver visualmente desabilitado, ignorar
             if (a.classList.contains('disabled') || a.getAttribute('aria-disabled') === 'true') return;
-            const prodId = a.closest('.list-group-item').dataset.produtoId;
-            const row = document.querySelector(`.list-group-item[data-produto-id="${prodId}"]`);
-            const state = getRowState(row);
-            if (state.checado === 1) return; // já checado
-            ev.preventDefault();
-            const checkForm = document.querySelector(`.PRODUTO-action-form.action-check[data-produto-id="${prodId}"]`);
-            if (!checkForm) {
-                showAlert('danger', 'FORMULÁRIO DE CHECADO NÃO ENCONTRADO');
-                return;
-            }
-            const fd = new FormData(checkForm);
-            fetch(checkForm.action, {
-                    method: 'POST',
-                    body: fd,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(r => r.json().catch(() => ({})))
-                .then(j => {
-                    if (j.success === false) {
-                        showAlert('danger', j.message || 'FALHA AO MARCAR COMO CHECADO');
-                        return;
-                    }
-                    applyState(row, {
-                        checado: 1
-                    });
-                    // Redirecionar para edição
-                    window.location.href = a.href;
-                }).catch(err => {
-                    showAlert('danger', err.message || 'ERRO NO SERVIDOR');
-                });
+            // Permitir comportamento padrão (navegação para a página de edição)
+            // A marcação como 'checado' será tratada ao salvar as alterações no servidor (ProdutoUpdateController)
         });
 
         // Observador para mudanças em data-checado: se virar 0, desmarcar imprimir e limpar edições
