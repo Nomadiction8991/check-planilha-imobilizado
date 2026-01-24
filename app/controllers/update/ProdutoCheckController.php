@@ -57,8 +57,9 @@ try {
         exit;
     }
 
-    if ($checado === 0 && $status && ($status['ativo'] == 0 || $status['imprimir'] == 1 || $status['editado'] == 1)) {
-        $msg = 'NÃO É POSSÍVEL DESMARCAR O CHECK SE O PRODUTO ESTIVER NO DR, MARCADO PARA IMPRESSÃO OU COM ALTERAÇÕES EDITADAS (REMOVA AS ALTERAÇÕES PARA DESMARCAR)';
+    // Apenas bloquear desmarcar check se produto estiver no DR (ativo=0)
+    if ($checado === 0 && $status && $status['ativo'] == 0) {
+        $msg = 'NÃO É POSSÍVEL DESMARCAR O CHECK SE O PRODUTO ESTIVER NO DR';
         if (is_ajax_request()) {
             json_response(['success' => false, 'message' => $msg], 422);
         }
