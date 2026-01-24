@@ -1,5 +1,5 @@
 <?php
- // AutenticaÃ§Ã£o
+// AutenticaÃ§Ã£o
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -57,15 +57,16 @@ try {
         exit;
     }
 
-    if ($checado === 0 && $status && ($status['ativo'] == 0 || $status['imprimir'] == 1 || $status['editado'] == 1)) {
-        $msg = 'NÃO É POSSÍVEL DESMARCAR O CHECK SE O PRODUTO ESTIVER NO DR, MARCADO PARA IMPRESSÃO OU COM ALTERAÇÕES EDITADAS (REMOVA AS ALTERAÇÕES PARA DESMARCAR)';
+    // Apenas bloquear desmarcar check se produto estiver no DR (ativo=0)
+    if ($checado === 0 && $status && $status['ativo'] == 0) {
+        $msg = 'NÃO É POSSÍVEL DESMARCAR O CHECK SE O PRODUTO ESTIVER NO DR';
         if (is_ajax_request()) {
             json_response(['success' => false, 'message' => $msg], 422);
         }
         header('Location: ' . $buildRedirect($msg));
         exit;
     }
-    
+
     // Atualizar coluna checado na tabela produtos
     $sql = "UPDATE produtos SET checado = :checado WHERE id_produto = :produto_id";
     $stmt = $conexao->prepare($sql);
@@ -81,10 +82,9 @@ try {
             'message' => $checado ? 'PRODUTO MARCADO COMO CHECADO' : 'PRODUTO DESMARCADO'
         ]);
     }
-    
+
     header('Location: ' . $buildRedirect());
     exit;
-    
 } catch (Exception $e) {
     $msg = 'ERRO AO PROCESSAR CHECK: ' . $e->getMessage();
     if (is_ajax_request()) {
@@ -93,6 +93,3 @@ try {
     header('Location: ' . $buildRedirect($msg));
     exit;
 }
-
-
-

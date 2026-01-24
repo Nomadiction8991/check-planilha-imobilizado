@@ -402,7 +402,7 @@ ob_start();
 </div>
 <?php endif;
 
-// Preparar dados dos PRODUTOS para JavaScript
+// Preparar dados dos produtos para JavaScript
   $PRODUTOSDataJS = json_encode(array_map(function($p){ 
      return [
          'id_PRODUTO' => (int)($p['id_PRODUTO'] ?? ($p['id'] ?? 0)),

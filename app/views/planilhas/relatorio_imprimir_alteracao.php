@@ -66,7 +66,7 @@ try {
                      p.editado_descricao_completa as nome_editado, 
                      p.editado_dependencia_id as dependencia_editada,
                      'comum' as origem
-                     FROM PRODUTOS p 
+                     FROM produtos p 
                      WHERE p.comum_id = :id_comum";
   $params = [':id_comum' => $id_planilha];
   if (!empty($filtro_dependencia)) {
@@ -88,7 +88,7 @@ try {
   // $sql_novos = "SELECT pc.id, pc.id_planilha, pc.descricao_completa as nome, '' as codigo, pc.complemento as dependencia,
   //               pc.quantidade, pc.tipo_ben, pc.imprimir_14_1 as imprimir_cadastro, 'cadastro' as origem,
   //               NULL as checado, 1 as ativo, NULL as imprimir, NULL as observacoes, NULL as editado, NULL as nome_editado, NULL as dependencia_editada
-  //               FROM PRODUTOS_cadastro pc
+  //               FROM produtos_cadastro pc
   //               WHERE pc.id_planilha = :id_planilha";
   // $params_novos = [':id_planilha' => $id_planilha];
   // if (!empty($filtro_dependencia)) { $sql_novos .= " AND pc.complemento LIKE :dependencia"; $params_novos[':dependencia'] = '%' . $filtro_dependencia . '%'; }
@@ -107,9 +107,9 @@ try {
 try {
   // BUSCAR depend+Ã¯Â¿Â½ncias originais + depend+Ã¯Â¿Â½ncias editadas
   $sql_dependencias = "
-        SELECT DISTINCT p.dependencia_id as dependencia FROM PRODUTOS p WHERE p.comum_id = :id_comum1
+        SELECT DISTINCT p.dependencia_id as dependencia FROM produtos p WHERE p.comum_id = :id_comum1
         UNION
-        SELECT DISTINCT p.editado_dependencia_id as dependencia FROM PRODUTOS p
+        SELECT DISTINCT p.editado_dependencia_id as dependencia FROM produtos p
         WHERE p.comum_id = :id_comum2 AND p.editado = 1 AND p.editado_dependencia_id IS NOT NULL
         ORDER BY dependencia
     ";

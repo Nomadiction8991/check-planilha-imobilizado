@@ -32,7 +32,7 @@ if ($_REQUEST_METHOD === 'POST') {
 
     try {
         // BUSCAR STATUS atual no novo schema (PRODUTOS) - USANDO id_PRODUTO
-        $stmt_STATUS = $conexao->prepare('SELECT checado, imprimir_etiqueta, imprimir_14_1 FROM PRODUTOS WHERE id_PRODUTO = :id_PRODUTO AND comum_id = :comum_id');
+        $stmt_STATUS = $conexao->prepare('SELECT checado, imprimir_etiqueta, imprimir_14_1 FROM produtos WHERE id_PRODUTO = :id_PRODUTO AND comum_id = :comum_id');
         $stmt_STATUS->bindValue(':id_PRODUTO', $PRODUTO_id, PDO::PARAM_INT);
         $stmt_STATUS->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
         $stmt_STATUS->execute();
@@ -54,7 +54,7 @@ if ($_REQUEST_METHOD === 'POST') {
         }
 
         // ATUALIZAR flag no prÃ³prio PRODUTO - USANDO id_PRODUTO
-        $stmt_up = $conexao->prepare('UPDATE PRODUTOS SET checado = :checado WHERE id_PRODUTO = :id_PRODUTO AND comum_id = :comum_id');
+        $stmt_up = $conexao->prepare('UPDATE produtos SET checado = :checado WHERE id_PRODUTO = :id_PRODUTO AND comum_id = :comum_id');
         $stmt_up->bindValue(':checado', (int)$checado, PDO::PARAM_INT);
         $stmt_up->bindValue(':id_PRODUTO', $PRODUTO_id, PDO::PARAM_INT);
         $stmt_up->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);

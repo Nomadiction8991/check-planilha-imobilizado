@@ -1,6 +1,12 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
+// Evitar cache do navegador para garantir dados atualizados
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: 0');
+
 // Usamos o ID da comum como parametro principal
 $comum_id = 0;
 if (isset($_GET['comum_id'])) {
@@ -608,7 +614,7 @@ ob_start();
 
                 if ($p['ativo'] == 0) {
                     $classe = 'linha-dr';
-                } elseif ($p['imprimir'] == 1 && $p['checado'] == 1) {
+                } elseif ($p['imprimir'] == 1) {
                     $classe = 'linha-imprimir';
                 } elseif ($p['checado'] == 1) {
                     $classe = 'linha-checado';
@@ -620,28 +626,24 @@ ob_start();
                     $classe = 'linha-pendente';
                 }
 
-                // Determinar quais botÃ¢â€Å“ÃƒÂes mostrar
-                // Se estiver em DR (ativo=0), esconder todas as aÃ¢â€Å“Ã‚ÂºÃ¢â€Å“ÃƒÂes exceto o DR
+                // Todos os botões funcionam de forma independente
+                // Apenas bloquear quando produto estiver em DR (ativo=0)
                 if ($p['ativo'] == 0) {
-                    // Em DR, manter observação, editar e imprimir visíveis; check não disponível
+                    // Em DR, bloquear check mas manter outros disponíveis
                     $show_check = false;
                     $show_imprimir = true;
                     $show_obs = true;
                     $show_edit = true;
-                    $show_dr = true;
                 } else {
-                    // Regra do botão de check: NÃO mostrar quando imprimir=1 ou editado=1; caso contrário, mostrar
-                    $show_check = !($p['imprimir'] == 1 || $p['editado'] == 1);
-                    // Etiqueta sempre visível (servidor decide se permite remoção)
+                    // Todos os botões disponíveis e independentes
+                    $show_check = true;
                     $show_imprimir = true;
-                    $show_obs = true; // Observação disponível
-                    $show_edit = true; // Editar sempre disponível
-                    $show_dr = true; // Sempre mostrar DR
+                    $show_obs = true;
+                    $show_edit = true;
                 }
 
                 $checkDisabled = !$show_check;
-                // Bloquear imprimir quando o produto estiver editado (mostrar mas sem permitir clique)
-                $imprimirDisabled = $tem_edicao || !$show_imprimir;
+                $imprimirDisabled = !$show_imprimir;
                 $obsDisabled = !$show_obs;
                 $editDisabled = !$show_edit;
 
@@ -862,7 +864,7 @@ ob_start();
         const linhaClasses = ['linha-dr', 'linha-imprimir', 'linha-checado', 'linha-observacao', 'linha-editado', 'linha-pendente'];
         const computeRowClass = (state) => {
             if (state.ativo === 0) return 'linha-dr';
-            if (state.imprimir === 1 && state.checado === 1) return 'linha-imprimir';
+            if (state.imprimir === 1) return 'linha-imprimir';
             if (state.checado === 1) return 'linha-checado';
             if ((state.observacao || '').trim() !== '') return 'linha-observacao';
             if (state.editado === 1) return 'linha-editado';
@@ -878,27 +880,20 @@ ob_start();
         });
 
         const updateActionButtons = (row, state) => {
-            // Estado básico
+            // Todos os botões funcionam de forma INDEPENDENTE
+            // Apenas bloquear quando produto estiver em DR (ativo=0)
             const active = state.ativo === 1;
-            const isEdited = Number(state.editado) === 1;
 
-            // Se editado, forçar checado e imprimir como ativos; não bloquear o botão de imprimir (servidor tratará remoção quando necessário)
-            const checkActive = isEdited ? true : state.checado === 1;
-            // Bloquear checado quando houver edições ou quando a etiqueta estiver marcada; também bloquear se não ativo
-            const checkDisabled = isEdited || state.imprimir === 1 || !active;
+            const checkActive = state.checado === 1;
+            const checkDisabled = !active; // Só bloqueia se DR
 
             const imprimirActive = state.imprimir === 1;
-            // Desabilitar o botão de imprimir quando o produto estiver editado ou quando não estiver ativo
-            const imprimirDisabled = isEdited || !active;
-
-            const showObs = true; // Observação sempre disponível
-            const showEdit = true; // Editar sempre disponível
+            const imprimirDisabled = !active; // Só bloqueia se DR
 
             // Check
             row.querySelectorAll('.action-check').forEach(el => {
                 el.style.display = 'inline-block';
                 const btn = el.querySelector('button');
-                // Sincronizar input escondido do formulário de check para garantir que o valor enviado esteja coerente com o estado exibido
                 const checkForm = row.querySelector('.PRODUTO-action-form.action-check');
                 const checkInput = checkForm ? checkForm.querySelector('input[name="checado"]') : null;
                 if (btn) {
@@ -906,14 +901,12 @@ ob_start();
                     btn.classList.toggle('active', checkActive);
                     if (checkDisabled) {
                         btn.setAttribute('aria-disabled', 'true');
-                        btn.title = isEdited ? 'IMPOSSÍVEL DESMARCAR: PRODUTO COM ALTERAÇÕES EDITADAS' : (btn.title || 'Marcar como checado');
                     } else {
                         btn.removeAttribute('aria-disabled');
-                        btn.title = btn.title || (checkActive ? 'Desmarcar checado' : 'Marcar como checado');
                     }
+                    btn.title = checkActive ? 'Desmarcar checado' : 'Marcar como checado';
                 }
                 if (checkInput) {
-                    // se atualmente está ativo (checado), o valor do input deve ser '0' para que o próximo clique desmarque; do contrário '1'
                     checkInput.value = checkActive ? '0' : '1';
                 }
             });
@@ -927,30 +920,27 @@ ob_start();
                 if (btn) {
                     btn.disabled = imprimirDisabled;
                     btn.classList.toggle('active', imprimirActive);
+                    btn.classList.remove('disabled-visually');
                     if (imprimirDisabled) {
                         btn.setAttribute('aria-disabled', 'true');
-                        btn.classList.add('disabled-visually');
-                        btn.title = isEdited ? 'Etiqueta indisponível enquanto o produto estiver editado' : 'Etiqueta indisponível';
                     } else {
                         btn.removeAttribute('aria-disabled');
-                        btn.classList.remove('disabled-visually');
-                        btn.title = btn.title || 'Etiqueta';
                     }
+                    btn.title = imprimirActive ? 'Remover etiqueta' : 'Marcar para etiqueta';
                 }
                 if (imprimirInput) {
-                    // se atualmente está ativo (imprimir), o valor do input deve ser '0' para que o próximo clique desmarque; do contrário '1'
                     imprimirInput.value = imprimirActive ? '0' : '1';
                 }
             });
 
-            // Observação
+            // Observação - sempre disponível
             row.querySelectorAll('.btn-outline-warning').forEach(el => {
                 el.style.display = 'inline-block';
                 el.classList.remove('disabled');
                 el.removeAttribute('aria-disabled');
             });
 
-            // Editar
+            // Editar - sempre disponível
             row.querySelectorAll('.btn-outline-primary').forEach(el => {
                 el.style.display = 'inline-block';
                 el.classList.remove('disabled-visually');
@@ -963,11 +953,7 @@ ob_start();
                 ...getRowState(row),
                 ...updates
             };
-            // Se o produto estiver marcado como editado, forçar checado = 1 e imprimir = 1
-            if (Number(state.editado) === 1) {
-                state.checado = 1;
-                state.imprimir = 1;
-            }
+            // NÃO forçar nenhum estado - cada botão é independente
             row.dataset.ativo = state.ativo;
             row.dataset.checado = state.checado;
             row.dataset.imprimir = state.imprimir;
@@ -994,60 +980,7 @@ ob_start();
             // A marcação como 'checado' será tratada ao salvar as alterações no servidor (ProdutoUpdateController)
         });
 
-        // Observador para mudanças em data-checado: se virar 0, desmarcar imprimir e limpar edições
-        const observer = new MutationObserver((mutList) => {
-            for (const m of mutList) {
-                if (m.type !== 'attributes' || m.attributeName !== 'data-checado') continue;
-                const row = m.target;
-                const prodId = row.dataset.produtoId;
-                const state = getRowState(row);
-                if (Number(state.checado) === 0) {
-                    // desmarcar imprimir
-                    const imprimirForm = document.querySelector(`.PRODUTO-action-form.action-imprimir[data-produto-id="${prodId}"]`);
-                    if (imprimirForm) {
-                        const fdImp = new FormData(imprimirForm);
-                        fdImp.set('imprimir', '0');
-                        fetch(imprimirForm.action, {
-                                method: 'POST',
-                                body: fdImp,
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(r => r.json().catch(() => ({})))
-                            .then(j => {
-                                if (j.success !== false) applyState(row, {
-                                    imprimir: 0
-                                });
-                            })
-                            .catch(() => {});
-                    }
-                    // limpar edições via endpoint AJAX (novo controller)
-                    fetch('<?php echo '../../../app/controllers/update/ProdutoLimparEdicoesController.php'; ?>', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            },
-                            body: 'produto_id=' + encodeURIComponent(prodId) + '&comum_id=' + encodeURIComponent(<?php echo json_encode($comum_id ?? ''); ?>)
-                        })
-                        .then(r => r.json().catch(() => ({}))).then(j => {
-                            if (j.success !== false) applyState(row, {
-                                editado: 0,
-                                imprimir: 0,
-                                checado: 0
-                            });
-                        }).catch(() => {});
-                }
-            }
-        });
-
-        document.querySelectorAll('.list-group-item[data-produto-id]').forEach(r => observer.observe(r, {
-            attributes: true
-        }));
-
+        // Observer removido - cada botão funciona de forma independente
         document.querySelectorAll('.PRODUTO-action-form').forEach(form => {
             form.addEventListener('submit', (event) => {
                 event.preventDefault();
@@ -1112,9 +1045,7 @@ ob_start();
                         } else if (action === 'imprimir') {
                             const newVal = Number(formData.get('imprimir') || 0);
                             stateUpdates.imprimir = newVal;
-                            // Se estiver marcando para imprimir, garantir visualmente que o produto fique marcado como checado
-                            if (newVal === 1) stateUpdates.checado = 1;
-                            const input = form.querySelector('input[name=\"imprimir\"]');
+                            const input = form.querySelector('input[name="imprimir"]');
                             if (input) {
                                 input.value = newVal ? '0' : '1';
                             }

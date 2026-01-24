@@ -23,7 +23,7 @@ $multiplo = count($PRODUTOS_ids) > 1;
 
 // BUSCAR dados dos PRODUTOS
 $placeholders = implode(',', array_fill(0, count($PRODUTOS_ids), '?'));
-$sql = "SELECT p.id_PRODUTO, p.descricao_completa, p.condicao_14_1, p.nota_numero, p.nota_data, p.nota_valor, p.nota_fornecedor, p.doador_conjugue_id, tb.descricao as tipo_descricao, u.nome as doador_nome FROM PRODUTOS p LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id LEFT JOIN usuarios u ON p.doador_conjugue_id = u.id WHERE p.id_PRODUTO IN ($placeholders)";
+$sql = "SELECT p.id_PRODUTO, p.descricao_completa, p.condicao_14_1, p.nota_numero, p.nota_data, p.nota_valor, p.nota_fornecedor, p.doador_conjugue_id, tb.descricao as tipo_descricao, u.nome as doador_nome FROM produtos p LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id LEFT JOIN usuarios u ON p.doador_conjugue_id = u.id WHERE p.id_PRODUTO IN ($placeholders)";
 $stmt = $conexao->prepare($sql);
 $stmt->execute($PRODUTOS_ids);
 $PRODUTOS = $stmt->fetchAll();

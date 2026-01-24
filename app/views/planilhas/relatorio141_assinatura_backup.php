@@ -18,7 +18,7 @@ $sql = "SELECT
             COALESCE(a.STATUS, 'pendente') as STATUS_assinatura,
             a.token,
             a.id as id_assinatura
-        FROM PRODUTOS p
+        FROM produtos p
         LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
         LEFT JOIN assinaturas_14_1 a ON a.id_PRODUTO = p.id_PRODUTO
         WHERE p.comum_id = :id_comum 
@@ -163,12 +163,12 @@ ob_start();
 <div class="card mb-3">
     <div class="card-header bg-primary text-white">
         <i class="bi bi-pen me-2"></i>
-        Selecione os PRODUTOS para Assinar
+        Selecione os produtos para Assinar
     </div>
     <div class="card-body">
         <p class="mb-3">
             <i class="bi bi-info-circle me-1"></i>
-            Clique no PRODUTO para selecionÃƒÂ¡-lo. VocÃƒÂª pode selecionar vÃƒÂ¡rios PRODUTOS para assinar todos de uma vez.
+            Clique no PRODUTO para selecionÃƒÂ¡-lo. VocÃƒÂª pode selecionar vÃƒÂ¡rios produtos para assinar todos de uma vez.
         </p>
         <!-- Legenda de STATUS -->
         <div class="legenda-STATUS">

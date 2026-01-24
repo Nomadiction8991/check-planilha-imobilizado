@@ -25,7 +25,7 @@ try {
     $placeholders = implode(',', array_fill(0, count($ids_PRODUTOS), '?'));
 
     // Preparar SQL
-    $sql = "DELETE FROM PRODUTOS WHERE comum_id = ? AND id_PRODUTO IN ($placeholders)";
+    $sql = "DELETE FROM produtos WHERE comum_id = ? AND id_PRODUTO IN ($placeholders)";
     $stmt = $conexao->prepare($sql);
 
     // Bind do ID da comum

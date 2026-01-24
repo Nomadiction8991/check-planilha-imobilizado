@@ -18,7 +18,7 @@ $sql = "SELECT
             p.doador_conjugue_id,
             tb.descricao as tipo_descricao,
             u.nome as doador_nome
-        FROM PRODUTOS p
+        FROM produtos p
         LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
         LEFT JOIN usuarios u ON p.doador_conjugue_id = u.id
         WHERE p.comum_id = :id_comum 
@@ -178,7 +178,7 @@ endif; ?>
 <div class="card mb-3">
     <div class="card-header bg-primary text-white">
         <i class="bi bi-pen me-2"></i>
-        PRODUTOS para Assinar
+        produtos para Assinar
     </div>
     <div class="card-body">
         <p class="mb-2">

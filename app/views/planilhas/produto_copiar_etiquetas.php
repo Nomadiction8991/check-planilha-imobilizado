@@ -45,7 +45,7 @@ try {
 // DependÃƒÂªncias disponÃƒÂ­veis
 try {
   $sql_dependencias = "
-        SELECT DISTINCT d.descricao as dependencia FROM PRODUTOS p
+        SELECT DISTINCT d.descricao as dependencia FROM produtos p
         LEFT JOIN dependencias d ON COALESCE(p.editado_dependencia_id, p.dependencia_id) = d.id
         WHERE p.comum_id = :comum_id AND d.descricao IS NOT NULL
         ORDER BY dependencia
@@ -63,7 +63,7 @@ $dependencia_selecionada = $_GET['dependencia'] ?? '';
 // PRODUTOS marcados para imprimir (PRODUTOS checados)
 try {
   $sql_PRODUTOS = "SELECT p.codigo, COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia
-                     FROM PRODUTOS p 
+                     FROM produtos p 
                      LEFT JOIN dependencias d_orig ON p.dependencia_id = d_orig.id
                      LEFT JOIN dependencias d_edit ON p.editado_dependencia_id = d_edit.id
                      WHERE p.comum_id = :comum_id AND COALESCE(p.imprimir_etiqueta, 0) = 1"; // usar comum_id (coluna real da tabela) para filtrar os produtos
@@ -84,7 +84,7 @@ try {
   // BUSCAR tambÃƒÂ©m PRODUTOS cadastrados (novos) com cÃƒÂ³digo preenchido
   // Nota: tabela PRODUTOS_cadastro nÃƒÂ£o existe no schema atual, entÃƒÂ£o comentado
   // $sql_novos = "SELECT pc.codigo, d.descricao as dependencia
-  // FROM PRODUTOS_cadastro pc
+  // FROM produtos_cadastro pc
   // LEFT JOIN dependencias d ON pc.id_dependencia = d.id
   // WHERE pc.id_planilha = :comum_id 
   // AND pc.codigo IS NOT NULL 

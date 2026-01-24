@@ -25,7 +25,7 @@ $sql = "SELECT
             p.{$coluna_assinatura} as minha_assinatura,
             tb.descricao as tipo_descricao,
             d.descricao as dependencia_descricao
-        FROM PRODUTOS p
+        FROM produtos p
         LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
         LEFT JOIN dependencias d ON p.dependencia_id = d.id
         WHERE p.comum_id = :id_comum AND p.ativo = 1

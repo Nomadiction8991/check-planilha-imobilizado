@@ -39,34 +39,13 @@ if ($produto_id <= 0 || $comum_id <= 0) {
 }
 
 try {
-    // Impedir remoção da etiqueta se produto estiver editado
-    $stmt_check = $conexao->prepare('SELECT COALESCE(editado,0) AS editado FROM produtos WHERE id_produto = :id_produto AND comum_id = :comum_id');
-    $stmt_check->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
-    $stmt_check->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
-    $stmt_check->execute();
-    $info = $stmt_check->fetch(PDO::FETCH_ASSOC);
-    if (($info['editado'] ?? 0) == 1 && $imprimir === 0) {
-        $msg = 'NÃO É POSSÍVEL REMOVER A ETIQUETA ENQUANTO HOUVER ALTERAÇÕES EDITADAS (REMOVA AS ALTERAÇÕES PARA REMOVER)';
-        if (is_ajax_request()) {
-            json_response(['success' => false, 'message' => $msg], 422);
-        }
-        header('Location: ' . $buildRedirect($msg));
-        exit;
-    }
 
-    // Se for marcar para imprimir, garantir que o produto fique marcado como checado automaticamente.
-    // Se for desmarcar, não alterar o campo 'checado' (permanece como está).
-    if ($imprimir === 1) {
-        $stmt = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = 1, checado = 1 WHERE id_produto = :id_produto AND comum_id = :comum_id');
-        $stmt->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
-        $stmt->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
-        $stmt->execute();
-    } else {
-        $stmt = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = 0 WHERE id_produto = :id_produto AND comum_id = :comum_id');
-        $stmt->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
-        $stmt->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
-        $stmt->execute();
-    }
+    // Apenas altera o campo imprimir_etiqueta, sem afetar outros campos
+    $stmt = $conexao->prepare('UPDATE produtos SET imprimir_etiqueta = :imprimir WHERE id_produto = :id_produto AND comum_id = :comum_id');
+    $stmt->bindValue(':imprimir', $imprimir, PDO::PARAM_INT);
+    $stmt->bindValue(':id_produto', $produto_id, PDO::PARAM_INT);
+    $stmt->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
+    $stmt->execute();
 
     if (is_ajax_request()) {
         json_response([
