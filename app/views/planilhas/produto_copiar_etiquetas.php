@@ -42,15 +42,19 @@ try {
   die('Erro ao carregar planilha: ' . $e->getMessage());
 }
 
-// Dependências disponíveis (com ID para filtro mais preciso)
+// Dependências disponíveis (todas que têm produtos marcados para imprimir)
 try {
   $sql_dependencias = "
-        SELECT DISTINCT d.id, d.descricao as dependencia FROM produtos p
-        LEFT JOIN dependencias d ON COALESCE(p.editado_dependencia_id, p.dependencia_id) = d.id
+        SELECT DISTINCT 
+            COALESCE(p.editado_dependencia_id, p.dependencia_id) as id,
+            COALESCE(d_edit.descricao, d_orig.descricao) as dependencia 
+        FROM produtos p
+        LEFT JOIN dependencias d_orig ON p.dependencia_id = d_orig.id
+        LEFT JOIN dependencias d_edit ON p.editado_dependencia_id = d_edit.id
         WHERE p.comum_id = :comum_id 
-          AND d.descricao IS NOT NULL
           AND COALESCE(p.imprimir_etiqueta, 0) = 1
-        ORDER BY d.descricao
+          AND COALESCE(d_edit.descricao, d_orig.descricao) IS NOT NULL
+        ORDER BY dependencia
     ";
   $stmt_dependencias = $conexao->prepare($sql_dependencias);
   $stmt_dependencias->bindValue(':comum_id', $id_planilha);
