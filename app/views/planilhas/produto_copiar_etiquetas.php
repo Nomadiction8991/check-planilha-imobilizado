@@ -172,15 +172,20 @@ ob_start();
       <div class="mb-3">
         <label for="filtroDependencia"
           class="form-label"><?php echo htmlspecialchars(to_uppercase('Filtrar por dependência'), ENT_QUOTES, 'UTF-8'); ?></label>
-        <select class="form-select" id="filtroDependencia" onchange="filtrarPorDependencia()">
-          <option value="">
-            <?php echo htmlspecialchars(to_uppercase('Todas as dependências'), ENT_QUOTES, 'UTF-8'); ?></option>
-          <?php foreach ($dependencias as $dep): ?>
-            <option value="<?php echo htmlspecialchars($dep['id']); ?>"
-              <?php echo ($dependencia_selecionada == $dep['id']) ? 'selected' : ''; ?>>
-              <?php echo htmlspecialchars(to_uppercase($dep['dependencia']), ENT_QUOTES, 'UTF-8'); ?></option>
-          <?php endforeach; ?>
-        </select>
+        <div class="input-group">
+          <select class="form-select" id="filtroDependencia">
+            <option value="">
+              <?php echo htmlspecialchars(to_uppercase('Todas as dependências'), ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php foreach ($dependencias as $dep): ?>
+              <option value="<?php echo (int)$dep['id']; ?>"
+                <?php echo ((string)$dependencia_selecionada === (string)$dep['id']) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars(to_uppercase($dep['dependencia']), ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php endforeach; ?>
+          </select>
+          <button class="btn btn-primary" type="button" onclick="filtrarPorDependencia()">
+            <i class="bi bi-funnel me-1"></i><?php echo htmlspecialchars(to_uppercase('Filtrar'), ENT_QUOTES, 'UTF-8'); ?>
+          </button>
+        </div>
       </div>
     <?php endif; ?>
 
@@ -223,15 +228,15 @@ ob_start();
       <div class="alert alert-warning mt-3 text-center">
         <strong><?php echo htmlspecialchars(to_uppercase('Nenhum produto disponível para etiquetas.'), ENT_QUOTES, 'UTF-8'); ?></strong>
         <?php if (!empty($dependencia_selecionada)): ?>
-          <?php 
-            // Buscar nome da dependência selecionada
-            $dep_nome = '';
-            foreach ($dependencias as $d) {
-              if ($d['id'] == $dependencia_selecionada) {
-                $dep_nome = $d['dependencia'];
-                break;
-              }
+          <?php
+          // Buscar nome da dependência selecionada
+          $dep_nome = '';
+          foreach ($dependencias as $d) {
+            if ($d['id'] == $dependencia_selecionada) {
+              $dep_nome = $d['dependencia'];
+              break;
             }
+          }
           ?>
           <div class="small">
             <?php echo htmlspecialchars(to_uppercase('Não há produtos marcados para etiqueta na dependência "' . $dep_nome . '".'), ENT_QUOTES, 'UTF-8'); ?>
