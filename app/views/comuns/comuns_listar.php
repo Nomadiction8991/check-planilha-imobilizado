@@ -22,9 +22,9 @@ $pagina = isset($_GET['pagina']) ? max(1,(int)$_GET['pagina']) : 1;
 $limite = 20;
 $offset = ($pagina - 1) * $limite;
 
-// Obter total
+// Obter total e página atual usando helpers (detectam tabela correta automaticamente)
 try {
-    $total_registros = (int)$conexao->query("SELECT COUNT(*) FROM comums")->fetchColumn();
+    $total_registros = (int) contar_comuns($conexao, '');
     $total_paginas = (int)ceil($total_registros / $limite);
 } catch (Exception $e) {
     $total_registros = 0;
@@ -32,13 +32,9 @@ try {
     $erro = "Erro ao contar comuns: " . $e->getMessage();
 }
 
-// Obter pÃƒÂ¡gina atual
+// Obter página atual
 try {
-    $stmt_comuns = $conexao->prepare("SELECT id, codigo, cnpj, descricao, administracao, cidade, setor FROM comums ORDER BY codigo ASC LIMIT :limite OFFSET :offset");
-    $stmt_comuns->bindValue(':limite',$limite,PDO::PARAM_INT);
-    $stmt_comuns->bindValue(':offset',$offset,PDO::PARAM_INT);
-    $stmt_comuns->execute();
-    $comuns = $stmt_comuns->fetchAll(PDO::FETCH_ASSOC);
+    $comuns = buscar_comuns_paginated($conexao, '', $limite, $offset);
 } catch (Exception $e) {
     $comuns = [];
     $erro = "Erro ao carregar comuns: " . $e->getMessage();

@@ -16,8 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Selecione uma Comum válida.');
         }
 
-        // Validar se a comum existe e está ativa (substituímos 'planilhas' por 'comums')
-        $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comums WHERE id = :id');
+        // Validar se a comum existe e está ativa (detecta nome da tabela automaticamente)
+        $table = detectar_tabela_comuns($conexao);
+        $stmt = $conexao->prepare("SELECT id, descricao as comum FROM `{$table}` WHERE id = :id");
         $stmt->bindValue(':id', $comum_id, PDO::PARAM_INT);
         $stmt->execute();
         $planilha = $stmt->fetch();
@@ -41,9 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Carregar lista de comuns ativas (refatorado para usar 'comums')
+// Carregar lista de comuns ativas (detecta tabela automaticamente)
 try {
-    $stmt = $conexao->query('SELECT id, descricao as comum FROM comums WHERE 1 ORDER BY descricao ASC');
+    $table = detectar_tabela_comuns($conexao);
+    $stmt = $conexao->query("SELECT id, descricao as comum FROM `{$table}` WHERE 1 ORDER BY descricao ASC");
     $comuns = $stmt->fetchAll();
 } catch (PDOException $e) {
     $erro = "Erro ao carregar lista de comuns: " . $e->getMessage();

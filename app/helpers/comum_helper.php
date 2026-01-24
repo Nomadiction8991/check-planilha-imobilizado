@@ -295,6 +295,28 @@ function processar_comum($conexao, $comum_text, $dados = [])
 
 
 /**
+ * Detecta qual tabela de comuns existe no banco ('comums' ou 'comuns') e retorna o nome
+ * @param PDO $conexao
+ * @return string
+ */
+function detectar_tabela_comuns(PDO $conexao): string
+{
+    $candidatas = ['comums', 'comuns'];
+    foreach ($candidatas as $t) {
+        try {
+            // tenta uma consulta simples; se a tabela não existir, PDO lançará exceção
+            $conexao->query("SELECT 1 FROM `{$t}` LIMIT 1");
+            return $t;
+        } catch (Exception $e) {
+            // ignorar e testar próxima
+            continue;
+        }
+    }
+    // fallback conservador
+    return 'comums';
+}
+
+/**
  * Obtém todos os comuns cadastrados
  * 
  * @param PDO $conexao Conexão com banco de dados
@@ -303,7 +325,8 @@ function processar_comum($conexao, $comum_text, $dados = [])
 function obter_todos_comuns($conexao)
 {
     try {
-        $sql = "SELECT id, codigo, cnpj, descricao, administracao, cidade, setor FROM comums ORDER BY codigo ASC";
+        $table = detectar_tabela_comuns($conexao);
+        $sql = "SELECT id, codigo, cnpj, descricao, administracao, cidade, setor FROM `{$table}` ORDER BY codigo ASC";
         $stmt = $conexao->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -323,7 +346,8 @@ function obter_todos_comuns($conexao)
 function obter_comum_por_id($conexao, $id)
 {
     try {
-        $sql = "SELECT id, codigo, cnpj, descricao, administracao, cidade, setor FROM comums WHERE id = :id";
+        $table = detectar_tabela_comuns($conexao);
+        $sql = "SELECT id, codigo, cnpj, descricao, administracao, cidade, setor FROM `{$table}` WHERE id = :id";
         $stmt = $conexao->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -480,6 +504,8 @@ function buscar_comuns($conexao, $termo = '')
     $likeDigits = $digits !== '' ? '%' . $digits . '%' : null;
 
     try {
+        $table = detectar_tabela_comuns($conexao);
+
         $conds = [
             'CAST(codigo AS CHAR) LIKE ?',
             'descricao LIKE ?',
@@ -497,7 +523,7 @@ function buscar_comuns($conexao, $termo = '')
         }
 
         $sql = "SELECT id, codigo, cnpj, descricao, administracao, cidade, setor
-                FROM comums
+                FROM `{$table}`
                 WHERE " . implode(' OR ', $conds) . "
                 ORDER BY codigo ASC";
 
@@ -521,7 +547,8 @@ function contar_comuns($conexao, $termo = '')
     $termo = trim((string) $termo);
     if ($termo === '') {
         try {
-            $stmt = $conexao->query("SELECT COUNT(*) FROM comums");
+            $table = detectar_tabela_comuns($conexao);
+            $stmt = $conexao->query("SELECT COUNT(*) FROM `{$table}`");
             return (int) $stmt->fetchColumn();
         } catch (Exception $e) {
             error_log('Erro ao contar comuns: ' . $e->getMessage());
@@ -582,6 +609,8 @@ function buscar_comuns_paginated($conexao, $termo = '', $limite = null, $offset 
     $likeDigits = $digits !== '' ? '%' . $digits . '%' : null;
 
     try {
+        $table = detectar_tabela_comuns($conexao);
+
         $conds = [];
         $params = [];
         $i = 1;
@@ -605,7 +634,7 @@ function buscar_comuns_paginated($conexao, $termo = '', $limite = null, $offset 
         }
 
         $sql = "SELECT id, codigo, cnpj, descricao, administracao, cidade, setor
-                FROM comums
+                FROM `{$table}`
                 WHERE " . implode(' OR ', $conds) . "
                 ORDER BY codigo ASC";
 
