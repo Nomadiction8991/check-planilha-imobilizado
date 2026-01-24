@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AUTENTICAÇÃO
+// AUTENTICAÇÃO
 include __DIR__ . '/../../../app/controllers/read/ProdutoListController.php';
 
 $id_planilha = $comum_id; // compatibilidade com CÓDIGO legado
@@ -14,7 +14,7 @@ $headerActions = '
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPRODUTOS">
             <li>
-                <a href="./PRODUTO_criar.php?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro(true) . '" class="dropdown-item">
+                <a href="./produto_criar.php?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro(true) . '" class="dropdown-item">
                     <i class="bi bi-plus-lg me-2"></i>Novo PRODUTO
                 </a>
             </li>
@@ -133,7 +133,7 @@ ob_start();
   <div class="card-footer text-muted small">
     <?php echo $total_registros ?? 0; ?> registros encontrados
   </div>
-  
+
 </div>
 
 <!-- BOTÃƒO DE EXCLUSÃƒO EM MASSA (inicialmente oculto) -->
@@ -193,7 +193,7 @@ ob_start();
                         <?php endif; ?>
                       </div>
                       <div class="btn-group btn-group-sm">
-                        <a class="btn btn-outline-primary btn-sm" title="EDITAR" href="./PRODUTO_atualizar.php?id_PRODUTO=<?php echo $PRODUTO['id']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
+                        <a class="btn btn-outline-primary btn-sm" title="EDITAR" href="./produto_atualizar.php?id_produto=<?php echo $PRODUTO['id']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
                           <i class="bi bi-pencil-fill"></i>
                         </a>
                       </div>
@@ -222,12 +222,12 @@ ob_start();
       <nav>
         <ul class="pagination justify-content-center mb-0">
           <?php
-            $pagina_inicial = max(1, $pagina - 1);
-            $pagina_final = min($total_paginas, $pagina + 1);
-            if ($pagina_final - $pagina_inicial < 2) {
-              if ($pagina_inicial == 1 && $total_paginas >= 3) $pagina_final = 3;
-              elseif ($pagina_final == $total_paginas && $total_paginas >= 3) $pagina_inicial = $total_paginas - 2;
-            }
+          $pagina_inicial = max(1, $pagina - 1);
+          $pagina_final = min($total_paginas, $pagina + 1);
+          if ($pagina_final - $pagina_inicial < 2) {
+            if ($pagina_inicial == 1 && $total_paginas >= 3) $pagina_final = 3;
+            elseif ($pagina_final == $total_paginas && $total_paginas >= 3) $pagina_inicial = $total_paginas - 2;
+          }
           ?>
           <?php if ($pagina > 2): ?>
             <li class="page-item">
@@ -257,66 +257,66 @@ ob_start();
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const checkboxes = document.querySelectorAll('.PRODUTO-checkbox');
-  const deleteButtonContainer = document.getElementById('deleteButtonContainer');
-  const selectedProductsDiv = document.getElementById('selectedProducts');
-  const countSelected = document.getElementById('countSelected');
-  const deleteForm = document.getElementById('deleteForm');
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.PRODUTO-checkbox');
+    const deleteButtonContainer = document.getElementById('deleteButtonContainer');
+    const selectedProductsDiv = document.getElementById('selectedProducts');
+    const countSelected = document.getElementById('countSelected');
+    const deleteForm = document.getElementById('deleteForm');
 
-  function atualizarContagem() {
-    const checados = document.querySelectorAll('.PRODUTO-checkbox:checked').length;
-    countSelected.textContent = checados;
-    
-    // Mostrar/ocultar container de exclusÃ£o
-    if (checados > 0) {
-      deleteButtonContainer.style.display = 'block';
-    } else {
-      deleteButtonContainer.style.display = 'none';
-    }
-    
-    // ATUALIZAR inputs ocultos com IDs selecionados
-    selectedProductsDiv.innerHTML = '';
-    document.querySelectorAll('.PRODUTO-checkbox:checked').forEach(checkbox => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'ids_PRODUTOS[]';
-      input.value = checkbox.value;
-      selectedProductsDiv.appendChild(input);
-    });
-  }
+    function atualizarContagem() {
+      const checados = document.querySelectorAll('.PRODUTO-checkbox:checked').length;
+      countSelected.textContent = checados;
 
-  // Adicionar listener em cada checkbox
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', atualizarContagem);
-  });
-
-  // Enviar form de exclusÃ£o via POST
-  deleteForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Enviar via AJAX ou formulÃ¡rio tradicional
-    const formData = new FormData(deleteForm);
-    
-    fetch('./PRODUTOS_excluir.php', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Recarregar a pÃ¡gina
-        location.reload();
+      // Mostrar/ocultar container de exclusÃ£o
+      if (checados > 0) {
+        deleteButtonContainer.style.display = 'block';
       } else {
-        alert('Erro ao excluir PRODUTOS: ' + (data.message || 'Erro desconhecido'));
+        deleteButtonContainer.style.display = 'none';
       }
-    })
-    .catch(error => {
-      console.error('Erro:', error);
-      alert('Erro ao excluir PRODUTOS');
+
+      // ATUALIZAR inputs ocultos com IDs selecionados
+      selectedProductsDiv.innerHTML = '';
+      document.querySelectorAll('.PRODUTO-checkbox:checked').forEach(checkbox => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids_PRODUTOS[]';
+        input.value = checkbox.value;
+        selectedProductsDiv.appendChild(input);
+      });
+    }
+
+    // Adicionar listener em cada checkbox
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', atualizarContagem);
+    });
+
+    // Enviar form de exclusÃ£o via POST
+    deleteForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Enviar via AJAX ou formulÃ¡rio tradicional
+      const formData = new FormData(deleteForm);
+
+      fetch('./PRODUTOS_excluir.php', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Recarregar a pÃ¡gina
+            location.reload();
+          } else {
+            alert('Erro ao excluir PRODUTOS: ' + (data.message || 'Erro desconhecido'));
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          alert('Erro ao excluir PRODUTOS');
+        });
     });
   });
-});
 </script>
 
 <?php
@@ -327,5 +327,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
-

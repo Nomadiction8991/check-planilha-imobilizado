@@ -125,7 +125,7 @@ try {
 
 $pageTitle = 'Copiar Etiquetas';
 // Garantir que o back link use o ID recebido (tratado como planilha/comum)
-$backUrl = '../planilhas/planilha_visualizar.php?id=' . urlencode($id_planilha) . '&comum_id=' . urlencode($id_planilha);
+$backUrl = './planilha_visualizar.php?id=' . urlencode($id_planilha) . '&comum_id=' . urlencode($id_planilha);
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuEtiquetas" data-bs-toggle="dropdown" aria-expanded="false">
@@ -133,7 +133,7 @@ $headerActions = '
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuEtiquetas">
             <li>
-                <a class="dropdown-item" href="../planilhas/planilha_visualizar.php?id=' . $id_planilha . '&comum_id=' . $id_planilha . '">
+                <a class="dropdown-item" href="./planilha_visualizar.php?id=' . $id_planilha . '&comum_id=' . $id_planilha . '">
                     <i class="bi bi-eye me-2"></i>VISUALIZAR COMUM
                 </a>
             </li>

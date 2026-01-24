@@ -229,9 +229,9 @@ if ($mostrar_etiqueta) $total_mostrar += $total_etiqueta;
 if ($mostrar_alteracoes) $total_mostrar += $total_alteracoes;
 if ($mostrar_novos) $total_mostrar += $total_novos;
 
-// Cabe+Ã¯Â¿Â½alho do layout
-$pageTitle = 'Imprimir Altera+Ã¯Â¿Â½+Ã¯Â¿Â½es';
-$backUrl = '../planilhas/planilha_visualizar.php?id=' . $id_planilha;
+// Cabeçalho do layout
+$pageTitle = 'Imprimir Alterações';
+$backUrl = './planilha_visualizar.php?id=' . $id_planilha . '&comum_id=' . $id_planilha;
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuAlteracao" data-bs-toggle="dropdown" aria-expanded="false">

@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AUTENTICAÇÃO
+// AUTENTICAÇÃO
 require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 // Carregar template completo com CSS inline
@@ -16,7 +16,7 @@ if (file_exists($templatePath)) {
     } else {
         $a4Block = '';
     }
-    
+
     // Extrair o <style> do template
     preg_match('/<style>(.*?)<\/style>/s', $templateCompleto, $matchesStyle);
     $styleContent = isset($matchesStyle[1]) ? $matchesStyle[1] : '';
@@ -25,8 +25,8 @@ if (file_exists($templatePath)) {
     $styleContent = '';
 }
 
-$pageTitle = 'RelatÃ³rio 14.1';
-$backUrl = '../planilhas/planilha_visualizar.php?id=' . urlencode($id_planilha);
+$pageTitle = 'Relatório 14.1';
+$backUrl = './planilha_visualizar.php?id=' . urlencode($id_planilha) . '&comum_id=' . urlencode($id_planilha);
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuRelatorio" data-bs-toggle="dropdown" aria-expanded="false">
@@ -64,7 +64,8 @@ if (file_exists($customCssPath)) {
 
 // Helper para preencher campos no template (suporta textarea e input)
 if (!function_exists('r141_fillFieldById')) {
-    function r141_fillFieldById(string $html, string $id, string $text): string {
+    function r141_fillFieldById(string $html, string $id, string $text): string
+    {
         // VersÃ£o segura usando DOMDocument (substitui manipulaÃ§Ã£o por regex)
         // - NÃ£o altera arquivos no disco
         // - Preenche <textarea id="..."> ou <input id="..."> quando existir
@@ -88,7 +89,9 @@ if (!function_exists('r141_fillFieldById')) {
         $textarea = $xpath->query('//textarea[@id="' . $id . '"]')->item(0);
         if ($textarea) {
             // limpar nÃ³s filhos e inserir texto seguro
-            while ($textarea->firstChild) { $textarea->removeChild($textarea->firstChild); }
+            while ($textarea->firstChild) {
+                $textarea->removeChild($textarea->firstChild);
+            }
             $textarea->appendChild($doc->createTextNode($text));
             libxml_clear_errors();
             libxml_use_internal_errors($prev);
@@ -113,7 +116,8 @@ if (!function_exists('r141_fillFieldById')) {
 
 // helper: extrai innerHTML de um nÃ³ DOM
 if (!function_exists('r141_inner_html')) {
-    function r141_inner_html(\DOMNode $element): string {
+    function r141_inner_html(\DOMNode $element): string
+    {
         $html = '';
         foreach ($element->childNodes as $child) {
             $html .= $element->ownerDocument->saveHTML($child);
@@ -124,15 +128,16 @@ if (!function_exists('r141_inner_html')) {
 
 // helper: insere imagem de assinatura no lugar de um textarea
 if (!function_exists('r141_insertSignatureImage')) {
-    function r141_insertSignatureImage(string $html, string $textareaId, string $base64Image): string {
+    function r141_insertSignatureImage(string $html, string $textareaId, string $base64Image): string
+    {
         if (empty($base64Image)) return $html;
-        
+
         $prev = libxml_use_internal_errors(true);
         $doc = new \DOMDocument('1.0', 'UTF-8');
         $wrapped = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/></head><body>' . $html . '</body></html>';
         $doc->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $xpath = new \DOMXPath($doc);
-        
+
         // Encontrar o textarea
         $textarea = $xpath->query('//textarea[@id="' . $textareaId . '"]')->item(0);
         if ($textarea) {
@@ -143,15 +148,15 @@ if (!function_exists('r141_insertSignatureImage')) {
             // Altura aproximada de 2 linhas de textarea; ajuste fino se necessÃ¡rio
             // Centraliza a assinatura horizontalmente
             $img->setAttribute('style', 'max-width: 100%; height: auto; display: block; max-height: 9mm; margin: 0 auto; object-fit: contain;');
-            
+
             // Substituir textarea pela imagem
             $textarea->parentNode->replaceChild($img, $textarea);
-            
+
             libxml_clear_errors();
             libxml_use_internal_errors($prev);
             return r141_inner_html($doc->getElementsByTagName('body')->item(0));
         }
-        
+
         libxml_clear_errors();
         libxml_use_internal_errors($prev);
         return $html;
@@ -165,8 +170,8 @@ ob_start();
 ?>
 
 <?php if (count($PRODUTOS) > 0): ?>
-<?php
-      // Descobrir imagem de fundo, se existir
+    <?php
+    // Descobrir imagem de fundo, se existir
     $bgCandidates = [
         '/relatorios/relatorio-14-1-bg.png',
         '/relatorios/relatorio-14-1-bg.jpg',
@@ -180,28 +185,31 @@ ob_start();
     $projectRoot = __DIR__ . '/../../../';
     foreach ($bgCandidates as $rel) {
         $abs = $projectRoot . ltrim($rel, '/');
-        if (file_exists($abs)) { $bgUrl = $rel; break; }
+        if (file_exists($abs)) {
+            $bgUrl = $rel;
+            break;
+        }
     }
-?>
+    ?>
 
-<!-- valores-comuns removido conforme solicitado -->
+    <!-- valores-comuns removido conforme solicitado -->
 
-<!-- Container de pÃ¡ginas -->
-<div class="paginas-container">
-    <?php foreach($PRODUTOS as $index => $row): ?>
-        <div class="pagina-card">
-            <div class="pagina-header">
-                <span class="pagina-numero">
-                    <i class="bi bi-file-earmark-text"></i> PÃ¡gina <?php echo $index + 1; ?> de <?php echo count($PRODUTOS); ?>
-                </span>
-                <div class="pagina-actions">
-                    <!-- VISUALIZAR removido conforme solicitado -->
+    <!-- Container de pÃ¡ginas -->
+    <div class="paginas-container">
+        <?php foreach ($PRODUTOS as $index => $row): ?>
+            <div class="pagina-card">
+                <div class="pagina-header">
+                    <span class="pagina-numero">
+                        <i class="bi bi-file-earmark-text"></i> PÃ¡gina <?php echo $index + 1; ?> de <?php echo count($PRODUTOS); ?>
+                    </span>
+                    <div class="pagina-actions">
+                        <!-- VISUALIZAR removido conforme solicitado -->
+                    </div>
                 </div>
-            </div>
-            
-            <div class="a4-viewport">
-                <div class="a4-scaled">
-                    <?php
+
+                <div class="a4-viewport">
+                    <div class="a4-scaled">
+                        <?php
                         // Preencher dados do PRODUTO no template
                         $htmlPreenchido = $a4Block;
                         if (!empty($htmlPreenchido)) {
@@ -213,7 +221,9 @@ ob_start();
                             $administracao_auto = '';
                             if (!empty($comum_planilha)) {
                                 $partesComum = array_map('trim', explode('-', $comum_planilha));
-                                if (count($partesComum) >= 1) { $administracao_auto = $partesComum[0]; }
+                                if (count($partesComum) >= 1) {
+                                    $administracao_auto = $partesComum[0];
+                                }
                             }
                             $setor_auto = isset($row['dependencia_descricao']) ? trim((string)$row['dependencia_descricao']) : '';
                             // NÃ£o incluir data automÃ¡tica no campo de local/data â€” ficarÃ¡ apenas o valor comum da planilha
@@ -229,14 +239,16 @@ ob_start();
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input5', $cnpj_planilha ?? '');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input6', $numero_relatorio_auto ?? '');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input7', $casa_oracao_auto ?? '');
-                            if (!empty($descricaoBem)) { $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input8', $descricaoBem); }
+                            if (!empty($descricaoBem)) {
+                                $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input8', $descricaoBem);
+                            }
                             // Preencher input16 com o valor comum da planilha seguido do placeholder de data
                             $local_data_with_placeholder = trim(($local_data_auto ?? '') . ' ' . '___/___/_____');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input16', $local_data_with_placeholder);
 
                             // Preencher campos do administrador/acessor diretamente do PRODUTO (administrador_acessor_id)
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input27', (string)($row['administrador_nome'] ?? ''));
-                            
+
                             // Assinatura do administrador
                             $sigAdmin = (string)($row['administrador_assinatura'] ?? '');
                             if (!empty($sigAdmin)) {
@@ -293,7 +305,7 @@ ob_start();
                             }
                             // Repetir nome do doador no termo de aceite
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input29', (string)($row['doador_nome'] ?? ''));
-                            
+
                             // Assinatura do doador
                             $sigDoador = (string)($row['doador_assinatura'] ?? '');
                             if (!empty($sigDoador)) {
@@ -305,7 +317,7 @@ ob_start();
                                 // Campo de assinatura do doador no termo de aceite
                                 $htmlPreenchido = r141_insertSignatureImage($htmlPreenchido, 'input30', $sigDoador);
                             }
-                            
+
                             // CÃ´njuge (se o doador for casado)
                             if (!empty($row['doador_casado']) && $row['doador_casado'] == 1) {
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input18', (string)($row['doador_nome_conjuge'] ?? ''));
@@ -346,7 +358,7 @@ ob_start();
                                 if (!empty($endereco_conjuge_final)) {
                                     $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input20', $endereco_conjuge_final);
                                 }
-                                
+
                                 // Assinatura do cÃ´njuge
                                 $sigConjuge = (string)($row['doador_assinatura_conjuge'] ?? '');
                                 if (!empty($sigConjuge)) {
@@ -369,7 +381,7 @@ ob_start();
                             // Opcional: injetar imagem de fundo se detectada
                             $htmlIsolado = $htmlPreenchido;
                             if (!empty($bgUrl)) {
-                                $htmlIsolado = preg_replace('/(<div\s+class="a4"[^>]*>)/', '$1'.'<img class="page-bg" src="'.htmlspecialchars($bgUrl, ENT_QUOTES).'" alt="">', $htmlIsolado, 1);
+                                $htmlIsolado = preg_replace('/(<div\s+class="a4"[^>]*>)/', '$1' . '<img class="page-bg" src="' . htmlspecialchars($bgUrl, ENT_QUOTES) . '" alt="">', $htmlIsolado, 1);
                             }
                             // Montar srcdoc isolado com CSS do template
                             $styleInline = !empty($styleContent) ? $styleContent : '';
@@ -391,27 +403,27 @@ ob_start();
                         } else {
                             echo '<div class="r141-root"><div class="a4"><p style="padding:10mm;color:#900">Template 14-1 NÃO encontrado.</p></div></div>';
                         }
-                    ?>
+                        ?>
+                    </div>
                 </div>
             </div>
-        </div>
-    <?php endforeach; ?>
-</div>
+        <?php endforeach; ?>
+    </div>
 
 <?php else: ?>
-<div class="alert alert-warning">
-    <i class="bi bi-exclamation-triangle me-2"></i>
-    Nenhum PRODUTO encontrado para impressÃ£o do relatÃ³rio 14.1.
-</div>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Nenhum PRODUTO encontrado para impressÃ£o do relatÃ³rio 14.1.
+    </div>
 <?php endif;
 
 // Preparar dados dos produtos para JavaScript
-  $PRODUTOSDataJS = json_encode(array_map(function($p){ 
-     return [
-         'id_produto' => (int)($p['id_produto'] ?? ($p['id'] ?? 0)),
-         'condicao_14_1' => isset($p['condicao_14_1']) ? (int)$p['condicao_14_1'] : 0
-     ]; 
- }, $PRODUTOS));
+$PRODUTOSDataJS = json_encode(array_map(function ($p) {
+    return [
+        'id_produto' => (int)($p['id_produto'] ?? ($p['id'] ?? 0)),
+        'condicao_14_1' => isset($p['condicao_14_1']) ? (int)$p['condicao_14_1'] : 0
+    ];
+}, $PRODUTOS));
 
 $script = <<<JS
 <script>
@@ -538,4 +550,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
