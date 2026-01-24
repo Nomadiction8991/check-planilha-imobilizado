@@ -33,6 +33,26 @@ PHP;
 
 use voku\helper\UTF8;
 
+// Se a classe não existir (deploy sem dependências), define um fallback mínimo para evitar erro fatal
+if (!class_exists('voku\\helper\\UTF8')) {
+    $code = <<<'PHP'
+namespace voku\helper;
+class UTF8 {
+    public static function fix_utf8($s) { return $s; }
+    public static function strtoupper($s) { return mb_strtoupper($s, 'UTF-8'); }
+    public static function strtolower($s) { return mb_strtolower($s, 'UTF-8'); }
+    public static function remove_accents($s) {
+        $out = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+        if ($out === false) {
+            return preg_replace('/[^\x20-\x7E]/u','',$s);
+        }
+        return preg_replace('/[^\x20-\x7E]/u','',$out);
+    }
+}
+PHP;
+    eval($code);
+}
+
 /**
  * Helper interno para remover acentos, usando método correto da biblioteca voku
  */
