@@ -30,6 +30,7 @@ jobs:
           server-dir: /checkplanilha.anvy.com.br/prod/
           state-name: ftp-state-prod.json
           log-level: verbose
+          dangerous-clean-slate: false
           exclude: |
             **/.git/**
             **/.git*
@@ -45,3 +46,12 @@ jobs:
             **/__pending_review__/**
             **/scripts/**
             **/Dockerfiles/**
+            **/database/**
+            **/storage/**
+            **/storage/logs/**
+            **/*.sql
+            **/*.log
+            **/composer.lock
+            **/ftp-state*.json
+            **/.php
+            **/app/config/**

@@ -121,7 +121,7 @@ if (isset($_GET['ajax'])) {
                 $rowsHtml .= '<td>';
                 $rowsHtml .= '<div class="btn-group btn-group-sm" role="group">';
                 // preserve current busca/page when building edit links for AJAX rows
-                $editHref = 'app/views/comuns/comum_editar.php?id=' . (int) $comum['id'] . ($busca !== '' || $pagina_ajax > 1 ? ('?' . http_build_query(['busca' => $busca, 'pagina' => $pagina_ajax])) : '');
+                $editHref = 'app/views/comuns/comum_editar.php?id=' . (int) $comum['id'] . ($busca !== '' || $pagina_ajax > 1 ? ('&' . http_build_query(['busca' => $busca, 'pagina' => $pagina_ajax])) : '');
                 $viewHref = 'app/views/planilhas/planilha_visualizar.php?comum_id=' . (int) $comum['id'];
                 $rowsHtml .= '<a class="btn btn-outline-primary" href="' . $editHref . '" title="Editar"><i class="bi bi-pencil"></i></a>';
                 $rowsHtml .= '<a class="btn btn-outline-secondary btn-view-planilha" href="' . $viewHref . '" data-cadastro-ok="' . ($cadastro_ok ? '1' : '0') . '" data-edit-url="' . $editHref . '" title="Visualizar planilha"><i class="bi bi-eye"></i></a>';
@@ -254,7 +254,7 @@ ob_start();
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a class="btn btn-outline-primary"
-                                            href="app/views/comuns/comum_editar.php?id=<?php echo (int) $comum['id']; ?><?php echo ($qs ? ('?' . $qs) : ''); ?>"
+                                            href="app/views/comuns/comum_editar.php?id=<?php echo (int) $comum['id']; ?><?php echo ($qs ? ('&' . $qs) : ''); ?>"
                                             title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
