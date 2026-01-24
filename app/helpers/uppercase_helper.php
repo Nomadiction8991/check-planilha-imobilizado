@@ -4,6 +4,32 @@
  * Usa a biblioteca voku/portable-utf8 para manipulação avançada de UTF-8
  */
 
+// Tenta garantir que o autoload do Composer foi carregado (evita fatal em deploys sem `composer install`)
+$autoload = __DIR__ . '/../../vendor/autoload.php';
+if (file_exists($autoload)) {
+    require_once $autoload;
+}
+
+// Se a classe não existir (deploy sem dependências), define um fallback mínimo para evitar erro fatal
+if (!class_exists('voku\\helper\\UTF8')) {
+    $code = <<<'PHP'
+namespace voku\helper;
+class UTF8 {
+    public static function fix_utf8($s) { return $s; }
+    public static function strtoupper($s) { return mb_strtoupper($s, 'UTF-8'); }
+    public static function strtolower($s) { return mb_strtolower($s, 'UTF-8'); }
+    public static function remove_accents($s) {
+        $out = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+        if ($out === false) {
+            return preg_replace('/[^\x20-\x7E]/u','',$s);
+        }
+        return preg_replace('/[^\x20-\x7E]/u','',$out);
+    }
+}
+PHP;
+    eval($code);
+}
+
 use voku\helper\UTF8;
 
 /**
