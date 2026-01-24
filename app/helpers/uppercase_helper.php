@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Helper para converter strings para UPPERCASE
  * Usa a biblioteca voku/portable-utf8 para manipulação avançada de UTF-8
@@ -38,7 +39,8 @@ PHP;
  * @param string $value O valor a ser convertido
  * @return string O valor em UPPERCASE
  */
-function to_uppercase($value) {
+function to_uppercase($value)
+{
     if (empty($value) || !is_string($value)) {
         return $value;
     }
@@ -51,7 +53,8 @@ function to_uppercase($value) {
 /**
  * Alias para to_uppercase (compatibilidade)
  */
-function uppercase($value) {
+function uppercase($value)
+{
     return to_uppercase($value);
 }
 
@@ -62,7 +65,8 @@ function uppercase($value) {
  * @param array $fields_to_convert Lista de campos que devem ser convertidos
  * @return array Array com campos convertidos
  */
-function uppercase_fields(&$data, $fields_to_convert = []) {
+function uppercase_fields(&$data, $fields_to_convert = [])
+{
     foreach ($fields_to_convert as $field) {
         // Safety: never uppercase password fields even if requested
         if ($field === 'senha' || $field === 'password') {
@@ -82,7 +86,8 @@ function uppercase_fields(&$data, $fields_to_convert = []) {
  * @param bool $remove_accents Se deve remover acentos
  * @return string Texto normalizado
  */
-function normalize_text($text, $remove_accents = false) {
+function normalize_text($text, $remove_accents = false)
+{
     if (empty($text)) {
         return $text;
     }
@@ -101,7 +106,8 @@ function normalize_text($text, $remove_accents = false) {
  * @param string $value O valor a ser convertido
  * @return string O valor em lowercase
  */
-function to_lowercase($value) {
+function to_lowercase($value)
+{
     if (empty($value) || !is_string($value)) {
         return $value;
     }
@@ -115,7 +121,8 @@ function to_lowercase($value) {
  * @param string $text Texto com possíveis acentos
  * @return string Texto sem acentos
  */
-function remove_accents($text) {
+function remove_accents($text)
+{
     if (empty($text)) {
         return $text;
     }
@@ -127,7 +134,8 @@ function remove_accents($text) {
  * Campos que devem ser salvos em UPPERCASE no banco de dados
  * Por modelo/tabela
  */
-function get_uppercase_fields($table = null) {
+function get_uppercase_fields($table = null)
+{
     $fields_by_table = [
         'usuarios' => [
             'nome',
