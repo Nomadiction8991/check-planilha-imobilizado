@@ -1038,7 +1038,7 @@ ob_start();
                             }
                         } else if (action === 'imprimir') {
                             const newVal = Number(formData.get('imprimir') || 0);
-                            // NÃO forçar checado - cada botão é independente
+                            stateUpdates.imprimir = newVal;
                             const input = form.querySelector('input[name="imprimir"]');
                             if (input) {
                                 input.value = newVal ? '0' : '1';
