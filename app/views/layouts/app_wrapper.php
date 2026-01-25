@@ -11,11 +11,12 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?php echo $pageTitle ?? 'Anvy - Gestão de Planilhas'; ?></title>
-    
+
     <!-- PWA - Progressive Web App -->
     <link rel="manifest" href="<?php echo $manifest_path; ?>">
     <meta name="theme-color" content="#667eea">
@@ -23,22 +24,24 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CheckPlanilha">
     <link rel="apple-touch-icon" href="<?php echo ($ambiente_manifest === 'dev') ? '/dev/logo.png' : '/logo.png'; ?>">
-    
+
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+
     <!-- Mobile-First Global CSS - REMOVIDO: contradiz objetivo de CSS único para todos dispositivos -->
     <!-- <link rel="stylesheet" href="<?php echo ($ambiente_manifest === 'dev') ? '/dev/public/assets/css/mobile-first.css' : '/public/assets/css/mobile-first.css'; ?>"> -->
-    
+
     <!-- Custom CSS -->
     <style>
-/* Ensure header titles display uppercase visually too */
-                        .app-title { text-transform: uppercase; }
+        /* Ensure header titles display uppercase visually too */
+        .app-title {
+            text-transform: uppercase;
+        }
 
-/* ===== LAYOUT MOBILE 400px CENTRALIZADO ===== */
+        /* ===== LAYOUT MOBILE 400px CENTRALIZADO ===== */
         body {
             margin: 0;
             padding: 0;
@@ -54,7 +57,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
         .text-uppercase {
             text-transform: uppercase;
         }
-        
+
         /* Container principal centralizado */
         .app-container {
             display: flex;
@@ -63,7 +66,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             min-height: 100vh;
             padding: 20px 10px;
         }
-        
+
         /* Wrapper mobile de 400px */
         .mobile-wrapper {
             width: 100%;
@@ -77,7 +80,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             flex-direction: column;
             position: relative;
         }
-        
+
         /* Header fixo */
         .app-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -93,16 +96,16 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             width: 100%;
             max-width: 400px;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .header-left {
             display: flex;
             align-items: center;
             gap: 12px;
             flex: 1;
         }
-        
+
         .btn-back {
             background: rgba(255, 255, 255, 0.2);
             border: none;
@@ -116,12 +119,12 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             transition: all 0.3s;
             text-decoration: none;
         }
-        
+
         .btn-back:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.1);
         }
-        
+
         .app-title {
             margin: 0;
             font-size: 18px;
@@ -131,12 +134,12 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             text-overflow: ellipsis;
             max-width: 220px;
         }
-        
+
         .header-actions {
             display: flex;
             gap: 8px;
         }
-        
+
         .btn-header-action {
             background: rgba(255, 255, 255, 0.2);
             border: none;
@@ -150,32 +153,35 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             transition: all 0.3s;
             text-decoration: none;
         }
-        
+
         .btn-header-action:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.1);
         }
-        
+
         /* Botão PWA com animação de pulso */
         #installPwaBtn {
             position: relative;
             animation: pulsePwa 2s infinite;
         }
-        
+
         @keyframes pulsePwa {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
             }
+
             50% {
                 box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
             }
         }
-        
+
         #installPwaBtn:hover {
             animation: none;
             background: rgba(255, 255, 255, 0.4) !important;
         }
-        
+
         /* Conteúdo principal */
         .app-content {
             flex: 1;
@@ -185,18 +191,18 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             overflow-y: auto;
             background: #f8f9fa;
         }
-        
+
         /* Cards Bootstrap personalizados */
         .card {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 16px;
             transition: all 0.3s;
         }
-        
+
         .card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
             transform: translateY(-2px);
         }
 
@@ -206,6 +212,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             position: fixed !important;
             z-index: 1055;
         }
+
         .mobile-wrapper .modal {
             top: 0;
             left: 50%;
@@ -217,19 +224,22 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0, 0, 0, 0.45);
             padding: 12px 16px;
         }
+
         .mobile-wrapper .modal.show {
             display: flex !important;
             opacity: 1;
         }
+
         .mobile-wrapper .modal-dialog {
             margin: 1rem;
             width: auto;
             max-width: 360px;
             transform: none !important;
         }
+
         .mobile-wrapper .modal-backdrop {
             display: none !important;
         }
@@ -244,7 +254,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
         .w-47 {
             width: 47%;
         }
-        
+
         .card-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -253,7 +263,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             font-weight: 600;
             padding: 12px 16px;
         }
-        
+
         /* Botões personalizados */
         .btn {
             border-radius: 8px;
@@ -261,39 +271,39 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             padding: 10px 20px;
             transition: all 0.3s;
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
-        
+
         /* Exceção: botões dentro de input-group não devem se mover */
         .input-group .btn:hover,
         .input-group .btn:focus,
         .input-group .btn:active {
             transform: none !important;
         }
-        
+
         /* Tabelas responsivas */
         .table-responsive {
             border-radius: 12px;
             overflow: hidden;
         }
-        
+
         table {
             margin-bottom: 0;
         }
-        
+
         thead {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         thead th {
             border: none;
             font-weight: 600;
@@ -302,21 +312,21 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             letter-spacing: 0.5px;
             padding: 12px 8px;
         }
-        
+
         tbody tr {
             transition: all 0.2s;
         }
-        
+
         tbody tr:hover {
             background: #f8f9fa;
         }
-        
+
         tbody td {
             padding: 12px 8px;
             vertical-align: middle;
             font-size: 14px;
         }
-        
+
         /* Badges personalizados */
         .badge {
             padding: 6px 12px;
@@ -324,69 +334,71 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             font-weight: 500;
             font-size: 11px;
         }
-        
+
         /* Forms */
-        .form-control, .form-select {
+        .form-control,
+        .form-select {
             border-radius: 8px;
             border: 1px solid #dee2e6;
             padding: 10px 12px;
             transition: all 0.3s;
         }
-        
-        .form-control:focus, .form-select:focus {
+
+        .form-control:focus,
+        .form-select:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
-        
+
         .form-label {
             font-weight: 600;
             font-size: 13px;
             color: #495057;
             margin-bottom: 6px;
         }
-        
+
         /* Loading */
         .spinner-border-sm {
             width: 1rem;
             height: 1rem;
             border-width: 0.15em;
         }
-        
+
         /* Paginação */
         .pagination {
             gap: 4px;
         }
-        
+
         .page-link {
             border-radius: 8px;
             border: 1px solid #dee2e6;
             color: #667eea;
             transition: all 0.3s;
         }
-        
+
         .page-link:hover {
             background: #667eea;
             color: white;
             border-color: #667eea;
         }
-        
+
         .page-item.active .page-link {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
         }
-        
+
         /* Responsividade extra para < 400px */
         @media (max-width: 420px) {
             .app-container {
                 padding: 0;
             }
-            
+
             .mobile-wrapper {
                 border-radius: 0;
                 min-height: 100vh;
             }
         }
-        
+
         /* Utilitários */
         .text-gradient {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -394,23 +406,24 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .shadow-sm-custom {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
         }
-        
+
         /* Animações */
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .fade-in {
             animation: fadeIn 0.3s ease-out;
         }
@@ -419,9 +432,12 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
     <?php if (isset($customCssPath) && file_exists(__DIR__ . '/../../../' . ltrim($customCssPath, '/'))): ?>
         <link rel="stylesheet" href="<?php echo $customCssPath; ?>">
     <?php elseif (isset($customCss)): ?>
-        <style><?php echo $customCss; ?></style>
+        <style>
+            <?php echo $customCss; ?>
+        </style>
     <?php endif; ?>
 </head>
+
 <body>
     <div class="app-container">
         <div class="mobile-wrapper">
@@ -442,7 +458,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
                             </small>
                         <?php endif; ?>
                     </div>
-                    
+
                 </div>
                 <div class="header-actions">
                     <?php if (isset($headerActions)): ?>
@@ -450,7 +466,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
                     <?php endif; ?>
                 </div>
             </header>
-            
+
             <!-- Content -->
             <main class="app-content fade-in">
                 <?php if (isset($contentHtml) && $contentHtml !== ''): ?>
@@ -467,10 +483,10 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             </main>
         </div>
     </div>
-    
+
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Ajuste dinâmico do espaçamento do conteúdo baseado na altura do header -->
     <script>
         (function() {
@@ -494,36 +510,40 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             }
         })();
     </script>
-    
+
     <!-- Bloqueio de zoom global (pinch/double-tap) fora do viewer do relatório -->
     <script>
-        (function(){
+        (function() {
             const isViewerOpen = () => {
                 const ov = document.getElementById('viewerOverlay');
                 return !!(ov && !ov.hasAttribute('hidden'));
             };
 
             // Evita pinch-zoom (2+ dedos) fora do viewer
-            document.addEventListener('touchstart', function(e){
+            document.addEventListener('touchstart', function(e) {
                 if (isViewerOpen()) return; // permitir no viewer (zoom customizado)
                 if (e.touches && e.touches.length > 1) {
                     e.preventDefault();
                 }
-            }, { passive: false });
+            }, {
+                passive: false
+            });
 
             // Evita double-tap zoom fora do viewer
             let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(e){
+            document.addEventListener('touchend', function(e) {
                 if (isViewerOpen()) return;
                 const now = Date.now();
                 if (now - lastTouchEnd <= 300) {
                     e.preventDefault();
                 }
                 lastTouchEnd = now;
-            }, { passive: false });
+            }, {
+                passive: false
+            });
 
             // Alguns navegadores disparam gesturestart (iOS antigos)
-            document.addEventListener('gesturestart', function(e){
+            document.addEventListener('gesturestart', function(e) {
                 if (isViewerOpen()) return;
                 e.preventDefault();
             });
@@ -535,7 +555,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
 
     <!-- Garantir que modais fiquem dentro do wrapper mobile -->
     <script>
-        document.addEventListener('show.bs.modal', function (event) {
+        document.addEventListener('show.bs.modal', function(event) {
             var appWrapper = document.querySelector('.mobile-wrapper');
             if (!appWrapper) return;
             var modal = event.target;
@@ -567,58 +587,68 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             });
         }
     </script>
-    
+
     <?php if (isset($customJs)): ?>
-        <script><?php echo $customJs; ?></script>
+        <script>
+            <?php echo $customJs; ?>
+        </script>
     <?php endif; ?>
 
     <!-- Global alert behavior: remove close button, auto-dismiss after 3s with 1s fade -->
     <script>
-    (function(){
-        const AUTO_MS = 3000; // show time
-        const FADE_MS = 1000; // fade duration
+        (function() {
+            const AUTO_MS = 3000; // show time
+            const FADE_MS = 1000; // fade duration
 
-        function processAlert(el){
-            if (!el || el.dataset._autoDismissProcessed) return;
-            el.dataset._autoDismissProcessed = '1';
+            function processAlert(el) {
+                if (!el || el.dataset._autoDismissProcessed) return;
+                el.dataset._autoDismissProcessed = '1';
 
-            // Remove any close button (X)
-            const closeBtn = el.querySelector('.btn-close');
-            if (closeBtn) closeBtn.remove();
+                // Remove any close button (X)
+                const closeBtn = el.querySelector('.btn-close');
+                if (closeBtn) closeBtn.remove();
 
-            // Ensure fade class and desired transition duration
-            el.classList.add('fade');
-            // force transition duration to 1s for opacity
-            el.style.transition = `opacity ${FADE_MS}ms ease`;
+                // Ensure fade class and desired transition duration
+                el.classList.add('fade');
+                // force transition duration to 1s for opacity
+                el.style.transition = `opacity ${FADE_MS}ms ease`;
 
-            // Ensure it is shown (some alerts may be created without show)
-            if (!el.classList.contains('show')) el.classList.add('show');
+                // Ensure it is shown (some alerts may be created without show)
+                if (!el.classList.contains('show')) el.classList.add('show');
 
-            // Schedule auto-hide
-            setTimeout(()=>{
-                // remove 'show' to start fade
-                el.classList.remove('show');
-                // remove from DOM after fade
-                setTimeout(()=>{ try{ el.remove(); }catch(e){} }, FADE_MS + 20);
-            }, AUTO_MS);
-        }
-
-        // process existing alerts
-        document.querySelectorAll('.alert').forEach(processAlert);
-
-        // observe for dynamically added alerts
-        const mo = new MutationObserver(muts => {
-            for (const m of muts){
-                for (const node of m.addedNodes){
-                    if (!(node instanceof HTMLElement)) continue;
-                    if (node.classList && node.classList.contains('alert')) processAlert(node);
-                    // also check nested
-                    node.querySelectorAll && node.querySelectorAll('.alert').forEach(processAlert);
-                }
+                // Schedule auto-hide
+                setTimeout(() => {
+                    // remove 'show' to start fade
+                    el.classList.remove('show');
+                    // remove from DOM after fade
+                    setTimeout(() => {
+                        try {
+                            el.remove();
+                        } catch (e) {}
+                    }, FADE_MS + 20);
+                }, AUTO_MS);
             }
-        });
-        mo.observe(document.body, { childList: true, subtree: true });
-    })();
+
+            // process existing alerts
+            document.querySelectorAll('.alert').forEach(processAlert);
+
+            // observe for dynamically added alerts
+            const mo = new MutationObserver(muts => {
+                for (const m of muts) {
+                    for (const node of m.addedNodes) {
+                        if (!(node instanceof HTMLElement)) continue;
+                        if (node.classList && node.classList.contains('alert')) processAlert(node);
+                        // also check nested
+                        node.querySelectorAll && node.querySelectorAll('.alert').forEach(processAlert);
+                    }
+                }
+            });
+            mo.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        })();
     </script>
 </body>
+
 </html>

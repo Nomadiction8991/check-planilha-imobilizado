@@ -271,11 +271,11 @@ ob_start();
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const confirmButton = document.getElementById('confirmDeleteButton');
     const deleteForm = document.getElementById('deleteForm');
     if (confirmButton && deleteForm) {
-      confirmButton.addEventListener('click', function () {
+      confirmButton.addEventListener('click', function() {
         deleteForm.submit();
       });
     }
