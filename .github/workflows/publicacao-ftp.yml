@@ -1,4 +1,4 @@
-name: Publicação via FTP (ANVY)
+name: Publicação via FTP
 
 on:
   push:
@@ -12,8 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.ANVY_HOST }}
+          server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
-          server-dir: /checkplanilha.anvy.com.br/
+          server-dir: ${{ secrets.FTP_PATH }}
