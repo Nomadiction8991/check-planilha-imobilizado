@@ -10,148 +10,144 @@ html, body { margin: 0; padding: 0; background: #fff; }
 * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .r145-root * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', 'Helvetica', sans-serif; }
 .r145-root div.a4 { width: 210mm; height: 297mm; display: flex; flex-direction: column; }
-.r145-root section.cabecalho { width: 203mm; height: 25mm; margin: 2.5mm auto 0; }
+.r145-root section.cabecalho { display: flex; width: 203mm; height: 25mm; margin-inline: auto; overflow: hidden; margin-top: 2.5mm; }
 .r145-root section.cabecalho table { border-collapse: collapse; width: 100%; height: 100%; }
 .r145-root section.cabecalho th { border: 1px solid #000; background: #fff; font-weight: normal; }
-.r145-root section.conteudo { width: 203mm; margin: 0 auto; flex: 1; display: flex; flex-direction: column; }
-.r145-root section.conteudo h3 { font-size: 11pt; margin: 2mm 0; font-weight: bold; }
-.r145-root section.conteudo div.formulario { border: 2px solid #000; flex: 1; display: flex; flex-direction: column; }
-.r145-root table { border-collapse: collapse; width: 100%; }
-.r145-root td { border: 1px solid #000; padding: 1mm 2mm; font-size: 9pt; vertical-align: top; }
-.r145-root textarea { width: 100%; border: none; background: transparent; resize: none; font-family: inherit; font-size: 9pt; outline: none; padding: 0; }
-.r145-root .hdr { background: #333; color: #fff; font-weight: bold; font-size: 10pt; padding: 1.5mm 3mm; }
-.r145-root .lbl { font-weight: bold; font-size: 8pt; background: #f0f0f0; }
-.r145-root .val { min-height: 7mm; }
-.r145-root .titulo-ccb { color: #808080; font-weight: bold; font-size: 12pt; padding-left: 3mm; }
-.r145-root .titulo-form { font-weight: bold; font-size: 12pt; text-align: center; }
-.r145-root .sig-row td { height: 8mm; }
-.r145-root section.rodape { width: 203mm; margin: 1mm auto 0; }
-.r145-root section.rodape td { border: none; text-align: center; font-weight: bold; font-size: 9pt; padding: 2mm; }
+.r145-root section.cabecalho th.col1 { text-align: center; width: 27mm; }
+.r145-root section.cabecalho th.col2 { text-align: center; width: 122mm; }
+.r145-root section.cabecalho th.col3 { text-align: right; width: 28mm; font-size: small; }
+.r145-root section.cabecalho th.col4 { text-align: center; width: 21mm; font-size: small; }
+.r145-root section.cabecalho tr.row1 th.col1 { font-weight: bold; font-size: xx-large; }
+.r145-root section.cabecalho tr.row1 th.col2 { font-weight: bold; font-size: x-large; }
+.r145-root section.cabecalho tr.row4 th.col1 { font-size: large; }
+.r145-root section.cabecalho tr.row4 th.col2 { font-size: large; }
+.r145-root section.conteudo { border: 1px solid #000; margin-inline: auto; width: 203mm; height: 255mm; display: flex; flex-direction: column; }
+.r145-root section.conteudo h1 { font-size: medium; width: 95%; margin-inline: auto; margin-block: 1.5mm; }
+.r145-root section.conteudo div.conteudo { margin-inline: auto; width: 95%; height: 97.5%; display: flex; margin-bottom: 2.5%; flex-direction: column; border: 2px solid #000; }
+.r145-root section.conteudo div.conteudo table { border-collapse: collapse; width: 100%; margin: auto; margin-top: -1px; }
+.r145-root section.conteudo div.conteudo table td { border: 1px solid #000; background: #fff; font-size: small; }
+.r145-root .hdr { background: #999; color: #fff; padding-left: 3mm; }
+.r145-root .lbl { background: #ccc; padding-left: 3mm; font-size: x-small; }
+.r145-root .titulo-ccb { color: #999; padding-left: 3mm; }
+.r145-root .titulo-form { text-align: center; }
+.r145-root section.rodape { margin-inline: auto; width: 203mm; height: 10mm; display: flex; flex-direction: column; margin-top: 1.5mm; }
+.r145-root section.rodape table { border-collapse: collapse; width: 100%; height: 99%; margin: auto; }
+.r145-root section.rodape table td { border: none; background: #fff; font-weight: bold; font-size: small; text-align: center; }
+.r145-root textarea { width: 98%; display: block; margin: 0 auto; padding: 2px 4px; border: none; background: transparent; box-sizing: border-box; outline: none; font-size: 9pt; line-height: 1.3; font-family: inherit; font-weight: normal; resize: none; text-align: center; }
+.r145-root .texto { padding: 3mm; font-size: x-small; line-height: 1.4; }
+.r145-root input[type="checkbox"] { width: 14px; height: 14px; margin-right: 5px; cursor: pointer; border: 2px solid #000; background: #fff; accent-color: #000; }
 </style>
 </head>
 <body>
-<!-- A4-START -->
 <div class="r145-root">
 <div class="a4">
 <section class="cabecalho">
 <table>
-<tr>
-<th rowspan="3" style="width:27mm; text-align:center; font-weight:bold; font-size:xx-large; border:1px solid #000;">CCB</th>
-<th rowspan="3" style="width:122mm; text-align:center; font-weight:bold; font-size:x-large; border:1px solid #000;">MANUAL ADMINISTRATIVO</th>
-<th style="width:28mm; text-align:right; font-size:small; border:1px solid #000;">SEÇÃO:</th>
-<th style="width:21mm; text-align:center; font-size:small; border:1px solid #000;">14</th>
+<tr class="row1">
+<th class="col1" rowspan="3">CCB</th>
+<th class="col2" rowspan="3">MANUAL ADMINISTRATIVO</th>
+<th class="col3">SEÇÃO:</th>
+<th class="col4">14</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small; border:1px solid #000;">FL. / FLS.:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">40/46</th>
+<tr class="row2">
+<th class="col3">FL./FLS.</th>
+<th class="col4">40/46</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small; border:1px solid #000;">DATA REVISÃO:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">24/09/2019</th>
+<tr class="row3">
+<th class="col3">DATA REVISÃO:</th>
+<th class="col4">24/09/2019</th>
 </tr>
-<tr>
-<th rowspan="2" style="font-size:large; border:1px solid #000;">ASSUNTO</th>
-<th rowspan="2" style="font-size:large; border:1px solid #000;">PATRIMÔNIO – BENS MÓVEIS</th>
-<th style="text-align:right; font-size:small; border:1px solid #000;">EDIÇÃO:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">6</th>
+<tr class="row4">
+<th class="col1" rowspan="2">ASSUNTO</th>
+<th class="col2" rowspan="2">PATRIMÔNIO – BENS MÓVEIS</th>
+<th class="col3">EDIÇÃO:</th>
+<th class="col4">6</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small; border:1px solid #000;">REVISÃO:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">1</th>
+<tr class="row5">
+<th class="col3">REVISÃO:</th>
+<th class="col4">1</th>
 </tr>
 </table>
 </section>
 <section class="conteudo">
-<h3>FORMULÁRIO 14.5: ATA DE INVENTÁRIO DE BENS MÓVEIS</h3>
-<div class="formulario">
+<h1>FORMULÁRIO 14.5: ATA DE INVENTÁRIO DE BENS MÓVEIS</h1>
+<div class="conteudo">
 <table>
-<tr style="height:8mm;">
-<td class="titulo-ccb" style="width:70%;">CONGREGAÇÃO CRISTÃ NO BRASIL</td>
-<td style="width:30%; font-weight:bold; font-size:10pt; padding-left:2mm;">FORMULÁRIO 14.5</td>
+<tr style="height:10mm;">
+<td class="titulo-ccb" colspan="2" style="width:70%;">CONGREGAÇÃO CRISTÃ NO BRASIL</td>
+<td colspan="2" style="width:30%; padding-left:3mm;">FORMULÁRIO 14.5</td>
 </tr>
-<tr style="height:8mm;">
-<td class="titulo-form">ATA DE INVENTÁRIO DOS BENS MÓVEIS</td>
-<td style="font-weight:bold; font-size:10pt; padding-left:2mm;">Data Emissão: <textarea id="data_emissao" rows="1"></textarea></td>
+<tr style="height:10mm;">
+<td class="titulo-form" colspan="2">ATA DE INVENTÁRIO DOS BENS MÓVEIS</td>
+<td colspan="2" style="padding-left:3mm; font-size:x-small;">Data Emissão:<br><textarea id="data_emissao" rows="1"></textarea></td>
 </tr>
 </table>
 <table>
-<tr>
-<td colspan="3" class="hdr"><span style="margin-right:15mm;">A</span>LOCALIDADE EMISSORA</td>
+<tr style="height:5mm;">
+<td style="width:5%; text-align:center;">A</td>
+<td class="hdr" colspan="2" style="width:95%;">LOCALIDADE EMISSORA</td>
 </tr>
-<tr class="lbl">
-<td style="width:40%;">Administração</td>
-<td style="width:32%;">Cidade</td>
-<td style="width:28%;">Setor</td>
+</table>
+<table>
+<tr style="height:5mm;">
+<td class="lbl" style="width:40%;">Administração</td>
+<td class="lbl" style="width:30%;">Cidade</td>
+<td class="lbl" style="width:30%;">Setor</td>
 </tr>
-<tr class="val">
-<td style="height:10mm;"><textarea id="administracao" rows="2"></textarea></td>
+<tr style="height:10mm;">
+<td><textarea id="administracao" rows="2"></textarea></td>
 <td><textarea id="cidade" rows="2"></textarea></td>
 <td><textarea id="setor" rows="2"></textarea></td>
 </tr>
-<tr class="lbl">
-<td>CNPJ da Administração</td>
-<td>N° Relatório</td>
-<td>Casa de Oração</td>
+<tr style="height:5mm;">
+<td class="lbl">CNPJ da Administração</td>
+<td class="lbl">N° Relatório</td>
+<td class="lbl">Casa de Oração</td>
 </tr>
-<tr class="val">
-<td style="height:10mm;"><textarea id="cnpj" rows="2"></textarea></td>
+<tr style="height:10mm;">
+<td><textarea id="cnpj" rows="2"></textarea></td>
 <td><textarea id="num_relatorio" rows="2"></textarea></td>
 <td><textarea id="casa_oracao" rows="2"></textarea></td>
 </tr>
 </table>
 <table>
 <tr>
-<td colspan="3" style="font-size:10pt; padding:3mm 2mm; border-bottom:none;">Nesta data foi realizado o serviço de:</td>
-</tr>
-<tr>
-<td colspan="3" style="padding:2mm 2mm 2mm 15mm; border-top:none; border-bottom:none;">
-( &nbsp;&nbsp; ) aposição de etiquetas para identificação dos bens móveis
+<td class="texto" colspan="3">
+Nesta data foi realizado o serviço de:<br><br>
+<label><input type="checkbox" id="etiquetas"> aposição de etiquetas para identificação dos bens móveis</label><br><br>
+<label><input type="checkbox" id="conferencia"> conferência física dos bens móveis.</label><br><br>
+Ao final dos trabalhos foram registradas as seguintes ocorrências relevantes:<br>
+<label><input type="checkbox" id="sem_ocorrencia"> não houve fato relevante para ser registrado.</label>
 </td>
 </tr>
-<tr>
-<td colspan="3" style="padding:2mm 2mm 2mm 15mm; border-top:none; border-bottom:none;">
-( &nbsp;&nbsp; ) conferência física dos bens móveis.
-</td>
-</tr>
-<tr>
-<td colspan="3" style="font-size:10pt; padding:3mm 2mm; border-top:none; border-bottom:none;">
-Ao final dos trabalhos foram registradas as seguintes ocorrências relevantes:
-</td>
-</tr>
-<tr>
-<td colspan="3" style="padding:2mm 2mm 2mm 15mm; border-top:none; border-bottom:none;">
-( &nbsp;&nbsp;&nbsp; ) &nbsp;não houve fato relevante para ser registrado.
-</td>
-</tr>
-<tr>
-<td colspan="3" style="height:15mm; border-top:none;"><textarea id="ocorrencias" rows="3"></textarea></td>
+<tr style="height:25mm;">
+<td colspan="3"><textarea id="ocorrencias" rows="5"></textarea></td>
 </tr>
 </table>
 <table>
 <tr>
-<td colspan="3" style="font-size:9pt; padding:2mm; line-height:1.6;">
-<b>Encerramento</b>: Foi encerrada esta reunião com uma oração de agradecimento a Deus, sendo esta ata assinada
+<td class="texto" colspan="3">
+Encerramento: Foi encerrada esta reunião com uma oração de agradecimento a Deus, sendo esta ata assinada<br>
 pelos presentes, ministério e outros mais que dela tomaram conhecimento.
 </td>
 </tr>
-<tr class="lbl">
-<td style="width:38%;">Nome</td>
-<td style="width:32%;">Ministério / cargo / colaborador</td>
-<td style="width:30%;">Assinatura</td>
-</tr>
-<tr class="sig-row"><td><textarea id="nome1" rows="1"></textarea></td><td><textarea id="cargo1" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome2" rows="1"></textarea></td><td><textarea id="cargo2" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome3" rows="1"></textarea></td><td><textarea id="cargo3" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome4" rows="1"></textarea></td><td><textarea id="cargo4" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome5" rows="1"></textarea></td><td><textarea id="cargo5" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome6" rows="1"></textarea></td><td><textarea id="cargo6" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome7" rows="1"></textarea></td><td><textarea id="cargo7" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome8" rows="1"></textarea></td><td><textarea id="cargo8" rows="1"></textarea></td><td>&nbsp;</td></tr>
-<tr class="sig-row"><td><textarea id="nome9" rows="1"></textarea></td><td><textarea id="cargo9" rows="1"></textarea></td><td>&nbsp;</td></tr>
 </table>
 <table>
-<tr>
-<td colspan="3" style="font-size:8pt; padding:2mm;">Encaminhar uma via para a Administração / Setor</td>
+<tr style="height:5mm;">
+<td class="lbl" style="width:40%;">Nome</td>
+<td class="lbl" style="width:30%;">Ministério / cargo / colaborador</td>
+<td class="lbl" style="width:30%;">Assinatura</td>
+</tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td></td></tr>
+</table>
+<table>
+<tr style="height:7mm;">
+<td class="texto" colspan="3">Encaminhar uma via para a Administração / Setor</td>
 </tr>
 </table>
 </div>
@@ -159,14 +155,11 @@ pelos presentes, ministério e outros mais que dela tomaram conhecimento.
 <section class="rodape">
 <table>
 <tr>
-<td style="width:20%;">&nbsp;</td>
-<td style="width:60%;">sp.saopaulo.manualadm@congregacao.org.br</td>
-<td style="width:20%;">&nbsp;</td>
+<td>sp.saopaulo.manualadm@congregacao.org.br</td>
 </tr>
 </table>
 </section>
 </div>
 </div>
-<!-- A4-END -->
 </body>
 </html>

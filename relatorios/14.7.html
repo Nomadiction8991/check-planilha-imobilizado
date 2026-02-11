@@ -10,132 +10,147 @@ html, body { margin: 0; padding: 0; background: #fff; }
 * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .r147-root * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', 'Helvetica', sans-serif; }
 .r147-root div.a4 { width: 210mm; height: 297mm; display: flex; flex-direction: column; }
-.r147-root section.cabecalho { width: 203mm; height: 25mm; margin: 2.5mm auto 0; }
+.r147-root section.cabecalho { display: flex; width: 203mm; height: 25mm; margin-inline: auto; overflow: hidden; margin-top: 2.5mm; }
 .r147-root section.cabecalho table { border-collapse: collapse; width: 100%; height: 100%; }
 .r147-root section.cabecalho th { border: 1px solid #000; background: #fff; font-weight: normal; }
-.r147-root section.conteudo { width: 203mm; margin: 0 auto; flex: 1; display: flex; flex-direction: column; }
-.r147-root section.conteudo h3 { font-size: 11pt; margin: 2mm 0; font-weight: bold; }
-.r147-root section.conteudo div.formulario { border: 2px solid #000; flex: 1; display: flex; flex-direction: column; }
-.r147-root table { border-collapse: collapse; width: 100%; }
-.r147-root td { border: 1px solid #000; padding: 1mm 2mm; font-size: 9pt; vertical-align: top; }
-.r147-root textarea { width: 100%; border: none; background: transparent; resize: none; font-family: inherit; font-size: 9pt; outline: none; padding: 0; }
-.r147-root .hdr { background: #333; color: #fff; font-weight: bold; font-size: 10pt; padding: 1.5mm 3mm; }
-.r147-root .lbl { font-weight: bold; font-size: 8pt; background: #f0f0f0; }
-.r147-root .val { min-height: 7mm; }
-.r147-root .titulo-ccb { color: #808080; font-weight: bold; font-size: 12pt; padding-left: 3mm; }
-.r147-root .titulo-form { font-weight: bold; font-size: 12pt; text-align: center; }
-.r147-root .grid-row td { height: 10mm; }
-.r147-root section.rodape { width: 203mm; margin: 1mm auto 0; }
-.r147-root section.rodape td { border: none; text-align: center; font-weight: bold; font-size: 9pt; padding: 2mm; }
+.r147-root section.cabecalho th.col1 { text-align: center; width: 27mm; }
+.r147-root section.cabecalho th.col2 { text-align: center; width: 122mm; }
+.r147-root section.cabecalho th.col3 { text-align: right; width: 28mm; font-size: small; }
+.r147-root section.cabecalho th.col4 { text-align: center; width: 21mm; font-size: small; }
+.r147-root section.cabecalho tr.row1 th.col1 { font-weight: bold; font-size: xx-large; }
+.r147-root section.cabecalho tr.row1 th.col2 { font-weight: bold; font-size: x-large; }
+.r147-root section.cabecalho tr.row4 th.col1 { font-size: large; }
+.r147-root section.cabecalho tr.row4 th.col2 { font-size: large; }
+.r147-root section.conteudo { border: 1px solid #000; margin-inline: auto; width: 203mm; height: 255mm; display: flex; flex-direction: column; }
+.r147-root section.conteudo h1 { font-size: medium; width: 95%; margin-inline: auto; margin-block: 1.5mm; }
+.r147-root section.conteudo div.conteudo { margin-inline: auto; width: 95%; height: 97.5%; display: flex; margin-bottom: 2.5%; flex-direction: column; border: 2px solid #000; }
+.r147-root section.conteudo div.conteudo table { border-collapse: collapse; width: 100%; margin: auto; margin-top: -1px; }
+.r147-root section.conteudo div.conteudo table td { border: 1px solid #000; background: #fff; font-size: small; }
+.r147-root .hdr { background: #999; color: #fff; padding-left: 3mm; }
+.r147-root .lbl { background: #ccc; padding-left: 3mm; font-size: x-small; }
+.r147-root .titulo-ccb { color: #999; padding-left: 3mm; }
+.r147-root .titulo-form { text-align: center; }
+.r147-root .texto { padding: 3mm; font-size: x-small; line-height: 1.4; }
+.r147-root section.rodape { margin-inline: auto; width: 203mm; height: 10mm; display: flex; flex-direction: column; margin-top: 1.5mm; }
+.r147-root section.rodape table { border-collapse: collapse; width: 100%; height: 99%; margin: auto; }
+.r147-root section.rodape table td { border: none; background: #fff; font-weight: bold; font-size: small; text-align: center; }
+.r147-root textarea { width: 98%; display: block; margin: 0 auto; padding: 2px 4px; border: none; background: transparent; box-sizing: border-box; outline: none; font-size: 9pt; line-height: 1.3; font-family: inherit; font-weight: normal; resize: none; text-align: center; }
+.r147-root input[type="checkbox"] { width: 14px; height: 14px; margin-right: 5px; cursor: pointer; border: 2px solid #000; background: #fff; accent-color: #000; }
 </style>
 </head>
 <body>
-<!-- A4-START -->
 <div class="r147-root">
 <div class="a4">
 <section class="cabecalho">
 <table>
-<tr>
-<th rowspan="3" style="width:27mm; text-align:center; font-weight:bold; font-size:xx-large; border:1px solid #000;">CCB</th>
-<th rowspan="3" style="width:122mm; text-align:center; font-weight:bold; font-size:x-large; border:1px solid #000;">MANUAL ADMINISTRATIVO</th>
-<th style="width:28mm; text-align:right; font-size:small; border:1px solid #000;">SEÇÃO:</th>
-<th style="width:21mm; text-align:center; font-size:small; border:1px solid #000;">14</th>
+<tr class="row1">
+<th class="col1" rowspan="3">CCB</th>
+<th class="col2" rowspan="3">MANUAL ADMINISTRATIVO</th>
+<th class="col3">SEÇÃO:</th>
+<th class="col4">14</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small; border:1px solid #000;">FL. / FLS.:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">42/46</th>
+<tr class="row2">
+<th class="col3">FL./FLS.</th>
+<th class="col4">42/46</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small; border:1px solid #000;">DATA REVISÃO:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">24/09/2019</th>
+<tr class="row3">
+<th class="col3">DATA REVISÃO:</th>
+<th class="col4">24/09/2019</th>
 </tr>
-<tr>
-<th rowspan="2" style="font-size:large; border:1px solid #000;">ASSUNTO</th>
-<th rowspan="2" style="font-size:large; border:1px solid #000;">PATRIMÔNIO – BENS MÓVEIS</th>
-<th style="text-align:right; font-size:small; border:1px solid #000;">EDIÇÃO:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">6</th>
+<tr class="row4">
+<th class="col1" rowspan="2">ASSUNTO</th>
+<th class="col2" rowspan="2">PATRIMÔNIO – BENS MÓVEIS</th>
+<th class="col3">EDIÇÃO:</th>
+<th class="col4">6</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small; border:1px solid #000;">REVISÃO:</th>
-<th style="text-align:center; font-size:small; border:1px solid #000;">1</th>
+<tr class="row5">
+<th class="col3">REVISÃO:</th>
+<th class="col4">1</th>
 </tr>
 </table>
 </section>
 <section class="conteudo">
-<h3>FORMULÁRIO 14.7: MOVIMENTAÇÃO INTERNA DE BEM</h3>
-<div class="formulario">
+<h1>FORMULÁRIO 14.7: MOVIMENTAÇÃO INTERNA DE BEM</h1>
+<div class="conteudo">
 <table>
-<tr style="height:8mm;">
-<td class="titulo-ccb" style="width:70%;">CONGREGAÇÃO CRISTÃ NO BRASIL</td>
-<td style="width:30%; font-weight:bold; font-size:10pt; padding-left:2mm;">FORMULÁRIO 14.7</td>
+<tr style="height:10mm;">
+<td class="titulo-ccb" colspan="2" style="width:70%;">CONGREGAÇÃO CRISTÃ NO BRASIL</td>
+<td colspan="2" style="width:30%; padding-left:3mm;">FORMULÁRIO 14.7</td>
 </tr>
-<tr style="height:8mm;">
-<td class="titulo-form">MOVIMENTAÇÃO INTERNA DE BEM</td>
-<td style="font-weight:bold; font-size:10pt; padding-left:2mm;">Data Emissão: <textarea id="data_emissao" rows="1"></textarea></td>
+<tr style="height:10mm;">
+<td class="titulo-form" colspan="2">MOVIMENTAÇÃO INTERNA DE BEM</td>
+<td colspan="2" style="padding-left:3mm; font-size:x-small;">Data Emissão<br><textarea id="data_emissao" rows="1"></textarea></td>
 </tr>
 </table>
 <table>
 <tr>
-<td colspan="3" style="font-size:9pt; padding:3mm 5mm; line-height:1.5; border-bottom:none;">
-Este formulário deve ser preenchido sempre que um bem for retirado de um local e levado para manutenção,
+<td class="texto" colspan="2">
+Este formulário deve ser preenchido sempre que um bem for retirado de um local e levado para manutenção,<br>
 troca ou empréstimo para outro local dentro da administração.
 </td>
 </tr>
 </table>
 <table>
-<tr>
-<td colspan="3" class="hdr"><span style="margin-right:15mm;">A</span>LOCALIDADE EMISSORA</td>
-</tr>
-<tr class="lbl">
-<td colspan="2" style="width:55%;">Administração / Setor</td>
-<td style="width:45%;">Dependência onde o bem está alocado</td>
-</tr>
-<tr class="val">
-<td colspan="2" style="height:12mm;"><textarea id="administracao_setor" rows="2"></textarea></td>
-<td><textarea id="dependencia" rows="2"></textarea></td>
+<tr style="height:5mm;">
+<td style="width:5%; text-align:center;">A</td>
+<td class="hdr" style="width:95%;">LOCALIDADE EMISSORA</td>
 </tr>
 </table>
 <table>
-<tr>
-<td colspan="3" class="hdr"><span style="margin-right:15mm;">B</span>MOTIVO DA RETIRADA E LOCAL DE DESTINO</td>
+<tr style="height:5mm;">
+<td class="lbl" style="width:30%;">Administração / Setor</td>
+<td class="lbl" style="width:70%;">Dependência onde o bem está alocado</td>
 </tr>
-<tr>
-<td colspan="3" style="padding:3mm 5mm; border-bottom:none;">
-<span style="margin-right:15mm;">( &nbsp;&nbsp; ) Empréstimo</span>
-<span style="margin-right:15mm;">( &nbsp;&nbsp; ) Manutenção</span>
-<span style="margin-right:15mm;">( &nbsp;&nbsp; ) Troca</span>
-<span>( &nbsp;&nbsp; ) Descrever: <textarea id="descrever_motivo" rows="1" style="width:40mm; display:inline; border-bottom:1px solid #000;"></textarea></span>
+<tr style="height:12mm;">
+<td><textarea id="administracao_setor" rows="3"></textarea></td>
+<td><textarea id="dependencia" rows="3"></textarea></td>
+</tr>
+</table>
+<table>
+<tr style="height:5mm;">
+<td style="width:5%; text-align:center;">B</td>
+<td class="hdr" colspan="3" style="width:95%;">MOTIVO DA RETIRADA E LOCAL DE DESTINO</td>
+</tr>
+</table>
+<table>
+<tr style="height:7mm;">
+<td colspan="3" style="background:#ccc; font-size:x-small; padding-left:10mm;">
+<label><input type="checkbox" id="emprestimo">Empréstimo</label>
+<label style="margin-left:15mm;"><input type="checkbox" id="manutencao">Manutenção</label>
+<label style="margin-left:15mm;"><input type="checkbox" id="troca">Troca</label>
+<label style="margin-left:15mm;"><input type="checkbox" id="descrever">Descrever</label>
+<textarea id="descricao_descrever" rows="1" style="display:inline; width:30%;"></textarea>
 </td>
 </tr>
-<tr class="lbl">
-<td style="width:18%;">Código do bem</td>
-<td style="width:55%;">Descrição do bem</td>
-<td style="width:27%;">Destino</td>
-</tr>
-<tr class="grid-row"><td><textarea id="cod1" rows="1"></textarea></td><td><textarea id="desc1" rows="1"></textarea></td><td><textarea id="dest1" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="cod2" rows="1"></textarea></td><td><textarea id="desc2" rows="1"></textarea></td><td><textarea id="dest2" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="cod3" rows="1"></textarea></td><td><textarea id="desc3" rows="1"></textarea></td><td><textarea id="dest3" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="cod4" rows="1"></textarea></td><td><textarea id="desc4" rows="1"></textarea></td><td><textarea id="dest4" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="cod5" rows="1"></textarea></td><td><textarea id="desc5" rows="1"></textarea></td><td><textarea id="dest5" rows="1"></textarea></td></tr>
 </table>
 <table>
-<tr class="lbl">
-<td style="width:55%;">Nome</td>
-<td style="width:25%;">Identificação</td>
-<td style="width:20%;">Número</td>
+<tr style="height:5mm;">
+<td class="lbl" style="width:20%;">Código do bem</td>
+<td class="lbl" style="width:55%;">Descrição do bem</td>
+<td class="lbl" style="width:25%;">Destino</td>
 </tr>
-<tr>
-<td style="height:12mm;"><textarea id="nome" rows="2"></textarea></td>
-<td><textarea id="identificacao" rows="2"></textarea></td>
-<td><textarea id="numero" rows="2"></textarea></td>
+<tr style="height:12mm;"><td><textarea rows="3"></textarea></td><td><textarea rows="3"></textarea></td><td><textarea rows="3"></textarea></td></tr>
+<tr style="height:12mm;"><td><textarea rows="3"></textarea></td><td><textarea rows="3"></textarea></td><td><textarea rows="3"></textarea></td></tr>
+<tr style="height:12mm;"><td><textarea rows="3"></textarea></td><td><textarea rows="3"></textarea></td><td><textarea rows="3"></textarea></td></tr>
+</table>
+<table>
+<tr style="height:5mm;">
+<td class="lbl" style="width:55%;">Nome</td>
+<td class="lbl" style="width:25%;">Identificação</td>
+<td class="lbl" style="width:20%;">Número</td>
 </tr>
-<tr class="lbl">
-<td>Assinatura</td>
-<td colspan="2">Data da devolução</td>
+<tr style="height:12mm;">
+<td><textarea id="nome" rows="3"></textarea></td>
+<td><textarea id="identificacao" rows="3"></textarea></td>
+<td><textarea id="numero" rows="3"></textarea></td>
 </tr>
-<tr>
-<td style="height:15mm;">&nbsp;</td>
-<td colspan="2"><textarea id="data_devolucao" rows="2"></textarea></td>
+<tr style="height:5mm;">
+<td class="lbl" colspan="2">Assinatura</td>
+<td class="lbl">Data da devolução</td>
+</tr>
+<tr style="height:15mm;">
+<td colspan="2"></td>
+<td><textarea id="data_devolucao" rows="3"></textarea></td>
 </tr>
 </table>
 </div>
@@ -143,14 +158,11 @@ troca ou empréstimo para outro local dentro da administração.
 <section class="rodape">
 <table>
 <tr>
-<td style="width:20%;">&nbsp;</td>
-<td style="width:60%;">sp.saopaulo.manualadm@congregacao.org.br</td>
-<td style="width:20%;">&nbsp;</td>
+<td>sp.saopaulo.manualadm@congregacao.org.br</td>
 </tr>
 </table>
 </section>
 </div>
 </div>
-<!-- A4-END -->
 </body>
 </html>

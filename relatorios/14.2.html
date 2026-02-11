@@ -10,187 +10,184 @@ html, body { margin: 0; padding: 0; background: #fff; }
 * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .r142-root * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', 'Helvetica', sans-serif; }
 .r142-root div.a4 { width: 210mm; height: 297mm; display: flex; flex-direction: column; }
-.r142-root section.cabecalho { width: 203mm; height: 25mm; margin: 2.5mm auto 0; }
+.r142-root section.cabecalho { display: flex; width: 203mm; height: 25mm; margin-inline: auto; overflow: hidden; margin-top: 2.5mm; }
 .r142-root section.cabecalho table { border-collapse: collapse; width: 100%; height: 100%; }
 .r142-root section.cabecalho th { border: 1px solid #000; background: #fff; font-weight: normal; }
-.r142-root section.conteudo { width: 203mm; margin: 0 auto; flex: 1; display: flex; flex-direction: column; }
-.r142-root section.conteudo h3 { font-size: 11pt; margin: 2mm 0; font-weight: bold; }
-.r142-root section.conteudo div.formulario { border: 2px solid #000; flex: 1; display: flex; flex-direction: column; }
-.r142-root table { border-collapse: collapse; width: 100%; }
-.r142-root td, .r142-root th { border: 1px solid #000; padding: 1mm 2mm; font-size: 9pt; vertical-align: top; }
-.r142-root textarea { width: 100%; border: none; background: transparent; resize: none; font-family: inherit; font-size: 9pt; outline: none; padding: 0; }
-.r142-root .hdr { background: #333; color: #fff; font-weight: bold; font-size: 10pt; padding: 1.5mm 3mm; }
-.r142-root .lbl { font-weight: bold; font-size: 8pt; background: #f0f0f0; }
-.r142-root .val { min-height: 7mm; }
-.r142-root .sub-hdr td { font-size: 8pt; color: #808080; font-weight: bold; }
-.r142-root .titulo-ccb { color: #808080; font-weight: bold; font-size: 12pt; padding-left: 3mm; }
-.r142-root .titulo-form { font-weight: bold; font-size: 12pt; text-align: center; }
-.r142-root .grid-row td { height: 7mm; }
-.r142-root .sig-hdr td { font-size: 8pt; font-weight: bold; text-align: center; background: #f5f5f5; }
-.r142-root .sig-row td { height: 8mm; }
-.r142-root .footer-row td { font-size: 8pt; text-align: center; border: none; padding: 2mm 0; }
-.r142-root section.rodape { width: 203mm; margin: 1mm auto 0; }
-.r142-root section.rodape table { border-collapse: collapse; width: 100%; }
-.r142-root section.rodape td { border: 1px solid #000; text-align: center; font-weight: bold; font-size: 9pt; padding: 2mm; }
+.r142-root section.cabecalho th.col1 { text-align: center; width: 27mm; }
+.r142-root section.cabecalho th.col2 { text-align: center; width: 122mm; }
+.r142-root section.cabecalho th.col3 { text-align: right; width: 28mm; font-size: small; }
+.r142-root section.cabecalho th.col4 { text-align: center; width: 21mm; font-size: small; }
+.r142-root section.cabecalho tr.row1 th.col1 { font-weight: bold; font-size: xx-large; }
+.r142-root section.cabecalho tr.row1 th.col2 { font-weight: bold; font-size: x-large; }
+.r142-root section.cabecalho tr.row4 th.col1 { font-size: large; }
+.r142-root section.cabecalho tr.row4 th.col2 { font-size: large; }
+.r142-root section.conteudo { border: 1px solid #000; margin-inline: auto; width: 203mm; height: 255mm; display: flex; flex-direction: column; }
+.r142-root section.conteudo h1 { font-size: medium; width: 95%; margin-inline: auto; margin-block: 1.5mm; }
+.r142-root section.conteudo div.conteudo { margin-inline: auto; width: 95%; height: 97.5%; display: flex; margin-bottom: 2.5%; flex-direction: column; border: 2px solid #000; }
+.r142-root section.conteudo div.conteudo table { border-collapse: collapse; width: 100%; margin: auto; margin-top: -1px; }
+.r142-root section.conteudo div.conteudo table td { border: 1px solid #000; background: #fff; font-size: small; }
+.r142-root .hdr { background: #999; color: #fff; padding-left: 3mm; }
+.r142-root .lbl { background: #ccc; padding-left: 3mm; font-size: x-small; }
+.r142-root .titulo-ccb { color: #999; padding-left: 3mm; }
+.r142-root .titulo-form { text-align: center; }
+.r142-root .origem { background: #bfbfbf; padding-left: 3mm; font-size: x-small; }
+.r142-root .sig-hdr { background: #ccc; text-align: center; font-size: x-small; }
+.r142-root section.rodape { margin-inline: auto; width: 203mm; height: 10mm; display: flex; flex-direction: column; margin-top: 1.5mm; }
+.r142-root section.rodape table { border-collapse: collapse; width: 100%; height: 99%; margin: auto; }
+.r142-root section.rodape table td { border: 1px solid #000; background: #fff; font-weight: bold; font-size: small; }
+.r142-root section.rodape td.col1 { width: 33%; text-align: center; }
+.r142-root section.rodape td.col2 { width: 34%; text-align: center; }
+.r142-root section.rodape td.col3 { width: 33%; text-align: center; }
+.r142-root textarea { width: 98%; display: block; margin: 0 auto; padding: 2px 4px; border: none; background: transparent; box-sizing: border-box; outline: none; font-size: 9pt; line-height: 1.3; font-family: inherit; font-weight: normal; resize: none; text-align: center; }
+.r142-root input[type="checkbox"] { width: 14px; height: 14px; margin-right: 5px; cursor: pointer; border: 2px solid #000; background: #fff; accent-color: #000; }
 </style>
 </head>
 <body>
-<!-- A4-START -->
 <div class="r142-root">
 <div class="a4">
 <section class="cabecalho">
 <table>
-<tr>
-<th rowspan="3" style="width:27mm; text-align:center; font-weight:bold; font-size:xx-large;">CCB</th>
-<th rowspan="3" style="width:122mm; text-align:center; font-weight:bold; font-size:x-large;">MANUAL ADMINISTRATIVO</th>
-<th style="width:28mm; text-align:right; font-size:small;">SEÇÃO:</th>
-<th style="width:21mm; text-align:center; font-size:small;">14</th>
+<tr class="row1">
+<th class="col1" rowspan="3">CCB</th>
+<th class="col2" rowspan="3">MANUAL ADMINISTRATIVO</th>
+<th class="col3">SEÇÃO:</th>
+<th class="col4">14</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small;">FL. / FLS.:</th>
-<th style="text-align:center; font-size:small;">37/46</th>
+<tr class="row2">
+<th class="col3">FL./FLS.</th>
+<th class="col4">37/46</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small;">DATA REVISÃO:</th>
-<th style="text-align:center; font-size:small;">24/09/2019</th>
+<tr class="row3">
+<th class="col3">DATA REVISÃO:</th>
+<th class="col4">24/09/2019</th>
 </tr>
-<tr>
-<th rowspan="2" style="font-size:large;">ASSUNTO</th>
-<th rowspan="2" style="font-size:large;">PATRIMÔNIO – BENS MÓVEIS</th>
-<th style="text-align:right; font-size:small;">EDIÇÃO:</th>
-<th style="text-align:center; font-size:small;">6</th>
+<tr class="row4">
+<th class="col1" rowspan="2">ASSUNTO</th>
+<th class="col2" rowspan="2">PATRIMÔNIO – BENS MÓVEIS</th>
+<th class="col3">EDIÇÃO:</th>
+<th class="col4">6</th>
 </tr>
-<tr>
-<th style="text-align:right; font-size:small;">REVISÃO:</th>
-<th style="text-align:center; font-size:small;">1</th>
+<tr class="row5">
+<th class="col3">REVISÃO:</th>
+<th class="col4">1</th>
 </tr>
 </table>
 </section>
 <section class="conteudo">
-<h3>FORMULÁRIO 14.2: OCORRÊNCIA DE ENTRADA DE BENS MÓVEIS</h3>
-<div class="formulario">
+<h1>FORMULÁRIO 14.2: OCORRÊNCIA DE ENTRADA DE BENS MÓVEIS</h1>
+<div class="conteudo">
 <table>
-<tr style="height:8mm;">
-<td colspan="4" class="titulo-ccb" style="width:70%;">CONGREGAÇÃO CRISTÃ NO BRASIL</td>
-<td colspan="2" style="width:30%; font-weight:bold; font-size:10pt; padding-left:2mm;">Formulário 14.2</td>
+<tr style="height:10mm;">
+<td class="titulo-ccb" colspan="2" style="width:70%;">CONGREGAÇÃO CRISTÃ NO BRASIL</td>
+<td colspan="2" style="width:30%; padding-left:3mm;">Formulário 14.2</td>
 </tr>
-<tr style="height:8mm;">
-<td colspan="4" class="titulo-form">OCORRÊNCIA DE ENTRADAS DE BENS MÓVEIS</td>
-<td colspan="2" style="font-weight:bold; font-size:10pt; padding-left:2mm;">Data Emissão: <textarea id="data_emissao" rows="1"></textarea></td>
+<tr style="height:10mm;">
+<td class="titulo-form" colspan="2">OCORRÊNCIA DE ENTRADAS DE BENS MÓVEIS</td>
+<td colspan="2" style="padding-left:3mm; font-size:x-small;">Data Emissão:<br><textarea id="data_emissao" rows="1"></textarea></td>
 </tr>
 </table>
 <table>
-<tr>
-<td colspan="6" class="hdr"><span style="margin-right:15mm;">A</span>LOCALIDADE RECEBEDORA</td>
+<tr style="height:5mm;">
+<td style="width:5%; text-align:center;">A</td>
+<td class="hdr" colspan="3" style="width:95%;">LOCALIDADE RECEBEDORA</td>
 </tr>
-<tr class="lbl">
-<td style="width:23%;">Administração</td>
-<td style="width:23%;">Cidade</td>
-<td style="width:18%;">Setor</td>
-<td colspan="3" style="width:36%;">&nbsp;</td>
+</table>
+<table>
+<tr style="height:5mm;">
+<td class="lbl" style="width:33%;">Administração</td>
+<td class="lbl" style="width:33%;">Cidade</td>
+<td class="lbl" style="width:34%;">Setor</td>
 </tr>
-<tr class="val">
+<tr style="height:10mm;">
 <td><textarea id="administracao" rows="2"></textarea></td>
 <td><textarea id="cidade" rows="2"></textarea></td>
 <td><textarea id="setor" rows="2"></textarea></td>
-<td colspan="3">&nbsp;</td>
 </tr>
-<tr class="lbl">
-<td>CNPJ da Administração</td>
-<td>&nbsp;</td>
-<td>Nº do Relatório</td>
-<td colspan="3">Casa de Oração</td>
+<tr style="height:5mm;">
+<td class="lbl">CNPJ da Administração</td>
+<td class="lbl">Nº do Relatório</td>
+<td class="lbl">Casa de Oração</td>
 </tr>
-<tr class="val">
+<tr style="height:10mm;">
 <td><textarea id="cnpj" rows="2"></textarea></td>
-<td>&nbsp;</td>
 <td><textarea id="num_relatorio" rows="2"></textarea></td>
-<td colspan="3"><textarea id="casa_oracao" rows="2"></textarea></td>
+<td><textarea id="casa_oracao" rows="2"></textarea></td>
 </tr>
 </table>
 <table>
-<tr>
-<td colspan="6" class="hdr"><span style="margin-right:15mm;">B</span>MOTIVO DA OCORRÊNCIA</td>
-</tr>
-<tr>
-<td class="lbl" style="width:12%;">Entradas</td>
-<td style="width:3%; text-align:center;"><input type="checkbox" id="transferencia_recebida"></td>
-<td style="width:20%;">Transferência recebida</td>
-<td style="width:3%; text-align:center;"><input type="checkbox" id="doacao"></td>
-<td style="width:12%;">Doação</td>
-<td style="width:50%;">&nbsp;</td>
-</tr>
-<tr>
-<td colspan="6" style="font-weight:bold; font-size:9pt;">Descrição do Motivo:</td>
-</tr>
-<tr>
-<td colspan="6" style="height:18mm;"><textarea id="descricao_motivo" rows="4"></textarea></td>
-</tr>
-<tr>
-<td colspan="6" style="font-weight:bold; font-size:8pt;">Localidade de origem quando o motivo for Transferência recebida</td>
-</tr>
-<tr class="lbl">
-<td colspan="1" style="width:20%;">Administração</td>
-<td colspan="2" style="width:23%;">Cidade / Setor</td>
-<td colspan="1" style="width:18%;">Nº do Relatório</td>
-<td colspan="2" style="width:39%;">Casa de Oração</td>
-</tr>
-<tr class="val">
-<td colspan="1"><textarea id="origem_administracao" rows="1"></textarea></td>
-<td colspan="2"><textarea id="origem_cidade_setor" rows="1"></textarea></td>
-<td colspan="1"><textarea id="origem_num_relatorio" rows="1"></textarea></td>
-<td colspan="2"><textarea id="origem_casa_oracao" rows="1"></textarea></td>
+<tr style="height:5mm;">
+<td style="width:5%; text-align:center;">B</td>
+<td class="hdr" colspan="3" style="width:95%;">MOTIVO DA OCORRÊNCIA</td>
 </tr>
 </table>
 <table>
-<tr>
-<td colspan="5" class="hdr"><span style="margin-right:15mm;"><i><b>C</b></i></span>DADOS DO BEM</td>
+<tr style="height:5mm;">
+<td class="lbl" style="width:15%;">Entradas</td>
+<td style="width:42%; background:#ccc; font-size:x-small;"><input type="checkbox" id="transf_recebida">Transferência recebida</td>
+<td style="width:43%; background:#ccc; font-size:x-small;"><input type="checkbox" id="doacao">Doação</td>
 </tr>
-<tr class="lbl">
-<td style="width:10%;">Tipo de bem</td>
-<td style="width:10%;">Quantidade</td>
-<td style="width:42%;">Descrição</td>
-<td style="width:15%;">Valor de aquisição</td>
-<td style="width:12%;">Local do bem</td>
+<tr style="height:5mm;">
+<td class="lbl">Descrição do Motivo:</td>
+<td colspan="2"><textarea id="descricao_motivo" rows="1"></textarea></td>
 </tr>
-<tr class="grid-row"><td><textarea id="tipo1" rows="1"></textarea></td><td><textarea id="qtd1" rows="1"></textarea></td><td><textarea id="desc1" rows="1"></textarea></td><td><textarea id="valor1" rows="1"></textarea></td><td><textarea id="local1" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo2" rows="1"></textarea></td><td><textarea id="qtd2" rows="1"></textarea></td><td><textarea id="desc2" rows="1"></textarea></td><td><textarea id="valor2" rows="1"></textarea></td><td><textarea id="local2" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo3" rows="1"></textarea></td><td><textarea id="qtd3" rows="1"></textarea></td><td><textarea id="desc3" rows="1"></textarea></td><td><textarea id="valor3" rows="1"></textarea></td><td><textarea id="local3" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo4" rows="1"></textarea></td><td><textarea id="qtd4" rows="1"></textarea></td><td><textarea id="desc4" rows="1"></textarea></td><td><textarea id="valor4" rows="1"></textarea></td><td><textarea id="local4" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo5" rows="1"></textarea></td><td><textarea id="qtd5" rows="1"></textarea></td><td><textarea id="desc5" rows="1"></textarea></td><td><textarea id="valor5" rows="1"></textarea></td><td><textarea id="local5" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo6" rows="1"></textarea></td><td><textarea id="qtd6" rows="1"></textarea></td><td><textarea id="desc6" rows="1"></textarea></td><td><textarea id="valor6" rows="1"></textarea></td><td><textarea id="local6" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo7" rows="1"></textarea></td><td><textarea id="qtd7" rows="1"></textarea></td><td><textarea id="desc7" rows="1"></textarea></td><td><textarea id="valor7" rows="1"></textarea></td><td><textarea id="local7" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo8" rows="1"></textarea></td><td><textarea id="qtd8" rows="1"></textarea></td><td><textarea id="desc8" rows="1"></textarea></td><td><textarea id="valor8" rows="1"></textarea></td><td><textarea id="local8" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo9" rows="1"></textarea></td><td><textarea id="qtd9" rows="1"></textarea></td><td><textarea id="desc9" rows="1"></textarea></td><td><textarea id="valor9" rows="1"></textarea></td><td><textarea id="local9" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo10" rows="1"></textarea></td><td><textarea id="qtd10" rows="1"></textarea></td><td><textarea id="desc10" rows="1"></textarea></td><td><textarea id="valor10" rows="1"></textarea></td><td><textarea id="local10" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo11" rows="1"></textarea></td><td><textarea id="qtd11" rows="1"></textarea></td><td><textarea id="desc11" rows="1"></textarea></td><td><textarea id="valor11" rows="1"></textarea></td><td><textarea id="local11" rows="1"></textarea></td></tr>
-<tr class="grid-row"><td><textarea id="tipo12" rows="1"></textarea></td><td><textarea id="qtd12" rows="1"></textarea></td><td><textarea id="desc12" rows="1"></textarea></td><td><textarea id="valor12" rows="1"></textarea></td><td><textarea id="local12" rows="1"></textarea></td></tr>
-</table>
-<table>
-<tr class="sig-hdr">
-<td style="width:5%;">&nbsp;</td>
-<td style="width:27%;">Colaborador Administrativo</td>
-<td style="width:27%;">Ministério</td>
-<td style="width:41%;">Administração /Assessor</td>
-</tr>
-<tr class="sig-row">
-<td style="font-weight:bold; font-size:8pt;">Nome</td>
-<td><textarea id="nome_colaborador" rows="1"></textarea></td>
-<td><textarea id="nome_ministerio" rows="1"></textarea></td>
-<td><textarea id="nome_admin" rows="1"></textarea></td>
-</tr>
-<tr class="sig-row">
-<td style="font-weight:bold; font-size:8pt;">Assinatura</td>
-<td><textarea id="assinatura_colaborador" rows="1"></textarea></td>
-<td><textarea id="assinatura_ministerio" rows="1"></textarea></td>
-<td><textarea id="assinatura_admin" rows="1"></textarea></td>
+<tr style="height:10mm;">
+<td colspan="3"><textarea id="descricao_motivo_continuacao" rows="2"></textarea></td>
 </tr>
 </table>
 <table>
-<tr class="footer-row">
-<td style="width:33%;">1 via - Contabilidade</td>
-<td style="width:34%;">1 via - Emissor</td>
-<td style="width:33%;">1 via - Destinatário</td>
+<tr style="height:5mm;">
+<td class="origem" colspan="4">Localidade de origem quando o motivo for Transferência recebida</td>
+</tr>
+<tr style="height:5mm;">
+<td class="lbl" style="width:25%;">Administração</td>
+<td class="lbl" style="width:25%;">Cidade / Setor</td>
+<td class="lbl" style="width:25%;">Nº do Relatório</td>
+<td class="lbl" style="width:25%;">Casa de Oração</td>
+</tr>
+<tr style="height:10mm;">
+<td><textarea id="origem_adm" rows="2"></textarea></td>
+<td><textarea id="origem_cidade" rows="2"></textarea></td>
+<td><textarea id="origem_relatorio" rows="2"></textarea></td>
+<td><textarea id="origem_casa" rows="2"></textarea></td>
+</tr>
+</table>
+<table>
+<tr style="height:5mm;">
+<td style="width:5%; text-align:center;">C</td>
+<td class="hdr" colspan="4" style="width:95%;">DADOS DO BEM</td>
+</tr>
+</table>
+<table>
+<tr style="height:5mm;">
+<td class="lbl" style="width:15%;">Tipo de bem</td>
+<td class="lbl" style="width:12%;">Quantidade</td>
+<td class="lbl" style="width:43%;">Descrição</td>
+<td class="lbl" style="width:15%;">Valor de aquisição</td>
+<td class="lbl" style="width:15%;">Local do bem</td>
+</tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td></tr>
+<tr style="height:10mm;"><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td><td><textarea rows="2"></textarea></td></tr>
+</table>
+<table>
+<tr style="height:5mm;">
+<td style="width:10%;"></td>
+<td class="sig-hdr" style="width:30%;">Colaborador Administrativo</td>
+<td class="sig-hdr" style="width:30%;">Ministério</td>
+<td class="sig-hdr" style="width:30%;">Administração /Assessor</td>
+</tr>
+<tr style="height:10mm;">
+<td class="lbl">Nome</td>
+<td><textarea rows="2"></textarea></td>
+<td><textarea rows="2"></textarea></td>
+<td><textarea rows="2"></textarea></td>
+</tr>
+<tr style="height:15mm;">
+<td class="lbl">Assinatura</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </table>
 </div>
@@ -198,14 +195,16 @@ html, body { margin: 0; padding: 0; background: #fff; }
 <section class="rodape">
 <table>
 <tr>
-<td style="width:20%; border:none;">&nbsp;</td>
-<td style="width:60%; border:none;">sp.saopaulo.manualadm@congregacao.org.br</td>
-<td style="width:20%; border:none;">&nbsp;</td>
+<td class="col1">1 via - Contabilidade</td>
+<td class="col2">1 via - Emissor</td>
+<td class="col3">1 via - Destinatário</td>
 </tr>
 </table>
 </section>
+<section style="width:203mm; margin-inline:auto; text-align:center; margin-top:2mm;">
+<span style="font-weight:bold; font-size:small;">sp.saopaulo.manualadm@congregacao.org.br</span>
+</section>
 </div>
 </div>
-<!-- A4-END -->
 </body>
 </html>
