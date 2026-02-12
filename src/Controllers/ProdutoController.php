@@ -16,12 +16,61 @@ class ProdutoController extends BaseController
 
     public function index(): void
     {
-        $this->renderizar('produtos/produtos_listar');
+        $comumId = (int) ($_GET['comum_id'] ?? 0);
+        if ($comumId <= 0) {
+            $this->redirecionar('/comuns?erro=ID do comum é obrigatório');
+            return;
+        }
+
+        // Parâmetros de paginação e filtros
+        $pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+        $limite = 10;
+
+        // Filtros
+        $filtroComplemento = trim($_GET['filtro_complemento'] ?? '');
+        $pesquisaId = trim($_GET['pesquisa_id'] ?? '');
+        $filtroTipoBen = trim($_GET['filtro_tipo_ben'] ?? '');
+        $filtroBem = trim($_GET['filtro_bem'] ?? '');
+        $filtroDependencia = trim($_GET['filtro_dependencia'] ?? '');
+        $filtroStatus = trim($_GET['filtro_STATUS'] ?? '');
+
+        // TODO: Implementar busca real de produtos com filtros e paginação
+        $produtos = [];
+        $totalRegistros = 0;
+        $totalPaginas = 1;
+
+        // TODO: Implementar busca de tipos de bens, códigos de bens e dependências
+        $tiposBens = [];
+        $bemCodigos = [];
+        $dependencias = [];
+
+        $this->renderizar('produtos/produtos_listar', [
+            'comum_id' => $comumId,
+            'produtos' => $produtos,
+            'pagina' => $pagina,
+            'total_paginas' => $totalPaginas,
+            'total_registros' => $totalRegistros,
+            'filtro_complemento' => $filtroComplemento,
+            'pesquisa_id' => $pesquisaId,
+            'filtro_tipo_ben' => $filtroTipoBen,
+            'filtro_bem' => $filtroBem,
+            'filtro_dependencia' => $filtroDependencia,
+            'filtro_STATUS' => $filtroStatus,
+            'tipos_bens' => $tiposBens,
+            'bem_codigos' => $bemCodigos,
+            'dependencias' => $dependencias
+        ]);
     }
 
     public function create(): void
     {
-        $this->renderizar('produtos/produto_criar');
+        $comumId = (int) ($_GET['comum_id'] ?? 0);
+        if ($comumId <= 0) {
+            $this->redirecionar('/comuns?erro=ID do comum é obrigatório');
+            return;
+        }
+
+        $this->renderizar('produtos/produto_criar', ['comum_id' => $comumId]);
     }
 
     public function store(): void
