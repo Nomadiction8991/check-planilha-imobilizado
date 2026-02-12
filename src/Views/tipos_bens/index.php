@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'TIPOS DE BENS';
-$backUrl = '/menu';
+$backUrl = null;
 ?>
 
 <div class="container-fluid py-3">

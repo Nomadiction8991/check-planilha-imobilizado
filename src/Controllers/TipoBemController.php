@@ -36,7 +36,6 @@ class TipoBemController extends BaseController
 
             ViewRenderer::render('tipos_bens/index', [
                 'pageTitle' => 'TIPOS DE BENS',
-                'backUrl' => '/menu',
                 'headerActions' => '',
                 'tipos' => $tipos,
                 'busca' => $busca,
@@ -55,7 +54,6 @@ class TipoBemController extends BaseController
     {
         ViewRenderer::render('tipos_bens/criar', [
             'pageTitle' => 'CADASTRAR TIPO DE BEM',
-            'backUrl' => '/tipos-bens',
             'headerActions' => ''
         ]);
     }
@@ -111,7 +109,6 @@ class TipoBemController extends BaseController
 
             ViewRenderer::render('tipos_bens/editar', [
                 'pageTitle' => 'EDITAR TIPO DE BEM',
-                'backUrl' => '/tipos-bens',
                 'headerActions' => '',
                 'tipo' => $tipo
             ]);

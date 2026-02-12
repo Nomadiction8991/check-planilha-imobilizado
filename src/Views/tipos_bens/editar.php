@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'EDITAR TIPO DE BEM';
-$backUrl = '/tipos-bens';
+$backUrl = null;
 ?>
 
 <div class="container-fluid py-3">
