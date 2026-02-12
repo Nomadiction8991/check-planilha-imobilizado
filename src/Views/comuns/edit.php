@@ -1,4 +1,5 @@
 <?php
+
 /**
  * View: Editar Comum
  * Formulário moderno para edição de comuns usando arquitetura MVC
@@ -21,8 +22,8 @@
                             <?= htmlspecialchars($_SESSION['mensagem']) ?>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                        <?php 
-                        unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']); 
+                        <?php
+                        unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
                         ?>
                     <?php endif; ?>
 
@@ -38,15 +39,14 @@
                                     <i class="bi bi-tag me-1"></i>
                                     Código <span class="text-danger">*</span>
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control text-uppercase" 
-                                    id="codigo" 
-                                    name="codigo" 
+                                <input
+                                    type="text"
+                                    class="form-control text-uppercase"
+                                    id="codigo"
+                                    name="codigo"
                                     value="<?= htmlspecialchars($comum['codigo'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     required
-                                    maxlength="50"
-                                >
+                                    maxlength="50">
                             </div>
 
                             <!-- Descrição -->
@@ -55,15 +55,14 @@
                                     <i class="bi bi-card-text me-1"></i>
                                     Descrição <span class="text-danger">*</span>
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control text-uppercase" 
-                                    id="descricao" 
-                                    name="descricao" 
+                                <input
+                                    type="text"
+                                    class="form-control text-uppercase"
+                                    id="descricao"
+                                    name="descricao"
                                     value="<?= htmlspecialchars($comum['descricao'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     required
-                                    maxlength="255"
-                                >
+                                    maxlength="255">
                             </div>
 
                             <!-- CNPJ -->
@@ -72,15 +71,14 @@
                                     <i class="bi bi-file-earmark-text me-1"></i>
                                     CNPJ
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="cnpj" 
-                                    name="cnpj" 
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="cnpj"
+                                    name="cnpj"
                                     value="<?= htmlspecialchars($comum['cnpj'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     maxlength="18"
-                                    placeholder="00.000.000/0000-00"
-                                >
+                                    placeholder="00.000.000/0000-00">
                             </div>
 
                             <!-- Administração -->
@@ -89,14 +87,13 @@
                                     <i class="bi bi-building me-1"></i>
                                     Administração
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control text-uppercase" 
-                                    id="administracao" 
-                                    name="administracao" 
+                                <input
+                                    type="text"
+                                    class="form-control text-uppercase"
+                                    id="administracao"
+                                    name="administracao"
                                     value="<?= htmlspecialchars($comum['administracao'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                    maxlength="100"
-                                >
+                                    maxlength="100">
                             </div>
 
                             <!-- Cidade -->
@@ -105,14 +102,13 @@
                                     <i class="bi bi-geo-alt me-1"></i>
                                     Cidade
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control text-uppercase" 
-                                    id="cidade" 
-                                    name="cidade" 
+                                <input
+                                    type="text"
+                                    class="form-control text-uppercase"
+                                    id="cidade"
+                                    name="cidade"
                                     value="<?= htmlspecialchars($comum['cidade'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                    maxlength="100"
-                                >
+                                    maxlength="100">
                             </div>
 
                             <!-- Estado -->
@@ -125,9 +121,33 @@
                                     <option value="">Selecione...</option>
                                     <?php
                                     $estados = [
-                                        'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
-                                        'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
-                                        'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+                                        'AC',
+                                        'AL',
+                                        'AP',
+                                        'AM',
+                                        'BA',
+                                        'CE',
+                                        'DF',
+                                        'ES',
+                                        'GO',
+                                        'MA',
+                                        'MT',
+                                        'MS',
+                                        'MG',
+                                        'PA',
+                                        'PB',
+                                        'PR',
+                                        'PE',
+                                        'PI',
+                                        'RJ',
+                                        'RN',
+                                        'RS',
+                                        'RO',
+                                        'RR',
+                                        'SC',
+                                        'SP',
+                                        'SE',
+                                        'TO'
                                     ];
                                     $estadoAtual = $comum['estado'] ?? '';
                                     foreach ($estados as $uf):
@@ -145,14 +165,13 @@
                                     <i class="bi bi-house me-1"></i>
                                     Endereço
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control text-uppercase" 
-                                    id="endereco" 
-                                    name="endereco" 
+                                <input
+                                    type="text"
+                                    class="form-control text-uppercase"
+                                    id="endereco"
+                                    name="endereco"
                                     value="<?= htmlspecialchars($comum['endereco'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                    maxlength="255"
-                                >
+                                    maxlength="255">
                             </div>
 
                             <!-- Telefone -->
@@ -161,15 +180,14 @@
                                     <i class="bi bi-telephone me-1"></i>
                                     Telefone
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="telefone" 
-                                    name="telefone" 
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="telefone"
+                                    name="telefone"
                                     value="<?= htmlspecialchars($comum['telefone'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     maxlength="20"
-                                    placeholder="(00) 00000-0000"
-                                >
+                                    placeholder="(00) 00000-0000">
                             </div>
                         </div>
 
@@ -191,73 +209,75 @@
 </div>
 
 <style>
-.text-uppercase {
-    text-transform: uppercase !important;
-}
-.form-label {
-    font-weight: 500;
-}
-.card {
-    border: none;
-}
+    .text-uppercase {
+        text-transform: uppercase !important;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .card {
+        border: none;
+    }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-uppercase para campos específicos
-    const upperFields = document.querySelectorAll('.text-uppercase');
-    upperFields.forEach(field => {
-        field.addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-uppercase para campos específicos
+        const upperFields = document.querySelectorAll('.text-uppercase');
+        upperFields.forEach(field => {
+            field.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
         });
-    });
 
-    // Máscara de CNPJ
-    const cnpjField = document.getElementById('cnpj');
-    if (cnpjField) {
-        cnpjField.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 14) {
-                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-                value = value.replace(/(\d{4})(\d)/, '$1-$2');
-                e.target.value = value;
-            }
-        });
-    }
-
-    // Máscara de telefone
-    const telefoneField = document.getElementById('telefone');
-    if (telefoneField) {
-        telefoneField.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 11) {
-                if (value.length <= 10) {
-                    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+        // Máscara de CNPJ
+        const cnpjField = document.getElementById('cnpj');
+        if (cnpjField) {
+            cnpjField.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 14) {
+                    value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                    value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
                     value = value.replace(/(\d{4})(\d)/, '$1-$2');
-                } else {
-                    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
-                    value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                    e.target.value = value;
                 }
-                e.target.value = value;
-            }
-        });
-    }
+            });
+        }
 
-    // Validação do formulário
-    const form = document.getElementById('formEditarComum');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const codigo = document.getElementById('codigo').value.trim();
-            const descricao = document.getElementById('descricao').value.trim();
+        // Máscara de telefone
+        const telefoneField = document.getElementById('telefone');
+        if (telefoneField) {
+            telefoneField.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 11) {
+                    if (value.length <= 10) {
+                        value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+                        value = value.replace(/(\d{4})(\d)/, '$1-$2');
+                    } else {
+                        value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+                        value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                    }
+                    e.target.value = value;
+                }
+            });
+        }
 
-            if (!codigo || !descricao) {
-                e.preventDefault();
-                alert('Código e Descrição são obrigatórios!');
-                return false;
-            }
-        });
-    }
-});
+        // Validação do formulário
+        const form = document.getElementById('formEditarComum');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const codigo = document.getElementById('codigo').value.trim();
+                const descricao = document.getElementById('descricao').value.trim();
+
+                if (!codigo || !descricao) {
+                    e.preventDefault();
+                    alert('Código e Descrição são obrigatórios!');
+                    return false;
+                }
+            });
+        }
+    });
 </script>

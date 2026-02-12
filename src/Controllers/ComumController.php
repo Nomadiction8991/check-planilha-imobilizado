@@ -221,7 +221,7 @@ class ComumController extends BaseController
 
         try {
             $comum = $this->comumService->buscarPorId($id);
-            
+
             if (!$comum) {
                 $this->setMensagem('Comum não encontrado.', 'danger');
                 $this->redirecionar('/comuns');
@@ -292,7 +292,7 @@ class ComumController extends BaseController
         } catch (\Throwable $e) {
             error_log('Erro ComumController::update: ' . $e->getMessage());
             $this->setMensagem('Erro ao atualizar comum: ' . $e->getMessage(), 'danger');
-            
+
             // Voltar para edição com dados preservados
             $busca = $this->post('busca', '');
             $pagina = $this->post('pagina', 1);

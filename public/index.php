@@ -26,7 +26,7 @@ if (!isset($rotas[$chaveRota])) {
 if ($classeControlador === 'App\Controllers\AuthController') {
     $controlador = new $classeControlador();
 } else {
-    
+
     global $conexao;
     $controlador = new $classeControlador($conexao);
 }
