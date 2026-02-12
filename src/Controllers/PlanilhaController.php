@@ -26,7 +26,9 @@ class PlanilhaController extends BaseController
             return;
         }
 
-        $this->redirecionar('/planilhas/importar?success=1');
+        // TODO: CRÍTICO - Implementar importação de planilhas
+        http_response_code(501);
+        die('Funcionalidade de importação em implementação. Controller pendente de migração.');
     }
 
     public function visualizar(): void

@@ -31,7 +31,9 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->redirecionar('/produtos?success=1');
+        // TODO: Implementar lógica de criação
+        http_response_code(501);
+        die('Funcionalidade em implementação. Controller pendente de migração.');
     }
 
     public function edit(): void
@@ -52,7 +54,9 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->redirecionar('/produtos?success=1');
+        // TODO: Implementar lógica de atualização
+        http_response_code(501);
+        die('Funcionalidade em implementação. Controller pendente de migração.');
     }
 
     public function delete(): void
@@ -62,7 +66,8 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->json(['sucesso' => true, 'mensagem' => 'Produto deletado']);
+        // TODO: Implementar lógica de exclusão
+        $this->jsonErro('Funcionalidade em implementação. Controller pendente de migração.', 501);
     }
 
     public function observacao(): void
@@ -72,7 +77,8 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->json(['sucesso' => true, 'mensagem' => 'Observação atualizada']);
+        // TODO: Implementar lógica de observação
+        $this->jsonErro('Funcionalidade em implementação. Controller pendente de migração.', 501);
     }
 
     public function check(): void
@@ -82,7 +88,9 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->redirecionar('/produtos?success=1');
+        // TODO: Implementar lógica de check
+        http_response_code(501);
+        die('Funcionalidade em implementação. Controller pendente de migração.');
     }
 
     public function etiqueta(): void
@@ -92,7 +100,9 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->redirecionar('/produtos?success=1');
+        // TODO: Implementar lógica de etiqueta
+        http_response_code(501);
+        die('Funcionalidade em implementação. Controller pendente de migração.');
     }
 
     public function assinar(): void
@@ -102,6 +112,7 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->json(['sucesso' => true, 'mensagem' => 'Produtos assinados']);
+        // TODO: Implementar lógica de assinatura
+        $this->jsonErro('Funcionalidade em implementação. Controller pendente de migração.', 501);
     }
 }

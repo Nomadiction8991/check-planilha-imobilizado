@@ -1,6 +1,6 @@
 <?php
 
-define('SKIP_AUTH', true); 
+// define('SKIP_AUTH', true); // ⚠️ REMOVIDO - Autenticação agora está ATIVA
 require __DIR__ . '/../config/bootstrap.php';
 
 require __DIR__ . '/../vendor/autoload.php';

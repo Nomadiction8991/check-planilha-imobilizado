@@ -136,7 +136,8 @@ class ComumController extends BaseController
 
     private function gerarHeaderActions(): string
     {
-        if (!isLoggedIn()) {
+        // Verificar se usuário está logado (função global do auth_helper.php)
+        if (!function_exists('isLoggedIn') || !\isLoggedIn()) {
             return '';
         }
 
@@ -214,11 +215,36 @@ class ComumController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->redirecionar('/comuns?erro=ID inválido');
+            $this->redirecionar('/comuns?erro=' . urlencode('ID inválido'));
             return;
         }
 
-        $this->renderizar('comuns/comum_editar', ['id' => $id]);
+        try {
+            $comum = $this->comumService->buscarPorId($id);
+            
+            if (!$comum) {
+                $this->setMensagem('Comum não encontrado.', 'danger');
+                $this->redirecionar('/comuns');
+                return;
+            }
+
+            // Preservar parâmetros de busca/paginação
+            $busca = $this->query('busca', '');
+            $pagina = $this->query('pagina', 1);
+
+            ViewRenderer::render('comuns/edit', [
+                'pageTitle' => 'EDITAR COMUM',
+                'backUrl' => '/comuns?busca=' . urlencode($busca) . '&pagina=' . $pagina,
+                'headerActions' => '',
+                'comum' => $comum,
+                'busca' => $busca,
+                'pagina' => $pagina
+            ]);
+        } catch (\Throwable $e) {
+            error_log('Erro ComumController::edit: ' . $e->getMessage());
+            $this->setMensagem('Erro ao carregar comum: ' . $e->getMessage(), 'danger');
+            $this->redirecionar('/comuns');
+        }
     }
 
     public function update(): void
@@ -228,6 +254,49 @@ class ComumController extends BaseController
             return;
         }
 
-        $this->redirecionar('/comuns?success=1');
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->setMensagem('ID inválido.', 'danger');
+            $this->redirecionar('/comuns');
+            return;
+        }
+
+        try {
+            $dados = [
+                'codigo' => trim($_POST['codigo'] ?? ''),
+                'descricao' => trim($_POST['descricao'] ?? ''),
+                'cnpj' => trim($_POST['cnpj'] ?? ''),
+                'administracao' => trim($_POST['administracao'] ?? ''),
+                'cidade' => trim($_POST['cidade'] ?? ''),
+                'estado' => trim($_POST['estado'] ?? ''),
+                'endereco' => trim($_POST['endereco'] ?? ''),
+                'telefone' => trim($_POST['telefone'] ?? '')
+            ];
+
+            // Validações básicas
+            if (empty($dados['codigo'])) {
+                throw new \Exception('Código é obrigatório.');
+            }
+            if (empty($dados['descricao'])) {
+                throw new \Exception('Descrição é obrigatória.');
+            }
+
+            $this->comumService->atualizar($id, $dados);
+
+            // Preservar parâmetros de busca/paginação
+            $busca = $this->post('busca', '');
+            $pagina = $this->post('pagina', 1);
+
+            $this->setMensagem('Comum atualizado com sucesso!', 'success');
+            $this->redirecionar('/comuns?busca=' . urlencode($busca) . '&pagina=' . $pagina);
+        } catch (\Throwable $e) {
+            error_log('Erro ComumController::update: ' . $e->getMessage());
+            $this->setMensagem('Erro ao atualizar comum: ' . $e->getMessage(), 'danger');
+            
+            // Voltar para edição com dados preservados
+            $busca = $this->post('busca', '');
+            $pagina = $this->post('pagina', 1);
+            $this->redirecionar('/comuns/editar?id=' . $id . '&busca=' . urlencode($busca) . '&pagina=' . $pagina);
+        }
     }
 }

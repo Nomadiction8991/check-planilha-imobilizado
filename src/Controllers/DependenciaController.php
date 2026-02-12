@@ -31,7 +31,9 @@ class DependenciaController extends BaseController
             return;
         }
 
-        $this->redirecionar('/dependencias?success=1');
+        // TODO: Implementar lógica de criação
+        http_response_code(501);
+        die('Funcionalidade em implementação. Controller pendente de migração.');
     }
 
     public function edit(): void
@@ -52,7 +54,9 @@ class DependenciaController extends BaseController
             return;
         }
 
-        $this->redirecionar('/dependencias?success=1');
+        // TODO: Implementar lógica de atualização
+        http_response_code(501);
+        die('Funcionalidade em implementação. Controller pendente de migração.');
     }
 
     public function delete(): void
@@ -62,6 +66,7 @@ class DependenciaController extends BaseController
             return;
         }
 
-        $this->json(['sucesso' => true, 'mensagem' => 'Dependência deletada']);
+        // TODO: Implementar lógica de exclusão
+        $this->jsonErro('Funcionalidade em implementação. Controller pendente de migração.', 501);
     }
 }
