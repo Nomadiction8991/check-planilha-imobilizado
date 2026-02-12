@@ -23,7 +23,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CheckPlanilha">
-    <link rel="apple-touch-icon" href="<?php echo ($ambiente_manifest === 'dev') ? '/dev/logo.png' : '/logo.png'; ?>">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
 
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
