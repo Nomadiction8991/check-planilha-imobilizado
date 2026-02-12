@@ -164,3 +164,79 @@ body {
 .voltar {
     transition: all 0.2s ease-in-out;
 }
+
+/* ----- Clean menu styles for the new Menu view (left-aligned, neutral) ----- */
+.menu-list {
+    max-width: 100%;
+    margin: 16px 12px;
+}
+
+.menu-root {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.menu-item { border-bottom: 1px solid rgba(0,0,0,0.06); }
+
+.menu-item a,
+.menu-item .menu-toggle {
+    display: block;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: #222;
+    font-weight: 600;
+    text-align: left;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.menu-item a:hover,
+.menu-item .menu-toggle:hover { background: rgba(0,0,0,0.03); }
+
+.has-sub .menu-toggle::after {
+    content: '\25BC';
+    float: right;
+    font-size: 0.7rem;
+    opacity: 0.6;
+    transform: translateY(2px);
+}
+
+.menu-item.open .menu-toggle::after { transform: rotate(180deg) translateY(-2px); }
+
+.submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 6px 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 220ms ease;
+}
+
+.menu-item.open .submenu { max-height: 480px; }
+
+.submenu li a {
+    display: block;
+    padding: 10px 30px;
+    text-decoration: none;
+    color: #444;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.submenu li a:hover { background: rgba(0,0,0,0.02); }
+
+@media (max-width: 420px) {
+    .menu-list { margin: 10px 8px; }
+    .menu-item a, .menu-item .menu-toggle { padding: 12px 14px; }
+    .submenu li a { padding: 8px 26px; }
+}
+
+/* hide legacy .opcao entries */
+.opcao { display: none; }
