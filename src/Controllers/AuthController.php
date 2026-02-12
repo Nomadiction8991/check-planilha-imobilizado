@@ -23,7 +23,7 @@ class AuthController
     public function login()
     {
         if ($this->authService->isAuthenticated()) {
-            header('Location: /comuns');
+            header('Location: /planilhas/visualizar');
             exit;
         }
 
@@ -49,7 +49,7 @@ class AuthController
 
             $this->authService->authenticate($email, $senha);
 
-            header('Location: /comuns');
+            header('Location: /planilhas/visualizar');
             exit;
         } catch (\Exception $e) {
             $erro = $e->getMessage();

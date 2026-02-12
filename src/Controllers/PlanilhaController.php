@@ -33,9 +33,12 @@ class PlanilhaController extends BaseController
 
     public function visualizar(): void
     {
-        $comumId = (int) ($_GET['comum_id'] ?? 0);
+        // Usa comum_id da sessão (já definida no layout app.php)
+        $comumId = (int) ($_SESSION['comum_id'] ?? 0);
+        
         if ($comumId <= 0) {
-            $this->redirecionar('/comuns?erro=ID inválido');
+            // Se não há comum selecionada, redireciona para comuns
+            $this->redirecionar('/comuns?erro=Selecione uma comum');
             return;
         }
 
