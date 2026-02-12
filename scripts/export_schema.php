@@ -2,7 +2,8 @@
 define('SKIP_AUTH', true);
 
 // Copiar a classe Database sem bootstrap
-class Database {
+class Database
+{
     private string $host;
     private string $db_name;
     private string $username;
@@ -67,4 +68,3 @@ foreach ($tables as $table) {
 // Dados iniciais: usuário admin
 echo "-- Dados iniciais\n";
 echo "INSERT INTO usuarios (email, senha, tipo, ativo, nome) VALUES ('admin@example.com', '\$2y\$10\$examplehashedpassword', 'Administrador', 1, 'Administrador');\n";
-?>
