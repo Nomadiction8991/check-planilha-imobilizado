@@ -5,7 +5,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 $pageTitle = 'USUÁRIOS';
-$backUrl = '../../../index.php';
+$backUrl = base_url('/');
 
 $qsArr = [];
 if (!empty($filtroNome)) {
@@ -18,7 +18,7 @@ if (!empty($pagina) && $pagina > 1) {
     $qsArr['pagina'] = $pagina;
 }
 $qs = http_build_query($qsArr);
-$createHref = './usuario_criar.php' . ($qs ? ('?' . $qs) : '');
+$createHref = '/usuarios/criar' . ($qs ? ('?' . $qs) : '');
 $headerActions = '<a href="' . $createHref . '" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>';
 
 
@@ -121,12 +121,12 @@ ob_start();
                                         <div class="fw-semibold text-wrap"><?php echo htmlspecialchars(to_uppercase($usuario['nome'])); ?></div>
                                         <div class="small text-muted text-wrap"><?php echo htmlspecialchars(to_uppercase($usuario['email']), ENT_QUOTES, 'UTF-8'); ?></div>
                                         <div class="mt-2 d-flex gap-1 flex-wrap justify-content-end">
-                                            <a href="./usuario_ver.php?id=<?php echo $usuario['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
+                                            <a href="/usuarios/ver?id=<?php echo $usuario['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
                                                 class="btn btn-sm btn-outline-secondary" title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <?php if ($is_self): ?>
-                                                <a href="./usuario_editar.php?id=<?php echo $usuario['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
+                                                <a href="/usuarios/editar?id=<?php echo $usuario['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
                                                     class="btn btn-sm btn-outline-primary" title="EDITAR MEU PERFIL">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
@@ -186,7 +186,7 @@ ob_start();
                 return;
             }
 
-            fetch('../../../app/controllers/delete/UsuarioDeleteController.php', {
+            fetch('/usuarios/deletar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

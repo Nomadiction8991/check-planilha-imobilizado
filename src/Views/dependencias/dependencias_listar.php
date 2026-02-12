@@ -13,13 +13,13 @@ try {
 }
 
 $pageTitle = 'Dependencias';
-$backUrl = '../../../index.php';
+$backUrl = base_url('/');
 
 $qsArr = [];
 if (!empty($busca)) { $qsArr['busca'] = $busca; }
 if (!empty($pagina) && $pagina > 1) { $qsArr['pagina'] = $pagina; }
 $qs = http_build_query($qsArr);
-$createHref = './dependencia_criar.php' . ($qs ? ('?' . $qs) : '');
+$createHref = '/dependencias/criar' . ($qs ? ('?' . $qs) : '');
 $headerActions = '<a href="' . $createHref . '" class="btn-header-action" title="Nova Dependencia"><i class="bi bi-plus-lg"></i></a>';
 
 
@@ -108,7 +108,7 @@ ob_start();
                                 <td><?php echo htmlspecialchars(to_uppercase(dep_corrigir_encoding($dependencia['descricao'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="./dependencia_editar.php?id=<?php echo $dependencia['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
+                                        <a href="/dependencias/editar?id=<?php echo $dependencia['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
                                            class="btn btn-sm btn-outline-primary" title="EDITAR">
                                             <i class="bi bi-pencil"></i>
                                         </a>
@@ -189,7 +189,7 @@ function deletarDependencia(id) {
 }
 
 function performDelete(id) {
-    fetch('../../../app/controllers/delete/DependenciaDeleteController.php', {
+    fetch('/dependencias/deletar', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

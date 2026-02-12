@@ -5,7 +5,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $idParam = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if (!$idParam) {
-    header('Location: ../../../index.php');
+    header('Location: /usuarios');
     exit;
 }
 
@@ -23,7 +23,7 @@ if (!empty($_GET['pagina'])) {
     $qsArr['pagina'] = $_GET['pagina'];
 }
 
-$backUrl = './usuarios_listar.php' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
+$backUrl = '/usuarios' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
 
 ob_start();
 ?>

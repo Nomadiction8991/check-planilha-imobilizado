@@ -4,7 +4,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $id_planilha = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if (!$id_planilha) {
-    header('Location: ../../index.php');
+    header('Location: ' . base_url('/'));
     exit;
 }
 
@@ -34,7 +34,7 @@ $stmt->execute();
 $PRODUTOS = $stmt->fetchAll();
 
 $pageTitle = 'Assinar PRODUTOS';
-$backUrl = '../planilhas/planilha_visualizar.php?id=' . $id_planilha . '&comum_id=' . $id_planilha;
+$backUrl = '/planilhas/visualizar?id=' . $id_planilha . '&comum_id=' . $id_planilha;
 
 ob_start();
 ?>
@@ -243,7 +243,7 @@ ob_start();
         formData.append('acao', acao);
         PRODUTOS.forEach(id => formData.append('PRODUTOS[]', id));
 
-        fetch('../../../app/controllers/update/PRODUTOSAssinarController.php', {
+        fetch('/produtos/assinar', {
                 method: 'POST',
                 body: formData
             })

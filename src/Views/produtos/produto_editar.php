@@ -170,7 +170,7 @@ ob_start();
         transform: translateY(-1px);
         ¤ // Iniciar bufferrios
         $headerActions .='
- <li><a class="dropdown-item" href="../planilhas/relatorio141_view.php?id=' . $comum_id . '&comum_id=' . $comum_id . '"><i class="bi bi-file-earmark-pdf me-2"></i>' . htmlspecialchars(to_uppercase(' Relatrio 14.1'), ENT_QUOTES, ' UTF-8') . '
+ <li><a class="dropdown-item" href="/relatorios/14-1?id=' . $comum_id . '&comum_id=' . $comum_id . '"><i class="bi bi-file-earmark-pdf me-2"></i>' . htmlspecialchars(to_uppercase(' Relatrio 14.1'), ENT_QUOTES, ' UTF-8') . '
         </a>$headerActions .='
  <li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Sair </a></li></ul></div>';
 
@@ -867,7 +867,7 @@ ob_start();
 </form>
 
 <div class="mt-3">
-    <a href="./produtos_limpar_edicoes.php?id=<?php echo $comum_id; ?>&comum_id=<?php echo $comum_id; ?>&id_PRODUTO=<?php echo $id_produto; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&status=<?php echo urlencode($filtro_STATUS); ?>"
+    <a href="/produtos/limpar-edicoes?id=<?php echo $comum_id; ?>&comum_id=<?php echo $comum_id; ?>&id_PRODUTO=<?php echo $id_produto; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&status=<?php echo urlencode($filtro_STATUS); ?>"
         class="btn btn-outline-danger w-100">
         <i class="bi bi-trash3 me-2"></i>
         <?php echo htmlspecialchars(to_uppercase('Limpar Edições'), ENT_QUOTES, 'UTF-8'); ?>

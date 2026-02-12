@@ -30,6 +30,7 @@ class MapaRotas
             'GET /usuarios' => [UsuarioController::class, 'index'],
             'GET /usuarios/criar' => [UsuarioController::class, 'create'],
             'POST /usuarios/criar' => [UsuarioController::class, 'store'],
+            'GET /usuarios/ver' => [UsuarioController::class, 'show'],
             'GET /usuarios/editar' => [UsuarioController::class, 'edit'],
             'POST /usuarios/editar' => [UsuarioController::class, 'update'],
             'POST /usuarios/deletar' => [UsuarioController::class, 'delete'],

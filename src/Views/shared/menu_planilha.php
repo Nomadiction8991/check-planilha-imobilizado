@@ -4,13 +4,13 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 $id_planilha = $_GET['id'] ?? null;
 
 if (!$id_planilha) {
-    header('Location: ../../index.php');
+    header('Location: ' . base_url('/'));
     exit;
 }
 
 
 $pageTitle = "Menu";
-$backUrl = '../planilhas/planilha_visualizar.php?id=' . $id_planilha;
+$backUrl = '/planilhas/visualizar?id=' . $id_planilha;
 
 
 ob_start();
@@ -73,7 +73,7 @@ ob_start();
 
 
 <div class="menu-grid">
-    <a href="../produtos/produtos_listar.php?id=<?php echo $id_planilha; ?>" class="text-decoration-none">
+    <a href="/produtos?id=<?php echo $id_planilha; ?>" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -85,7 +85,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/planilha_importar.php" class="text-decoration-none">
+    <a href="/planilhas/importar" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -97,7 +97,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.1" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.1" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -109,7 +109,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.2" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.2" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -121,7 +121,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.3" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.3" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -133,7 +133,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.4" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.4" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -145,7 +145,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.5" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.5" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -157,7 +157,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.6" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.6" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -169,7 +169,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.7" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.7" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -181,7 +181,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.8" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=14.8" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -193,7 +193,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/produto_copiar_etiquetas.php?id=<?php echo $id_planilha; ?>" class="text-decoration-none">
+    <a href="/produtos/etiqueta?id=<?php echo $id_planilha; ?>" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
@@ -205,7 +205,7 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio_imprimir_alteracao.php?id=<?php echo $id_planilha; ?>" class="text-decoration-none">
+    <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=alteracao" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">

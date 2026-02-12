@@ -3,7 +3,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
  
 
 $pageTitle = 'Excluir PRODUTO';
-$backUrl = './PRODUTOS_listar.php?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
+$backUrl = '/produtos?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
 
 ob_start();
 ?>

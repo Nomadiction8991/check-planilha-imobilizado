@@ -17,7 +17,7 @@ $filtro_STATUS = $_GET['STATUS'] ?? '';
 function redirectBack($params)
 {
     $qs = http_build_query($params);
-    header('Location: ../planilhas/planilha_visualizar.php?' . $qs);
+    header('Location: /planilhas/visualizar?' . $qs);
     exit;
 }
 

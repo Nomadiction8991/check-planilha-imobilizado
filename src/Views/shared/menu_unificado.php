@@ -28,12 +28,12 @@ if ($origem) {
     $backUrl = $origem;
 } elseif (($contexto === 'planilha' || $contexto === 'relatorio') && $id_planilha) {
     if ($modo_publico) {
-        $backUrl = '../../../public/assinatura_publica.php';
+        $backUrl = base_url('assinatura_publica.php');
     } else {
-        $backUrl = '../planilhas/planilha_visualizar.php?id=' . urlencode($id_planilha);
+        $backUrl = base_url('/planilhas/visualizar?id=' . urlencode($id_planilha));
     }
 } else {
-    $backUrl = $modo_publico ? '../../../public/assinatura_publica.php' : '../../../index.php';
+    $backUrl = $modo_publico ? base_url('assinatura_publica.php') : base_url('/');
 }
 
 $pageTitle = "Menu";
@@ -51,13 +51,13 @@ ob_start();
             <div class="list-group-item bg-light text-muted small fw-semibold">
                 <i class="bi bi-file-earmark-spreadsheet me-1"></i> PLANILHAS
             </div>
-            <a href="../planilhas/planilha_importar.php" class="list-group-item list-group-item-action">
+            <a href="/planilhas/importar" class="list-group-item list-group-item-action">
                 <i class="bi bi-upload me-2"></i><?php echo htmlspecialchars(to_uppercase('Importar Planilha'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
             <div class="list-group-item bg-light text-muted small fw-semibold">
                 <i class="bi bi-people me-1"></i> <?php echo htmlspecialchars(to_uppercase('Administração'), ENT_QUOTES, 'UTF-8'); ?>
             </div>
-            <a href="../usuarios/usuarios_listar.php" class="list-group-item list-group-item-action">
+            <a href="/usuarios" class="list-group-item list-group-item-action">
                 <i class="bi bi-people me-2"></i><?php echo htmlspecialchars(to_uppercase('Listagem de Usuários'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
             <div class="list-group-item bg-light text-muted small fw-semibold">
@@ -73,27 +73,27 @@ ob_start();
                 <div class="list-group-item bg-light text-muted small fw-semibold">
                     <i class="bi bi-box-seam me-1"></i> <?php echo htmlspecialchars(to_uppercase('Produtos'), ENT_QUOTES, 'UTF-8'); ?>
                 </div>
-                <a href="../produtos/produtos_listar.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+                <a href="/produtos?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-list-ul me-2"></i><?php echo htmlspecialchars(to_uppercase('Listagem de Produtos'), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endif; ?>
             <div class="list-group-item bg-light text-muted small fw-semibold">
                 <i class="bi bi-file-earmark-text me-1"></i> <?php echo htmlspecialchars(to_uppercase('Relatórios'), ENT_QUOTES, 'UTF-8'); ?>
             </div>
-            <a href="../planilhas/relatorio141_view.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+            <a href="/relatorios/14-1?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                 <i class="bi bi-file-earmark-pdf me-2"></i><?php echo htmlspecialchars(to_uppercase('Relatório 14.1'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
-            <a href="../planilhas/relatorio_imprimir_alteracao.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+            <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=alteracao" class="list-group-item list-group-item-action">
                 <i class="bi bi-file-earmark-diff me-2"></i><?php echo htmlspecialchars(to_uppercase('Relatório de Alterações'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
             <?php if (!$modo_publico): ?>
                 <div class="list-group-item bg-light text-muted small fw-semibold">
                     <i class="bi bi-three-dots me-1"></i> <?php echo htmlspecialchars(to_uppercase('Outros'), ENT_QUOTES, 'UTF-8'); ?>
                 </div>
-                <a href="../planilhas/produto_copiar_etiquetas.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+                <a href="/produtos/etiqueta?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-tags me-2"></i><?php echo htmlspecialchars(to_uppercase('Copiar Etiquetas'), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
-                <a href="../planilhas/configuracao_importacao_editar.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+                <a href="/planilhas/configuracao?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-pencil me-2"></i><?php echo htmlspecialchars(to_uppercase('Editar Planilha'), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endif; ?>
@@ -103,17 +103,17 @@ ob_start();
             <div class="list-group-item bg-light text-muted small fw-semibold">
                 <i class="bi bi-compass me-1"></i> <?php echo htmlspecialchars(to_uppercase('Navegação'), ENT_QUOTES, 'UTF-8'); ?>
             </div>
-            <a href="../planilhas/planilha_visualizar.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+            <a href="/planilhas/visualizar?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                 <i class="bi bi-eye me-2"></i><?php echo htmlspecialchars(to_uppercase('Ver Planilha'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
-            <a href="../planilhas/configuracao_importacao_editar.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+            <a href="/planilhas/configuracao?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                 <i class="bi bi-pencil me-2"></i>Editar Planilha
             </a>
             <?php if (!$modo_publico): ?>
                 <div class="list-group-item bg-light text-muted small fw-semibold">
                     <i class="bi bi-box-seam me-1"></i> PRODUTOS
                 </div>
-                <a href="../produtos/produtos_listar.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+                <a href="/produtos?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-plus-circle me-2"></i><?php echo htmlspecialchars(to_uppercase('Cadastrar Produto'), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endif; ?>
@@ -121,11 +121,11 @@ ob_start();
                 <i class="bi bi-printer me-1"></i> <?php echo htmlspecialchars(to_uppercase('Impressões'), ENT_QUOTES, 'UTF-8'); ?>
             </div>
             <?php if (!$modo_publico): ?>
-                <a href="../planilhas/produto_copiar_etiquetas.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+                <a href="/produtos/etiqueta?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
                     <i class="bi bi-tags me-2"></i><?php echo htmlspecialchars(to_uppercase('Copiar Etiquetas'), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             <?php endif; ?>
-            <a href="../planilhas/relatorio_imprimir_alteracao.php?id=<?php echo $id_planilha; ?>" class="list-group-item list-group-item-action">
+            <a href="/relatorios/visualizar?id=<?php echo $id_planilha; ?>&form=alteracao" class="list-group-item list-group-item-action">
                 <i class="bi bi-file-earmark-diff me-2"></i><?php echo htmlspecialchars(to_uppercase('Imprimir Alterações'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
         <?php endif; ?>
@@ -134,7 +134,7 @@ ob_start();
             <div class="list-group-item bg-light text-muted small fw-semibold">
                 <i class="bi bi-gear me-1"></i> SISTEMA
             </div>
-            <a href="../../../public/logout_publico.php" class="list-group-item list-group-item-action text-danger">
+            <a href="/logout" class="list-group-item list-group-item-action text-danger">
                 <i class="bi bi-box-arrow-right me-2"></i>Sair
             </a>
         <?php endif; ?>

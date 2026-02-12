@@ -3,7 +3,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 $pageTitle = 'Relatório 14.1';
-$backUrl = '../shared/menu_planilha.php?id=' . urlencode($id_planilha);
+$backUrl = '/planilhas/visualizar?id=' . urlencode($id_planilha);
 $headerActions = '<button id="btnPrint" class="btn-header-action" title="Imprimir" onclick="validarEImprimir()"><i class="bi bi-printer"></i></button>';
 
 

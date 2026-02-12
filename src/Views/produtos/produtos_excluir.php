@@ -42,7 +42,7 @@ try {
     if ($stmt->execute()) {
         $payload = ['success' => true, 'message' => 'Produtos excluídos com sucesso'];
         if (function_exists('is_ajax_request') && !is_ajax_request()) {
-            header('Location: ./produtos_listar.php?comum_id=' . urlencode((string)$comum_id) . '&deleted=1');
+            header('Location: /produtos?comum_id=' . urlencode((string)$comum_id) . '&deleted=1');
             exit;
         }
         echo json_encode($payload);

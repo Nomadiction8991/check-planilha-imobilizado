@@ -15,12 +15,11 @@ if (isset($_GET['comum_id'])) {
     $comum_id = (int)$_GET['id'];
 }
 if ($comum_id <= 0) {
-    header('Location: ../../../index.php');
+    header('Location: ' . base_url('/'));
     exit;
 }
 
-require_once dirname(__DIR__, 2) . '/controllers/read/PlanilhaViewController.php';
-
+// Dados serão fornecidos pelo controller ou carregados inline
 $PRODUTOS = $produtos ?? [];
 $erro_PRODUTOS = $erro_produtos ?? '';
 $filtro_STATUS = $filtro_status ?? '';
@@ -28,7 +27,7 @@ $filtro_STATUS = $filtro_status ?? '';
 
 $id_planilha = $comum_id; 
 $pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'VISUALIZAR Planilha');
-$backUrl = '../../../index.php';
+$backUrl = base_url('/');
 
 
 if (!empty($acesso_bloqueado)) {
@@ -36,7 +35,7 @@ if (!empty($acesso_bloqueado)) {
 
     
     $pageTitle = 'Importação Desatualizada';
-    $backUrl = '../../../index.php';
+    $backUrl = base_url('/');
 
     ob_start();
 ?>
@@ -880,7 +879,7 @@ if (!empty($acesso_bloqueado)) {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title text-uppercase" id="importacaoDesatualizadaLabel">IMPORTAÇÃO DESATUALIZADA</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar" onclick="window.location.href='../../../index.php'"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar" onclick="window.location.href='/'"></button>
                 </div>
                 <div class="modal-body text-center">
                     <div class="mb-3 text-warning">
@@ -889,10 +888,10 @@ if (!empty($acesso_bloqueado)) {
                     <p class="text-uppercase"><?php echo htmlspecialchars($mensagemBloqueio, ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
                 <div class="modal-footer">
-                    <a href="../../../index.php" class="btn btn-outline-secondary w-47">
+                    <a href="/" class="btn btn-outline-secondary w-47">
                         <i class="bi bi-arrow-left me-1"></i>VOLTAR
                     </a>
-                    <a href="../planilhas/planilha_importar.php" class="btn btn-primary w-47">
+                    <a href="/planilhas/importar" class="btn btn-primary w-47">
                         <i class="bi bi-upload me-1"></i>IMPORTAR
                     </a>
                 </div>
@@ -932,23 +931,23 @@ $headerActions = '
 
 $headerActions .= '
             <li>
-                <a class="dropdown-item" href="../produtos/produtos_listar.php?comum_id=' . $comum_id . '">
+                <a class="dropdown-item" href="/produtos?comum_id=' . $comum_id . '">
                     <i class="bi bi-list-ul me-2"></i>' . htmlspecialchars(to_uppercase('Listagem de Produtos'), ENT_QUOTES, 'UTF-8') . '
                 </a>
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-                <a class="dropdown-item" href="../planilhas/relatorio141_view.php?id=' . $comum_id . '&comum_id=' . $comum_id . '">
+                <a class="dropdown-item" href="/relatorios/14-1?id=' . $comum_id . '&comum_id=' . $comum_id . '">
                     <i class="bi bi-file-earmark-pdf me-2"></i>' . htmlspecialchars(to_uppercase('Relatório 14.1'), ENT_QUOTES, 'UTF-8') . '
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="../planilhas/produto_copiar_etiquetas.php?id=' . $id_planilha . '&comum_id=' . $comum_id . '">
+                <a class="dropdown-item" href="/produtos/etiqueta?id=' . $id_planilha . '&comum_id=' . $comum_id . '">
                     <i class="bi bi-tags me-2"></i>' . htmlspecialchars(to_uppercase('Copiar Etiquetas'), ENT_QUOTES, 'UTF-8') . '
                 </a>
             </li>
             <li>
-                <a class="dropdown-item" href="../planilhas/relatorio_imprimir_alteracao.php?id=' . $comum_id . '&comum_id=' . $comum_id . '">
+                <a class="dropdown-item" href="/relatorios/visualizar?id=' . $comum_id . '&comum_id=' . $comum_id . '&form=alteracao">
                     <i class="bi bi-printer me-2"></i>' . htmlspecialchars(to_uppercase('Imprimir Alteração'), ENT_QUOTES, 'UTF-8') . '
                 </a>
             </li>';
@@ -1306,8 +1305,8 @@ ob_start();
                     $filtroDependenciaParam = urlencode($filtro_dependencia ?? '');
                     $filtroCodigoParam = urlencode($filtro_codigo ?? '');
                     $filtroStatusParam = urlencode($filtro_STATUS ?? '');
-                    $observacaoUrl = '../produtos/produto_observacao.php?id_produto=' . $produtoId . '&comum_id=' . $comum_id . '&pagina=' . $paginaAtual . '&nome=' . $filtroNomeParam . '&dependencia=' . $filtroDependenciaParam . '&filtro_codigo=' . $filtroCodigoParam . '&status=' . $filtroStatusParam;
-                    $editarUrl = '../produtos/produto_editar.php?id_produto=' . $produtoId . '&comum_id=' . $comum_id . '&pagina=' . $paginaAtual . '&nome=' . $filtroNomeParam . '&dependencia=' . $filtroDependenciaParam . '&filtro_codigo=' . $filtroCodigoParam . '&status=' . $filtroStatusParam;
+                    $observacaoUrl = '/produtos/observacao?id_produto=' . $produtoId . '&comum_id=' . $comum_id . '&pagina=' . $paginaAtual . '&nome=' . $filtroNomeParam . '&dependencia=' . $filtroDependenciaParam . '&filtro_codigo=' . $filtroCodigoParam . '&status=' . $filtroStatusParam;
+                    $editarUrl = '/produtos/editar?id_produto=' . $produtoId . '&comum_id=' . $comum_id . '&pagina=' . $paginaAtual . '&nome=' . $filtroNomeParam . '&dependencia=' . $filtroDependenciaParam . '&filtro_codigo=' . $filtroCodigoParam . '&status=' . $filtroStatusParam;
                     ?>
                     <div class="acao-container">
                         <!-- Check -->
@@ -1689,7 +1688,7 @@ ob_start();
                 formData.set('comum_id', current.comumId);
                 formData.set('observacoes', ta.value.trim()); // controller expects 'observacoes'
 
-                fetch('<?php echo '../../../app/controllers/update/ProdutoObservacaoController.php'; ?>', {
+                fetch('/produtos/observacao', {
                     method: 'POST',
                     body: formData,
                     headers: {

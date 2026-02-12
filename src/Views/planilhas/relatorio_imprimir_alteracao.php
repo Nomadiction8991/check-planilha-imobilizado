@@ -5,7 +5,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $id_planilha = $_GET['id'] ?? null;
 if (!$id_planilha) {
-  header('Location: ../../index.php');
+  header('Location: ' . base_url('/'));
   exit;
 }
 
@@ -230,7 +230,7 @@ if ($mostrar_novos) $total_mostrar += $total_novos;
 
 
 $pageTitle = 'Imprimir Alterações';
-$backUrl = './planilha_visualizar.php?id=' . $id_planilha . '&comum_id=' . $id_planilha;
+$backUrl = '/planilhas/visualizar?id=' . $id_planilha . '&comum_id=' . $id_planilha;
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuAlteracao" data-bs-toggle="dropdown" aria-expanded="false">

@@ -9,7 +9,7 @@ if (isset($_GET['public']) && $_GET['public'] == '1') {
 if (!defined('PUBLIC_REGISTER')) {
     
     if (!function_exists('isLoggedIn') || !isLoggedIn()) {
-        header('Location: ../../../login.php');
+        header('Location: /login');
         exit;
     }
 } else {
@@ -24,14 +24,14 @@ if (!defined('PUBLIC_REGISTER')) {
 
 $pageTitle = defined('PUBLIC_REGISTER') ? 'CADASTRO' : 'NOVO USUÁRIO';
 if (defined('PUBLIC_REGISTER')) {
-    $backUrl = '../../../login.php';
+    $backUrl = '/login';
 } else {
     
     $qsArr = [];
     if (!empty($_GET['busca'])) { $qsArr['busca'] = $_GET['busca']; }
     if (isset($_GET['status']) && $_GET['status'] !== '') { $qsArr['status'] = $_GET['status']; }
     if (!empty($_GET['pagina'])) { $qsArr['pagina'] = $_GET['pagina']; }
-    $backUrl = './usuarios_listar.php' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
+    $backUrl = '/usuarios' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
 }
 
 ob_start();

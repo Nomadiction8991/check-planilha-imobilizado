@@ -1,24 +1,21 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
-require_once __DIR__ . '/../../controllers/read/RelatorioViewController.php';
+// NOTA: RelatorioViewController foi removido na migração app/ → src/
+// Este arquivo precisa ser migrado para usar RelatorioController via rota MVC
 
 $id_planilha = $_GET['id'] ?? null;
 $formulario = $_GET['form'] ?? '14.1';
 
 if (!$id_planilha) {
-    header('Location: ../../index.php');
+    header('Location: ' . base_url('/'));
     exit;
 }
 
-try {
-    $controller = new RelatorioViewController($pdo, $id_planilha, $formulario);
-    $dados = $controller->obterDados();
-    extract($dados);
-} catch (Exception $e) {
-    die('Erro ao carregar dados: ' . htmlspecialchars($e->getMessage()));
-}
-
-$templatePath = __DIR__ . "/../../../relatorios/{$formulario}.html";
+// TODO: Migrar para RelatorioController via rota MVC (/relatorios/visualizar)
+// RelatorioViewController foi removido na migração app/ → src/
+// Por enquanto, exibe mensagem de funcionalidade em migração
+$dados = [];
+$templatePath = dirname(__DIR__, 2) . "/relatorios/{$formulario}.html";
 if (!file_exists($templatePath)) {
     die("Template do formulário {$formulario} não encontrado");
 }
@@ -39,7 +36,7 @@ if ($start !== false && $end !== false) {
 }
 
 $pageTitle = "Relatório {$formulario}";
-$backUrl = './planilha_visualizar.php?id=' . urlencode($id_planilha);
+$backUrl = '/planilhas/visualizar?id=' . urlencode($id_planilha);
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuRelatorio" data-bs-toggle="dropdown">

@@ -3,7 +3,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 $pageTitle = 'CADASTRAR PRODUTO';
-$backUrl = './produtos_listar.php?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro();
+$backUrl = '/produtos?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro();
 
 ob_start();
 ?>

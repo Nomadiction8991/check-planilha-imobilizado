@@ -6,7 +6,7 @@ $id_planilha = $comum_id;
 $PRODUTOS = $produtos ?? [];
 
 $pageTitle = 'VISUALIZAR PRODUTOS';
-$backUrl = '../planilhas/planilha_visualizar.php?id=' . urlencode($comum_id) . '&comum_id=' . urlencode($comum_id);
+$backUrl = '/planilhas/visualizar?id=' . urlencode($comum_id) . '&comum_id=' . urlencode($comum_id);
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuPRODUTOS" data-bs-toggle="dropdown" aria-expanded="false">
@@ -14,7 +14,7 @@ $headerActions = '
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPRODUTOS">
             <li>
-                <a href="./produto_criar.php?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro(true) . '" class="dropdown-item">
+                <a href="/produtos/criar?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro(true) . '" class="dropdown-item">
                     <i class="bi bi-plus-lg me-2"></i>Novo PRODUTO
                 </a>
             </li>
@@ -134,7 +134,7 @@ ob_start();
 <!-- BOTO DE EXCLUSO EM MASSA (inicialmente oculto) -->
 <div id="deleteButtonContainer" class="card mb-3" style="display: none;">
   <div class="card-body">
-    <form method="POST" id="deleteForm" action="./produtos_excluir.php">
+    <form method="POST" id="deleteForm" action="/produtos/deletar">
       <input type="hidden" name="id_planilha" value="<?php echo htmlspecialchars($id_planilha); ?>">
       <div id="selectedProducts"></div>
       <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
@@ -206,7 +206,7 @@ ob_start();
                         <?php endif; ?>
                       </div>
                       <div class="btn-group btn-group-sm">
-                        <a class="btn btn-outline-primary btn-sm" title="EDITAR" href="./produto_atualizar.php?id_produto=<?php echo $PRODUTO['id']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
+                        <a class="btn btn-outline-primary btn-sm" title="EDITAR" href="/produtos/editar?id_produto=<?php echo $PRODUTO['id']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
                           <i class="bi bi-pencil-fill"></i>
                         </a>
                       </div>

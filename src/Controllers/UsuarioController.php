@@ -12,6 +12,7 @@ use Exception;
 class UsuarioController extends BaseController
 {
     private UsuarioService $usuarioService;
+    private PDO $conexao;
 
     public function __construct(?PDO $conexao = null)
     {
@@ -19,6 +20,7 @@ class UsuarioController extends BaseController
             $conexao = ConnectionManager::getConnection();
         }
 
+        $this->conexao = $conexao;
         $usuarioRepo = new UsuarioRepository($conexao);
         $this->usuarioService = new UsuarioService($usuarioRepo);
     }
@@ -362,5 +364,21 @@ class UsuarioController extends BaseController
         $tipo_mensagem = $erro ? 'error' : '';
 
         require __DIR__ . '/../Views/usuarios/usuario_editar.php';
+    }
+
+    /**
+     * Exibe detalhes de um usuário (GET /usuarios/ver?id=X)
+     */
+    public function show(): void
+    {
+        $id = (int) $this->query('id', 0);
+
+        if ($id <= 0) {
+            $this->redirecionar('/usuarios?erro=ID inválido');
+            return;
+        }
+
+        $conexao = $this->conexao;
+        require __DIR__ . '/../Views/usuarios/usuario_ver.php';
     }
 }

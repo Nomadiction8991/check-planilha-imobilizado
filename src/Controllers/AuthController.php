@@ -23,7 +23,7 @@ class AuthController
     public function login()
     {
         if ($this->authService->isAuthenticated()) {
-            header('Location: ../index.php');
+            header('Location: /comuns');
             exit;
         }
 
@@ -39,7 +39,7 @@ class AuthController
 
     public function authenticate()
     {
-        $email = to_uppercase(trim($_POST['email'] ?? ''));
+        $email = mb_strtoupper(trim($_POST['email'] ?? ''), 'UTF-8');
         $senha = trim($_POST['senha'] ?? '');
 
         try {
@@ -49,7 +49,7 @@ class AuthController
 
             $this->authService->authenticate($email, $senha);
 
-            header('Location: ../index.php');
+            header('Location: /comuns');
             exit;
         } catch (\Exception $e) {
             $erro = $e->getMessage();

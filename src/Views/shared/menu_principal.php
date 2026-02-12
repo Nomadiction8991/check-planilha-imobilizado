@@ -5,7 +5,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 $pageTitle = "Menu";
-$backUrl = '../../../index.php';
+$backUrl = base_url('/');
 
 
 ob_start();
@@ -68,7 +68,7 @@ ob_start();
 
 
 <div class="menu-grid">
-    <a href="../planilhas/planilha_importar.php" class="text-decoration-none">
+    <a href="/planilhas/importar" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">

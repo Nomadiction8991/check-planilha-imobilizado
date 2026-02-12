@@ -5,7 +5,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 $pageTitle = 'Nova DEPENDÊNCIA';
-$backUrl = './dependencias_listar.php';
+$backUrl = '/dependencias';
 
 ob_start();
 ?>

@@ -2,7 +2,7 @@
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
  
 $pageTitle = 'Importar Planilha';
-$backUrl = '../../../index.php';
+$backUrl = base_url('/');
 
 $jobDir = realpath(__DIR__ . '/../../../storage/tmp');
 $jobEmExecucao = null;
@@ -35,7 +35,7 @@ ob_start();
                 Já existe uma importação em progresso (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>). Conclua ou cancele antes de iniciar uma nova.
             </div>
             <div class="modal-footer">
-                <a class="btn btn-primary" href="<?php echo htmlspecialchars(base_url('app/views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
+                <a class="btn btn-primary" href="<?php echo htmlspecialchars(base_url('src/Views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
@@ -45,7 +45,7 @@ ob_start();
 
 <?php if ($jobEmExecucao): ?>
     <p class="text-muted small mb-3">
-        Há uma importação em andamento. <a href="<?php echo htmlspecialchars(base_url('app/views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
+        Há uma importação em andamento. <a href="<?php echo htmlspecialchars(base_url('src/Views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
     </p>
 <?php endif; ?>
 

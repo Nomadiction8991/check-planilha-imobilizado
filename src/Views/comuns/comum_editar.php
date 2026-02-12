@@ -3,7 +3,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 if ($id <= 0) {
-    header('Location: ../../../index.php');
+    header('Location: ' . base_url('/comuns'));
     exit;
 }
 
@@ -11,7 +11,7 @@ $comum = obter_comum_por_id($conexao, $id);
 if (!$comum) {
     $_SESSION['mensagem'] = 'Comum NÃO encontrada.';
     $_SESSION['tipo_mensagem'] = 'danger';
-    header('Location: ../../../index.php');
+    header('Location: ' . base_url('/comuns'));
     exit;
 }
 
@@ -21,7 +21,7 @@ $pageTitle = 'EDITAR COMUM';
 $filterParams = $_GET;
 unset($filterParams['id'], $filterParams['success'], $filterParams['ajax']);
 $filterQueryString = http_build_query($filterParams);
-$backUrl = '../../../index.php' . ($filterQueryString !== '' ? ('?' . $filterQueryString) : '');
+$backUrl = '/comuns' . ($filterQueryString !== '' ? ('?' . $filterQueryString) : '');
 $filtersHiddenValue = htmlspecialchars($filterQueryString, ENT_QUOTES, 'UTF-8');
 $buscaValue = $_REQUEST['busca'] ?? ($filterParams['busca'] ?? '');
 $paginaValue = $_REQUEST['pagina'] ?? ($filterParams['pagina'] ?? '');

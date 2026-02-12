@@ -99,7 +99,6 @@ class Relatorio141Service
         
         $templatePaths = [
             __DIR__ . '/../Views/planilhas/relatorio141_template.php',
-            __DIR__ . '/../../app/views/planilhas/relatorio141_template.php',
         ];
 
         $templateFound = false;

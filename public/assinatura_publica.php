@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['public_comum_id'] = $planilha['id'];
         $_SESSION['public_comum'] = $planilha['comum'];
 
-        header('Location: ../src/Views/shared/menu_unificado.php?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
+        header('Location: /comuns?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
         exit;
     } catch (Exception $e) {
         $erro = $e->getMessage();

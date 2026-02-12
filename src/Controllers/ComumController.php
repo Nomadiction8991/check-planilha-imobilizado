@@ -102,9 +102,9 @@ class ComumController extends BaseController
             $cadastroOk = $this->verificarCadastroCompleto($comum);
 
             $qsEdit = http_build_query(['busca' => $busca, 'pagina' => $pagina]);
-            $editHref = 'src/Views/comuns/comum_editar.php?id=' . (int) $comum['id'] .
+            $editHref = '/comuns/editar?id=' . (int) $comum['id'] .
                 ($qsEdit ? ('&' . $qsEdit) : '');
-            $viewHref = 'src/Views/planilhas/planilha_visualizar.php?comum_id=' . (int) $comum['id'];
+            $viewHref = '/planilhas/visualizar?comum_id=' . (int) $comum['id'];
 
             $html .= '<tr>';
             $html .= '<td class="fw-semibold text-uppercase">' . htmlspecialchars($comum['codigo']) . '</td>';
@@ -163,7 +163,7 @@ class ComumController extends BaseController
                 <li><a class="dropdown-item" href="/planilhas/importar">
                     <i class="bi bi-upload me-2"></i>IMPORTAR PLANILHA</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="logout.php">
+                <li><a class="dropdown-item" href="/logout">
                     <i class="bi bi-box-arrow-right me-2"></i>SAIR</a></li>
             </ul>
         </div>';

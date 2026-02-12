@@ -9,7 +9,7 @@ $jobId = $_GET['job'] ?? '';
 if ($jobId === '') {
     $_SESSION['mensagem'] = 'Job de importação não informado.';
     $_SESSION['tipo_mensagem'] = 'danger';
-    header('Location: ' . base_url('app/views/planilhas/planilha_importar.php'));
+    header('Location: ' . base_url('/planilhas/importar'));
     exit;
 }
 
@@ -155,7 +155,7 @@ ob_start();
             cancelBtn.disabled = true;
             canceled = true;
             try {
-                const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=cancel&job=' + encodeURIComponent(jobId), {
+                const resp = await fetch(baseUrl + 'planilhas/importar?action=cancel&job=' + encodeURIComponent(jobId), {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json'
@@ -184,7 +184,7 @@ ob_start();
             const concludeBtn = document.getElementById('conclude-btn');
             concludeBtn.disabled = true;
             try {
-                const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=finish&job=' + encodeURIComponent(jobId), {
+                const resp = await fetch(baseUrl + 'planilhas/importar?action=finish&job=' + encodeURIComponent(jobId), {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json'
@@ -214,7 +214,7 @@ ob_start();
                 return;
             }
             try {
-                const resp = await fetch(baseUrl + 'app/controllers/create/ImportacaoPlanilhaController.php?action=process&job=' + encodeURIComponent(jobId), {
+                const resp = await fetch(baseUrl + 'planilhas/importar?action=process&job=' + encodeURIComponent(jobId), {
                     headers: {
                         'Accept': 'application/json'
                     }

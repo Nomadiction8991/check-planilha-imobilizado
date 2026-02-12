@@ -4,7 +4,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $id_planilha = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id_planilha <= 0) {
-    header('Location: ../../../index.php');
+    header('Location: ' . base_url('/'));
     exit;
 }
 
@@ -80,7 +80,7 @@ if (!$planilha) {
 }
 
 $pageTitle = 'EDITAR Planilha';
-$backUrl = '../comuns/configuracoes_importacao.php?comum_id=' . urlencode((string)$planilha['comum_id']);
+$backUrl = '/comuns/configuracao?comum_id=' . urlencode((string)$planilha['comum_id']);
 
 ob_start();
 ?>

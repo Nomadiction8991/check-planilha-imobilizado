@@ -5,7 +5,7 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 $pageTitle = 'Gerenciar Comuns';
-$backUrl = '../shared/menu_planilha.php';
+$backUrl = base_url('/');
 
 $qsArr = [];
 if (!empty($_GET['busca'])) {
@@ -16,7 +16,7 @@ if (!empty($pagina) && $pagina > 1) {
 }
 $qs = http_build_query($qsArr);
 $headerActions = '
-    <a href="../shared/menu_planilha.php" class="btn-header-action" title="Menu">
+    <a href="/" class="btn-header-action" title="Menu">
         <i class="bi bi-list fs-5"></i>
     </a>
 ';
@@ -109,12 +109,12 @@ ob_start();
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="./comum_editar.php?id=<?php echo $comum['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
+                                            <a href="/comuns/editar?id=<?php echo $comum['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
                                                 class="btn btn-outline-primary"
                                                 title="EDITAR">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <a href="./configuracoes_importacao.php?comum_id=<?php echo $comum['id']; ?>"
+                                            <a href="/comuns/configuracao?comum_id=<?php echo $comum['id']; ?>"
                                                 class="btn btn-outline-secondary"
                                                 title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>

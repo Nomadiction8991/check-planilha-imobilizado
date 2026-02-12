@@ -8,9 +8,9 @@ if (!defined('APP_BOOTSTRAPPED')) {
         define('BASE_PATH', dirname(__DIR__));
     }
 
-    
-    
-    
+
+
+
     if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start([
             'cookie_httponly' => true,
@@ -19,7 +19,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
         ]);
     }
 
-    
+
     if (!headers_sent()) {
         header('Content-Type: text/html; charset=UTF-8');
     }
@@ -31,26 +31,21 @@ if (!defined('APP_BOOTSTRAPPED')) {
         mb_http_output('UTF-8');
     }
 
-    
+
     date_default_timezone_set('America/Cuiaba');
 
-    
+
     require_once BASE_PATH . '/vendor/autoload.php';
 
-    
-    require_once BASE_PATH . '/app/helpers/env_helper.php';
+    // Funções globais de compatibilidade (env, auth, string, csv)
+    require_once BASE_PATH . '/src/Helpers/GlobalFunctions.php';
     loadEnv(BASE_PATH . '/.env');
 
-    
+    // Conexão com banco e configurações da aplicação
     require_once BASE_PATH . '/config/database.php';
     require_once BASE_PATH . '/config/app_config.php';
 
-    
-    require_once BASE_PATH . '/app/helpers/auth_helper.php';
-    require_once BASE_PATH . '/app/helpers/uppercase_helper.php';
-    require_once BASE_PATH . '/app/helpers/csv_encoding_helper.php';
 
-    
     $logDir = BASE_PATH . '/storage/logs';
     if (!is_dir($logDir)) {
         @mkdir($logDir, 0775, true);
@@ -58,7 +53,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
     ini_set('log_errors', '1');
     ini_set('error_log', $logDir . '/app.log');
 
-    
+
     function is_ajax_request(): bool
     {
         $byHeader = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower((string) $_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
@@ -66,7 +61,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
         return $byHeader || $byAccept;
     }
 
-    
+
     function json_response(array $payload, int $statusCode = 200): void
     {
         if (!headers_sent()) {
@@ -78,7 +73,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
         exit;
     }
 
-    
+
     function sanitize_text($value): string
     {
         return trim((string) $value);

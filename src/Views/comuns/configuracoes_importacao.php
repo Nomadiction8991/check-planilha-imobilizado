@@ -6,16 +6,16 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 $comum_id = $_GET['comum_id'] ?? null;
 
 if (!$comum_id) {
-    header('Location: ../../../index.php');
+    header('Location: ' . base_url('/'));
     exit;
 }
 
 
-header('Location: ./comuns_listar.php');
+header('Location: /comuns');
 exit;
 
 $pageTitle = $comum['descricao'];
-$backUrl = "../../../index.php";
+$backUrl = base_url('/');
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuPlanilhas" data-bs-toggle="dropdown" aria-expanded="false">
@@ -227,10 +227,10 @@ ob_start();
                                     <td><span class="badge <?php echo $STATUS_badge; ?>"><?php echo $STATUS_texto; ?></span></td>
                                     <td>
                                         <div class="d-flex justify-content-center gap-2">
-                                            <a href="../planilhas/planilha_visualizar.php?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="VISUALIZAR">
+                                            <a href="/planilhas/visualizar?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                                <a href="../planilhas/configuracao_importacao_editar.php?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="EDITAR">
+                                                <a href="/planilhas/configuracao?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="EDITAR">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
                                         </div>

@@ -4,13 +4,13 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $idParam = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($idParam <= 0) {
-    header('Location: ./dependencias_listar.php');
+    header('Location: /dependencias');
     exit;
 }
 
 
-$pageTitle = 'EDITAR DEPENDÊNCIA';
-$backUrl = './dependencias_listar.php';
+$pageTitle = 'EDITAR DEPÊNDÊNCIA';
+$backUrl = '/dependencias';
 
 ob_start();
 ?>
