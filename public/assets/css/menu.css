@@ -29,6 +29,34 @@
     border-bottom: none;
 }
 
+/* Headers de categoria */
+.menu-header {
+    padding: 16px 20px 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+    margin-top: 8px;
+}
+
+.menu-header:first-child {
+    margin-top: 0;
+}
+
+.menu-header span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.menu-header .bi {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
 /* Links e botões de toggle */
 .menu-item a,
 .menu-item .menu-toggle {
