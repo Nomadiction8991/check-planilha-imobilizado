@@ -26,6 +26,9 @@ class MapaRotas
             'GET /comuns/editar' => [ComumController::class, 'edit'],
             'POST /comuns/editar' => [ComumController::class, 'update'],
 
+            // Menu (página que centraliza cabeçalho / footer / navegação)
+            'GET /menu' => [\App\Controllers\MenuController::class, 'index'],
+
 
             'GET /usuarios' => [UsuarioController::class, 'index'],
             'GET /usuarios/criar' => [UsuarioController::class, 'create'],
