@@ -45,8 +45,18 @@ class TipoBemController extends BaseController
             ]);
         } catch (\Throwable $e) {
             error_log('Erro TipoBemController::index: ' . $e->getMessage());
-            $this->setMensagem('Erro ao carregar tipos de bens: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/menu');
+            
+            // Renderiza a view mesmo com erro, mostrando lista vazia
+            ViewRenderer::render('tipos_bens/index', [
+                'pageTitle' => 'TIPOS DE BENS',
+                'headerActions' => '',
+                'tipos' => [],
+                'busca' => $busca,
+                'pagina' => 1,
+                'total' => 0,
+                'totalPaginas' => 1,
+                'erro' => 'Erro ao carregar tipos de bens: ' . $e->getMessage()
+            ]);
         }
     }
 

@@ -18,6 +18,13 @@ $backUrl = null;
         </div>
     <?php endif; ?>
 
+    <?php if (isset($erro)): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-box-seam me-2"></i>TIPOS DE BENS</span>

@@ -75,7 +75,7 @@ class TipoBemRepository extends BaseRepository
 
         if (!empty($busca)) {
             $where = "WHERE descricao LIKE :busca OR codigo LIKE :busca";
-            $params['busca'] = "%{$busca}%";
+            $params[':busca'] = "%{$busca}%";
         }
 
         $sql = "SELECT * FROM {$this->table} 
@@ -103,7 +103,7 @@ class TipoBemRepository extends BaseRepository
 
         if (!empty($busca)) {
             $where = "WHERE descricao LIKE :busca OR codigo LIKE :busca";
-            $params['busca'] = "%{$busca}%";
+            $params[':busca'] = "%{$busca}%";
         }
 
         $sql = "SELECT COUNT(*) FROM {$this->table} {$where}";
