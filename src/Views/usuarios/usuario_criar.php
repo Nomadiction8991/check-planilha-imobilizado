@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
 if (isset($_GET['public']) && $_GET['public'] == '1') {
     define('PUBLIC_REGISTER', true);

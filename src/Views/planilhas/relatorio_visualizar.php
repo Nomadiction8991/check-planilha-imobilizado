@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 // NOTA: RelatorioViewController foi removido na migração app/ → src/
 // Este arquivo precisa ser migrado para usar RelatorioController via rota MVC
 

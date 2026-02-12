@@ -3,6 +3,9 @@
 // define('SKIP_AUTH', true); // ⚠️ REMOVIDO - Autenticação agora está ATIVA
 require __DIR__ . '/../config/bootstrap.php';
 
+// Define constante global indicando que o bootstrap foi carregado
+define('BOOTSTRAP_LOADED', true);
+
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Routes\MapaRotas;

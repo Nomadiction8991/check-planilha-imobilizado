@@ -665,6 +665,50 @@ grep -r "public function __construct" src/Services/
 
 ---
 
+## 🔧 MELHORIAS DE ARQUITETURA - BOOTSTRAP LOADER
+
+### Problema Identificado
+Os arquivos de view estavam fazendo `require_once` direto do `bootstrap.php` com caminhos relativos complexos, causando:
+- **Manutenção difícil** de caminhos
+- **Risco de erros** em refatorações
+- **Carregamentos desnecessários** quando já carregado pelo `index.php`
+
+### Solução Implementada
+
+#### 1. Centralização no Index.php
+```php
+// public/index.php
+require __DIR__ . '/../config/bootstrap.php';
+define('BOOTSTRAP_LOADED', true); // Flag global
+```
+
+#### 2. BootstrapLoader Helper
+```php
+// src/Helpers/BootstrapLoader.php
+if (!defined('BOOTSTRAP_LOADED')) {
+    require_once dirname(__DIR__, 3) . '/config/bootstrap.php';
+    define('BOOTSTRAP_LOADED', true);
+}
+```
+
+#### 3. Padronização nos Views
+```php
+// Antes (problemático)
+require_once dirname(__DIR__, 3) . '/config/bootstrap.php';
+
+// Depois (centralizado)
+require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
+```
+
+### Benefícios Alcançados
+✅ **Carregamento único** garantido  
+✅ **Caminhos padronizados** e seguros  
+✅ **Manutenção simplificada** (mudar em um lugar)  
+✅ **Performance melhorada** (evita includes desnecessários)  
+✅ **Conformidade arquitetural** (helpers centralizam lógica comum)
+
+---
+
 **Arquitetura aprovada em:** 11/02/2026  
 **Desenvolvedor:** Equipe CCB  
 **Revisão:** Aprovada com 100% conformidade SOLID

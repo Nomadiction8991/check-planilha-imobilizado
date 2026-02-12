@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
