@@ -2,21 +2,38 @@
 
 namespace App\Controllers;
 
+use App\Services\ComumService;
 use App\Repositories\ComumRepository;
 use App\Core\ViewRenderer;
+use App\Core\ConnectionManager;
 use PDO;
 
 /**
  * Controller de Comuns
- * Gerencia listagem, visualização e edição de comuns
+ * 
+ * SOLID Principles:
+ * - Single Responsibility: Gerencia APENAS fluxo HTTP de comuns
+ * - Dependency Inversion: Depende de ComumService (abstração)
+ * 
+ * Responsabilidades:
+ * - Processar requisições HTTP (GET/POST)
+ * - Validar entrada do usuário
+ * - Delegar para ComumService
+ * - Renderizar views ou retornar JSON
  */
 class ComumController extends BaseController
 {
-    private ComumRepository $comumRepo;
+    private ComumService $comumService;
 
-    public function __construct(PDO $conexao)
+    public function __construct(?PDO $conexao = null)
     {
-        $this->comumRepo = new ComumRepository($conexao);
+        // Permite DI mas mantém backward compatibility
+        if ($conexao === null) {
+            $conexao = ConnectionManager::getConnection();
+        }
+
+        $comumRepo = new ComumRepository($conexao);
+        $this->comumService = new ComumService($comumRepo);
     }
 
     /**
@@ -31,12 +48,12 @@ class ComumController extends BaseController
         $offset = ($pagina - 1) * $limite;
 
         try {
-            // Buscar comuns
-            $comuns = $this->comumRepo->buscarPaginado($busca, $limite, $offset);
+            // Buscar comuns via Service
+            $comuns = $this->comumService->buscarPaginado($busca, $limite, $offset);
 
             // Contar totais
-            $total = $this->comumRepo->contarComFiltro($busca);
-            $totalGeral = $this->comumRepo->contar();
+            $total = $this->comumService->contar($busca);
+            $totalGeral = $this->comumService->contar();
             $totalPaginas = $total > 0 ? (int) ceil($total / $limite) : 1;
 
             // Se for requisição AJAX, retornar JSON

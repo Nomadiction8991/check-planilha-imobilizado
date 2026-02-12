@@ -2,22 +2,39 @@
 
 namespace App\Controllers;
 
+use App\Services\UsuarioService;
 use App\Repositories\UsuarioRepository;
 use App\Core\ViewRenderer;
+use App\Core\ConnectionManager;
 use PDO;
 use Exception;
 
 /**
  * Controller de Usuários
- * Gerencia CRUD completo de usuários
+ * 
+ * SOLID Principles:
+ * - Single Responsibility: Gerencia APENAS fluxo HTTP de usuários
+ * - Dependency Inversion: Depende de UsuarioService (abstração)
+ * 
+ * Responsabilidades:
+ * - Processar requisições HTTP (GET/POST)
+ * - Validar entrada do usuário
+ * - Delegar para UsuarioService
+ * - Renderizar views ou retornar JSON
  */
 class UsuarioController extends BaseController
 {
-    private UsuarioRepository $usuarioRepo;
+    private UsuarioService $usuarioService;
 
-    public function __construct(PDO $conexao)
+    public function __construct(?PDO $conexao = null)
     {
-        $this->usuarioRepo = new UsuarioRepository($conexao);
+        // Permite DI mas mantém backward compatibility
+        if ($conexao === null) {
+            $conexao = ConnectionManager::getConnection();
+        }
+
+        $usuarioRepo = new UsuarioRepository($conexao);
+        $this->usuarioService = new UsuarioService($usuarioRepo);
     }
 
     /**
@@ -34,7 +51,7 @@ class UsuarioController extends BaseController
         ];
 
         try {
-            $resultado = $this->usuarioRepo->buscarPaginadoComFiltros($pagina, $limite, $filtros);
+            $resultado = $this->usuarioService->buscarPaginado($pagina, $limite, $filtros);
 
             // Renderizar view limpa
             ViewRenderer::render('usuarios/index', [
@@ -103,17 +120,8 @@ class UsuarioController extends BaseController
             // Validar dados
             $this->validarUsuario($dados);
 
-            // Verificar duplicações
-            if ($this->usuarioRepo->emailExiste($dados['email'])) {
-                throw new Exception('Este e-mail já está cadastrado.');
-            }
-
-            if ($this->usuarioRepo->cpfExiste($dados['cpf'])) {
-                throw new Exception('Este CPF já está cadastrado.');
-            }
-
-            // Criar usuário
-            $id = $this->usuarioRepo->criarUsuario($dados);
+            // Verificar duplicações via Service
+            $id = $this->usuarioService->criar($dados);
 
             // Redirecionar com sucesso
             $this->redirecionarAposOperacao('success=1', 'Usuário cadastrado com sucesso!');
@@ -138,7 +146,7 @@ class UsuarioController extends BaseController
             return;
         }
 
-        $usuario = $this->usuarioRepo->buscarPorId($id);
+        $usuario = $this->usuarioService->buscarPorId($id);
 
         if (!$usuario) {
             $this->redirecionar('app/views/usuarios/usuarios_listar.php?erro=Usuário não encontrado');
@@ -165,22 +173,13 @@ class UsuarioController extends BaseController
             // Validar dados
             $this->validarUsuario($dados, $id);
 
-            // Verificar duplicações (exceto o próprio usuário)
-            if ($this->usuarioRepo->emailExiste($dados['email'], $id)) {
-                throw new Exception('Este e-mail já está cadastrado.');
-            }
-
-            if ($this->usuarioRepo->cpfExiste($dados['cpf'], $id)) {
-                throw new Exception('Este CPF já está cadastrado.');
-            }
-
-            // Atualizar
-            $this->usuarioRepo->atualizarUsuario($id, $dados);
+            // Atualizar (service valida duplicações automaticamente)
+            $this->usuarioService->atualizar($id, $dados);
 
             // Redirecionar com sucesso
             $this->redirecionarAposOperacao('success=1', 'Usuário atualizado com sucesso!');
         } catch (Exception $e) {
-            $usuario = $this->usuarioRepo->buscarPorId($id);
+            $usuario = $this->usuarioService->buscarPorId($id);
             $this->renderizarFormularioEdicaoLegado($usuario, $e->getMessage());
         }
     }
@@ -197,12 +196,12 @@ class UsuarioController extends BaseController
                 throw new Exception('ID inválido.');
             }
 
-            $usuario = $this->usuarioRepo->buscarPorId($id);
+            $usuario = $this->usuarioService->buscarPorId($id);
             if (!$usuario) {
                 throw new Exception('Usuário não encontrado.');
             }
 
-            $this->usuarioRepo->deletar($id);
+            $this->usuarioService->deletar($id);
 
             $this->setMensagem('Usuário deletado com sucesso!', 'success');
             $this->redirecionar('app/views/usuarios/usuarios_listar.php');
@@ -398,15 +397,20 @@ class UsuarioController extends BaseController
     }
 
     /**
-     * TEMPORÁRIO: Renderiza listagem legada
-     * TODO: Criar src/Views/usuarios/index.php
+     * DEPRECATED: Renderiza listagem legada
+     * 
+     * @deprecated Use ViewRenderer::render('usuarios/index') instead
+     * TODO: Remover após migração completa para src/Views/usuarios/index.php
      */
     private function renderizarListagemLegada(array $dados): void
     {
+        // Importar variáveis para compatibilidade com view legada
         extract($dados);
-        global $conexao;
 
-        // Importar variáveis para compatibilidade
+        // NOTA: Conexão global necessária para view legada
+        // Será removida quando view for migrada para src/Views/
+        $conexao = ConnectionManager::getConnection();
+
         $usuarios = $dados['usuarios'];
         $total_registros = $dados['total'];
         $total_registros_all = $dados['totalGeral'];

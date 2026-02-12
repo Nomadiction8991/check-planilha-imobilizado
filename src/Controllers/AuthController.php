@@ -3,13 +3,41 @@
 namespace App\Controllers;
 
 use App\Services\AuthService;
+use App\Repositories\UsuarioRepository;
+use App\Core\ConnectionManager;
 
+/**
+ * AuthController - Controlador de Autenticação
+ * 
+ * SOLID Principles:
+ * - Single Responsibility: Gerencia APENAS fluxo HTTP de autenticação
+ * - Dependency Inversion: Depende de AuthService (abstração)
+ * 
+ * Responsabilidades:
+ * - Processar requisições HTTP (GET/POST)
+ * - Validar entrada do usuário
+ * - Delegar autenticação para AuthService
+ * - Renderizar views ou redirecionar
+ */
 class AuthController
 {
+    private AuthService $authService;
+
+    public function __construct(?AuthService $authService = null)
+    {
+        // Permite DI mas mantém backward compatibility
+        if ($authService === null) {
+            $conexao = ConnectionManager::getConnection();
+            $usuarioRepo = new UsuarioRepository($conexao);
+            $authService = new AuthService($usuarioRepo);
+        }
+        $this->authService = $authService;
+    }
+
     public function login()
     {
-        // Se já está logado, redireciona para o index antigo
-        if (isset($_SESSION['usuario_id'])) {
+        // Se já está logado, redireciona para o index
+        if ($this->authService->isAuthenticated()) {
             header('Location: ../index.php');
             exit;
         }
@@ -36,10 +64,9 @@ class AuthController
                 throw new \Exception('E-mail e senha são obrigatórios.');
             }
 
-            $authService = new AuthService();
-            $usuario = $authService->authenticate($email, $senha);
+            $this->authService->authenticate($email, $senha);
 
-            // Login bem-sucedido - redirecionar para o código antigo
+            // Login bem-sucedido - redirecionar
             header('Location: ../index.php');
             exit;
         } catch (\Exception $e) {
