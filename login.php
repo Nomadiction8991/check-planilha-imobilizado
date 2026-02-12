@@ -26,26 +26,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('E-mail e senha são obrigatórios.');
         }
 
-            // Buscar usuário por email (comparacao em UPPER para ser robusto a case)
-            // Não filtramos por ativo aqui para permitir mostrar mensagem específica quando inativo
-            $stmt = $conexao->prepare('SELECT * FROM usuarios WHERE UPPER(email) = :email LIMIT 1');
-            $stmt->bindValue(':email', to_uppercase($email));
+        // Buscar usuário por email (comparacao em UPPER para ser robusto a case)
+        // Não filtramos por ativo aqui para permitir mostrar mensagem específica quando inativo
+        $stmt = $conexao->prepare('SELECT * FROM usuarios WHERE UPPER(email) = :email LIMIT 1');
+        $stmt->bindValue(':email', to_uppercase($email));
         $stmt->execute();
         $usuario = $stmt->fetch();
 
-            if (!$usuario) {
-                throw new Exception('E-mail ou senha inválidos.');
-            }
+        if (!$usuario) {
+            throw new Exception('E-mail ou senha inválidos.');
+        }
 
-            // Se usuário existe mas está inativo, informar especificamente
-            if ((int)($usuario['ativo'] ?? 0) !== 1) {
-                throw new Exception('Usuário inativo. Entre em contato com o administrador.');
-            }
+        // Se usuário existe mas está inativo, informar especificamente
+        if ((int)($usuario['ativo'] ?? 0) !== 1) {
+            throw new Exception('Usuário inativo. Entre em contato com o administrador.');
+        }
 
-            // Verificar senha
-            if (!password_verify($senha, $usuario['senha'])) {
-                throw new Exception('E-mail ou senha inválidos.');
-            }
+        // Verificar senha
+        if (!password_verify($senha, $usuario['senha'])) {
+            throw new Exception('E-mail ou senha inválidos.');
+        }
 
         // Login bem-sucedido
         // Regenerate session id to prevent fixation and ensure session persistence
@@ -75,7 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         header('Location: index.php');
         exit;
-
     } catch (Exception $e) {
         $erro = $e->getMessage();
     }
@@ -83,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,31 +97,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             justify-content: center;
         }
+
         .login-container {
             max-width: 400px;
             width: 100%;
             padding: 15px;
         }
+
         .login-card {
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
+
         .login-body {
-            padding: 1.25rem 2rem 1.25rem; /* less top/bottom space */
+            padding: 1.25rem 2rem 1.25rem;
+            /* less top/bottom space */
         }
+
         .btn-login {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             padding: 0.75rem;
             font-weight: 500;
         }
+
         .btn-login:hover {
             background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-card">
@@ -129,18 +136,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if ($sucesso): ?>
                     <div class="alert alert-success fade show" role="alert">
                         <i class="bi bi-check-circle me-2"></i>
-                        <?php 
-                            // Corrige possíveis problemas de codificação e então aplica uppercase
-                            echo to_uppercase(htmlspecialchars(\voku\helper\UTF8::fix_utf8($sucesso), ENT_QUOTES, 'UTF-8')); 
+                        <?php
+                        // Corrige possíveis problemas de codificação e então aplica uppercase
+                        echo to_uppercase(htmlspecialchars(\voku\helper\UTF8::fix_utf8($sucesso), ENT_QUOTES, 'UTF-8'));
                         ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <?php if ($erro): ?>
                     <div class="alert alert-danger fade show" role="alert">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        <?php 
-                            echo to_uppercase(htmlspecialchars(\voku\helper\UTF8::fix_utf8($erro), ENT_QUOTES, 'UTF-8'));
+                        <?php
+                        echo to_uppercase(htmlspecialchars(\voku\helper\UTF8::fix_utf8($erro), ENT_QUOTES, 'UTF-8'));
                         ?>
                     </div>
                 <?php endif; ?>
@@ -151,9 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="bi bi-envelope me-1"></i>
                             EMAIL
                         </label>
-                        <input type="email" class="form-control text-uppercase" id="email" name="email" 
-                               placeholder="SEU@EMAIL.COM" required autofocus
-                               value="<?php echo htmlspecialchars($email ?? ''); ?>" style="text-transform:uppercase;">
+                        <input type="email" class="form-control text-uppercase" id="email" name="email"
+                            placeholder="SEU@EMAIL.COM" required autofocus
+                            value="<?php echo htmlspecialchars($email ?? ''); ?>" style="text-transform:uppercase;">
                     </div>
 
                     <div class="mb-3">
@@ -161,8 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="bi bi-lock me-1"></i>
                             SENHA
                         </label>
-                        <input type="password" class="form-control" id="senha" name="senha" 
-                               placeholder="DIGITE SUA SENHA" required>
+                        <input type="password" class="form-control" id="senha" name="senha"
+                            placeholder="DIGITE SUA SENHA" required>
                     </div>
 
                     <div class="d-grid">
@@ -180,14 +187,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Auto-dismiss alerts: show for 3s, then fade out smoothly over 1s, then remove
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.alert').forEach(function (alertEl) {
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.alert').forEach(function(alertEl) {
                 // Ensure we can transition opacity/height
                 alertEl.style.transition = 'opacity 1s ease, max-height 1s ease, margin 1s ease, padding 1s ease';
                 alertEl.style.overflow = 'hidden';
 
                 // Wait 3 seconds, then fade
-                setTimeout(function () {
+                setTimeout(function() {
                     // start fade: opacity -> 0 and collapse spacing
                     alertEl.style.opacity = '0';
                     alertEl.style.maxHeight = '0';
@@ -195,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     alertEl.style.padding = '0';
 
                     // remove element after 1s (duration of fade)
-                    setTimeout(function () {
+                    setTimeout(function() {
                         if (alertEl.parentNode) alertEl.parentNode.removeChild(alertEl);
                     }, 1000);
                 }, 3000);
@@ -203,8 +210,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 </body>
+
 </html>
-
-
-
-
