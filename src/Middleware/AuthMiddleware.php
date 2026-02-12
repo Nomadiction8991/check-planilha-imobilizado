@@ -1,13 +1,15 @@
 <?php
 
+namespace App\Middleware;
+
+use App\Core\SessionManager;
+
 require_once __DIR__ . '/../Core/SessionManager.php';
 require_once __DIR__ . '/../Services/AuthService.php';
 
 
 class AuthMiddleware
 {
-    private SessionManager $sessionManager;
-
 
     private const SESSION_TIMEOUT = 1800;
 
@@ -18,12 +20,9 @@ class AuthMiddleware
         '/src/Views/planilhas/relatorio_imprimir_alteracao.php',
     ];
 
-    public function __construct(?SessionManager $sessionManager = null)
+    public function __construct()
     {
-        if ($sessionManager === null) {
-            $sessionManager = SessionManager::getInstance();
-        }
-        $this->sessionManager = $sessionManager;
+        // SessionManager é usado estaticamente
     }
 
 
