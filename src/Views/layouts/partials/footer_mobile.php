@@ -18,22 +18,22 @@ $logoutPath = $logoutPath ?? '/logout';
 <footer class="app-footer footer-mobile">
     <div class="footer-left">
         <button class="btn-footer-action" onclick="goBack()" title="Voltar" aria-label="Voltar">
-            <i class="bi bi-arrow-left"></i>
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+            <span class="footer-label">Voltar</span>
         </button>
-        <div class="footer-label">Voltar</div>
     </div>
 
     <div class="footer-center">
         <a href="<?= htmlspecialchars($homePath, ENT_QUOTES, 'UTF-8') ?>" class="btn-footer-action" title="Início" aria-label="Início">
-            <i class="bi bi-house-door"></i>
+            <i class="bi bi-house-door" aria-hidden="true"></i>
+            <span class="footer-label">Início</span>
         </a>
-        <div class="footer-label">Início</div>
     </div>
 
     <div class="footer-right">
         <a href="<?= htmlspecialchars($logoutPath, ENT_QUOTES, 'UTF-8') ?>" class="btn-footer-action btn-logout" title="Sair" aria-label="Sair">
-            <i class="bi bi-box-arrow-right"></i>
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            <span class="footer-label">Sair</span>
         </a>
-        <div class="footer-label">Sair</div>
     </div>
 </footer>

@@ -26,7 +26,7 @@
 /* Conteúdo principal */
 .app-content {
     flex: 1;
-    padding: 80px 16px 96px; /* espaço extra para footer + labels */
+    padding: 76px 16px 86px; /* ajustar espaço inferior após reduzir footer */
     overflow-y: auto;
     background: #f8f9fa;
 }
