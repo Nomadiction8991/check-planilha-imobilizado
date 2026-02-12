@@ -136,4 +136,61 @@ class SessionManager
         self::start();
         $_SESSION = [];
     }
+
+    /**
+     * Garante que o usuário logado tenha uma comum_id definida na sessão.
+     * Se não houver, define a primeira comum disponível como padrão e persiste no DB.
+     * @return int|null ID da comum ativa, ou null se não houver comuns disponíveis
+     */
+    public static function ensureComumId(): ?int
+    {
+        self::start();
+        
+        // Se já existe comum_id na sessão, retorna
+        if (isset($_SESSION['comum_id']) && (int)$_SESSION['comum_id'] > 0) {
+            return (int)$_SESSION['comum_id'];
+        }
+
+        // Verifica se usuário está logado
+        if (!self::isAuthenticated()) {
+            return null;
+        }
+
+        try {
+            $conexao = ConnectionManager::getConnection();
+            
+            // Buscar comum_id do usuário no banco
+            $stmt = $conexao->prepare("SELECT comum_id FROM usuarios WHERE id = :id");
+            $stmt->bindValue(':id', self::getUserId(), \PDO::PARAM_INT);
+            $stmt->execute();
+            $usuario = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $comumId = $usuario['comum_id'] ?? null;
+
+            // Se não houver comum definida, busca a primeira disponível
+            if ((int)$comumId <= 0) {
+                $stmtComum = $conexao->query("SELECT id FROM comums ORDER BY id LIMIT 1");
+                $primeiraComum = $stmtComum->fetch(\PDO::FETCH_ASSOC);
+                
+                if ($primeiraComum) {
+                    $comumId = (int)$primeiraComum['id'];
+                    
+                    // Persiste a comum padrão no banco
+                    $uStmt = $conexao->prepare("UPDATE usuarios SET comum_id = :comum_id WHERE id = :id");
+                    $uStmt->bindValue(':comum_id', $comumId, \PDO::PARAM_INT);
+                    $uStmt->bindValue(':id', self::getUserId(), \PDO::PARAM_INT);
+                    $uStmt->execute();
+                } else {
+                    return null; // Não há comuns cadastradas
+                }
+            }
+
+            // Define na sessão
+            $_SESSION['comum_id'] = $comumId;
+            return $comumId;
+            
+        } catch (\Exception $e) {
+            error_log('Erro ao garantir comum_id: ' . $e->getMessage());
+            return null;
+        }
+    }
 }

@@ -108,29 +108,8 @@ if (!isset($content)) {
                     $comumRepo = new \App\Repositories\ComumRepository($conexao);
                     $comuns = $comumRepo->buscarTodos();
                     
-                    // Buscar comum_id do usuário
-                    $stmt = $conexao->prepare("SELECT comum_id FROM usuarios WHERE id = :id");
-                    $stmt->bindValue(':id', $_SESSION['usuario_id'], PDO::PARAM_INT);
-                    $stmt->execute();
-                    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-                    $comumAtualId = $usuario['comum_id'] ?? null;
-
-                    // Se não houver comum definida para o usuário, definimos a primeira como padrão
-                    if ((int)$comumAtualId <= 0 && !empty($comuns)) {
-                        $comumAtualId = (int) $comuns[0]['id'];
-
-                        try {
-                            // Persistir valor padrão para o usuário
-                            $uStmt = $conexao->prepare("UPDATE usuarios SET comum_id = :comum_id WHERE id = :id");
-                            $uStmt->bindValue(':comum_id', $comumAtualId, PDO::PARAM_INT);
-                            $uStmt->bindValue(':id', $_SESSION['usuario_id'], PDO::PARAM_INT);
-                            $uStmt->execute();
-                        } catch (\Exception $e) {
-                            error_log('Erro ao persistir comum padrão para usuário: ' . $e->getMessage());
-                        }
-                    }
-
-                    $_SESSION['comum_id'] = $comumAtualId;
+                    // Garante que comum_id está definida (usa SessionManager)
+                    $comumAtualId = \App\Core\SessionManager::ensureComumId();
                 } catch (\Exception $e) {
                     error_log('Erro ao carregar comuns: ' . $e->getMessage());
                 }
