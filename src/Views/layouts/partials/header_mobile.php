@@ -15,6 +15,13 @@ $pageTitle = $pageTitle ?? 'TÍTULO DA PÁGINA';
 $userName = $userName ?? '';
 $comuns = $comuns ?? [];
 $comumAtualId = $comumAtualId ?? null;
+
+function _fmtCodigoComum($codigo) {
+    // formata número como "BR 00-000". Se não for numérico, retorna original.
+    if (!is_numeric($codigo)) return $codigo;
+    $s = str_pad((string)$codigo, 5, '0', STR_PAD_LEFT);
+    return 'BR ' . substr($s, 0, 2) . '-' . substr($s, 2);
+}
 ?>
 
 <div class="app-header header-mobile">
@@ -34,7 +41,7 @@ $comumAtualId = $comumAtualId ?? null;
         <select id="comum-selector" class="form-select form-select-sm" aria-label="Selecionar Comum">
             <?php foreach ($comuns as $comum): ?>
                 <option value="<?= (int)$comum['id'] ?>" <?= (int)$comum['id'] === (int)$comumAtualId ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($comum['codigo'], ENT_QUOTES, 'UTF-8') ?>
+                    <?= htmlspecialchars(_fmtCodigoComum($comum['codigo']), ENT_QUOTES, 'UTF-8') ?>
                 </option>
             <?php endforeach; ?>
         </select>
