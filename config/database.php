@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Database Configuration
  * 
@@ -27,4 +28,3 @@ $conexao = ConnectionManager::getConnection();
  * 
  * A variável $conexao será removida quando todo código legado for migrado.
  */
-

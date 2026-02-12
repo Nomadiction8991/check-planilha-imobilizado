@@ -63,7 +63,7 @@ class ComumService
         // Regra de negócio: Gerar CNPJ único se necessário
         if (isset($dados['cnpj'])) {
             $dados['cnpj'] = $this->comumRepository->gerarCnpjUnico(
-                $dados['cnpj'], 
+                $dados['cnpj'],
                 (int)$dados['codigo']
             );
         }
@@ -107,7 +107,7 @@ class ComumService
 
             // Regra de negócio: Gerar CNPJ único
             $dados['cnpj'] = $this->comumRepository->gerarCnpjUnico(
-                $dados['cnpj'], 
+                $dados['cnpj'],
                 (int)($dados['codigo'] ?? $comumExistente['codigo']),
                 $id
             );

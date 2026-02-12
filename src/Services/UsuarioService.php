@@ -155,8 +155,18 @@ class UsuarioService
      */
     private function normalizarDados(array $dados): array
     {
-        $camposUppercase = ['nome', 'email', 'telefone', 'endereco', 'cidade', 'estado', 
-                            'rg', 'cidade_natural', 'estado_natural', 'nome_conjuge'];
+        $camposUppercase = [
+            'nome',
+            'email',
+            'telefone',
+            'endereco',
+            'cidade',
+            'estado',
+            'rg',
+            'cidade_natural',
+            'estado_natural',
+            'nome_conjuge'
+        ];
 
         foreach ($camposUppercase as $campo) {
             if (isset($dados[$campo]) && is_string($dados[$campo])) {
