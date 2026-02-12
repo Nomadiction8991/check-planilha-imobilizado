@@ -1,309 +1,247 @@
 <?php
-require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
-
-$pageTitle = 'Progresso da Importação';
-
+$pageTitle = 'PROGRESSO DA IMPORTAÇÃO';
 $backUrl = null;
-$jobId = $_GET['job'] ?? '';
-
-if ($jobId === '') {
-    $_SESSION['mensagem'] = 'Job de importação não informado.';
-    $_SESSION['tipo_mensagem'] = 'danger';
-    header('Location: ' . base_url('/planilhas/importar'));
-    exit;
-}
-
-ob_start();
+$importacaoId = $importacao_id ?? 0;
 ?>
 
-<div class="card">
-    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-cloud-upload"></i>
-            <span id="job-id"><?php echo htmlspecialchars($jobId, ENT_QUOTES, 'UTF-8'); ?></span>
+<div class="container-fluid py-3">
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-hourglass-split me-2"></i>
+            PROCESSANDO IMPORTAÇÃO
         </div>
-    </div>
-    <div class="card-body">
-        <p class="mb-3">Estamos processando sua planilha em lotes de 200 registros para evitar travamentos. Esta página irá atualizar o progresso automaticamente.</p>
+        <div class="card-body">
+            <!-- Status -->
+            <div class="mb-3 text-center">
+                <h5 id="status-text">Preparando importação...</h5>
+            </div>
 
-        <div class="progress mb-3" style="height: 32px;">
-            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">0%</div>
-        </div>
+            <!-- Barra de Progresso -->
+            <div class="mb-3">
+                <div class="progress" style="height: 30px;">
+                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: 0%"
+                         aria-valuenow="0" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        <span id="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
 
-        <div class="row row-cols-1 g-2 mb-3 text-start">
-            <div class="col"><strong>Processados:</strong> <span id="processed">0</span></div>
-            <div class="col"><strong>Total estimado:</strong> <span id="total">0</span></div>
-            <div class="col"><strong>Novos:</strong> <span id="novos">0</span></div>
-            <div class="col"><strong>Atualizados:</strong> <span id="atualizados">0</span></div>
-            <div class="col"><strong>Excluídos:</strong> <span id="excluidos">0</span></div>
-        </div>
+            <!-- Informações Detalhadas -->
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="border rounded p-3 mb-2">
+                        <h6 class="text-muted mb-1">TOTAL DE LINHAS</h6>
+                        <h4 id="total-linhas" class="mb-0">-</h4>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 mb-2">
+                        <h6 class="text-muted mb-1">PROCESSADAS</h6>
+                        <h4 id="linhas-processadas" class="mb-0 text-primary">-</h4>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 mb-2">
+                        <h6 class="text-muted mb-1">SUCESSO</h6>
+                        <h4 id="linhas-sucesso" class="mb-0 text-success">-</h4>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 mb-2">
+                        <h6 class="text-muted mb-1">ERROS</h6>
+                        <h4 id="linhas-erro" class="mb-0 text-danger">-</h4>
+                    </div>
+                </div>
+            </div>
 
-        <div id="alert-area"></div>
+            <!-- Status do Arquivo -->
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-file-earmark-text me-1"></i>
+                    <span id="arquivo-nome">Carregando...</span>
+                </small>
+            </div>
 
-        <div id="errors-note" class="alert alert-warning mt-3" role="alert" style="display: none;">
-            <strong>Erros acumulados:</strong>
-            <ul id="errors-list" class="mb-0 mt-2"></ul>
-        </div>
+            <!-- Mensagem de Erro -->
+            <div id="erro-container" class="alert alert-danger mt-3" style="display: none;">
+                <h6><i class="bi bi-exclamation-triangle me-2"></i>ERRO</h6>
+                <p id="erro-mensagem" class="mb-0"></p>
+            </div>
 
-        <div class="mt-3">
-            <div class="fw-bold mb-2">Log</div>
-            <div id="log-box" class="border rounded p-2 bg-light" style="max-height: 220px; overflow-y: auto; font-size: 0.9rem;"></div>
-        </div>
-
-        <div id="done-actions" class="text-center mt-4" style="display: none;">
-            <p class="mb-2">Importação finalizada.</p>
-            <a id="go-comuns" class="btn btn-primary" style="display:none;">Voltar para listagem de comuns</a>
-        </div>
-
-        <div class="text-center mt-4" id="processing-note">
-            <p class="mt-2 mb-0">Processando lotes. Você pode manter esta aba aberta; ao concluir, use o botão para voltar.</p>
-        </div>
-
-        <div class="mt-3">
-            <button id="cancel-btn" type="button" class="btn btn-outline-danger w-100 py-3">Cancelar</button>
-            <button id="conclude-btn" type="button" class="btn btn-success w-100 py-3" style="display:none; margin-top:8px;">Concluir</button>
+            <!-- Mensagem de Sucesso -->
+            <div id="sucesso-container" class="alert alert-success mt-3" style="display: none;">
+                <h6><i class="bi bi-check-circle me-2"></i>IMPORTAÇÃO CONCLUÍDA!</h6>
+                <p class="mb-0">
+                    <span id="sucesso-linhas">0</span> linhas importadas com sucesso.
+                    <span id="sucesso-erros-txt"></span>
+                </p>
+                <div class="mt-3">
+                    <a href="/planilhas/visualizar" class="btn btn-primary">
+                        <i class="bi bi-eye me-2"></i>VISUALIZAR PRODUTOS
+                    </a>
+                    <a href="/planilhas/importar" class="btn btn-secondary">
+                        <i class="bi bi-upload me-2"></i>NOVA IMPORTAÇÃO
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    (function() {
-        const baseUrl = <?php echo json_encode(base_url()); ?>;
-        const jobId = <?php echo json_encode($jobId); ?>;
-        const progressBar = document.getElementById('progress-bar');
-        const processedEl = document.getElementById('processed');
-        const totalEl = document.getElementById('total');
-        const novosEl = document.getElementById('novos');
-        const atualizadosEl = document.getElementById('atualizados');
-        const excluidosEl = document.getElementById('excluidos');
-        const alertArea = document.getElementById('alert-area');
-        const cancelBtn = document.getElementById('cancel-btn');
-        const errorsNote = document.getElementById('errors-note');
-        const errorsList = document.getElementById('errors-list');
-        const doneActions = document.getElementById('done-actions');
-        const goComuns = document.getElementById('go-comuns');
-        const processingNote = document.getElementById('processing-note');
-        const logBox = document.getElementById('log-box');
+const importacaoId = <?= $importacaoId ?>;
+let processamentoIniciado = false;
+let intervaloAtualizacao = null;
 
-        const errorsAccum = new Set();
+// Inicia processamento
+function iniciarProcessamento() {
+    if (processamentoIniciado) return;
+    processamentoIniciado = true;
 
-        let canceled = false;
-        let fatal = false;
-
-        function setProgress(percent) {
-            const pct = Math.max(0, Math.min(100, percent));
-            progressBar.style.width = pct + '%';
-            progressBar.setAttribute('aria-valuenow', pct);
-            progressBar.textContent = pct.toFixed(2) + '%';
+    fetch('/planilhas/processar-arquivo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'id=' + importacaoId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.erro) {
+            mostrarErro(data.erro);
+            pararAtualizacao();
         }
+    })
+    .catch(error => {
+        console.error('Erro ao processar:', error);
+    });
+}
 
-        function showAlert(type, message) {
-            alertArea.innerHTML = '<div class="alert alert-' + type + '" role="alert">' + message + '</div>';
-        }
-
-        function formatLogEntry(entry) {
-            const ts = entry.ts ? new Date(entry.ts * 1000) : new Date();
-            const stamp = ts.toLocaleTimeString('pt-BR');
-            const lvl = (entry.level || 'info').toUpperCase();
-            const msg = entry.message || '';
-            return '[' + stamp + '] ' + lvl + ': ' + msg;
-        }
-
-        function renderLog(entries) {
-            if (!logBox) return;
-            logBox.innerHTML = '';
-            entries.forEach(e => {
-                const div = document.createElement('div');
-                div.textContent = formatLogEntry(e);
-                logBox.appendChild(div);
-            });
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        function appendLog(level, message) {
-            if (!logBox) return;
-            const entry = {
-                ts: Math.floor(Date.now() / 1000),
-                level,
-                message
-            };
-            const div = document.createElement('div');
-            div.textContent = formatLogEntry(entry);
-            logBox.appendChild(div);
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        function pushErrors(errs) {
-            if (!errs || !errs.length) return;
-            errs.forEach(e => {
-                if (!errorsAccum.has(e)) {
-                    errorsAccum.add(e);
-                    const li = document.createElement('li');
-                    li.textContent = e;
-                    errorsList.appendChild(li);
-                }
-            });
-            if (errorsAccum.size > 0) {
-                errorsNote.style.display = '';
-            }
-        }
-
-        async function cancelImport() {
-            if (!confirm('Cancelar esta importação?')) {
+// Atualiza progresso
+function atualizarProgresso() {
+    fetch('/planilhas/api/progresso?id=' + importacaoId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.erro) {
+                mostrarErro(data.erro);
+                pararAtualizacao();
                 return;
             }
-            cancelBtn.disabled = true;
-            canceled = true;
-            try {
-                const resp = await fetch(baseUrl + 'planilhas/importar?action=cancel&job=' + encodeURIComponent(jobId), {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                const data = await resp.json();
-                if (!resp.ok) {
-                    showAlert('danger', data.message || 'Falha ao cancelar importação.');
-                    appendLog('erro', data.message || 'Falha ao cancelar importação.');
-                    cancelBtn.disabled = false;
-                    canceled = false;
-                    return;
-                }
-                const msg = 'Importação cancelada.';
-                showAlert('warning', msg);
-                appendLog('aviso', msg);
-            } catch (err) {
-                showAlert('danger', 'Erro ao cancelar: ' + err);
-                appendLog('erro', 'Erro ao cancelar: ' + err);
-                cancelBtn.disabled = false;
-                canceled = false;
+
+            // Atualiza informações
+            document.getElementById('total-linhas').textContent = data.total_linhas.toLocaleString();
+            document.getElementById('linhas-processadas').textContent = data.linhas_processadas.toLocaleString();
+            document.getElementById('linhas-sucesso').textContent = data.linhas_sucesso.toLocaleString();
+            document.getElementById('linhas-erro').textContent = data.linhas_erro.toLocaleString();
+            document.getElementById('arquivo-nome').textContent = data.arquivo_nome;
+
+            // Atualiza barra de progresso
+            const porcentagem = Math.round(data.porcentagem);
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            progressBar.style.width = porcentagem + '%';
+            progressBar.setAttribute('aria-valuenow', porcentagem);
+            progressText.textContent = porcentagem + '%';
+
+            // Atualiza status
+            let statusTexto = 'Processando...';
+            if (data.status === 'aguardando') {
+                statusTexto = 'Aguardando início...';
+            } else if (data.status === 'processando') {
+                statusTexto = 'Processando linhas...';
+            } else if (data.status === 'concluida') {
+                statusTexto = 'Importação concluída!';
+                mostrarSucesso(data.linhas_sucesso, data.linhas_erro);
+                pararAtualizacao();
+                progressBar.classList.remove('progress-bar-animated');
+                progressBar.classList.add('bg-success');
+            } else if (data.status === 'erro') {
+                statusTexto = 'Erro na importação';
+                mostrarErro(data.mensagem_erro || 'Erro desconhecido');
+                pararAtualizacao();
+                progressBar.classList.remove('progress-bar-animated');
+                progressBar.classList.add('bg-danger');
             }
-        }
+            
+            document.getElementById('status-text').textContent = statusTexto;
+        })
+        .catch(error => {
+            console.error('Erro ao buscar progresso:', error);
+        });
+}
 
-        async function concludeImport() {
-            const concludeBtn = document.getElementById('conclude-btn');
-            concludeBtn.disabled = true;
-            try {
-                const resp = await fetch(baseUrl + 'planilhas/importar?action=finish&job=' + encodeURIComponent(jobId), {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                const data = await resp.json();
-                if (!resp.ok) {
-                    showAlert('danger', data.message || 'Falha ao finalizar importação.');
-                    appendLog('erro', data.message || 'Falha ao finalizar importação.');
-                    concludeBtn.disabled = false;
-                    return;
-                }
-                const redirect = data.redirect || (baseUrl + 'index.php');
-                window.location.href = redirect;
-            } catch (err) {
-                showAlert('danger', 'Erro ao finalizar: ' + err);
-                appendLog('erro', 'Erro ao finalizar: ' + err);
-                concludeBtn.disabled = false;
-            }
-        }
+function mostrarErro(mensagem) {
+    document.getElementById('erro-mensagem').textContent = mensagem;
+    document.getElementById('erro-container').style.display = 'block';
+}
 
-        async function poll() {
-            if (canceled) {
-                return;
-            }
-            if (fatal) {
-                return;
-            }
-            try {
-                const resp = await fetch(baseUrl + 'planilhas/importar?action=process&job=' + encodeURIComponent(jobId), {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                if (!resp.ok) {
-                    const text = await resp.text();
-                    const msg = 'Erro ao processar: ' + text;
-                    showAlert('danger', msg);
-                    appendLog('erro', msg);
-                    fatal = true;
-                    return;
-                }
-                const data = await resp.json();
+function mostrarSucesso(sucesso, erros) {
+    document.getElementById('sucesso-linhas').textContent = sucesso.toLocaleString();
+    
+    if (erros > 0) {
+        document.getElementById('sucesso-erros-txt').textContent = 
+            erros + ' linha(s) com erro.';
+    }
+    
+    document.getElementById('sucesso-container').style.display = 'block';
+}
 
-                if (data.total !== undefined) {
-                    totalEl.textContent = data.total;
-                }
-                if (data.stats) {
-                    processedEl.textContent = data.stats.processados ?? 0;
-                    novosEl.textContent = data.stats.novos ?? 0;
-                    atualizadosEl.textContent = data.stats.atualizados ?? 0;
-                    excluidosEl.textContent = data.stats.excluidos ?? 0;
-                }
-                if (data.progress !== undefined) {
-                    setProgress(data.progress);
-                }
+function pararAtualizacao() {
+    if (intervaloAtualizacao) {
+        clearInterval(intervaloAtualizacao);
+        intervaloAtualizacao = null;
+    }
+}
 
-                if (data.log && Array.isArray(data.log)) {
-                    renderLog(data.log);
-                }
+// Inicia quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Primeira atualização imediata
+    atualizarProgresso();
+    
+    // Inicia processamento em background
+    setTimeout(iniciarProcessamento, 500);
+    
+    // Atualiza a cada 1 segundo
+    intervaloAtualizacao = setInterval(atualizarProgresso, 1000);
+});
 
-                if (data.errors && data.errors.length > 0) {
-                    showAlert('warning', 'Erros até agora: ' + data.errors.slice(-3).join(' | '));
-                    pushErrors(data.errors);
-                    appendLog('aviso', 'Erros recebidos: ' + data.errors.slice(-3).join(' | '));
-                }
-
-                if (data.done) {
-                    setProgress(100);
-                    const message = data.message || 'Importação finalizada.';
-                    const redirect = data.redirect || (baseUrl + 'index.php');
-                    if (data.errors && data.errors.length > 0) {
-                        showAlert('warning', message + ' Verifique as linhas com erro.');
-                        pushErrors(data.errors);
-                        appendLog('aviso', 'Finalizada com erros: ' + data.errors.length + ' ocorrência(s).');
-                    } else {
-                        showAlert('success', message);
-                        appendLog('ok', 'Finalizada com sucesso.');
-                    }
-                    if (processingNote) processingNote.style.display = 'none';
-                    if (doneActions) doneActions.style.display = '';
-                    // esconder botão cancelar e exibir botão Concluir
-                    try {
-                        if (cancelBtn) cancelBtn.style.display = 'none';
-                        const concludeBtn = document.getElementById('conclude-btn');
-                        if (concludeBtn) {
-                            concludeBtn.style.display = '';
-                            concludeBtn.addEventListener('click', concludeImport);
-                        }
-                    } catch (e) {
-                        // noop
-                    }
-                    if (goComuns) {
-                        goComuns.setAttribute('href', redirect);
-                        goComuns.style.display = 'inline-block';
-                        goComuns.addEventListener('click', () => {
-                            window.location.href = redirect;
-                        });
-                    }
-                    return;
-                }
-
-                setTimeout(poll, 400);
-            } catch (err) {
-                showAlert('danger', 'Falha na requisição: ' + err);
-                appendLog('erro', 'Falha na requisição: ' + err);
-                setTimeout(poll, 3000);
-            }
-        }
-
-        cancelBtn.addEventListener('click', cancelImport);
-        poll();
-    })();
+// Para de atualizar se o usuário sair da página
+window.addEventListener('beforeunload', function() {
+    pararAtualizacao();
+});
 </script>
 
-<?php
-$contentHtml = ob_get_clean();
-$contentFile = __DIR__ . '/../../../temp_importar_planilha_content_' . uniqid() . '.php';
-file_put_contents($contentFile, $contentHtml);
-include_once __DIR__ . '/../layouts/app.php';
-@unlink($contentFile);
-?>
+<style>
+.progress {
+    background-color: #e9ecef;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.3s ease;
+}
+
+#progress-text {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.border.rounded {
+    transition: all 0.3s ease;
+}
+
+.border.rounded:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+</style>
