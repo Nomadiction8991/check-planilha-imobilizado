@@ -1092,7 +1092,7 @@ ob_start();
 
                 if ($p['ativo'] == 0) {
                     $classe = 'linha-dr';
-                } elseif ($p['imprimir'] == 1) {
+                } elseif (($p['imprimir_etiqueta'] ?? 0) == 1) {
                     $classe = 'linha-imprimir';
                 } elseif ($p['checado'] == 1) {
                     $classe = 'linha-checado';
@@ -1136,7 +1136,7 @@ ob_start();
                     data-produto-id="<?php echo $produtoId; ?>"
                     data-ativo="<?php echo (int) $p['ativo']; ?>"
                     data-checado="<?php echo (int) $p['checado']; ?>"
-                    data-imprimir="<?php echo (int) $p['imprimir']; ?>"
+                    data-imprimir="<?php echo (int) ($p['imprimir_etiqueta'] ?? 0); ?>"
                     data-observacao="<?php echo htmlspecialchars($p['observacao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                     data-editado="<?php echo (int) $p['editado']; ?>"
                     <?php echo $tipo_invalido ? 'title="Tipo de bem não identificado"' : ''; ?>>
@@ -1232,13 +1232,13 @@ ob_start();
                         <form method="POST" action="/produtos/etiqueta" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $produtoId; ?>">
                             <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                             <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
-                            <input type="hidden" name="imprimir" value="<?php echo $p['imprimir'] ? '0' : '1'; ?>">
+                            <input type="hidden" name="imprimir" value="<?php echo ($p['imprimir_etiqueta'] ?? 0) ? '0' : '1'; ?>">
                             <input type="hidden" name="pagina" value="<?php echo $paginaAtual; ?>">
                             <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>">
                             <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? ''); ?>">
                             <input type="hidden" name="codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>">
                             <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_STATUS ?? ''); ?>">
-                            <button type="submit" class="btn btn-outline-info btn-sm <?php echo $p['imprimir'] == 1 ? 'active' : ''; ?>" title="Etiqueta" <?php echo $imprimirDisabled ? 'disabled' : ''; ?>>
+                            <button type="submit" class="btn btn-outline-info btn-sm <?php echo ($p['imprimir_etiqueta'] ?? 0) == 1 ? 'active' : ''; ?>" title="Etiqueta" <?php echo $imprimirDisabled ? 'disabled' : ''; ?>">
                                 <i class="bi bi-printer-fill"></i>
                             </button>
                         </form>

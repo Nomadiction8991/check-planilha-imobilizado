@@ -68,40 +68,40 @@ class PlanilhaController extends BaseController
         $filtroCodigo = $_GET['filtro_codigo'] ?? '';
 
         // Montar query com filtros
-        $where = ['comum_id = :comum_id'];
+        $where = ['p.comum_id = :comum_id'];
         $params = [':comum_id' => $comumId];
 
         if ($filtroNome !== '') {
-            $where[] = '(descricao_completa LIKE :nome OR bem LIKE :nome)';
+            $where[] = '(p.descricao_completa LIKE :nome OR p.bem LIKE :nome)';
             $params[':nome'] = '%' . $filtroNome . '%';
         }
 
         if ($filtroDependencia !== '') {
-            $where[] = 'dependencia_id = :dependencia';
+            $where[] = 'p.dependencia_id = :dependencia';
             $params[':dependencia'] = (int)$filtroDependencia;
         }
 
         if ($filtroCodigo !== '') {
-            $where[] = 'codigo LIKE :codigo';
+            $where[] = 'p.codigo LIKE :codigo';
             $params[':codigo'] = '%' . $filtroCodigo . '%';
         }
 
         if ($filtroStatus === 'checado') {
-            $where[] = 'checado = 1';
+            $where[] = 'p.checado = 1';
         } elseif ($filtroStatus === 'observacao') {
-            $where[] = 'observacao != ""';
+            $where[] = 'p.observacao != ""';
         } elseif ($filtroStatus === 'etiqueta') {
-            $where[] = 'imprimir_etiqueta = 1';
+            $where[] = 'p.imprimir_etiqueta = 1';
         } elseif ($filtroStatus === 'pendente') {
-            $where[] = 'checado = 0';
+            $where[] = 'p.checado = 0';
         } elseif ($filtroStatus === 'editado') {
-            $where[] = 'editado = 1';
+            $where[] = 'p.editado = 1';
         }
 
         $whereClause = implode(' AND ', $where);
 
         // Contar total de produtos
-        $stmtCount = $this->conexao->prepare("SELECT COUNT(*) FROM produtos WHERE $whereClause");
+        $stmtCount = $this->conexao->prepare("SELECT COUNT(*) FROM produtos p WHERE $whereClause");
         foreach ($params as $key => $value) {
             $stmtCount->bindValue($key, $value);
         }
@@ -109,8 +109,19 @@ class PlanilhaController extends BaseController
         $totalProdutos = (int)$stmtCount->fetchColumn();
         $totalPaginas = ceil($totalProdutos / $itensPorPagina);
 
-        // Buscar produtos
-        $sql = "SELECT * FROM produtos WHERE $whereClause ORDER BY codigo ASC LIMIT :limite OFFSET :offset";
+        // Buscar produtos com JOINs para pegar descrições
+        $sql = "SELECT p.*, 
+                       tb.codigo as tipo_codigo, 
+                       tb.descricao as tipo_desc,
+                       d.descricao as dependencia_desc,
+                       COALESCE(ed.descricao, '') as editado_dependencia_desc
+                FROM produtos p
+                LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
+                LEFT JOIN dependencias d ON p.dependencia_id = d.id
+                LEFT JOIN dependencias ed ON p.editado_dependencia_id = ed.id
+                WHERE $whereClause 
+                ORDER BY p.codigo ASC 
+                LIMIT :limite OFFSET :offset";
         $stmtProdutos = $this->conexao->prepare($sql);
         foreach ($params as $key => $value) {
             $stmtProdutos->bindValue($key, $value);
@@ -129,10 +140,10 @@ class PlanilhaController extends BaseController
             'comum_id' => $comumId,
             'planilha' => $planilha,
             'produtos' => $produtos,
-            'total_produtos' => $totalProdutos,
+            'total_registros' => $totalProdutos,
             'pagina' => $paginaAtual,
             'total_paginas' => $totalPaginas,
-            'dependencias' => $dependencias,
+            'dependencia_options' => $dependencias,
             'filtro_nome' => $filtroNome,
             'filtro_dependencia' => $filtroDependencia,
             'filtro_status' => $filtroStatus,
