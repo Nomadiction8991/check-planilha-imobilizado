@@ -3,15 +3,7 @@
 
 
 
-$ambiente_manifest = 'prod';
-if (
-    strpos($_SERVER['REQUEST_URI'], '/dev/') !== false ||
-    strpos($_SERVER['HTTP_HOST'], 'dev.') !== false ||
-    strpos($_SERVER['HTTP_HOST'], 'localhost') !== false
-) {
-    $ambiente_manifest = 'dev';
-}
-$manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/manifest-prod.json';
+$manifest_path = '/manifest-prod.json';
 
 $pageTitle = $pageTitle ?? 'ANVY - GESTÃO DE PLANILHAS';
 $backUrl = $backUrl ?? null;
@@ -135,8 +127,7 @@ if (!isset($content)) {
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const swPath = '<?= ($ambiente_manifest === "dev") ? "/dev/sw.js" : "/sw.js" ?>';
-                navigator.serviceWorker.register(swPath)
+                navigator.serviceWorker.register('/sw.js')
                     .then(reg => console.log('Service Worker registrado:', reg.scope))
                     .catch(err => console.error('Erro ao registrar Service Worker:', err));
             });
