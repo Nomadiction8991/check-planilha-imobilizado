@@ -150,8 +150,13 @@ class CsvParserService
             return [];
         }
 
-        // Primeira linha = cabeçalho
-        $cabecalho = array_map('trim', array_map('strtolower', $dados[0]));
+        // Primeira linha = cabeçalho — converte null para string vazia
+        $cabecalho = array_map(
+            'trim',
+            array_map(function($val) {
+                return strtolower((string)$val);
+            }, $dados[0])
+        );
 
         $linhas = [];
         for ($i = 1; $i < count($dados); $i++) {
