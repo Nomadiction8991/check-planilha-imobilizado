@@ -2,23 +2,23 @@
 
 namespace App\Core;
 
+/**
+ * Renderizador (DEPRECATED)
+ * 
+ * @deprecated Use ViewRenderer instead
+ * @see ViewRenderer
+ * 
+ * Esta classe está mantida apenas para backward compatibility.
+ * Será removida na próxima versão major.
+ */
 class Renderizador
 {
+    /**
+     * @deprecated Use ViewRenderer::render() instead
+     */
     public static function renderizar(string $arquivo, array $dados = []): string
     {
-        extract($dados);
-        ob_start();
-        $caminhoView = __DIR__ . '/../Views/' . ltrim($arquivo, '/');
-        include $caminhoView;
-        $conteudo = ob_get_clean();
-
-        $caminhoLayout = __DIR__ . '/../Views/layout.php';
-        if (file_exists($caminhoLayout)) {
-            ob_start();
-            include $caminhoLayout;
-            return ob_get_clean();
-        }
-
-        return $conteudo;
+        // Delega para ViewRenderer
+        return ViewRenderer::renderView($arquivo, $dados);
     }
 }

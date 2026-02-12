@@ -2,14 +2,23 @@
 
 namespace App\Repositories;
 
+use App\Contracts\RepositoryInterface;
 use PDO;
 use PDOException;
 
 /**
  * Repositório Base 
  * Fornece métodos CRUD genéricos para todas as entidades
+ * 
+ * SOLID Principles:
+ * - Single Responsibility: Gerencia APENAS acesso a dados
+ * - Open/Closed: Extensível via herança, fechado para modificação
+ * - Liskov Substitution: Classes filhas podem substituir sem quebrar comportamento
+ * - Dependency Inversion: Depende de PDO (abstração de banco)
+ * 
+ * @package App\Repositories
  */
-abstract class BaseRepository
+abstract class BaseRepository implements RepositoryInterface
 {
     protected PDO $conexao;
     protected string $tabela;

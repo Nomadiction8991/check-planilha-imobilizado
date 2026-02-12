@@ -2,47 +2,102 @@
 
 namespace App\Services;
 
-use PDO;
+use App\Contracts\AuthServiceInterface;
+use App\Repositories\UsuarioRepository;
+use App\Core\SessionManager;
+use Exception;
 
-class AuthService
+/**
+ * AuthService - Serviço de Autenticação
+ * 
+ * SOLID Principles:
+ * - Single Responsibility: Gerencia APENAS autenticação
+ * - Dependency Inversion: Depende de UsuarioRepository (abstração), não de PDO direto
+ * - Open/Closed: Extensível via métodos, não modifica lógica core
+ * 
+ * @package App\Services
+ */
+class AuthService implements AuthServiceInterface
 {
-    private PDO $conexao;
+    private UsuarioRepository $usuarioRepository;
 
-    public function __construct()
+    /**
+     * Construtor com Dependency Injection
+     * 
+     * @param UsuarioRepository $usuarioRepository
+     */
+    public function __construct(UsuarioRepository $usuarioRepository)
     {
-        // Assumir que a conexão global está disponível, ou injetar
-        global $conexao;
-        $this->conexao = $conexao;
+        $this->usuarioRepository = $usuarioRepository;
     }
 
+    /**
+     * Autentica usuário com email e senha
+     * 
+     * @param string $email
+     * @param string $senha
+     * @return array Dados do usuário autenticado
+     * @throws Exception Se autenticação falhar
+     */
     public function authenticate(string $email, string $senha): array
     {
-        // Buscar usuário por email (comparacao em UPPER para ser robusto a case)
-        // Não filtramos por ativo aqui para permitir mostrar mensagem específica quando inativo
-        $stmt = $this->conexao->prepare('SELECT * FROM usuarios WHERE UPPER(email) = :email LIMIT 1');
-        $stmt->bindValue(':email', to_uppercase($email));
-        $stmt->execute();
-        $usuario = $stmt->fetch();
+        // Buscar usuário por email (normalizado em uppercase)
+        $usuario = $this->usuarioRepository->buscarPorEmail($email);
 
         if (!$usuario) {
-            throw new \Exception('E-mail ou senha inválidos.');
+            throw new Exception('E-mail ou senha inválidos.');
         }
 
-        // Se usuário existe mas está inativo, informar especificamente
+        // Verifica se usuário está ativo
         if ((int)($usuario['ativo'] ?? 0) !== 1) {
-            throw new \Exception('Usuário inativo. Entre em contato com o administrador.');
+            throw new Exception('Usuário inativo. Entre em contato com o administrador.');
         }
 
-        // Verificar senha
+        // Verifica senha
         if (!password_verify($senha, $usuario['senha'])) {
-            throw new \Exception('E-mail ou senha inválidos.');
+            throw new Exception('E-mail ou senha inválidos.');
         }
 
-        // Login bem-sucedido - definir sessão
-        $_SESSION['usuario_id'] = $usuario['id'];
-        $_SESSION['usuario_nome'] = $usuario['nome'];
-        $_SESSION['usuario_email'] = $usuario['email'];
+        // Login bem-sucedido - armazena dados na sessão
+        SessionManager::setUser(
+            (int)$usuario['id'],
+            $usuario['nome'],
+            $usuario['email']
+        );
+
+        // Regenera ID da sessão (segurança contra session fixation)
+        SessionManager::regenerate();
 
         return $usuario;
+    }
+
+    /**
+     * Verifica se usuário está autenticado
+     * 
+     * @return bool
+     */
+    public function isAuthenticated(): bool
+    {
+        return SessionManager::isAuthenticated();
+    }
+
+    /**
+     * Recupera ID do usuário autenticado
+     * 
+     * @return int|null
+     */
+    public function getUserId(): ?int
+    {
+        return SessionManager::getUserId();
+    }
+
+    /**
+     * Realiza logout do usuário
+     * 
+     * @return void
+     */
+    public function logout(): void
+    {
+        SessionManager::clearUser();
     }
 }

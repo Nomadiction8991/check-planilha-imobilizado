@@ -3,10 +3,20 @@
 namespace App\Core;
 
 /**
- * Renderizador de Views
+ * ViewRenderer - Renderizador de Views
  * 
- * Gerencia a renderização de views com layout e dados.
- * Suporta views parciais e layouts personalizados.
+ * SOLID Principles:
+ * - Single Responsibility: Gerencia APENAS renderização de views
+ * - Open/Closed: Extensível via métodos, fechado para modificação
+ * - Dependency Inversion: Não depende de implementações concretas
+ * 
+ * Responsabilidades:
+ * - Renderização de views com layouts
+ * - Suporte a partials (componentes reutilizáveis)
+ * - Respostas JSON para APIs
+ * - Isolamento de dados via extract()
+ * 
+ * @package App\Core
  */
 class ViewRenderer
 {
