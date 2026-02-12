@@ -38,18 +38,18 @@ if (false && !empty($acesso_bloqueado)) {
 ?>
 
     <style>
-        /* Modal fullscreen customizado - TELA INTEIRA MOBILE */
+        /* Modal fullscreen customizado (95% largura x 80% altura) */
         .modal-fullscreen-custom {
-            width: 100vw;
-            height: 100vh;
-            max-width: 100vw;
-            max-height: 100vh;
-            margin: 0;
+            width: 95vw;
+            height: 80vh;
+            max-width: 95vw;
+            max-height: 80vh;
+            margin: 10vh auto;
         }
 
         .modal-fullscreen-custom .modal-content {
             height: 100%;
-            border-radius: 0;
+            border-radius: 12px;
             overflow: hidden;
         }
 
@@ -58,20 +58,6 @@ if (false && !empty($acesso_bloqueado)) {
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        /* Modal com z-index altíssimo para ficar acima de tudo */
-        #barcodeModal {
-            z-index: 9999 !important;
-        }
-
-        .modal-backdrop.show {
-            z-index: 9998 !important;
-        }
-
-        /* Garantir que o modal fique por cima dos botões flutuantes */
-        #barcodeModal.show {
-            z-index: 9999 !important;
         }
 
         /* Botão X para fechar */
@@ -310,60 +296,191 @@ if (false && !empty($acesso_bloqueado)) {
             font-size: 20px !important;
         }
 
-        /* BOTÕES FLUTUANTES NO CANTO INFERIOR DIREITO */
-        .floating-buttons {
+        /* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
+        .floating-buttons-container {
             position: fixed;
             bottom: 20px;
             right: 20px;
+            z-index: 1040;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            z-index: 1000;
+            align-items: center;
         }
 
         .floating-btn {
             width: 60px;
             height: 60px;
             border-radius: 50%;
+            border: none;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-size: 24px;
             transition: all 0.3s ease;
-            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            background: white;
+            color: #333;
         }
 
         .floating-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
         }
 
         .floating-btn:active {
             transform: scale(0.95);
         }
 
-        .floating-btn i,
-        .floating-btn .material-icons-round {
-            font-size: 28px;
+        .floating-btn.mic {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
-        .floating-btn-mic {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .floating-btn-mic.listening {
+        .floating-btn.cam {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            animation: pulse 1.5s infinite;
+            color: white;
         }
 
-        .floating-btn-mic.listening .material-icons-round {
-            animation: pulse 1.5s infinite;
+        .floating-btn.listening {
+            animation: pulse-float 1.5s infinite;
         }
 
-        .floating-btn-camera {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        @keyframes pulse-float {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+            }
+        }
+
+        /* ===== MODAL DE CÂMERA EM TELA INTEIRA ===== */
+        .camera-fullscreen-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            z-index: 1050;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .camera-fullscreen-modal.show {
+            display: flex;
+        }
+
+        .camera-fullscreen-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .camera-scanner-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-scanner-container video,
+        .camera-scanner-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scanner-frame-fullscreen {
+            width: 80%;
+            max-width: 600px;
+            aspect-ratio: 1;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .scanner-frame-fullscreen.detected {
+            border-color: #28a745;
+            box-shadow: 0 0 0 9999px rgba(40, 167, 69, 0.3);
+        }
+
+        .camera-controls {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .camera-controls label {
+            color: white;
+            margin: 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .camera-controls select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            background: white;
+            color: #333;
+        }
+
+        .camera-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1051;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .camera-close-btn:hover {
+            background: white;
+            transform: scale(1.1);
         }
 
         /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
@@ -1069,9 +1186,17 @@ ob_start();
                     <i class="bi bi-upc-scan me-1"></i>
                     <?php echo htmlspecialchars(to_uppercase('Código do Produto'), ENT_QUOTES, 'UTF-8'); ?>
                 </label>
-                <input type="text" class="form-control" id="codigo" name="codigo"
-                    value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>"
-                    placeholder="<?php echo htmlspecialchars(to_uppercase('Digite, fale ou escaneie o código...'), ENT_QUOTES, 'UTF-8'); ?>">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="codigo" name="codigo"
+                        value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>"
+                        placeholder="<?php echo htmlspecialchars(to_uppercase('Digite, fale ou escaneie o código...'), ENT_QUOTES, 'UTF-8'); ?>">
+                    <button id="btnMic" class="btn btn-primary mic-btn" type="button" style="display:none;" title="<?php echo htmlspecialchars(to_uppercase('Falar código (Ctrl+M)'), ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars(to_uppercase('Falar código'), ENT_QUOTES, 'UTF-8'); ?>" aria-pressed="false">
+                        <span class="material-icons-round" aria-hidden="true">mic</span>
+                    </button>
+                    <button id="btnCam" class="btn btn-primary" type="button" style="display:none;" title="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>">
+                        <i class="bi bi-camera-video-fill" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="accordion" id="filtrosAvancados">
@@ -1133,6 +1258,43 @@ ob_start();
     </div>
     <div class="card-footer text-muted small">
         <?php echo htmlspecialchars(to_uppercase(($total_registros ?? 0) . ' registros encontrados no total'), ENT_QUOTES, 'UTF-8'); ?>
+    </div>
+</div>
+
+<!-- BOTÕES FLUTUANTES - CÂMERA E MICROFONE -->
+<div class="floating-buttons-container">
+    <button id="btnFloatingMic" class="floating-btn mic" type="button" title="Falar código" aria-label="Falar código">
+        <i class="bi bi-mic-fill"></i>
+    </button>
+    <button id="btnFloatingCam" class="floating-btn cam" type="button" title="Escanear código de barras" aria-label="Escanear código de barras">
+        <i class="bi bi-camera-video-fill"></i>
+    </button>
+</div>
+
+<!-- MODAL DE CÂMERA EM TELA INTEIRA -->
+<div class="camera-fullscreen-modal" id="cameraFullscreenModal">
+    <button class="camera-close-btn" id="cameraCloseBtn" type="button" aria-label="Fechar câmera">
+        <i class="bi bi-x-lg"></i>
+    </button>
+    
+    <div class="camera-fullscreen-content">
+        <div class="camera-scanner-container" id="cameraFullscreenContainer">
+            <div class="camera-overlay">
+                <div class="scanner-frame-fullscreen" id="scannerFrameFullscreen"></div>
+            </div>
+        </div>
+        
+        <div class="camera-controls">
+            <label for="cameraSelectFloating">Câmera:</label>
+            <select id="cameraSelectFloating" class="form-select form-select-sm" style="max-width: 200px;">
+                <option value="">Câmera padrão</option>
+            </select>
+            
+            <label for="zoomSliderFloating" style="flex: 1; max-width: 200px; margin-left: auto;">
+                Zoom: <span id="zoomLevelFloating">1.0x</span>
+            </label>
+            <input type="range" id="zoomSliderFloating" class="form-range" min="1" max="10" step="0.5" value="1" style="max-width: 150px;">
+        </div>
     </div>
 </div>
 
@@ -1947,370 +2109,278 @@ ob_start();
     // Aguardar TUDO carregar (DOM + Bootstrap + Quagga)
     document.addEventListener('DOMContentLoaded', function() {
         // Aguardar mais um pouco para garantir que Bootstrap está pronto
+        setTimeout(initFloatingButtons, 100);
         setTimeout(initBarcodeScanner, 500);
     });
 
-    function initBarcodeScanner() {
-        console.log('=== INICIANDO BARCODE SCANNER ===');
-
-        const camBtn = document.getElementById('btnCam');
-        const modalEl = document.getElementById('barcodeModal');
-
-        console.log('Elementos encontrados:', {
-            camBtn: !!camBtn,
-            modalEl: !!modalEl,
-            bootstrap: !!window.bootstrap,
-            Quagga: typeof Quagga
-        });
-
-        if (!camBtn) {
-            console.error('ERRO: Botão btnCam não encontrado!');
+    // ===== INICIALIZAÇÃO DOS BOTÕES FLUTUANTES =====
+    function initFloatingButtons() {
+        console.log('===== INICIALIZANDO BOTÕES FLUTUANTES =====');
+        
+        const btnFloatingMic = document.getElementById('btnFloatingMic');
+        const btnFloatingCam = document.getElementById('btnFloatingCam');
+        const btnMicOriginal = document.getElementById('btnMic');
+        const btnCamOriginal = document.getElementById('btnCam');
+        const cameraFullscreenModal = document.getElementById('cameraFullscreenModal');
+        const cameraCloseBtn = document.getElementById('cameraCloseBtn');
+        
+        if (!btnFloatingMic || !btnFloatingCam) {
+            console.error('Botões flutuantes não encontrados!');
             return;
         }
-
-        if (!modalEl) {
-            console.error('ERRO: Modal barcodeModal não encontrado!');
-            return;
-        }
-
-        if (!window.bootstrap) {
-            console.error('ERRO: Bootstrap não carregado!');
-            return;
-        }
-
-        if (typeof Quagga === 'undefined') {
-            console.error('ERRO: Quagga não carregado!');
-            return;
-        }
-
-        const codigoInput = document.getElementById('codigo');
-        const form = codigoInput ? (codigoInput.form || document.querySelector('form')) : document.querySelector('form');
-        const scannerContainer = document.getElementById('scanner-container');
-        const btnCloseScanner = document.querySelector('.btn-close-scanner');
-        const cameraSelect = document.getElementById('cameraSelect');
-        const zoomSlider = document.getElementById('zoomSlider');
-        const scannerInfo = document.querySelector('.scanner-info');
-        const bsModal = new bootstrap.Modal(modalEl, {
-            backdrop: 'static',
-            keyboard: false
-        });
-
-        let scanning = false;
-        let lastCode = '';
-        let currentStream = null;
-        let currentTrack = null;
-        let availableCameras = [];
-        let selectedDeviceId = null;
-
-        // Função para normalizar códigos (remover espaços, traços, barras)
-        function normalizeCode(code) {
-            return code.replace(/[\s\-\/]/g, '');
-        }
-
-        // Enumerar câmeras disponíveis
-        async function enumerateCameras() {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                availableCameras = devices.filter(device => device.kind === 'videoinput');
-
-                console.log(`£ ${availableCameras.length} câmera(s) encontrada(s)`);
-
-                // LIMPAR e popular dropdown
-                cameraSelect.innerHTML = '';
-                availableCameras.forEach((camera, index) => {
-                    const option = document.createElement('option');
-                    option.value = camera.deviceId;
-                    option.textContent = camera.label || `Cmera ${index + 1}`;
-                    cameraSelect.appendChild(option);
-                });
-
-                // Tentar selecionar câmera traseira como padrão
-                const backCamera = availableCameras.find(cam =>
-                    cam.label.toLowerCase().includes('back') ||
-                    cam.label.toLowerCase().includes('traseira') ||
-                    cam.label.toLowerCase().includes('rear')
-                );
-
-                if (backCamera) {
-                    selectedDeviceId = backCamera.deviceId;
-                    cameraSelect.value = selectedDeviceId;
-                } else if (availableCameras.length > 0) {
-                    selectedDeviceId = availableCameras[0].deviceId;
-                }
-
-            } catch (error) {
-                console.error('Erro ao enumerar câmeras:', error);
-            }
-        }
-
-        // Aplicar zoom
-        function applyZoom(zoomLevel) {
-            if (!currentTrack) return;
-
-            const capabilities = currentTrack.getCapabilities();
-            if (capabilities.zoom) {
-                const settings = currentTrack.getSettings();
-                const maxZoom = capabilities.zoom.max;
-                const minZoom = capabilities.zoom.min;
-
-                // Mapear slider (1-3) para range da câmera
-                const zoom = minZoom + ((zoomLevel - 1) / 2) * (maxZoom - minZoom);
-
-                currentTrack.applyConstraints({
-                    advanced: [{
-                        zoom: zoom
-                    }]
-                }).then(() => {
-                    if (scannerInfo) {
-                        scannerInfo.textContent = `Zoom: ${zoomLevel.toFixed(1)}x`;
-                    }
-                }).catch(err => {
-                    console.warn('Zoom não suportado:', err);
-                });
-            } else {
-                console.warn('Câmera não suporta zoom');
-                if (scannerInfo) {
-                    scannerInfo.textContent = 'Zoom não disponível nesta câmera';
-                }
-            }
-        }
-
-        function stopScanner() {
-            console.log('Parando scanner...');
-            try {
-                Quagga.stop();
-
-                // Parar stream de vídeo
-                if (currentStream) {
-                    currentStream.getTracks().forEach(track => track.stop());
-                    currentStream = null;
-                }
-                currentTrack = null;
-
-                // LIMPAR canvas/video elements
-                if (scannerContainer) {
-                    while (scannerContainer.firstChild) {
-                        scannerContainer.removeChild(scannerContainer.firstChild);
-                    }
-                }
-                console.log('Scanner parado');
-            } catch (e) {
-                console.error('Erro ao parar scanner:', e);
-            }
-            scanning = false;
-        }
-
-        function startScanner() {
-            if (scanning) {
-                console.log('Scanner já está ativo');
-                return;
-            }
-            console.log('»´© Iniciando scanner...');
-            scanning = true;
-
-            // Configurar constraints baseado na câmera selecionada
-            const constraints = {
-                width: {
-                    ideal: 1920
-                },
-                height: {
-                    ideal: 1080
-                }
-            };
-
-            if (selectedDeviceId) {
-                constraints.deviceId = {
-                    exact: selectedDeviceId
-                };
-            } else {
-                constraints.facingMode = 'environment';
-            }
-
-            Quagga.init({
-                inputStream: {
-                    type: 'LiveStream',
-                    target: scannerContainer,
-                    constraints: constraints
-                },
-                decoder: {
-                    readers: [
-                        'ean_reader', // EAN-13 (mais comum)
-                        'code_128_reader', // CODE-128
-                        'ean_8_reader', // EAN-8
-                        'upc_reader', // UPC-A
-                        'upc_e_reader' // UPC-E
-                    ],
-                    multiple: false
-                },
-                locate: true,
-                locator: {
-                    patchSize: 'large', // Maior = mais rápido, menos preciso
-                    halfSample: true // Processar imagem menor = mais rápido
-                },
-                frequency: 10, // Reduzir frequência de localização = mais rápido
-                numOfWorkers: navigator.hardwareConcurrency || 4
-            }, function(err) {
-                if (err) {
-                    console.error('Erro ao iniciar scanner:', err);
-                    alert('Não foi possível acessar a câmera:\n\n' + err.message + '\n\nVerifique se:\nVocê deu permissão para usar a câmera\nO site está em HTTPS (ou localhost)\nA câmera não está sendo usada por outro app');
-                    scanning = false;
-                    bsModal.hide();
-                    return;
-                }
-                console.log('Scanner iniciado com sucesso!');
-                Quagga.start();
-
-                // Capturar stream para controle de zoom
-                const videoElement = scannerContainer.querySelector('video');
-                if (videoElement && videoElement.srcObject) {
-                    currentStream = videoElement.srcObject;
-                    const videoTracks = currentStream.getVideoTracks();
-                    if (videoTracks.length > 0) {
-                        currentTrack = videoTracks[0];
-
-                        // Aplicar zoom inicial
-                        applyZoom(parseFloat(zoomSlider.value));
-                    }
-                }
-            });
-
-            Quagga.offDetected();
-            Quagga.onDetected(function(result) {
-                if (!result || !result.codeResult || !result.codeResult.code) return;
-                const rawCode = result.codeResult.code.trim();
-                if (!rawCode || rawCode === lastCode) return;
-
-                // Verificar qualidade da leitura (evitar falsos positivos)
-                if (result.codeResult.decodedCodes && result.codeResult.decodedCodes.length > 0) {
-                    const avgError = result.codeResult.decodedCodes.reduce((sum, code) => {
-                        return sum + (code.error || 0);
-                    }, 0) / result.codeResult.decodedCodes.length;
-
-                    // Se erro médio muito alto, ignorar
-                    if (avgError > 0.12) return; // Limiar mais rigoroso para velocidade
-                }
-
-                // Normalizar código (remover espaços, traços, barras)
-                const code = normalizeCode(rawCode);
-
-                console.log(' Código detectado:', rawCode, '¥ normalizado:', code);
-                lastCode = rawCode;
-
-                // Feedback visual (borda verde)
-                const frame = document.querySelector('.scanner-frame');
-                if (frame) {
-                    frame.style.borderColor = '#28a745';
-                    frame.style.boxShadow = '0 0 0 9999px rgba(40, 167, 69, 0.3)';
-                }
-
-                // Pequeno delay para dar feedback visual
-                setTimeout(() => {
-                    stopScanner();
-                    bsModal.hide();
-
-                    if (codigoInput) {
-                        codigoInput.value = code;
-                        codigoInput.dispatchEvent(new Event('input', {
-                            bubbles: true
-                        }));
-                        codigoInput.dispatchEvent(new Event('change', {
-                            bubbles: true
-                        }));
-                    }
-                    if (form) {
-                        form.requestSubmit ? form.requestSubmit() : form.submit();
-                    }
-                }, 200); // Reduzido de 300ms para 200ms = mais rápido
-            });
-        }
-
-        // ===== EVENTO DO BOT¢O DE C©MERA =====
-        camBtn.addEventListener('click', async function(e) {
-            console.log('© Botão de câmera CLICADO!');
-            e.preventDefault();
-            e.stopPropagation();
-            lastCode = '';
-
-            // Enumerar câmeras antes de abrir modal
-            await enumerateCameras();
-
-            console.log(' Abrindo modal...');
-            bsModal.show();
-
-            // Dar tempo para o modal abrir antes de iniciar câmera
-            setTimeout(() => {
-                console.log('Iniciando câmera...');
-                startScanner();
-            }, 400);
-        });
-
-        console.log('Event listener da câmera ADICIONADO ao botão');
-
-        // ===== EVENTO DE MUDAN§A DE C©MERA =====
-        if (cameraSelect) {
-            cameraSelect.addEventListener('change', function(e) {
-                selectedDeviceId = e.target.value;
-                console.log('£ Mudando para câmera:', selectedDeviceId);
-
-                // Reiniciar scanner com nova câmera
-                if (scanning) {
-                    stopScanner();
-                    setTimeout(() => startScanner(), 300);
-                }
-            });
-            console.log('Event listener de seleção de câmera adicionado');
-        }
-
-        // ===== EVENTO DE CONTROLE DE ZOOM =====
-        if (zoomSlider) {
-            zoomSlider.addEventListener('input', function(e) {
-                const zoomLevel = parseFloat(e.target.value);
-                applyZoom(zoomLevel);
-            });
-            console.log('Event listener de zoom adicionado');
-        }
-
-        // ===== EVENTO DO BOT¢O X =====
-        if (btnCloseScanner) {
-            btnCloseScanner.addEventListener('click', function(e) {
-                console.log('Botão X clicado');
+        
+        // Conectar botão flutuante de microfone ao botão original
+        if (btnMicOriginal) {
+            btnFloatingMic.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                stopScanner();
-                bsModal.hide();
+                console.log('Clicado botão flutuante de microfone');
+                btnMicOriginal.click();
             });
-            console.log('Event listener do botão X adicionado');
+            console.log('✓ Botão flutuante de microfone conectado');
         }
-
-        // ===== LIMPAR QUANDO MODAL FECHAR =====
-        modalEl.addEventListener('hidden.bs.modal', function() {
-            console.log('Modal fechado');
-            stopScanner();
-            // Reset visual do frame
-            const frame = document.querySelector('.scanner-frame');
-            if (frame) {
-                frame.style.borderColor = 'rgba(255, 255, 255, 0.8)';
-                frame.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.5)';
+        
+        // Conectar botão flutuante de câmera para abrir modal fullscreen
+        if (btnFloatingCam && cameraFullscreenModal) {
+            btnFloatingCam.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Clicado botão flutuante de câmera');
+                cameraFullscreenModal.classList.add('show');
+                
+                // Aguardar ser visível antes de iniciar câmera
+                setTimeout(initFullscreenCamera, 300);
+            });
+            console.log('✓ Botão flutuante de câmera conectado');
+        }
+        
+        // Botão de fechar da modal fullscreen
+        if (cameraCloseBtn && cameraFullscreenModal) {
+            cameraCloseBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Clicado botão de fechar câmera');
+                stopFullscreenCamera();
+                cameraFullscreenModal.classList.remove('show');
+            });
+        }
+        
+        // Fechar ao clicar fora (backdrop)
+        cameraFullscreenModal.addEventListener('click', function(e) {
+            if (e.target === cameraFullscreenModal) {
+                stopFullscreenCamera();
+                cameraFullscreenModal.classList.remove('show');
             }
         });
+        
+        // ESC para fechar
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && cameraFullscreenModal.classList.contains('show')) {
+                stopFullscreenCamera();
+                cameraFullscreenModal.classList.remove('show');
+            }
+        });
+        
+        console.log('✓ Botões flutuantes inicializados com sucesso!');
+    }
 
-        console.log('=== BARCODE SCANNER CONFIGURADO COM SUCESSO ===');
+    // ===== VARIÁVEIS GLOBAIS DA CÂMERA FULLSCREEN =====
+    let fullscreenScanning = false;
+    let fullscreenCurrentStream = null;
+    let fullscreenCurrentTrack = null;
+    let fullscreenSelectedDeviceId = '';
+    let fullscreenAvailableCameras = [];
+    let fullscreenLastCode = '';
+
+    async function initFullscreenCamera() {
+        console.log('Inicializando câmera fullscreen...');
+        
+        await enumerateFullscreenCameras();
+        startFullscreenScanner();
+    }
+
+    async function enumerateFullscreenCameras() {
+        const cameraSelectFloating = document.getElementById('cameraSelectFloating');
+        if (!cameraSelectFloating) return;
+        
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            fullscreenAvailableCameras = devices.filter(device => device.kind === 'videoinput');
+            
+            console.log(`√ ${fullscreenAvailableCameras.length} câmera(s) encontrada(s)`);
+            
+            cameraSelectFloating.innerHTML = '<option value="">Câmera padrão</option>';
+            fullscreenAvailableCameras.forEach((camera, index) => {
+                const option = document.createElement('option');
+                option.value = camera.deviceId;
+                option.text = camera.label || `Câmera ${index + 1}`;
+                cameraSelectFloating.appendChild(option);
+            });
+        } catch (err) {
+            console.error('Erro ao enumerar câmeras:', err);
+        }
+    }
+
+    function startFullscreenScanner() {
+        if (fullscreenScanning) return;
+        fullscreenScanning = true;
+        fullscreenLastCode = '';
+        
+        const container = document.getElementById('cameraFullscreenContainer');
+        if (!container) return;
+        
+        const constraints = {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+        };
+        
+        if (fullscreenSelectedDeviceId) {
+            constraints.deviceId = { exact: fullscreenSelectedDeviceId };
+        } else {
+            constraints.facingMode = 'environment';
+        }
+        
+        Quagga.init({
+            inputStream: {
+                type: 'LiveStream',
+                target: container,
+                constraints: constraints
+            },
+            decoder: {
+                readers: [
+                    'ean_reader',
+                    'code_128_reader',
+                    'ean_8_reader',
+                    'upc_reader',
+                    'upc_e_reader'
+                ],
+                multiple: false
+            },
+            locate: true,
+            locator: { patchSize: 'large', halfSample: true },
+            frequency: 10,
+            numOfWorkers: navigator.hardwareConcurrency || 4
+        }, function(err) {
+            if (err) {
+                console.error('Erro ao iniciar câmera:', err);
+                alert('Não foi possível acessar a câmera:\n\n' + err.message);
+                fullscreenScanning = false;
+                return;
+            }
+            
+            console.log('√ Câmera fullscreen iniciada!');
+            Quagga.start();
+            
+            // Capturar stream
+            const videoElement = container.querySelector('video');
+            if (videoElement && videoElement.srcObject) {
+                fullscreenCurrentStream = videoElement.srcObject;
+                const videoTracks = fullscreenCurrentStream.getVideoTracks();
+                if (videoTracks.length > 0) {
+                    fullscreenCurrentTrack = videoTracks[0];
+                }
+            }
+        });
+        
+        Quagga.offDetected();
+        Quagga.onDetected(function(result) {
+            if (!result || !result.codeResult || !result.codeResult.code) return;
+            
+            const rawCode = result.codeResult.code.trim();
+            if (!rawCode || rawCode === fullscreenLastCode) return;
+            
+            fullscreenLastCode = rawCode;
+            const code = normalizeBarcodeFullscreen(rawCode);
+            
+            console.log('√ Código detectado:', code);
+            
+            // Feedback visual
+            const frame = document.getElementById('scannerFrameFullscreen');
+            if (frame) {
+                frame.classList.add('detected');
+                setTimeout(() => frame.classList.remove('detected'), 300);
+            }
+            
+            stopFullscreenScanner();
+            const cameraModal = document.getElementById('cameraFullscreenModal');
+            if (cameraModal) cameraModal.classList.remove('show');
+            
+            // Preencher o input original e enviar
+            const codigoInput = document.getElementById('codigo');
+            if (codigoInput) {
+                codigoInput.value = code;
+                codigoInput.dispatchEvent(new Event('input', { bubbles: true }));
+                codigoInput.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                const form = codigoInput.form || document.querySelector('form');
+                if (form) {
+                    form.requestSubmit ? form.requestSubmit() : form.submit();
+                }
+            }
+        });
+    }
+
+    function stopFullscreenScanner() {
+        console.log('Parando câmera fullscreen...');
+        try {
+            Quagga.stop();
+            if (fullscreenCurrentStream) {
+                fullscreenCurrentStream.getTracks().forEach(track => track.stop());
+                fullscreenCurrentStream = null;
+            }
+            fullscreenCurrentTrack = null;
+            
+            const container = document.getElementById('cameraFullscreenContainer');
+            if (container) {
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+            }
+        } catch (e) {
+            console.error('Erro ao parar câmera:', e);
+        }
+        fullscreenScanning = false;
+    }
+
+    function normalizeBarcodeFullscreen(code) {
+        return code.trim().replace(/\s+/g, '');
+    }
+
+    // Eventos de câmera
+    document.getElementById('cameraSelectFloating')?.addEventListener('change', function(e) {
+        fullscreenSelectedDeviceId = e.target.value;
+        if (fullscreenScanning) {
+            stopFullscreenScanner();
+            setTimeout(() => startFullscreenScanner(), 300);
+        }
+    });
+
+    document.getElementById('zoomSliderFloating')?.addEventListener('input', function(e) {
+        const zoomLevel = parseFloat(e.target.value);
+        document.getElementById('zoomLevelFloating').textContent = zoomLevel.toFixed(1) + 'x';
+        if (fullscreenCurrentTrack && fullscreenCurrentTrack.getCapabilities().zoom) {
+            fullscreenCurrentTrack.applyConstraints({ advanced: [{ zoom: zoomLevel }] });
+        }
+    });
+
+    function stopFullscreenCamera() {
+        stopFullscreenScanner();
+    }
+
+    // ===== FUNÇÃO DUMMY PARA COMPATIBILIDADE =====
+    function initBarcodeScanner() {
+        console.log('initBarcodeScanner() chamada - usando câmera fullscreen');
+        // Compatibilidade com código antigo - não fazer nada
+        // Os botões flutuantes já controlam tudo
     }
 </script>
 
-<!-- BOTÕES FLUTUANTES -->
-<div class="floating-buttons">
-    <button id="btnMic" class="floating-btn floating-btn-mic mic-btn" type="button" 
-            title="<?php echo htmlspecialchars(to_uppercase('Falar código (Ctrl+M)'), ENT_QUOTES, 'UTF-8'); ?>" 
-            aria-label="<?php echo htmlspecialchars(to_uppercase('Falar código'), ENT_QUOTES, 'UTF-8'); ?>" 
-            aria-pressed="false">
-        <span class="material-icons-round" aria-hidden="true">mic</span>
-    </button>
-    <button id="btnCam" class="floating-btn floating-btn-camera" type="button" 
-            title="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>" 
-            aria-label="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>">
-        <i class="bi bi-camera-video-fill" aria-hidden="true"></i>
-    </button>
+<!-- Modal para escanear código de barras (ORIGINAL - ESCONDIDA) -->
+<div class="modal fade" id="barcodeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" style="display:none;">
+    <div class="modal-dialog modal-fullscreen-custom">
+        <div class="modal-content bg-dark">
+        </div>
+    </div>
 </div>
 
 <?php
