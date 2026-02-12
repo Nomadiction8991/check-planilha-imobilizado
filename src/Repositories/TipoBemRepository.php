@@ -54,7 +54,7 @@ class TipoBemRepository extends BaseRepository
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute(['id' => $id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result ?: null;
     }
 
@@ -64,7 +64,7 @@ class TipoBemRepository extends BaseRepository
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute(['codigo' => $codigo]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result ?: null;
     }
 
@@ -84,11 +84,11 @@ class TipoBemRepository extends BaseRepository
                 LIMIT :limite OFFSET :offset";
 
         $stmt = $this->conexao->prepare($sql);
-        
+
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
-        
+
         $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();

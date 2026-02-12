@@ -52,10 +52,10 @@ class DependenciaService
 
         // Verifica se já existe dependência com essa descrição na mesma igreja
         $existente = $this->dependenciaRepository->buscarPorDescricaoEComum(
-            $dados['descricao'], 
+            $dados['descricao'],
             $dados['comum_id']
         );
-        
+
         if ($existente) {
             throw new Exception('Dependência já existe nesta igreja.');
         }

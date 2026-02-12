@@ -18,7 +18,7 @@ class AddComumIdToDependencias extends AbstractMigration
 
         // Remover unique key de descricao (agora pode repetir entre comuns diferentes)
         $this->execute("ALTER TABLE `dependencias` DROP INDEX `descricao`");
-        
+
         // Adicionar unique composto (comum_id + descricao)
         $this->execute("
             ALTER TABLE `dependencias` 

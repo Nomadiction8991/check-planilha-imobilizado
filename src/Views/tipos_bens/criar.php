@@ -20,15 +20,15 @@ $backUrl = '/tipos-bens';
             <form method="POST" action="/tipos-bens/criar">
                 <div class="mb-3">
                     <label for="codigo" class="form-label">Código *</label>
-                    <input type="number" class="form-control" id="codigo" name="codigo" required 
-                           placeholder="Ex: 1" min="1">
+                    <input type="number" class="form-control" id="codigo" name="codigo" required
+                        placeholder="Ex: 1" min="1">
                     <small class="text-muted">Código numérico único do tipo de bem</small>
                 </div>
 
                 <div class="mb-3">
                     <label for="descricao" class="form-label">Descrição *</label>
                     <input type="text" class="form-control" id="descricao" name="descricao" required
-                           placeholder="Ex: Imóveis">
+                        placeholder="Ex: Imóveis">
                 </div>
 
                 <div class="d-grid gap-2">

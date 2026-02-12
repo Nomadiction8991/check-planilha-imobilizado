@@ -21,7 +21,7 @@ $backUrl = '/menu';
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-box-seam me-2"></i>TIPOS DE BENS</span>
-            <a href="/tipos-bens/criar" class="btn btn-primary btn-sm">
+            <a href="/tipos-bens/criar" class="btn btn-light btn-sm" style="color: #6f42c1; border-color: #e0e0e0;">
                 <i class="bi bi-plus-circle me-1"></i>NOVO
             </a>
         </div>
@@ -30,9 +30,9 @@ $backUrl = '/menu';
             <div class="mb-3">
                 <form method="GET" action="/tipos-bens">
                     <div class="input-group">
-                        <input type="text" class="form-control" name="busca" 
-                               placeholder="Buscar por código ou descrição..."
-                               value="<?= htmlspecialchars($busca ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="text" class="form-control" name="busca"
+                            placeholder="Buscar por código ou descrição..."
+                            value="<?= htmlspecialchars($busca ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <button class="btn btn-outline-secondary" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
@@ -70,8 +70,8 @@ $backUrl = '/menu';
                                     <td><?= htmlspecialchars($tipo['descricao'], ENT_QUOTES, 'UTF-8') ?></td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
-                                            <a href="/tipos-bens/<?= htmlspecialchars($tipo['id'], ENT_QUOTES, 'UTF-8') ?>/editar" 
-                                               class="btn btn-outline-primary" title="Editar">
+                                            <a href="/tipos-bens/<?= htmlspecialchars($tipo['id'], ENT_QUOTES, 'UTF-8') ?>/editar"
+                                                class="btn btn-outline-primary" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                         </div>

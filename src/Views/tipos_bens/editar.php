@@ -19,18 +19,18 @@ $backUrl = '/tipos-bens';
         <div class="card-body">
             <form method="POST" action="/tipos-bens/<?= htmlspecialchars($tipo['id'], ENT_QUOTES, 'UTF-8') ?>/editar">
                 <input type="hidden" name="id" value="<?= htmlspecialchars($tipo['id'], ENT_QUOTES, 'UTF-8') ?>">
-                
+
                 <div class="mb-3">
                     <label for="codigo" class="form-label">Código *</label>
-                    <input type="number" class="form-control" id="codigo" name="codigo" required 
-                           value="<?= htmlspecialchars($tipo['codigo'], ENT_QUOTES, 'UTF-8') ?>"
-                           min="1">
+                    <input type="number" class="form-control" id="codigo" name="codigo" required
+                        value="<?= htmlspecialchars($tipo['codigo'], ENT_QUOTES, 'UTF-8') ?>"
+                        min="1">
                 </div>
 
                 <div class="mb-3">
                     <label for="descricao" class="form-label">Descrição *</label>
                     <input type="text" class="form-control" id="descricao" name="descricao" required
-                           value="<?= htmlspecialchars($tipo['descricao'], ENT_QUOTES, 'UTF-8') ?>">
+                        value="<?= htmlspecialchars($tipo['descricao'], ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
                 <div class="d-grid gap-2">
