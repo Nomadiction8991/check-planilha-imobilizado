@@ -16,7 +16,8 @@ $userName = $userName ?? '';
 $comuns = $comuns ?? [];
 $comumAtualId = $comumAtualId ?? null;
 
-function _fmtCodigoComum($codigo) {
+function _fmtCodigoComum($codigo)
+{
     // formata número como "BR 00-000". Se não for numérico, retorna original.
     if (!is_numeric($codigo)) return $codigo;
     $s = str_pad((string)$codigo, 5, '0', STR_PAD_LEFT);
@@ -38,47 +39,49 @@ function _fmtCodigoComum($codigo) {
 
     <div class="header-actions">
         <?php if (!empty($comuns)): ?>
-        <select id="comum-selector" class="form-select form-select-sm" aria-label="Selecionar Comum">
-            <?php foreach ($comuns as $comum): ?>
-                <option value="<?= (int)$comum['id'] ?>" <?= (int)$comum['id'] === (int)$comumAtualId ? 'selected' : '' ?>>
-                    <?= htmlspecialchars(_fmtCodigoComum($comum['codigo']), ENT_QUOTES, 'UTF-8') ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+            <select id="comum-selector" class="form-select form-select-sm" aria-label="Selecionar Comum">
+                <?php foreach ($comuns as $comum): ?>
+                    <option value="<?= (int)$comum['id'] ?>" <?= (int)$comum['id'] === (int)$comumAtualId ? 'selected' : '' ?>>
+                        <?= htmlspecialchars(_fmtCodigoComum($comum['codigo']), ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         <?php endif; ?>
     </div>
 </div>
 
 <?php if (!empty($comuns)): ?>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selector = document.getElementById('comum-selector');
-    if (selector) {
-        selector.addEventListener('change', function() {
-            const comumId = this.value;
-            if (comumId) {
-                fetch('/usuarios/selecionar-comum', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ comum_id: comumId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert('Erro ao selecionar comum: ' + (data.message || 'Erro desconhecido'));
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('comum-selector');
+            if (selector) {
+                selector.addEventListener('change', function() {
+                    const comumId = this.value;
+                    if (comumId) {
+                        fetch('/usuarios/selecionar-comum', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    comum_id: comumId
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    window.location.reload();
+                                } else {
+                                    alert('Erro ao selecionar comum: ' + (data.message || 'Erro desconhecido'));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erro:', error);
+                                alert('Erro ao selecionar comum');
+                            });
                     }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert('Erro ao selecionar comum');
                 });
             }
         });
-    }
-});
-</script>
+    </script>
 <?php endif; ?>

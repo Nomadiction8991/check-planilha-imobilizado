@@ -780,44 +780,6 @@ if (false && !empty($acesso_bloqueado)) {
                 margin-top: 0.5rem;
             }
 
-            .legend-grid {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(160px, 1fr));
-                gap: 0.5rem;
-            }
-
-            .legend-item {
-                display: flex;
-                align-items: center;
-                gap: 0.6rem;
-                font-size: 0.85rem;
-                text-transform: uppercase;
-                font-weight: 600;
-            }
-
-            .legend-color {
-                width: 12px;
-                height: 12px;
-                border-radius: 2px;
-                display: inline-block;
-            }
-
-            .legend-checked {
-                background-color: #28A745;
-            }
-
-            .legend-observacao {
-                background-color: #D4AF37;
-            }
-
-            .legend-imprimir {
-                background-color: #0D6EFD;
-            }
-
-            .legend-editado {
-                background-color: #8E24AA;
-            }
-
             /* Forcar cores dos botoes de acao e icones quando ativos */
             .acao-container .action-imprimir button {
                 border-color: #0D6EFD !important;
@@ -1109,30 +1071,6 @@ ob_start();
     </div>
     <div class="card-footer text-muted small">
         <?php echo htmlspecialchars(to_uppercase(($total_registros ?? 0) . ' registros encontrados no total'), ENT_QUOTES, 'UTF-8'); ?>
-    </div>
-</div>
-
-<!-- Legenda -->
-<div class="card mb-3">
-    <div class="card-body p-3">
-        <div class="legend-grid">
-            <div class="legend-item">
-                <span class="legend-color legend-checked"></span>
-                <?php echo htmlspecialchars(to_uppercase('Checado'), ENT_QUOTES, 'UTF-8'); ?>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color legend-observacao"></span>
-                <?php echo htmlspecialchars(to_uppercase('Observação'), ENT_QUOTES, 'UTF-8'); ?>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color legend-imprimir"></span>
-                <?php echo htmlspecialchars(to_uppercase('Imprimir Etiqueta'), ENT_QUOTES, 'UTF-8'); ?>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color legend-editado"></span>
-                <?php echo htmlspecialchars(to_uppercase('Editado'), ENT_QUOTES, 'UTF-8'); ?>
-            </div>
-        </div>
     </div>
 </div>
 

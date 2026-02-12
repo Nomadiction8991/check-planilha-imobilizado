@@ -35,7 +35,7 @@ class PlanilhaController extends BaseController
     {
         // Garante que comum_id está definida na sessão
         $comumId = \App\Core\SessionManager::ensureComumId();
-        
+
         if (!$comumId || $comumId <= 0) {
             // Se não há comum disponível, redireciona para comuns
             $this->redirecionar('/comuns?erro=Nenhuma comum disponível');
@@ -55,7 +55,7 @@ class PlanilhaController extends BaseController
 
         // Formatar dados da planilha/comum
         $planilha['comum_descricao'] = $planilha['descricao'] ?? 'Comum';
-        
+
         // Buscar produtos da comum com paginação
         $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
         $itensPorPagina = 20;

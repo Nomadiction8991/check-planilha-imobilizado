@@ -7,7 +7,7 @@ class SessionManager
 {
     private static bool $started = false;
 
-    
+
     public static function start(): void
     {
         if (self::$started || session_status() === PHP_SESSION_ACTIVE) {
@@ -23,42 +23,42 @@ class SessionManager
         self::$started = true;
     }
 
-    
+
     public static function set(string $key, $value): void
     {
         self::start();
         $_SESSION[$key] = $value;
     }
 
-    
+
     public static function get(string $key, $default = null)
     {
         self::start();
         return $_SESSION[$key] ?? $default;
     }
 
-    
+
     public static function has(string $key): bool
     {
         self::start();
         return isset($_SESSION[$key]);
     }
 
-    
+
     public static function remove(string $key): void
     {
         self::start();
         unset($_SESSION[$key]);
     }
 
-    
+
     public static function flash(string $key, $value): void
     {
         self::start();
         $_SESSION['_flash'][$key] = $value;
     }
 
-    
+
     public static function getFlash(string $key, $default = null)
     {
         self::start();
@@ -67,32 +67,32 @@ class SessionManager
         return $value;
     }
 
-    
+
     public static function isAuthenticated(): bool
     {
         return self::has('usuario_id');
     }
 
-    
+
     public static function getUserId(): ?int
     {
         $id = self::get('usuario_id');
         return $id ? (int)$id : null;
     }
 
-    
+
     public static function getUserName(): ?string
     {
         return self::get('usuario_nome');
     }
 
-    
+
     public static function getUserEmail(): ?string
     {
         return self::get('usuario_email');
     }
 
-    
+
     public static function setUser(int $id, string $nome, string $email): void
     {
         self::set('usuario_id', $id);
@@ -100,7 +100,7 @@ class SessionManager
         self::set('usuario_email', $email);
     }
 
-    
+
     public static function clearUser(): void
     {
         self::remove('usuario_id');
@@ -108,7 +108,7 @@ class SessionManager
         self::remove('usuario_email');
     }
 
-    
+
     public static function destroy(): void
     {
         self::start();
@@ -116,21 +116,21 @@ class SessionManager
         self::$started = false;
     }
 
-    
+
     public static function regenerate(): void
     {
         self::start();
         session_regenerate_id(true);
     }
 
-    
+
     public static function all(): array
     {
         self::start();
         return $_SESSION;
     }
 
-    
+
     public static function clear(): void
     {
         self::start();
@@ -145,7 +145,7 @@ class SessionManager
     public static function ensureComumId(): ?int
     {
         self::start();
-        
+
         // Se já existe comum_id na sessão, retorna
         if (isset($_SESSION['comum_id']) && (int)$_SESSION['comum_id'] > 0) {
             return (int)$_SESSION['comum_id'];
@@ -158,7 +158,7 @@ class SessionManager
 
         try {
             $conexao = ConnectionManager::getConnection();
-            
+
             // Buscar comum_id do usuário no banco
             $stmt = $conexao->prepare("SELECT comum_id FROM usuarios WHERE id = :id");
             $stmt->bindValue(':id', self::getUserId(), \PDO::PARAM_INT);
@@ -170,10 +170,10 @@ class SessionManager
             if ((int)$comumId <= 0) {
                 $stmtComum = $conexao->query("SELECT id FROM comums ORDER BY id LIMIT 1");
                 $primeiraComum = $stmtComum->fetch(\PDO::FETCH_ASSOC);
-                
+
                 if ($primeiraComum) {
                     $comumId = (int)$primeiraComum['id'];
-                    
+
                     // Persiste a comum padrão no banco
                     $uStmt = $conexao->prepare("UPDATE usuarios SET comum_id = :comum_id WHERE id = :id");
                     $uStmt->bindValue(':comum_id', $comumId, \PDO::PARAM_INT);
@@ -187,7 +187,6 @@ class SessionManager
             // Define na sessão
             $_SESSION['comum_id'] = $comumId;
             return $comumId;
-            
         } catch (\Exception $e) {
             error_log('Erro ao garantir comum_id: ' . $e->getMessage());
             return null;
