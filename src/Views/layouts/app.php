@@ -94,7 +94,7 @@ if (!isset($content)) {
             <?php
             // Variáveis para header, footer e conteúdo
             $pageTitle = $pageTitle ?? ($tituloPagina ?? null);
-            $userName  = $userName ?? ($usuario['nome'] ?? '');
+            $userName  = $userName ?? \App\Core\SessionManager::getUserName() ?? '';
             $menuPath  = $menuPath ?? '/menu';
             $homePath  = $homePath ?? '/planilhas/visualizar';
             $logoutPath = $logoutPath ?? '/logout';
