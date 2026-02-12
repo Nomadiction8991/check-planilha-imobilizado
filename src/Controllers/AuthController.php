@@ -56,4 +56,11 @@ class AuthController
             require __DIR__ . '/../Views/auth/login.php';
         }
     }
+
+    public function logout()
+    {
+        $this->authService->logout();
+        header('Location: /login');
+        exit;
+    }
 }

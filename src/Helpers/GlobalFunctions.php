@@ -1,5 +1,7 @@
 <?php
 
+use App\Middleware\AuthMiddleware;
+
 /**
  * GlobalFunctions.php
  *
