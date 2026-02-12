@@ -187,7 +187,7 @@ class PlanilhaController extends BaseController
 
         // Buscar produtos da comum com paginação
         $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-        $itensPorPagina = 20;
+        $itensPorPagina = 50;
         $offset = ($paginaAtual - 1) * $itensPorPagina;
 
         // Filtros
