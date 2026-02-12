@@ -1200,6 +1200,11 @@ ob_start();
                     <!-- Informações -->
                     <div class="info-PRODUTO">
                         <?php echo htmlspecialchars($p['descricao_completa']); ?><br>
+                        <?php if (!empty($p['descricao_velha'])): ?>
+                            <small style="font-size: 0.7em; color: #666; opacity: 0.8;">
+                                <?php echo htmlspecialchars($p['descricao_velha']); ?>
+                            </small><br>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Ações -->
