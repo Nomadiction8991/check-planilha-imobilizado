@@ -11,16 +11,16 @@ class MapaRotas
     public static function obter(): array
     {
         return [
-            // Autenticação
+            
             'GET /' => [AuthController::class, 'login'],
             'GET /login' => [AuthController::class, 'login'],
             'POST /login' => [AuthController::class, 'authenticate'],
             'GET /logout' => [AuthController::class, 'logout'],
 
-            // Comuns (gerenciamento)
+            
             'GET /comuns' => [ComumController::class, 'index'],
 
-            // Usuários (CRUD completo)
+            
             'GET /usuarios' => [UsuarioController::class, 'index'],
             'GET /usuarios/criar' => [UsuarioController::class, 'create'],
             'POST /usuarios/criar' => [UsuarioController::class, 'store'],

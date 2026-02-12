@@ -1,12 +1,12 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Autenticao
 
 
-// Configura§µes da p¡gina
+
+
 $pageTitle = 'Gerenciar Comuns';
 $backUrl = '../shared/menu_planilha.php';
-// Preserve current filters (if any) when navigating to edit/create
+
 $qsArr = [];
 if (!empty($_GET['busca'])) {
     $qsArr['busca'] = $_GET['busca'];
@@ -21,12 +21,12 @@ $headerActions = '
     </a>
 ';
 
-// Pagina§£o de comuns
+
 $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
 $limite = 20;
 $offset = ($pagina - 1) * $limite;
 
-// Obter total e pgina atual usando helpers (detectam tabela correta automaticamente)
+
 try {
     $total_registros = (int) contar_comuns($conexao, '');
     $total_paginas = (int)ceil($total_registros / $limite);
@@ -36,7 +36,7 @@ try {
     $erro = "Erro ao contar comuns: " . $e->getMessage();
 }
 
-// Obter pgina atual
+
 try {
     $comuns = buscar_comuns_paginated($conexao, '', $limite, $offset);
 } catch (Exception $e) {
@@ -44,7 +44,7 @@ try {
     $erro = "Erro ao carregar comuns: " . $e->getMessage();
 }
 
-// Iniciar buffer para capturar o conteºdo
+
 ob_start();
 ?>
 
@@ -162,6 +162,6 @@ ob_start();
 <?php
 $conteudo = ob_get_clean();
 
-// Incluir layout
+
 require_once __DIR__ . '/../shared/layout.php';
 ?>

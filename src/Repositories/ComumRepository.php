@@ -5,17 +5,12 @@ namespace App\Repositories;
 use PDO;
 use Exception;
 
-/**
- * Repositório de Comuns
- * Gerencia acesso a dados da tabela 'comums'
- */
+
 class ComumRepository extends BaseRepository
 {
     protected string $tabela = 'comums';
 
-    /**
-     * Busca comuns com paginação e filtros
-     */
+    
     public function buscarPaginado(string $busca = '', int $limite = 10, int $offset = 0): array
     {
         $params = [];
@@ -44,9 +39,7 @@ class ComumRepository extends BaseRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Conta comuns com filtro de busca
-     */
+    
     public function contarComFiltro(string $busca = ''): int
     {
         $params = [];
@@ -60,9 +53,7 @@ class ComumRepository extends BaseRepository
         return $this->contar($where, $params);
     }
 
-    /**
-     * Busca comum por código
-     */
+    
     public function buscarPorCodigo(int $codigo): ?array
     {
         $sql = "SELECT * FROM {$this->tabela} WHERE codigo = :codigo";
@@ -74,9 +65,7 @@ class ComumRepository extends BaseRepository
         return $resultado ?: null;
     }
 
-    /**
-     * Busca comum por CNPJ
-     */
+    
     public function buscarPorCnpj(string $cnpj): ?array
     {
         $sql = "SELECT * FROM {$this->tabela} WHERE cnpj = :cnpj";
@@ -88,17 +77,13 @@ class ComumRepository extends BaseRepository
         return $resultado ?: null;
     }
 
-    /**
-     * Normaliza CNPJ (remove não-dígitos)
-     */
+    
     public function normalizarCnpj(string $cnpj): string
     {
         return preg_replace('/\D+/', '', trim($cnpj));
     }
 
-    /**
-     * Gera CNPJ único para o comum
-     */
+    
     public function gerarCnpjUnico(string $cnpjBase, int $codigo, ?int $ignorarId = null): string
     {
         $cnpjLimpo = $this->normalizarCnpj($cnpjBase);
@@ -112,7 +97,7 @@ class ComumRepository extends BaseRepository
             $stmt->execute();
             $existente = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Não existe ou é o próprio registro sendo atualizado
+            
             if (!$existente || ($ignorarId !== null && (int)$existente['id'] === (int)$ignorarId)) {
                 return $cnpjFinal;
             }
@@ -125,10 +110,7 @@ class ComumRepository extends BaseRepository
         }
     }
 
-    /**
-     * Garante que existe um comum com o código informado
-     * Se não existir, cria com placeholders
-     */
+    
     public function garantirPorCodigo(int $codigo, array $dados = []): int
     {
         if ($codigo <= 0) {
@@ -138,7 +120,7 @@ class ComumRepository extends BaseRepository
         $existente = $this->buscarPorCodigo($codigo);
 
         if ($existente) {
-            // Atualizar dados básicos se enviados
+            
             if (!empty($dados)) {
                 $updates = [];
                 $params = [':id' => (int)$existente['id']];
@@ -184,7 +166,7 @@ class ComumRepository extends BaseRepository
             return (int)$existente['id'];
         }
 
-        // Inserir novo registro
+        
         $dadosInsert = [
             'codigo' => $codigo,
             'cnpj' => null,
@@ -197,15 +179,12 @@ class ComumRepository extends BaseRepository
         return $this->criar($dadosInsert);
     }
 
-    /**
-     * Extrai código numérico do texto do comum
-     * Ex: "BR 09-0040 - SIBIPIRUNAS" retorna 90040
-     */
+    
     public function extrairCodigo(string $comumTexto): int
     {
         $comumTexto = trim($comumTexto);
 
-        // Aceita variações como "BR 09-0040", "BR09 0040", "09-0040"
+        
         if (preg_match('/BR\s*(\d{2})\D?(\d{4})/i', $comumTexto, $matches)) {
             return (int)($matches[1] . $matches[2]);
         }
@@ -216,10 +195,7 @@ class ComumRepository extends BaseRepository
         return 0;
     }
 
-    /**
-     * Extrai descrição do texto do comum
-     * Ex: "BR 09-0040 - SIBIPIRUNAS" retorna "SIBIPIRUNAS"
-     */
+    
     public function extrairDescricao(string $comumTexto): string
     {
         $comumTexto = trim($comumTexto);
@@ -241,9 +217,7 @@ class ComumRepository extends BaseRepository
         return '';
     }
 
-    /**
-     * Processa/cria comum a partir do texto completo
-     */
+    
     public function processarComum(string $comumTexto, array $dados = []): int
     {
         if (empty($comumTexto)) {

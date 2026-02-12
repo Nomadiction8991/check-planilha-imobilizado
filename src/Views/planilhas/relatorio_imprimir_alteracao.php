@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Autenticação
-// Agora: página integrada ao layout app-wrapper (Bootstrap 5, 400px)
+
+
 
 $id_planilha = $_GET['id'] ?? null;
 if (!$id_planilha) {
@@ -9,9 +9,9 @@ if (!$id_planilha) {
   exit;
 }
 
-// BUSCAR dados da planilha
+
 try {
-  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id"; // refatorado para usar 'comums' diretamente
+  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id"; 
   $stmt_planilha = $conexao->prepare($sql_planilha);
   $stmt_planilha->bindValue(':id', $id_planilha);
   $stmt_planilha->execute();
@@ -20,7 +20,7 @@ try {
     throw new Exception('Planilha não encontrada.');
   }
 } catch (PDOException $e) {
-  // Se tabela 'planilhas' não existir, tentar usar 'comums' (trabalhar com o que já existe)
+  
   if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
     try {
       $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comums WHERE id = :id');
@@ -28,7 +28,7 @@ try {
       $stmt->execute();
       $comum = $stmt->fetch(PDO::FETCH_ASSOC);
       if ($comum) {
-        // Criar um objeto mínimo representando a planilha com base no comum
+        
         $planilha = ['id' => (int)$comum['id'], 'comum' => $comum['comum'], 'comum_id' => (int)$comum['id'], 'ativo' => 1];
         $using_comum_fallback = true;
       } else {
@@ -44,7 +44,7 @@ try {
   die("Erro ao carregar planilha: " . $e->getMessage());
 }
 
-// Variáveis de filtros/visões
+
 $mostrar_pendentes = isset($_GET['mostrar_pendentes']);
 $mostrar_checados = isset($_GET['mostrar_checados']);
 $mostrar_observacao = isset($_GET['mostrar_observacao']);
@@ -56,7 +56,7 @@ $mostrar_novos = isset($_GET['mostrar_novos']);
 $filtro_dependencia = isset($_GET['dependencia']) && $_GET['dependencia'] !== '' ? (int)$_GET['dependencia'] : '';
 
 try {
-  // BUSCAR PRODUTOS da planilha importada (tabela PRODUTOS)
+  
   $sql_PRODUTOS = "SELECT p.*, 
                      CAST(p.checado AS SIGNED) as checado, 
                      CAST(p.ativo AS SIGNED) as ativo, 
@@ -87,28 +87,28 @@ try {
   $stmt_PRODUTOS->execute();
   $todos_PRODUTOS = $stmt_PRODUTOS->fetchAll();
 
-  // BUSCAR PRODUTOS novos cadastrados manualmente (tabela PRODUTOS_cadastro não existe no schema atual)
-  // $sql_novos = "SELECT pc.id, pc.id_planilha, pc.descricao_completa as nome, '' as codigo, pc.complemento as dependencia,
-  //               pc.quantidade, pc.tipo_ben, pc.imprimir_14_1 as imprimir_cadastro, 'cadastro' as origem,
-  //               NULL as checado, 1 as ativo, NULL as imprimir, NULL as observacoes, NULL as editado, NULL as nome_editado, NULL as dependencia_editada
-  //               FROM produtos_cadastro pc
-  //               WHERE pc.id_planilha = :id_planilha";
-  // $params_novos = [':id_planilha' => $id_planilha];
-  // if (!empty($filtro_dependencia)) { $sql_novos .= " AND pc.complemento LIKE :dependencia"; $params_novos[':dependencia'] = '%' . $filtro_dependencia . '%'; }
-  // $sql_novos .= " ORDER BY pc.id";
-  // $stmt_novos = $conexao->prepare($sql_novos);
-  // foreach ($params_novos as $k => $v) { $stmt_novos->bindValue($k, $v); }
-  // $stmt_novos->execute();
-  // $PRODUTOS_cadastrados = $stmt_novos->fetchAll();
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  // Combinar ambos os arrays (removido pois tabela PRODUTOS_cadastro não existe)
-  // $todos_PRODUTOS = array_merge($todos_PRODUTOS, $PRODUTOS_cadastrados);
+  
+  
 } catch (Exception $e) {
   die("Erro ao carregar PRODUTOS: " . $e->getMessage());
 }
 
 try {
-  // BUSCAR dependências originais + dependências editadas
+  
   $sql_dependencias = "
         SELECT DISTINCT p.dependencia_id as dependencia FROM produtos p WHERE p.comum_id = :id_comum1
         UNION
@@ -125,7 +125,7 @@ try {
   $dependencia_options = [];
 }
 
-// Mapear ID -> descrição para exibir label amigável no filtro
+
 $dependencias_map = [];
 if (!empty($dependencia_options)) {
   $placeholders = implode(',', array_fill(0, count($dependencia_options), '?'));
@@ -144,23 +144,23 @@ if (!empty($dependencia_options)) {
 
 $PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_checados_observacao = $PRODUTOS_dr = $PRODUTOS_etiqueta = $PRODUTOS_alteracoes = $PRODUTOS_novos = [];
 foreach ($todos_PRODUTOS as $PRODUTO) {
-  // Nome atual: usa descrição editada se existir, senão a descrição completa original
+  
   $nome_editado = trim($PRODUTO['nome_editado'] ?? '');
   $nome_original = trim($PRODUTO['descricao_completa'] ?? ($PRODUTO['nome'] ?? ''));
   $nome_atual = $nome_editado !== '' ? $nome_editado : $nome_original;
   $PRODUTO['nome_atual'] = $nome_atual !== '' ? $nome_atual : 'Sem descricao';
   $PRODUTO['nome_original'] = $nome_original;
 
-  // PRODUTOS novos = vindos da tabela PRODUTOS_cadastro
+  
   if (($PRODUTO['origem'] ?? '') === 'cadastro') {
     $PRODUTOS_novos[] = $PRODUTO;
     if (!empty($PRODUTO['codigo'])) {
-      $PRODUTOS_etiqueta[] = $PRODUTO; // novos com código também vão para etiqueta
+      $PRODUTOS_etiqueta[] = $PRODUTO; 
     }
     continue;
   }
 
-  // PRODUTOS da planilha importada (tabela PRODUTOS)
+  
   $tem_observacao = !empty($PRODUTO['observacoes']);
   $esta_checado = ($PRODUTO['checado'] ?? 0) == 1;
   $esta_no_dr = ($PRODUTO['ativo'] ?? 1) == 0;
@@ -169,7 +169,7 @@ foreach ($todos_PRODUTOS as $PRODUTO) {
   $eh_pendente = is_null($PRODUTO['checado']) && ($PRODUTO['ativo'] ?? 1) == 1 && is_null($PRODUTO['imprimir']) && is_null($PRODUTO['observacoes']) && is_null($PRODUTO['editado']);
 
   if ($tem_alteracoes) {
-    // Editados aparecem aqui e também mantém sua seção de STATUS
+    
     $PRODUTOS_alteracoes[] = $PRODUTO;
     $PRODUTOS_etiqueta[] = $PRODUTO;
   }
@@ -200,7 +200,7 @@ $total_alteracoes = count($PRODUTOS_alteracoes);
 $total_novos = count($PRODUTOS_novos);
 $total_geral = count($todos_PRODUTOS);
 
-// DEBUG: Verificar PRODUTOS com editado = 1
+
 if (isset($_GET['debug'])) {
   echo "<pre>DEBUG - PRODUTOS com editado:<br>";
   foreach ($todos_PRODUTOS as $p) {
@@ -228,7 +228,7 @@ if ($mostrar_etiqueta) $total_mostrar += $total_etiqueta;
 if ($mostrar_alteracoes) $total_mostrar += $total_alteracoes;
 if ($mostrar_novos) $total_mostrar += $total_novos;
 
-// Cabeçalho do layout
+
 $pageTitle = 'Imprimir Alterações';
 $backUrl = './planilha_visualizar.php?id=' . $id_planilha . '&comum_id=' . $id_planilha;
 $headerActions = '
@@ -252,7 +252,7 @@ $headerActions = '
     </div>
 ';
 
-// CSS de impressão e ajustes para o wrapper mobile
+
 $customCss = '
 @media print {
   .app-header, .no-print { display: none !important; }
@@ -267,7 +267,7 @@ $customCss = '
 ';
 
 
-// Conteúdo da página
+
 ob_start();
 ?>
 
@@ -348,7 +348,7 @@ ob_start();
   </div>
   <div class="card-footer">
     <?php
-    // STATUS dinâmico da planilha com base nos totais
+    
     if ($total_pendentes === $total_geral && $total_novos === 0) {
       $STATUS_calc = 'Pendente';
       $badge = 'secondary';
@@ -402,18 +402,18 @@ ob_start();
             <tbody>
               <?php foreach ($PRODUTOS_alteracoes as $PRODUTO): ?>
                 <?php
-                // Construir texto antigo e novo
+                
                 $antigo = [];
                 $novo = [];
 
-                // Verificar alteração no nome (usar descrições completas já montadas)
+                
                 $nome_original = $PRODUTO['nome_original'] ?? ($PRODUTO['nome'] ?? '');
                 $nome_atual = $PRODUTO['nome_atual'] ?? $nome_original;
                 if (!empty($PRODUTO['nome_editado']) && $PRODUTO['nome_editado'] != $nome_original) {
                   $antigo[] = htmlspecialchars($nome_original);
                   $novo[] = htmlspecialchars($nome_atual);
                 } else {
-                  // Se não mudou, mostrar o nome atual em ambas as colunas
+                  
                   $antigo[] = htmlspecialchars($nome_atual);
                   $novo[] = htmlspecialchars($nome_atual);
                 }

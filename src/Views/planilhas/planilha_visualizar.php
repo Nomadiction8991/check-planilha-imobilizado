@@ -1,13 +1,13 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
-// Evitar cache do navegador para garantir dados atualizados
+
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Cache-Control: post-check=0, pre-check=0', false);
 header('Pragma: no-cache');
 header('Expires: 0');
 
-// Usamos o ID da comum como parametro principal
+
 $comum_id = 0;
 if (isset($_GET['comum_id'])) {
     $comum_id = (int)$_GET['comum_id'];
@@ -25,16 +25,16 @@ $PRODUTOS = $produtos ?? [];
 $erro_PRODUTOS = $erro_produtos ?? '';
 $filtro_STATUS = $filtro_status ?? '';
 
-// Configurações da pagina
-$id_planilha = $comum_id; // compatibilidade com código legado
+
+$id_planilha = $comum_id; 
 $pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'VISUALIZAR Planilha');
 $backUrl = '../../../index.php';
 
-// Bloqueio por data de importação (UTC-4)
+
 if (!empty($acesso_bloqueado)) {
     $mensagemBloqueio = $mensagem_bloqueio ?: 'A planilha precisa ser importada novamente para continuar.';
 
-    // Usa o layout padrão do sistema com modal igual ao index
+    
     $pageTitle = 'Importação Desatualizada';
     $backUrl = '../../../index.php';
 
@@ -921,7 +921,7 @@ if (!empty($acesso_bloqueado)) {
     exit;
 }
 
-// Menu completo para todos os usuários
+
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuPlanilha" data-bs-toggle="dropdown" aria-expanded="false">
@@ -929,7 +929,7 @@ $headerActions = '
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPlanilha">';
 
-// Todas as ações disponveis para todos os usuários
+
 $headerActions .= '
             <li>
                 <a class="dropdown-item" href="../produtos/produtos_listar.php?comum_id=' . $comum_id . '">
@@ -964,7 +964,7 @@ $headerActions .= '
     </div>
 ';
 
-// Iniciar buffer para capturar o conteúdo
+
 ob_start();
 ?>
 
@@ -1183,7 +1183,7 @@ ob_start();
     <div class="list-group list-group-flush">
         <?php if ($PRODUTOS): ?>
             <?php foreach ($PRODUTOS as $p):
-                // Determinar a classe com base nos STATUS
+                
                 $classe = '';
                 $tem_edicao = $p['editado'] == 1;
 
@@ -1201,16 +1201,16 @@ ob_start();
                     $classe = 'linha-pendente';
                 }
 
-                // Todos os botes funcionam de forma independente
-                // Apenas bloquear quando produto estiver em DR (ativo=0)
+                
+                
                 if ($p['ativo'] == 0) {
-                    // Em DR, bloquear check mas manter outros disponveis
+                    
                     $show_check = false;
                     $show_imprimir = true;
                     $show_obs = true;
                     $show_edit = true;
                 } else {
-                    // Todos os botes disponveis e independentes
+                    
                     $show_check = true;
                     $show_imprimir = true;
                     $show_obs = true;
@@ -1247,16 +1247,16 @@ ob_start();
                         <div class="edicao-pendente">
                             <strong><?php echo mb_strtoupper('EDITAR:', 'UTF-8'); ?></strong><br>
                             <?php
-                            // Mostrar editado_descricao_completa se existir; caso contrário montar uma versão dinâmica
+                            
                             $desc_editada_visivel = trim($p['editado_descricao_completa'] ?? '');
                             if ($desc_editada_visivel === '') {
-                                // Dados base (preferir editados)
+                                
                                 $tipo_codigo_final = $p['tipo_codigo'];
                                 $tipo_desc_final = $p['tipo_desc'];
                                 $ben_final = ($p['editado_bem'] !== '' ? $p['editado_bem'] : $p['bem']);
                                 $comp_final = ($p['editado_complemento'] !== '' ? $p['editado_complemento'] : $p['complemento']);
                                 $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
-                                // Montagem simples (similar a funcao pp_montar_descricao, mas sem quantidade)
+                                
                                 $partes = [];
                                 if ($tipo_codigo_final && $tipo_desc_final) {
                                     $partes[] = mb_strtoupper($tipo_codigo_final . ' - ' . $tipo_desc_final, 'UTF-8');
@@ -1265,7 +1265,7 @@ ob_start();
                                     $partes[] = mb_strtoupper($ben_final, 'UTF-8');
                                 }
                                 if ($comp_final !== '') {
-                                    // Evitar duplicacao do bem no complemento (basico)
+                                    
                                     $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
                                     if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
                                         $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
@@ -2321,17 +2321,17 @@ ob_start();
 </script>
 
 <?php
-// Capturar o conteúdo
+
 $contentHtml = ob_get_clean();
 
-// Criar arquivo temporário com o conteúdo
+
 $tempFile = __DIR__ . '/../../../temp_view_planilha_content_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 
-// Renderizar o layout
+
 include __DIR__ . '/../layouts/app_wrapper.php';
 
-// LIMPAR arquivo temporário
+
 unlink($tempFile);
 ?>

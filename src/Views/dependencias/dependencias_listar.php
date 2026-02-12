@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
-// Incluir lógica de leitura (preparada em CRUD)
+
 try {
     include __DIR__ . '/../../../app/controllers/read/DependenciaListController.php';
 } catch (Throwable $e) {
@@ -15,7 +15,7 @@ try {
 
 $pageTitle = 'Dependencias';
 $backUrl = '../../../index.php';
-// Preserve current filters when navigating to create/edit pages
+
 $qsArr = [];
 if (!empty($busca)) { $qsArr['busca'] = $busca; }
 if (!empty($pagina) && $pagina > 1) { $qsArr['pagina'] = $pagina; }

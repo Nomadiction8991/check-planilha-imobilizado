@@ -1,12 +1,12 @@
 <?php
- // AUTENTICAÇÃO
-// Se $PRODUTOS NÃO foi definido, usar array vazio
+ 
+
 $PRODUTOS = $PRODUTOS ?? [];
 $cnpj = $cnpj ?? '{{CNPJ}}';
 $numero_relatorio = $numero_relatorio ?? '{{NUMERO_RELATORIO}}';
 $casa_oracao = $casa_oracao ?? '{{CASA_ORACAO}}';
 
-// Se NÃO houver PRODUTOS, criar uma página em branco como exemplo
+
 if (empty($PRODUTOS)) {
     $PRODUTOS = [
         [
@@ -17,7 +17,7 @@ if (empty($PRODUTOS)) {
     ];
 }
 
-// Contador de páginas
+
 $total_paginas = count($PRODUTOS);
 $pagina_atual = 0;
 

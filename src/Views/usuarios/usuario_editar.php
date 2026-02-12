@@ -1,8 +1,8 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// AUTENTICAÇÃO
 
-// Qualquer usuário autenticado pode editar usuários
+
+
 $idParam = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if (!$idParam) {
     header('Location: ../../../index.php');
@@ -12,7 +12,7 @@ if (!$idParam) {
 include __DIR__ . '/../../../app/controllers/update/UsuarioUpdateController.php';
 
 $pageTitle = 'EDITAR USUÁRIO';
-// Voltar: sempre para listagem (preservando filtros)
+
 $qsArr = [];
 if (!empty($_GET['busca'])) {
     $qsArr['busca'] = $_GET['busca'];
@@ -58,7 +58,7 @@ ob_start();
 
 <?php if (isset($usuario)): ?>
     <form method="POST" id="formUsuario">
-        <?php // Preserve filters when submitting the edit form so controller can redirect back properly 
+        <?php 
         ?>
         <input type="hidden" name="busca" value="<?php echo htmlspecialchars($_GET['busca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         <input type="hidden" name="status" value="<?php echo htmlspecialchars($_GET['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">

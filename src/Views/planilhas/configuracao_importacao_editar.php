@@ -11,7 +11,7 @@ if ($id_planilha <= 0) {
 $mensagem = '';
 $tipo_mensagem = '';
 
-// Carregar dados da planilha e do comum associado
+
 function carregar_planilha($conexao, $id_planilha) {
     $sql = "SELECT p.id, p.comum_id, p.ativo, p.data_posicao,
                    c.descricao AS comum_descricao,
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Administra§£o e CIDADE s£o obrigat³rios.');
         }
 
-        // Obter comum_id pela planilha
+        
         $planilha_atual = carregar_planilha($conexao, $id_planilha);
         if (!$planilha_atual) {
             throw new Exception('Planilha n£o encontrada.');
@@ -44,13 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $conexao->beginTransaction();
 
-        // ATUALIZAR STATUS da planilha
+        
         $up1 = $conexao->prepare('UPDATE planilhas SET ativo = :ativo WHERE id = :id');
         $up1->bindValue(':ativo', $ativo, PDO::PARAM_INT);
         $up1->bindValue(':id', $id_planilha, PDO::PARAM_INT);
         $up1->execute();
 
-        // ATUALIZAR dados do comum relacionado
+        
         $up2 = $conexao->prepare('UPDATE comums SET administracao = :adm, cidade = :cid, setor = :setor WHERE id = :cid_comum');
         $up2->bindValue(':adm', $administracao);
         $up2->bindValue(':cid', $cidade);
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Dados atualizados para exibi§£o
+
 $planilha = carregar_planilha($conexao, $id_planilha);
 if (!$planilha) { 
     die('Planilha n£o encontrada.');
@@ -104,10 +104,10 @@ ob_start();
                 <div class="col-md-6">
                     <label for="administracao" class="form-label">Administra§£o <span class="text-danger">*</span></label>
                     <?php 
-                        // Administra§£o e cidade armazenadas como 'MT - NomeDaCIDADE'
+                        
                         $administracao_atual = $planilha['administracao'] ?? '';
                         $cidade_atual = $planilha['cidade'] ?? '';
-                        // Extrair somente nome ap³s ' - '
+                        
                         $nome_cidade_adm = '';
                         if (strpos($administracao_atual,' - ') !== false) {
                             $parts = explode(' - ',$administracao_atual,2);
@@ -118,7 +118,7 @@ ob_start();
                             $parts2 = explode(' - ',$cidade_atual,2);
                             $nome_cidade_cid = $parts2[1];
                         }
-                        // Definir base de cidades de MT (pode ser ampliado depois ou carregado de tabela auxiliar)
+                        
                         $cidades_mt = [
                             'Cuiab¡','V¡rzea Grande','Rondon³polis','Sinop','Sorriso','Barra do Gar§as','Tangar¡ da Serra','Lucas do Rio Verde','Primavera do Leste','Alta Floresta','Campo Verde','C¡ceres','Col­der','Guarant£ do Norte','Ju­na','Mirassol dOeste','Nova Mutum','Pontes e Lacerda','S£o F©lix do Araguaia','Peixoto de Azevedo'
                         ];
@@ -189,10 +189,10 @@ ob_start();
 <?php
 $contentHtml = ob_get_clean();
 
-// Script para captura de assinaturas e carregar assinaturas existentes
-// Reutiliza a mesma l³gica do importar-planilha para modal, estados e cidades
-// Pre-encode any server values used by the script to avoid parsing issues
-// Render direto sem JS (prefill j¡ feito via PHP)
+
+
+
+
 $contentHtmlFinal = $contentHtml;
 $tempFile = __DIR__ . '/../../../temp_editar_planilha_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtmlFinal);

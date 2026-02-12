@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// AUTENTICACAO
+
 include __DIR__ . '/../../../app/controllers/update/ProdutoObservacaoController.php';
 
 $pageTitle = to_uppercase('observacoes');

@@ -17,7 +17,7 @@ if (!$comum) {
 
 $pageTitle = 'EDITAR COMUM';
 
-// Capture the filter query string so we can reuse it on the back button and in the form
+
 $filterParams = $_GET;
 unset($filterParams['id'], $filterParams['success'], $filterParams['ajax']);
 $filterQueryString = http_build_query($filterParams);
@@ -200,7 +200,7 @@ ob_start();
             <form method="POST" action="../../../app/controllers/update/ComumUpdateController.php" novalidate>
                 <input type="hidden" name="id" value="<?php echo (int) $comum['id']; ?>">
                 <input type="hidden" name="filters" value="<?php echo $filtersHiddenValue; ?>">
-                <?php // Preserve list filters when submitting the edit form (accept GET or POST) ?>
+                <?php ?>
                 <input type="hidden" name="busca" value="<?php echo htmlspecialchars($buscaValue, ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="pagina" value="<?php echo htmlspecialchars($paginaValue, ENT_QUOTES, 'UTF-8'); ?>">
 

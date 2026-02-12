@@ -1,14 +1,14 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// AUTENTICAO
+
 require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
-// Carregar template completo com CSS inline
+
 $templatePath = __DIR__ . '/../../../relatorios/14-1.html';
 $templateCompleto = '';
 if (file_exists($templatePath)) {
     $templateCompleto = file_get_contents($templatePath);
-    // Extrair apenas o conteúdo entre <!-- A4-START --> e <!-- A4-END -->
+    
     $start = strpos($templateCompleto, '<!-- A4-START -->');
     $end   = strpos($templateCompleto, '<!-- A4-END -->');
     if ($start !== false && $end !== false && $end > $start) {
@@ -17,7 +17,7 @@ if (file_exists($templatePath)) {
         $a4Block = '';
     }
 
-    // Extrair o <style> do template
+    
     preg_match('/<style>(.*?)<\/style>/s', $templateCompleto, $matchesStyle);
     $styleContent = isset($matchesStyle[1]) ? $matchesStyle[1] : '';
 } else {
@@ -48,7 +48,7 @@ $headerActions = '
     </div>
 ';
 
-// CSS customizado para a interface da aplicação (não do formulário)
+
 $customCss = '';
 $customCssPath = __DIR__ . '/style/relatorio141.css';
 if (file_exists($customCssPath)) {
@@ -58,7 +58,7 @@ $customCss .= "\n.r141-root textarea, .r141-root input{pointer-events:none; -web
 $customCss .= "\n.r141-root textarea{background:transparent; border:none; outline:none;}";
 $customCss .= "\n.r141-root input[disabled]{opacity:1; filter:none;}";
 
-// (removed previous @media print rules - printing will open a clean window with the A4 content)
+
 
 if (!function_exists('r141_safe_strlen')) {
     function r141_safe_strlen(string $text): int
@@ -155,14 +155,14 @@ if (!function_exists('r141_insertSignatureImageRegex')) {
     }
 }
 
-// Helper para preencher campos no template (suporta textarea e input)
+
 if (!function_exists('r141_fillFieldById')) {
     function r141_fillFieldById(string $html, string $id, string $text): string
     {
-        // Versão segura usando DOMDocument (substitui manipulação por regex)
-        // - Não altera arquivos no disco
-        // - Preenche <textarea id="..."> ou <input id="..."> quando existir
-        // - Não faz fallbacks agressivos por padrão (mantém o template intacto em caso de ausência)
+        
+        
+        
+        
 
         $text = trim((string)$text);
         $maxLen = 10000;
@@ -176,16 +176,16 @@ if (!function_exists('r141_fillFieldById')) {
 
         $prev = function_exists('libxml_use_internal_errors') ? libxml_use_internal_errors(true) : null;
         $doc = new \DOMDocument('1.0', 'UTF-8');
-        // Wrap para garantir parse correto
+        
         $wrapped = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/></head><body>' . $html . '</body></html>';
-        // Carregar o fragmento (suprimir warnings de HTML imperfeito)
+        
         $doc->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $xpath = new \DOMXPath($doc);
 
-        // 1) Procurar textarea com o id e preencher seu conteúdo
+        
         $textarea = $xpath->query('//textarea[@id="' . $id . '"]')->item(0);
         if ($textarea) {
-            // limpar ns filhos e inserir texto seguro
+            
             while ($textarea->firstChild) {
                 $textarea->removeChild($textarea->firstChild);
             }
@@ -200,7 +200,7 @@ if (!function_exists('r141_fillFieldById')) {
             return $body ? r141_inner_html($body) : $html;
         }
 
-        // 2) Procurar input com o id e definir atributo value
+        
         $input = $xpath->query('//input[@id="' . $id . '"]')->item(0);
         if ($input) {
             $input->setAttribute('value', $text);
@@ -214,7 +214,7 @@ if (!function_exists('r141_fillFieldById')) {
             return $body ? r141_inner_html($body) : $html;
         }
 
-        // 3) Não modificar se no encontrou elementos alvo
+        
         if (function_exists('libxml_clear_errors')) {
             libxml_clear_errors();
         }
@@ -256,7 +256,7 @@ if (!function_exists('r141_setCheckboxById')) {
     }
 }
 
-// helper: extrai innerHTML de um n DOM
+
 if (!function_exists('r141_inner_html')) {
     function r141_inner_html(\DOMNode $element): string
     {
@@ -268,7 +268,7 @@ if (!function_exists('r141_inner_html')) {
     }
 }
 
-// helper: insere imagem de assinatura no lugar de um textarea
+
 if (!function_exists('r141_insertSignatureImage')) {
     function r141_insertSignatureImage(string $html, string $textareaId, string $base64Image): string
     {
@@ -284,18 +284,18 @@ if (!function_exists('r141_insertSignatureImage')) {
         $doc->loadHTML($wrapped, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $xpath = new \DOMXPath($doc);
 
-        // Encontrar o textarea
+        
         $textarea = $xpath->query('//textarea[@id="' . $textareaId . '"]')->item(0);
         if ($textarea) {
-            // Criar elemento img
+            
             $img = $doc->createElement('img');
             $img->setAttribute('src', $base64Image);
             $img->setAttribute('alt', 'Assinatura');
-            // Altura aproximada de 2 linhas de textarea; ajuste fino se necessrio
-            // Centraliza a assinatura horizontalmente
+            
+            
             $img->setAttribute('style', 'max-width: 100%; height: auto; display: block; max-height: 9mm; margin: 0 auto; object-fit: contain;');
 
-            // Substituir textarea pela imagem
+            
             $textarea->parentNode->replaceChild($img, $textarea);
 
             if (function_exists('libxml_clear_errors')) {
@@ -318,7 +318,7 @@ if (!function_exists('r141_insertSignatureImage')) {
     }
 }
 
-// Compatibilidade: $produtos (minsculo do controller) para $PRODUTOS (maisculo usado na view)
+
 $PRODUTOS = $produtos ?? [];
 
 ob_start();
@@ -326,7 +326,7 @@ ob_start();
 
 <?php if (count($PRODUTOS) > 0): ?>
     <?php
-    // Descobrir imagem de fundo, se existir
+    
     $bgCandidates = [
         '/relatorios/relatorio-14-1-bg.png',
         '/relatorios/relatorio-14-1-bg.jpg',
@@ -368,14 +368,14 @@ ob_start();
                 <div class="a4-viewport">
                     <div class="a4-scaled">
                         <?php
-                        // Preencher dados do PRODUTO no template
+                        
                         $htmlPreenchido = $a4Block;
                         if (!empty($htmlPreenchido)) {
-                            // Preencher Data Emisso automaticamente com a data atual
+                            
                             $dataEmissao = date('d/m/Y');
                             $descricaoBem = $row['descricao_completa'];
 
-                            // Derivar alguns campos comuns adicionais
+                            
                             $administracao_auto = '';
                             if (!empty($comum_planilha)) {
                                 $partesComum = array_map('trim', explode('-', $comum_planilha));
@@ -384,41 +384,41 @@ ob_start();
                                 }
                             }
                             $setor_auto = isset($row['dependencia_descricao']) ? trim((string)$row['dependencia_descricao']) : '';
-                            // No incluir data automtica no campo de local/data  ficar apenas o valor comum da planilha
+                            
                             $local_data_auto = trim(($comum_planilha ?? ''));
 
-                            // Injetar valores nos campos por ID (textarea/input)
-                            // Preencher campo de Data Emisso com a data atual
+                            
+                            
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input1', $dataEmissao);
-                            // Preencher Administração e CIDADE dos novos campos da planilha
+                            
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input2', $administracao_planilha ?? '');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input3', $cidade_planilha ?? '');
-                            // NÃO preencher automaticamente o setor (input4) por solicitação do usuário
+                            
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input5', $cnpj_planilha ?? '');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input6', $numero_relatorio_auto ?? '');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input7', $casa_oracao_auto ?? '');
                             if (!empty($descricaoBem)) {
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input8', $descricaoBem);
                             }
-                            // Preencher input16 com o valor comum da planilha seguido do placeholder de data
+                            
                             $local_data_with_placeholder = trim(($local_data_auto ?? '') . ' ' . '___/___/_____');
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input16', $local_data_with_placeholder);
 
-                            // Preencher campos do administrador/acessor diretamente do PRODUTO (administrador_acessor_id)
+                            
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input27', (string)($row['administrador_nome'] ?? ''));
 
-                            // Assinatura do administrador
+                            
                             $sigAdmin = (string)($row['administrador_assinatura'] ?? '');
                             if (!empty($sigAdmin)) {
-                                // Prefixar data URL se necessrio
+                                
                                 if (stripos($sigAdmin, 'data:image') !== 0) {
                                     $sigAdmin = 'data:image/png;base64,' . $sigAdmin;
                                 }
                                 $htmlPreenchido = r141_insertSignatureImage($htmlPreenchido, 'input28', $sigAdmin);
                             }
 
-                            // Preencher campos do doador/cnjuge diretamente do PRODUTO (doador_conjugue_id)
-                            // Montagem de endereo completo do doador: logradouro, nmero, complemento, bairro - cidade/UF - CEP
+                            
+                            
                             $end_doador = trim(implode(' ', array_filter([
                                 $row['doador_endereco_logradouro'] ?? '',
                                 $row['doador_endereco_numero'] ?? ''
@@ -432,51 +432,51 @@ ob_start();
                                 trim(($row['doador_endereco_estado'] ?? ''))
                             ])));
                             $end_doador_cep = trim($row['doador_endereco_cep'] ?? '');
-                            // Formatao amigvel: Partes principais separadas por vrgula; cidade-UF agrupadas; CEP no final se existir.
+                            
                             $partesEnd = [];
-                            if ($end_doador) $partesEnd[] = $end_doador; // Rua + nmero
-                            if ($end_doador_comp) $partesEnd[] = $end_doador_comp; // COMPLEMENTO - BAIRRO
-                            if ($end_doador_local) $partesEnd[] = $end_doador_local; // CIDADE - UF
+                            if ($end_doador) $partesEnd[] = $end_doador; 
+                            if ($end_doador_comp) $partesEnd[] = $end_doador_comp; 
+                            if ($end_doador_local) $partesEnd[] = $end_doador_local; 
                             $endereco_doador_final = implode(', ', $partesEnd);
                             if ($end_doador_cep) {
                                 $endereco_doador_final = rtrim($endereco_doador_final, ', ');
                                 $endereco_doador_final .= ($endereco_doador_final ? ' - ' : '') . $end_doador_cep;
                             } else {
-                                // Se NO houver CEP, remover trao final se existir
+                                
                                 $endereco_doador_final = rtrim($endereco_doador_final, ' -');
                             }
 
-                            // Doador: nome, CPF, RG, Endereo
+                            
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input17', (string)($row['doador_nome'] ?? ''));
                             $cpfDoador = (string)($row['doador_cpf'] ?? '');
                             $rgDoadorOriginal = (string)($row['doador_rg'] ?? '');
                             $rgDoador = $rgDoadorOriginal;
                             if (empty($rgDoador) || (!empty($row['doador_rg_igual_cpf']) && $row['doador_rg_igual_cpf'])) {
-                                // Fallback: RG recebe CPF quando marcado ou RG vazio
+                                
                                 $rgDoador = $cpfDoador;
                             }
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input21', $cpfDoador);
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input23', $rgDoador);
-                            // Endereo do doador
+                            
                             if (!empty($endereco_doador_final)) {
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input19', $endereco_doador_final);
                             }
-                            // Repetir nome do doador no termo de aceite
+                            
                             $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input29', (string)($row['doador_nome'] ?? ''));
 
-                            // Assinatura do doador
+                            
                             $sigDoador = (string)($row['doador_assinatura'] ?? '');
                             if (!empty($sigDoador)) {
                                 if (stripos($sigDoador, 'data:image') !== 0) {
                                     $sigDoador = 'data:image/png;base64,' . $sigDoador;
                                 }
-                                // Campo de assinatura do doador na seo C
+                                
                                 $htmlPreenchido = r141_insertSignatureImage($htmlPreenchido, 'input25', $sigDoador);
-                                // Campo de assinatura do doador no termo de aceite
+                                
                                 $htmlPreenchido = r141_insertSignatureImage($htmlPreenchido, 'input30', $sigDoador);
                             }
 
-                            // Cnjuge (se o doador for casado)
+                            
                             if (!empty($row['doador_casado']) && $row['doador_casado'] == 1) {
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input18', (string)($row['doador_nome_conjuge'] ?? ''));
                                 $cpfConj = (string)($row['doador_cpf_conjuge'] ?? '');
@@ -487,7 +487,7 @@ ob_start();
                                 }
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input22', $cpfConj);
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input24', $rgConj);
-                                // Endereo do cnjuge (utiliza os mesmos campos do doador; se houver especficos, ajustar aqui)
+                                
                                 $end_conj = trim(implode(' ', array_filter([
                                     $row['doador_endereco_logradouro'] ?? '',
                                     $row['doador_endereco_numero'] ?? ''
@@ -510,14 +510,14 @@ ob_start();
                                     $endereco_conjuge_final = rtrim($endereco_conjuge_final, ', ');
                                     $endereco_conjuge_final .= ($endereco_conjuge_final ? ' - ' : '') . $end_conj_cep;
                                 } else {
-                                    // Se NO houver CEP, remover trao final se existir
+                                    
                                     $endereco_conjuge_final = rtrim($endereco_conjuge_final, ' -');
                                 }
                                 if (!empty($endereco_conjuge_final)) {
                                     $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input20', $endereco_conjuge_final);
                                 }
 
-                                // Assinatura do cnjuge
+                                
                                 $sigConjuge = (string)($row['doador_assinatura_conjuge'] ?? '');
                                 if (!empty($sigConjuge)) {
                                     if (stripos($sigConjuge, 'data:image') !== 0) {
@@ -527,21 +527,21 @@ ob_start();
                                 }
                             }
 
-                            // Preencher campos de nota fiscal e marcar checkbox baseado em condicao_141
+                            
                             if (isset($row['condicao_14_1']) && ($row['condicao_14_1'] == 1 || $row['condicao_14_1'] == 3)) {
-                                // Preencher campos de nota fiscal com novos nomes de colunas
+                                
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input9', (string)($row['nota_numero'] ?? ''));
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input10', (string)($row['nota_data'] ?? ''));
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input11', (string)($row['nota_valor'] ?? ''));
                                 $htmlPreenchido = r141_fillFieldById($htmlPreenchido, 'input12', (string)($row['nota_fornecedor'] ?? ''));
                             }
 
-                            // Opcional: injetar imagem de fundo se detectada
+                            
                             $htmlIsolado = $htmlPreenchido;
                             if (!empty($bgUrl)) {
                                 $htmlIsolado = preg_replace('/(<div\s+class="a4"[^>]*>)/', '$1' . '<img class="page-bg" src="' . htmlspecialchars($bgUrl, ENT_QUOTES) . '" alt="">', $htmlIsolado, 1);
                             }
-                            // Marcar checkboxes no HTML (sem JS/iframe)
+                            
                             $condicao = isset($row['condicao_14_1']) ? (int)$row['condicao_14_1'] : 0;
                             $htmlIsolado = r141_setCheckboxById($htmlIsolado, 'input13', $condicao === 1);
                             $htmlIsolado = r141_setCheckboxById($htmlIsolado, 'input14', $condicao === 2);
@@ -619,8 +619,8 @@ $script = <<<JS
 </script>
 JS;
 
-// Substituir o placeholder pelos dados reais
-// Garantir que o boto de imprimir chame a FUNO (listener delegado, mais robusto)
+
+
 echo "<script>document.addEventListener('click', function(e){ var btn = e.target && e.target.closest && e.target.closest('#btnPrint'); if(btn){ e.preventDefault(); try{ console && console.log && console.log('print button clicked'); if(typeof window.validarEImprimir==='function'){ window.validarEImprimir(); } else { window.print(); } }catch(err){ console && console.error && console.error('print handler error', err); window.print(); } } });</script>\n";
 
 echo $script;

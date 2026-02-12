@@ -1,13 +1,6 @@
 <?php
 
-/**
- * View: Criar Novo Usuário
- * 
- * Variáveis esperadas:
- * - $publicRegister: bool - Se true, é registro público (sem autenticação)
- * - $errors: array - Erros de validação
- * - $old: array - Dados antigos do formulário
- */
+
 
 use App\Helpers\{AlertHelper, FormHelper, ViewHelper};
 

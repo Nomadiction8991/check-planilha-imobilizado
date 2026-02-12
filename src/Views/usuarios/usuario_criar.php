@@ -1,24 +1,24 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Detectar se é registro público via parÁ¢metro GET
+
 if (isset($_GET['public']) && $_GET['public'] == '1') {
     define('PUBLIC_REGISTER', true);
 }
 
-// Apenas incluir AUTENTICAÇÃO se NÃO for registro público
+
 if (!defined('PUBLIC_REGISTER')) {
-    // Require login (any authenticated user)
+    
     if (!function_exists('isLoggedIn') || !isLoggedIn()) {
         header('Location: ../../../login.php');
         exit;
     }
 } else {
-    // Registro público - iniciar sessão se NÃO existir
+    
     if (session_STATUS() === PHP_SESSION_NONE) {
         session_start();
     }
     
-    // Registro público - sem perfil específico
+    
 }
 
 include __DIR__ . '/../../../app/controllers/create/UsuarioCreateController.php';
@@ -27,7 +27,7 @@ $pageTitle = defined('PUBLIC_REGISTER') ? 'CADASTRO' : 'NOVO USUÁRIO';
 if (defined('PUBLIC_REGISTER')) {
     $backUrl = '../../../login.php';
 } else {
-    // Preserve filters on return to list
+    
     $qsArr = [];
     if (!empty($_GET['busca'])) { $qsArr['busca'] = $_GET['busca']; }
     if (isset($_GET['status']) && $_GET['status'] !== '') { $qsArr['status'] = $_GET['status']; }
@@ -67,7 +67,7 @@ ob_start();
 
 
 <form method="POST" id="formUsuario">
-    <?php // Preserve filters when submitting the create form so controller can redirect back properly ?>
+    <?php ?>
     <?php if (!defined('PUBLIC_REGISTER')): ?>
         <input type="hidden" name="busca" value="<?php echo htmlspecialchars($_GET['busca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         <input type="hidden" name="status" value="<?php echo htmlspecialchars($_GET['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">

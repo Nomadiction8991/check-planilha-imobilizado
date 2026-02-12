@@ -1,6 +1,6 @@
 <?php
 
-define('SKIP_AUTH', true); // Para rotas públicas como login
+define('SKIP_AUTH', true); 
 require __DIR__ . '/../config/bootstrap.php';
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -21,12 +21,12 @@ if (!isset($rotas[$chaveRota])) {
 
 [$classeControlador, $acao] = $rotas[$chaveRota];
 
-// Injetar conexão PDO para controllers que precisam
-// AuthController não precisa de conexão no construtor
+
+
 if ($classeControlador === 'App\Controllers\AuthController') {
     $controlador = new $classeControlador();
 } else {
-    // Para outros controllers, injetar a conexão global
+    
     global $conexao;
     $controlador = new $classeControlador($conexao);
 }

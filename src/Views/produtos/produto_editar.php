@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// AUTENTICAÇÁO
+
 require_once __DIR__ . '/../../../app/controllers/update/ProdutoUpdateController.php';
 
 $pageTitle = to_uppercase('editar produto');
@@ -696,7 +696,7 @@ ob_start();
 <script>
     // Mapeamento de tipos de bens e suas opçÁµes de bem
     const tiposBensOpcoes = <?php echo json_encode(array_reduce($tipos_bens, function ($carry, $item) {
-                                // Separar opçÁµes por / se houver
+                                
                                 $opcoes = [];
                                 if (!empty($item['descricao'])) {
                                     $partes = explode('/', $item['descricao']);

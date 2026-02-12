@@ -9,26 +9,12 @@ use App\Core\ConnectionManager;
 use PDO;
 use Exception;
 
-/**
- * Controller de Usuários
- * 
- * SOLID Principles:
- * - Single Responsibility: Gerencia APENAS fluxo HTTP de usuários
- * - Dependency Inversion: Depende de UsuarioService (abstração)
- * 
- * Responsabilidades:
- * - Processar requisições HTTP (GET/POST)
- * - Validar entrada do usuário
- * - Delegar para UsuarioService
- * - Renderizar views ou retornar JSON
- */
 class UsuarioController extends BaseController
 {
     private UsuarioService $usuarioService;
 
     public function __construct(?PDO $conexao = null)
     {
-        // Permite DI mas mantém backward compatibility
         if ($conexao === null) {
             $conexao = ConnectionManager::getConnection();
         }
@@ -37,9 +23,6 @@ class UsuarioController extends BaseController
         $this->usuarioService = new UsuarioService($usuarioRepo);
     }
 
-    /**
-     * Lista usuários com paginação e filtros
-     */
     public function index(): void
     {
         $pagina = max(1, (int) $this->query('pagina', 1));
@@ -53,7 +36,6 @@ class UsuarioController extends BaseController
         try {
             $resultado = $this->usuarioService->buscarPaginado($pagina, $limite, $filtros);
 
-            // Renderizar view limpa
             ViewRenderer::render('usuarios/index', [
                 'pageTitle' => 'USUÁRIOS',
                 'backUrl' => '/comuns',
@@ -84,9 +66,6 @@ class UsuarioController extends BaseController
         }
     }
 
-    /**
-     * Exibe formulário de criação de usuário
-     */
     public function create(): void
     {
         if ($this->isPost()) {
@@ -94,7 +73,6 @@ class UsuarioController extends BaseController
             return;
         }
 
-        // Renderizar formulário limpo
         ViewRenderer::render('usuarios/create', [
             'pageTitle' => 'NOVO USUÁRIO',
             'backUrl' => '/usuarios',
@@ -104,29 +82,20 @@ class UsuarioController extends BaseController
             'old' => $_SESSION['old_input'] ?? []
         ]);
 
-        // Limpar old input
         unset($_SESSION['old_input']);
     }
 
-    /**
-     * Processa criação de novo usuário
-     */
     public function store(): void
     {
         try {
-            // Coletar dados do formulário
             $dados = $this->coletarDadosFormulario();
 
-            // Validar dados
             $this->validarUsuario($dados);
 
-            // Verificar duplicações via Service
             $id = $this->usuarioService->criar($dados);
 
-            // Redirecionar com sucesso
             $this->redirecionarAposOperacao('success=1', 'Usuário cadastrado com sucesso!');
         } catch (Exception $e) {
-            // Renderizar formulário com erro
             $this->renderizarFormularioLegado([
                 'erro' => $e->getMessage(),
                 'dados' => $_POST
@@ -134,9 +103,6 @@ class UsuarioController extends BaseController
         }
     }
 
-    /**
-     * Exibe formulário de edição
-     */
     public function edit(): void
     {
         $id = (int) $this->query('id', 0);
@@ -158,25 +124,18 @@ class UsuarioController extends BaseController
             return;
         }
 
-        // Renderizar formulário de edição (temporário)
         $this->renderizarFormularioEdicaoLegado($usuario);
     }
 
-    /**
-     * Processa atualização de usuário
-     */
     public function update(int $id): void
     {
         try {
             $dados = $this->coletarDadosFormulario();
 
-            // Validar dados
             $this->validarUsuario($dados, $id);
 
-            // Atualizar (service valida duplicações automaticamente)
             $this->usuarioService->atualizar($id, $dados);
 
-            // Redirecionar com sucesso
             $this->redirecionarAposOperacao('success=1', 'Usuário atualizado com sucesso!');
         } catch (Exception $e) {
             $usuario = $this->usuarioService->buscarPorId($id);
@@ -184,9 +143,6 @@ class UsuarioController extends BaseController
         }
     }
 
-    /**
-     * Deleta usuário
-     */
     public function delete(): void
     {
         $id = (int) $this->post('id', 0);
@@ -211,9 +167,6 @@ class UsuarioController extends BaseController
         }
     }
 
-    /**
-     * Coleta dados do formulário
-     */
     private function coletarDadosFormulario(): array
     {
         $formatarRg = function ($valor) {
@@ -245,20 +198,17 @@ class UsuarioController extends BaseController
             'endereco_estado' => trim($this->post('endereco_estado', ''))
         ];
 
-        // Senha (apenas se fornecida)
         $senha = trim($this->post('senha', ''));
         if ($senha !== '') {
             $dados['senha'] = $senha;
         }
 
-        // Formatar RG
         if ($dados['rg_igual_cpf']) {
             $dados['rg'] = $dados['cpf'];
         } else {
             $dados['rg'] = $formatarRg($dados['rg']);
         }
 
-        // Formatar RG do cônjuge
         if ($dados['casado']) {
             if ($dados['rg_conjuge_igual_cpf'] && !empty($dados['cpf_conjuge'])) {
                 $dados['rg_conjuge'] = $dados['cpf_conjuge'];
@@ -266,7 +216,6 @@ class UsuarioController extends BaseController
                 $dados['rg_conjuge'] = $formatarRg($dados['rg_conjuge']);
             }
         } else {
-            // Se não casado, limpar campos de cônjuge
             $dados['nome_conjuge'] = '';
             $dados['cpf_conjuge'] = '';
             $dados['rg_conjuge'] = '';
@@ -276,17 +225,12 @@ class UsuarioController extends BaseController
         return $dados;
     }
 
-    /**
-     * Valida dados do usuário
-     */
     private function validarUsuario(array $dados, ?int $ignorarId = null): void
     {
-        // Nome obrigatório
         if (empty($dados['nome'])) {
             throw new Exception('O nome é obrigatório.');
         }
 
-        // Email obrigatório e válido
         if (empty($dados['email'])) {
             throw new Exception('O e-mail é obrigatório.');
         }
@@ -295,7 +239,6 @@ class UsuarioController extends BaseController
             throw new Exception('E-mail inválido.');
         }
 
-        // Senha (apenas se fornecida ou em criação)
         if (isset($dados['senha'])) {
             if (strlen($dados['senha']) < 6) {
                 throw new Exception('A senha deve ter no mínimo 6 caracteres.');
@@ -306,11 +249,9 @@ class UsuarioController extends BaseController
                 throw new Exception('As senhas não conferem.');
             }
         } elseif ($ignorarId === null) {
-            // Criação: senha obrigatória
             throw new Exception('A senha é obrigatória.');
         }
 
-        // CPF obrigatório e válido
         if (empty($dados['cpf'])) {
             throw new Exception('O CPF é obrigatório.');
         }
@@ -320,13 +261,11 @@ class UsuarioController extends BaseController
             throw new Exception('CPF inválido. Deve conter 11 dígitos.');
         }
 
-        // RG obrigatório
         $rgNumeros = preg_replace('/\D/', '', $dados['rg']);
         if (strlen($rgNumeros) < 2) {
             throw new Exception('O RG é obrigatório e deve ter ao menos 2 dígitos.');
         }
 
-        // Telefone obrigatório
         if (empty($dados['telefone'])) {
             throw new Exception('O telefone é obrigatório.');
         }
@@ -336,7 +275,6 @@ class UsuarioController extends BaseController
             throw new Exception('Telefone inválido.');
         }
 
-        // Endereço obrigatório
         if (
             empty($dados['endereco_cep']) || empty($dados['endereco_logradouro']) ||
             empty($dados['endereco_numero']) || empty($dados['endereco_bairro']) ||
@@ -345,7 +283,6 @@ class UsuarioController extends BaseController
             throw new Exception('Todos os campos de endereço (CEP, logradouro, número, bairro, cidade e estado) são obrigatórios.');
         }
 
-        // Se casado, validar dados do cônjuge
         if ($dados['casado']) {
             if (empty($dados['nome_conjuge'])) {
                 throw new Exception('O nome do cônjuge é obrigatório.');
@@ -371,9 +308,6 @@ class UsuarioController extends BaseController
         }
     }
 
-    /**
-     * Redireciona após operação preservando filtros
-     */
     private function redirecionarAposOperacao(string $queryExtra, string $mensagem = ''): void
     {
         $retQ = [];
@@ -396,19 +330,10 @@ class UsuarioController extends BaseController
         $this->redirecionar('app/views/usuarios/usuarios_listar.php?' . $query);
     }
 
-    /**
-     * DEPRECATED: Renderiza listagem legada
-     * 
-     * @deprecated Use ViewRenderer::render('usuarios/index') instead
-     * TODO: Remover após migração completa para src/Views/usuarios/index.php
-     */
     private function renderizarListagemLegada(array $dados): void
     {
-        // Importar variáveis para compatibilidade com view legada
         extract($dados);
 
-        // NOTA: Conexão global necessária para view legada
-        // Será removida quando view for migrada para src/Views/
         $conexao = ConnectionManager::getConnection();
 
         $usuarios = $dados['usuarios'];
@@ -423,9 +348,6 @@ class UsuarioController extends BaseController
         require __DIR__ . '/../../app/views/usuarios/usuarios_listar.php';
     }
 
-    /**
-     * TEMPORÁRIO: Renderiza formulário de criação legado
-     */
     private function renderizarFormularioLegado(array $dados): void
     {
         $mensagem = $dados['erro'] ?? '';
@@ -434,9 +356,6 @@ class UsuarioController extends BaseController
         require __DIR__ . '/../../app/views/usuarios/usuario_criar.php';
     }
 
-    /**
-     * TEMPORÁRIO: Renderiza formulário de edição legado
-     */
     private function renderizarFormularioEdicaoLegado(array $usuario, string $erro = ''): void
     {
         $mensagem = $erro;

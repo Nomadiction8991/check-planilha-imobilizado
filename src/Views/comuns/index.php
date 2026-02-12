@@ -1,20 +1,10 @@
 <?php
 
-/**
- * View: Listagem de Comuns
- * 
- * Variáveis esperadas:
- * - $comuns: Array de comuns paginados
- * - $total: Total de registros
- * - $pagina: Página atual
- * - $totalPaginas: Total de páginas
- * - $busca: Termo de busca
- * - $limite: Itens por página
- */
+
 
 use App\Helpers\{AlertHelper, PaginationHelper, ViewHelper};
 
-// Garantir que variáveis existem
+
 $comuns = $comuns ?? [];
 $total = $total ?? 0;
 $pagina = $pagina ?? 1;
@@ -83,13 +73,13 @@ $limite = $limite ?? 10;
             <?php else: ?>
                 <?php foreach ($comuns as $comum): ?>
                     <?php
-                    // Verificar se cadastro está completo
+                    
                     $cadastroCompleto = !empty(trim($comum['descricao'] ?? '')) &&
                         !empty(trim($comum['cnpj'] ?? '')) &&
                         !empty(trim($comum['administracao'] ?? '')) &&
                         !empty(trim($comum['cidade'] ?? ''));
 
-                    // Formatar código (BR 00-0000)
+                    
                     $codigo = preg_replace("/\D/", '', (string)($comum['codigo'] ?? ''));
                     if ($codigo === '') {
                         $codigoFormatado = 'BR --';
@@ -98,7 +88,7 @@ $limite = $limite ?? 10;
                         $codigoFormatado = 'BR ' . substr($codigo, 0, 2) . '-' . substr($codigo, 2);
                     }
 
-                    // URLs das ações
+                    
                     $editUrl = ViewHelper::urlComQuery('/comuns/editar', ['id' => $comum['id']]);
                     $viewUrl = ViewHelper::urlComQuery('/planilhas/visualizar', ['comum_id' => $comum['id']]);
                     ?>

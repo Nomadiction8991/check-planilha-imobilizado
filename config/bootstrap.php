@@ -1,9 +1,6 @@
 <?php
 
-/**
- * Bootstrap central para inicializar charset, sessao e utilidades comuns.
- * Garantimos UTF-8 de ponta a ponta para evitar problemas de acentuacao.
- */
+
 
 if (!defined('APP_BOOTSTRAPPED')) {
     define('APP_BOOTSTRAPPED', true);
@@ -11,9 +8,9 @@ if (!defined('APP_BOOTSTRAPPED')) {
         define('BASE_PATH', dirname(__DIR__));
     }
 
-    // ⚠️ IMPORTANTE: session_start() DEVE vir ANTES de qualquer header()!
-    // Caso contrário, auth_helper não consegue fazer redirect (headers already sent).
-    // Sessoes mais seguras
+    
+    
+    
     if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start([
             'cookie_httponly' => true,
@@ -22,7 +19,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
         ]);
     }
 
-    // Forcar UTF-8 em todas as saídas
+    
     if (!headers_sent()) {
         header('Content-Type: text/html; charset=UTF-8');
     }
@@ -34,26 +31,26 @@ if (!defined('APP_BOOTSTRAPPED')) {
         mb_http_output('UTF-8');
     }
 
-    // Timezone padrao da aplicacao (Cuiaba - UTC-4)
+    
     date_default_timezone_set('America/Cuiaba');
 
-    // Autoload do Composer com bibliotecas externas
+    
     require_once BASE_PATH . '/vendor/autoload.php';
 
-    // Carregar variáveis de ambiente
+    
     require_once BASE_PATH . '/app/helpers/env_helper.php';
     loadEnv(BASE_PATH . '/.env');
 
-    // Carrega config da aplicacao
+    
     require_once BASE_PATH . '/config/database.php';
     require_once BASE_PATH . '/config/app_config.php';
 
-    // Carrega helpers utilitarios
+    
     require_once BASE_PATH . '/app/helpers/auth_helper.php';
     require_once BASE_PATH . '/app/helpers/uppercase_helper.php';
     require_once BASE_PATH . '/app/helpers/csv_encoding_helper.php';
 
-    // Log em arquivo local (cria pasta se necessario)
+    
     $logDir = BASE_PATH . '/storage/logs';
     if (!is_dir($logDir)) {
         @mkdir($logDir, 0775, true);
@@ -61,9 +58,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
     ini_set('log_errors', '1');
     ini_set('error_log', $logDir . '/app.log');
 
-    /**
-     * Detecta se a requisicao foi feita via AJAX/Fetch.
-     */
+    
     function is_ajax_request(): bool
     {
         $byHeader = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower((string) $_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
@@ -71,12 +66,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
         return $byHeader || $byAccept;
     }
 
-    /**
-     * Envia resposta JSON padronizada e encerra a execucao.
-     *
-     * @param array $payload Dados a serem serializados
-     * @param int $statusCode Codigo HTTP
-     */
+    
     function json_response(array $payload, int $statusCode = 200): void
     {
         if (!headers_sent()) {
@@ -88,9 +78,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
         exit;
     }
 
-    /**
-     * Sanitiza textos simples vindos do cliente.
-     */
+    
     function sanitize_text($value): string
     {
         return trim((string) $value);

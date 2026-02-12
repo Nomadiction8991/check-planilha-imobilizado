@@ -2,23 +2,10 @@
 
 namespace App\Helpers;
 
-/**
- * Helper para geração de elementos de formulário
- * 
- * Centraliza a criação de campos HTML padronizados.
- * Todos os campos aplicam uppercase automaticamente.
- */
+
 class FormHelper
 {
-    /**
-     * Gera um campo de texto (input type="text")
-     * 
-     * @param string $name Nome do campo
-     * @param string $label Label do campo
-     * @param string $value Valor atual
-     * @param array $options Opções adicionais (required, placeholder, maxlength, etc.)
-     * @return string HTML do campo
-     */
+    
     public static function text(string $name, string $label, string $value = '', array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -49,9 +36,7 @@ class FormHelper
         return $html;
     }
 
-    /**
-     * Gera um campo de senha (input type="password")
-     */
+    
     public static function password(string $name, string $label, array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -77,9 +62,7 @@ class FormHelper
         return $html;
     }
 
-    /**
-     * Gera um campo de email (input type="email")
-     */
+    
     public static function email(string $name, string $label, string $value = '', array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -107,9 +90,7 @@ class FormHelper
         return $html;
     }
 
-    /**
-     * Gera um campo select (dropdown)
-     */
+    
     public static function select(string $name, string $label, array $options, string $selected = '', array $attributes = []): string
     {
         $id = $attributes['id'] ?? $name;
@@ -141,9 +122,7 @@ class FormHelper
         return $html;
     }
 
-    /**
-     * Gera um campo textarea
-     */
+    
     public static function textarea(string $name, string $label, string $value = '', array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -172,9 +151,7 @@ class FormHelper
         return $html;
     }
 
-    /**
-     * Gera um checkbox
-     */
+    
     public static function checkbox(string $name, string $label, bool $checked = false, array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -197,9 +174,7 @@ class FormHelper
         return $html;
     }
 
-    /**
-     * Gera botões de submit e cancelar
-     */
+    
     public static function buttons(string $submitText = 'SALVAR', string $cancelUrl = null): string
     {
         $html = '<div class="d-grid gap-2">';

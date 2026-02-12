@@ -3,7 +3,7 @@ define('SKIP_AUTH', true);
 session_start();
 require_once __DIR__ . '/../config/bootstrap.php';
 
-// Reset de sessão pública ao entrar nesta página
+
 unset($_SESSION['public_acesso'], $_SESSION['public_planilha_id'], $_SESSION['public_comum']);
 
 $erro = '';
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Selecione uma Comum válida.');
         }
 
-        // Validar se a comum existe e está ativa (detecta nome da tabela automaticamente)
+        
         $table = detectar_tabela_comuns($conexao);
         $stmt = $conexao->prepare("SELECT id, descricao as comum FROM `{$table}` WHERE id = :id");
         $stmt->bindValue(':id', $comum_id, PDO::PARAM_INT);
@@ -27,14 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Comum não encontrada ou inativa.');
         }
 
-        // Habilitar modo público com contexto da comum
+        
         $_SESSION['public_acesso'] = true;
-        // manter chave legada por compatibilidade e adicionar a nova
+        
         $_SESSION['public_planilha_id'] = $planilha['id'];
         $_SESSION['public_comum_id'] = $planilha['id'];
         $_SESSION['public_comum'] = $planilha['comum'];
 
-        // Redirecionar para o menu com contexto da comum (somente relatórios)
+        
         header('Location: ../app/views/shared/menu_unificado.php?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
         exit;
     } catch (Exception $e) {
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Carregar lista de comuns ativas (detecta tabela automaticamente)
+
 try {
     $table = detectar_tabela_comuns($conexao);
     $stmt = $conexao->query("SELECT id, descricao as comum FROM `{$table}` WHERE 1 ORDER BY descricao ASC");

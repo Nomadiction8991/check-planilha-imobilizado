@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
-// AUTENTICAÇÁO
+
 
 $idParam = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if (!$idParam) {
@@ -20,7 +20,7 @@ if (!$usuario) {
 }
 
 $pageTitle = 'VISUALIZAR Usuário';
-// Preserve filters when returning to the list
+
 $qsArr = [];
 if (!empty($_GET['busca'])) {
     $qsArr['busca'] = $_GET['busca'];

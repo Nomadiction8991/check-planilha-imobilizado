@@ -1,13 +1,13 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// AUTENTICAO
+
 require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 $pageTitle = 'Relatório 14.1';
 $backUrl = '../shared/menu_planilha.php?id=' . urlencode($id_planilha);
 $headerActions = '<button id="btnPrint" class="btn-header-action" title="Imprimir" onclick="validarEImprimir()"><i class="bi bi-printer"></i></button>';
 
-// CSS moved to external file
+
 $customCssPath = '/public/assets/css/generated_relatorio_141.css';
 
 ob_start();

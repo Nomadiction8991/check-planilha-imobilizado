@@ -10,7 +10,7 @@ if (!$comum_id) {
     exit;
 }
 
-// Esta view n£o © mais usada (planilhas removidas)
+
 header('Location: ./comuns_listar.php');
 exit;
 
@@ -31,12 +31,12 @@ $headerActions = '
     </div>
 ';
 
-// ===== Consulta de planilhas (aplicando filtros) =====
+
 $fs = $_GET['filtro_STATUS'] ?? 'todas';
 $data_inicio_str = trim($_GET['data_inicio'] ?? '');
 $data_fim_str = trim($_GET['data_fim'] ?? '');
 
-// Agora inputs vªm em formato yyyy-mm-dd direto do input type="date"
+
 $data_inicio_mysql = $data_inicio_str !== '' ? $data_inicio_str : null;
 $data_fim_mysql = $data_fim_str !== '' ? $data_fim_str : null;
 
@@ -47,7 +47,7 @@ try {
     $conds = ['p.comum_id = :comum_id'];
     $params = [':comum_id' => (int)$comum_id];
 
-    // Filtro por intervalo de datas
+    
     if ($data_inicio_mysql && $data_fim_mysql) {
         $conds[] = 'p.data_posicao BETWEEN :data_inicio AND :data_fim';
         $params[':data_inicio'] = $data_inicio_mysql;
@@ -71,7 +71,7 @@ try {
     $limite = 20;
     $offset = ($pagina - 1) * $limite;
 
-    // Contagem total para pagina§£o
+    
     $sql_count = "SELECT COUNT(*) FROM planilhas p WHERE $where";
     $stmt_count = $conexao->prepare($sql_count);
     foreach ($params as $k=>$v){ $stmt_count->bindValue($k,$v); }
@@ -91,9 +91,9 @@ try {
     $stmt->bindValue(':offset',$offset,PDO::PARAM_INT);
     $stmt->execute();
     $planilhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // $total_registros j¡ calculado acima
+    
 } catch (Exception $e) {
-    // Exibiremos o erro mais abaixo no bloco de listagem
+    
     $erro_carregar = $e->getMessage();
 }
 
@@ -200,18 +200,18 @@ ob_start();
                                     $STATUS_badge = $planilha['ativo'] ? 'bg-success' : 'bg-secondary';
                                     $STATUS_texto = $planilha['ativo'] ? 'Ativa' : 'Inativa';
                                     
-                                    // Formatar data para dd/mm/yyyy independente do formato de origem
+                                    
                                     $data_formatada = '-';
                                     if (!empty($planilha['data_posicao'])) {
                                         $rawData = trim($planilha['data_posicao']);
                                         $dt = null;
-                                        // Tentar formatos comuns
+                                        
                                         $formatos = ['Y-m-d','d/m/Y','m/d/Y','Y-m-d H:i:s','d/m/Y H:i:s','m/d/Y H:i:s'];
                                         foreach ($formatos as $f) {
                                             $dt = DateTime::createFromFormat($f, $rawData);
                                             if ($dt) { break; }
                                         }
-                                        // Como fallback usar strtotime
+                                        
                                         if (!$dt) {
                                             $ts = strtotime($rawData);
                                             if ($ts) { $dt = (new DateTime())->setTimestamp($ts); }
@@ -270,10 +270,10 @@ $contentHtml = ob_get_clean();
 $contentFile = __DIR__ . '/../../../temp_content.php';
 file_put_contents($contentFile, $contentHtml);
 
-// Incluir layout app-wrapper (padronizado)
+
 require_once __DIR__ . '/../layouts/app_wrapper.php';
 
-// LIMPAR arquivo tempor¡rio
+
 @unlink($contentFile);
 ?>
 

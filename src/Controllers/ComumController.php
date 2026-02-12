@@ -8,26 +8,12 @@ use App\Core\ViewRenderer;
 use App\Core\ConnectionManager;
 use PDO;
 
-/**
- * Controller de Comuns
- * 
- * SOLID Principles:
- * - Single Responsibility: Gerencia APENAS fluxo HTTP de comuns
- * - Dependency Inversion: Depende de ComumService (abstração)
- * 
- * Responsabilidades:
- * - Processar requisições HTTP (GET/POST)
- * - Validar entrada do usuário
- * - Delegar para ComumService
- * - Renderizar views ou retornar JSON
- */
 class ComumController extends BaseController
 {
     private ComumService $comumService;
 
     public function __construct(?PDO $conexao = null)
     {
-        // Permite DI mas mantém backward compatibility
         if ($conexao === null) {
             $conexao = ConnectionManager::getConnection();
         }
@@ -36,42 +22,31 @@ class ComumController extends BaseController
         $this->comumService = new ComumService($comumRepo);
     }
 
-    /**
-     * Lista comuns com paginação e busca
-     */
     public function index(): void
     {
-        // Parâmetros de busca e paginação
         $busca = trim($this->query('busca', ''));
         $pagina = max(1, (int) $this->query('pagina', 1));
         $limite = 10;
         $offset = ($pagina - 1) * $limite;
 
         try {
-            // Buscar comuns via Service
             $comuns = $this->comumService->buscarPaginado($busca, $limite, $offset);
 
-            // Contar totais
             $total = $this->comumService->contar($busca);
             $totalGeral = $this->comumService->contar();
             $totalPaginas = $total > 0 ? (int) ceil($total / $limite) : 1;
 
-            // Se for requisição AJAX, retornar JSON
             if ($this->query('ajax') === '1') {
                 $this->retornarAjax($comuns, $total, $totalGeral, $pagina, $totalPaginas, $busca);
                 return;
             }
 
-            // Renderizar página HTML
             $this->renderizarIndex($comuns, $busca, $pagina, $limite, $total, $totalGeral, $totalPaginas);
         } catch (\Throwable $e) {
             $this->tratarErro($e, $busca, $pagina);
         }
     }
 
-    /**
-     * Renderiza a página principal
-     */
     private function renderizarIndex(
         array $comuns,
         string $busca,
@@ -81,7 +56,6 @@ class ComumController extends BaseController
         int $totalGeral,
         int $totalPaginas
     ): void {
-        // Preparar dados para a view
         ViewRenderer::render('comuns/index', [
             'pageTitle' => 'COMUNS',
             'backUrl' => null,
@@ -96,9 +70,6 @@ class ComumController extends BaseController
         ]);
     }
 
-    /**
-     * Retorna dados em formato JSON para requisições AJAX
-     */
     private function retornarAjax(
         array $comuns,
         int $total,
@@ -119,9 +90,6 @@ class ComumController extends BaseController
         ]);
     }
 
-    /**
-     * Gera HTML das linhas da tabela
-     */
     private function gerarLinhasTabela(array $comuns, string $busca, int $pagina): string
     {
         if (empty($comuns)) {
@@ -157,9 +125,6 @@ class ComumController extends BaseController
         return $html;
     }
 
-    /**
-     * Verifica se o cadastro do comum está completo
-     */
     private function verificarCadastroCompleto(array $comum): bool
     {
         return trim((string) $comum['descricao']) !== ''
@@ -168,9 +133,7 @@ class ComumController extends BaseController
             && trim((string) $comum['cidade']) !== '';
     }
 
-    /**
-     * Gera ações do header
-     */
+
     private function gerarHeaderActions(): string
     {
         if (!isLoggedIn()) {
@@ -207,9 +170,6 @@ class ComumController extends BaseController
         return $actions;
     }
 
-    /**
-     * CSS customizado
-     */
     private function getCustomCss(): string
     {
         return '
@@ -219,12 +179,8 @@ class ComumController extends BaseController
         ';
     }
 
-    /**
-     * Trata erros e loga
-     */
     private function tratarErro(\Throwable $e, string $busca, int $pagina): void
     {
-        // Log do erro
         @is_dir(__DIR__ . '/../../storage/logs') || @mkdir(__DIR__ . '/../../storage/logs', 0755, true);
         @file_put_contents(
             __DIR__ . '/../../storage/logs/comuns_controller.log',
@@ -237,7 +193,6 @@ class ComumController extends BaseController
             FILE_APPEND
         );
 
-        // Se for AJAX, retornar erro JSON
         if ($this->query('ajax') === '1') {
             $this->json([
                 'error' => true,
@@ -245,20 +200,13 @@ class ComumController extends BaseController
             ], 500);
         }
 
-        // Senão, renderizar página vazia
         $this->renderizarIndex([], $busca, $pagina, 10, 0, 0, 1);
     }
 
-    /**
-     * TEMPORÁRIO: Renderiza HTML legado até migrar a view
-     * TODO: Criar src/Views/comuns/index.php
-     */
     private function renderizarHtmlLegado(array $dados): void
     {
         extract($dados);
 
-        // Incluir o arquivo original temporariamente
-        // Depois vamos criar uma view limpa em src/Views/comuns/index.php
         require __DIR__ . '/../../index.php';
     }
 }

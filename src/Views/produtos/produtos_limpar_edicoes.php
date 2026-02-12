@@ -1,13 +1,13 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Autenticação
 
-// Parâmetros
-// Aceitar tanto id_PRODUTO (legacy) quanto id_produto (mais comum) para compatibilidade
+
+
+
 $id_PRODUTO = $_GET['id_PRODUTO'] ?? $_GET['id_produto'] ?? null;
 $comum_id = $_GET['comum_id'] ?? $_GET['id'] ?? null;
 
-// Filtros para retorno
+
 $pagina = $_GET['pagina'] ?? 1;
 $filtro_nome = $_GET['nome'] ?? '';
 $filtro_dependencia = $_GET['dependencia'] ?? '';
@@ -37,8 +37,8 @@ if (!$id_PRODUTO || !$comum_id) {
 }
 
 try {
-    // LIMPAR campos de edição na tabela produtos - USANDO id_produto
-    // Importante: usar valores padrão válidos ('' ou 0) pois colunas são NOT NULL em alguns bancos
+    
+    
     $sql_update = "UPDATE produtos 
                    SET editado_tipo_bem_id = 0,
                        editado_bem = '',

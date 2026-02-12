@@ -1,8 +1,8 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AUTENTICAÇÁO
-// Página dedicada para captura de assinatura em modo paisagem.
-// Salva o resultado em localStorage['signature_temp'] e retorna via history.back()
+ 
+
+
 
 ob_start();
 ?>

@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Detectar ambiente (produção ou desenvolvimento)
-$ambiente_manifest = 'prod'; // padrão produção
+
+$ambiente_manifest = 'prod'; 
 if (strpos($_SERVER['REQUEST_URI'], '/dev/') !== false) {
     $ambiente_manifest = 'dev';
 } elseif (strpos($_SERVER['HTTP_HOST'], 'dev.') !== false || strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {

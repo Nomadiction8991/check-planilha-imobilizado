@@ -1,9 +1,9 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// AUTENTICAO
+
 include __DIR__ . '/../../../app/controllers/read/ProdutoListController.php';
 
-$id_planilha = $comum_id; // compatibilidade com CDIGO legado
+$id_planilha = $comum_id; 
 $PRODUTOS = $produtos ?? [];
 
 $pageTitle = 'VISUALIZAR PRODUTOS';
@@ -29,7 +29,7 @@ $headerActions = '
     </div>
 ';
 
-// CSS moved to external file to avoid inline styles
+
 $customCssPath = '/public/assets/css/generated_custom.css';
 
 ob_start();

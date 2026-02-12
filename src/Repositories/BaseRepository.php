@@ -6,18 +6,7 @@ use App\Contracts\RepositoryInterface;
 use PDO;
 use PDOException;
 
-/**
- * Repositório Base 
- * Fornece métodos CRUD genéricos para todas as entidades
- * 
- * SOLID Principles:
- * - Single Responsibility: Gerencia APENAS acesso a dados
- * - Open/Closed: Extensível via herança, fechado para modificação
- * - Liskov Substitution: Classes filhas podem substituir sem quebrar comportamento
- * - Dependency Inversion: Depende de PDO (abstração de banco)
- * 
- * @package App\Repositories
- */
+
 abstract class BaseRepository implements RepositoryInterface
 {
     protected PDO $conexao;
@@ -29,9 +18,7 @@ abstract class BaseRepository implements RepositoryInterface
         $this->conexao = $conexao;
     }
 
-    /**
-     * Busca registro por ID
-     */
+    
     public function buscarPorId(int $id): ?array
     {
         $sql = "SELECT * FROM {$this->tabela} WHERE {$this->chavePrimaria} = :id";
@@ -43,18 +30,14 @@ abstract class BaseRepository implements RepositoryInterface
         return $resultado ?: null;
     }
 
-    /**
-     * Busca todos os registros
-     */
+    
     public function buscarTodos(): array
     {
         $sql = "SELECT * FROM {$this->tabela}";
         return $this->conexao->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Cria novo registro
-     */
+    
     public function criar(array $dados): int
     {
         $colunas = implode(', ', array_keys($dados));
@@ -71,9 +54,7 @@ abstract class BaseRepository implements RepositoryInterface
         return (int) $this->conexao->lastInsertId();
     }
 
-    /**
-     * Atualiza registro existente
-     */
+    
     public function atualizar(int $id, array $dados): bool
     {
         $sets = [];
@@ -93,9 +74,7 @@ abstract class BaseRepository implements RepositoryInterface
         return $stmt->execute();
     }
 
-    /**
-     * Deleta registro
-     */
+    
     public function deletar(int $id): bool
     {
         $sql = "DELETE FROM {$this->tabela} WHERE {$this->chavePrimaria} = :id";
@@ -104,9 +83,7 @@ abstract class BaseRepository implements RepositoryInterface
         return $stmt->execute();
     }
 
-    /**
-     * Conta total de registros
-     */
+    
     public function contar(string $where = '', array $params = []): int
     {
         $sql = "SELECT COUNT(*) FROM {$this->tabela}";
@@ -123,9 +100,7 @@ abstract class BaseRepository implements RepositoryInterface
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Paginação genérica
-     */
+    
     protected function paginar(int $pagina, int $limite, string $where = '', array $params = [], string $orderBy = ''): array
     {
         $offset = ($pagina - 1) * $limite;

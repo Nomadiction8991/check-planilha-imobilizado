@@ -2,7 +2,7 @@
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
 $pageTitle = 'Progresso da Importação';
-// Não exibir botão voltar no cabeçalho nesta tela (fluxo assíncrono de upload)
+
 $backUrl = null;
 $jobId = $_GET['job'] ?? '';
 

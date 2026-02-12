@@ -1,18 +1,8 @@
 <?php
 
-/**
- * Layout Principal da Aplicação
- * 
- * Variáveis esperadas:
- * - $pageTitle: Título da página
- * - $backUrl: URL do botão voltar (opcional)
- * - $headerActions: HTML dos botões de ação (opcional)
- * - $content: Conteúdo principal da página
- * - $customCss: CSS adicional (opcional)
- * - $customJs: JavaScript adicional (opcional)
- */
 
-// Detectar ambiente para manifest PWA
+
+
 $ambiente_manifest = 'prod';
 if (
     strpos($_SERVER['REQUEST_URI'], '/dev/') !== false ||

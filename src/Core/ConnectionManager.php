@@ -5,38 +5,20 @@ namespace App\Core;
 use PDO;
 use PDOException;
 
-/**
- * ConnectionManager - Gerenciador Centralizado de Conexões
- * 
- * SOLID Principles:
- * - Single Responsibility: Gerencia APENAS conexões de banco
- * - Open/Closed: Extensível via configuração, fechado para modificação
- * - Dependency Inversion: Retorna interface PDO, não implementação específica
- * 
- * @package App\Core
- */
+
 class ConnectionManager
 {
     private static ?PDO $conexao = null;
     private static ?array $config = null;
 
-    /**
-     * Configura parâmetros de conexão
-     * 
-     * @param array $config ['host', 'database', 'username', 'password', 'charset', 'port']
-     */
+    
     public static function configure(array $config): void
     {
         self::$config = $config;
-        self::$conexao = null; // Reset conexão existente
+        self::$conexao = null; 
     }
 
-    /**
-     * Retorna conexão PDO singleton
-     * 
-     * @return PDO
-     * @throws PDOException Se conexão falhar
-     */
+    
     public static function getConnection(): PDO
     {
         if (self::$conexao instanceof PDO) {
@@ -44,7 +26,7 @@ class ConnectionManager
         }
 
         if (self::$config === null) {
-            // Fallback para variáveis de ambiente
+            
             self::$config = [
                 'host' => LerEnv::obter('DB_HOST', '127.0.0.1'),
                 'database' => LerEnv::obter('DB_DATABASE', 'ellobackup'),
@@ -73,11 +55,7 @@ class ConnectionManager
         return self::$conexao;
     }
 
-    /**
-     * Cria NOVA conexão (não-singleton) para transações isoladas
-     * 
-     * @return PDO
-     */
+    
     public static function createNewConnection(): PDO
     {
         $config = self::$config ?? [
@@ -104,20 +82,14 @@ class ConnectionManager
         ]);
     }
 
-    /**
-     * Reseta conexão (útil para testes)
-     */
+    
     public static function reset(): void
     {
         self::$conexao = null;
         self::$config = null;
     }
 
-    /**
-     * Backward compatibility: retorna conexão para código legado ($conexao global)
-     * 
-     * @deprecated Use ConnectionManager::getConnection() diretamente
-     */
+    
     public static function getGlobalConnection(): PDO
     {
         return self::getConnection();

@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Autenticação
+
 $id_planilha = $_GET['id'] ?? null;
 
 if (!$id_planilha) {
@@ -8,11 +8,11 @@ if (!$id_planilha) {
     exit;
 }
 
-// ConfiguraçÁµes da página
+
 $pageTitle = "Menu";
 $backUrl = '../planilhas/planilha_visualizar.php?id=' . $id_planilha;
 
-// Iniciar buffer para capturar o conteúdo
+
 ob_start();
 ?>
 
@@ -229,17 +229,17 @@ ob_start();
 </div>
 
 <?php
-// Capturar o conteúdo
+
 $contentHtml = ob_get_clean();
 
-// Criar arquivo temporário com o conteúdo
+
 $tempFile = __DIR__ . '/../../../temp_menu_content_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 
-// Renderizar o layout
+
 include __DIR__ . '/../layouts/app_wrapper.php';
 
-// Limpar arquivo temporário
+
 unlink($tempFile);
 ?>

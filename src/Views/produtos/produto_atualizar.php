@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
- // AUTENTICAÇÁO
+ 
 include __DIR__ . '/../../../app/controllers/update/PRODUTOPartialUpdateController.php';
 
 $pageTitle = 'EDITAR PRODUTO';

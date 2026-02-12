@@ -10,10 +10,10 @@ if (!$id_planilha) {
 
 $usuario_id = isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 0;
 
-// Todos os usuários assinam como administradores
+
 $coluna_assinatura = 'administrador_acessor_id';
 
-// BUSCAR PRODUTOS da planilha
+
 $sql = "SELECT 
             p.id_produto,
             p.codigo,

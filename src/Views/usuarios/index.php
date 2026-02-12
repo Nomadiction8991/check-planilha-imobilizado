@@ -1,17 +1,6 @@
 <?php
 
-/**
- * View: Listagem de Usuários
- * 
- * Variáveis esperadas:
- * - $usuarios: Array de usuários paginados
- * - $total: Total de registros
- * - $pagina: Página atual
- * - $totalPaginas: Total de páginas
- * - $busca: Termo de busca
- * - $status: Filtro de status
- * - $limite: Itens por página
- */
+
 
 use App\Helpers\{AlertHelper, PaginationHelper, ViewHelper};
 

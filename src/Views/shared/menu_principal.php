@@ -1,13 +1,13 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Autenticação
-// Menu principal (sem necessidade de ID de planilha)
 
-// ConfiguraçÁµes da página
+
+
+
 $pageTitle = "Menu";
 $backUrl = '../../../index.php';
 
-// Iniciar buffer para capturar o conteúdo
+
 ob_start();
 ?>
 
@@ -92,17 +92,17 @@ ob_start();
 </div>
 
 <?php
-// Capturar o conteúdo
+
 $contentHtml = ob_get_clean();
 
-// Criar arquivo temporário com o conteúdo
+
 $tempFile = __DIR__ . '/../../../temp_menu_principal_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 
-// Renderizar o layout
+
 include __DIR__ . '/../layouts/app_wrapper.php';
 
-// Limpar arquivo temporário
+
 unlink($tempFile);
 ?>

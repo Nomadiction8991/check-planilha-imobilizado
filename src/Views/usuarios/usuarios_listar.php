@@ -1,13 +1,13 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
 
-// AUTENTICAÇÁO
+
 
 include __DIR__ . '/../../../app/controllers/read/UsuarioListController.php';
 
 $pageTitle = 'USUÁRIOS';
 $backUrl = '../../../index.php';
-// Preserve current filters when navigating to create/edit pages
+
 $qsArr = [];
 if (!empty($filtroNome)) {
     $qsArr['busca'] = $filtroNome;

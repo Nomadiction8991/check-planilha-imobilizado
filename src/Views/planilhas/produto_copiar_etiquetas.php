@@ -1,18 +1,18 @@
 <?php
 require_once dirname(__DIR__, 2) . '/bootstrap.php';
-// Autenticao
+
 
 $id_planilha = $_GET['id'] ?? null;
 if (!$id_planilha) {
   header('Location: ../../index.php');
   exit;
 }
-// Compatibilidade: algumas partes do código ainda usam $comum_id; garantir que esteja definido
+
 $comum_id = $id_planilha;
 
-// BUSCAR dados da planilha
+
 try {
-  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id"; // refatorado para usar 'comums' diretamente
+  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id"; 
   $stmt_planilha = $conexao->prepare($sql_planilha);
   $stmt_planilha->bindValue(':id', $id_planilha);
   $stmt_planilha->execute();
@@ -20,7 +20,7 @@ try {
   if (!$planilha) throw new Exception('Planilha no encontrada.');
 } catch (PDOException $e) {
   if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
-    // Tabela 'planilhas' ausente: tentar usar 'comums' como fallback
+    
     try {
       $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comums WHERE id = :id');
       $stmt->bindValue(':id', $id_planilha, PDO::PARAM_INT);
@@ -42,7 +42,7 @@ try {
   die('Erro ao carregar planilha: ' . $e->getMessage());
 }
 
-// Dependncias disponveis (todas que tm produtos marcados para imprimir)
+
 try {
   $sql_dependencias = "
         SELECT DISTINCT 
@@ -66,7 +66,7 @@ try {
 
 $dependencia_selecionada = $_GET['dependencia'] ?? '';
 
-// PRODUTOS marcados para imprimir (PRODUTOS checados)
+
 try {
   $sql_PRODUTOS = "SELECT p.codigo, COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia
                      FROM produtos p 
@@ -85,27 +85,27 @@ try {
   $stmt_PRODUTOS->execute();
   $PRODUTOS = $stmt_PRODUTOS->fetchAll(PDO::FETCH_ASSOC);
 
-  // BUSCAR tamb©m PRODUTOS cadastrados (novos) com c³digo preenchido
-  // Nota: tabela PRODUTOS_cadastro n£o existe no schema atual, ent£o comentado
-  // $sql_novos = "SELECT pc.codigo, d.descricao as dependencia
-  // FROM produtos_cadastro pc
-  // LEFT JOIN dependencias d ON pc.id_dependencia = d.id
-  // WHERE pc.id_planilha = :comum_id 
-  // AND pc.codigo IS NOT NULL 
-  // AND pc.codigo != ''";
-  // if (!empty($dependencia_selecionada)) {
-  //     $sql_novos .= " AND d.descricao = :dependencia";
-  // }
-  // $sql_novos .= " ORDER BY pc.codigo";
-  // $stmt_novos = $conexao->prepare($sql_novos);
-  // $stmt_novos->bindValue(':comum_id', $id_planilha);
-  // if (!empty($dependencia_selecionada)) { $stmt_novos->bindValue(':dependencia', $dependencia_selecionada); }
-  // $stmt_novos->execute();
-  // $PRODUTOS_novos = $stmt_novos->fetchAll(PDO::FETCH_ASSOC);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  $PRODUTOS_novos = []; // Temporariamente vazio at© tabela existir
+  $PRODUTOS_novos = []; 
 
-  // Combinar PRODUTOS checados e novos
+  
   $PRODUTOS = array_merge($PRODUTOS, $PRODUTOS_novos);
 
   $codigos = array_column($PRODUTOS, 'codigo');
@@ -114,17 +114,17 @@ try {
 } catch (Exception $e) {
   $codigos_concatenados = '';
   $PRODUTOS = [];
-  // Tratar erro de tabela ausente de forma amigvel e em UPPERCASE
+  
   if ($e instanceof PDOException && ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false)) {
     $mensagem = to_uppercase("Erro ao carregar produtos (comum_id: " . $comum_id . "): tabela 'produtos' no encontrada no banco de dados. Verifique a instalao ou migraes e contate o administrador.");
   } else {
-    // Evitar vazar SQL cru  mostrar a mensagem em uppercase
+    
     $mensagem = to_uppercase('Erro ao carregar produtos (comum_id: ' . $comum_id . '): ' . $e->getMessage());
   }
 }
 
 $pageTitle = 'Copiar Etiquetas';
-// Garantir que o back link use o ID recebido (tratado como planilha/comum)
+
 $backUrl = './planilha_visualizar.php?id=' . urlencode($id_planilha) . '&comum_id=' . urlencode($id_planilha);
 $headerActions = '
     <div class="dropdown">
@@ -229,7 +229,7 @@ ob_start();
         <strong><?php echo htmlspecialchars(to_uppercase('Nenhum produto disponvel para etiquetas.'), ENT_QUOTES, 'UTF-8'); ?></strong>
         <?php if (!empty($dependencia_selecionada)): ?>
           <?php
-          // Buscar nome da dependncia selecionada
+          
           $dep_nome = '';
           foreach ($dependencias as $d) {
             if ($d['id'] == $dependencia_selecionada) {
