@@ -4,7 +4,7 @@
 
 $pageTitle = $pageTitle ?? 'Menu';
 // permitir que a view carregue CSS específico do menu
-$customCssPath = $customCssPath ?? '/public/assets/css/menu.css';
+$customCssPath = $customCssPath ?? '/assets/css/menu.css';
 // permite que o layout exiba o nome do usuário caso esteja disponível
 $userName = $userName ?? ($usuario['nome'] ?? 'Usuário');
 ?>

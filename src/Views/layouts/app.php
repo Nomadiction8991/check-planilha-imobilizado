@@ -65,8 +65,22 @@ if (!isset($content)) {
     <link rel="stylesheet" href="/assets/css/footer-mobile.css">
 
     <!-- Custom CSS Adicional -->
-    <?php if (isset($customCssPath) && file_exists(__DIR__ . '/../../../' . ltrim($customCssPath, '/'))): ?>
-        <link rel="stylesheet" href="<?= $customCssPath ?>">
+    <?php
+        // Suporte para caminhos de CSS por view que podem apontar para '/assets/...' ou '/public/assets/...'
+        $linkHref = null;
+        if (isset($customCssPath)) {
+            $fsA = __DIR__ . '/../../../' . ltrim($customCssPath, '/');
+            $fsB = __DIR__ . '/../../../public/' . ltrim($customCssPath, '/');
+            if (file_exists($fsA)) {
+                $linkHref = $customCssPath;
+            } elseif (file_exists($fsB)) {
+                // serve pelo webroot sem o /public prefix
+                $linkHref = '/' . ltrim($customCssPath, '/');
+            }
+        }
+    ?>
+    <?php if ($linkHref): ?>
+        <link rel="stylesheet" href="<?= $linkHref ?>">
     <?php elseif (isset($customCss) && $customCss): ?>
         <style><?= $customCss ?></style>
     <?php endif; ?>
