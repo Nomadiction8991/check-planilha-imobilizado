@@ -24,8 +24,6 @@ class MapaRotas
 
 
             'GET /comuns' => [ComumController::class, 'index'],
-            'GET /comuns/criar' => [ComumController::class, 'create'],
-            'POST /comuns/criar' => [ComumController::class, 'store'],
             'GET /comuns/editar' => [ComumController::class, 'edit'],
             'POST /comuns/editar' => [ComumController::class, 'update'],
 
