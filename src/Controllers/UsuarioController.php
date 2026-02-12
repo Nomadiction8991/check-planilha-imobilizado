@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Repositories\UsuarioRepository;
+use App\Core\ViewRenderer;
 use PDO;
 use Exception;
 
@@ -35,32 +36,33 @@ class UsuarioController extends BaseController
         try {
             $resultado = $this->usuarioRepo->buscarPaginadoComFiltros($pagina, $limite, $filtros);
 
-            // Dados para a view
-            $dados = [
+            // Renderizar view limpa
+            ViewRenderer::render('usuarios/index', [
+                'pageTitle' => 'USUÁRIOS',
+                'backUrl' => '/comuns',
+                'headerActions' => '<a href="/usuarios/criar" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>',
                 'usuarios' => $resultado['dados'],
                 'total' => $resultado['total'],
-                'totalGeral' => $resultado['totalGeral'],
                 'pagina' => $pagina,
                 'limite' => $limite,
                 'totalPaginas' => $resultado['totalPaginas'],
-                'filtros' => $filtros,
-                'erro' => $this->query('erro', '')
-            ];
-
-            // Renderizar compatibilidade legada (temporário)
-            $this->renderizarListagemLegada($dados);
+                'busca' => $filtros['busca'],
+                'status' => $filtros['status']
+            ]);
         } catch (\Throwable $e) {
             error_log('ERROR UsuarioController::index: ' . $e->getMessage());
 
-            $this->renderizarListagemLegada([
+            ViewRenderer::render('usuarios/index', [
+                'pageTitle' => 'USUÁRIOS',
+                'backUrl' => '/comuns',
+                'headerActions' => '<a href="/usuarios/criar" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>',
                 'usuarios' => [],
                 'total' => 0,
-                'totalGeral' => 0,
                 'pagina' => 1,
                 'limite' => 10,
                 'totalPaginas' => 1,
-                'filtros' => $filtros,
-                'erro' => 'Erro ao buscar usuários. Verifique os logs.'
+                'busca' => $filtros['busca'],
+                'status' => $filtros['status']
             ]);
         }
     }
@@ -75,8 +77,18 @@ class UsuarioController extends BaseController
             return;
         }
 
-        // Renderizar formulário (temporário - incluir view legada)
-        $this->renderizarFormularioLegado([]);
+        // Renderizar formulário limpo
+        ViewRenderer::render('usuarios/create', [
+            'pageTitle' => 'NOVO USUÁRIO',
+            'backUrl' => '/usuarios',
+            'headerActions' => '',
+            'publicRegister' => false,
+            'errors' => [],
+            'old' => $_SESSION['old_input'] ?? []
+        ]);
+        
+        // Limpar old input
+        unset($_SESSION['old_input']);
     }
 
     /**

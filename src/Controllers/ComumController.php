@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Repositories\ComumRepository;
+use App\Core\ViewRenderer;
 use PDO;
 
 /**
@@ -63,37 +64,19 @@ class ComumController extends BaseController
         int $totalGeral,
         int $totalPaginas
     ): void {
-        $buscaDisplay = mb_strtoupper($busca, 'UTF-8');
-
-        // Build query string para preservar filtros
-        $qsArr = [];
-        if ($busca !== '') {
-            $qsArr['busca'] = $busca;
-        }
-        if ($pagina > 1) {
-            $qsArr['pagina'] = $pagina;
-        }
-        $qs = http_build_query($qsArr);
-
         // Preparar dados para a view
-        $dados = [
+        ViewRenderer::render('comuns/index', [
             'pageTitle' => 'COMUNS',
             'backUrl' => null,
             'headerActions' => $this->gerarHeaderActions(),
             'customCss' => $this->getCustomCss(),
             'comuns' => $comuns,
             'busca' => $busca,
-            'buscaDisplay' => $buscaDisplay,
             'pagina' => $pagina,
             'limite' => $limite,
             'total' => $total,
-            'totalGeral' => $totalGeral,
-            'totalPaginas' => $totalPaginas,
-            'qs' => $qs
-        ];
-
-        // Renderizar view (criar arquivo separado depois)
-        $this->renderizarHtmlLegado($dados);
+            'totalPaginas' => $totalPaginas
+        ]);
     }
 
     /**
