@@ -56,13 +56,9 @@
     transform: translateY(-3px);
 }
 
-/* Estilo especial para logout (tornar ícone com leve destaque vermelho no hover) */
+/* Estilo especial para logout: ícone permanece branco (sem mudança no hover) */
 .btn-logout i {
     color: white;
-}
-
-.btn-logout:hover i {
-    color: #ff6b6b;
 }
 
 .footer-label {
