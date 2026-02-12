@@ -1,0 +1,81 @@
+/* celular-container.css — estilos para o frame / celular (partial celular_container.php) */
+
+/* Container principal centralizado */
+.app-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px 10px;
+}
+
+/* Wrapper mobile de 400px */
+.mobile-wrapper {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    min-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Conteúdo principal */
+.app-content {
+    flex: 1;
+    padding: 80px 16px 70px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+/* Modais dentro do wrapper mobile */
+.mobile-wrapper .modal,
+.mobile-wrapper .modal-backdrop {
+    position: fixed !important;
+    z-index: 1055;
+}
+
+.mobile-wrapper .modal {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    display: none !important;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 12px 16px;
+}
+
+.mobile-wrapper .modal.show {
+    display: flex !important;
+    opacity: 1;
+}
+
+.mobile-wrapper .modal-dialog {
+    margin: 1rem;
+    width: auto;
+    max-width: 360px;
+    transform: none !important;
+}
+
+.mobile-wrapper .modal-backdrop {
+    display: none !important;
+}
+
+@media (max-width: 420px) {
+    .app-container {
+        padding: 0;
+    }
+
+    .mobile-wrapper {
+        border-radius: 0;
+        min-height: 100vh;
+    }
+}

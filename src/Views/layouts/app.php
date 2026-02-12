@@ -56,8 +56,13 @@ if (!isset($content)) {
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-    <!-- Estilos do Layout App -->
+    <!-- Estilos do Layout App (globals) -->
     <link rel="stylesheet" href="/assets/css/app-layout.css">
+
+    <!-- Estilos por partial -->
+    <link rel="stylesheet" href="/assets/css/celular-container.css">
+    <link rel="stylesheet" href="/assets/css/header-mobile.css">
+    <link rel="stylesheet" href="/assets/css/footer-mobile.css">
 
     <!-- Custom CSS Adicional -->
     <?php if ($customCss): ?>
