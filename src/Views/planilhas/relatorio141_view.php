@@ -1,7 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-// DEPRECATED: require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 
 $templatePath = __DIR__ . '/../../../relatorios/14-1.html';

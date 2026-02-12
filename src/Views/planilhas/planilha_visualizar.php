@@ -1311,7 +1311,7 @@ ob_start();
                     ?>
                     <div class="acao-container">
                         <!-- Check -->
-                        <form method="POST" action="../../../app/controllers/update/ProdutoCheckController.php" class="PRODUTO-action-form action-check" data-action="check" data-produto-id="<?php echo $produtoId; ?>">
+                        <form method="POST" action="/produtos/check" class="PRODUTO-action-form action-check" data-action="check" data-produto-id="<?php echo $produtoId; ?>">
                             <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                             <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                             <input type="hidden" name="checado" value="<?php echo $p['checado'] ? '0' : '1'; ?>">
@@ -1326,7 +1326,7 @@ ob_start();
                         </form>
 
                         <!-- Etiqueta -->
-                        <form method="POST" action="../../../app/controllers/update/ProdutoEtiquetaController.php" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $produtoId; ?>">
+                        <form method="POST" action="/produtos/etiqueta" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $produtoId; ?>">
                             <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                             <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                             <input type="hidden" name="imprimir" value="<?php echo $p['imprimir'] ? '0' : '1'; ?>">

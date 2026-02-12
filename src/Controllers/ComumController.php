@@ -148,7 +148,7 @@ class ComumController extends BaseController
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPrincipal">
                 <li><a class="dropdown-item" href="/usuarios">
                     <i class="bi bi-people me-2"></i>LISTAGEM DE USUÁRIOS</a></li>
-                <li><a class="dropdown-item" href="src/Views/dependencias/dependencias_listar.php">
+                <li><a class="dropdown-item" href="/dependencias">
                     <i class="bi bi-diagram-3 me-2"></i>LISTAGEM DE DEPENDÊNCIAS</a></li>';
 
         if (isset($_SESSION['usuario_id'])) {
@@ -159,7 +159,7 @@ class ComumController extends BaseController
         }
 
         $actions .= '
-                <li><a class="dropdown-item" href="src/Views/planilhas/planilha_importar.php">
+                <li><a class="dropdown-item" href="/planilhas/importar">
                     <i class="bi bi-upload me-2"></i>IMPORTAR PLANILHA</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="logout.php">
@@ -208,5 +208,26 @@ class ComumController extends BaseController
         extract($dados);
 
         require __DIR__ . '/../../index.php';
+    }
+
+    public function edit(): void
+    {
+        $id = (int) ($_GET['id'] ?? 0);
+        if ($id <= 0) {
+            $this->redirecionar('/comuns?erro=ID inválido');
+            return;
+        }
+
+        $this->renderizar('comuns/comum_editar', ['id' => $id]);
+    }
+
+    public function update(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirecionar('/comuns');
+            return;
+        }
+
+        $this->redirecionar('/comuns?success=1');
     }
 }

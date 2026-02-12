@@ -1,7 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-// DEPRECATED: require_once __DIR__ . '/../../../app/controllers/update/ProdutoUpdateController.php';
 
 $pageTitle = to_uppercase('editar produto');
 $backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);

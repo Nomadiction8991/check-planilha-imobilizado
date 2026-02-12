@@ -3,7 +3,6 @@
 declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/create/DependenciaCreateController.php';
 
 $pageTitle = 'Nova DEPENDÊNCIA';
 $backUrl = './dependencias_listar.php';

@@ -1,7 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/create/ProdutoCreateController.php';
 
 $pageTitle = 'CADASTRAR PRODUTO';
 $backUrl = './produtos_listar.php?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro();

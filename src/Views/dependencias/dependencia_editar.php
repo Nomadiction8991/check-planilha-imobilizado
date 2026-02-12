@@ -8,7 +8,6 @@ if ($idParam <= 0) {
     exit;
 }
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/update/DependenciaUpdateController.php';
 
 $pageTitle = 'EDITAR DEPENDÊNCIA';
 $backUrl = './dependencias_listar.php';

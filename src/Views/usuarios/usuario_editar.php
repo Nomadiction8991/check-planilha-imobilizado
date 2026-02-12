@@ -9,7 +9,6 @@ if (!$idParam) {
     exit;
 }
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/update/UsuarioUpdateController.php';
 
 $pageTitle = 'EDITAR USUÁRIO';
 

@@ -4,7 +4,6 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 try {
-    // DEPRECATED: include __DIR__ . '/../../../app/controllers/read/DependenciaListController.php';
 } catch (Throwable $e) {
     $dependencias = [];
     $total_registros = 0;

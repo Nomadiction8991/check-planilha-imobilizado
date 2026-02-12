@@ -49,7 +49,7 @@ ob_start();
     </p>
 <?php endif; ?>
 
-<form action="../../../app/controllers/create/ImportacaoPlanilhaController.php" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+<form action="/planilhas/importar" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
     <!-- Arquivo CSV -->
     <div class="card mb-3">
         <div class="card-header">

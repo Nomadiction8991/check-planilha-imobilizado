@@ -197,7 +197,7 @@ ob_start();
             <i class="bi bi-pencil-square me-2"></i><?php echo htmlspecialchars(to_uppercase('Editar Comum'), ENT_QUOTES, 'UTF-8'); ?>
         </div>
         <div class="card-body">
-            <form method="POST" action="../../../app/controllers/update/ComumUpdateController.php" novalidate>
+            <form method="POST" action="/comuns/editar" novalidate>
                 <input type="hidden" name="id" value="<?php echo (int) $comum['id']; ?>">
                 <input type="hidden" name="filters" value="<?php echo $filtersHiddenValue; ?>">
                 <?php ?>

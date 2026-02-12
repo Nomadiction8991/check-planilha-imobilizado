@@ -1,7 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/read/ProdutoListController.php';
 
 $id_planilha = $comum_id; 
 $PRODUTOS = $produtos ?? [];

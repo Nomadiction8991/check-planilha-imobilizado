@@ -3,7 +3,6 @@ require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/read/UsuarioListController.php';
 
 $pageTitle = 'USUÁRIOS';
 $backUrl = '../../../index.php';

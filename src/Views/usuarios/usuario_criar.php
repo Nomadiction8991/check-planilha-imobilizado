@@ -21,7 +21,6 @@ if (!defined('PUBLIC_REGISTER')) {
     
 }
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/create/UsuarioCreateController.php';
 
 $pageTitle = defined('PUBLIC_REGISTER') ? 'CADASTRO' : 'NOVO USUÁRIO';
 if (defined('PUBLIC_REGISTER')) {

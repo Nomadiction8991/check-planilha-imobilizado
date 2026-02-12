@@ -1,7 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-// DEPRECATED: include __DIR__ . '/../../../app/controllers/update/ProdutoObservacaoController.php';
 
 $pageTitle = to_uppercase('observacoes');
 $filtroStatus = $filtro_status ?? ($filtro_STATUS ?? '');

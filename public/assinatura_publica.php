@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Selecione uma Comum válida.');
         }
 
-        
+
         $table = detectar_tabela_comuns($conexao);
         $stmt = $conexao->prepare("SELECT id, descricao as comum FROM `{$table}` WHERE id = :id");
         $stmt->bindValue(':id', $comum_id, PDO::PARAM_INT);
@@ -27,9 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Comum não encontrada ou inativa.');
         }
 
-        
+
         $_SESSION['public_acesso'] = true;
-        
+
         $_SESSION['public_planilha_id'] = $planilha['id'];
         $_SESSION['public_comum_id'] = $planilha['id'];
         $_SESSION['public_comum'] = $planilha['comum'];
