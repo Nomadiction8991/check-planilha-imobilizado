@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 
@@ -244,7 +244,7 @@ $headerActions = '
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-                <a class="dropdown-item" href="../../../logout.php">
+                <a class="dropdown-item" href="/logout">
                     <i class="bi bi-box-arrow-right me-2"></i>Sair
                 </a>
             </li>

@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 if (isset($_GET['public']) && $_GET['public'] == '1') {
     define('PUBLIC_REGISTER', true);
@@ -21,7 +21,7 @@ if (!defined('PUBLIC_REGISTER')) {
     
 }
 
-include __DIR__ . '/../../../app/controllers/create/UsuarioCreateController.php';
+// DEPRECATED: include __DIR__ . '/../../../app/controllers/create/UsuarioCreateController.php';
 
 $pageTitle = defined('PUBLIC_REGISTER') ? 'CADASTRO' : 'NOVO USUÁRIO';
 if (defined('PUBLIC_REGISTER')) {

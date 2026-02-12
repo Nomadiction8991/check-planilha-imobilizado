@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -956,7 +956,7 @@ $headerActions .= '
 $headerActions .= '
             <li><hr class="dropdown-divider"></li>
             <li>
-                <a class="dropdown-item" href="../../../logout.php">
+                <a class="dropdown-item" href="/logout">
                     <i class="bi bi-box-arrow-right me-2"></i>Sair
                 </a>
             </li>

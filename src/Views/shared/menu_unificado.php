@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 $id_planilha = $_GET['id'] ?? null;
@@ -63,7 +63,7 @@ ob_start();
             <div class="list-group-item bg-light text-muted small fw-semibold">
                 <i class="bi bi-gear me-1"></i> <?php echo htmlspecialchars(to_uppercase('Sistema'), ENT_QUOTES, 'UTF-8'); ?>
             </div>
-            <a href="../../../logout.php" class="list-group-item list-group-item-action text-danger">
+            <a href="/logout" class="list-group-item list-group-item-action text-danger">
                 <i class="bi bi-box-arrow-right me-2"></i><?php echo htmlspecialchars(to_uppercase('Sair'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
         <?php endif; ?>

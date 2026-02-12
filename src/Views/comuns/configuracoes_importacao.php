@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 
@@ -23,7 +23,7 @@ $headerActions = '
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPlanilhas">
             <li>
-                <a class="dropdown-item" href="../../../logout.php">
+                <a class="dropdown-item" href="/logout">
                     <i class="bi bi-box-arrow-right me-2"></i>Sair
                 </a>
             </li>

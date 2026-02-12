@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 
@@ -9,7 +9,7 @@ if (!$idParam) {
     exit;
 }
 
-include __DIR__ . '/../../../app/controllers/update/UsuarioUpdateController.php';
+// DEPRECATED: include __DIR__ . '/../../../app/controllers/update/UsuarioUpdateController.php';
 
 $pageTitle = 'EDITAR USUÁRIO';
 

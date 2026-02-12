@@ -108,14 +108,14 @@ class UsuarioController extends BaseController
         $id = (int) $this->query('id', 0);
 
         if ($id <= 0) {
-            $this->redirecionar('app/views/usuarios/usuarios_listar.php?erro=ID inválido');
+            $this->redirecionar('/usuarios?erro=ID inválido');
             return;
         }
 
         $usuario = $this->usuarioService->buscarPorId($id);
 
         if (!$usuario) {
-            $this->redirecionar('app/views/usuarios/usuarios_listar.php?erro=Usuário não encontrado');
+            $this->redirecionar('/usuarios?erro=Usuário não encontrado');
             return;
         }
 
@@ -160,10 +160,10 @@ class UsuarioController extends BaseController
             $this->usuarioService->deletar($id);
 
             $this->setMensagem('Usuário deletado com sucesso!', 'success');
-            $this->redirecionar('app/views/usuarios/usuarios_listar.php');
+            $this->redirecionar('/usuarios');
         } catch (Exception $e) {
             $this->setMensagem('Erro ao deletar usuário: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('app/views/usuarios/usuarios_listar.php');
+            $this->redirecionar('/usuarios');
         }
     }
 
@@ -327,7 +327,7 @@ class UsuarioController extends BaseController
         }
 
         $query = http_build_query($retQ) . ($queryExtra ? '&' . $queryExtra : '');
-        $this->redirecionar('app/views/usuarios/usuarios_listar.php?' . $query);
+        $this->redirecionar('/usuarios?' . $query);
     }
 
     private function renderizarListagemLegada(array $dados): void
@@ -345,7 +345,7 @@ class UsuarioController extends BaseController
         $filtroStatus = $dados['filtros']['status'];
         $erro = $dados['erro'];
 
-        require __DIR__ . '/../../app/views/usuarios/usuarios_listar.php';
+        require __DIR__ . '/../Views/usuarios/usuarios_listar.php';
     }
 
     private function renderizarFormularioLegado(array $dados): void
@@ -353,7 +353,7 @@ class UsuarioController extends BaseController
         $mensagem = $dados['erro'] ?? '';
         $tipo_mensagem = $mensagem ? 'error' : '';
 
-        require __DIR__ . '/../../app/views/usuarios/usuario_criar.php';
+        require __DIR__ . '/../Views/usuarios/usuario_criar.php';
     }
 
     private function renderizarFormularioEdicaoLegado(array $usuario, string $erro = ''): void
@@ -361,6 +361,6 @@ class UsuarioController extends BaseController
         $mensagem = $erro;
         $tipo_mensagem = $erro ? 'error' : '';
 
-        require __DIR__ . '/../../app/views/usuarios/usuario_editar.php';
+        require __DIR__ . '/../Views/usuarios/usuario_editar.php';
     }
 }

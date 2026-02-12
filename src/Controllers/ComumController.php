@@ -102,9 +102,9 @@ class ComumController extends BaseController
             $cadastroOk = $this->verificarCadastroCompleto($comum);
 
             $qsEdit = http_build_query(['busca' => $busca, 'pagina' => $pagina]);
-            $editHref = 'app/views/comuns/comum_editar.php?id=' . (int) $comum['id'] .
+            $editHref = 'src/Views/comuns/comum_editar.php?id=' . (int) $comum['id'] .
                 ($qsEdit ? ('&' . $qsEdit) : '');
-            $viewHref = 'app/views/planilhas/planilha_visualizar.php?comum_id=' . (int) $comum['id'];
+            $viewHref = 'src/Views/planilhas/planilha_visualizar.php?comum_id=' . (int) $comum['id'];
 
             $html .= '<tr>';
             $html .= '<td class="fw-semibold text-uppercase">' . htmlspecialchars($comum['codigo']) . '</td>';
@@ -146,20 +146,20 @@ class ComumController extends BaseController
                 <i class="bi bi-list fs-5"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPrincipal">
-                <li><a class="dropdown-item" href="app/views/usuarios/usuarios_listar.php">
+                <li><a class="dropdown-item" href="/usuarios">
                     <i class="bi bi-people me-2"></i>LISTAGEM DE USUÁRIOS</a></li>
-                <li><a class="dropdown-item" href="app/views/dependencias/dependencias_listar.php">
+                <li><a class="dropdown-item" href="src/Views/dependencias/dependencias_listar.php">
                     <i class="bi bi-diagram-3 me-2"></i>LISTAGEM DE DEPENDÊNCIAS</a></li>';
 
         if (isset($_SESSION['usuario_id'])) {
             $actions .= '
-                <li><a class="dropdown-item" href="app/views/usuarios/usuario_editar.php?id=' .
+                <li><a class="dropdown-item" href="/usuarios/editar?id=' .
                 (int)$_SESSION['usuario_id'] . '">
                     <i class="bi bi-pencil-square me-2"></i>EDITAR MEU USUÁRIO</a></li>';
         }
 
         $actions .= '
-                <li><a class="dropdown-item" href="app/views/planilhas/planilha_importar.php">
+                <li><a class="dropdown-item" href="src/Views/planilhas/planilha_importar.php">
                     <i class="bi bi-upload me-2"></i>IMPORTAR PLANILHA</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="logout.php">

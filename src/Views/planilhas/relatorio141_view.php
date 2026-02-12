@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
+// DEPRECATED: require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 
 $templatePath = __DIR__ . '/../../../relatorios/14-1.html';
@@ -40,7 +40,7 @@ $headerActions = '
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-                <a class="dropdown-item" href="../../../logout.php">
+                <a class="dropdown-item" href="/logout">
                     <i class="bi bi-box-arrow-right me-2"></i>Sair
                 </a>
             </li>

@@ -34,8 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['public_comum_id'] = $planilha['id'];
         $_SESSION['public_comum'] = $planilha['comum'];
 
-        
-        header('Location: ../app/views/shared/menu_unificado.php?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
+        header('Location: ../src/Views/shared/menu_unificado.php?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
         exit;
     } catch (Exception $e) {
         $erro = $e->getMessage();
@@ -157,7 +156,7 @@ try {
                         <i class="bi bi-arrow-right-circle me-1"></i>
                         Continuar
                     </button>
-                    <a href="../login.php" class="btn btn-outline-secondary">
+                    <a href="/login" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-1"></i>
                         Voltar ao login
                     </a>

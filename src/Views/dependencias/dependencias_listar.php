@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 
 try {
-    include __DIR__ . '/../../../app/controllers/read/DependenciaListController.php';
+    // DEPRECATED: include __DIR__ . '/../../../app/controllers/read/DependenciaListController.php';
 } catch (Throwable $e) {
     $dependencias = [];
     $total_registros = 0;

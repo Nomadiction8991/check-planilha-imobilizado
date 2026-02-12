@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $ambiente_manifest = 'prod'; 
 if (strpos($_SERVER['REQUEST_URI'], '/dev/') !== false) {

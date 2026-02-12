@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
  
-require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
+// DEPRECATED: require_once __DIR__ . '/../../../app/controllers/read/Relatorio141DataController.php';
 
 $pageTitle = 'Relatório 14.1';
 $backUrl = '../shared/menu_planilha.php?id=' . urlencode($id_planilha);

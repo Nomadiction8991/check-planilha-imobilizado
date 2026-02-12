@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
 $idParam = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($idParam <= 0) {
@@ -8,7 +8,7 @@ if ($idParam <= 0) {
     exit;
 }
 
-include __DIR__ . '/../../../app/controllers/update/DependenciaUpdateController.php';
+// DEPRECATED: include __DIR__ . '/../../../app/controllers/update/DependenciaUpdateController.php';
 
 $pageTitle = 'EDITAR DEPENDÊNCIA';
 $backUrl = './dependencias_listar.php';

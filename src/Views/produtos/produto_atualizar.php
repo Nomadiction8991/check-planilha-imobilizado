@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
  
-include __DIR__ . '/../../../app/controllers/update/PRODUTOPartialUpdateController.php';
+// DEPRECATED: include __DIR__ . '/../../../app/controllers/update/PRODUTOPartialUpdateController.php';
 
 $pageTitle = 'EDITAR PRODUTO';
 $backUrl = './PRODUTOS_listar.php?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();

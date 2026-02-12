@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
-require_once __DIR__ . '/../../../app/controllers/update/ProdutoUpdateController.php';
+// DEPRECATED: require_once __DIR__ . '/../../../app/controllers/update/ProdutoUpdateController.php';
 
 $pageTitle = to_uppercase('editar produto');
 $backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
@@ -173,7 +173,7 @@ ob_start();
         $headerActions .='
  <li><a class="dropdown-item" href="../planilhas/relatorio141_view.php?id=' . $comum_id . '&comum_id=' . $comum_id . '"><i class="bi bi-file-earmark-pdf me-2"></i>' . htmlspecialchars(to_uppercase(' Relatrio 14.1'), ENT_QUOTES, ' UTF-8') . '
         </a>$headerActions .='
- <li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="../../../logout.php"><i class="bi bi-box-arrow-right me-2"></i>Sair </a></li></ul></div>';
+ <li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Sair </a></li></ul></div>';
 
         // Iniciar buffer para capturar o contedo
         ob_start();
