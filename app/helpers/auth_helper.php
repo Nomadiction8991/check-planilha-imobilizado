@@ -1,19 +1,32 @@
 <?php
+
+/**
+ * @deprecated Use AuthMiddleware em src/Middleware/AuthMiddleware.php
+ * @see AuthMiddleware
+ */
+
 // Permite pular autenticação em páginas públicas/controladas
 if (defined('SKIP_AUTH') && SKIP_AUTH === true) {
     return;
 }
 
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/src/Middleware/AuthMiddleware.php';
 
 // Logar mas nao exibir erros em producao
 error_reporting(E_ALL);
 ini_set('display_errors', '0');
 
-// Middleware de autenticacao
-// Incluir este arquivo no inicio de todas as paginas que precisam de autenticacao
+// Inicializa middleware e executa verificação
+$authMiddleware = AuthMiddleware::getInstance();
+$authMiddleware->handle();
 
-// URL de login baseada na profundidade do diretorio
+// Funções de compatibilidade (delegam para AuthMiddleware)
+
+/**
+ * URL de login baseada na profundidade do diretorio
+ * @deprecated Use AuthMiddleware internamente
+ */
 function getLoginUrl(): string
 {
     $prefix = '';
@@ -30,73 +43,29 @@ function getLoginUrl(): string
     return preg_replace('#/+#', '/', $path);
 }
 
-// Modo publico: permitir acesso restrito a algumas paginas com base em sessao publica
-$isPublic = !empty($_SESSION['public_acesso']) && (!empty($_SESSION['public_comum_id']) || !empty($_SESSION['public_planilha_id']));
-if (!isset($_SESSION['usuario_id'])) {
-    if ($isPublic) {
-        // Lista de paginas publicas permitidas (entrada do script)
-        $allowed = [
-            '/app/views/shared/menu_unificado.php',
-            '/app/views/planilhas/relatorio141_view.php',
-            '/app/views/planilhas/relatorio_imprimir_alteracao.php',
-        ];
-
-        $scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? '';
-        $root = realpath(__DIR__);
-        $ok = false;
-        foreach ($allowed as $rel) {
-            $full = realpath($root . $rel);
-            if ($full && $scriptFile === $full) {
-                $ok = true;
-                break;
-            }
-        }
-
-        if (!$ok) {
-            // Log why redirecting to login (help debug redirect loops)
-            error_log('AUTH_REDIRECT: missing session usuario_id; is_public=' . ($isPublic ? '1' : '0') . ' script=' . ($_SERVER['SCRIPT_NAME'] ?? '') . ' session_id=' . session_id());
-            header('Location: ' . getLoginUrl());
-            exit;
-        }
-    } else {
-        // Save redirect target and log for debug
-        $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'] ?? '/';
-        error_log('AUTH_REDIRECT: not logged in; redirect_after_login=' . ($_SESSION['redirect_after_login'] ?? '') . ' session_id=' . session_id());
-        header('Location: ' . getLoginUrl());
-        exit;
-    }
-}
-
-// Atualizar ultima atividade
-$_SESSION['last_activity'] = time();
-
-// Timeout de sessao (30 minutos de inatividade)
-if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
-    session_unset();
-    session_destroy();
-    error_log('AUTH_REDIRECT: session timeout for session_id=' . session_id());
-    header('Location: ' . getLoginUrl() . '?timeout=1');
-    exit;
-}
-
-// NOTE: `usuario_tipo` column may be removed; prefer using `is_admin` / `is_doador` session flags set at login.
-
-// Verifica se o usuario é Administrador/Acessor
+/**
+ * Verifica se o usuario é Administrador/Acessor
+ * @deprecated Use AuthMiddleware::isAdmin()
+ */
 function isAdmin(): bool
 {
-    // Todos os usuários autenticados serão tratados como administradores por decisão do projeto
-    return isLoggedIn();
+    return AuthMiddleware::getInstance()->isAdmin();
 }
 
-// Verifica se o usuario é Doador/Cônjuge
+/**
+ * Verifica se o usuario é Doador/Cônjuge
+ * @deprecated Use AuthMiddleware::isDoador()
+ */
 function isDoador(): bool
 {
-    // Compatibilidade: tratar doador como usuário autenticado também (para exibir opções que antes eram apenas para doadores)
-    return isLoggedIn();
+    return AuthMiddleware::getInstance()->isDoador();
 }
 
-// Verifica se o usuario esta autenticado
+/**
+ * Verifica se o usuario esta autenticado
+ * @deprecated Use AuthMiddleware::isAuthenticated()
+ */
 function isLoggedIn(): bool
 {
-    return isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] > 0;
+    return AuthMiddleware::getInstance()->isAuthenticated();
 }
