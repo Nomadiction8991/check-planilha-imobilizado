@@ -45,7 +45,7 @@ class ImportacaoService
     public function processar(int $importacaoId): array
     {
         $importacao = $this->importacaoRepo->buscarPorId($importacaoId);
-        
+
         if (!$importacao) {
             throw new Exception('Importação não encontrada');
         }
@@ -68,21 +68,21 @@ class ImportacaoService
 
         try {
             $arquivo = fopen($importacao['arquivo_caminho'], 'r');
-            
+
             if (!$arquivo) {
                 throw new Exception('Não foi possível abrir o arquivo');
             }
 
             // Ler cabeçalho
             $cabecalho = fgetcsv($arquivo, 0, ',');
-            
+
             $linhaAtual = 0;
             $lote = [];
             $totalLinhas = $importacao['total_linhas'];
 
             while (($linha = fgetcsv($arquivo, 0, ',')) !== false) {
                 $linhaAtual++;
-                
+
                 // Adiciona linha ao lote
                 $lote[] = [
                     'numero' => $linhaAtual,
@@ -92,7 +92,7 @@ class ImportacaoService
                 // Processa quando atingir tamanho do lote ou fim do arquivo
                 if (count($lote) >= self::LOTE_SIZE) {
                     $resultadoLote = $this->processarLote($lote, $cabecalho, $importacao['comum_id']);
-                    
+
                     $resultado['sucesso'] += $resultadoLote['sucesso'];
                     $resultado['erro'] += $resultadoLote['erro'];
                     $resultado['erros'] = array_merge($resultado['erros'], $resultadoLote['erros']);
@@ -108,7 +108,7 @@ class ImportacaoService
 
                     // Limpa lote
                     $lote = [];
-                    
+
                     // Libera memória
                     gc_collect_cycles();
                 }
@@ -117,7 +117,7 @@ class ImportacaoService
             // Processa lote restante
             if (!empty($lote)) {
                 $resultadoLote = $this->processarLote($lote, $cabecalho, $importacao['comum_id']);
-                
+
                 $resultado['sucesso'] += $resultadoLote['sucesso'];
                 $resultado['erro'] += $resultadoLote['erro'];
                 $resultado['erros'] = array_merge($resultado['erros'], $resultadoLote['erros']);
@@ -137,7 +137,6 @@ class ImportacaoService
                 'status' => 'concluida',
                 'concluida_em' => date('Y-m-d H:i:s')
             ]);
-
         } catch (Exception $e) {
             // Marca como erro
             $this->importacaoRepo->atualizar($importacaoId, [
@@ -198,7 +197,7 @@ class ImportacaoService
     {
         // Mapeia colunas
         $mapa = array_flip($cabecalho);
-        
+
         // Extrai dados
         $codigo = $dados[$mapa['codigo']] ?? '';
         $descricaoCompleta = $dados[$mapa['descricao']] ?? '';
@@ -209,7 +208,7 @@ class ImportacaoService
 
         // Busca ou cria tipo de bem
         $tipoBemId = $this->buscarOuCriarTipoBem($tipoBemCodigo);
-        
+
         // Busca ou cria dependência
         $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);
 
@@ -276,7 +275,7 @@ class ImportacaoService
     private function buscarOuCriarDependencia(string $descricao, int $comumId): int
     {
         $descricao = trim(strtoupper($descricao));
-        
+
         $stmt = $this->conexao->prepare("SELECT id FROM dependencias WHERE descricao = :descricao AND comum_id = :comum_id");
         $stmt->execute([
             ':descricao' => $descricao,
@@ -332,11 +331,11 @@ class ImportacaoService
 
         $sql = "INSERT INTO produtos (" . implode(', ', $campos) . ") VALUES (" . implode(', ', $placeholders) . ")";
         $stmt = $this->conexao->prepare($sql);
-        
+
         foreach ($dados as $campo => $valor) {
             $stmt->bindValue(":$campo", $valor);
         }
-        
+
         $stmt->execute();
         return (int) $this->conexao->lastInsertId();
     }
@@ -345,16 +344,16 @@ class ImportacaoService
     {
         $arquivo = fopen($caminho, 'r');
         $linhas = 0;
-        
+
         // Pula cabeçalho
         fgets($arquivo);
-        
+
         while (!feof($arquivo)) {
             if (fgets($arquivo)) {
                 $linhas++;
             }
         }
-        
+
         fclose($arquivo);
         return $linhas;
     }
@@ -367,7 +366,7 @@ class ImportacaoService
     public function limparArquivo(int $importacaoId): void
     {
         $importacao = $this->importacaoRepo->buscarPorId($importacaoId);
-        
+
         if ($importacao && file_exists($importacao['arquivo_caminho'])) {
             unlink($importacao['arquivo_caminho']);
         }

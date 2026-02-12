@@ -45,7 +45,7 @@ class PlanilhaController extends BaseController
             }
 
             $arquivo = $_FILES['arquivo'];
-            
+
             // Valida tipo
             $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
             if (!in_array($extensao, ['csv', 'txt'])) {
@@ -70,7 +70,6 @@ class PlanilhaController extends BaseController
 
             // Redireciona para tela de progresso
             $this->redirecionar('/planilhas/progresso?id=' . $importacaoId);
-
         } catch (\Exception $e) {
             error_log('Erro ao processar importação: ' . $e->getMessage());
             $this->setMensagem('Erro: ' . $e->getMessage(), 'danger');
@@ -201,7 +200,7 @@ class PlanilhaController extends BaseController
     public function progresso(): void
     {
         $importacaoId = (int) ($_GET['id'] ?? 0);
-        
+
         if ($importacaoId <= 0) {
             $this->redirecionar('/planilhas/importar?erro=' . urlencode('ID de importação inválido'));
             return;
@@ -215,9 +214,9 @@ class PlanilhaController extends BaseController
     public function apiProgresso(): void
     {
         header('Content-Type: application/json');
-        
+
         $importacaoId = (int) ($_GET['id'] ?? 0);
-        
+
         if ($importacaoId <= 0) {
             echo json_encode(['erro' => 'ID inválido']);
             exit;
@@ -225,7 +224,7 @@ class PlanilhaController extends BaseController
 
         try {
             $progresso = $this->importacaoService->buscarProgresso($importacaoId);
-            
+
             if (!$progresso) {
                 echo json_encode(['erro' => 'Importação não encontrada']);
                 exit;
@@ -247,16 +246,16 @@ class PlanilhaController extends BaseController
         } catch (\Exception $e) {
             echo json_encode(['erro' => $e->getMessage()]);
         }
-        
+
         exit;
     }
 
     public function processarArquivo(): void
     {
         header('Content-Type: application/json');
-        
+
         $importacaoId = (int) ($_POST['id'] ?? 0);
-        
+
         if ($importacaoId <= 0) {
             echo json_encode(['erro' => 'ID inválido']);
             exit;
@@ -266,20 +265,19 @@ class PlanilhaController extends BaseController
             // Processa em background (assíncrono)
             set_time_limit(0);
             ignore_user_abort(true);
-            
+
             $resultado = $this->importacaoService->processar($importacaoId);
-            
+
             echo json_encode([
                 'sucesso' => true,
                 'linhas_sucesso' => $resultado['sucesso'],
                 'linhas_erro' => $resultado['erro'],
                 'erros' => array_slice($resultado['erros'], 0, 10) // Primeiros 10 erros
             ]);
-            
         } catch (\Exception $e) {
             echo json_encode(['erro' => $e->getMessage()]);
         }
-        
+
         exit;
     }
 }

@@ -45,7 +45,7 @@ class TipoBemController extends BaseController
             ]);
         } catch (\Throwable $e) {
             error_log('Erro TipoBemController::index: ' . $e->getMessage());
-            
+
             // Renderiza a view mesmo com erro, mostrando lista vazia
             ViewRenderer::render('tipos_bens/index', [
                 'pageTitle' => 'TIPOS DE BENS',

@@ -38,18 +38,18 @@ if (false && !empty($acesso_bloqueado)) {
 ?>
 
     <style>
-        /* Modal fullscreen customizado (95% largura x 80% altura) */
+        /* Modal fullscreen customizado - TELA INTEIRA MOBILE */
         .modal-fullscreen-custom {
-            width: 95vw;
-            height: 80vh;
-            max-width: 95vw;
-            max-height: 80vh;
-            margin: 10vh auto;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            margin: 0;
         }
 
         .modal-fullscreen-custom .modal-content {
             height: 100%;
-            border-radius: 12px;
+            border-radius: 0;
             overflow: hidden;
         }
 
@@ -58,6 +58,20 @@ if (false && !empty($acesso_bloqueado)) {
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* Modal com z-index altíssimo para ficar acima de tudo */
+        #barcodeModal {
+            z-index: 9999 !important;
+        }
+
+        .modal-backdrop.show {
+            z-index: 9998 !important;
+        }
+
+        /* Garantir que o modal fique por cima dos botões flutuantes */
+        #barcodeModal.show {
+            z-index: 9999 !important;
         }
 
         /* Botão X para fechar */
@@ -294,6 +308,62 @@ if (false && !empty($acesso_bloqueado)) {
         .input-group>.btn .material-icons-round,
         .input-group>.btn i {
             font-size: 20px !important;
+        }
+
+        /* BOTÕES FLUTUANTES NO CANTO INFERIOR DIREITO */
+        .floating-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .floating-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .floating-btn:active {
+            transform: scale(0.95);
+        }
+
+        .floating-btn i,
+        .floating-btn .material-icons-round {
+            font-size: 28px;
+            color: white;
+        }
+
+        .floating-btn-mic {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .floating-btn-mic.listening {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 1.5s infinite;
+        }
+
+        .floating-btn-mic.listening .material-icons-round {
+            animation: pulse 1.5s infinite;
+        }
+
+        .floating-btn-camera {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
 
         /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
@@ -999,17 +1069,9 @@ ob_start();
                     <i class="bi bi-upc-scan me-1"></i>
                     <?php echo htmlspecialchars(to_uppercase('Código do Produto'), ENT_QUOTES, 'UTF-8'); ?>
                 </label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="codigo" name="codigo"
-                        value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>"
-                        placeholder="<?php echo htmlspecialchars(to_uppercase('Digite, fale ou escaneie o código...'), ENT_QUOTES, 'UTF-8'); ?>">
-                    <button id="btnMic" class="btn btn-primary mic-btn" type="button" title="<?php echo htmlspecialchars(to_uppercase('Falar código (Ctrl+M)'), ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars(to_uppercase('Falar código'), ENT_QUOTES, 'UTF-8'); ?>" aria-pressed="false">
-                        <span class="material-icons-round" aria-hidden="true">mic</span>
-                    </button>
-                    <button id="btnCam" class="btn btn-primary" type="button" title="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>">
-                        <i class="bi bi-camera-video-fill" aria-hidden="true"></i>
-                    </button>
-                </div>
+                <input type="text" class="form-control" id="codigo" name="codigo"
+                    value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>"
+                    placeholder="<?php echo htmlspecialchars(to_uppercase('Digite, fale ou escaneie o código...'), ENT_QUOTES, 'UTF-8'); ?>">
             </div>
 
             <div class="accordion" id="filtrosAvancados">
@@ -2235,6 +2297,21 @@ ob_start();
         console.log('=== BARCODE SCANNER CONFIGURADO COM SUCESSO ===');
     }
 </script>
+
+<!-- BOTÕES FLUTUANTES -->
+<div class="floating-buttons">
+    <button id="btnMic" class="floating-btn floating-btn-mic mic-btn" type="button" 
+            title="<?php echo htmlspecialchars(to_uppercase('Falar código (Ctrl+M)'), ENT_QUOTES, 'UTF-8'); ?>" 
+            aria-label="<?php echo htmlspecialchars(to_uppercase('Falar código'), ENT_QUOTES, 'UTF-8'); ?>" 
+            aria-pressed="false">
+        <span class="material-icons-round" aria-hidden="true">mic</span>
+    </button>
+    <button id="btnCam" class="floating-btn floating-btn-camera" type="button" 
+            title="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>" 
+            aria-label="<?php echo htmlspecialchars(to_uppercase('Escanear código de barras'), ENT_QUOTES, 'UTF-8'); ?>">
+        <i class="bi bi-camera-video-fill" aria-hidden="true"></i>
+    </button>
+</div>
 
 <?php
 

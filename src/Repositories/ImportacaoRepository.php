@@ -13,7 +13,7 @@ class ImportacaoRepository extends BaseRepository
         $sql = "INSERT INTO {$this->table} 
                 (usuario_id, comum_id, arquivo_nome, arquivo_caminho, total_linhas, status, iniciada_em) 
                 VALUES (:usuario_id, :comum_id, :arquivo_nome, :arquivo_caminho, :total_linhas, :status, NOW())";
-        
+
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute([
             ':usuario_id' => $dados['usuario_id'],
@@ -73,7 +73,7 @@ class ImportacaoRepository extends BaseRepository
 
         $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE id = :id";
         $stmt = $this->conexao->prepare($sql);
-        
+
         return $stmt->execute($params);
     }
 
@@ -83,7 +83,7 @@ class ImportacaoRepository extends BaseRepository
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute([':id' => $id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result ?: null;
     }
 
@@ -93,11 +93,11 @@ class ImportacaoRepository extends BaseRepository
                 WHERE usuario_id = :usuario_id 
                 ORDER BY created_at DESC 
                 LIMIT 1";
-        
+
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute([':usuario_id' => $usuarioId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result ?: null;
     }
 
@@ -106,7 +106,7 @@ class ImportacaoRepository extends BaseRepository
         $sql = "SELECT * FROM {$this->table} 
                 WHERE status IN ('aguardando', 'processando') 
                 ORDER BY created_at ASC";
-        
+
         $stmt = $this->conexao->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
