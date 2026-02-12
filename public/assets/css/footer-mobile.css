@@ -17,21 +17,15 @@
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.footer-left {
-    display: flex;
-    align-items: center;
-}
-
-.footer-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-}
-
+.footer-left,
+.footer-center,
 .footer-right {
     display: flex;
+    flex-direction: column; /* botão em cima, label embaixo */
     align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 64px;
 }
 
 .btn-footer-action {
@@ -68,8 +62,9 @@
 }
 
 .footer-label {
-    margin-top: 6px;
-    font-size: 11px;
+    margin-top: 2px;
+    font-size: 12px;
     color: rgba(255,255,255,0.95);
     text-align: center;
+    line-height: 1;
 }
