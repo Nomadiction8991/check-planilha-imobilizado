@@ -1216,13 +1216,7 @@ ob_start();
                         <!-- Check -->
                         <form method="POST" action="/produtos/check" class="PRODUTO-action-form action-check" data-action="check" data-produto-id="<?php echo $produtoId; ?>">
                             <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
-                            <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
                             <input type="hidden" name="checado" value="<?php echo $p['checado'] ? '0' : '1'; ?>">
-                            <input type="hidden" name="pagina" value="<?php echo $paginaAtual; ?>">
-                            <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>">
-                            <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? ''); ?>">
-                            <input type="hidden" name="codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>">
-                            <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_STATUS ?? ''); ?>">
                             <button type="submit" class="btn btn-outline-success btn-sm <?php echo $p['checado'] == 1 ? 'active' : ''; ?>" title="<?php echo $p['checado'] ? 'Desmarcar checado' : 'Marcar como checado'; ?>" <?php echo $checkDisabled ? 'disabled' : ''; ?>>
                                 <i class="bi bi-check-circle-fill"></i>
                             </button>
@@ -1231,13 +1225,8 @@ ob_start();
                         <!-- Etiqueta -->
                         <form method="POST" action="/produtos/etiqueta" class="PRODUTO-action-form action-imprimir" data-action="imprimir" data-produto-id="<?php echo $produtoId; ?>">
                             <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
-                            <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
+                            <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                             <input type="hidden" name="imprimir" value="<?php echo ($p['imprimir_etiqueta'] ?? 0) ? '0' : '1'; ?>">
-                            <input type="hidden" name="pagina" value="<?php echo $paginaAtual; ?>">
-                            <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? ''); ?>">
-                            <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? ''); ?>">
-                            <input type="hidden" name="codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>">
-                            <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_STATUS ?? ''); ?>">
                             <button type="submit" class="btn btn-outline-info btn-sm <?php echo ($p['imprimir_etiqueta'] ?? 0) == 1 ? 'active' : ''; ?>" title="Etiqueta" <?php echo $imprimirDisabled ? 'disabled' : ''; ?>">
                                 <i class="bi bi-printer-fill"></i>
                             </button>

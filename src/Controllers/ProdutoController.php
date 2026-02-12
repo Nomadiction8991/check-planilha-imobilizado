@@ -16,10 +16,11 @@ class ProdutoController extends BaseController
 
     public function index(): void
     {
-        $comumId = (int) ($_GET['comum_id'] ?? 0);
+        // Usa comum_id da sessão
+        $comumId = \App\Core\SessionManager::ensureComumId();
 
         // Se não tiver comum_id, redireciona para página de comuns
-        if ($comumId <= 0) {
+        if (!$comumId || $comumId <= 0) {
             $this->redirecionar('/comuns?mensagem=' . urlencode('Selecione um Comum para ver os produtos'));
             return;
         }
@@ -66,10 +67,11 @@ class ProdutoController extends BaseController
 
     public function create(): void
     {
-        $comumId = (int) ($_GET['comum_id'] ?? 0);
+        // Usa comum_id da sessão
+        $comumId = \App\Core\SessionManager::ensureComumId();
 
         // Se não tiver comum_id, redireciona para página de comuns
-        if ($comumId <= 0) {
+        if (!$comumId || $comumId <= 0) {
             $this->redirecionar('/comuns?mensagem=' . urlencode('Selecione um Comum para criar um produto'));
             return;
         }
@@ -130,20 +132,71 @@ class ProdutoController extends BaseController
             return;
         }
 
-        // TODO: Implementar lógica de observação
-        $this->jsonErro('Funcionalidade em implementação. Controller pendente de migração.', 501);
+        $comumId = \App\Core\SessionManager::ensureComumId();
+        if (!$comumId) {
+            $this->jsonErro('Comum não selecionada', 400);
+            return;
+        }
+
+        $produtoId = (int) ($_POST['produto_id'] ?? 0);
+        $observacao = trim($_POST['observacao'] ?? '');
+
+        if ($produtoId <= 0) {
+            $this->jsonErro('Produto inválido', 400);
+            return;
+        }
+
+        try {
+            $stmt = $this->conexao->prepare(
+                "UPDATE produtos SET observacao = :obs WHERE id_produto = :id AND comum_id = :comum_id"
+            );
+            $stmt->bindValue(':obs', $observacao, PDO::PARAM_STR);
+            $stmt->bindValue(':id', $produtoId, PDO::PARAM_INT);
+            $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $this->json(['sucesso' => true, 'mensagem' => 'Observação salva com sucesso']);
+        } catch (\Exception $e) {
+            error_log('Erro ao salvar observação: ' . $e->getMessage());
+            $this->jsonErro('Erro ao salvar observação', 500);
+        }
     }
 
     public function check(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/produtos');
+            $this->redirecionar('/planilhas/visualizar');
             return;
         }
 
-        // TODO: Implementar lógica de check
-        http_response_code(501);
-        die('Funcionalidade em implementação. Controller pendente de migração.');
+        $comumId = \App\Core\SessionManager::ensureComumId();
+        if (!$comumId) {
+            $this->redirecionar('/planilhas/visualizar?erro=Comum não selecionada');
+            return;
+        }
+
+        $produtoId = (int) ($_POST['produto_id'] ?? 0);
+        $checado = (int) ($_POST['checado'] ?? 0);
+
+        if ($produtoId <= 0) {
+            $this->redirecionar('/planilhas/visualizar?erro=Produto inválido');
+            return;
+        }
+
+        try {
+            $stmt = $this->conexao->prepare(
+                "UPDATE produtos SET checado = :checado WHERE id_produto = :id AND comum_id = :comum_id"
+            );
+            $stmt->bindValue(':checado', $checado, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $produtoId, PDO::PARAM_INT);
+            $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $this->redirecionar('/planilhas/visualizar?sucesso=Produto atualizado');
+        } catch (\Exception $e) {
+            error_log('Erro ao atualizar check: ' . $e->getMessage());
+            $this->redirecionar('/planilhas/visualizar?erro=Erro ao atualizar produto');
+        }
     }
 
     public function etiqueta(): void
@@ -154,9 +207,35 @@ class ProdutoController extends BaseController
             return;
         }
 
-        // TODO: Implementar lógica de etiqueta POST
-        http_response_code(501);
-        die('Funcionalidade em implementação. Controller pendente de migração.');
+        // POST - marcar/desmarcar para impressão de etiqueta
+        $comumId = \App\Core\SessionManager::ensureComumId();
+        if (!$comumId) {
+            $this->redirecionar('/planilhas/visualizar?erro=Comum não selecionada');
+            return;
+        }
+
+        $produtoId = (int) ($_POST['produto_id'] ?? 0);
+        $imprimir = (int) ($_POST['imprimir'] ?? 0);
+
+        if ($produtoId <= 0) {
+            $this->redirecionar('/planilhas/visualizar?erro=Produto inválido');
+            return;
+        }
+
+        try {
+            $stmt = $this->conexao->prepare(
+                "UPDATE produtos SET imprimir_etiqueta = :imprimir WHERE id_produto = :id AND comum_id = :comum_id"
+            );
+            $stmt->bindValue(':imprimir', $imprimir, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $produtoId, PDO::PARAM_INT);
+            $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $this->redirecionar('/planilhas/visualizar?sucesso=Etiqueta atualizada');
+        } catch (\Exception $e) {
+            error_log('Erro ao atualizar etiqueta: ' . $e->getMessage());
+            $this->redirecionar('/planilhas/visualizar?erro=Erro ao atualizar etiqueta');
+        }
     }
 
     public function assinar(): void
