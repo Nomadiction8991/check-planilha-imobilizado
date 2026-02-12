@@ -1,0 +1,17 @@
+paths:
+    migrations: '%%PHINX_CONFIG_DIR%%/database/migrations'
+    seeds: '%%PHINX_CONFIG_DIR%%/database/seeds'
+
+environments:
+    default_migration_table: phinxlog
+    default_environment: development
+    development:
+        adapter: mysql
+        host: anvy.com.br
+        name: anvycomb_checkplanilha
+        user: anvycomb_checkplanilha
+        pass: uGyzaCndm7EDahptkBZd
+        port: 3306
+        charset: utf8mb4
+
+version_order: creation

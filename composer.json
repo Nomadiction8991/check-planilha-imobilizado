@@ -10,6 +10,7 @@
         "setasign/fpdi": "^2.6",
         "voku/portable-ascii": "^2.0",
         "symfony/string": "^6.4",
-        "voku/portable-utf8": "^6.0"
+        "voku/portable-utf8": "^6.0",
+        "robmorgan/phinx": "^0.16"
     }
 }
