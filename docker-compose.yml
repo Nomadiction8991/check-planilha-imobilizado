@@ -12,3 +12,26 @@ services:
       - ./Dockerfiles/php.ini:/usr/local/etc/php/conf.d/dev.ini:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=checkplanilha
+      - DB_USER=checkplanilha
+      - DB_PASS=checkplanilha123
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: checkplanilha
+      MYSQL_USER: checkplanilha
+      MYSQL_PASSWORD: checkplanilha123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

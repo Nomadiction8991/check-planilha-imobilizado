@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 
-class Database {
+class Database
+{
     private string $host;
     private string $db_name;
     private string $username;
@@ -12,10 +13,10 @@ class Database {
 
     public function __construct()
     {
-        $this->host = getenv('DB_HOST') ?: 'anvy.com.br';
-        $this->db_name = getenv('DB_NAME') ?: 'anvycomb_checkplanilha';
-        $this->username = getenv('DB_USER') ?: 'anvycomb_checkplanilha';
-        $this->password = getenv('DB_PASS') ?: 'uGyzaCndm7EDahptkBZd';
+        $this->host = env('DB_HOST', 'db');
+        $this->db_name = env('DB_NAME', 'checkplanilha');
+        $this->username = env('DB_USER', 'checkplanilha');
+        $this->password = env('DB_PASS', 'checkplanilha123');
     }
 
     public function getConnection(): PDO
@@ -55,4 +56,3 @@ class Database {
 // Instancia compartilhada
 $database = new Database();
 $conexao = $database->getConnection();
-

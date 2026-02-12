@@ -14,6 +14,31 @@ else
     echo "Composer não encontrado, pulando composer install."
 fi
 
+# Copiar .env.example para .env se não existir
+if [ ! -f .env ] && [ -f .env.example ]; then
+    echo "Copiando .env.example para .env..."
+    cp .env.example .env
+fi
+
+# Executar migrations do Phinx se disponível
+if command -v ./vendor/bin/phinx >/dev/null 2>&1; then
+    echo "Executando migrations do Phinx..."
+    ./vendor/bin/phinx migrate --environment=development --no-interaction
+else
+    echo "Phinx não encontrado, tentando instalar dependências..."
+    if command -v composer >/dev/null 2>&1; then
+        composer update --no-interaction --prefer-dist --no-progress --optimize-autoloader
+        if command -v ./vendor/bin/phinx >/dev/null 2>&1; then
+            echo "Executando migrations do Phinx..."
+            ./vendor/bin/phinx migrate --environment=development --no-interaction
+        else
+            echo "Falha ao instalar Phinx."
+        fi
+    else
+        echo "Composer não encontrado."
+    fi
+fi
+
 
 if [ -x /usr/local/bin/docker-php-entrypoint ]; then
     exec docker-php-entrypoint "$@"

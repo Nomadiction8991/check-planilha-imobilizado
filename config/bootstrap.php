@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Bootstrap central para inicializar charset, sessao e utilidades comuns.
  * Garantimos UTF-8 de ponta a ponta para evitar problemas de acentuacao.
@@ -38,6 +39,10 @@ if (!defined('APP_BOOTSTRAPPED')) {
 
     // Autoload do Composer com bibliotecas externas
     require_once BASE_PATH . '/vendor/autoload.php';
+
+    // Carregar variáveis de ambiente
+    require_once BASE_PATH . '/app/helpers/env_helper.php';
+    loadEnv(BASE_PATH . '/.env');
 
     // Carrega config da aplicacao
     require_once BASE_PATH . '/config/database.php';
