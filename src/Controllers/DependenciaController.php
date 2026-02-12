@@ -2,21 +2,105 @@
 
 namespace App\Controllers;
 
+use App\Services\DependenciaService;
+use App\Repositories\DependenciaRepository;
+use App\Core\ViewRenderer;
 use App\Core\ConnectionManager;
 use PDO;
 
 class DependenciaController extends BaseController
 {
-    private PDO $conexao;
+    private DependenciaService $dependenciaService;
 
     public function __construct(?PDO $conexao = null)
     {
-        $this->conexao = $conexao ?? ConnectionManager::getConnection();
+        if ($conexao === null) {
+            $conexao = ConnectionManager::getConnection();
+        }
+
+        $dependenciaRepo = new DependenciaRepository($conexao);
+        $this->dependenciaService = new DependenciaService($dependenciaRepo);
     }
 
     public function index(): void
     {
-        $this->renderizar('dependencias/dependencias_listar');
+        $busca = trim($this->query('busca', ''));
+        $pagina = max(1, (int) $this->query('pagina', 1));
+        $limite = 10;
+        $offset = ($pagina - 1) * $limite;
+
+        try {
+            $dependencias = $this->dependenciaService->buscarPaginado($busca, $limite, $offset);
+
+            $total = $this->dependenciaService->contar($busca);
+            $totalGeral = $this->dependenciaService->contar();
+            $totalPaginas = $total > 0 ? (int) ceil($total / $limite) : 1;
+
+            if ($this->query('ajax') === '1') {
+                $this->retornarAjax($dependencias, $total, $totalGeral, $pagina, $totalPaginas, $busca);
+                return;
+            }
+
+            $this->renderizarIndex($dependencias, $busca, $pagina, $limite, $total, $totalGeral, $totalPaginas);
+        } catch (\Throwable $e) {
+            $this->tratarErro($e, $busca, $pagina);
+        }
+    }
+
+    private function renderizarIndex(
+        array $dependencias,
+        string $busca,
+        int $pagina,
+        int $limite,
+        int $total,
+        int $totalGeral,
+        int $totalPaginas
+    ): void {
+        $this->renderizar('dependencias/dependencias_listar', [
+            'dependencias' => $dependencias,
+            'busca' => $busca,
+            'pagina' => $pagina,
+            'limite' => $limite,
+            'total_registros' => $total,
+            'total_registros_all' => $totalGeral,
+            'total_paginas' => $totalPaginas,
+        ]);
+    }
+
+    private function tratarErro(\Throwable $e, string $busca, int $pagina): void
+    {
+        error_log('Erro no DependenciaController: ' . $e->getMessage());
+
+        $this->renderizar('dependencias/dependencias_listar', [
+            'dependencias' => [],
+            'busca' => $busca,
+            'pagina' => $pagina,
+            'limite' => 10,
+            'total_registros' => 0,
+            'total_registros_all' => 0,
+            'total_paginas' => 1,
+            'erro' => 'Erro ao carregar dependências: ' . $e->getMessage(),
+        ]);
+    }
+
+    private function retornarAjax(
+        array $dependencias,
+        int $total,
+        int $totalGeral,
+        int $pagina,
+        int $totalPaginas,
+        string $busca
+    ): void {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'dependencias' => $dependencias,
+            'total' => $total,
+            'totalGeral' => $totalGeral,
+            'pagina' => $pagina,
+            'totalPaginas' => $totalPaginas,
+            'busca' => $busca,
+        ]);
+        exit;
     }
 
     public function create(): void
@@ -31,9 +115,16 @@ class DependenciaController extends BaseController
             return;
         }
 
-        // TODO: Implementar lógica de criação
-        http_response_code(501);
-        die('Funcionalidade em implementação. Controller pendente de migração.');
+        try {
+            $dados = [
+                'descricao' => trim($_POST['descricao'] ?? ''),
+            ];
+
+            $this->dependenciaService->criar($dados);
+            $this->redirecionar('/dependencias?success=1');
+        } catch (\Exception $e) {
+            $this->redirecionar('/dependencias/criar?erro=' . urlencode($e->getMessage()));
+        }
     }
 
     public function edit(): void
@@ -44,7 +135,16 @@ class DependenciaController extends BaseController
             return;
         }
 
-        $this->renderizar('dependencias/dependencia_editar', ['id' => $id]);
+        $dependencia = $this->dependenciaService->buscarPorId($id);
+        if (!$dependencia) {
+            $this->redirecionar('/dependencias?erro=Dependência não encontrada');
+            return;
+        }
+
+        $this->renderizar('dependencias/dependencia_editar', [
+            'id' => $id,
+            'dependencia' => $dependencia,
+        ]);
     }
 
     public function update(): void
@@ -54,9 +154,22 @@ class DependenciaController extends BaseController
             return;
         }
 
-        // TODO: Implementar lógica de atualização
-        http_response_code(501);
-        die('Funcionalidade em implementação. Controller pendente de migração.');
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->redirecionar('/dependencias?erro=ID inválido');
+            return;
+        }
+
+        try {
+            $dados = [
+                'descricao' => trim($_POST['descricao'] ?? ''),
+            ];
+
+            $this->dependenciaService->atualizar($id, $dados);
+            $this->redirecionar('/dependencias?success=1');
+        } catch (\Exception $e) {
+            $this->redirecionar('/dependencias/editar?id=' . $id . '&erro=' . urlencode($e->getMessage()));
+        }
     }
 
     public function delete(): void
@@ -66,7 +179,20 @@ class DependenciaController extends BaseController
             return;
         }
 
-        // TODO: Implementar lógica de exclusão
-        $this->jsonErro('Funcionalidade em implementação. Controller pendente de migração.', 501);
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->jsonErro('ID inválido', 400);
+            return;
+        }
+
+        try {
+            $this->dependenciaService->deletar($id);
+            $this->json([
+                'sucesso' => true,
+                'mensagem' => 'Dependência excluída com sucesso'
+            ]);
+        } catch (\Exception $e) {
+            $this->jsonErro($e->getMessage(), 400);
+        }
     }
 }

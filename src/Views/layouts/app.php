@@ -257,12 +257,43 @@ $customJs = $customJs ?? '';
         .offcanvas {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            width: 280px !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 100% !important;
+            max-width: 400px !important;
+            height: 100% !important;
+            z-index: 1050 !important;
+            visibility: hidden;
+            transition: visibility 0.3s ease-in-out;
+        }
+
+        .offcanvas.show {
+            visibility: visible;
         }
 
         .offcanvas .offcanvas-header {
             background: rgba(255, 255, 255, 0.1);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .offcanvas-backdrop {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .offcanvas-backdrop.show {
+            opacity: 1;
         }
 
         .menu-item {
@@ -287,6 +318,55 @@ $customJs = $customJs ?? '';
 
         .menu-item span {
             font-weight: 500;
+        }
+
+        /* Seções do Menu */
+        .menu-section {
+            margin-bottom: 8px;
+        }
+
+        .menu-section-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 16px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-section-title i {
+            font-size: 14px;
+        }
+
+        .menu-submenu {
+            margin-left: 8px;
+            border-left: 2px solid rgba(255, 255, 255, 0.2);
+            padding-left: 8px;
+        }
+
+        .menu-subitem {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .menu-subitem:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(2px);
+        }
+
+        .menu-subitem i {
+            font-size: 12px;
         }
 
         /* Conteúdo principal */
@@ -430,27 +510,129 @@ $customJs = $customJs ?? '';
                 </div>
                 <div class="offcanvas-body">
                     <div class="d-flex flex-column">
+                        <!-- Início -->
                         <a href="/comuns" class="menu-item">
                             <i class="bi bi-house-door me-3"></i>
                             <span>Início</span>
                         </a>
-                        <a href="/planilhas" class="menu-item">
-                            <i class="bi bi-file-earmark-spreadsheet me-3"></i>
-                            <span>Planilhas</span>
-                        </a>
-                        <a href="/produtos" class="menu-item">
-                            <i class="bi bi-box-seam me-3"></i>
-                            <span>Produtos</span>
-                        </a>
-                        <a href="/dependencias" class="menu-item">
-                            <i class="bi bi-diagram-3 me-3"></i>
-                            <span>Dependências</span>
-                        </a>
-                        <a href="/usuarios" class="menu-item">
-                            <i class="bi bi-people me-3"></i>
-                            <span>Usuários</span>
-                        </a>
+
+                        <!-- Planilhas -->
+                        <div class="menu-section">
+                            <div class="menu-section-title">
+                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                                <span>Planilhas</span>
+                            </div>
+                            <div class="menu-submenu">
+                                <a href="/planilhas/importar" class="menu-subitem">
+                                    <i class="bi bi-upload me-2"></i>
+                                    <span>Importar Planilha</span>
+                                </a>
+                                <a href="/planilhas/visualizar" class="menu-subitem">
+                                    <i class="bi bi-eye me-2"></i>
+                                    <span>Visualizar Planilha</span>
+                                </a>
+                                <a href="/planilhas/progresso" class="menu-subitem">
+                                    <i class="bi bi-bar-chart-line me-2"></i>
+                                    <span>Progresso de Importação</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Produtos -->
+                        <div class="menu-section">
+                            <div class="menu-section-title">
+                                <i class="bi bi-box-seam me-2"></i>
+                                <span>Produtos</span>
+                            </div>
+                            <div class="menu-submenu">
+                                <a href="/produtos" class="menu-subitem">
+                                    <i class="bi bi-list-ul me-2"></i>
+                                    <span>Listar Produtos</span>
+                                </a>
+                                <a href="/produtos/criar" class="menu-subitem">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    <span>Criar Produto</span>
+                                </a>
+                                <a href="/produtos/editar" class="menu-subitem">
+                                    <i class="bi bi-pencil me-2"></i>
+                                    <span>Editar Produto</span>
+                                </a>
+                                <a href="/produtos/etiqueta" class="menu-subitem">
+                                    <i class="bi bi-tags me-2"></i>
+                                    <span>Copiar Etiquetas</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Dependências -->
+                        <div class="menu-section">
+                            <div class="menu-section-title">
+                                <i class="bi bi-diagram-3 me-2"></i>
+                                <span>Dependências</span>
+                            </div>
+                            <div class="menu-submenu">
+                                <a href="/dependencias" class="menu-subitem">
+                                    <i class="bi bi-list-ul me-2"></i>
+                                    <span>Listar Dependências</span>
+                                </a>
+                                <a href="/dependencias/criar" class="menu-subitem">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    <span>Criar Dependência</span>
+                                </a>
+                                <a href="/dependencias/editar" class="menu-subitem">
+                                    <i class="bi bi-pencil me-2"></i>
+                                    <span>Editar Dependência</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Usuários -->
+                        <div class="menu-section">
+                            <div class="menu-section-title">
+                                <i class="bi bi-people me-2"></i>
+                                <span>Usuários</span>
+                            </div>
+                            <div class="menu-submenu">
+                                <a href="/usuarios" class="menu-subitem">
+                                    <i class="bi bi-list-ul me-2"></i>
+                                    <span>Listar Usuários</span>
+                                </a>
+                                <a href="/usuarios/criar" class="menu-subitem">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    <span>Criar Usuário</span>
+                                </a>
+                                <a href="/usuarios/editar" class="menu-subitem">
+                                    <i class="bi bi-pencil me-2"></i>
+                                    <span>Editar Usuário</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Relatórios -->
+                        <div class="menu-section">
+                            <div class="menu-section-title">
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                <span>Relatórios</span>
+                            </div>
+                            <div class="menu-submenu">
+                                <a href="/relatorios/14-1" class="menu-subitem">
+                                    <i class="bi bi-file-earmark-pdf me-2"></i>
+                                    <span>Relatório 14.1</span>
+                                </a>
+                                <a href="/relatorios/visualizar" class="menu-subitem">
+                                    <i class="bi bi-eye me-2"></i>
+                                    <span>Visualizar Relatório</span>
+                                </a>
+                                <a href="/relatorios/assinatura" class="menu-subitem">
+                                    <i class="bi bi-pen me-2"></i>
+                                    <span>Assinatura Digital</span>
+                                </a>
+                            </div>
+                        </div>
+
                         <hr class="my-3">
+
+                        <!-- Sair -->
                         <a href="/logout" class="menu-item text-danger">
                             <i class="bi bi-box-arrow-right me-3"></i>
                             <span>Sair</span>
@@ -498,6 +680,72 @@ $customJs = $customJs ?? '';
                     .catch(err => console.error('Erro ao registrar Service Worker:', err));
             });
         }
+    </script>
+
+    <!-- Menu Offcanvas Customizado -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menu = document.getElementById('menuLateral');
+            const backdrop = document.createElement('div');
+            backdrop.className = 'offcanvas-backdrop';
+            backdrop.id = 'menuBackdrop';
+            const closeBtn = menu.querySelector('.btn-close');
+
+            function closeMenu() {
+                menu.classList.remove('show');
+                backdrop.classList.remove('show');
+                document.body.style.overflow = '';
+                if (backdrop.parentNode) {
+                    backdrop.parentNode.removeChild(backdrop);
+                }
+            }
+
+            // Evento quando o menu é mostrado
+            menu.addEventListener('show.bs.offcanvas', function() {
+                document.body.appendChild(backdrop);
+                backdrop.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            });
+
+            // Evento quando o menu é escondido
+            menu.addEventListener('hide.bs.offcanvas', function() {
+                closeMenu();
+            });
+
+            // Fechar menu
+            closeBtn.addEventListener('click', function() {
+                const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
+                if (bsOffcanvas) {
+                    bsOffcanvas.hide();
+                }
+            });
+            backdrop.addEventListener('click', function() {
+                const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
+                if (bsOffcanvas) {
+                    bsOffcanvas.hide();
+                }
+            });
+
+            // Fechar menu ao clicar em links
+            menu.querySelectorAll('.menu-item, .menu-subitem').forEach(link => {
+                link.addEventListener('click', function() {
+                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
+                    if (bsOffcanvas) {
+                        bsOffcanvas.hide();
+                    }
+                });
+            });
+
+            // Fechar menu com tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && menu.classList.contains('show')) {
+                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
+                    if (bsOffcanvas) {
+                        bsOffcanvas.hide();
+                    }
+                }
+            });
+        });
     </script>
 
     <!-- Função para voltar (igual ao botão do navegador) -->

@@ -15,7 +15,6 @@ class AuthMiddleware
 
 
     private const PUBLIC_ROUTES = [
-        '/src/Views/shared/menu_unificado.php',
         '/src/Views/planilhas/relatorio141_view.php',
         '/src/Views/planilhas/relatorio_imprimir_alteracao.php',
     ];
