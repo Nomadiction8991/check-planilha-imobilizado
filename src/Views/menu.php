@@ -12,69 +12,55 @@ $userName = $userName ?? ($usuario['nome'] ?? 'Usuário');
 <nav class="menu-list" aria-label="Menu principal">
     <ul class="menu-root">
         <!-- LISTAGENS -->
-        <li class="menu-header">
-            <span><i class="bi bi-list-ul" aria-hidden="true"></i>LISTAGENS</span>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/planilhas/visualizar"><i class="bi bi-eye" aria-hidden="true"></i>Visualizar Planilha</a>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/produtos"><i class="bi bi-list" aria-hidden="true"></i>Listar Produtos</a>
+        <li class="menu-item has-sub">
+            <button class="menu-toggle" aria-expanded="false">
+                <i class="bi bi-list-ul" aria-hidden="true"></i>Listagens
+            </button>
+            <ul class="submenu">
+                <li><a href="/planilhas/visualizar"><i class="bi bi-eye" aria-hidden="true"></i>Visualizar Planilha</a></li>
+                <li><a href="/produtos"><i class="bi bi-list" aria-hidden="true"></i>Listar Produtos</a></li>
+            </ul>
         </li>
 
         <!-- CADASTROS -->
-        <li class="menu-header">
-            <span><i class="bi bi-pencil-square" aria-hidden="true"></i>CADASTROS</span>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/comuns"><i class="bi bi-building" aria-hidden="true"></i>Comuns</a>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/produtos/criar"><i class="bi bi-plus-circle" aria-hidden="true"></i>Criar Produto</a>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/dependencias"><i class="bi bi-link-45deg" aria-hidden="true"></i>Dependências</a>
+        <li class="menu-item has-sub">
+            <button class="menu-toggle" aria-expanded="false">
+                <i class="bi bi-pencil-square" aria-hidden="true"></i>Cadastros
+            </button>
+            <ul class="submenu">
+                <li><a href="/comuns"><i class="bi bi-building" aria-hidden="true"></i>Comuns</a></li>
+                <li><a href="/produtos/criar"><i class="bi bi-plus-circle" aria-hidden="true"></i>Criar Produto</a></li>
+                <li><a href="/dependencias"><i class="bi bi-link-45deg" aria-hidden="true"></i>Dependências</a></li>
+            </ul>
         </li>
 
         <!-- RELATÓRIOS -->
-        <li class="menu-header">
-            <span><i class="bi bi-file-earmark-text" aria-hidden="true"></i>RELATÓRIOS</span>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/relatorios/14-1"><i class="bi bi-journal-text" aria-hidden="true"></i>Relatório 14.1</a>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/relatorios/visualizar"><i class="bi bi-eye-fill" aria-hidden="true"></i>Visualizar Relatório</a>
+        <li class="menu-item has-sub">
+            <button class="menu-toggle" aria-expanded="false">
+                <i class="bi bi-file-earmark-text" aria-hidden="true"></i>Relatórios
+            </button>
+            <ul class="submenu">
+                <li><a href="/relatorios/14-1"><i class="bi bi-journal-text" aria-hidden="true"></i>Relatório 14.1</a></li>
+                <li><a href="/relatorios/visualizar"><i class="bi bi-eye-fill" aria-hidden="true"></i>Visualizar Relatório</a></li>
+            </ul>
         </li>
 
         <!-- OUTROS -->
-        <li class="menu-header">
-            <span><i class="bi bi-three-dots" aria-hidden="true"></i>OUTROS</span>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/planilhas/importar"><i class="bi bi-upload" aria-hidden="true"></i>Importar Planilha</a>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/planilhas/progresso"><i class="bi bi-bar-chart-line" aria-hidden="true"></i>Progresso de Importação</a>
-        </li>
-        
-        <li class="menu-item">
-            <a href="/produtos/etiqueta"><i class="bi bi-tags" aria-hidden="true"></i>Copiar Etiquetas</a>
+        <li class="menu-item has-sub">
+            <button class="menu-toggle" aria-expanded="false">
+                <i class="bi bi-three-dots" aria-hidden="true"></i>Outros
+            </button>
+            <ul class="submenu">
+                <li><a href="/planilhas/importar"><i class="bi bi-upload" aria-hidden="true"></i>Importar Planilha</a></li>
+                <li><a href="/planilhas/progresso"><i class="bi bi-bar-chart-line" aria-hidden="true"></i>Progresso de Importação</a></li>
+                <li><a href="/produtos/etiqueta"><i class="bi bi-tags" aria-hidden="true"></i>Copiar Etiquetas</a></li>
+            </ul>
         </li>
     </ul>
 </nav>
 
 <script>
-    // comportamento simples para abrir/fechar submenus (não usado mais, mas mantido para compatibilidade)
+    // comportamento simples para abrir/fechar submenus
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.menu-toggle').forEach(btn => {
             btn.addEventListener('click', function() {
