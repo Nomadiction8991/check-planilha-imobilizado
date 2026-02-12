@@ -35,20 +35,41 @@
 }
 
 .btn-footer-action {
-    background: rgba(255, 255, 255, 0.2);
+    background: transparent; /* remover bolinha esbranquiçada */
     border: none;
-    color: white;
-    width: 36px;
-    height: 36px;
+    color: white; /* ícones brancos */
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
+    transition: transform 0.18s ease;
     text-decoration: none;
+    box-shadow: none;
+}
+
+.btn-footer-action i {
+    color: white; /* garante ícone branco */
+    font-size: 18px;
 }
 
 .btn-footer-action:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
+    transform: translateY(-3px);
+}
+
+/* Estilo especial para logout (tornar ícone com leve destaque vermelho no hover) */
+.btn-logout i {
+    color: white;
+}
+
+.btn-logout:hover i {
+    color: #ff6b6b;
+}
+
+.footer-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.95);
+    text-align: center;
 }

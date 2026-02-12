@@ -20,17 +20,20 @@ $logoutPath = $logoutPath ?? '/logout';
         <button class="btn-footer-action" onclick="goBack()" title="Voltar" aria-label="Voltar">
             <i class="bi bi-arrow-left"></i>
         </button>
+        <div class="footer-label">Voltar</div>
     </div>
 
     <div class="footer-center">
         <a href="<?= htmlspecialchars($homePath, ENT_QUOTES, 'UTF-8') ?>" class="btn-footer-action" title="Início" aria-label="Início">
             <i class="bi bi-house-door"></i>
         </a>
+        <div class="footer-label">Início</div>
     </div>
 
     <div class="footer-right">
-        <a href="<?= htmlspecialchars($logoutPath, ENT_QUOTES, 'UTF-8') ?>" class="btn-footer-action text-danger" title="Sair" aria-label="Sair">
+        <a href="<?= htmlspecialchars($logoutPath, ENT_QUOTES, 'UTF-8') ?>" class="btn-footer-action btn-logout" title="Sair" aria-label="Sair">
             <i class="bi bi-box-arrow-right"></i>
         </a>
+        <div class="footer-label">Sair</div>
     </div>
 </footer>
