@@ -2,7 +2,8 @@
 define('SKIP_AUTH', true);
 
 // Copiar a classe Database sem bootstrap
-class Database {
+class Database
+{
     private string $host;
     private string $db_name;
     private string $username;
@@ -105,4 +106,3 @@ foreach ($indexesToAdd as $table => $columns) {
         }
     }
 }
-?>
