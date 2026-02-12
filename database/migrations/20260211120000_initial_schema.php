@@ -4,10 +4,10 @@ use Phinx\Migration\AbstractMigration;
 
 class InitialSchema extends AbstractMigration
 {
-    public function up()
-    {
-        // Criar tabelas na ordem de dependências
-        $this->execute("
+        public function up()
+        {
+                // Criar tabelas na ordem de dependências
+                $this->execute("
 CREATE TABLE `comums` (
   `id` int NOT NULL AUTO_INCREMENT,
   `codigo` int NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE `comums` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
-        $this->execute("
+                $this->execute("
 CREATE TABLE `configuracoes` (
   `posicao_data` varchar(255) NOT NULL DEFAULT 'D13',
   `pulo_linhas` varchar(255) NOT NULL DEFAULT '25',
@@ -31,7 +31,7 @@ CREATE TABLE `configuracoes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         ");
 
-        $this->execute("
+                $this->execute("
 CREATE TABLE `dependencias` (
   `id` int NOT NULL AUTO_INCREMENT,
   `descricao` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE `dependencias` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
-        $this->execute("
+                $this->execute("
 CREATE TABLE `tipos_bens` (
   `id` int NOT NULL AUTO_INCREMENT,
   `codigo` int NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE `tipos_bens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
-        $this->execute("
+                $this->execute("
 CREATE TABLE `usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nome` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
-        $this->execute("
+                $this->execute("
 CREATE TABLE `produtos` (
   `comum_id` int NOT NULL,
   `id_produto` int NOT NULL AUTO_INCREMENT,
@@ -122,7 +122,7 @@ CREATE TABLE `produtos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ");
 
-        $this->execute("
+                $this->execute("
 CREATE TABLE `import_job_processed` (
   `job_id` varchar(128) NOT NULL,
   `id_produto` int NOT NULL,
@@ -132,26 +132,26 @@ CREATE TABLE `import_job_processed` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         ");
 
-        // Inserir dados de teste
-        $this->execute("
+                // Inserir dados de teste
+                $this->execute("
 INSERT INTO comums (codigo, cnpj, descricao, administracao, cidade, setor) VALUES
 (1, '12345678000100', 'Comum Exemplo 1', 'Administração Municipal', 'Cuiabá', 1),
 (2, '98765432000199', 'Comum Exemplo 2', 'Administração Estadual', 'Várzea Grande', 2);
         ");
 
-        $this->execute("
+                $this->execute("
 INSERT INTO configuracoes (posicao_data, pulo_linhas, mapeamento_colunas, data_importacao) VALUES
 ('D13', '25', 'codigo=A;complemento=D;dependencia=P;localidade=K', '2026-02-11');
         ");
 
-        $this->execute("
+                $this->execute("
 INSERT INTO dependencias (descricao) VALUES
 ('Dependência 1'),
 ('Dependência 2'),
 ('Dependência 3');
         ");
 
-        $this->execute("
+                $this->execute("
 INSERT INTO tipos_bens (codigo, descricao) VALUES
 (1, 'BANCO DE MADEIRA/GENUFLEXORIO'),
 (2, 'TRIBUNA/CRIADO MUDO'),
@@ -204,32 +204,32 @@ INSERT INTO tipos_bens (codigo, descricao) VALUES
 (99, 'DIVERSOS');
         ");
 
-        $this->execute("
+                $this->execute("
 INSERT INTO usuarios (nome, email, senha, ativo) VALUES ('Administrador', 'admin@checkplanilha.com', '\$2y\$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);
         ");
 
-        $this->execute("
+                $this->execute("
 INSERT INTO usuarios (nome, email, senha, ativo) VALUES
 ('Usuário Teste', 'teste@checkplanilha.com', '\$2y\$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);
         ");
 
-        $this->execute("
+                $this->execute("
 INSERT INTO produtos (comum_id, codigo, descricao_completa, editado_descricao_completa, tipo_bem_id, editado_tipo_bem_id, bem, editado_bem, complemento, editado_complemento, dependencia_id, editado_dependencia_id, novo, checado, editado, imprimir_etiqueta, imprimir_14_1, observacao, ativo) VALUES
 (1, 'PROD001', 'Produto de Teste 1', '', 1, 0, 'Bem móvel de teste', '', 'Complemento 1', '', 1, 0, 1, 1, 0, 1, 1, 'Observação teste', 1),
 (2, 'PROD002', 'Produto de Teste 2', '', 2, 0, 'Bem imóvel de teste', '', 'Complemento 2', '', 2, 0, 1, 1, 0, 1, 1, 'Observação teste 2', 1);
         ");
 
-        // import_job_processed pode ficar vazio para teste
-    }
+                // import_job_processed pode ficar vazio para teste
+        }
 
-    public function down()
-    {
-        $this->execute("DROP TABLE IF EXISTS import_job_processed");
-        $this->execute("DROP TABLE IF EXISTS produtos");
-        $this->execute("DROP TABLE IF EXISTS usuarios");
-        $this->execute("DROP TABLE IF EXISTS tipos_bens");
-        $this->execute("DROP TABLE IF EXISTS dependencias");
-        $this->execute("DROP TABLE IF EXISTS configuracoes");
-        $this->execute("DROP TABLE IF EXISTS comums");
-    }
+        public function down()
+        {
+                $this->execute("DROP TABLE IF EXISTS import_job_processed");
+                $this->execute("DROP TABLE IF EXISTS produtos");
+                $this->execute("DROP TABLE IF EXISTS usuarios");
+                $this->execute("DROP TABLE IF EXISTS tipos_bens");
+                $this->execute("DROP TABLE IF EXISTS dependencias");
+                $this->execute("DROP TABLE IF EXISTS configuracoes");
+                $this->execute("DROP TABLE IF EXISTS comums");
+        }
 }

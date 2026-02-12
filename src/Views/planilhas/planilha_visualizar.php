@@ -350,10 +350,13 @@ if (false && !empty($acesso_bloqueado)) {
         }
 
         @keyframes pulse-float {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: scale(1) !important;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
             }
+
             50% {
                 transform: scale(1.1) !important;
                 box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
@@ -1156,10 +1159,13 @@ ob_start();
     }
 
     @keyframes pulse-float {
-        0%, 100% {
+
+        0%,
+        100% {
             transform: scale(1) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
         }
+
         50% {
             transform: scale(1.1) !important;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
@@ -1513,20 +1519,20 @@ ob_start();
     <button class="camera-close-btn" id="cameraCloseBtn" type="button" aria-label="Fechar câmera">
         <i class="bi bi-x-lg"></i>
     </button>
-    
+
     <div class="camera-fullscreen-content">
         <div class="camera-scanner-container" id="cameraFullscreenContainer">
             <div class="camera-overlay">
                 <div class="scanner-frame-fullscreen" id="scannerFrameFullscreen"></div>
             </div>
         </div>
-        
+
         <div class="camera-controls">
             <label for="cameraSelectFloating">Câmera:</label>
             <select id="cameraSelectFloating" class="form-select form-select-sm" style="max-width: 200px;">
                 <option value="">Câmera padrão</option>
             </select>
-            
+
             <label for="zoomSliderFloating" style="flex: 1; max-width: 200px; margin-left: auto;">
                 Zoom: <span id="zoomLevelFloating">1.0x</span>
             </label>
@@ -2353,19 +2359,19 @@ ob_start();
     // ===== INICIALIZAÇÃO DOS BOTÕES FLUTUANTES =====
     function initFloatingButtons() {
         console.log('===== INICIALIZANDO BOTÕES FLUTUANTES =====');
-        
+
         const btnFloatingMic = document.getElementById('btnFloatingMic');
         const btnFloatingCam = document.getElementById('btnFloatingCam');
         const btnMicOriginal = document.getElementById('btnMic');
         const btnCamOriginal = document.getElementById('btnCam');
         const cameraFullscreenModal = document.getElementById('cameraFullscreenModal');
         const cameraCloseBtn = document.getElementById('cameraCloseBtn');
-        
+
         if (!btnFloatingMic || !btnFloatingCam) {
             console.error('Botões flutuantes não encontrados!');
             return;
         }
-        
+
         // Conectar botão flutuante de microfone ao botão original
         if (btnMicOriginal) {
             btnFloatingMic.addEventListener('click', function(e) {
@@ -2376,7 +2382,7 @@ ob_start();
             });
             console.log('✓ Botão flutuante de microfone conectado');
         }
-        
+
         // Conectar botão flutuante de câmera para abrir modal fullscreen
         if (btnFloatingCam && cameraFullscreenModal) {
             btnFloatingCam.addEventListener('click', function(e) {
@@ -2384,13 +2390,13 @@ ob_start();
                 e.stopPropagation();
                 console.log('Clicado botão flutuante de câmera');
                 cameraFullscreenModal.classList.add('show');
-                
+
                 // Aguardar ser visível antes de iniciar câmera
                 setTimeout(initFullscreenCamera, 300);
             });
             console.log('✓ Botão flutuante de câmera conectado');
         }
-        
+
         // Botão de fechar da modal fullscreen
         if (cameraCloseBtn && cameraFullscreenModal) {
             cameraCloseBtn.addEventListener('click', function(e) {
@@ -2401,7 +2407,7 @@ ob_start();
                 cameraFullscreenModal.classList.remove('show');
             });
         }
-        
+
         // Fechar ao clicar fora (backdrop)
         cameraFullscreenModal.addEventListener('click', function(e) {
             if (e.target === cameraFullscreenModal) {
@@ -2409,7 +2415,7 @@ ob_start();
                 cameraFullscreenModal.classList.remove('show');
             }
         });
-        
+
         // ESC para fechar
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && cameraFullscreenModal.classList.contains('show')) {
@@ -2417,7 +2423,7 @@ ob_start();
                 cameraFullscreenModal.classList.remove('show');
             }
         });
-        
+
         console.log('✓ Botões flutuantes inicializados com sucesso!');
     }
 
@@ -2431,7 +2437,7 @@ ob_start();
 
     async function initFullscreenCamera() {
         console.log('Inicializando câmera fullscreen...');
-        
+
         await enumerateFullscreenCameras();
         startFullscreenScanner();
     }
@@ -2439,13 +2445,13 @@ ob_start();
     async function enumerateFullscreenCameras() {
         const cameraSelectFloating = document.getElementById('cameraSelectFloating');
         if (!cameraSelectFloating) return;
-        
+
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             fullscreenAvailableCameras = devices.filter(device => device.kind === 'videoinput');
-            
+
             console.log(`√ ${fullscreenAvailableCameras.length} câmera(s) encontrada(s)`);
-            
+
             cameraSelectFloating.innerHTML = '<option value="">Câmera padrão</option>';
             fullscreenAvailableCameras.forEach((camera, index) => {
                 const option = document.createElement('option');
@@ -2462,21 +2468,27 @@ ob_start();
         if (fullscreenScanning) return;
         fullscreenScanning = true;
         fullscreenLastCode = '';
-        
+
         const container = document.getElementById('cameraFullscreenContainer');
         if (!container) return;
-        
+
         const constraints = {
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
+            width: {
+                ideal: 1920
+            },
+            height: {
+                ideal: 1080
+            }
         };
-        
+
         if (fullscreenSelectedDeviceId) {
-            constraints.deviceId = { exact: fullscreenSelectedDeviceId };
+            constraints.deviceId = {
+                exact: fullscreenSelectedDeviceId
+            };
         } else {
             constraints.facingMode = 'environment';
         }
-        
+
         Quagga.init({
             inputStream: {
                 type: 'LiveStream',
@@ -2494,7 +2506,10 @@ ob_start();
                 multiple: false
             },
             locate: true,
-            locator: { patchSize: 'large', halfSample: true },
+            locator: {
+                patchSize: 'large',
+                halfSample: true
+            },
             frequency: 10,
             numOfWorkers: navigator.hardwareConcurrency || 4
         }, function(err) {
@@ -2504,10 +2519,10 @@ ob_start();
                 fullscreenScanning = false;
                 return;
             }
-            
+
             console.log('√ Câmera fullscreen iniciada!');
             Quagga.start();
-            
+
             // Capturar stream
             const videoElement = container.querySelector('video');
             if (videoElement && videoElement.srcObject) {
@@ -2518,37 +2533,41 @@ ob_start();
                 }
             }
         });
-        
+
         Quagga.offDetected();
         Quagga.onDetected(function(result) {
             if (!result || !result.codeResult || !result.codeResult.code) return;
-            
+
             const rawCode = result.codeResult.code.trim();
             if (!rawCode || rawCode === fullscreenLastCode) return;
-            
+
             fullscreenLastCode = rawCode;
             const code = normalizeBarcodeFullscreen(rawCode);
-            
+
             console.log('√ Código detectado:', code);
-            
+
             // Feedback visual
             const frame = document.getElementById('scannerFrameFullscreen');
             if (frame) {
                 frame.classList.add('detected');
                 setTimeout(() => frame.classList.remove('detected'), 300);
             }
-            
+
             stopFullscreenScanner();
             const cameraModal = document.getElementById('cameraFullscreenModal');
             if (cameraModal) cameraModal.classList.remove('show');
-            
+
             // Preencher o input original e enviar
             const codigoInput = document.getElementById('codigo');
             if (codigoInput) {
                 codigoInput.value = code;
-                codigoInput.dispatchEvent(new Event('input', { bubbles: true }));
-                codigoInput.dispatchEvent(new Event('change', { bubbles: true }));
-                
+                codigoInput.dispatchEvent(new Event('input', {
+                    bubbles: true
+                }));
+                codigoInput.dispatchEvent(new Event('change', {
+                    bubbles: true
+                }));
+
                 const form = codigoInput.form || document.querySelector('form');
                 if (form) {
                     form.requestSubmit ? form.requestSubmit() : form.submit();
@@ -2566,7 +2585,7 @@ ob_start();
                 fullscreenCurrentStream = null;
             }
             fullscreenCurrentTrack = null;
-            
+
             const container = document.getElementById('cameraFullscreenContainer');
             if (container) {
                 while (container.firstChild) {
@@ -2596,7 +2615,11 @@ ob_start();
         const zoomLevel = parseFloat(e.target.value);
         document.getElementById('zoomLevelFloating').textContent = zoomLevel.toFixed(1) + 'x';
         if (fullscreenCurrentTrack && fullscreenCurrentTrack.getCapabilities().zoom) {
-            fullscreenCurrentTrack.applyConstraints({ advanced: [{ zoom: zoomLevel }] });
+            fullscreenCurrentTrack.applyConstraints({
+                advanced: [{
+                    zoom: zoomLevel
+                }]
+            });
         }
     });
 

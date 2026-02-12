@@ -258,9 +258,20 @@ class CsvParserService
         $codigoNorm = strtolower(trim($codigo));
 
         $palavrasMetadados = [
-            'total', 'subtotal', 'soma', 'resumo', 'grupo',
-            'relatório', 'relatorio', 'congregação', 'congregacao',
-            'dependência', 'dependencia', 'página', 'pagina', 'folha',
+            'total',
+            'subtotal',
+            'soma',
+            'resumo',
+            'grupo',
+            'relatório',
+            'relatorio',
+            'congregação',
+            'congregacao',
+            'dependência',
+            'dependencia',
+            'página',
+            'pagina',
+            'folha',
         ];
 
         foreach ($palavrasMetadados as $palavra) {
