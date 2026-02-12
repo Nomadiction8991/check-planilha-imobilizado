@@ -22,23 +22,23 @@ if (!$comum_id || empty($ids_produtos)) {
 }
 
 try {
-    
+
     $ids_produtos = array_map('intval', $ids_produtos);
     $placeholders = implode(',', array_fill(0, count($ids_produtos), '?'));
 
-    
+
     $sql = "DELETE FROM produtos WHERE comum_id = ? AND id_produto IN ($placeholders)";
     $stmt = $conexao->prepare($sql);
 
-    
+
     $stmt->bindValue(1, $comum_id, PDO::PARAM_INT);
 
-    
+
     foreach ($ids_produtos as $index => $id) {
         $stmt->bindValue($index + 2, $id, PDO::PARAM_INT);
     }
 
-    
+
     if ($stmt->execute()) {
         $payload = ['success' => true, 'message' => 'Produtos excluídos com sucesso'];
         if (function_exists('is_ajax_request') && !is_ajax_request()) {

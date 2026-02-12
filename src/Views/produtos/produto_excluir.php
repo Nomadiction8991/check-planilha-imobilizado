@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
- 
+
 
 $pageTitle = 'Excluir PRODUTO';
 $backUrl = '/produtos?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
@@ -17,17 +17,17 @@ ob_start();
       <?php endforeach; ?>
     </ul>
   <?php endif; ?>
-  
+
 </div>
 
 <form method="POST" id="form-PRODUTO">
   <div class="card mb-3">
     <div class="card-body">
       <?php if (!empty($PRODUTO['codigo'])): ?>
-      <div class="mb-3">
-        <label class="form-label">CÓDIGO</label>
-        <input type="text" class="form-control" value="<?php echo htmlspecialchars($PRODUTO['codigo']); ?>" disabled>
-      </div>
+        <div class="mb-3">
+          <label class="form-label">CÓDIGO</label>
+          <input type="text" class="form-control" value="<?php echo htmlspecialchars($PRODUTO['codigo']); ?>" disabled>
+        </div>
       <?php endif; ?>
 
       <div class="mb-3">
@@ -74,5 +74,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
-

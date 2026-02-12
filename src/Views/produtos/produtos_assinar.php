@@ -40,7 +40,7 @@ ob_start();
 ?>
 
 <style>
-.PRODUTO-card {
+    .PRODUTO-card {
         border-left: 4px solid #dee2e6;
         transition: all 0.3s;
     }
@@ -60,7 +60,7 @@ ob_start();
     }
 
 
-.PRODUTO-card {
+    .PRODUTO-card {
         border-left: 4px solid #dee2e6;
         transition: all 0.3s;
     }

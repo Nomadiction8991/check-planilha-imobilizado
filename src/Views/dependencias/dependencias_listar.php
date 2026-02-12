@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
 
@@ -16,19 +17,24 @@ $pageTitle = 'Dependencias';
 $backUrl = base_url('/');
 
 $qsArr = [];
-if (!empty($busca)) { $qsArr['busca'] = $busca; }
-if (!empty($pagina) && $pagina > 1) { $qsArr['pagina'] = $pagina; }
+if (!empty($busca)) {
+    $qsArr['busca'] = $busca;
+}
+if (!empty($pagina) && $pagina > 1) {
+    $qsArr['pagina'] = $pagina;
+}
 $qs = http_build_query($qsArr);
 $createHref = '/dependencias/criar' . ($qs ? ('?' . $qs) : '');
 $headerActions = '<a href="' . $createHref . '" class="btn-header-action" title="Nova Dependencia"><i class="bi bi-plus-lg"></i></a>';
 
 
 if (!function_exists('dep_corrigir_encoding')) {
-    function dep_corrigir_encoding($texto) {
+    function dep_corrigir_encoding($texto)
+    {
         if ($texto === null) return '';
         $texto = trim((string)$texto);
         if ($texto === '') return '';
-        $enc = mb_detect_encoding($texto, ['UTF-8','ISO-8859-1','Windows-1252','ASCII'], true);
+        $enc = mb_detect_encoding($texto, ['UTF-8', 'ISO-8859-1', 'Windows-1252', 'ASCII'], true);
         if ($enc && $enc !== 'UTF-8') {
             $texto = mb_convert_encoding($texto, 'UTF-8', $enc);
         }
@@ -93,7 +99,7 @@ ob_start();
                 Nenhuma dependencia cadastrada
             </div>
         <?php else: ?>
-            
+
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead>
@@ -104,17 +110,17 @@ ob_start();
                     </thead>
                     <tbody>
                         <?php foreach ($dependencias as $dependencia): ?>
-                                    <tr>
+                            <tr>
                                 <td><?php echo htmlspecialchars(to_uppercase(dep_corrigir_encoding($dependencia['descricao'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a href="/dependencias/editar?id=<?php echo $dependencia['id']; ?><?php echo ($qs ? '&' . $qs : ''); ?>"
-                                           class="btn btn-sm btn-outline-primary" title="EDITAR">
+                                            class="btn btn-sm btn-outline-primary" title="EDITAR">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger"
-                                                onclick="deletarDependencia(<?php echo $dependencia['id']; ?>)"
-                                                title="Excluir">
+                                            onclick="deletarDependencia(<?php echo $dependencia['id']; ?>)"
+                                            title="Excluir">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -154,104 +160,107 @@ ob_start();
 <?php endif; ?>
 
 <script>
-function showFlash(type, message) {
-    const el = document.createElement('div');
-    el.className = 'alert alert-' + type + ' alert-dismissible fade show';
-    el.setAttribute('role', 'alert');
-    const icon = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
-    el.innerHTML = '<i class="bi bi-' + icon + ' me-2"></i><span></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
-    el.querySelector('span').textContent = message;
-    // Insert at top of main content area if available
-    const container = document.querySelector('.app-content .container-fluid') || document.querySelector('.app-content') || document.body;
-    container.insertBefore(el, container.firstChild);
-}
-
-function deletarDependencia(id) {
-    // Open confirm modal and attach id to confirm button
-    const modal = document.getElementById('confirmModalDependencia');
-    if (!modal) {
-        // fallback to prompt if modal not available
-        if (!confirm('Tem certeza que deseja excluir esta dependência?')) return;
-        performDelete(id);
-        return;
+    function showFlash(type, message) {
+        const el = document.createElement('div');
+        el.className = 'alert alert-' + type + ' alert-dismissible fade show';
+        el.setAttribute('role', 'alert');
+        const icon = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
+        el.innerHTML = '<i class="bi bi-' + icon + ' me-2"></i><span></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+        el.querySelector('span').textContent = message;
+        // Insert at top of main content area if available
+        const container = document.querySelector('.app-content .container-fluid') || document.querySelector('.app-content') || document.body;
+        container.insertBefore(el, container.firstChild);
     }
-    const confirmBtn = modal.querySelector('.confirm-delete');
-    modal.querySelector('.modal-body span').textContent = 'Deseja realmente excluir esta dependência?';
-    confirmBtn.setAttribute('data-delete-id', id);
-    // show modal using Bootstrap API if available
-    if (typeof bootstrap !== 'undefined') {
-        const bs = new bootstrap.Modal(modal);
-        bs.show();
-    } else {
-        modal.style.display = 'block';
-        modal.classList.add('show');
-    }
-}
 
-function performDelete(id) {
-    fetch('/dependencias/deletar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'id=' + id
-    })
-    .then(response => response.text())
-    .then(text => {
-        try {
-            const data = JSON.parse(text);
-            if (data.success) {
-                showFlash('success', data.message);
-                // Give user a moment to see the flash before reloading
-                setTimeout(function(){ location.reload(); }, 900);
-            } else {
-                showFlash('danger', data.message);
-            }
-        } catch (e) {
-            console.error('Invalid JSON response:', text);
-            showFlash('danger', 'Erro na requisição: resposta inválida do servidor. Verifique o console para detalhes.');
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        showFlash('danger', 'Erro na requisição: ' + String(error));
-    });
-}
-
-// Bind modal confirm button
-(function(){
-    document.addEventListener('DOMContentLoaded', function(){
+    function deletarDependencia(id) {
+        // Open confirm modal and attach id to confirm button
         const modal = document.getElementById('confirmModalDependencia');
-        if (!modal) return;
-        modal.querySelector('.confirm-delete').addEventListener('click', function(e){
-            const id = this.getAttribute('data-delete-id');
-            // hide modal
-            if (typeof bootstrap !== 'undefined') {
-                bootstrap.Modal.getInstance(modal)?.hide();
-            } else {
-                modal.classList.remove('show'); modal.style.display = 'none';
-            }
-            if (id) performDelete(id);
+        if (!modal) {
+            // fallback to prompt if modal not available
+            if (!confirm('Tem certeza que deseja excluir esta dependência?')) return;
+            performDelete(id);
+            return;
+        }
+        const confirmBtn = modal.querySelector('.confirm-delete');
+        modal.querySelector('.modal-body span').textContent = 'Deseja realmente excluir esta dependência?';
+        confirmBtn.setAttribute('data-delete-id', id);
+        // show modal using Bootstrap API if available
+        if (typeof bootstrap !== 'undefined') {
+            const bs = new bootstrap.Modal(modal);
+            bs.show();
+        } else {
+            modal.style.display = 'block';
+            modal.classList.add('show');
+        }
+    }
+
+    function performDelete(id) {
+        fetch('/dependencias/deletar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'id=' + id
+            })
+            .then(response => response.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        showFlash('success', data.message);
+                        // Give user a moment to see the flash before reloading
+                        setTimeout(function() {
+                            location.reload();
+                        }, 900);
+                    } else {
+                        showFlash('danger', data.message);
+                    }
+                } catch (e) {
+                    console.error('Invalid JSON response:', text);
+                    showFlash('danger', 'Erro na requisição: resposta inválida do servidor. Verifique o console para detalhes.');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                showFlash('danger', 'Erro na requisição: ' + String(error));
+            });
+    }
+
+    // Bind modal confirm button
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('confirmModalDependencia');
+            if (!modal) return;
+            modal.querySelector('.confirm-delete').addEventListener('click', function(e) {
+                const id = this.getAttribute('data-delete-id');
+                // hide modal
+                if (typeof bootstrap !== 'undefined') {
+                    bootstrap.Modal.getInstance(modal)?.hide();
+                } else {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                }
+                if (id) performDelete(id);
+            });
         });
-    });
-})();
+    })();
 </script>
 
 <!-- Confirm modal for deleting dependencia -->
 <div class="modal fade" id="confirmModalDependencia" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirmação</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body"><span></span></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger confirm-delete">Excluir</button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"><span></span></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger confirm-delete">Excluir</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <?php
@@ -262,5 +271,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
-

@@ -47,7 +47,7 @@ ob_start();
 ?>
 
 <style>
-.info-label {
+    .info-label {
         font-weight: 600;
         color: #6c757d;
         font-size: 0.85rem;
@@ -94,7 +94,7 @@ ob_start();
     }
 
 
-.info-label {
+    .info-label {
         font-weight: 600;
         color: #6c757d;
         font-size: 0.85rem;

@@ -25,7 +25,7 @@ $erro_PRODUTOS = $erro_produtos ?? '';
 $filtro_STATUS = $filtro_status ?? '';
 
 
-$id_planilha = $comum_id; 
+$id_planilha = $comum_id;
 $pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'VISUALIZAR Planilha');
 $backUrl = base_url('/');
 
@@ -33,344 +33,188 @@ $backUrl = base_url('/');
 if (!empty($acesso_bloqueado)) {
     $mensagemBloqueio = $mensagem_bloqueio ?: 'A planilha precisa ser importada novamente para continuar.';
 
-    
+
     $pageTitle = 'Importação Desatualizada';
     $backUrl = base_url('/');
 
     ob_start();
 ?>
 
-<style>
-/* Modal fullscreen customizado (95% largura x 80% altura) */
-    .modal-fullscreen-custom {
-        width: 95vw;
-        height: 80vh;
-        max-width: 95vw;
-        max-height: 80vh;
-        margin: 10vh auto;
-    }
-
-    .modal-fullscreen-custom .modal-content {
-        height: 100%;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    .modal-fullscreen-custom .modal-body {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Botão X para fechar */
-    .btn-close-scanner {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 1050;
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .btn-close-scanner:hover {
-        background: rgba(255, 255, 255, 1);
-        transform: scale(1.1);
-    }
-
-    .btn-close-scanner i {
-        color: #333;
-        font-size: 24px;
-    }
-
-    /* Overlay com moldura e dica */
-    .scanner-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        pointer-events: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-    }
-
-    .scanner-frame {
-        width: 80%;
-        max-width: 400px;
-        height: 200px;
-        border: 3px solid rgba(255, 255, 255, 0.8);
-        border-radius: 12px;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-        position: relative;
-    }
-
-    .scanner-frame::before,
-    .scanner-frame::after {
-        content: '';
-        position: absolute;
-        background: #fff;
-    }
-
-    .scanner-frame::before {
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 2px;
-        transform: translateY(-50%);
-        animation: scan 2s ease-in-out infinite;
-    }
-
-    @keyframes scan {
-
-        0%,
-        100% {
-            opacity: 0;
+    <style>
+        /* Modal fullscreen customizado (95% largura x 80% altura) */
+        .modal-fullscreen-custom {
+            width: 95vw;
+            height: 80vh;
+            max-width: 95vw;
+            max-height: 80vh;
+            margin: 10vh auto;
         }
 
-        50% {
-            opacity: 1;
-        }
-    }
-
-    .scanner-hint {
-        color: white;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 12px 24px;
-        border-radius: 8px;
-        margin-top: 20px;
-        font-size: 14px;
-        text-align: center;
-        max-width: 80%;
-    }
-
-    .scanner-info {
-        color: white;
-        background: rgba(0, 0, 0, 0.8);
-        padding: 8px 16px;
-        border-radius: 6px;
-        margin-top: 10px;
-        font-size: 12px;
-        text-align: center;
-    }
-
-    /* Controles de c³mera e zoom */
-    .scanner-controls {
-        position: absolute;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1050;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        width: 90%;
-        max-width: 400px;
-        pointer-events: auto;
-    }
-
-    .scanner-controls select {
-        background: rgba(255, 255, 255, 0.95);
-        border: none;
-        border-radius: 8px;
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    .zoom-control {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 10px 15px;
-        border-radius: 8px;
-    }
-
-    .zoom-control i {
-        color: #333;
-        font-size: 18px;
-    }
-
-    .zoom-control .form-range {
-        flex: 1;
-        margin: 0;
-    }
-
-    /* Container de vídeo do Quagga */
-    #scanner-container video,
-    #scanner-container canvas {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover;
-    }
-
-/* Estilos para o botão de microfone */
-    .mic-btn {
-        /* herda totalmente o estilo do .btn (Bootstrap) */
-        cursor: pointer;
-        padding: 0.5rem;
-        transition: all 0.3s ease;
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .mic-btn:focus,
-    .mic-btn:active {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-
-    .mic-btn .material-icons-round {
-        color: white !important;
-        transition: color 0.3s ease;
-    }
-
-    .mic-btn.listening .material-icons-round {
-        color: #dc3545 !important;
-        /* vermelho quando gravando */
-        animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-
-        0%,
-        100% {
-            transform: scale(1);
+        .modal-fullscreen-custom .modal-content {
+            height: 100%;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
-        50% {
-            transform: scale(1.15);
+        .modal-fullscreen-custom .modal-body {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-    }
 
-    /* Garantir que botões do input-group não se movam */
-    .input-group .btn {
-        transform: none !important;
-    }
+        /* Botão X para fechar */
+        .btn-close-scanner {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
 
-    .input-group .btn:hover,
-    .input-group .btn:focus,
-    .input-group .btn:active {
-        transform: none !important;
-    }
+        .btn-close-scanner:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
 
-    .mic-btn .material-icons-round {
-        font-size: 20px;
-        vertical-align: middle;
-    }
+        .btn-close-scanner i {
+            color: #333;
+            font-size: 24px;
+        }
 
-    /* Estilos padrão para todos os dispositivos (mobile-first) */
-    .input-group {
-        flex-wrap: nowrap !important;
-        display: flex !important;
-    }
+        /* Overlay com moldura e dica */
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
 
-    .input-group .form-control {
-        min-width: 0;
-        flex: 1 1 auto !important;
-        /* Input preenche o espao restante */
-    }
+        .scanner-frame {
+            width: 80%;
+            max-width: 400px;
+            height: 200px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
 
-    .input-group>.btn {
-        flex: 0 0 15% !important;
-        /* Botes ocupam 15% cada */
-        min-width: 45px !important;
-        max-width: 60px !important;
-        padding: 0.375rem 0.25rem !important;
-        font-size: 1.1rem !important;
-    }
+        .scanner-frame::before,
+        .scanner-frame::after {
+            content: '';
+            position: absolute;
+            background: #fff;
+        }
 
-    .input-group>.btn .material-icons-round,
-    .input-group>.btn i {
-        font-size: 20px !important;
-    }
+        .scanner-frame::before {
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            transform: translateY(-50%);
+            animation: scan 2s ease-in-out infinite;
+        }
 
-    /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
-    .linha-pendente {
-        background-color: #ffffff;
-        border-left: none;
-    }
+        @keyframes scan {
 
-    .linha-checado {
-        background-color: #d4f4dd;
-        border-left: 4px solid #10b759;
-    }
+            0%,
+            100% {
+                opacity: 0;
+            }
 
-    .linha-observacao {
-        background-color: #fff4e6;
-        border-left: 4px solid #fb8c00;
-    }
+            50% {
+                opacity: 1;
+            }
+        }
 
-    .linha-imprimir {
-        background-color: #e3f2fd;
-        border-left: 4px solid #1976d2;
-    }
+        .scanner-hint {
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 24px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
+            max-width: 80%;
+        }
 
-    .linha-dr {
-        background-color: #F1F3F5;
-        border-left: 4px solid #6C757D;
-    }
+        .scanner-info {
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 12px;
+            text-align: center;
+        }
 
-    .linha-editado {
-        background-color: #F3E5F5;
-        border-left: 4px solid #8E24AA;
-    }
+        /* Controles de c³mera e zoom */
+        .scanner-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+            pointer-events: auto;
+        }
 
-    .linha-checado {
-        background-color: #E9F7EF;
-    }
+        .scanner-controls select {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+        }
 
-    .linha-imprimir {
-        background-color: #E8F4FF;
-    }
+        .zoom-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
 
-    .linha-observacao {
-        background-color: #FFF8E1;
-    }
+        .zoom-control i {
+            color: #333;
+            font-size: 18px;
+        }
 
-    /* Aviso de tipo no identificado - amarelo ouro forte */
-    .tipo-nao-identificado {
-        border-left: 4px solid #fdd835 !important;
-    }
+        .zoom-control .form-range {
+            flex: 1;
+            margin: 0;
+        }
 
-    /* Aes: usar padrão Bootstrap para botões e manter largura proporcional */
-    .acao-container .btn {
-        aspect-ratio: 1 / 1;
-        width: 48px;
-        min-width: 48px;
-        max-width: 48px;
-        height: 48px;
-        padding: 0 !important;
-        display: inline-flex !important;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        border-radius: 0.85rem;
-        transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
-    }
-
-    .acao-container .btn:not([disabled]):not(.disabled):hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
-    }
-
-    .acao-container .btn:not([disabled]):not(.disabled):hover {
-        transform: translateY(-1px);
-
+        /* Container de vídeo do Quagga */
+        #scanner-container video,
+        #scanner-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
 
         /* Estilos para o botão de microfone */
         .mic-btn {
@@ -438,12 +282,12 @@ if (!empty($acesso_bloqueado)) {
         .input-group .form-control {
             min-width: 0;
             flex: 1 1 auto !important;
-            /* Input preenche o espaço restante */
+            /* Input preenche o espao restante */
         }
 
         .input-group>.btn {
             flex: 0 0 15% !important;
-            /* Botões ocupam 15% cada */
+            /* Botes ocupam 15% cada */
             min-width: 45px !important;
             max-width: 60px !important;
             padding: 0.375rem 0.25rem !important;
@@ -498,7 +342,7 @@ if (!empty($acesso_bloqueado)) {
             background-color: #FFF8E1;
         }
 
-        /* Aviso de tipo não identificado - amarelo ouro forte */
+        /* Aviso de tipo no identificado - amarelo ouro forte */
         .tipo-nao-identificado {
             border-left: 4px solid #fdd835 !important;
         }
@@ -519,351 +363,513 @@ if (!empty($acesso_bloqueado)) {
             transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
         }
 
-        .acao-container .btn[disabled],
-        .acao-container .btn.disabled {
-            pointer-events: none;
-            opacity: 0.55;
+        .acao-container .btn:not([disabled]):not(.disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
         }
 
-        /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
-        .acao-container .btn.disabled-visually {
-            pointer-events: auto;
-            opacity: 0.45;
-            filter: grayscale(0.18);
-        }
+        .acao-container .btn:not([disabled]):not(.disabled):hover {
+            transform: translateY(-1px);
 
-        .acao-container .btn.disabled-visually:hover {
-            transform: none;
-            box-shadow: none;
-        }
 
-        /* Cores dos botões (paleta coerente com tema) */
-        .acao-container .action-check button {
-            border-color: #28A745;
-            color: #28A745;
-        }
+            /* Estilos para o botão de microfone */
+            .mic-btn {
+                /* herda totalmente o estilo do .btn (Bootstrap) */
+                cursor: pointer;
+                padding: 0.5rem;
+                transition: all 0.3s ease;
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
 
-        .acao-container .action-check button.active,
-        .acao-container .action-check button:hover {
-            background: #28A745;
-            color: #fff;
-        }
+            .mic-btn:focus,
+            .mic-btn:active {
+                transform: none !important;
+                box-shadow: none !important;
+            }
 
-        .acao-container .action-imprimir button {
-            border-color: #0D6EFD;
-            color: #0D6EFD;
-        }
+            .mic-btn .material-icons-round {
+                color: white !important;
+                transition: color 0.3s ease;
+            }
 
-        .acao-container .action-imprimir button.active,
-        .acao-container .action-imprimir button:hover {
-            background: #0D6EFD;
-            color: #fff;
-        }
+            .mic-btn.listening .material-icons-round {
+                color: #dc3545 !important;
+                /* vermelho quando gravando */
+                animation: pulse 1.5s infinite;
+            }
 
-        /* Aparncia quando o botão de imprimir estiver bloqueado (produto editado) */
-        .acao-container .action-imprimir button[disabled] {
-            opacity: 0.45;
-            cursor: not-allowed;
-            filter: grayscale(20%);
-        }
+            @keyframes pulse {
 
-        .acao-container .action-observacao {
-            border-color: #D4AF37 !important;
-            color: #D4AF37 !important;
-        }
+                0%,
+                100% {
+                    transform: scale(1);
+                }
 
-        .acao-container .action-observacao:hover {
-            background: #D4AF37 !important;
-            color: #fff !important;
-        }
+                50% {
+                    transform: scale(1.15);
+                }
+            }
 
-        .acao-container .action-etiqueta {
-            border-color: #6F42C1 !important;
-            color: #6F42C1 !important;
-        }
+            /* Garantir que botões do input-group não se movam */
+            .input-group .btn {
+                transform: none !important;
+            }
 
-        .acao-container .action-etiqueta:hover {
-            background: #6F42C1 !important;
-            color: #fff !important;
-        }
+            .input-group .btn:hover,
+            .input-group .btn:focus,
+            .input-group .btn:active {
+                transform: none !important;
+            }
 
-        .acao-container .action-signatarios {
-            border-color: #17A2B8 !important;
-            color: #17A2B8 !important;
-        }
+            .mic-btn .material-icons-round {
+                font-size: 20px;
+                vertical-align: middle;
+            }
 
-        .acao-container .action-signatarios:hover {
-            background: #17A2B8 !important;
-            color: #fff !important;
-        }
+            /* Estilos padrão para todos os dispositivos (mobile-first) */
+            .input-group {
+                flex-wrap: nowrap !important;
+                display: flex !important;
+            }
 
-        .acao-container .action-editar {
-            border-color: #6F42C1 !important;
-            color: #6F42C1 !important;
-        }
+            .input-group .form-control {
+                min-width: 0;
+                flex: 1 1 auto !important;
+                /* Input preenche o espaço restante */
+            }
 
-        .acao-container .action-editar:hover {
-            background: #6F42C1 !important;
-            color: #fff !important;
-        }
+            .input-group>.btn {
+                flex: 0 0 15% !important;
+                /* Botões ocupam 15% cada */
+                min-width: 45px !important;
+                max-width: 60px !important;
+                padding: 0.375rem 0.25rem !important;
+                font-size: 1.1rem !important;
+            }
 
-        /* Indicadores de estado (para botões com toggle) */
-        .acao-container .btn.active {
-            transform: scale(1.05);
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.18);
-        }
+            .input-group>.btn .material-icons-round,
+            .input-group>.btn i {
+                font-size: 20px !important;
+            }
 
-        /* Linha com produtos em diferentes estados */
-        .linha-pendente {
-            background-color: #ffffff;
-            border-left: none;
-        }
+            /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
+            .linha-pendente {
+                background-color: #ffffff;
+                border-left: none;
+            }
 
-        .linha-checado {
-            background-color: #d4f4dd;
-            border-left: 4px solid #10b759;
-        }
+            .linha-checado {
+                background-color: #d4f4dd;
+                border-left: 4px solid #10b759;
+            }
 
-        .linha-observacao {
-            background-color: #FFF8E1;
-            border-left: 4px solid #D4AF37;
-        }
+            .linha-observacao {
+                background-color: #fff4e6;
+                border-left: 4px solid #fb8c00;
+            }
 
-        .linha-imprimir {
-            background-color: #e3f2fd;
-            border-left: 4px solid #1976d2;
-        }
+            .linha-imprimir {
+                background-color: #e3f2fd;
+                border-left: 4px solid #1976d2;
+            }
 
-        .linha-dr {
-            background-color: #F1F3F5;
-            border-left: 4px solid #6C757D;
-        }
+            .linha-dr {
+                background-color: #F1F3F5;
+                border-left: 4px solid #6C757D;
+            }
 
-        .linha-editado {
-            background-color: #F3E5F5;
-            border-left: 4px solid #8E24AA;
-        }
+            .linha-editado {
+                background-color: #F3E5F5;
+                border-left: 4px solid #8E24AA;
+            }
 
-        .linha-checado {
-            background-color: #E9F7EF;
-        }
+            .linha-checado {
+                background-color: #E9F7EF;
+            }
 
-        .linha-imprimir {
-            background-color: #E8F4FF;
-        }
+            .linha-imprimir {
+                background-color: #E8F4FF;
+            }
 
-        .linha-observacao {
-            background-color: #FFF8E1;
-        }
+            .linha-observacao {
+                background-color: #FFF8E1;
+            }
 
-        /* Aviso de tipo no identificado - amarelo ouro forte */
-        .tipo-nao-identificado {
-            border-left: 4px solid #fdd835 !important;
-        }
+            /* Aviso de tipo não identificado - amarelo ouro forte */
+            .tipo-nao-identificado {
+                border-left: 4px solid #fdd835 !important;
+            }
 
-        /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
-        .acao-container .btn.disabled-visually {
-            pointer-events: auto;
-            opacity: 0.45;
-            filter: grayscale(0.18);
-        }
+            /* Aes: usar padrão Bootstrap para botões e manter largura proporcional */
+            .acao-container .btn {
+                aspect-ratio: 1 / 1;
+                width: 48px;
+                min-width: 48px;
+                max-width: 48px;
+                height: 48px;
+                padding: 0 !important;
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                border-radius: 0.85rem;
+                transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+            }
 
-        .acao-container .btn.disabled-visually:hover {
-            transform: none;
-            box-shadow: none;
-        }
+            .acao-container .btn[disabled],
+            .acao-container .btn.disabled {
+                pointer-events: none;
+                opacity: 0.55;
+            }
 
-        /* Cores dos botões (paleta coerente com tema) */
-        .acao-container .action-check button {
-            border-color: #28A745;
-            color: #28A745;
-        }
+            /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
+            .acao-container .btn.disabled-visually {
+                pointer-events: auto;
+                opacity: 0.45;
+                filter: grayscale(0.18);
+            }
 
-        .acao-container .action-check button.active,
-        .acao-container .action-check button:hover {
-            background: #28A745;
-            color: #fff;
-        }
+            .acao-container .btn.disabled-visually:hover {
+                transform: none;
+                box-shadow: none;
+            }
 
-        .acao-container .action-imprimir button {
-            border-color: #0D6EFD;
-            color: #0D6EFD;
-        }
+            /* Cores dos botões (paleta coerente com tema) */
+            .acao-container .action-check button {
+                border-color: #28A745;
+                color: #28A745;
+            }
 
-        .acao-container .action-imprimir button.active,
-        .acao-container .action-imprimir button:hover {
-            background: #0D6EFD;
-            color: #fff;
-        }
+            .acao-container .action-check button.active,
+            .acao-container .action-check button:hover {
+                background: #28A745;
+                color: #fff;
+            }
 
-        /* Aparncia quando o botão de imprimir estiver bloqueado (produto editado) */
-        .acao-container .action-imprimir button[disabled] {
-            opacity: 0.45;
-            cursor: not-allowed;
-            filter: grayscale(20%);
-        }
+            .acao-container .action-imprimir button {
+                border-color: #0D6EFD;
+                color: #0D6EFD;
+            }
 
-        .acao-container .action-observacao {
-            border-color: #D4AF37 !important;
-            color: #D4AF37 !important;
-        }
+            .acao-container .action-imprimir button.active,
+            .acao-container .action-imprimir button:hover {
+                background: #0D6EFD;
+                color: #fff;
+            }
 
-        .acao-container .action-observacao.active,
-        .acao-container .action-observacao:hover {
-            background: #D4AF37;
-            color: #fff !important;
-        }
+            /* Aparncia quando o botão de imprimir estiver bloqueado (produto editado) */
+            .acao-container .action-imprimir button[disabled] {
+                opacity: 0.45;
+                cursor: not-allowed;
+                filter: grayscale(20%);
+            }
 
-        /* Garantir que o cone dentro do botão de observao fique branco quando ativo */
-        .acao-container .action-observacao.active i,
-        .acao-container .action-observacao:hover i {
-            color: #fff !important;
-        }
+            .acao-container .action-observacao {
+                border-color: #D4AF37 !important;
+                color: #D4AF37 !important;
+            }
 
-        .acao-container .action-editar {
-            border-color: #6F42C1 !important;
-            color: #6F42C1 !important;
-        }
+            .acao-container .action-observacao:hover {
+                background: #D4AF37 !important;
+                color: #fff !important;
+            }
 
-        .acao-container .action-editar.active,
-        .acao-container .action-editar:hover {
-            background: #6F42C1;
-            color: #fff !important;
-        }
+            .acao-container .action-etiqueta {
+                border-color: #6F42C1 !important;
+                color: #6F42C1 !important;
+            }
 
-        .acao-container .action-imprimir button.active i,
-        .acao-container .action-imprimir button:hover i {
-            color: #fff !important;
-        }
+            .acao-container .action-etiqueta:hover {
+                background: #6F42C1 !important;
+                color: #fff !important;
+            }
 
-        /* Garantir que o cone dentro do botão tambm fique branco quando ativo */
-        .acao-container .action-editar.active i,
-        .acao-container .action-editar:hover i {
-            color: #fff !important;
-        }
+            .acao-container .action-signatarios {
+                border-color: #17A2B8 !important;
+                color: #17A2B8 !important;
+            }
 
-        .acao-container form,
-        .acao-container a {
-            margin: 0;
-        }
+            .acao-container .action-signatarios:hover {
+                background: #17A2B8 !important;
+                color: #fff !important;
+            }
 
-        .edicao-pendente {
-            background: #6F42C1;
-            color: #fff;
-            padding: 0.5rem 0.6rem;
-            border-radius: 8px;
-            margin: 3px 0 0.5rem;
-            border: 1px solid #6F42C1;
-        }
+            .acao-container .action-editar {
+                border-color: #6F42C1 !important;
+                color: #6F42C1 !important;
+            }
 
-        .observacao-PRODUTO {
-            background: #D4AF37;
-            color: #fff;
-            padding: 0.5rem 0.6rem;
-            border-radius: 8px;
-            margin: 3px 0 0.5rem;
-            border: 1px solid #D4AF37;
-        }
+            .acao-container .action-editar:hover {
+                background: #6F42C1 !important;
+                color: #fff !important;
+            }
 
-        .info-PRODUTO {
-            font-size: 0.9rem;
-            color: #555;
-        }
+            /* Indicadores de estado (para botões com toggle) */
+            .acao-container .btn.active {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.18);
+            }
 
-        .codigo-PRODUTO {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
+            /* Linha com produtos em diferentes estados */
+            .linha-pendente {
+                background-color: #ffffff;
+                border-left: none;
+            }
 
-        .acao-container {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 0.5rem;
-        }
+            .linha-checado {
+                background-color: #d4f4dd;
+                border-left: 4px solid #10b759;
+            }
 
-        .legend-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(160px, 1fr));
-            gap: 0.5rem;
-        }
+            .linha-observacao {
+                background-color: #FFF8E1;
+                border-left: 4px solid #D4AF37;
+            }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
+            .linha-imprimir {
+                background-color: #e3f2fd;
+                border-left: 4px solid #1976d2;
+            }
 
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            display: inline-block;
-        }
+            .linha-dr {
+                background-color: #F1F3F5;
+                border-left: 4px solid #6C757D;
+            }
 
-        .legend-checked {
-            background-color: #28A745;
-        }
+            .linha-editado {
+                background-color: #F3E5F5;
+                border-left: 4px solid #8E24AA;
+            }
 
-        .legend-observacao {
-            background-color: #D4AF37;
-        }
+            .linha-checado {
+                background-color: #E9F7EF;
+            }
 
-        .legend-imprimir {
-            background-color: #0D6EFD;
-        }
+            .linha-imprimir {
+                background-color: #E8F4FF;
+            }
 
-        .legend-editado {
-            background-color: #8E24AA;
-        }
+            .linha-observacao {
+                background-color: #FFF8E1;
+            }
 
-        /* Forcar cores dos botoes de acao e icones quando ativos */
-        .acao-container .action-imprimir button {
-            border-color: #0D6EFD !important;
-            color: #0D6EFD !important;
-        }
-        .acao-container .action-imprimir button.active,
-        .acao-container .action-imprimir button:hover {
-            background: #0D6EFD !important;
-            color: #fff !important;
-        }
-        .acao-container .action-imprimir button.active i,
-        .acao-container .action-imprimir button:hover i {
-            color: #fff !important;
-        }
+            /* Aviso de tipo no identificado - amarelo ouro forte */
+            .tipo-nao-identificado {
+                border-left: 4px solid #fdd835 !important;
+            }
 
-        .acao-container .action-observacao {
-            border-color: #D4AF37 !important;
-            color: #D4AF37 !important;
-        }
-        .acao-container .action-observacao.active,
-        .acao-container .action-observacao:hover {
-            background: #D4AF37 !important;
-            color: #fff !important;
-        }
-        .acao-container .action-observacao.active i,
-        .acao-container .action-observacao:hover i {
-            color: #fff !important;
-        }
+            /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
+            .acao-container .btn.disabled-visually {
+                pointer-events: auto;
+                opacity: 0.45;
+                filter: grayscale(0.18);
+            }
 
-        .acao-container .action-editar {
-            border-color: #6F42C1 !important;
-            color: #6F42C1 !important;
-        }
-        .acao-container .action-editar.active,
-        .acao-container .action-editar:hover {
-            background: #6F42C1 !important;
-            color: #fff !important;
-        }
-        .acao-container .action-editar.active i,
-        .acao-container .action-editar:hover i {
-            color: #fff !important;
-        }
-</style>
+            .acao-container .btn.disabled-visually:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            /* Cores dos botões (paleta coerente com tema) */
+            .acao-container .action-check button {
+                border-color: #28A745;
+                color: #28A745;
+            }
+
+            .acao-container .action-check button.active,
+            .acao-container .action-check button:hover {
+                background: #28A745;
+                color: #fff;
+            }
+
+            .acao-container .action-imprimir button {
+                border-color: #0D6EFD;
+                color: #0D6EFD;
+            }
+
+            .acao-container .action-imprimir button.active,
+            .acao-container .action-imprimir button:hover {
+                background: #0D6EFD;
+                color: #fff;
+            }
+
+            /* Aparncia quando o botão de imprimir estiver bloqueado (produto editado) */
+            .acao-container .action-imprimir button[disabled] {
+                opacity: 0.45;
+                cursor: not-allowed;
+                filter: grayscale(20%);
+            }
+
+            .acao-container .action-observacao {
+                border-color: #D4AF37 !important;
+                color: #D4AF37 !important;
+            }
+
+            .acao-container .action-observacao.active,
+            .acao-container .action-observacao:hover {
+                background: #D4AF37;
+                color: #fff !important;
+            }
+
+            /* Garantir que o cone dentro do botão de observao fique branco quando ativo */
+            .acao-container .action-observacao.active i,
+            .acao-container .action-observacao:hover i {
+                color: #fff !important;
+            }
+
+            .acao-container .action-editar {
+                border-color: #6F42C1 !important;
+                color: #6F42C1 !important;
+            }
+
+            .acao-container .action-editar.active,
+            .acao-container .action-editar:hover {
+                background: #6F42C1;
+                color: #fff !important;
+            }
+
+            .acao-container .action-imprimir button.active i,
+            .acao-container .action-imprimir button:hover i {
+                color: #fff !important;
+            }
+
+            /* Garantir que o cone dentro do botão tambm fique branco quando ativo */
+            .acao-container .action-editar.active i,
+            .acao-container .action-editar:hover i {
+                color: #fff !important;
+            }
+
+            .acao-container form,
+            .acao-container a {
+                margin: 0;
+            }
+
+            .edicao-pendente {
+                background: #6F42C1;
+                color: #fff;
+                padding: 0.5rem 0.6rem;
+                border-radius: 8px;
+                margin: 3px 0 0.5rem;
+                border: 1px solid #6F42C1;
+            }
+
+            .observacao-PRODUTO {
+                background: #D4AF37;
+                color: #fff;
+                padding: 0.5rem 0.6rem;
+                border-radius: 8px;
+                margin: 3px 0 0.5rem;
+                border: 1px solid #D4AF37;
+            }
+
+            .info-PRODUTO {
+                font-size: 0.9rem;
+                color: #555;
+            }
+
+            .codigo-PRODUTO {
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
+                color: #333;
+            }
+
+            .acao-container {
+                display: flex;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                margin-top: 0.5rem;
+            }
+
+            .legend-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(160px, 1fr));
+                gap: 0.5rem;
+            }
+
+            .legend-item {
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                font-weight: 600;
+            }
+
+            .legend-color {
+                width: 12px;
+                height: 12px;
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+            .legend-checked {
+                background-color: #28A745;
+            }
+
+            .legend-observacao {
+                background-color: #D4AF37;
+            }
+
+            .legend-imprimir {
+                background-color: #0D6EFD;
+            }
+
+            .legend-editado {
+                background-color: #8E24AA;
+            }
+
+            /* Forcar cores dos botoes de acao e icones quando ativos */
+            .acao-container .action-imprimir button {
+                border-color: #0D6EFD !important;
+                color: #0D6EFD !important;
+            }
+
+            .acao-container .action-imprimir button.active,
+            .acao-container .action-imprimir button:hover {
+                background: #0D6EFD !important;
+                color: #fff !important;
+            }
+
+            .acao-container .action-imprimir button.active i,
+            .acao-container .action-imprimir button:hover i {
+                color: #fff !important;
+            }
+
+            .acao-container .action-observacao {
+                border-color: #D4AF37 !important;
+                color: #D4AF37 !important;
+            }
+
+            .acao-container .action-observacao.active,
+            .acao-container .action-observacao:hover {
+                background: #D4AF37 !important;
+                color: #fff !important;
+            }
+
+            .acao-container .action-observacao.active i,
+            .acao-container .action-observacao:hover i {
+                color: #fff !important;
+            }
+
+            .acao-container .action-editar {
+                border-color: #6F42C1 !important;
+                color: #6F42C1 !important;
+            }
+
+            .acao-container .action-editar.active,
+            .acao-container .action-editar:hover {
+                background: #6F42C1 !important;
+                color: #fff !important;
+            }
+
+            .acao-container .action-editar.active i,
+            .acao-container .action-editar:hover i {
+                color: #fff !important;
+            }
+    </style>
 
     <!-- Conteúdo vazio - apenas o modal ser exibido -->
     <div class="text-center py-5">
@@ -973,6 +979,7 @@ ob_start();
         border-color: #0D6EFD !important;
         color: #0D6EFD !important;
     }
+
     .acao-container .action-imprimir .btn.active,
     .acao-container .action-imprimir .btn:hover {
         background: linear-gradient(135deg, #0D6EFD 0%, #0A58CA 100%) !important;
@@ -980,6 +987,7 @@ ob_start();
         color: #fff !important;
         box-shadow: 0 6px 14px rgba(13, 110, 253, 0.3);
     }
+
     .acao-container .action-imprimir .btn.active i,
     .acao-container .action-imprimir .btn:hover i {
         color: #fff !important;
@@ -989,6 +997,7 @@ ob_start();
         border-color: #F59E0B !important;
         color: #F59E0B !important;
     }
+
     .acao-container .action-observacao.active,
     .acao-container .action-observacao:hover {
         background: linear-gradient(135deg, #F59E0B 0%, #F2C94C 100%) !important;
@@ -996,6 +1005,7 @@ ob_start();
         color: #fff !important;
         box-shadow: 0 6px 14px rgba(245, 158, 11, 0.3);
     }
+
     .acao-container .action-observacao.active i,
     .acao-container .action-observacao:hover i {
         color: #fff !important;
@@ -1005,6 +1015,7 @@ ob_start();
         border-color: #6F42C1 !important;
         color: #6F42C1 !important;
     }
+
     .acao-container .action-editar.active,
     .acao-container .action-editar:hover {
         background: linear-gradient(135deg, #6F42C1 0%, #4B2A7D 100%) !important;
@@ -1012,6 +1023,7 @@ ob_start();
         color: #fff !important;
         box-shadow: 0 6px 14px rgba(111, 66, 193, 0.3);
     }
+
     .acao-container .action-editar.active i,
     .acao-container .action-editar:hover i {
         color: #fff !important;
@@ -1182,7 +1194,7 @@ ob_start();
     <div class="list-group list-group-flush">
         <?php if ($PRODUTOS): ?>
             <?php foreach ($PRODUTOS as $p):
-                
+
                 $classe = '';
                 $tem_edicao = $p['editado'] == 1;
 
@@ -1200,16 +1212,16 @@ ob_start();
                     $classe = 'linha-pendente';
                 }
 
-                
-                
+
+
                 if ($p['ativo'] == 0) {
-                    
+
                     $show_check = false;
                     $show_imprimir = true;
                     $show_obs = true;
                     $show_edit = true;
                 } else {
-                    
+
                     $show_check = true;
                     $show_imprimir = true;
                     $show_obs = true;
@@ -1246,16 +1258,16 @@ ob_start();
                         <div class="edicao-pendente">
                             <strong><?php echo mb_strtoupper('EDITAR:', 'UTF-8'); ?></strong><br>
                             <?php
-                            
+
                             $desc_editada_visivel = trim($p['editado_descricao_completa'] ?? '');
                             if ($desc_editada_visivel === '') {
-                                
+
                                 $tipo_codigo_final = $p['tipo_codigo'];
                                 $tipo_desc_final = $p['tipo_desc'];
                                 $ben_final = ($p['editado_bem'] !== '' ? $p['editado_bem'] : $p['bem']);
                                 $comp_final = ($p['editado_complemento'] !== '' ? $p['editado_complemento'] : $p['complemento']);
                                 $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
-                                
+
                                 $partes = [];
                                 if ($tipo_codigo_final && $tipo_desc_final) {
                                     $partes[] = mb_strtoupper($tipo_codigo_final . ' - ' . $tipo_desc_final, 'UTF-8');
@@ -1264,7 +1276,7 @@ ob_start();
                                     $partes[] = mb_strtoupper($ben_final, 'UTF-8');
                                 }
                                 if ($comp_final !== '') {
-                                    
+
                                     $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
                                     if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
                                         $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));

@@ -29,12 +29,12 @@ ob_start();
 ?>
 
 <style>
-.signature-preview-canvas {
+    .signature-preview-canvas {
         pointer-events: none;
     }
 
 
-.signature-preview-canvas {
+    .signature-preview-canvas {
         pointer-events: none;
     }
 </style>
@@ -57,7 +57,7 @@ ob_start();
 
 <?php if (isset($usuario)): ?>
     <form method="POST" id="formUsuario">
-        <?php 
+        <?php
         ?>
         <input type="hidden" name="busca" value="<?php echo htmlspecialchars($_GET['busca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         <input type="hidden" name="status" value="<?php echo htmlspecialchars($_GET['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
@@ -427,11 +427,14 @@ ob_start();
 
         // Funções de assinatura removidas. Mantemos stubs para evitar erros caso chamadas permaneçam em código legado.
         window.limparModalAssinatura = function() {
-            /* assinatura removida */ };
+            /* assinatura removida */
+        };
         window.salvarModalAssinatura = function() {
-            /* assinatura removida */ };
+            /* assinatura removida */
+        };
         window.fecharModalAssinatura = async function() {
-            /* assinatura removida */ };
+            /* assinatura removida */
+        };
 
         // Se NÃO é o próprio usuário, desabilitar todos campos
         document.addEventListener('DOMContentLoaded', function() {

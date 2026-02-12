@@ -8,10 +8,10 @@ class AuthMiddleware
 {
     private SessionManager $sessionManager;
 
-    
+
     private const SESSION_TIMEOUT = 1800;
 
-    
+
     private const PUBLIC_ROUTES = [
         '/src/Views/shared/menu_unificado.php',
         '/src/Views/planilhas/relatorio141_view.php',
@@ -26,60 +26,60 @@ class AuthMiddleware
         $this->sessionManager = $sessionManager;
     }
 
-    
+
     public function handle(): void
     {
-        
+
         if (defined('SKIP_AUTH') && SKIP_AUTH === true) {
             return;
         }
 
-        
+
         if ($this->hasSessionTimedOut()) {
             $this->handleTimeout();
             return;
         }
 
-        
+
         $this->updateLastActivity();
 
-        
+
         if ($this->isAuthenticated()) {
             return;
         }
 
-        
+
         if ($this->isPublicAccess()) {
             if ($this->isPublicRoute()) {
                 return;
             }
 
-            
+
             $this->logRedirect('missing session usuario_id; is_public=1');
             $this->redirectToLogin();
             return;
         }
 
-        
+
         $this->saveRedirectTarget();
         $this->logRedirect('not logged in');
         $this->redirectToLogin();
     }
 
-    
+
     public function isAuthenticated(): bool
     {
         return isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] > 0;
     }
 
-    
+
     private function isPublicAccess(): bool
     {
         return !empty($_SESSION['public_acesso'])
             && (!empty($_SESSION['public_comum_id']) || !empty($_SESSION['public_planilha_id']));
     }
 
-    
+
     private function isPublicRoute(): bool
     {
         $scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? '';
@@ -95,7 +95,7 @@ class AuthMiddleware
         return false;
     }
 
-    
+
     public function hasSessionTimedOut(): bool
     {
         if (!isset($_SESSION['last_activity'])) {
@@ -106,13 +106,13 @@ class AuthMiddleware
         return $inactiveTime > self::SESSION_TIMEOUT;
     }
 
-    
+
     private function updateLastActivity(): void
     {
         $_SESSION['last_activity'] = time();
     }
 
-    
+
     private function handleTimeout(): void
     {
         $sessionId = session_id();
@@ -124,13 +124,13 @@ class AuthMiddleware
         $this->redirectToLogin(['timeout' => '1']);
     }
 
-    
+
     private function saveRedirectTarget(): void
     {
         $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'] ?? '/';
     }
 
-    
+
     private function redirectToLogin(array $queryParams = []): void
     {
         $loginUrl = $this->getLoginUrl();
@@ -143,7 +143,7 @@ class AuthMiddleware
         exit;
     }
 
-    
+
     private function getLoginUrl(): string
     {
         $prefix = '';
@@ -163,7 +163,7 @@ class AuthMiddleware
         return preg_replace('#/+#', '/', $path);
     }
 
-    
+
     private function logRedirect(string $reason): void
     {
         $scriptName = $_SERVER['SCRIPT_NAME'] ?? 'unknown';
@@ -173,19 +173,19 @@ class AuthMiddleware
         error_log("AUTH_REDIRECT: {$reason}; script={$scriptName}; session_id={$sessionId}; redirect_after_login={$redirectTarget}");
     }
 
-    
+
     public function isAdmin(): bool
     {
         return $this->isAuthenticated();
     }
 
-    
+
     public function isDoador(): bool
     {
         return $this->isAuthenticated();
     }
 
-    
+
     public function getUserId(): ?int
     {
         if (!$this->isAuthenticated()) {
@@ -195,7 +195,7 @@ class AuthMiddleware
         return (int) $_SESSION['usuario_id'];
     }
 
-    
+
     public static function getInstance(): self
     {
         static $instance = null;

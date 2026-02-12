@@ -47,7 +47,7 @@ try {
     $conds = ['p.comum_id = :comum_id'];
     $params = [':comum_id' => (int)$comum_id];
 
-    
+
     if ($data_inicio_mysql && $data_fim_mysql) {
         $conds[] = 'p.data_posicao BETWEEN :data_inicio AND :data_fim';
         $params[':data_inicio'] = $data_inicio_mysql;
@@ -67,14 +67,16 @@ try {
     }
 
     $where = implode(' AND ', $conds);
-    $pagina = isset($_GET['pagina']) ? max(1,(int)$_GET['pagina']) : 1;
+    $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
     $limite = 20;
     $offset = ($pagina - 1) * $limite;
 
-    
+
     $sql_count = "SELECT COUNT(*) FROM planilhas p WHERE $where";
     $stmt_count = $conexao->prepare($sql_count);
-    foreach ($params as $k=>$v){ $stmt_count->bindValue($k,$v); }
+    foreach ($params as $k => $v) {
+        $stmt_count->bindValue($k, $v);
+    }
     $stmt_count->execute();
     $total_registros = (int)$stmt_count->fetchColumn();
 
@@ -86,14 +88,15 @@ try {
         ORDER BY p.data_posicao DESC, p.id DESC
         LIMIT :limite OFFSET :offset";
     $stmt = $conexao->prepare($sql);
-    foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
-    $stmt->bindValue(':limite',$limite,PDO::PARAM_INT);
-    $stmt->bindValue(':offset',$offset,PDO::PARAM_INT);
+    foreach ($params as $k => $v) {
+        $stmt->bindValue($k, $v);
+    }
+    $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $planilhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
 } catch (Exception $e) {
-    
+
     $erro_carregar = $e->getMessage();
 }
 
@@ -117,7 +120,7 @@ ob_start();
                         Data inicial
                     </label>
                     <input type="date" class="form-control" id="data_inicio" name="data_inicio"
-                           value="<?php echo $data_inicio_mysql ?? ''; ?>">
+                        value="<?php echo $data_inicio_mysql ?? ''; ?>">
                 </div>
                 <div class="col-6">
                     <label class="form-label" for="data_fim">
@@ -125,7 +128,7 @@ ob_start();
                         Data final
                     </label>
                     <input type="date" class="form-control" id="data_fim" name="data_fim"
-                           value="<?php echo $data_fim_mysql ?? ''; ?>">
+                        value="<?php echo $data_fim_mysql ?? ''; ?>">
                 </div>
             </div>
 
@@ -142,9 +145,9 @@ ob_start();
                             <div class="mb-3">
                                 <label class="form-label" for="filtro_STATUS">STATUS</label>
                                 <select id="filtro_STATUS" name="filtro_STATUS" class="form-select">
-                                    <option value="todas" <?php echo $fs==='todas'?'selected':''; ?>>Todas</option>
-                                    <option value="ativas" <?php echo $fs==='ativas'?'selected':''; ?>>Ativas</option>
-                                    <option value="inativas" <?php echo $fs==='inativas'?'selected':''; ?>>Inativas</option>
+                                    <option value="todas" <?php echo $fs === 'todas' ? 'selected' : ''; ?>>Todas</option>
+                                    <option value="ativas" <?php echo $fs === 'ativas' ? 'selected' : ''; ?>>Ativas</option>
+                                    <option value="inativas" <?php echo $fs === 'inativas' ? 'selected' : ''; ?>>Inativas</option>
                                 </select>
                             </div>
                         </div>
@@ -172,7 +175,7 @@ ob_start();
             <i class="bi bi-list me-2"></i>
             Planilhas
         </span>
-    <span class="badge bg-white text-dark"><?php echo (int)$total_registros; ?> itens (p¡g. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
+        <span class="badge bg-white text-dark"><?php echo (int)$total_registros; ?> itens (p¡g. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
     </div>
     <div class="card-body p-0">
         <?php if (!empty($erro_carregar)): ?>
@@ -197,29 +200,33 @@ ob_start();
                         <tbody>
                             <?php foreach ($planilhas as $planilha): ?>
                                 <?php
-                                    $STATUS_badge = $planilha['ativo'] ? 'bg-success' : 'bg-secondary';
-                                    $STATUS_texto = $planilha['ativo'] ? 'Ativa' : 'Inativa';
-                                    
-                                    
-                                    $data_formatada = '-';
-                                    if (!empty($planilha['data_posicao'])) {
-                                        $rawData = trim($planilha['data_posicao']);
-                                        $dt = null;
-                                        
-                                        $formatos = ['Y-m-d','d/m/Y','m/d/Y','Y-m-d H:i:s','d/m/Y H:i:s','m/d/Y H:i:s'];
-                                        foreach ($formatos as $f) {
-                                            $dt = DateTime::createFromFormat($f, $rawData);
-                                            if ($dt) { break; }
-                                        }
-                                        
-                                        if (!$dt) {
-                                            $ts = strtotime($rawData);
-                                            if ($ts) { $dt = (new DateTime())->setTimestamp($ts); }
-                                        }
+                                $STATUS_badge = $planilha['ativo'] ? 'bg-success' : 'bg-secondary';
+                                $STATUS_texto = $planilha['ativo'] ? 'Ativa' : 'Inativa';
+
+
+                                $data_formatada = '-';
+                                if (!empty($planilha['data_posicao'])) {
+                                    $rawData = trim($planilha['data_posicao']);
+                                    $dt = null;
+
+                                    $formatos = ['Y-m-d', 'd/m/Y', 'm/d/Y', 'Y-m-d H:i:s', 'd/m/Y H:i:s', 'm/d/Y H:i:s'];
+                                    foreach ($formatos as $f) {
+                                        $dt = DateTime::createFromFormat($f, $rawData);
                                         if ($dt) {
-                                            $data_formatada = $dt->format('d/m/Y');
+                                            break;
                                         }
                                     }
+
+                                    if (!$dt) {
+                                        $ts = strtotime($rawData);
+                                        if ($ts) {
+                                            $dt = (new DateTime())->setTimestamp($ts);
+                                        }
+                                    }
+                                    if ($dt) {
+                                        $data_formatada = $dt->format('d/m/Y');
+                                    }
+                                }
                                 ?>
                                 <tr>
                                     <td><strong><?php echo $planilha['id']; ?></strong></td>
@@ -230,9 +237,9 @@ ob_start();
                                             <a href="/planilhas/visualizar?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                                <a href="/planilhas/configuracao?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="EDITAR">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
+                                            <a href="/planilhas/configuracao?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="EDITAR">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -241,25 +248,25 @@ ob_start();
                     </table>
                 </div>
             <?php endif; ?>
-            <?php if($total_paginas > 1): ?>
-            <nav aria-label="Pagina§£o" class="mt-3">
-                <ul class="pagination pagination-sm justify-content-center mb-0">
-                    <?php if($pagina > 1): ?>
-                    <li class="page-item"><a class="page-link" href="?<?php echo http_build_query(array_merge($_GET,['pagina'=>$pagina-1])); ?>">&laquo;</a></li>
-                    <?php endif; ?>
-                    <?php 
-                    $ini = max(1,$pagina-2);
-                    $fim = min($total_paginas,$pagina+2);
-                    for($i=$ini;$i<=$fim;$i++): ?>
-                        <li class="page-item <?php echo $i==$pagina?'active':''; ?>">
-                            <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET,['pagina'=>$i])); ?>"><?php echo $i; ?></a>
-                        </li>
-                    <?php endfor; ?>
-                    <?php if($pagina < $total_paginas): ?>
-                    <li class="page-item"><a class="page-link" href="?<?php echo http_build_query(array_merge($_GET,['pagina'=>$pagina+1])); ?>">&raquo;</a></li>
-                    <?php endif; ?>
-                </ul>
-            </nav>
+            <?php if ($total_paginas > 1): ?>
+                <nav aria-label="Pagina§£o" class="mt-3">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <?php if ($pagina > 1): ?>
+                            <li class="page-item"><a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina - 1])); ?>">&laquo;</a></li>
+                        <?php endif; ?>
+                        <?php
+                        $ini = max(1, $pagina - 2);
+                        $fim = min($total_paginas, $pagina + 2);
+                        for ($i = $ini; $i <= $fim; $i++): ?>
+                            <li class="page-item <?php echo $i == $pagina ? 'active' : ''; ?>">
+                                <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $i])); ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        <?php if ($pagina < $total_paginas): ?>
+                            <li class="page-item"><a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina + 1])); ?>">&raquo;</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
             <?php endif; ?>
         <?php endif; ?>
     </div>
@@ -276,4 +283,3 @@ require_once __DIR__ . '/../layouts/app_wrapper.php';
 
 @unlink($contentFile);
 ?>
-

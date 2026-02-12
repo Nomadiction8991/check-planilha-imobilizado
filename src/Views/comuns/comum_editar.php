@@ -213,7 +213,7 @@ ob_start();
                     <div class="col-12">
                         <label for="descricao" class="form-label"><?php echo htmlspecialchars(to_uppercase('Descrição'), ENT_QUOTES, 'UTF-8'); ?> <span class="text-danger">*</span></label>
                         <input type="text" id="descricao" name="descricao" class="form-control text-uppercase w-100" required
-                               value="<?php echo htmlspecialchars($comumDescricao); ?>">
+                            value="<?php echo htmlspecialchars($comumDescricao); ?>">
                     </div>
                 </div>
 
@@ -221,7 +221,7 @@ ob_start();
                     <div class="col-12">
                         <label for="cnpj" class="form-label"><?php echo htmlspecialchars(to_uppercase('CNPJ'), ENT_QUOTES, 'UTF-8'); ?> <span class="text-danger">*</span></label>
                         <input type="text" id="cnpj" name="cnpj" class="form-control text-uppercase w-100" required
-                               value="<?php echo htmlspecialchars($comum['cnpj']); ?>" placeholder="00.000.000/0000-00">
+                            value="<?php echo htmlspecialchars($comum['cnpj']); ?>" placeholder="00.000.000/0000-00">
                     </div>
                 </div>
 
@@ -257,7 +257,7 @@ ob_start();
                     <div class="col-12">
                         <label for="setor" class="form-label"><?php echo htmlspecialchars(to_uppercase('Setor (opcional)'), ENT_QUOTES, 'UTF-8'); ?></label>
                         <input type="text" id="setor" name="setor" class="form-control text-uppercase w-100"
-                               value="<?php echo htmlspecialchars($comumSetor); ?>">
+                            value="<?php echo htmlspecialchars($comumSetor); ?>">
                     </div>
                 </div>
 
@@ -273,23 +273,25 @@ ob_start();
 
 <script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const cnpjInput = document.getElementById('cnpj');
-    if (cnpjInput && window.Inputmask) {
-        Inputmask({mask: "99.999.999/9999-99"}).mask(cnpjInput);
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        const cnpjInput = document.getElementById('cnpj');
+        if (cnpjInput && window.Inputmask) {
+            Inputmask({
+                mask: "99.999.999/9999-99"
+            }).mask(cnpjInput);
+        }
+    });
 </script>
 
 <?php if ($filterQueryString !== ''): ?>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const backBtn = document.querySelector('.btn-back');
-    if (!backBtn) return;
-    const base = backBtn.getAttribute('href').split('?')[0];
-    backBtn.setAttribute('href', base + '?' + <?php echo json_encode($filterQueryString); ?>);
-});
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const backBtn = document.querySelector('.btn-back');
+            if (!backBtn) return;
+            const base = backBtn.getAttribute('href').split('?')[0];
+            backBtn.setAttribute('href', base + '?' + <?php echo json_encode($filterQueryString); ?>);
+        });
+    </script>
 <?php endif; ?>
 
 <?php

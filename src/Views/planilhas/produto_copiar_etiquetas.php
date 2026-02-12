@@ -12,7 +12,7 @@ $comum_id = $id_planilha;
 
 
 try {
-  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id"; 
+  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id";
   $stmt_planilha = $conexao->prepare($sql_planilha);
   $stmt_planilha->bindValue(':id', $id_planilha);
   $stmt_planilha->execute();
@@ -20,7 +20,7 @@ try {
   if (!$planilha) throw new Exception('Planilha no encontrada.');
 } catch (PDOException $e) {
   if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
-    
+
     try {
       $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comums WHERE id = :id');
       $stmt->bindValue(':id', $id_planilha, PDO::PARAM_INT);
@@ -85,27 +85,27 @@ try {
   $stmt_PRODUTOS->execute();
   $PRODUTOS = $stmt_PRODUTOS->fetchAll(PDO::FETCH_ASSOC);
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
-  $PRODUTOS_novos = []; 
 
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  $PRODUTOS_novos = [];
+
+
   $PRODUTOS = array_merge($PRODUTOS, $PRODUTOS_novos);
 
   $codigos = array_column($PRODUTOS, 'codigo');
@@ -114,11 +114,11 @@ try {
 } catch (Exception $e) {
   $codigos_concatenados = '';
   $PRODUTOS = [];
-  
+
   if ($e instanceof PDOException && ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false)) {
     $mensagem = to_uppercase("Erro ao carregar produtos (comum_id: " . $comum_id . "): tabela 'produtos' no encontrada no banco de dados. Verifique a instalao ou migraes e contate o administrador.");
   } else {
-    
+
     $mensagem = to_uppercase('Erro ao carregar produtos (comum_id: ' . $comum_id . '): ' . $e->getMessage());
   }
 }
@@ -229,7 +229,7 @@ ob_start();
         <strong><?php echo htmlspecialchars(to_uppercase('Nenhum produto disponvel para etiquetas.'), ENT_QUOTES, 'UTF-8'); ?></strong>
         <?php if (!empty($dependencia_selecionada)): ?>
           <?php
-          
+
           $dep_nome = '';
           foreach ($dependencias as $d) {
             if ($d['id'] == $dependencia_selecionada) {

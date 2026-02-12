@@ -12,7 +12,8 @@ $mensagem = '';
 $tipo_mensagem = '';
 
 
-function carregar_planilha($conexao, $id_planilha) {
+function carregar_planilha($conexao, $id_planilha)
+{
     $sql = "SELECT p.id, p.comum_id, p.ativo, p.data_posicao,
                    c.descricao AS comum_descricao,
                    c.administracao, c.cidade, c.setor
@@ -36,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Administra§£o e CIDADE s£o obrigat³rios.');
         }
 
-        
+
         $planilha_atual = carregar_planilha($conexao, $id_planilha);
         if (!$planilha_atual) {
             throw new Exception('Planilha n£o encontrada.');
@@ -44,13 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $conexao->beginTransaction();
 
-        
+
         $up1 = $conexao->prepare('UPDATE planilhas SET ativo = :ativo WHERE id = :id');
         $up1->bindValue(':ativo', $ativo, PDO::PARAM_INT);
         $up1->bindValue(':id', $id_planilha, PDO::PARAM_INT);
         $up1->execute();
 
-        
+
         $up2 = $conexao->prepare('UPDATE comums SET administracao = :adm, cidade = :cid, setor = :setor WHERE id = :cid_comum');
         $up2->bindValue(':adm', $administracao);
         $up2->bindValue(':cid', $cidade);
@@ -67,7 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mensagem = 'Dados atualizados com sucesso!';
         $tipo_mensagem = 'success';
     } catch (Exception $e) {
-        if ($conexao->inTransaction()) { $conexao->rollBack(); }
+        if ($conexao->inTransaction()) {
+            $conexao->rollBack();
+        }
         $mensagem = 'Erro ao atualizar: ' . $e->getMessage();
         $tipo_mensagem = 'error';
     }
@@ -75,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 $planilha = carregar_planilha($conexao, $id_planilha);
-if (!$planilha) { 
+if (!$planilha) {
     die('Planilha n£o encontrada.');
 }
 
@@ -103,26 +106,45 @@ ob_start();
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="administracao" class="form-label">Administra§£o <span class="text-danger">*</span></label>
-                    <?php 
-                        
-                        $administracao_atual = $planilha['administracao'] ?? '';
-                        $cidade_atual = $planilha['cidade'] ?? '';
-                        
-                        $nome_cidade_adm = '';
-                        if (strpos($administracao_atual,' - ') !== false) {
-                            $parts = explode(' - ',$administracao_atual,2);
-                            $nome_cidade_adm = $parts[1];
-                        }
-                        $nome_cidade_cid = '';
-                        if (strpos($cidade_atual,' - ') !== false) {
-                            $parts2 = explode(' - ',$cidade_atual,2);
-                            $nome_cidade_cid = $parts2[1];
-                        }
-                        
-                        $cidades_mt = [
-                            'Cuiab¡','V¡rzea Grande','Rondon³polis','Sinop','Sorriso','Barra do Gar§as','Tangar¡ da Serra','Lucas do Rio Verde','Primavera do Leste','Alta Floresta','Campo Verde','C¡ceres','Col­der','Guarant£ do Norte','Ju­na','Mirassol dOeste','Nova Mutum','Pontes e Lacerda','S£o F©lix do Araguaia','Peixoto de Azevedo'
-                        ];
-                        sort($cidades_mt);
+                    <?php
+
+                    $administracao_atual = $planilha['administracao'] ?? '';
+                    $cidade_atual = $planilha['cidade'] ?? '';
+
+                    $nome_cidade_adm = '';
+                    if (strpos($administracao_atual, ' - ') !== false) {
+                        $parts = explode(' - ', $administracao_atual, 2);
+                        $nome_cidade_adm = $parts[1];
+                    }
+                    $nome_cidade_cid = '';
+                    if (strpos($cidade_atual, ' - ') !== false) {
+                        $parts2 = explode(' - ', $cidade_atual, 2);
+                        $nome_cidade_cid = $parts2[1];
+                    }
+
+                    $cidades_mt = [
+                        'Cuiab¡',
+                        'V¡rzea Grande',
+                        'Rondon³polis',
+                        'Sinop',
+                        'Sorriso',
+                        'Barra do Gar§as',
+                        'Tangar¡ da Serra',
+                        'Lucas do Rio Verde',
+                        'Primavera do Leste',
+                        'Alta Floresta',
+                        'Campo Verde',
+                        'C¡ceres',
+                        'Col­der',
+                        'Guarant£ do Norte',
+                        'Ju­na',
+                        'Mirassol dOeste',
+                        'Nova Mutum',
+                        'Pontes e Lacerda',
+                        'S£o F©lix do Araguaia',
+                        'Peixoto de Azevedo'
+                    ];
+                    sort($cidades_mt);
                     ?>
                     <select id="administracao" name="administracao" class="form-select" required>
                         <?php if ($administracao_atual !== ''): ?>
@@ -130,9 +152,11 @@ ob_start();
                         <?php else: ?>
                             <option value="" selected>Selecione...</option>
                         <?php endif; ?>
-                        <?php foreach ($cidades_mt as $c): 
+                        <?php foreach ($cidades_mt as $c):
                             $val = 'MT - ' . $c;
-                            if (strcasecmp($administracao_atual, $val) === 0) { continue; }
+                            if (strcasecmp($administracao_atual, $val) === 0) {
+                                continue;
+                            }
                         ?>
                             <option value="<?php echo htmlspecialchars($val); ?>"><?php echo htmlspecialchars($val); ?></option>
                         <?php endforeach; ?>
@@ -146,9 +170,11 @@ ob_start();
                         <?php else: ?>
                             <option value="" selected>Selecione...</option>
                         <?php endif; ?>
-                        <?php foreach ($cidades_mt as $c): 
+                        <?php foreach ($cidades_mt as $c):
                             $val = 'MT - ' . $c;
-                            if (strcasecmp($cidade_atual, $val) === 0) { continue; }
+                            if (strcasecmp($cidade_atual, $val) === 0) {
+                                continue;
+                            }
                         ?>
                             <option value="<?php echo htmlspecialchars($val); ?>"><?php echo htmlspecialchars($val); ?></option>
                         <?php endforeach; ?>
@@ -156,8 +182,8 @@ ob_start();
                 </div>
                 <div class="col-md-3">
                     <label for="setor" class="form-label">Setor</label>
-                    <input type="number" class="form-control" id="setor" name="setor" 
-                           value="<?php echo htmlspecialchars($planilha['setor'] ?? ''); ?>" min="0" step="1">
+                    <input type="number" class="form-control" id="setor" name="setor"
+                        value="<?php echo htmlspecialchars($planilha['setor'] ?? ''); ?>" min="0" step="1">
                 </div>
             </div>
         </div>
@@ -171,8 +197,8 @@ ob_start();
         </div>
         <div class="card-body">
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" value="1" 
-                       <?php echo ($planilha['ativo'] ?? 0) ? 'checked' : ''; ?>>
+                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" value="1"
+                    <?php echo ($planilha['ativo'] ?? 0) ? 'checked' : ''; ?>>
                 <label class="form-check-label" for="ativo">
                     Planilha Ativa
                 </label>
@@ -200,5 +226,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
-

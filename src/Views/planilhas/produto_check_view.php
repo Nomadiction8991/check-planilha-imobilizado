@@ -15,7 +15,7 @@ if ($_REQUEST_METHOD === 'POST') {
     $comum_id = $_POST_BACKUP['comum_id'] ?? $_POST_BACKUP['id_planilha'] ?? null;
     $checado = $_POST_BACKUP['checado'] ?? 0;
 
-    
+
     $filtros = [
         'pagina' => $_POST_BACKUP['pagina'] ?? 1,
         'nome' => $_POST_BACKUP['nome'] ?? '',
@@ -31,7 +31,7 @@ if ($_REQUEST_METHOD === 'POST') {
     }
 
     try {
-        
+
         $stmt_STATUS = $conexao->prepare('SELECT checado, imprimir_etiqueta, imprimir_14_1 FROM produtos WHERE id_produto = :id_produto AND comum_id = :comum_id');
         $stmt_STATUS->bindValue(':id_produto', $PRODUTO_id, PDO::PARAM_INT);
         $stmt_STATUS->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
@@ -42,7 +42,7 @@ if ($_REQUEST_METHOD === 'POST') {
             throw new Exception('PRODUTO NÃO encontrado.');
         }
 
-        
+
         if ((int)$checado === 0 && (($STATUS['imprimir_etiqueta'] ?? 0) == 1 || ($STATUS['imprimir_14_1'] ?? 0) == 1)) {
             $query_string = http_build_query(array_merge(
                 ['id' => $id_planilha],
@@ -53,14 +53,14 @@ if ($_REQUEST_METHOD === 'POST') {
             exit;
         }
 
-        
+
         $stmt_up = $conexao->prepare('UPDATE produtos SET checado = :checado WHERE id_produto = :id_produto AND comum_id = :comum_id');
         $stmt_up->bindValue(':checado', (int)$checado, PDO::PARAM_INT);
         $stmt_up->bindValue(':id_produto', $PRODUTO_id, PDO::PARAM_INT);
         $stmt_up->bindValue(':comum_id', $comum_id, PDO::PARAM_INT);
         $stmt_up->execute();
 
-        
+
         $query_string = http_build_query(array_merge(['id' => $comum_id, 'comum_id' => $comum_id], $filtros));
         header('Location: /planilhas/visualizar?' . $query_string);
         exit;

@@ -12,7 +12,7 @@ ob_start();
 ?>
 
 <style>
-.menu-grid {
+    .menu-grid {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
@@ -38,7 +38,7 @@ ob_start();
     }
 
 
-.menu-grid {
+    .menu-grid {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;

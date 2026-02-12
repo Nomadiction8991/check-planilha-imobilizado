@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
- 
+
 
 $pageTitle = 'EDITAR PRODUTO';
 $backUrl = '/produtos?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
@@ -148,5 +148,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app_wrapper.php';
 unlink($tempFile);
 ?>
-
-

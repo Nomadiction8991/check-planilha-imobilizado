@@ -290,9 +290,17 @@ if (!function_exists('gerarParametrosFiltro')) {
     function gerarParametrosFiltro(bool $includeComumId = false): string
     {
         $params = [];
-        $filterKeys = ['busca', 'pagina', 'filtro_nome', 'filtro_dependencia',
-                        'filtro_codigo', 'filtro_status', 'filtro_STATUS',
-                        'id', 'status'];
+        $filterKeys = [
+            'busca',
+            'pagina',
+            'filtro_nome',
+            'filtro_dependencia',
+            'filtro_codigo',
+            'filtro_status',
+            'filtro_STATUS',
+            'id',
+            'status'
+        ];
 
         if ($includeComumId) {
             $filterKeys[] = 'comum_id';

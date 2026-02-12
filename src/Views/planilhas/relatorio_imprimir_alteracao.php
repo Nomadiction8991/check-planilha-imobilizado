@@ -11,7 +11,7 @@ if (!$id_planilha) {
 
 
 try {
-  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id"; 
+  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id";
   $stmt_planilha = $conexao->prepare($sql_planilha);
   $stmt_planilha->bindValue(':id', $id_planilha);
   $stmt_planilha->execute();
@@ -20,7 +20,7 @@ try {
     throw new Exception('Planilha não encontrada.');
   }
 } catch (PDOException $e) {
-  
+
   if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
     try {
       $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comums WHERE id = :id');
@@ -28,7 +28,7 @@ try {
       $stmt->execute();
       $comum = $stmt->fetch(PDO::FETCH_ASSOC);
       if ($comum) {
-        
+
         $planilha = ['id' => (int)$comum['id'], 'comum' => $comum['comum'], 'comum_id' => (int)$comum['id'], 'ativo' => 1];
         $using_comum_fallback = true;
       } else {
@@ -56,7 +56,7 @@ $mostrar_novos = isset($_GET['mostrar_novos']);
 $filtro_dependencia = isset($_GET['dependencia']) && $_GET['dependencia'] !== '' ? (int)$_GET['dependencia'] : '';
 
 try {
-  
+
   $sql_PRODUTOS = "SELECT p.*, 
                      CAST(p.checado AS SIGNED) as checado, 
                      CAST(p.ativo AS SIGNED) as ativo, 
@@ -86,29 +86,12 @@ try {
   }
   $stmt_PRODUTOS->execute();
   $todos_PRODUTOS = $stmt_PRODUTOS->fetchAll();
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-  
-  
 } catch (Exception $e) {
   die("Erro ao carregar PRODUTOS: " . $e->getMessage());
 }
 
 try {
-  
+
   $sql_dependencias = "
         SELECT DISTINCT p.dependencia_id as dependencia FROM produtos p WHERE p.comum_id = :id_comum1
         UNION
@@ -144,23 +127,23 @@ if (!empty($dependencia_options)) {
 
 $PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_checados_observacao = $PRODUTOS_dr = $PRODUTOS_etiqueta = $PRODUTOS_alteracoes = $PRODUTOS_novos = [];
 foreach ($todos_PRODUTOS as $PRODUTO) {
-  
+
   $nome_editado = trim($PRODUTO['nome_editado'] ?? '');
   $nome_original = trim($PRODUTO['descricao_completa'] ?? ($PRODUTO['nome'] ?? ''));
   $nome_atual = $nome_editado !== '' ? $nome_editado : $nome_original;
   $PRODUTO['nome_atual'] = $nome_atual !== '' ? $nome_atual : 'Sem descricao';
   $PRODUTO['nome_original'] = $nome_original;
 
-  
+
   if (($PRODUTO['origem'] ?? '') === 'cadastro') {
     $PRODUTOS_novos[] = $PRODUTO;
     if (!empty($PRODUTO['codigo'])) {
-      $PRODUTOS_etiqueta[] = $PRODUTO; 
+      $PRODUTOS_etiqueta[] = $PRODUTO;
     }
     continue;
   }
 
-  
+
   $tem_observacao = !empty($PRODUTO['observacoes']);
   $esta_checado = ($PRODUTO['checado'] ?? 0) == 1;
   $esta_no_dr = ($PRODUTO['ativo'] ?? 1) == 0;
@@ -169,7 +152,7 @@ foreach ($todos_PRODUTOS as $PRODUTO) {
   $eh_pendente = is_null($PRODUTO['checado']) && ($PRODUTO['ativo'] ?? 1) == 1 && is_null($PRODUTO['imprimir']) && is_null($PRODUTO['observacoes']) && is_null($PRODUTO['editado']);
 
   if ($tem_alteracoes) {
-    
+
     $PRODUTOS_alteracoes[] = $PRODUTO;
     $PRODUTOS_etiqueta[] = $PRODUTO;
   }
@@ -348,7 +331,7 @@ ob_start();
   </div>
   <div class="card-footer">
     <?php
-    
+
     if ($total_pendentes === $total_geral && $total_novos === 0) {
       $STATUS_calc = 'Pendente';
       $badge = 'secondary';
@@ -402,18 +385,18 @@ ob_start();
             <tbody>
               <?php foreach ($PRODUTOS_alteracoes as $PRODUTO): ?>
                 <?php
-                
+
                 $antigo = [];
                 $novo = [];
 
-                
+
                 $nome_original = $PRODUTO['nome_original'] ?? ($PRODUTO['nome'] ?? '');
                 $nome_atual = $PRODUTO['nome_atual'] ?? $nome_original;
                 if (!empty($PRODUTO['nome_editado']) && $PRODUTO['nome_editado'] != $nome_original) {
                   $antigo[] = htmlspecialchars($nome_original);
                   $novo[] = htmlspecialchars($nome_atual);
                 } else {
-                  
+
                   $antigo[] = htmlspecialchars($nome_atual);
                   $novo[] = htmlspecialchars($nome_atual);
                 }

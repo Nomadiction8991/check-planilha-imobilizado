@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
- 
+
 $pageTitle = 'Importar Planilha';
 $backUrl = base_url('/');
 
@@ -18,29 +18,29 @@ if ($jobDir !== false) {
         }
     }
 }
- 
+
 ob_start();
 ?>
 
 <?php if ($jobEmExecucao): ?>
-<!-- Modal: job em andamento (mostra imediatamente e bloqueia nova importação) -->
-<div class="modal fade" id="job-active-modal" tabindex="-1" aria-labelledby="job-active-title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="job-active-title">Importação em andamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                Já existe uma importação em progresso (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>). Conclua ou cancele antes de iniciar uma nova.
-            </div>
-            <div class="modal-footer">
-                <a class="btn btn-primary" href="<?php echo htmlspecialchars(base_url('src/Views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+    <!-- Modal: job em andamento (mostra imediatamente e bloqueia nova importação) -->
+    <div class="modal fade" id="job-active-modal" tabindex="-1" aria-labelledby="job-active-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="job-active-title">Importação em andamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    Já existe uma importação em progresso (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>). Conclua ou cancele antes de iniciar uma nova.
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary" href="<?php echo htmlspecialchars(base_url('src/Views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 <?php endif; ?>
 
 <?php if ($jobEmExecucao): ?>
@@ -62,7 +62,7 @@ ob_start();
             <div class="invalid-feedback">Selecione um arquivo CSV válido.</div>
         </div>
     </div>
- 
+
     <!-- Configurações Básicas -->
     <div class="card mb-3">
         <div class="card-header">
@@ -83,7 +83,7 @@ ob_start();
             </div>
         </div>
     </div>
- 
+
     <!-- Mapeamento de Colunas -->
     <div class="card mb-3">
         <div class="card-header">
@@ -117,7 +117,7 @@ ob_start();
             </div>
         </div>
     </div>
- 
+
     <button type="submit" class="btn btn-primary w-100 text-uppercase">
         <i class="bi bi-upload me-2"></i>
         <?php echo htmlspecialchars(to_uppercase('Importar Planilha'), ENT_QUOTES, 'UTF-8'); ?>
@@ -150,7 +150,7 @@ ob_start();
         }
     })();
 </script>
- 
+
 <?php
 $contentHtml = ob_get_clean();
 $contentFile = __DIR__ . '/../../../temp_importar_planilha_content_' . uniqid() . '.php';
@@ -158,6 +158,3 @@ file_put_contents($contentFile, $contentHtml);
 include __DIR__ . '/../layouts/app_wrapper.php';
 @unlink($contentFile);
 ?>
-
-
-

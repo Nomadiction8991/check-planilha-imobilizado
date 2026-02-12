@@ -8,7 +8,7 @@ class Relatorio141Service
     private ComumRepository $comumRepository;
     private PDO $pdo;
 
-    
+
     public function __construct(ComumRepository $comumRepository, ?PDO $pdo = null)
     {
         $this->comumRepository = $comumRepository;
@@ -21,20 +21,20 @@ class Relatorio141Service
         $this->pdo = $pdo;
     }
 
-    
+
     public function gerarRelatorio(int $idComum): array
     {
-        
+
         $comum = $this->buscarDadosComum($idComum);
 
         if (!$comum) {
             throw new InvalidArgumentException("Comum não encontrada: ID {$idComum}");
         }
 
-        
+
         $produtos = $this->buscarProdutos($idComum);
 
-        
+
         return [
             'cnpj' => $comum['cnpj'] ?? '',
             'numero_relatorio' => $comum['numero_relatorio'] ?? $idComum,
@@ -45,7 +45,7 @@ class Relatorio141Service
         ];
     }
 
-    
+
     private function buscarDadosComum(int $idComum): array|false
     {
         $sql = "SELECT 
@@ -63,7 +63,7 @@ class Relatorio141Service
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    
+
     private function buscarProdutos(int $idComum): array
     {
         $sql = "SELECT 
@@ -88,15 +88,15 @@ class Relatorio141Service
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    
+
     public function renderizar(int $idComum): string
     {
         $dados = $this->gerarRelatorio($idComum);
 
-        
+
         extract($dados);
 
-        
+
         $templatePaths = [
             __DIR__ . '/../Views/planilhas/relatorio141_template.php',
         ];
@@ -113,7 +113,7 @@ class Relatorio141Service
         throw new RuntimeException('Template do relatório 14.1 não encontrado');
     }
 
-    
+
     public function gerarEmBranco(int $numProdutos = 10): array
     {
         $produtos = array_fill(0, $numProdutos, [
@@ -136,7 +136,7 @@ class Relatorio141Service
         ];
     }
 
-    
+
     public function gerarEstatisticas(int $idComum): array
     {
         $produtos = $this->buscarProdutos($idComum);
@@ -168,7 +168,7 @@ class Relatorio141Service
             }
         }
 
-        
+
         if ($estatisticas['total_produtos'] > 0) {
             $total = $estatisticas['total_produtos'];
             $estatisticas['percentual_com_marca'] = round(($estatisticas['produtos_com_marca'] / $total) * 100, 2);

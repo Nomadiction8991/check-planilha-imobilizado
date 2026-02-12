@@ -9,12 +9,12 @@ ob_start();
 ?>
 
 <style>
-.text-uppercase-input {
+    .text-uppercase-input {
         text-transform: uppercase;
     }
 
 
-/* Estilos para o boto de microfone */
+    /* Estilos para o boto de microfone */
     .mic-btn {
         /* herda totalmente o estilo do .btn (Bootstrap) */
         cursor: pointer;
@@ -627,12 +627,14 @@ ob_start();
             border-color: #0D6EFD !important;
             color: #0D6EFD !important;
         }
+
         .acao-container .action-imprimir button.active,
         .acao-container .action-imprimir button:hover {
             background: linear-gradient(135deg, #0D6EFD 0%, #0A58CA 100%) !important;
             color: #fff !important;
             box-shadow: 0 6px 14px rgba(13, 110, 253, 0.3);
         }
+
         .acao-container .action-imprimir button.active i,
         .acao-container .action-imprimir button:hover i {
             color: #fff !important;
@@ -642,12 +644,14 @@ ob_start();
             border-color: #F59E0B !important;
             color: #F59E0B !important;
         }
+
         .acao-container .action-observacao.active,
         .acao-container .action-observacao:hover {
             background: linear-gradient(135deg, #F59E0B 0%, #F2C94C 100%) !important;
             color: #fff !important;
             box-shadow: 0 6px 14px rgba(245, 158, 11, 0.3);
         }
+
         .acao-container .action-observacao.active i,
         .acao-container .action-observacao:hover i {
             color: #fff !important;
@@ -657,12 +661,14 @@ ob_start();
             border-color: #6F42C1 !important;
             color: #6F42C1 !important;
         }
+
         .acao-container .action-editar.active,
         .acao-container .action-editar:hover {
             background: linear-gradient(135deg, #6F42C1 0%, #4B2A7D 100%) !important;
             color: #fff !important;
             box-shadow: 0 6px 14px rgba(111, 66, 193, 0.3);
         }
+
         .acao-container .action-editar.active i,
         .acao-container .action-editar:hover i {
             color: #fff !important;
@@ -695,7 +701,7 @@ ob_start();
 <script>
     // Mapeamento de tipos de bens e suas opçÁµes de bem
     const tiposBensOpcoes = <?php echo json_encode(array_reduce($tipos_bens, function ($carry, $item) {
-                                
+
                                 $opcoes = [];
                                 if (!empty($item['descricao'])) {
                                     $partes = explode('/', $item['descricao']);
