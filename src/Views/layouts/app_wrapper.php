@@ -136,11 +136,13 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
+            text-decoration: none;
         }
 
         .btn-menu:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.1);
+            color: white;
         }
 
         .header-title-section {
@@ -274,7 +276,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             transform: scale(1.1);
         }
 
-        /* Menu Lateral Offcanvas - Customizado para abrir dentro do container */
+        /* Menu Lateral Offcanvas */
         .offcanvas {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -292,6 +294,11 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
 
         .offcanvas.show {
             visibility: visible;
+        }
+
+        .offcanvas .offcanvas-header {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .offcanvas-backdrop {
@@ -312,24 +319,25 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             opacity: 1;
         }
 
-        .offcanvas-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
         }
 
-        .offcanvas-title {
-            color: white;
-            font-weight: 600;
+        .btn-close:hover {
+            opacity: 1;
         }
 
+        /* Estilos do Menu */
         .menu-item {
             color: white;
             text-decoration: none;
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 4px;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
-            transition: all 0.3s;
         }
 
         .menu-item:hover {
@@ -655,173 +663,16 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
 <body>
     <div class="app-container">
         <div class="mobile-wrapper">
-            <!-- Header -->
-            <header class="app-header">
-                <div class="header-left">
-                    <button class="btn-menu" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral" aria-controls="menuLateral">
-                        <i class="bi bi-list fs-5"></i>
-                    </button>
-                    <div class="header-title-section">
-                        <h1 class="app-title"><?php echo htmlspecialchars(to_uppercase($pageTitle ?? 'Anvy'), ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <?php if (isset($_SESSION['usuario_nome'])): ?>
-                            <small class="user-name">
-                                <i class="bi bi-person-circle me-1"></i>
-                                <?php echo htmlspecialchars(to_uppercase($_SESSION['usuario_nome']), ENT_QUOTES, 'UTF-8'); ?>
-                            </small>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <?php if (isset($headerActions)): ?>
-                        <?php echo $headerActions; ?>
-                    <?php endif; ?>
-                </div>
-            </header>
-
-            <!-- Menu Lateral Offcanvas -->
-            <div class="offcanvas-backdrop" id="menuBackdrop"></div>
-            <div class="offcanvas offcanvas-start" tabindex="-1" id="menuLateral" aria-labelledby="menuLateralLabel">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="menuLateralLabel">Menu</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
-                </div>
-                <div class="offcanvas-body">
-                    <div class="d-flex flex-column">
-                        <!-- Início -->
-                        <a href="/comuns" class="menu-item">
-                            <i class="bi bi-house-door me-3"></i>
-                            <span>Início</span>
-                        </a>
-
-                        <!-- Planilhas -->
-                        <div class="menu-section">
-                            <div class="menu-section-title">
-                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
-                                <span>Planilhas</span>
-                            </div>
-                            <div class="menu-submenu">
-                                <a href="/planilhas/importar" class="menu-subitem">
-                                    <i class="bi bi-upload me-2"></i>
-                                    <span>Importar Planilha</span>
-                                </a>
-                                <a href="/planilhas/visualizar" class="menu-subitem">
-                                    <i class="bi bi-eye me-2"></i>
-                                    <span>Visualizar Planilha</span>
-                                </a>
-                                <a href="/planilhas/progresso" class="menu-subitem">
-                                    <i class="bi bi-bar-chart-line me-2"></i>
-                                    <span>Progresso de Importação</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Produtos -->
-                        <div class="menu-section">
-                            <div class="menu-section-title">
-                                <i class="bi bi-box-seam me-2"></i>
-                                <span>Produtos</span>
-                            </div>
-                            <div class="menu-submenu">
-                                <a href="/produtos" class="menu-subitem">
-                                    <i class="bi bi-list-ul me-2"></i>
-                                    <span>Listar Produtos</span>
-                                </a>
-                                <a href="/produtos/criar" class="menu-subitem">
-                                    <i class="bi bi-plus-circle me-2"></i>
-                                    <span>Criar Produto</span>
-                                </a>
-                                <a href="/produtos/editar" class="menu-subitem">
-                                    <i class="bi bi-pencil me-2"></i>
-                                    <span>Editar Produto</span>
-                                </a>
-                                <a href="/produtos/etiqueta" class="menu-subitem">
-                                    <i class="bi bi-tags me-2"></i>
-                                    <span>Copiar Etiquetas</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Dependências -->
-                        <div class="menu-section">
-                            <div class="menu-section-title">
-                                <i class="bi bi-diagram-3 me-2"></i>
-                                <span>Dependências</span>
-                            </div>
-                            <div class="menu-submenu">
-                                <a href="/dependencias" class="menu-subitem">
-                                    <i class="bi bi-list-ul me-2"></i>
-                                    <span>Listar Dependências</span>
-                                </a>
-                                <a href="/dependencias/criar" class="menu-subitem">
-                                    <i class="bi bi-plus-circle me-2"></i>
-                                    <span>Criar Dependência</span>
-                                </a>
-                                <a href="/dependencias/editar" class="menu-subitem">
-                                    <i class="bi bi-pencil me-2"></i>
-                                    <span>Editar Dependência</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Usuários -->
-                        <div class="menu-section">
-                            <div class="menu-section-title">
-                                <i class="bi bi-people me-2"></i>
-                                <span>Usuários</span>
-                            </div>
-                            <div class="menu-submenu">
-                                <a href="/usuarios" class="menu-subitem">
-                                    <i class="bi bi-list-ul me-2"></i>
-                                    <span>Listar Usuários</span>
-                                </a>
-                                <a href="/usuarios/criar" class="menu-subitem">
-                                    <i class="bi bi-plus-circle me-2"></i>
-                                    <span>Criar Usuário</span>
-                                </a>
-                                <a href="/usuarios/editar" class="menu-subitem">
-                                    <i class="bi bi-pencil me-2"></i>
-                                    <span>Editar Usuário</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Relatórios -->
-                        <div class="menu-section">
-                            <div class="menu-section-title">
-                                <i class="bi bi-file-earmark-text me-2"></i>
-                                <span>Relatórios</span>
-                            </div>
-                            <div class="menu-submenu">
-                                <a href="/relatorios/14-1" class="menu-subitem">
-                                    <i class="bi bi-file-earmark-pdf me-2"></i>
-                                    <span>Relatório 14.1</span>
-                                </a>
-                                <a href="/relatorios/visualizar" class="menu-subitem">
-                                    <i class="bi bi-eye me-2"></i>
-                                    <span>Visualizar Relatório</span>
-                                </a>
-                                <a href="/relatorios/assinatura" class="menu-subitem">
-                                    <i class="bi bi-pen me-2"></i>
-                                    <span>Assinatura Digital</span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <hr class="my-3">
-
-                        <!-- Sair -->
-                        <a href="/logout" class="menu-item text-danger">
-                            <i class="bi bi-box-arrow-right me-3"></i>
-                            <span>Sair</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <?php include __DIR__ . '/partials/header.php'; ?>
 
             <!-- Content -->
             <main class="app-content fade-in">
                 <?php if (isset($contentHtml) && $contentHtml !== ''): ?>
                     <?php echo $contentHtml; ?>
+                <?php elseif (isset($conteudo) && $conteudo !== ''): ?>
+                    <?php echo $conteudo; ?>
+                <?php elseif (isset($content) && $content !== ''): ?>
+                    <?php echo $content; ?>
                 <?php elseif (isset($contentFile)): ?>
                     <?php include $contentFile; ?>
                 <?php else: ?>
@@ -835,24 +686,8 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="app-footer">
-        <div class="footer-left">
-            <button type="button" class="btn-footer-action" id="btnBack" title="Voltar" onclick="goBack()">
-                <i class="bi bi-arrow-left fs-5"></i>
-            </button>
-        </div>
-        <div class="footer-center">
-            <a href="/comuns" class="btn-footer-action" title="Página Inicial">
-                <i class="bi bi-house fs-5"></i>
-            </a>
-        </div>
-        <div class="footer-right">
-            <a href="/logout" class="btn-footer-action" title="Sair do Sistema">
-                <i class="bi bi-box-arrow-right fs-5"></i>
-            </a>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/partials/footer.php'; ?>
+    <?php include __DIR__ . '/partials/menu.php'; ?>
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -997,122 +832,65 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             <?php echo $customJs; ?>
         </script>
     <?php endif; ?>
+</body>
 
-    <!-- Menu Offcanvas Customizado -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menu = document.getElementById('menuLateral');
-            const backdrop = document.getElementById('menuBackdrop');
-            const closeBtn = menu.querySelector('.btn-close');
+</html>
 
-            function closeMenu() {
-                menu.classList.remove('show');
-                backdrop.classList.remove('show');
-                document.body.style.overflow = '';
-            }
+<!-- Global alert behavior: remove close button, auto-dismiss after 3s with 1s fade -->
+<script>
+    (function() {
+        const AUTO_MS = 3000; // show time
+        const FADE_MS = 1000; // fade duration
 
-            // Evento quando o menu é mostrado
-            menu.addEventListener('show.bs.offcanvas', function() {
-                backdrop.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            });
+        function processAlert(el) {
+            if (!el || el.dataset._autoDismissProcessed) return;
+            el.dataset._autoDismissProcessed = '1';
 
-            // Evento quando o menu é escondido
-            menu.addEventListener('hide.bs.offcanvas', function() {
-                closeMenu();
-            });
+            // Remove any close button (X)
+            const closeBtn = el.querySelector('.btn-close');
+            if (closeBtn) closeBtn.remove();
 
-            // Fechar menu
-            closeBtn.addEventListener('click', function() {
-                const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
-                if (bsOffcanvas) {
-                    bsOffcanvas.hide();
-                }
-            });
-            backdrop.addEventListener('click', function() {
-                const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
-                if (bsOffcanvas) {
-                    bsOffcanvas.hide();
-                }
-            });
+            // Ensure fade class and desired transition duration
+            el.classList.add('fade');
+            // force transition duration to 1s for opacity
+            el.style.transition = `opacity ${FADE_MS}ms ease`;
 
-            // Fechar menu ao clicar em links
-            menu.querySelectorAll('.menu-item, .menu-subitem').forEach(link => {
-                link.addEventListener('click', function() {
-                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
-                    if (bsOffcanvas) {
-                        bsOffcanvas.hide();
-                    }
-                });
-            });
+            // Ensure it is shown (some alerts may be created without show)
+            if (!el.classList.contains('show')) el.classList.add('show');
 
-            // Fechar menu com tecla ESC
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && menu.classList.contains('show')) {
-                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(menu);
-                    if (bsOffcanvas) {
-                        bsOffcanvas.hide();
-                    }
-                }
-            });
-        });
-    </script>
-
-    <!-- Global alert behavior: remove close button, auto-dismiss after 3s with 1s fade -->
-    <script>
-        (function() {
-            const AUTO_MS = 3000; // show time
-            const FADE_MS = 1000; // fade duration
-
-            function processAlert(el) {
-                if (!el || el.dataset._autoDismissProcessed) return;
-                el.dataset._autoDismissProcessed = '1';
-
-                // Remove any close button (X)
-                const closeBtn = el.querySelector('.btn-close');
-                if (closeBtn) closeBtn.remove();
-
-                // Ensure fade class and desired transition duration
-                el.classList.add('fade');
-                // force transition duration to 1s for opacity
-                el.style.transition = `opacity ${FADE_MS}ms ease`;
-
-                // Ensure it is shown (some alerts may be created without show)
-                if (!el.classList.contains('show')) el.classList.add('show');
-
-                // Schedule auto-hide
+            // Schedule auto-hide
+            setTimeout(() => {
+                // remove 'show' to start fade
+                el.classList.remove('show');
+                // remove from DOM after fade
                 setTimeout(() => {
-                    // remove 'show' to start fade
-                    el.classList.remove('show');
-                    // remove from DOM after fade
-                    setTimeout(() => {
-                        try {
-                            el.remove();
-                        } catch (e) {}
-                    }, FADE_MS + 20);
-                }, AUTO_MS);
-            }
+                    try {
+                        el.remove();
+                    } catch (e) {}
+                }, FADE_MS + 20);
+            }, AUTO_MS);
+        }
 
-            // process existing alerts
-            document.querySelectorAll('.alert').forEach(processAlert);
+        // process existing alerts
+        document.querySelectorAll('.alert').forEach(processAlert);
 
-            // observe for dynamically added alerts
-            const mo = new MutationObserver(muts => {
-                for (const m of muts) {
-                    for (const node of m.addedNodes) {
-                        if (!(node instanceof HTMLElement)) continue;
-                        if (node.classList && node.classList.contains('alert')) processAlert(node);
-                        // also check nested
-                        node.querySelectorAll && node.querySelectorAll('.alert').forEach(processAlert);
-                    }
+        // observe for dynamically added alerts
+        const mo = new MutationObserver(muts => {
+            for (const m of muts) {
+                for (const node of m.addedNodes) {
+                    if (!(node instanceof HTMLElement)) continue;
+                    if (node.classList && node.classList.contains('alert')) processAlert(node);
+                    // also check nested
+                    node.querySelectorAll && node.querySelectorAll('.alert').forEach(processAlert);
                 }
-            });
-            mo.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        })();
-    </script>
+            }
+        });
+        mo.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    })();
+</script>
 </body>
 
 </html>

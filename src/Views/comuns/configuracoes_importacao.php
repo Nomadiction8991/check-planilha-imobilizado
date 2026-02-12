@@ -16,22 +16,6 @@ exit;
 
 $pageTitle = $comum['descricao'];
 $backUrl = base_url('/');
-$headerActions = '
-    <div class="dropdown">
-        <button class="btn-header-action" type="button" id="menuPlanilhas" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-list fs-5"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPlanilhas">
-            <li>
-                <a class="dropdown-item" href="/logout">
-                    <i class="bi bi-box-arrow-right me-2"></i>Sair
-                </a>
-            </li>
-        </ul>
-    </div>
-';
-
-
 $fs = $_GET['filtro_STATUS'] ?? 'todas';
 $data_inicio_str = trim($_GET['data_inicio'] ?? '');
 $data_fim_str = trim($_GET['data_fim'] ?? '');

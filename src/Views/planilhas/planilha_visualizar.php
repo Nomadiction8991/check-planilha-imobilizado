@@ -30,7 +30,7 @@ $pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'VISUALIZAR Planil
 $backUrl = base_url('/');
 
 
-if (!empty($acesso_bloqueado)) {
+if (false && !empty($acesso_bloqueado)) {
     $mensagemBloqueio = $mensagem_bloqueio ?: 'A planilha precisa ser importada novamente para continuar.';
 
 
@@ -927,49 +927,6 @@ if (!empty($acesso_bloqueado)) {
 }
 
 
-$headerActions = '
-    <div class="dropdown">
-        <button class="btn-header-action" type="button" id="menuPlanilha" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-list fs-5"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPlanilha">';
-
-
-$headerActions .= '
-            <li>
-                <a class="dropdown-item" href="/produtos?comum_id=' . $comum_id . '">
-                    <i class="bi bi-list-ul me-2"></i>' . htmlspecialchars(to_uppercase('Listagem de Produtos'), ENT_QUOTES, 'UTF-8') . '
-                </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <a class="dropdown-item" href="/relatorios/14-1?id=' . $comum_id . '&comum_id=' . $comum_id . '">
-                    <i class="bi bi-file-earmark-pdf me-2"></i>' . htmlspecialchars(to_uppercase('Relatório 14.1'), ENT_QUOTES, 'UTF-8') . '
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="/produtos/etiqueta?id=' . $id_planilha . '&comum_id=' . $comum_id . '">
-                    <i class="bi bi-tags me-2"></i>' . htmlspecialchars(to_uppercase('Copiar Etiquetas'), ENT_QUOTES, 'UTF-8') . '
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="/relatorios/visualizar?id=' . $comum_id . '&comum_id=' . $comum_id . '&form=alteracao">
-                    <i class="bi bi-printer me-2"></i>' . htmlspecialchars(to_uppercase('Imprimir Alteração'), ENT_QUOTES, 'UTF-8') . '
-                </a>
-            </li>';
-
-$headerActions .= '
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <a class="dropdown-item" href="/logout">
-                    <i class="bi bi-box-arrow-right me-2"></i>Sair
-                </a>
-            </li>
-        </ul>
-    </div>
-';
-
-
 ob_start();
 ?>
 
@@ -1418,6 +1375,25 @@ ob_start();
 <script>
     // ======== AÇÕES AJAX (check/etiqueta) ========
     document.addEventListener('DOMContentLoaded', () => {
+        // Fechar qualquer modal aberto que possa estar bloqueando a interação
+        document.querySelectorAll('.modal.show').forEach(modal => {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+            } else {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+            }
+        });
+        // Remover backdrops persistentes
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.remove();
+        });
+        // Remover qualquer overlay que possa estar bloqueando
+        document.querySelectorAll('.scanner-overlay').forEach(overlay => {
+            overlay.remove();
+        });
+
         const alertHost = document.createElement('div');
         alertHost.id = 'ajaxAlerts';
         alertHost.className = 'position-fixed top-0 start-50 translate-middle-x p-3';

@@ -15,13 +15,6 @@ if (!empty($pagina) && $pagina > 1) {
     $qsArr['pagina'] = $pagina;
 }
 $qs = http_build_query($qsArr);
-$headerActions = '
-    <a href="/" class="btn-header-action" title="Menu">
-        <i class="bi bi-list fs-5"></i>
-    </a>
-';
-
-
 $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
 $limite = 20;
 $offset = ($pagina - 1) * $limite;
@@ -162,6 +155,5 @@ ob_start();
 <?php
 $conteudo = ob_get_clean();
 
-
-require_once __DIR__ . '/../shared/layout.php';
+require_once __DIR__ . '/../layouts/app_wrapper.php';
 ?>

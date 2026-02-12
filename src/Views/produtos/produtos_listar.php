@@ -7,28 +7,6 @@ $PRODUTOS = $produtos ?? [];
 
 $pageTitle = 'VISUALIZAR PRODUTOS';
 $backUrl = '/planilhas/visualizar?id=' . urlencode($comum_id) . '&comum_id=' . urlencode($comum_id);
-$headerActions = '
-    <div class="dropdown">
-        <button class="btn-header-action" type="button" id="menuPRODUTOS" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-list fs-5"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPRODUTOS">
-            <li>
-                <a href="/produtos/criar?comum_id=' . urlencode($comum_id) . '&' . gerarParametrosFiltro(true) . '" class="dropdown-item">
-                    <i class="bi bi-plus-lg me-2"></i>Novo PRODUTO
-                </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <a class="dropdown-item" href="/logout">
-                    <i class="bi bi-box-arrow-right me-2"></i>Sair
-                </a>
-            </li>
-        </ul>
-    </div>
-';
-
-
 $customCssPath = '/public/assets/css/generated_custom.css';
 
 ob_start();

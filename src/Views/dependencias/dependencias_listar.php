@@ -25,9 +25,6 @@ if (!empty($pagina) && $pagina > 1) {
 }
 $qs = http_build_query($qsArr);
 $createHref = '/dependencias/criar' . ($qs ? ('?' . $qs) : '');
-$headerActions = '<a href="' . $createHref . '" class="btn-header-action" title="Nova Dependencia"><i class="bi bi-plus-lg"></i></a>';
-
-
 if (!function_exists('dep_corrigir_encoding')) {
     function dep_corrigir_encoding($texto)
     {

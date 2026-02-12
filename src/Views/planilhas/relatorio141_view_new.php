@@ -4,9 +4,6 @@ require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
 $pageTitle = 'Relatório 14.1';
 $backUrl = '/planilhas/visualizar?id=' . urlencode($id_planilha);
-$headerActions = '<button id="btnPrint" class="btn-header-action" title="Imprimir" onclick="window.print()"><i class="bi bi-printer"></i></button>';
-
-
 $customCss = '
 /* Carrossel */
 .carousel-container { position: relative; overflow: hidden; margin-bottom: 15px; }

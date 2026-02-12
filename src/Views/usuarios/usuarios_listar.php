@@ -19,9 +19,6 @@ if (!empty($pagina) && $pagina > 1) {
 }
 $qs = http_build_query($qsArr);
 $createHref = '/usuarios/criar' . ($qs ? ('?' . $qs) : '');
-$headerActions = '<a href="' . $createHref . '" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>';
-
-
 ob_start();
 ?>
 

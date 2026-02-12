@@ -4,9 +4,6 @@ require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
 $pageTitle = 'Relatório 14.1';
 $backUrl = '/planilhas/visualizar?id=' . urlencode($id_planilha);
-$headerActions = '<button id="btnPrint" class="btn-header-action" title="Imprimir" onclick="validarEImprimir()"><i class="bi bi-printer"></i></button>';
-
-
 $customCssPath = '/public/assets/css/generated_relatorio_141.css';
 
 ob_start();
