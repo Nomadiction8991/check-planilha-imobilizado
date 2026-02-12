@@ -211,6 +211,51 @@ class ComumController extends BaseController
         require __DIR__ . '/../../index.php';
     }
 
+    public function create(): void
+    {
+        ViewRenderer::render('comuns/comum_criar', [
+            'pageTitle' => 'CADASTRAR IGREJA',
+            'backUrl' => '/comuns',
+            'headerActions' => ''
+        ]);
+    }
+
+    public function store(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirecionar('/comuns');
+            return;
+        }
+
+        try {
+            $dados = [
+                'codigo' => trim($_POST['codigo'] ?? ''),
+                'descricao' => trim($_POST['descricao'] ?? ''),
+                'cnpj' => trim($_POST['cnpj'] ?? ''),
+                'administracao' => trim($_POST['administracao'] ?? ''),
+                'cidade' => trim($_POST['cidade'] ?? ''),
+                'setor' => trim($_POST['setor'] ?? '')
+            ];
+
+            // Validações
+            if (empty($dados['codigo'])) {
+                throw new \Exception('Código é obrigatório.');
+            }
+            if (empty($dados['descricao'])) {
+                throw new \Exception('Descrição é obrigatória.');
+            }
+
+            $this->comumService->criar($dados);
+
+            $this->setMensagem('Igreja cadastrada com sucesso!', 'success');
+            $this->redirecionar('/comuns');
+        } catch (\Throwable $e) {
+            error_log('Erro ComumController::store: ' . $e->getMessage());
+            $this->setMensagem('Erro ao cadastrar igreja: ' . $e->getMessage(), 'danger');
+            $this->redirecionar('/comuns/criar?erro=' . urlencode($e->getMessage()));
+        }
+    }
+
     public function edit(): void
     {
         $id = (int) ($_GET['id'] ?? 0);

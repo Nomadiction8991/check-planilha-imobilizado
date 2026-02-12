@@ -6,6 +6,7 @@ use App\Services\DependenciaService;
 use App\Repositories\DependenciaRepository;
 use App\Core\ViewRenderer;
 use App\Core\ConnectionManager;
+use App\Core\SessionManager;
 use PDO;
 
 class DependenciaController extends BaseController
@@ -24,16 +25,19 @@ class DependenciaController extends BaseController
 
     public function index(): void
     {
+        SessionManager::ensureComumId();
+        $comumId = SessionManager::getComumId();
+
         $busca = trim($this->query('busca', ''));
         $pagina = max(1, (int) $this->query('pagina', 1));
         $limite = 10;
         $offset = ($pagina - 1) * $limite;
 
         try {
-            $dependencias = $this->dependenciaService->buscarPaginado($busca, $limite, $offset);
+            $dependencias = $this->dependenciaService->buscarPaginadoPorComum($comumId, $busca, $limite, $offset);
 
-            $total = $this->dependenciaService->contar($busca);
-            $totalGeral = $this->dependenciaService->contar();
+            $total = $this->dependenciaService->contarPorComum($comumId, $busca);
+            $totalGeral = $this->dependenciaService->contarPorComum($comumId);
             $totalPaginas = $total > 0 ? (int) ceil($total / $limite) : 1;
 
             if ($this->query('ajax') === '1') {
@@ -116,7 +120,11 @@ class DependenciaController extends BaseController
         }
 
         try {
+            SessionManager::ensureComumId();
+            $comumId = SessionManager::getComumId();
+
             $dados = [
+                'comum_id' => $comumId,
                 'descricao' => trim($_POST['descricao'] ?? ''),
             ];
 

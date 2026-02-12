@@ -93,6 +93,13 @@ class SessionManager
     }
 
 
+    public static function getComumId(): ?int
+    {
+        $id = self::get('comum_id');
+        return $id ? (int)$id : null;
+    }
+
+
     public static function setUser(int $id, string $nome, string $email): void
     {
         self::set('usuario_id', $id);

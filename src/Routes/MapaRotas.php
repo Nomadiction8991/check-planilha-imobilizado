@@ -9,6 +9,7 @@ use App\Controllers\DependenciaController;
 use App\Controllers\ProdutoController;
 use App\Controllers\PlanilhaController;
 use App\Controllers\RelatorioController;
+use App\Controllers\TipoBemController;
 
 class MapaRotas
 {
@@ -23,11 +24,21 @@ class MapaRotas
 
 
             'GET /comuns' => [ComumController::class, 'index'],
+            'GET /comuns/criar' => [ComumController::class, 'create'],
+            'POST /comuns/criar' => [ComumController::class, 'store'],
             'GET /comuns/editar' => [ComumController::class, 'edit'],
             'POST /comuns/editar' => [ComumController::class, 'update'],
 
             // Menu (página que centraliza cabeçalho / footer / navegação)
             'GET /menu' => [\App\Controllers\MenuController::class, 'index'],
+
+
+            'GET /tipos-bens' => [TipoBemController::class, 'index'],
+            'GET /tipos-bens/criar' => [TipoBemController::class, 'create'],
+            'POST /tipos-bens/criar' => [TipoBemController::class, 'store'],
+            'GET /tipos-bens/:id/editar' => [TipoBemController::class, 'edit'],
+            'POST /tipos-bens/:id/editar' => [TipoBemController::class, 'update'],
+            'POST /tipos-bens/deletar' => [TipoBemController::class, 'delete'],
 
 
             'GET /usuarios' => [UsuarioController::class, 'index'],

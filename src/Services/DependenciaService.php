@@ -19,6 +19,11 @@ class DependenciaService
         return $this->dependenciaRepository->buscarPaginado($busca, $limite, $offset);
     }
 
+    public function buscarPaginadoPorComum(int $comumId, string $busca = '', int $limite = 10, int $offset = 0): array
+    {
+        return $this->dependenciaRepository->buscarPaginadoPorComum($comumId, $busca, $limite, $offset);
+    }
+
     public function contar(string $busca = ''): int
     {
         if ($busca !== '') {
@@ -30,14 +35,29 @@ class DependenciaService
         return $this->dependenciaRepository->contar();
     }
 
+    public function contarPorComum(int $comumId, string $busca = ''): int
+    {
+        return $this->dependenciaRepository->contarPorComum($comumId, $busca);
+    }
+
     public function criar(array $dados): int
     {
         if (empty($dados['descricao'])) {
             throw new Exception('Descrição é obrigatória.');
         }
 
-        if ($this->dependenciaRepository->buscarPorDescricao($dados['descricao'])) {
-            throw new Exception('Dependência já existe.');
+        if (empty($dados['comum_id'])) {
+            throw new Exception('Igreja é obrigatória.');
+        }
+
+        // Verifica se já existe dependência com essa descrição na mesma igreja
+        $existente = $this->dependenciaRepository->buscarPorDescricaoEComum(
+            $dados['descricao'], 
+            $dados['comum_id']
+        );
+        
+        if ($existente) {
+            throw new Exception('Dependência já existe nesta igreja.');
         }
 
         $dados = $this->normalizarDados($dados);

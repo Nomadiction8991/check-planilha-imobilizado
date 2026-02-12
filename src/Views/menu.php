@@ -18,6 +18,8 @@ $customCssPath = $customCssPath ?? '/assets/css/menu.css';
                 <li><a href="/planilhas/visualizar"><i class="bi bi-eye" aria-hidden="true"></i>Produtos</a></li>
                 <li><a href="/produtos"><i class="bi bi-list" aria-hidden="true"></i>Produtos Cadastrados</a></li>
                 <li><a href="/comuns"><i class="bi bi-building" aria-hidden="true"></i>Igrejas</a></li>
+                <li><a href="/tipos-bens"><i class="bi bi-box-seam" aria-hidden="true"></i>Tipos de Bens</a></li>
+                <li><a href="/usuarios"><i class="bi bi-people" aria-hidden="true"></i>Usuários</a></li>
             </ul>
         </li>
 
@@ -28,7 +30,10 @@ $customCssPath = $customCssPath ?? '/assets/css/menu.css';
             </button>
             <ul class="submenu">
                 <li><a href="/produtos/criar"><i class="bi bi-plus-circle" aria-hidden="true"></i>Produto</a></li>
+                <li><a href="/comuns/criar"><i class="bi bi-building-add" aria-hidden="true"></i>Igreja</a></li>
+                <li><a href="/tipos-bens/criar"><i class="bi bi-box-seam" aria-hidden="true"></i>Tipo de Bem</a></li>
                 <li><a href="/dependencias"><i class="bi bi-link-45deg" aria-hidden="true"></i>Dependências</a></li>
+                <li><a href="/usuarios/criar"><i class="bi bi-person-plus" aria-hidden="true"></i>Usuário</a></li>
             </ul>
         </li>
 
