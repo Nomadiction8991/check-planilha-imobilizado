@@ -20,6 +20,14 @@ if [ ! -f .env ] && [ -f .env.example ]; then
     cp .env.example .env
 fi
 
+# Aguardar o banco de dados estar pronto
+echo "Aguardando banco de dados..."
+until php -r "try { new PDO('mysql:host=db;dbname=checkplanilha', 'checkplanilha', 'checkplanilha123'); echo 'OK'; } catch (Exception \$e) { exit(1); }"; do
+    echo "Banco não está pronto, aguardando..."
+    sleep 2
+done
+echo "Banco de dados pronto!"
+
 # Executar migrations do Phinx se disponível
 if command -v ./vendor/bin/phinx >/dev/null 2>&1; then
     echo "Executando migrations do Phinx..."
