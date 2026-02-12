@@ -17,7 +17,7 @@ ob_start();
 ?>
 
 <style>
-.menu-grid {
+    .menu-grid {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
@@ -43,7 +43,7 @@ ob_start();
     }
 
 
-.menu-grid {
+    .menu-grid {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1rem;
@@ -97,14 +97,98 @@ ob_start();
         </div>
     </a>
 
-    <a href="../planilhas/relatorio141_view.php?id=<?php echo $id_planilha; ?>" class="text-decoration-none">
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.1" class="text-decoration-none">
         <div class="card menu-card">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-printer-fill me-2" style="color: #17a2b8;"></i>
-                    <?php echo htmlspecialchars(to_uppercase('Imprimir 14.1'), ENT_QUOTES, 'UTF-8'); ?>
+                    <i class="bi bi-file-earmark-text me-2" style="color: #667eea;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.1'), ENT_QUOTES, 'UTF-8'); ?>
                 </h5>
-                <p class="card-text small text-muted">Gerar relatório 14.1</p>
+                <p class="card-text small text-muted">Declaração de Doação de Bem Móvel</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.2" class="text-decoration-none">
+        <div class="card menu-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-file-earmark-arrow-down me-2" style="color: #28a745;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.2'), ENT_QUOTES, 'UTF-8'); ?>
+                </h5>
+                <p class="card-text small text-muted">Ocorrência de Entrada de Bens</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.3" class="text-decoration-none">
+        <div class="card menu-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-file-earmark-arrow-up me-2" style="color: #dc3545;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.3'), ENT_QUOTES, 'UTF-8'); ?>
+                </h5>
+                <p class="card-text small text-muted">Declaração de Saída de Bens</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.4" class="text-decoration-none">
+        <div class="card menu-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-box-arrow-right me-2" style="color: #ffc107;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.4'), ENT_QUOTES, 'UTF-8'); ?>
+                </h5>
+                <p class="card-text small text-muted">Declaração de Retirada de Bem</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.5" class="text-decoration-none">
+        <div class="card menu-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-clipboard-check me-2" style="color: #17a2b8;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.5'), ENT_QUOTES, 'UTF-8'); ?>
+                </h5>
+                <p class="card-text small text-muted">Ata de Inventário de Bens</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.6" class="text-decoration-none">
+        <div class="card menu-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-pencil-square me-2" style="color: #6f42c1;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.6'), ENT_QUOTES, 'UTF-8'); ?>
+                </h5>
+                <p class="card-text small text-muted">Alteração de Cadastro de Bem</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.7" class="text-decoration-none">
+        <div class="card menu-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-arrow-left-right me-2" style="color: #e83e8c;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.7'), ENT_QUOTES, 'UTF-8'); ?>
+                </h5>
+                <p class="card-text small text-muted">Movimentação Interna de Bem</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="../planilhas/relatorio_visualizar.php?id=<?php echo $id_planilha; ?>&form=14.8" class="text-decoration-none">
+        <div class="card menu-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-calendar3 me-2" style="color: #fd7e14;"></i>
+                    <?php echo htmlspecialchars(to_uppercase('Formulário 14.8'), ENT_QUOTES, 'UTF-8'); ?>
+                </h5>
+                <p class="card-text small text-muted">Movimento Mensal de Bem</p>
             </div>
         </div>
     </a>
