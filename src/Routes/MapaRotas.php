@@ -19,7 +19,7 @@ class MapaRotas
 
             // Comuns (gerenciamento)
             'GET /comuns' => [ComumController::class, 'index'],
-            
+
             // Usuários (CRUD completo)
             'GET /usuarios' => [UsuarioController::class, 'index'],
             'GET /usuarios/criar' => [UsuarioController::class, 'create'],

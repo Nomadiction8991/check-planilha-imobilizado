@@ -19,12 +19,12 @@ class UsuarioRepository extends BaseRepository
     public function buscarPorEmail(string $email): ?array
     {
         $emailUpper = mb_strtoupper($email, 'UTF-8');
-        
+
         $sql = "SELECT * FROM {$this->tabela} WHERE UPPER(email) = :email";
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':email', $emailUpper);
         $stmt->execute();
-        
+
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
         return $resultado ?: null;
     }
@@ -38,7 +38,7 @@ class UsuarioRepository extends BaseRepository
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':cpf', $cpf);
         $stmt->execute();
-        
+
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
         return $resultado ?: null;
     }
@@ -109,19 +109,19 @@ class UsuarioRepository extends BaseRepository
     public function emailExiste(string $email, ?int $ignorarId = null): bool
     {
         $emailUpper = mb_strtoupper($email, 'UTF-8');
-        
+
         $sql = "SELECT id FROM {$this->tabela} WHERE UPPER(email) = :email";
         if ($ignorarId !== null) {
             $sql .= " AND id != :ignorar_id";
         }
-        
+
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':email', $emailUpper);
         if ($ignorarId !== null) {
             $stmt->bindValue(':ignorar_id', $ignorarId, PDO::PARAM_INT);
         }
         $stmt->execute();
-        
+
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -134,14 +134,14 @@ class UsuarioRepository extends BaseRepository
         if ($ignorarId !== null) {
             $sql .= " AND id != :ignorar_id";
         }
-        
+
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':cpf', $cpf);
         if ($ignorarId !== null) {
             $stmt->bindValue(':ignorar_id', $ignorarId, PDO::PARAM_INT);
         }
         $stmt->execute();
-        
+
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -191,7 +191,7 @@ class UsuarioRepository extends BaseRepository
     public function autenticar(string $email, string $senha): ?array
     {
         $usuario = $this->buscarPorEmail($email);
-        
+
         if (!$usuario) {
             return null;
         }

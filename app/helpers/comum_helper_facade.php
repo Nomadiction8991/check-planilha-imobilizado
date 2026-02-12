@@ -23,7 +23,7 @@ function buscar_comuns_paginated($conexao, $busca = '', $limite = 10, $offset = 
     if ($repo === null) {
         $repo = new ComumRepository($conexao);
     }
-    
+
     return $repo->buscarPaginado($busca, $limite, $offset);
 }
 
@@ -38,7 +38,7 @@ function contar_comuns($conexao, $busca = '')
     if ($repo === null) {
         $repo = new ComumRepository($conexao);
     }
-    
+
     return $repo->contarComFiltro($busca);
 }
 
@@ -64,7 +64,7 @@ function gerar_cnpj_unico($conexao, $cnpj_base, $codigo, $ignorar_id = null)
     if ($repo === null) {
         $repo = new ComumRepository($conexao);
     }
-    
+
     return $repo->gerarCnpjUnico($cnpj_base, $codigo, $ignorar_id);
 }
 
@@ -79,7 +79,7 @@ function garantir_comum_por_codigo($conexao, $codigo, $dados = [])
     if ($repo === null) {
         $repo = new ComumRepository($conexao);
     }
-    
+
     return $repo->garantirPorCodigo($codigo, $dados);
 }
 
@@ -141,6 +141,6 @@ function processar_comum($conexao, $comum_text, $dados = [])
     if ($repo === null) {
         $repo = new ComumRepository($conexao);
     }
-    
+
     return $repo->processarComum($comum_text, $dados);
 }

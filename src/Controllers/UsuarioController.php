@@ -49,10 +49,9 @@ class UsuarioController extends BaseController
 
             // Renderizar compatibilidade legada (temporário)
             $this->renderizarListagemLegada($dados);
-            
         } catch (\Throwable $e) {
             error_log('ERROR UsuarioController::index: ' . $e->getMessage());
-            
+
             $this->renderizarListagemLegada([
                 'usuarios' => [],
                 'total' => 0,
@@ -106,7 +105,6 @@ class UsuarioController extends BaseController
 
             // Redirecionar com sucesso
             $this->redirecionarAposOperacao('success=1', 'Usuário cadastrado com sucesso!');
-            
         } catch (Exception $e) {
             // Renderizar formulário com erro
             $this->renderizarFormularioLegado([
@@ -122,14 +120,14 @@ class UsuarioController extends BaseController
     public function edit(): void
     {
         $id = (int) $this->query('id', 0);
-        
+
         if ($id <= 0) {
             $this->redirecionar('app/views/usuarios/usuarios_listar.php?erro=ID inválido');
             return;
         }
 
         $usuario = $this->usuarioRepo->buscarPorId($id);
-        
+
         if (!$usuario) {
             $this->redirecionar('app/views/usuarios/usuarios_listar.php?erro=Usuário não encontrado');
             return;
@@ -169,7 +167,6 @@ class UsuarioController extends BaseController
 
             // Redirecionar com sucesso
             $this->redirecionarAposOperacao('success=1', 'Usuário atualizado com sucesso!');
-            
         } catch (Exception $e) {
             $usuario = $this->usuarioRepo->buscarPorId($id);
             $this->renderizarFormularioEdicaoLegado($usuario, $e->getMessage());
@@ -182,7 +179,7 @@ class UsuarioController extends BaseController
     public function delete(): void
     {
         $id = (int) $this->post('id', 0);
-        
+
         try {
             if ($id <= 0) {
                 throw new Exception('ID inválido.');
@@ -197,7 +194,6 @@ class UsuarioController extends BaseController
 
             $this->setMensagem('Usuário deletado com sucesso!', 'success');
             $this->redirecionar('app/views/usuarios/usuarios_listar.php');
-            
         } catch (Exception $e) {
             $this->setMensagem('Erro ao deletar usuário: ' . $e->getMessage(), 'danger');
             $this->redirecionar('app/views/usuarios/usuarios_listar.php');
@@ -330,9 +326,11 @@ class UsuarioController extends BaseController
         }
 
         // Endereço obrigatório
-        if (empty($dados['endereco_cep']) || empty($dados['endereco_logradouro']) || 
-            empty($dados['endereco_numero']) || empty($dados['endereco_bairro']) || 
-            empty($dados['endereco_cidade']) || empty($dados['endereco_estado'])) {
+        if (
+            empty($dados['endereco_cep']) || empty($dados['endereco_logradouro']) ||
+            empty($dados['endereco_numero']) || empty($dados['endereco_bairro']) ||
+            empty($dados['endereco_cidade']) || empty($dados['endereco_estado'])
+        ) {
             throw new Exception('Todos os campos de endereço (CEP, logradouro, número, bairro, cidade e estado) são obrigatórios.');
         }
 
@@ -368,7 +366,7 @@ class UsuarioController extends BaseController
     private function redirecionarAposOperacao(string $queryExtra, string $mensagem = ''): void
     {
         $retQ = [];
-        
+
         if (!empty($_REQUEST['busca'])) {
             $retQ['busca'] = $_REQUEST['busca'];
         }
@@ -395,7 +393,7 @@ class UsuarioController extends BaseController
     {
         extract($dados);
         global $conexao;
-        
+
         // Importar variáveis para compatibilidade
         $usuarios = $dados['usuarios'];
         $total_registros = $dados['total'];
@@ -405,7 +403,7 @@ class UsuarioController extends BaseController
         $filtroNome = $dados['filtros']['busca'];
         $filtroStatus = $dados['filtros']['status'];
         $erro = $dados['erro'];
-        
+
         require __DIR__ . '/../../app/views/usuarios/usuarios_listar.php';
     }
 
@@ -416,7 +414,7 @@ class UsuarioController extends BaseController
     {
         $mensagem = $dados['erro'] ?? '';
         $tipo_mensagem = $mensagem ? 'error' : '';
-        
+
         require __DIR__ . '/../../app/views/usuarios/usuario_criar.php';
     }
 
@@ -427,7 +425,7 @@ class UsuarioController extends BaseController
     {
         $mensagem = $erro;
         $tipo_mensagem = $erro ? 'error' : '';
-        
+
         require __DIR__ . '/../../app/views/usuarios/usuario_editar.php';
     }
 }

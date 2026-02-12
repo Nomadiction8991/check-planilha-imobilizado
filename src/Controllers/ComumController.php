@@ -32,7 +32,7 @@ class ComumController extends BaseController
         try {
             // Buscar comuns
             $comuns = $this->comumRepo->buscarPaginado($busca, $limite, $offset);
-            
+
             // Contar totais
             $total = $this->comumRepo->contarComFiltro($busca);
             $totalGeral = $this->comumRepo->contar();
@@ -46,7 +46,6 @@ class ComumController extends BaseController
 
             // Renderizar página HTML
             $this->renderizarIndex($comuns, $busca, $pagina, $limite, $total, $totalGeral, $totalPaginas);
-            
         } catch (\Throwable $e) {
             $this->tratarErro($e, $busca, $pagina);
         }
@@ -56,16 +55,16 @@ class ComumController extends BaseController
      * Renderiza a página principal
      */
     private function renderizarIndex(
-        array $comuns, 
-        string $busca, 
-        int $pagina, 
-        int $limite, 
-        int $total, 
-        int $totalGeral, 
+        array $comuns,
+        string $busca,
+        int $pagina,
+        int $limite,
+        int $total,
+        int $totalGeral,
         int $totalPaginas
     ): void {
         $buscaDisplay = mb_strtoupper($busca, 'UTF-8');
-        
+
         // Build query string para preservar filtros
         $qsArr = [];
         if ($busca !== '') {
@@ -101,10 +100,10 @@ class ComumController extends BaseController
      * Retorna dados em formato JSON para requisições AJAX
      */
     private function retornarAjax(
-        array $comuns, 
-        int $total, 
-        int $totalGeral, 
-        int $pagina, 
+        array $comuns,
+        int $total,
+        int $totalGeral,
+        int $pagina,
         int $totalPaginas,
         string $busca
     ): void {
@@ -127,16 +126,16 @@ class ComumController extends BaseController
     {
         if (empty($comuns)) {
             return '<tr><td colspan="3" class="text-center py-4 text-muted">' .
-                   '<i class="bi bi-inbox fs-3 d-block mb-2"></i>NENHUM COMUM ENCONTRADO</td></tr>';
+                '<i class="bi bi-inbox fs-3 d-block mb-2"></i>NENHUM COMUM ENCONTRADO</td></tr>';
         }
 
         $html = '';
         foreach ($comuns as $comum) {
             $cadastroOk = $this->verificarCadastroCompleto($comum);
-            
+
             $qsEdit = http_build_query(['busca' => $busca, 'pagina' => $pagina]);
-            $editHref = 'app/views/comuns/comum_editar.php?id=' . (int) $comum['id'] . 
-                       ($qsEdit ? ('&' . $qsEdit) : '');
+            $editHref = 'app/views/comuns/comum_editar.php?id=' . (int) $comum['id'] .
+                ($qsEdit ? ('&' . $qsEdit) : '');
             $viewHref = 'app/views/planilhas/planilha_visualizar.php?comum_id=' . (int) $comum['id'];
 
             $html .= '<tr>';
@@ -145,11 +144,11 @@ class ComumController extends BaseController
             $html .= '<td>';
             $html .= '<div class="btn-group btn-group-sm" role="group">';
             $html .= '<a class="btn btn-outline-primary" href="' . $editHref . '" title="Editar">' .
-                     '<i class="bi bi-pencil"></i></a>';
+                '<i class="bi bi-pencil"></i></a>';
             $html .= '<a class="btn btn-outline-secondary btn-view-planilha" href="' . $viewHref . '" ' .
-                     'data-cadastro-ok="' . ($cadastroOk ? '1' : '0') . '" ' .
-                     'data-edit-url="' . $editHref . '" title="Visualizar planilha">' .
-                     '<i class="bi bi-eye"></i></a>';
+                'data-cadastro-ok="' . ($cadastroOk ? '1' : '0') . '" ' .
+                'data-edit-url="' . $editHref . '" title="Visualizar planilha">' .
+                '<i class="bi bi-eye"></i></a>';
             $html .= '</div>';
             $html .= '</td>';
             $html .= '</tr>';
@@ -191,8 +190,8 @@ class ComumController extends BaseController
 
         if (isset($_SESSION['usuario_id'])) {
             $actions .= '
-                <li><a class="dropdown-item" href="app/views/usuarios/usuario_editar.php?id=' . 
-                    (int)$_SESSION['usuario_id'] . '">
+                <li><a class="dropdown-item" href="app/views/usuarios/usuario_editar.php?id=' .
+                (int)$_SESSION['usuario_id'] . '">
                     <i class="bi bi-pencil-square me-2"></i>EDITAR MEU USUÁRIO</a></li>';
         }
 
@@ -228,13 +227,13 @@ class ComumController extends BaseController
         // Log do erro
         @is_dir(__DIR__ . '/../../storage/logs') || @mkdir(__DIR__ . '/../../storage/logs', 0755, true);
         @file_put_contents(
-            __DIR__ . '/../../storage/logs/comuns_controller.log', 
+            __DIR__ . '/../../storage/logs/comuns_controller.log',
             date('c') . " ERROR " . json_encode([
-                'busca' => $busca, 
+                'busca' => $busca,
                 'pagina' => $pagina,
-                'message' => $e->getMessage(), 
+                'message' => $e->getMessage(),
                 'trace' => substr($e->getTraceAsString(), 0, 1200)
-            ]) . PHP_EOL, 
+            ]) . PHP_EOL,
             FILE_APPEND
         );
 
@@ -257,7 +256,7 @@ class ComumController extends BaseController
     private function renderizarHtmlLegado(array $dados): void
     {
         extract($dados);
-        
+
         // Incluir o arquivo original temporariamente
         // Depois vamos criar uma view limpa em src/Views/comuns/index.php
         require __DIR__ . '/../../index.php';

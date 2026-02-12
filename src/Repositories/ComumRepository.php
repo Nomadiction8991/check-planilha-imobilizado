@@ -20,26 +20,26 @@ class ComumRepository extends BaseRepository
     {
         $params = [];
         $where = '';
-        
+
         if ($busca !== '') {
             $where = "(codigo LIKE :busca OR descricao LIKE :busca)";
             $params[':busca'] = '%' . $busca . '%';
         }
-        
+
         $sql = "SELECT * FROM {$this->tabela}";
         if ($where) {
             $sql .= " WHERE {$where}";
         }
         $sql .= " ORDER BY codigo ASC LIMIT :limite OFFSET :offset";
-        
+
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        
+
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
-        
+
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -51,12 +51,12 @@ class ComumRepository extends BaseRepository
     {
         $params = [];
         $where = '';
-        
+
         if ($busca !== '') {
             $where = "(codigo LIKE :busca OR descricao LIKE :busca)";
             $params[':busca'] = '%' . $busca . '%';
         }
-        
+
         return $this->contar($where, $params);
     }
 
@@ -69,7 +69,7 @@ class ComumRepository extends BaseRepository
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':codigo', $codigo, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
         return $resultado ?: null;
     }
@@ -83,7 +83,7 @@ class ComumRepository extends BaseRepository
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':cnpj', $cnpj);
         $stmt->execute();
-        
+
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
         return $resultado ?: null;
     }
@@ -150,22 +150,22 @@ class ComumRepository extends BaseRepository
                         $params[':cnpj'] = $novoCnpj;
                     }
                 }
-                
+
                 if (isset($dados['descricao'])) {
                     $updates[] = "descricao = :descricao";
                     $params[':descricao'] = mb_strtoupper($dados['descricao'], 'UTF-8');
                 }
-                
+
                 if (isset($dados['administracao'])) {
                     $updates[] = "administracao = :administracao";
                     $params[':administracao'] = mb_strtoupper($dados['administracao'], 'UTF-8');
                 }
-                
+
                 if (isset($dados['cidade'])) {
                     $updates[] = "cidade = :cidade";
                     $params[':cidade'] = mb_strtoupper($dados['cidade'], 'UTF-8');
                 }
-                
+
                 if (isset($dados['setor'])) {
                     $updates[] = "setor = :setor";
                     $params[':setor'] = $dados['setor'];
