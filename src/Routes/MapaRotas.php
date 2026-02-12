@@ -75,6 +75,7 @@ class MapaRotas
             'GET /planilhas/visualizar' => [PlanilhaController::class, 'visualizar'],
             'GET /planilhas/preview' => [PlanilhaController::class, 'preview'],
             'POST /planilhas/preview/salvar-acoes' => [PlanilhaController::class, 'salvarAcoesPreview'],
+            'POST /planilhas/preview/acao-massa' => [PlanilhaController::class, 'acaoMassaPreview'],
             'POST /planilhas/confirmar' => [PlanilhaController::class, 'confirmarImportacao'],
             'GET /planilhas/progresso' => [PlanilhaController::class, 'progresso'],
             'POST /planilhas/processar-arquivo' => [PlanilhaController::class, 'processarArquivo'],

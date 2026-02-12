@@ -195,14 +195,22 @@ ob_start();
                     <?php endforeach; ?>
                 </div>
             </div>
-            <div class="col-auto ms-auto">
-                <span class="fw-bold small text-uppercase me-2">Ação em massa:</span>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-success" onclick="acaoEmMassa('importar')">
-                        <i class="bi bi-check-all"></i> IMPORTAR TUDO
+            <div class="col-12 col-md-auto ms-md-auto mt-2 mt-md-0">
+                <span class="fw-bold small text-uppercase me-2 d-block d-md-inline mb-1 mb-md-0">Ação em massa:</span>
+                <div class="btn-group me-2" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="acaoEmMassa('importar')" title="Aplica apenas aos registros desta página">
+                        <i class="bi bi-check"></i> PÁGINA
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="acaoEmMassa('pular')">
-                        <i class="bi bi-dash-circle"></i> PULAR TUDO
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="acaoEmMassa('pular')" title="Pular registros desta página">
+                        <i class="bi bi-dash-circle"></i> PULAR PÁG.
+                    </button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-success" onclick="acaoMassaTodos('importar')" title="Importar TODOS os <?= number_format($totalRegistros) ?> registros">
+                        <i class="bi bi-check-all"></i> IMPORTAR TODOS (<?= number_format($totalRegistros) ?>)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="acaoMassaTodos('pular')" title="Pular TODOS os registros">
+                        <i class="bi bi-dash-circle"></i> PULAR TODOS
                     </button>
                 </div>
             </div>
@@ -494,7 +502,7 @@ ob_start();
         atualizarContadores();
     };
 
-    // ─── Ação em massa (aplica na página atual visível) ───
+    // ─── Ação em massa — PÁGINA ATUAL ───
     window.acaoEmMassa = function (acao) {
         document.querySelectorAll('.registro-row').forEach(row => {
             const select = row.querySelector('.select-acao');
@@ -506,6 +514,34 @@ ob_start();
                 atualizarEstiloLinha(select);
             }
         });
+    };
+
+    // ─── Ação em massa — TODOS OS REGISTROS (todas as páginas) ───
+    window.acaoMassaTodos = async function (acao) {
+        const label = acao === 'importar' ? 'IMPORTAR' : 'PULAR';
+        if (!confirm(`Aplicar "${label}" a TODOS os registros de todas as páginas?`)) return;
+
+        // Primeiro salva ações da página atual
+        await salvarAcoes();
+
+        try {
+            const resp = await fetch('/planilhas/preview/acao-massa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ importacao_id: IMPORTACAO_ID, acao: acao })
+            });
+            const data = await resp.json();
+            if (data.sucesso) {
+                // Atualiza os selects da página atual para refletir
+                acaoEmMassa(acao);
+                alert(`${label} aplicado a ${data.total_aplicadas.toLocaleString()} registros.`);
+            } else {
+                alert('Erro: ' + (data.erro || 'Falha ao aplicar ação'));
+            }
+        } catch (e) {
+            console.error('Erro ação em massa:', e);
+            alert('Erro de conexão ao aplicar ação.');
+        }
     };
 
     // ─── Contadores de ações (só da página atual) ───

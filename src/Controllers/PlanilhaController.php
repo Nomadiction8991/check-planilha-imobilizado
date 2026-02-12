@@ -200,6 +200,54 @@ class PlanilhaController extends BaseController
     }
 
     /**
+     * AJAX: Aplica ação em massa a TODOS os registros (todas as páginas).
+     */
+    public function acaoMassaPreview(): void
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['erro' => 'Método não permitido']);
+            exit;
+        }
+
+        $dados = json_decode(file_get_contents('php://input'), true);
+        $importacaoId = (int) ($dados['importacao_id'] ?? 0);
+        $acao = $dados['acao'] ?? '';
+
+        if ($importacaoId <= 0 || !in_array($acao, ['importar', 'pular'])) {
+            echo json_encode(['erro' => 'Parâmetros inválidos']);
+            exit;
+        }
+
+        // Carrega análise para obter todas as linhas
+        $analise = $this->csvParserService->carregarAnalise($importacaoId);
+        if (!$analise) {
+            echo json_encode(['erro' => 'Análise não encontrada']);
+            exit;
+        }
+
+        // Aplica a ação a todos os registros (exceto erros)
+        $acoes = [];
+        foreach ($analise['registros'] as $reg) {
+            $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+            $status = $reg['status'] ?? 'erro';
+            if ($linhaCsv !== '' && $status !== 'erro') {
+                $acoes[$linhaCsv] = $acao;
+            }
+        }
+
+        $_SESSION['preview_acoes_' . $importacaoId] = $acoes;
+
+        echo json_encode([
+            'sucesso' => true,
+            'acao' => $acao,
+            'total_aplicadas' => count($acoes)
+        ]);
+        exit;
+    }
+
+    /**
      * PASSO 3: Confirma importação — recebe ações do usuário e processa.
      */
     public function confirmarImportacao(): void
