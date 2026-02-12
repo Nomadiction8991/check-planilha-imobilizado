@@ -8,14 +8,11 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 
-$comum_id = 0;
-if (isset($_GET['comum_id'])) {
-    $comum_id = (int)$_GET['comum_id'];
-} elseif (isset($_GET['id'])) {
-    $comum_id = (int)$_GET['id'];
-}
+// Usar comum_id passado pelo controller ou da sessão
+$comum_id = $comum_id ?? (int)($_SESSION['comum_id'] ?? 0);
+
 if ($comum_id <= 0) {
-    header('Location: ' . base_url('/'));
+    header('Location: ' . base_url('/comuns'));
     exit;
 }
 
