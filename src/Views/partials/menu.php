@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Partial: Menu Dropdown do Header
  * 
@@ -36,7 +37,9 @@ $usuarioId = $usuarioId ?? $_SESSION['usuario_id'] ?? null;
                     <i class="bi bi-upload me-2"></i>IMPORTAR PLANILHA
                 </a>
             </li>
-            <li><hr class="dropdown-divider"></li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
         <?php endif; ?>
         <li>
             <a class="dropdown-item" href="/logout">

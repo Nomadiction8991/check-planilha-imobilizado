@@ -86,7 +86,7 @@ class UsuarioController extends BaseController
             'errors' => [],
             'old' => $_SESSION['old_input'] ?? []
         ]);
-        
+
         // Limpar old input
         unset($_SESSION['old_input']);
     }

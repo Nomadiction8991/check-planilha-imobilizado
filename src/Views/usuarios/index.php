@@ -1,4 +1,5 @@
 <?php
+
 /**
  * View: Listagem de Usuários
  * 
@@ -36,14 +37,13 @@ $limite = $limite ?? 10;
             <div class="col-12">
                 <label for="busca" class="form-label">NOME OU EMAIL</label>
                 <div class="input-group">
-                    <input 
-                        type="text" 
-                        name="busca" 
-                        id="busca" 
+                    <input
+                        type="text"
+                        name="busca"
+                        id="busca"
                         class="form-control text-uppercase"
                         value="<?= ViewHelper::e($busca) ?>"
-                        placeholder="DIGITE NOME OU EMAIL"
-                    >
+                        placeholder="DIGITE NOME OU EMAIL">
                     <?php if ($busca): ?>
                         <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('busca').value=''; this.form.submit();" title="LIMPAR">
                             <i class="bi bi-x-lg"></i>
@@ -51,7 +51,7 @@ $limite = $limite ?? 10;
                     <?php endif; ?>
                 </div>
             </div>
-            
+
             <div class="col-12">
                 <label for="status" class="form-label">STATUS</label>
                 <select name="status" id="status" class="form-select">
@@ -60,7 +60,7 @@ $limite = $limite ?? 10;
                     <option value="0" <?= ViewHelper::selected($status, '0') ?>>INATIVOS</option>
                 </select>
             </div>
-            
+
             <div class="col-12">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-search me-2"></i>FILTRAR
@@ -111,18 +111,16 @@ $limite = $limite ?? 10;
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm d-flex justify-content-center" role="group">
-                                <a 
-                                    class="btn btn-outline-info" 
-                                    href="<?= ViewHelper::e($viewUrl) ?>" 
-                                    title="VISUALIZAR"
-                                >
+                                <a
+                                    class="btn btn-outline-info"
+                                    href="<?= ViewHelper::e($viewUrl) ?>"
+                                    title="VISUALIZAR">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a 
-                                    class="btn btn-outline-primary" 
-                                    href="<?= ViewHelper::e($editUrl) ?>" 
-                                    title="EDITAR"
-                                >
+                                <a
+                                    class="btn btn-outline-primary"
+                                    href="<?= ViewHelper::e($editUrl) ?>"
+                                    title="EDITAR">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                             </div>

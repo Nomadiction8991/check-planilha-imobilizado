@@ -1,4 +1,5 @@
 <?php
+
 /**
  * View: Listagem de Comuns
  * 
@@ -35,14 +36,13 @@ $limite = $limite ?? 10;
             <div class="col-12">
                 <label for="busca" class="form-label">CÓDIGO OU DESCRIÇÃO</label>
                 <div class="input-group">
-                    <input 
-                        type="text" 
-                        name="busca" 
-                        id="busca" 
+                    <input
+                        type="text"
+                        name="busca"
+                        id="busca"
                         class="form-control text-uppercase"
                         value="<?= ViewHelper::e($busca) ?>"
-                        placeholder="DIGITE CÓDIGO OU DESCRIÇÃO"
-                    >
+                        placeholder="DIGITE CÓDIGO OU DESCRIÇÃO">
                     <?php if ($busca): ?>
                         <a href="?" class="btn btn-outline-secondary" title="LIMPAR BUSCA">
                             <i class="bi bi-x-lg"></i>
@@ -85,10 +85,10 @@ $limite = $limite ?? 10;
                     <?php
                     // Verificar se cadastro está completo
                     $cadastroCompleto = !empty(trim($comum['descricao'] ?? '')) &&
-                                      !empty(trim($comum['cnpj'] ?? '')) &&
-                                      !empty(trim($comum['administracao'] ?? '')) &&
-                                      !empty(trim($comum['cidade'] ?? ''));
-                    
+                        !empty(trim($comum['cnpj'] ?? '')) &&
+                        !empty(trim($comum['administracao'] ?? '')) &&
+                        !empty(trim($comum['cidade'] ?? ''));
+
                     // Formatar código (BR 00-0000)
                     $codigo = preg_replace("/\D/", '', (string)($comum['codigo'] ?? ''));
                     if ($codigo === '') {
@@ -97,7 +97,7 @@ $limite = $limite ?? 10;
                         $codigo = str_pad($codigo, 6, '0', STR_PAD_LEFT);
                         $codigoFormatado = 'BR ' . substr($codigo, 0, 2) . '-' . substr($codigo, 2);
                     }
-                    
+
                     // URLs das ações
                     $editUrl = ViewHelper::urlComQuery('/comuns/editar', ['id' => $comum['id']]);
                     $viewUrl = ViewHelper::urlComQuery('/planilhas/visualizar', ['comum_id' => $comum['id']]);
@@ -111,21 +111,19 @@ $limite = $limite ?? 10;
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm d-flex justify-content-center" role="group">
-                                <a 
-                                    class="btn btn-outline-primary" 
-                                    href="<?= ViewHelper::e($editUrl) ?>" 
-                                    title="EDITAR COMUM"
-                                >
+                                <a
+                                    class="btn btn-outline-primary"
+                                    href="<?= ViewHelper::e($editUrl) ?>"
+                                    title="EDITAR COMUM">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <button 
+                                <button
                                     type="button"
-                                    class="btn btn-outline-secondary btn-view-planilha" 
+                                    class="btn btn-outline-secondary btn-view-planilha"
                                     data-cadastro-ok="<?= $cadastroCompleto ? '1' : '0' ?>"
                                     data-edit-url="<?= ViewHelper::e($editUrl) ?>"
                                     data-view-url="<?= ViewHelper::e($viewUrl) ?>"
-                                    title="VISUALIZAR PLANILHA"
-                                >
+                                    title="VISUALIZAR PLANILHA">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
@@ -165,28 +163,28 @@ $limite = $limite ?? 10;
 
 <!-- JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modalCadastro = new bootstrap.Modal(document.getElementById('modalCadastroIncompleto'));
-    const btnCompletar = document.getElementById('btnCompletarCadastro');
-    
-    // Handler para botões "visualizar planilha"
-    document.querySelectorAll('.btn-view-planilha').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const cadastroCompleto = this.dataset.cadastroOk === '1';
-            const editUrl = this.dataset.editUrl;
-            const viewUrl = this.dataset.viewUrl;
-            
-            if (!cadastroCompleto) {
-                // Mostrar modal de cadastro incompleto
-                btnCompletar.href = editUrl;
-                modalCadastro.show();
-            } else {
-                // Redirecionar para visualização da planilha
-                window.location.href = viewUrl;
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalCadastro = new bootstrap.Modal(document.getElementById('modalCadastroIncompleto'));
+        const btnCompletar = document.getElementById('btnCompletarCadastro');
+
+        // Handler para botões "visualizar planilha"
+        document.querySelectorAll('.btn-view-planilha').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const cadastroCompleto = this.dataset.cadastroOk === '1';
+                const editUrl = this.dataset.editUrl;
+                const viewUrl = this.dataset.viewUrl;
+
+                if (!cadastroCompleto) {
+                    // Mostrar modal de cadastro incompleto
+                    btnCompletar.href = editUrl;
+                    modalCadastro.show();
+                } else {
+                    // Redirecionar para visualização da planilha
+                    window.location.href = viewUrl;
+                }
+            });
         });
     });
-});
 </script>

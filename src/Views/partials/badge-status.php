@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Partial: Badge de Status
  * 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * View: Criar Novo Usuário
  * 
@@ -25,7 +26,7 @@ $old = $old ?? [];
     <?php if ($publicRegister): ?>
         <input type="hidden" name="tipo" value="DOADOR/CÔNJUGE">
     <?php endif; ?>
-    
+
     <!-- CARD 1: DADOS BÁSICOS -->
     <div class="card mb-3">
         <div class="card-header">
@@ -36,7 +37,7 @@ $old = $old ?? [];
                 'required' => true,
                 'placeholder' => 'DIGITE O NOME COMPLETO'
             ]) ?>
-            
+
             <div class="row g-3">
                 <div class="col-12">
                     <?= FormHelper::text('cpf', 'CPF', $old['cpf'] ?? '', [
@@ -45,7 +46,7 @@ $old = $old ?? [];
                         'placeholder' => '000.000.000-00'
                     ]) ?>
                 </div>
-                
+
                 <div class="col-12">
                     <?= FormHelper::text('rg', 'RG', $old['rg'] ?? '', [
                         'required' => true,
@@ -55,7 +56,7 @@ $old = $old ?? [];
                         'id' => 'rg_igual_cpf'
                     ]) ?>
                 </div>
-                
+
                 <div class="col-12">
                     <?= FormHelper::text('telefone', 'TELEFONE', $old['telefone'] ?? '', [
                         'required' => true,
@@ -64,11 +65,11 @@ $old = $old ?? [];
                     ]) ?>
                 </div>
             </div>
-            
+
             <?= FormHelper::email('email', 'EMAIL', $old['email'] ?? '', [
                 'required' => true
             ]) ?>
-            
+
             <div class="row g-3">
                 <div class="col-12">
                     <?= FormHelper::password('senha', 'SENHA', [
@@ -77,7 +78,7 @@ $old = $old ?? [];
                         'help' => 'Mínimo de 6 caracteres'
                     ]) ?>
                 </div>
-                
+
                 <div class="col-12">
                     <?= FormHelper::password('confirmar_senha', 'CONFIRMAR SENHA', [
                         'required' => true,
@@ -87,7 +88,7 @@ $old = $old ?? [];
             </div>
         </div>
     </div>
-    
+
     <!-- CARD 2: ESTADO CIVIL -->
     <div class="card mb-3">
         <div class="card-header">
@@ -99,7 +100,7 @@ $old = $old ?? [];
             ]) ?>
         </div>
     </div>
-    
+
     <!-- CARD 3: DADOS DO CÔNJUGE -->
     <div id="cardConjuge" class="card mb-3" style="display:none;">
         <div class="card-header">
@@ -109,7 +110,7 @@ $old = $old ?? [];
             <?= FormHelper::text('nome_conjuge', 'NOME COMPLETO DO CÔNJUGE', $old['nome_conjuge'] ?? '', [
                 'id' => 'nome_conjuge'
             ]) ?>
-            
+
             <div class="row g-3">
                 <div class="col-12">
                     <?= FormHelper::text('cpf_conjuge', 'CPF DO CÔNJUGE', $old['cpf_conjuge'] ?? '', [
@@ -117,7 +118,7 @@ $old = $old ?? [];
                         'placeholder' => '000.000.000-00'
                     ]) ?>
                 </div>
-                
+
                 <div class="col-12">
                     <?= FormHelper::text('rg_conjuge', 'RG DO CÔNJUGE', $old['rg_conjuge'] ?? '', [
                         'id' => 'rg_conjuge'
@@ -126,7 +127,7 @@ $old = $old ?? [];
                         'id' => 'rg_conjuge_igual_cpf'
                     ]) ?>
                 </div>
-                
+
                 <div class="col-12">
                     <?= FormHelper::text('telefone_conjuge', 'TELEFONE DO CÔNJUGE', $old['telefone_conjuge'] ?? '', [
                         'id' => 'telefone_conjuge',
@@ -136,7 +137,7 @@ $old = $old ?? [];
             </div>
         </div>
     </div>
-    
+
     <!-- CARD 4: ENDEREÇO -->
     <div class="card mb-3">
         <div class="card-header">
@@ -148,18 +149,18 @@ $old = $old ?? [];
                 'placeholder' => '00000-000',
                 'help' => 'Preencha para buscar automaticamente'
             ]) ?>
-            
+
             <?= FormHelper::text('endereco_logradouro', 'LOGRADOURO', $old['endereco_logradouro'] ?? '', [
                 'id' => 'logradouro'
             ]) ?>
-            
+
             <div class="row g-3">
                 <div class="col-6">
                     <?= FormHelper::text('endereco_numero', 'NÚMERO', $old['endereco_numero'] ?? '', [
                         'id' => 'numero'
                     ]) ?>
                 </div>
-                
+
                 <div class="col-6">
                     <?= FormHelper::text('endereco_complemento', 'COMPLEMENTO', $old['endereco_complemento'] ?? '', [
                         'id' => 'complemento',
@@ -167,29 +168,49 @@ $old = $old ?? [];
                     ]) ?>
                 </div>
             </div>
-            
+
             <?= FormHelper::text('endereco_bairro', 'BAIRRO', $old['endereco_bairro'] ?? '', [
                 'id' => 'bairro'
             ]) ?>
-            
+
             <div class="row g-3">
                 <div class="col-8">
                     <?= FormHelper::text('endereco_cidade', 'CIDADE', $old['endereco_cidade'] ?? '', [
                         'id' => 'cidade'
                     ]) ?>
                 </div>
-                
+
                 <div class="col-4">
                     <?php
                     $estados = [
                         '' => 'Selecione',
-                        'AC' => 'AC', 'AL' => 'AL', 'AP' => 'AP', 'AM' => 'AM',
-                        'BA' => 'BA', 'CE' => 'CE', 'DF' => 'DF', 'ES' => 'ES',
-                        'GO' => 'GO', 'MA' => 'MA', 'MT' => 'MT', 'MS' => 'MS',
-                        'MG' => 'MG', 'PA' => 'PA', 'PB' => 'PB', 'PR' => 'PR',
-                        'PE' => 'PE', 'PI' => 'PI', 'RJ' => 'RJ', 'RN' => 'RN',
-                        'RS' => 'RS', 'RO' => 'RO', 'RR' => 'RR', 'SC' => 'SC',
-                        'SP' => 'SP', 'SE' => 'SE', 'TO' => 'TO'
+                        'AC' => 'AC',
+                        'AL' => 'AL',
+                        'AP' => 'AP',
+                        'AM' => 'AM',
+                        'BA' => 'BA',
+                        'CE' => 'CE',
+                        'DF' => 'DF',
+                        'ES' => 'ES',
+                        'GO' => 'GO',
+                        'MA' => 'MA',
+                        'MT' => 'MT',
+                        'MS' => 'MS',
+                        'MG' => 'MG',
+                        'PA' => 'PA',
+                        'PB' => 'PB',
+                        'PR' => 'PR',
+                        'PE' => 'PE',
+                        'PI' => 'PI',
+                        'RJ' => 'RJ',
+                        'RN' => 'RN',
+                        'RS' => 'RS',
+                        'RO' => 'RO',
+                        'RR' => 'RR',
+                        'SC' => 'SC',
+                        'SP' => 'SP',
+                        'SE' => 'SE',
+                        'TO' => 'TO'
                     ];
                     ?>
                     <?= FormHelper::select('endereco_estado', 'UF', $estados, $old['endereco_estado'] ?? '', [
@@ -199,7 +220,7 @@ $old = $old ?? [];
             </div>
         </div>
     </div>
-    
+
     <!-- Botões -->
     <?= FormHelper::buttons(
         'CADASTRAR USUÁRIO',
@@ -212,83 +233,83 @@ $old = $old ?? [];
 <script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Máscaras
-    Inputmask('999.999.999-99').mask('#cpf, #cpf_conjuge');
-    Inputmask('99.999.999-9').mask('#rg, #rg_conjuge');
-    Inputmask('(99) 99999-9999').mask('#telefone, #telefone_conjuge');
-    Inputmask('99999-999').mask('#cep');
-    
-    // Mostrar/ocultar dados do cônjuge
-    $('#casado').on('change', function() {
-        $('#cardConjuge').toggle(this.checked);
-        
-        // Tornar campos obrigatórios se casado
-        if (this.checked) {
-            $('#nome_conjuge, #cpf_conjuge, #rg_conjuge, #telefone_conjuge')
-                .attr('required', true);
-        } else {
-            $('#nome_conjuge, #cpf_conjuge, #rg_conjuge, #telefone_conjuge')
-                .removeAttr('required');
-        }
+    $(document).ready(function() {
+        // Máscaras
+        Inputmask('999.999.999-99').mask('#cpf, #cpf_conjuge');
+        Inputmask('99.999.999-9').mask('#rg, #rg_conjuge');
+        Inputmask('(99) 99999-9999').mask('#telefone, #telefone_conjuge');
+        Inputmask('99999-999').mask('#cep');
+
+        // Mostrar/ocultar dados do cônjuge
+        $('#casado').on('change', function() {
+            $('#cardConjuge').toggle(this.checked);
+
+            // Tornar campos obrigatórios se casado
+            if (this.checked) {
+                $('#nome_conjuge, #cpf_conjuge, #rg_conjuge, #telefone_conjuge')
+                    .attr('required', true);
+            } else {
+                $('#nome_conjuge, #cpf_conjuge, #rg_conjuge, #telefone_conjuge')
+                    .removeAttr('required');
+            }
+        });
+
+        // RG igual ao CPF
+        $('#rg_igual_cpf').on('change', function() {
+            if (this.checked) {
+                const cpf = $('#cpf').val().replace(/\D/g, '');
+                $('#rg').val(cpf).prop('readonly', true);
+            } else {
+                $('#rg').val('').prop('readonly', false);
+            }
+        });
+
+        $('#rg_conjuge_igual_cpf').on('change', function() {
+            if (this.checked) {
+                const cpf = $('#cpf_conjuge').val().replace(/\D/g, '');
+                $('#rg_conjuge').val(cpf).prop('readonly', true);
+            } else {
+                $('#rg_conjuge').val('').prop('readonly', false);
+            }
+        });
+
+        // Buscar CEP
+        $('#cep').on('blur', function() {
+            const cep = $(this).val().replace(/\D/g, '');
+
+            if (cep.length === 8) {
+                $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(data) {
+                    if (!data.erro) {
+                        $('#logradouro').val(data.logradouro.toUpperCase());
+                        $('#bairro').val(data.bairro.toUpperCase());
+                        $('#cidade').val(data.localidade.toUpperCase());
+                        $('#estado').val(data.uf);
+                        $('#numero').focus();
+                    } else {
+                        alert('CEP NÃO ENCONTRADO!');
+                    }
+                }).fail(function() {
+                    alert('ERRO AO BUSCAR CEP!');
+                });
+            }
+        });
+
+        // Validar senha
+        $('#formUsuario').on('submit', function(e) {
+            const senha = $('#senha').val();
+            const confirmar = $('#confirmar_senha').val();
+
+            if (senha !== confirmar) {
+                e.preventDefault();
+                alert('AS SENHAS NÃO COINCIDEM!');
+                return false;
+            }
+
+            if (senha.length < 6) {
+                e.preventDefault();
+                alert('A SENHA DEVE TER NO MÍNIMO 6 CARACTERES!');
+                return false;
+            }
+        });
     });
-    
-    // RG igual ao CPF
-    $('#rg_igual_cpf').on('change', function() {
-        if (this.checked) {
-            const cpf = $('#cpf').val().replace(/\D/g, '');
-            $('#rg').val(cpf).prop('readonly', true);
-        } else {
-            $('#rg').val('').prop('readonly', false);
-        }
-    });
-    
-    $('#rg_conjuge_igual_cpf').on('change', function() {
-        if (this.checked) {
-            const cpf = $('#cpf_conjuge').val().replace(/\D/g, '');
-            $('#rg_conjuge').val(cpf).prop('readonly', true);
-        } else {
-            $('#rg_conjuge').val('').prop('readonly', false);
-        }
-    });
-    
-    // Buscar CEP
-    $('#cep').on('blur', function() {
-        const cep = $(this).val().replace(/\D/g, '');
-        
-        if (cep.length === 8) {
-            $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(data) {
-                if (!data.erro) {
-                    $('#logradouro').val(data.logradouro.toUpperCase());
-                    $('#bairro').val(data.bairro.toUpperCase());
-                    $('#cidade').val(data.localidade.toUpperCase());
-                    $('#estado').val(data.uf);
-                    $('#numero').focus();
-                } else {
-                    alert('CEP NÃO ENCONTRADO!');
-                }
-            }).fail(function() {
-                alert('ERRO AO BUSCAR CEP!');
-            });
-        }
-    });
-    
-    // Validar senha
-    $('#formUsuario').on('submit', function(e) {
-        const senha = $('#senha').val();
-        const confirmar = $('#confirmar_senha').val();
-        
-        if (senha !== confirmar) {
-            e.preventDefault();
-            alert('AS SENHAS NÃO COINCIDEM!');
-            return false;
-        }
-        
-        if (senha.length < 6) {
-            e.preventDefault();
-            alert('A SENHA DEVE TER NO MÍNIMO 6 CARACTERES!');
-            return false;
-        }
-    });
-});
 </script>

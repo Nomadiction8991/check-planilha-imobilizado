@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Layout Principal da Aplicação
  * 
@@ -13,9 +14,11 @@
 
 // Detectar ambiente para manifest PWA
 $ambiente_manifest = 'prod';
-if (strpos($_SERVER['REQUEST_URI'], '/dev/') !== false ||
+if (
+    strpos($_SERVER['REQUEST_URI'], '/dev/') !== false ||
     strpos($_SERVER['HTTP_HOST'], 'dev.') !== false ||
-    strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {
+    strpos($_SERVER['HTTP_HOST'], 'localhost') !== false
+) {
     $ambiente_manifest = 'dev';
 }
 $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/manifest-prod.json';
@@ -28,6 +31,7 @@ $customJs = $customJs ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -273,11 +277,10 @@ $customJs = $customJs ?? '';
         }
 
         /* Custom CSS Adicional */
-        <?php if ($customCss): ?>
-        <?= $customCss ?>
-        <?php endif; ?>
+        <?php if ($customCss): ?><?= $customCss ?><?php endif; ?>
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <div class="mobile-wrapper">
@@ -354,7 +357,10 @@ $customJs = $customJs ?? '';
                     }
                 }
             });
-            mo.observe(document.body, { childList: true, subtree: true });
+            mo.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
         })();
     </script>
 
@@ -372,9 +378,10 @@ $customJs = $customJs ?? '';
 
     <!-- JavaScript Customizado -->
     <?php if ($customJs): ?>
-    <script>
-        <?= $customJs ?>
-    </script>
+        <script>
+            <?= $customJs ?>
+        </script>
     <?php endif; ?>
 </body>
+
 </html>
