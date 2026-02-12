@@ -73,6 +73,8 @@ class MapaRotas
             'GET /planilhas/importar' => [PlanilhaController::class, 'importar'],
             'POST /planilhas/importar' => [PlanilhaController::class, 'processarImportacao'],
             'GET /planilhas/visualizar' => [PlanilhaController::class, 'visualizar'],
+            'GET /planilhas/preview' => [PlanilhaController::class, 'preview'],
+            'POST /planilhas/confirmar' => [PlanilhaController::class, 'confirmarImportacao'],
             'GET /planilhas/progresso' => [PlanilhaController::class, 'progresso'],
             'POST /planilhas/processar-arquivo' => [PlanilhaController::class, 'processarArquivo'],
             'GET /planilhas/api/progresso' => [PlanilhaController::class, 'apiProgresso'],

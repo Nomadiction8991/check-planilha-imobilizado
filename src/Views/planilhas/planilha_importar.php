@@ -4,50 +4,8 @@ require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 $pageTitle = 'Importar Planilha';
 $backUrl = base_url('/');
 
-$jobDir = realpath(__DIR__ . '/../../../storage/tmp');
-$jobEmExecucao = null;
-if ($jobDir !== false) {
-    foreach (glob($jobDir . '/import_job_*.json') ?: [] as $jobFile) {
-        $data = json_decode(@file_get_contents($jobFile), true);
-        if (is_array($data)) {
-            $status = $data['status'] ?? 'ready';
-            if ($status !== 'done') {
-                $jobEmExecucao = $data['id'] ?? basename($jobFile, '.json');
-                break;
-            }
-        }
-    }
-}
-
 ob_start();
 ?>
-
-<?php if ($jobEmExecucao): ?>
-    <!-- Modal: job em andamento (mostra imediatamente e bloqueia nova importação) -->
-    <div class="modal fade" id="job-active-modal" tabindex="-1" aria-labelledby="job-active-title" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="job-active-title">Importação em andamento</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    Já existe uma importação em progresso (ID: <?php echo htmlspecialchars($jobEmExecucao, ENT_QUOTES, 'UTF-8'); ?>). Conclua ou cancele antes de iniciar uma nova.
-                </div>
-                <div class="modal-footer">
-                    <a class="btn btn-primary" href="<?php echo htmlspecialchars(base_url('src/Views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-<?php endif; ?>
-
-<?php if ($jobEmExecucao): ?>
-    <p class="text-muted small mb-3">
-        Há uma importação em andamento. <a href="<?php echo htmlspecialchars(base_url('src/Views/planilhas/importacao_progresso.php?job=' . urlencode($jobEmExecucao)), ENT_QUOTES, 'UTF-8'); ?>">Ver progresso</a>
-    </p>
-<?php endif; ?>
 
 <form action="/planilhas/importar" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
     <!-- Arquivo CSV -->
@@ -58,78 +16,52 @@ ob_start();
         </div>
         <div class="card-body">
             <label for="arquivo_csv" class="form-label text-uppercase">Arquivo CSV <span class="text-danger">*</span></label>
-            <input type="file" class="form-control text-uppercase" id="arquivo_csv" name="arquivo_csv" accept=".csv" required>
+            <input type="file" class="form-control text-uppercase" id="arquivo_csv" name="arquivo_csv" accept=".csv,.txt" required>
             <div class="invalid-feedback">Selecione um arquivo CSV válido.</div>
-        </div>
-    </div>
-
-    <!-- Configurações Básicas -->
-    <div class="card mb-3">
-        <div class="card-header">
-            <i class="bi bi-gear me-2"></i>
-            <?php echo htmlspecialchars(to_uppercase('Configurações básicas'), ENT_QUOTES, 'UTF-8'); ?>
-        </div>
-        <div class="card-body">
-            <div class="mb-3">
-                <label for="pulo_linhas" class="form-label text-uppercase">Linhas iniciais a pular <span class="text-danger">*</span></label>
-                <input type="number" class="form-control text-uppercase" id="pulo_linhas" name="pulo_linhas" value="25" min="0" required>
-                <div class="invalid-feedback">Informe quantas linhas devem ser ignoradas.</div>
-            </div>
-            <div class="mb-3">
-                <label for="posicao_data" class="form-label text-uppercase">Célula data <span class="text-danger">*</span></label>
-                <input type="text" class="form-control text-uppercase" id="posicao_data" name="posicao_data" value="D13" required>
-
-                <div class="invalid-feedback">Informe a localização da célula da data.</div>
+            <div class="form-text small">
+                <i class="bi bi-info-circle me-1"></i>
+                O arquivo será analisado e você poderá conferir os dados antes de importar.
             </div>
         </div>
     </div>
 
-    <!-- Mapeamento de Colunas -->
-    <div class="card mb-3">
-        <div class="card-header">
-            <i class="bi bi-columns-gap me-2"></i>
-            <?php echo htmlspecialchars(to_uppercase('Mapeamento de colunas'), ENT_QUOTES, 'UTF-8'); ?>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="mapeamento_codigo" class="form-label text-uppercase">Código <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control text-center text-uppercase" id="mapeamento_codigo" name="mapeamento_codigo" value="A" maxlength="2" required>
-                    <div class="invalid-feedback">Informe a coluna do código.</div>
+    <!-- Informativo do Novo Fluxo -->
+    <div class="card mb-3 border-info">
+        <div class="card-body py-2">
+            <h6 class="card-title mb-2">
+                <i class="bi bi-diagram-3 me-2 text-info"></i>
+                COMO FUNCIONA
+            </h6>
+            <div class="d-flex flex-column gap-1 small">
+                <div>
+                    <span class="badge bg-primary me-1">1</span>
+                    <strong>Upload</strong> — Envie o arquivo CSV
                 </div>
-                <div class="col-md-6">
-                    <label for="mapeamento_complemento" class="form-label text-uppercase">Complemento <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control text-center text-uppercase" id="mapeamento_complemento" name="mapeamento_complemento" value="D" maxlength="2" required>
-                    <div class="invalid-feedback">Informe a coluna do complemento.</div>
+                <div>
+                    <span class="badge bg-info me-1">2</span>
+                    <strong>Conferência</strong> — Veja o que será importado, atualizado ou ignorado
                 </div>
-            </div>
-            <div class="row g-3 mt-2">
-                <div class="col-md-6">
-                    <label for="mapeamento_dependencia" class="form-label text-uppercase">Dependência <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control text-center text-uppercase" id="mapeamento_dependencia" name="mapeamento_dependencia" value="P" maxlength="2" required>
-                    <div class="invalid-feedback">Informe a coluna da dependência.</div>
+                <div>
+                    <span class="badge bg-warning text-dark me-1">3</span>
+                    <strong>Escolha</strong> — Selecione o que importar, pular ou excluir por registro
                 </div>
-                <div class="col-md-6">
-                    <label for="coluna_localidade" class="form-label text-uppercase">Localidade <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control text-center text-uppercase" id="coluna_localidade" name="coluna_localidade" value="K" maxlength="2" required>
-                    <div class="invalid-feedback">Informe a coluna com o código de localidade.</div>
+                <div>
+                    <span class="badge bg-success me-1">4</span>
+                    <strong>Confirme</strong> — Processe apenas o que você selecionou
                 </div>
             </div>
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary w-100 text-uppercase">
+    <button type="submit" class="btn btn-primary w-100 text-uppercase" id="btn-enviar">
         <i class="bi bi-upload me-2"></i>
-        <?php echo htmlspecialchars(to_uppercase('Importar Planilha'), ENT_QUOTES, 'UTF-8'); ?>
+        <?php echo htmlspecialchars(to_uppercase('Enviar e Analisar'), ENT_QUOTES, 'UTF-8'); ?>
     </button>
 </form>
 
 <script>
     (() => {
         'use strict';
-        const jobActive = <?php echo $jobEmExecucao ? 'true' : 'false'; ?>;
-        const jobModalEl = document.getElementById('job-active-modal');
-        const jobModal = jobModalEl ? new bootstrap.Modal(jobModalEl) : null;
         const forms = document.querySelectorAll('.needs-validation');
 
         Array.from(forms).forEach(form => {
@@ -138,16 +70,14 @@ ob_start();
                     event.preventDefault();
                     event.stopPropagation();
                 } else {
-                    const action = form.getAttribute('action');
-                    form.setAttribute('action', action + '?action=start');
+                    // Desabilita botão e mostra loading
+                    const btn = document.getElementById('btn-enviar');
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>ANALISANDO...';
                 }
                 form.classList.add('was-validated');
             }, false);
         });
-
-        if (jobActive && jobModal) {
-            jobModal.show();
-        }
     })();
 </script>
 

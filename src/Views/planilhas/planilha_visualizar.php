@@ -298,189 +298,214 @@ if (false && !empty($acesso_bloqueado)) {
 
         /* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
         .floating-buttons-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1040;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            z-index: 1040 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 15px !important;
+            align-items: center !important;
         }
 
         .floating-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            background: white;
-            color: #333;
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            border: none !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 24px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+            background: white !important;
+            color: #333 !important;
+            padding: 0 !important;
+            line-height: 1 !important;
         }
 
         .floating-btn:hover {
-            transform: scale(1.15);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+            transform: scale(1.15) !important;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
         }
 
         .floating-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.95) !important;
         }
 
         .floating-btn.mic {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
         }
 
         .floating-btn.cam {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+            color: white !important;
         }
 
         .floating-btn.listening {
-            animation: pulse-float 1.5s infinite;
+            animation: pulse-float 1.5s infinite !important;
         }
 
         @keyframes pulse-float {
             0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+                transform: scale(1) !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
             }
             50% {
-                transform: scale(1.1);
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+                transform: scale(1.1) !important;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
             }
         }
 
         /* ===== MODAL DE CÂMERA EM TELA INTEIRA ===== */
         .camera-fullscreen-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #000;
-            z-index: 1050;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: #000 !important;
+            z-index: 1050 !important;
+            display: none !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         .camera-fullscreen-modal.show {
-            display: flex;
+            display: flex !important;
         }
 
         .camera-fullscreen-content {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            position: relative !important;
         }
 
         .camera-scanner-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex: 1 !important;
+            position: relative !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: #000 !important;
         }
 
         .camera-scanner-container video,
         .camera-scanner-container canvas {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover;
+            object-fit: cover !important;
+            display: block !important;
         }
 
         .camera-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            pointer-events: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .scanner-frame-fullscreen {
-            width: 80%;
-            max-width: 600px;
-            aspect-ratio: 1;
-            border: 3px solid rgba(255, 255, 255, 0.8);
-            border-radius: 20px;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
+            width: 80% !important;
+            max-width: 600px !important;
+            aspect-ratio: 1 !important;
+            border: 3px solid rgba(255, 255, 255, 0.8) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+            transition: all 0.3s ease !important;
         }
 
         .scanner-frame-fullscreen.detected {
-            border-color: #28a745;
-            box-shadow: 0 0 0 9999px rgba(40, 167, 69, 0.3);
+            border-color: #28a745 !important;
+            box-shadow: 0 0 0 9999px rgba(40, 167, 69, 0.3) !important;
         }
 
         .camera-controls {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px 20px;
-            display: flex;
-            gap: 15px;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+            background: rgba(0, 0, 0, 0.8) !important;
+            padding: 15px 20px !important;
+            display: flex !important;
+            gap: 15px !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            width: 100% !important;
+            position: relative !important;
+            z-index: 1051 !important;
         }
 
         .camera-controls label {
-            color: white;
-            margin: 0;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: white !important;
+            margin: 0 !important;
+            font-size: 0.9rem !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            white-space: nowrap !important;
         }
 
         .camera-controls select {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            background: white;
-            color: #333;
+            padding: 8px 12px !important;
+            border-radius: 6px !important;
+            border: none !important;
+            background: white !important;
+            color: #333 !important;
+            font-size: 0.9rem !important;
+            cursor: pointer !important;
+        }
+
+        .camera-controls input[type="range"] {
+            cursor: pointer !important;
+            min-width: 100px !important;
         }
 
         .camera-close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            z-index: 1051;
-            transition: all 0.3s ease;
-            color: #333;
+            position: absolute !important;
+            top: 20px !important;
+            right: 20px !important;
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50% !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: none !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 24px !important;
+            z-index: 1051 !important;
+            transition: all 0.3s ease !important;
+            color: #333 !important;
+            padding: 0 !important;
+            line-height: 1 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
         }
 
         .camera-close-btn:hover {
-            background: white;
-            transform: scale(1.1);
+            background: white !important;
+            transform: scale(1.1) !important;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        .camera-close-btn:active {
+            transform: scale(0.95) !important;
         }
 
         /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
@@ -1077,6 +1102,218 @@ ob_start();
 ?>
 
 <style>
+    /* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
+    .floating-buttons-container {
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        z-index: 1040 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        align-items: center !important;
+    }
+
+    .floating-btn {
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 50% !important;
+        border: none !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+        background: white !important;
+        color: #333 !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+    }
+
+    .floating-btn:hover {
+        transform: scale(1.15) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .floating-btn:active {
+        transform: scale(0.95) !important;
+    }
+
+    .floating-btn.mic {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+    }
+
+    .floating-btn.cam {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        color: white !important;
+    }
+
+    .floating-btn.listening {
+        animation: pulse-float 1.5s infinite !important;
+    }
+
+    @keyframes pulse-float {
+        0%, 100% {
+            transform: scale(1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+        }
+        50% {
+            transform: scale(1.1) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+        }
+    }
+
+    /* ===== MODAL DE CÂMERA EM TELA INTEIRA ===== */
+    .camera-fullscreen-modal {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: #000 !important;
+        z-index: 1050 !important;
+        display: none !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .camera-fullscreen-modal.show {
+        display: flex !important;
+    }
+
+    .camera-fullscreen-content {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+    }
+
+    .camera-scanner-container {
+        flex: 1 !important;
+        position: relative !important;
+        overflow: hidden !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: #000 !important;
+    }
+
+    .camera-scanner-container video,
+    .camera-scanner-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block !important;
+    }
+
+    .camera-overlay {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        pointer-events: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .scanner-frame-fullscreen {
+        width: 80% !important;
+        max-width: 600px !important;
+        aspect-ratio: 1 !important;
+        border: 3px solid rgba(255, 255, 255, 0.8) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .scanner-frame-fullscreen.detected {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 0 9999px rgba(40, 167, 69, 0.3) !important;
+    }
+
+    .camera-controls {
+        background: rgba(0, 0, 0, 0.8) !important;
+        padding: 15px 20px !important;
+        display: flex !important;
+        gap: 15px !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        position: relative !important;
+        z-index: 1051 !important;
+    }
+
+    .camera-controls label {
+        color: white !important;
+        margin: 0 !important;
+        font-size: 0.9rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        white-space: nowrap !important;
+    }
+
+    .camera-controls select {
+        padding: 8px 12px !important;
+        border-radius: 6px !important;
+        border: none !important;
+        background: white !important;
+        color: #333 !important;
+        font-size: 0.9rem !important;
+        cursor: pointer !important;
+    }
+
+    .camera-controls input[type="range"] {
+        cursor: pointer !important;
+        min-width: 100px !important;
+    }
+
+    .camera-close-btn {
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        width: 50px !important;
+        height: 50px !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: none !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        z-index: 1051 !important;
+        transition: all 0.3s ease !important;
+        color: #333 !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .camera-close-btn:hover {
+        background: white !important;
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .camera-close-btn:active {
+        transform: scale(0.95) !important;
+    }
+
     /* Ajuste de cores dos botões de ação na visualização */
     .acao-container .action-imprimir .btn {
         border-color: #0D6EFD !important;

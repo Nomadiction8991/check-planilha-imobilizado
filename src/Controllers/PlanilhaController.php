@@ -5,17 +5,20 @@ namespace App\Controllers;
 use App\Core\ConnectionManager;
 use App\Core\SessionManager;
 use App\Services\ImportacaoService;
+use App\Services\CsvParserService;
 use PDO;
 
 class PlanilhaController extends BaseController
 {
     private PDO $conexao;
     private ImportacaoService $importacaoService;
+    private CsvParserService $csvParserService;
 
     public function __construct(?PDO $conexao = null)
     {
         $this->conexao = $conexao ?? ConnectionManager::getConnection();
         $this->importacaoService = new ImportacaoService($this->conexao);
+        $this->csvParserService = new CsvParserService($this->conexao);
     }
 
     public function importar(): void
@@ -23,6 +26,9 @@ class PlanilhaController extends BaseController
         $this->renderizar('planilhas/planilha_importar');
     }
 
+    /**
+     * PASSO 1: Upload do CSV → salva arquivo → analisa → redireciona para preview.
+     */
     public function processarImportacao(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,12 +45,17 @@ class PlanilhaController extends BaseController
                 throw new \Exception('Sessão inválida');
             }
 
-            // Valida upload
-            if (!isset($_FILES['arquivo']) || $_FILES['arquivo']['error'] !== UPLOAD_ERR_OK) {
-                throw new \Exception('Erro ao fazer upload do arquivo');
+            // Valida upload — aceita 'arquivo_csv' e 'arquivo' (compatibilidade)
+            $arquivo = null;
+            if (isset($_FILES['arquivo_csv']) && $_FILES['arquivo_csv']['error'] === UPLOAD_ERR_OK) {
+                $arquivo = $_FILES['arquivo_csv'];
+            } elseif (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK) {
+                $arquivo = $_FILES['arquivo'];
             }
 
-            $arquivo = $_FILES['arquivo'];
+            if (!$arquivo) {
+                throw new \Exception('Erro ao fazer upload do arquivo');
+            }
 
             // Valida tipo
             $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
@@ -53,14 +64,19 @@ class PlanilhaController extends BaseController
             }
 
             // Move arquivo para storage/importacao
+            $dirImportacao = __DIR__ . '/../../storage/importacao';
+            if (!is_dir($dirImportacao)) {
+                mkdir($dirImportacao, 0777, true);
+            }
+
             $nomeArquivo = 'importacao_' . $comumId . '_' . time() . '.' . $extensao;
-            $caminhoDestino = __DIR__ . '/../../storage/importacao/' . $nomeArquivo;
+            $caminhoDestino = $dirImportacao . '/' . $nomeArquivo;
 
             if (!move_uploaded_file($arquivo['tmp_name'], $caminhoDestino)) {
                 throw new \Exception('Erro ao salvar arquivo');
             }
 
-            // Registra importação
+            // Registra importação no banco
             $importacaoId = $this->importacaoService->iniciarImportacao(
                 $usuarioId,
                 $comumId,
@@ -68,13 +84,80 @@ class PlanilhaController extends BaseController
                 $caminhoDestino
             );
 
-            // Redireciona para tela de progresso
-            $this->redirecionar('/planilhas/progresso?id=' . $importacaoId);
+            // Analisa CSV vs banco de dados
+            $analise = $this->csvParserService->analisar($caminhoDestino, $comumId);
+
+            // Salva análise em JSON para a tela de preview
+            $this->csvParserService->salvarAnalise($importacaoId, $analise);
+
+            // Redireciona para tela de preview (conferência)
+            $this->redirecionar('/planilhas/preview?id=' . $importacaoId);
         } catch (\Exception $e) {
             error_log('Erro ao processar importação: ' . $e->getMessage());
             $this->setMensagem('Erro: ' . $e->getMessage(), 'danger');
             $this->redirecionar('/planilhas/importar');
         }
+    }
+
+    /**
+     * PASSO 2: Tela de preview — mostra análise com diff e ações por registro.
+     */
+    public function preview(): void
+    {
+        $importacaoId = (int) ($_GET['id'] ?? 0);
+
+        if ($importacaoId <= 0) {
+            $this->redirecionar('/planilhas/importar?erro=ID inválido');
+            return;
+        }
+
+        // Carrega dados da importação
+        $importacao = $this->importacaoService->buscarProgresso($importacaoId);
+        if (!$importacao) {
+            $this->redirecionar('/planilhas/importar?erro=Importação não encontrada');
+            return;
+        }
+
+        // Carrega análise salva
+        $analise = $this->csvParserService->carregarAnalise($importacaoId);
+        if (!$analise) {
+            $this->redirecionar('/planilhas/importar?erro=Análise não encontrada');
+            return;
+        }
+
+        $this->renderizar('planilhas/importacao_preview', [
+            'importacao_id' => $importacaoId,
+            'importacao' => $importacao,
+            'resumo' => $analise['resumo'],
+            'registros' => $analise['registros'],
+        ]);
+    }
+
+    /**
+     * PASSO 3: Confirma importação — recebe ações do usuário e processa.
+     */
+    public function confirmarImportacao(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirecionar('/planilhas/importar');
+            return;
+        }
+
+        $importacaoId = (int) ($_POST['importacao_id'] ?? 0);
+
+        if ($importacaoId <= 0) {
+            $this->redirecionar('/planilhas/importar?erro=ID inválido');
+            return;
+        }
+
+        // Coleta ações do formulário: acao[linha_csv] = importar|pular|excluir
+        $acoes = $_POST['acao'] ?? [];
+
+        // Salva ações em session para o processamento assíncrono
+        $_SESSION['importacao_acoes_' . $importacaoId] = $acoes;
+
+        // Redireciona para a tela de progresso
+        $this->redirecionar('/planilhas/progresso?id=' . $importacaoId);
     }
 
     public function visualizar(): void
@@ -262,18 +345,46 @@ class PlanilhaController extends BaseController
         }
 
         try {
-            // Processa em background (assíncrono)
             set_time_limit(0);
             ignore_user_abort(true);
 
-            $resultado = $this->importacaoService->processar($importacaoId);
+            // Verifica se há ações do preview na sessão
+            $acoes = $_SESSION['importacao_acoes_' . $importacaoId] ?? null;
 
-            echo json_encode([
-                'sucesso' => true,
-                'linhas_sucesso' => $resultado['sucesso'],
-                'linhas_erro' => $resultado['erro'],
-                'erros' => array_slice($resultado['erros'], 0, 10) // Primeiros 10 erros
-            ]);
+            if ($acoes !== null) {
+                // Fluxo NOVO: processar com ações selecionadas pelo usuário
+                $analise = $this->csvParserService->carregarAnalise($importacaoId);
+
+                if (!$analise) {
+                    echo json_encode(['erro' => 'Análise não encontrada. Refaça o upload.']);
+                    exit;
+                }
+
+                $resultado = $this->importacaoService->processarComAcoes($importacaoId, $acoes, $analise);
+
+                // Limpa dados temporários
+                unset($_SESSION['importacao_acoes_' . $importacaoId]);
+                $this->csvParserService->limparAnalise($importacaoId);
+
+                echo json_encode([
+                    'sucesso' => true,
+                    'linhas_sucesso' => $resultado['sucesso'],
+                    'linhas_erro' => $resultado['erro'],
+                    'linhas_puladas' => $resultado['pulados'] ?? 0,
+                    'linhas_excluidas' => $resultado['excluidos'] ?? 0,
+                    'erros' => array_slice($resultado['erros'], 0, 10)
+                ]);
+            } else {
+                // Fluxo LEGADO: processar tudo sem preview
+                $resultado = $this->importacaoService->processar($importacaoId);
+
+                echo json_encode([
+                    'sucesso' => true,
+                    'linhas_sucesso' => $resultado['sucesso'],
+                    'linhas_erro' => $resultado['erro'],
+                    'erros' => array_slice($resultado['erros'], 0, 10)
+                ]);
+            }
         } catch (\Exception $e) {
             echo json_encode(['erro' => $e->getMessage()]);
         }
