@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/app/bootstrap.php';
+require_once __DIR__ . '/config/bootstrap.php';
 
 $pageTitle = 'COMUNS';
 $backUrl = null;
@@ -15,7 +15,7 @@ $headerActions = '
 if (isLoggedIn()) {
     $headerActions .= '
             <li>
-                <a class="dropdown-item" href="app/views/usuarios/usuarios_listar.php">
+                <a class="dropdown-item" href="src/Views/usuarios/usuarios_listar.php">
                     <i class="bi bi-people me-2"></i>LISTAGEM DE USUÁRIOS
                 </a>
             </li>

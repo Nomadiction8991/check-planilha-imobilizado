@@ -1,6 +1,6 @@
 <?php
 define('SKIP_AUTH', true);
-require_once __DIR__ . '/app/bootstrap.php';
+require_once __DIR__ . '/config/bootstrap.php';
 
 // Se já está logado, redireciona para o index
 if (isset($_SESSION['usuario_id'])) {

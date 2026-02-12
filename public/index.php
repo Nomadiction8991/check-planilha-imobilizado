@@ -1,7 +1,7 @@
 <?php
 
 define('SKIP_AUTH', true); // Para rotas públicas como login
-require __DIR__ . '/../app/bootstrap.php';
+require __DIR__ . '/../config/bootstrap.php';
 
 require __DIR__ . '/../vendor/autoload.php';
 
