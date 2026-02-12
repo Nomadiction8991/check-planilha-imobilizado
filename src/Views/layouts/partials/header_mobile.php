@@ -32,10 +32,9 @@ $comumAtualId = $comumAtualId ?? null;
     <div class="header-actions">
         <?php if (!empty($comuns)): ?>
         <select id="comum-selector" class="form-select form-select-sm" aria-label="Selecionar Comum">
-            <option value="">Selecione a Comum</option>
             <?php foreach ($comuns as $comum): ?>
                 <option value="<?= (int)$comum['id'] ?>" <?= (int)$comum['id'] === (int)$comumAtualId ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($comum['codigo'] . ' - ' . $comum['descricao'], ENT_QUOTES, 'UTF-8') ?>
+                    <?= htmlspecialchars($comum['codigo'], ENT_QUOTES, 'UTF-8') ?>
                 </option>
             <?php endforeach; ?>
         </select>
