@@ -65,7 +65,9 @@ if (!isset($content)) {
     <link rel="stylesheet" href="/assets/css/footer-mobile.css">
 
     <!-- Custom CSS Adicional -->
-    <?php if ($customCss): ?>
+    <?php if (isset($customCssPath) && file_exists(__DIR__ . '/../../../' . ltrim($customCssPath, '/'))): ?>
+        <link rel="stylesheet" href="<?= $customCssPath ?>">
+    <?php elseif (isset($customCss) && $customCss): ?>
         <style><?= $customCss ?></style>
     <?php endif; ?>
 </head>

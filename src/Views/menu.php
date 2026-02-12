@@ -3,6 +3,8 @@
 // Esta view é carregada por ViewRenderer::render('menu') e é exibida dentro de `app.php`.
 
 $pageTitle = $pageTitle ?? 'Menu';
+// permitir que a view carregue CSS específico do menu
+$customCssPath = $customCssPath ?? '/assets/css/menu.css';
 // permite que o layout exiba o nome do usuário caso esteja disponível
 $userName = $userName ?? ($usuario['nome'] ?? 'Usuário');
 ?>
