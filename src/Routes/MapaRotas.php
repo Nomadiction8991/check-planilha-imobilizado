@@ -52,6 +52,7 @@ class MapaRotas
             'POST /produtos/deletar' => [ProdutoController::class, 'delete'],
             'POST /produtos/observacao' => [ProdutoController::class, 'observacao'],
             'POST /produtos/check' => [ProdutoController::class, 'check'],
+            'GET /produtos/etiqueta' => [ProdutoController::class, 'etiqueta'],
             'POST /produtos/etiqueta' => [ProdutoController::class, 'etiqueta'],
             'POST /produtos/assinar' => [ProdutoController::class, 'assinar'],
 

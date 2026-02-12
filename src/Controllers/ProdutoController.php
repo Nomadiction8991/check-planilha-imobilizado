@@ -17,8 +17,10 @@ class ProdutoController extends BaseController
     public function index(): void
     {
         $comumId = (int) ($_GET['comum_id'] ?? 0);
+
+        // Se não tiver comum_id, redireciona para página de comuns
         if ($comumId <= 0) {
-            $this->redirecionar('/comuns?erro=ID do comum é obrigatório');
+            $this->redirecionar('/comuns?mensagem=' . urlencode('Selecione um Comum para ver os produtos'));
             return;
         }
 
@@ -65,8 +67,10 @@ class ProdutoController extends BaseController
     public function create(): void
     {
         $comumId = (int) ($_GET['comum_id'] ?? 0);
+
+        // Se não tiver comum_id, redireciona para página de comuns
         if ($comumId <= 0) {
-            $this->redirecionar('/comuns?erro=ID do comum é obrigatório');
+            $this->redirecionar('/comuns?mensagem=' . urlencode('Selecione um Comum para criar um produto'));
             return;
         }
 
@@ -144,12 +148,13 @@ class ProdutoController extends BaseController
 
     public function etiqueta(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/produtos');
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            // Renderiza a view de copiar etiquetas
+            require_once __DIR__ . '/../Views/planilhas/produto_copiar_etiquetas.php';
             return;
         }
 
-        // TODO: Implementar lógica de etiqueta
+        // TODO: Implementar lógica de etiqueta POST
         http_response_code(501);
         die('Funcionalidade em implementação. Controller pendente de migração.');
     }
