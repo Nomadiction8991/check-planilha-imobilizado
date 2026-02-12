@@ -155,6 +155,6 @@ ob_start();
 $contentHtml = ob_get_clean();
 $contentFile = __DIR__ . '/../../../temp_importar_planilha_content_' . uniqid() . '.php';
 file_put_contents($contentFile, $contentHtml);
-include __DIR__ . '/../layouts/app_wrapper.php';
+include __DIR__ . '/../layouts/app.php';
 @unlink($contentFile);
 ?>

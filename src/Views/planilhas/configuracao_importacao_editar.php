@@ -223,6 +223,6 @@ $contentHtmlFinal = $contentHtml;
 $tempFile = __DIR__ . '/../../../temp_editar_planilha_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtmlFinal);
 $contentFile = $tempFile;
-include __DIR__ . '/../layouts/app_wrapper.php';
+include __DIR__ . '/../layouts/app.php';
 unlink($tempFile);
 ?>

@@ -262,7 +262,7 @@ $contentFile = __DIR__ . '/../../../temp_content.php';
 file_put_contents($contentFile, $contentHtml);
 
 
-require_once __DIR__ . '/../layouts/app_wrapper.php';
+require_once __DIR__ . '/../layouts/app.php';
 
 
 @unlink($contentFile);

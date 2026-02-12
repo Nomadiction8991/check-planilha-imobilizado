@@ -299,6 +299,6 @@ $contentHtml = ob_get_clean();
 $tempFile = __DIR__ . '/../../../temp_read_PRODUTO_' . uniqid() . '.php';
 file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
-include __DIR__ . '/../layouts/app_wrapper.php';
+include __DIR__ . '/../layouts/app.php';
 unlink($tempFile);
 ?>

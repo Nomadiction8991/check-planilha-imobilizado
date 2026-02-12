@@ -18,6 +18,21 @@ $backUrl = $backUrl ?? null;
 $headerActions = $headerActions ?? '';
 $customCss = $customCss ?? '';
 $customJs = $customJs ?? '';
+
+// Compatibilidade com views legadas que definiam $conteudo / $contentHtml / $contentFile
+if (!isset($content)) {
+    if (isset($conteudo)) {
+        $content = $conteudo;
+    } elseif (isset($contentHtml)) {
+        $content = $contentHtml;
+    } elseif (isset($contentFile) && file_exists($contentFile)) {
+        ob_start();
+        include $contentFile;
+        $content = ob_get_clean();
+    } else {
+        $content = null;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -41,334 +56,34 @@ $customJs = $customJs ?? '';
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-    <!-- Estilos Globais -->
-    <style>
-        /* Layout Mobile-First 400px Centralizado */
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-        }
+    <!-- Estilos do Layout App -->
+    <link rel="stylesheet" href="/assets/css/app-layout.css">
 
-        /* Campos em maiúsculas por padrão */
-        input.form-control:not([type="password"]),
-        textarea.form-control,
-        select.form-select,
-        .text-uppercase {
-            text-transform: uppercase;
-        }
-
-        /* Container principal centralizado */
-        .app-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 20px 10px;
-        }
-
-        /* Wrapper mobile de 400px */
-        .mobile-wrapper {
-            width: 100%;
-            max-width: 400px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            min-height: calc(100vh - 40px);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* Header fixo */
-        .app-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 400px;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-        }
-
-        .btn-back {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .btn-back:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        .btn-menu {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .btn-menu:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        .header-title-section {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            flex: 1;
-            margin-left: 12px;
-        }
-
-        .app-title {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-            text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
-            line-height: 1.2;
-        }
-
-        .user-name {
-            font-size: 11px;
-            opacity: 0.8;
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-header-action {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .btn-header-action:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        /* Footer fixo */
-        .app-footer {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 400px;
-            z-index: 1000;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .footer-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .footer-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .footer-right {
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-footer-action {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .btn-footer-action:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        /* Conteúdo principal */
-        .app-content {
-            flex: 1;
-            padding: 80px 16px 70px;
-            overflow-y: auto;
-            background: #f8f9fa;
-        }
-
-        /* Cards Bootstrap personalizados */
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 16px;
-            transition: all 0.3s;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-            transform: translateY(-2px);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px 12px 0 0 !important;
-            font-weight: 600;
-            padding: 12px 16px;
-        }
-
-        /* Botões personalizados */
-        .btn {
-            border-radius: 8px;
-            font-weight: 500;
-            padding: 10px 20px;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .input-group .btn:hover,
-        .input-group .btn:focus,
-        .input-group .btn:active {
-            transform: none !important;
-        }
-
-        /* Tabelas responsivas */
-        .table-responsive {
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        table {
-            margin-bottom: 0;
-        }
-
-        .table-hover tbody tr {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        /* Modais */
-        .mobile-wrapper .modal {
-            position: fixed !important;
-            z-index: 1055;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 400px;
-            height: 100vh;
-            display: none !important;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background: rgba(0, 0, 0, 0.45);
-            padding: 12px 16px;
-        }
-
-        .mobile-wrapper .modal.show {
-            display: flex !important;
-            opacity: 1;
-        }
-
-        .mobile-wrapper .modal-dialog {
-            margin: 1rem;
-            width: auto;
-            max-width: 360px;
-        }
-
-        body.modal-open {
-            padding-right: 0 !important;
-            overflow: hidden;
-        }
-
-        /* Custom CSS Adicional */
-        <?php if ($customCss): ?><?= $customCss ?><?php endif; ?>
-    </style>
+    <!-- Custom CSS Adicional -->
+    <?php if ($customCss): ?>
+        <style><?= $customCss ?></style>
+    <?php endif; ?>
 </head>
 
 <body>
-    <div class="app-container">
-        <div class="mobile-wrapper">
-            <!-- Conteúdo Principal -->
-            <main class="app-content">
+    <div class="app-container celular-frame">
+        <div class="mobile-wrapper celular-shell">
+            <?php
+            // Variáveis para header, footer e conteúdo
+            $pageTitle = $pageTitle ?? ($tituloPagina ?? null);
+            $userName  = $userName ?? ($usuario['nome'] ?? '');
+            $menuPath  = $menuPath ?? '/menu';
+            $homePath  = $homePath ?? '/comuns';
+            $logoutPath = $logoutPath ?? '/logout';
+            ?>
+
+            <?php include __DIR__ . '/partials/header_mobile.php'; ?>
+
+            <main class="app-content celular-screen">
                 <?= $content ?? '' ?>
             </main>
+
+            <?php include __DIR__ . '/partials/footer_mobile.php'; ?>
         </div>
     </div>
 

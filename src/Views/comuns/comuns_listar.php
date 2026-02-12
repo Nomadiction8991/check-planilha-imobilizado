@@ -155,5 +155,5 @@ ob_start();
 <?php
 $conteudo = ob_get_clean();
 
-require_once __DIR__ . '/../layouts/app_wrapper.php';
+require_once __DIR__ . '/../layouts/app.php';
 ?>

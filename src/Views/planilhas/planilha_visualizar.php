@@ -921,7 +921,7 @@ if (false && !empty($acesso_bloqueado)) {
     $contentHtml = ob_get_clean();
     $contentFile = __DIR__ . '/../../../temp_bloqueio_' . uniqid() . '.php';
     file_put_contents($contentFile, $contentHtml);
-    include_once __DIR__ . '/../layouts/app_wrapper.php';
+    include_once __DIR__ . '/../layouts/app.php';
     @unlink($contentFile);
     exit;
 }
@@ -2317,7 +2317,7 @@ file_put_contents($tempFile, $contentHtml);
 $contentFile = $tempFile;
 
 
-include __DIR__ . '/../layouts/app_wrapper.php';
+include __DIR__ . '/../layouts/app.php';
 
 
 unlink($tempFile);

@@ -274,5 +274,5 @@ ob_start();
 
 <?php
 $contentHtml = ob_get_clean();
-include __DIR__ . '/../layouts/app_wrapper.php';
+include __DIR__ . '/../layouts/app.php';
 ?>
