@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
-$ambiente_manifest = 'prod'; 
+$ambiente_manifest = 'prod';
 if (strpos($_SERVER['REQUEST_URI'], '/dev/') !== false) {
     $ambiente_manifest = 'dev';
 } elseif (strpos($_SERVER['HTTP_HOST'], 'dev.') !== false || strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {
@@ -125,14 +125,52 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             transform: scale(1.1);
         }
 
+        .btn-menu {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-menu:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .header-title-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 1;
+            margin-left: 12px;
+        }
+
         .app-title {
             margin: 0;
             font-size: 18px;
             font-weight: 600;
+            text-transform: uppercase;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 220px;
+            max-width: 200px;
+            line-height: 1.2;
+        }
+
+        .user-name {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
         }
 
         .header-actions {
@@ -182,12 +220,107 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             background: rgba(255, 255, 255, 0.4) !important;
         }
 
+        /* Footer fixo */
+        .app-footer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-footer-action {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-footer-action:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Menu Lateral Offcanvas */
+        .offcanvas {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .offcanvas-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .offcanvas-title {
+            color: white;
+            font-weight: 600;
+        }
+
+        .menu-item {
+            color: white;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(4px);
+        }
+
+        .menu-item i {
+            font-size: 18px;
+        }
+
+        .menu-item span {
+            font-weight: 500;
+        }
+
         /* Conteúdo principal */
         .app-content {
             flex: 1;
             padding: 12px 16px;
             /* Espaço dinâmico para o header fixo (altura calculada via JS) */
             padding-top: calc(var(--header-height, 76px) - 8px);
+            /* Ajuste do conteúdo para considerar footer */
+            padding-bottom: calc(var(--footer-height, 60px) + 16px);
             overflow-y: auto;
             background: #f8f9fa;
         }
@@ -444,21 +577,18 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             <!-- Header -->
             <header class="app-header">
                 <div class="header-left">
-                    <?php if (isset($backUrl)): ?>
-                        <a href="<?php echo $backUrl; ?>" class="btn-back">
-                            <i class="bi bi-arrow-left fs-5"></i>
-                        </a>
-                    <?php endif; ?>
-                    <div>
+                    <button class="btn-menu" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral" aria-controls="menuLateral">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                    <div class="header-title-section">
                         <h1 class="app-title"><?php echo htmlspecialchars(to_uppercase($pageTitle ?? 'Anvy'), ENT_QUOTES, 'UTF-8'); ?></h1>
                         <?php if (isset($_SESSION['usuario_nome'])): ?>
-                            <small style="font-size: 11px; opacity: 0.8;">
+                            <small class="user-name">
                                 <i class="bi bi-person-circle me-1"></i>
                                 <?php echo htmlspecialchars(to_uppercase($_SESSION['usuario_nome']), ENT_QUOTES, 'UTF-8'); ?>
                             </small>
                         <?php endif; ?>
                     </div>
-
                 </div>
                 <div class="header-actions">
                     <?php if (isset($headerActions)): ?>
@@ -466,6 +596,43 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
                     <?php endif; ?>
                 </div>
             </header>
+
+            <!-- Menu Lateral Offcanvas -->
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="menuLateral" aria-labelledby="menuLateralLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="menuLateralLabel">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div class="d-flex flex-column">
+                        <a href="/comuns" class="menu-item">
+                            <i class="bi bi-house-door me-3"></i>
+                            <span>Início</span>
+                        </a>
+                        <a href="/planilhas" class="menu-item">
+                            <i class="bi bi-file-earmark-spreadsheet me-3"></i>
+                            <span>Planilhas</span>
+                        </a>
+                        <a href="/produtos" class="menu-item">
+                            <i class="bi bi-box-seam me-3"></i>
+                            <span>Produtos</span>
+                        </a>
+                        <a href="/dependencias" class="menu-item">
+                            <i class="bi bi-diagram-3 me-3"></i>
+                            <span>Dependências</span>
+                        </a>
+                        <a href="/usuarios" class="menu-item">
+                            <i class="bi bi-people me-3"></i>
+                            <span>Usuários</span>
+                        </a>
+                        <hr class="my-3">
+                        <a href="/logout" class="menu-item text-danger">
+                            <i class="bi bi-box-arrow-right me-3"></i>
+                            <span>Sair</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             <!-- Content -->
             <main class="app-content fade-in">
@@ -483,6 +650,25 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
             </main>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-left">
+            <button type="button" class="btn-footer-action" id="btnBack" title="Voltar" onclick="goBack()">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </button>
+        </div>
+        <div class="footer-center">
+            <a href="/comuns" class="btn-footer-action" title="Página Inicial">
+                <i class="bi bi-house fs-5"></i>
+            </a>
+        </div>
+        <div class="footer-right">
+            <a href="/logout" class="btn-footer-action" title="Sair do Sistema">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+            </a>
+        </div>
+    </footer>
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -509,6 +695,40 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
                 if (header) ro.observe(header);
             }
         })();
+    </script>
+
+    <!-- Ajuste dinâmico do espaçamento do conteúdo baseado na altura do footer -->
+    <script>
+        (function() {
+            function setFooterHeightVar() {
+                var footer = document.querySelector('.app-footer');
+                if (!footer) return;
+                var h = footer.getBoundingClientRect().height;
+                document.documentElement.style.setProperty('--footer-height', h + 'px');
+            }
+
+            // Definir ao carregar e ao redimensionar
+            window.addEventListener('load', setFooterHeightVar);
+            window.addEventListener('resize', setFooterHeightVar);
+
+            // Pequeno debounce para mudanças de layout dinâmicas
+            var ro;
+            if ('ResizeObserver' in window) {
+                ro = new ResizeObserver(setFooterHeightVar);
+                var footer = document.querySelector('.app-footer');
+                if (footer) ro.observe(footer);
+            }
+        })();
+
+        // Função para voltar (igual ao botão do navegador)
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Se não há histórico, vai para a página inicial
+                window.location.href = '/comuns';
+            }
+        }
     </script>
 
     <!-- Bloqueio de zoom global (pinch/double-tap) fora do viewer do relatório -->
