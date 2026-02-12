@@ -1,9 +1,9 @@
 // Service Worker - Check Planilha PWA
-const CACHE_NAME = 'checkplanilha-v2';
+const CACHE_NAME = 'checkplanilha-v3';
 const urlsToCache = [
   '/',
-  '/index.php',
-  '/manifest.json',
+  '/manifest-prod.json',
+  '/assets/images/logo.png',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'
