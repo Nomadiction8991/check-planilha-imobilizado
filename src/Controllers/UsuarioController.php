@@ -381,4 +381,52 @@ class UsuarioController extends BaseController
         $conexao = $this->conexao;
         require __DIR__ . '/../Views/usuarios/usuario_ver.php';
     }
+
+    /**
+     * Seleciona a comum de trabalho do usuário (POST /usuarios/selecionar-comum)
+     */
+    public function selecionarComum(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!$this->isPost()) {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método não permitido']);
+            exit;
+        }
+
+        try {
+            $input = json_decode(file_get_contents('php://input'), true);
+            $comumId = (int) ($input['comum_id'] ?? 0);
+
+            if ($comumId <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'ID da comum inválido']);
+                exit;
+            }
+
+            $usuarioId = $_SESSION['usuario_id'] ?? 0;
+            if ($usuarioId <= 0) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
+                exit;
+            }
+
+            // Atualizar comum_id do usuário
+            $stmt = $this->conexao->prepare("UPDATE usuarios SET comum_id = :comum_id WHERE id = :id");
+            $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $usuarioId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Atualizar sessão
+            $_SESSION['comum_id'] = $comumId;
+
+            echo json_encode(['success' => true, 'message' => 'Comum selecionada com sucesso']);
+        } catch (Exception $e) {
+            error_log('ERROR UsuarioController::selecionarComum: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao selecionar comum']);
+        }
+        exit;
+    }
 }

@@ -2,20 +2,19 @@
 
 /**
  * Partial: header_mobile.php
- * Cabeçalho móvel conforme o mock enviado pelo usuário.
+ * Cabeçalho móvel com seletor de comum
  * Variáveis aceitas (opcionais):
  *  - $pageTitle (string)  -> título da página (renderizado em maiúsculas)
  *  - $userName  (string)  -> nome do usuário logado (pode ficar vazio)
  *  - $menuPath  (string)  -> caminho a ser usado no botão de menu (default: '/menu')
- *
- * Observações:
- * - Esta partial só cria a marcação; não altera rotas nem cria a página de menu.
- * - Usa classes já presentes no layout (`app-header`, `btn-menu`, `app-title`, `user-name`).
- * - Não é incluída em nenhum layout automaticamente — só disponibiliza a view.
+ *  - $comuns (array)      -> lista de comuns disponíveis
+ *  - $comumAtualId (int)  -> ID da comum selecionada
  */
 $menuPath = $menuPath ?? '/menu';
 $pageTitle = $pageTitle ?? 'TÍTULO DA PÁGINA';
 $userName = $userName ?? '';
+$comuns = $comuns ?? [];
+$comumAtualId = $comumAtualId ?? null;
 ?>
 
 <div class="app-header header-mobile">
@@ -31,6 +30,49 @@ $userName = $userName ?? '';
     </div>
 
     <div class="header-actions">
-        <!-- Espaço reservado para ações futuras (ícones, botão PWA, etc.) -->
+        <?php if (!empty($comuns)): ?>
+        <select id="comum-selector" class="form-select form-select-sm" aria-label="Selecionar Comum">
+            <option value="">Selecione a Comum</option>
+            <?php foreach ($comuns as $comum): ?>
+                <option value="<?= (int)$comum['id'] ?>" <?= (int)$comum['id'] === (int)$comumAtualId ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($comum['codigo'] . ' - ' . $comum['descricao'], ENT_QUOTES, 'UTF-8') ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <?php endif; ?>
     </div>
 </div>
+
+<?php if (!empty($comuns)): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selector = document.getElementById('comum-selector');
+    if (selector) {
+        selector.addEventListener('change', function() {
+            const comumId = this.value;
+            if (comumId) {
+                fetch('/usuarios/selecionar-comum', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ comum_id: comumId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Erro ao selecionar comum: ' + (data.message || 'Erro desconhecido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao selecionar comum');
+                });
+            }
+        });
+    }
+});
+</script>
+<?php endif; ?>

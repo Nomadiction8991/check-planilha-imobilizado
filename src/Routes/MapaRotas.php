@@ -37,6 +37,7 @@ class MapaRotas
             'GET /usuarios/editar' => [UsuarioController::class, 'edit'],
             'POST /usuarios/editar' => [UsuarioController::class, 'update'],
             'POST /usuarios/deletar' => [UsuarioController::class, 'delete'],
+            'POST /usuarios/selecionar-comum' => [UsuarioController::class, 'selecionarComum'],
 
 
             'GET /dependencias' => [DependenciaController::class, 'index'],

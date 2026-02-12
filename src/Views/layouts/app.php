@@ -73,9 +73,11 @@ if (!isset($content)) {
             $fsB = __DIR__ . '/../../../public/' . ltrim($customCssPath, '/');
             if (file_exists($fsA)) {
                 $linkHref = $customCssPath;
+                $linkHref .= '?v=' . filemtime($fsA);
             } elseif (file_exists($fsB)) {
                 // serve pelo webroot sem o /public prefix
                 $linkHref = '/' . ltrim($customCssPath, '/');
+                $linkHref .= '?v=' . filemtime($fsB);
             }
         }
     ?>
@@ -94,8 +96,29 @@ if (!isset($content)) {
             $pageTitle = $pageTitle ?? ($tituloPagina ?? null);
             $userName  = $userName ?? ($usuario['nome'] ?? '');
             $menuPath  = $menuPath ?? '/menu';
-            $homePath  = $homePath ?? '/comuns';
+            $homePath  = $homePath ?? '/planilhas/visualizar';
             $logoutPath = $logoutPath ?? '/logout';
+
+            // Carregar comuns para o seletor (se usuário logado)
+            $comuns = [];
+            $comumAtualId = null;
+            if (isset($_SESSION['usuario_id'])) {
+                try {
+                    $conexao = \App\Core\ConnectionManager::getConnection();
+                    $comumRepo = new \App\Repositories\ComumRepository($conexao);
+                    $comuns = $comumRepo->buscarTodos();
+                    
+                    // Buscar comum_id do usuário
+                    $stmt = $conexao->prepare("SELECT comum_id FROM usuarios WHERE id = :id");
+                    $stmt->bindValue(':id', $_SESSION['usuario_id'], PDO::PARAM_INT);
+                    $stmt->execute();
+                    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $comumAtualId = $usuario['comum_id'] ?? null;
+                    $_SESSION['comum_id'] = $comumAtualId;
+                } catch (\Exception $e) {
+                    error_log('Erro ao carregar comuns: ' . $e->getMessage());
+                }
+            }
             ?>
 
             <?php include __DIR__ . '/partials/header_mobile.php'; ?>
