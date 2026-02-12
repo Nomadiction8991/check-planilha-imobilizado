@@ -32,12 +32,15 @@
     background: transparent; /* remover bolinha esbranquiçada */
     border: none;
     color: white; /* ícones brancos */
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: auto; /* altura auto para comportar label */
     border-radius: 50%;
     display: flex;
+    flex-direction: column; /* empilha ícone e label */
     align-items: center;
     justify-content: center;
+    gap: 4px; /* distância entre ícone e label (3-5px solicitado) */
+    padding: 6px 6px;
     transition: transform 0.18s ease;
     text-decoration: none;
     box-shadow: none;
@@ -46,6 +49,7 @@
 .btn-footer-action i {
     color: white; /* garante ícone branco */
     font-size: 18px;
+    line-height: 1;
 }
 
 .btn-footer-action:hover {
@@ -62,8 +66,9 @@
 }
 
 .footer-label {
-    margin-top: 2px;
-    font-size: 12px;
+    display: block;
+    margin: 0; /* label agora dentro do botão — gap controla espaçamento */
+    font-size: 11px;
     color: rgba(255,255,255,0.95);
     text-align: center;
     line-height: 1;
