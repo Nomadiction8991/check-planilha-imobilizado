@@ -12,6 +12,7 @@
         "symfony/string": "^6.4",
         "voku/portable-utf8": "^6.0",
         "robmorgan/phinx": "^0.16",
-        "symfony/yaml": "^7.4"
+        "symfony/yaml": "^7.4",
+        "league/csv": "^9.28"
     }
 }

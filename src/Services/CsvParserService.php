@@ -3,18 +3,24 @@
 namespace App\Services;
 
 use App\Core\ConnectionManager;
+use League\Csv\Reader;
+use League\Csv\CharsetConverter;
 use PDO;
 use Exception;
 
 /**
  * CsvParserService — Serviço moderno para parsing e análise de CSV.
- * 
- * Responsabilidades:
- *  - Ler CSV com PhpSpreadsheet (suporte a encoding, delimitadores)
- *  - Analisar cada linha comparando com dados existentes no banco
- *  - Classificar registros: NOVO, ATUALIZAR, SEM_ALTERACAO
- *  - Detectar diferenças campo a campo (diff)
- *  - Salvar análise em JSON para a tela de preview
+ *
+ * O CSV é um relatório do sistema de imobilizado CCB com formato:
+ *  - ~25 linhas de metadados (nome da congregação, CNPJ, filtros)
+ *  - Linha de cabeçalho: Código,,,Nome,,,Fornecedor,,,,Localidade,...,Dependência,...
+ *  - Dados em colunas esparsas (muitas células vazias entre campos)
+ *  - Linhas vazias intercaladas entre registros
+ *  - Campo "Nome" contém: "TIPO_CODE - DESCRICAO BEM COMPLEMENTO"
+ *
+ * Configuração lida da tabela `configuracoes`:
+ *  - pulo_linhas: quantas linhas pular antes do cabeçalho
+ *  - mapeamento_colunas: codigo=A;complemento=D;dependencia=P;localidade=K
  */
 class CsvParserService
 {
@@ -30,18 +36,27 @@ class CsvParserService
     public const ACAO_PULAR = 'pular';
     public const ACAO_EXCLUIR = 'excluir';
 
+    /** Mapeamento padrão de colunas (letra → índice) */
+    private const MAPEAMENTO_PADRAO = [
+        'codigo' => 0,       // Coluna A
+        'complemento' => 3,  // Coluna D (campo "Nome" no relatório)
+        'dependencia' => 15, // Coluna P
+        'localidade' => 10,  // Coluna K
+    ];
+
+    /** Linhas de metadados a pular por padrão */
+    private const PULO_LINHAS_PADRAO = 25;
+
     public function __construct(?PDO $conexao = null)
     {
         $this->conexao = $conexao ?? ConnectionManager::getConnection();
     }
 
+    // ─── MÉTODO PRINCIPAL ───
+
     /**
      * Analisa um CSV e retorna resultado completo de análise.
      * Compara cada linha do CSV com os dados existentes no banco.
-     *
-     * @param string $caminhoArquivo Caminho absoluto do CSV
-     * @param int    $comumId        ID do comum ativo
-     * @return array Resultado da análise
      */
     public function analisar(string $caminhoArquivo, int $comumId): array
     {
@@ -49,13 +64,19 @@ class CsvParserService
             throw new Exception('Arquivo não encontrado: ' . $caminhoArquivo);
         }
 
-        $linhas = $this->lerCsv($caminhoArquivo);
+        // Carrega configuração do banco
+        $config = $this->carregarConfiguracoes();
+        $mapeamento = $this->parsearMapeamento($config['mapeamento_colunas'] ?? '');
+        $puloLinhas = (int) ($config['pulo_linhas'] ?? self::PULO_LINHAS_PADRAO);
+
+        // Lê CSV com league/csv
+        $linhas = $this->lerCsv($caminhoArquivo, $mapeamento, $puloLinhas);
 
         if (empty($linhas)) {
-            throw new Exception('Arquivo CSV vazio ou sem dados válidos');
+            throw new Exception('Arquivo CSV vazio ou sem dados válidos após pular ' . $puloLinhas . ' linhas de cabeçalho');
         }
 
-        // Pré-carregar todos os produtos existentes do comum (evita N+1 queries)
+        // Pré-carregar dados do banco (evita N+1 queries — Identity Map)
         $produtosExistentes = $this->carregarProdutosDoComum($comumId);
         $tiposBens = $this->carregarTiposBens();
         $dependencias = $this->carregarDependencias($comumId);
@@ -74,7 +95,7 @@ class CsvParserService
 
             try {
                 $registro = $this->analisarLinha($linha, $produtosExistentes, $tiposBens, $dependencias, $comumId);
-                $registro['linha_csv'] = $idx + 1; // 1-based para o usuário
+                $registro['linha_csv'] = $linha['_linha_original'] ?? ($idx + 1);
 
                 switch ($registro['status']) {
                     case self::STATUS_NOVO:
@@ -95,7 +116,7 @@ class CsvParserService
             } catch (Exception $e) {
                 $resumo['erros']++;
                 $registros[] = [
-                    'linha_csv' => $idx + 1,
+                    'linha_csv' => $linha['_linha_original'] ?? ($idx + 1),
                     'status' => 'erro',
                     'acao_sugerida' => self::ACAO_PULAR,
                     'erro' => $e->getMessage(),
@@ -112,82 +133,251 @@ class CsvParserService
         ];
     }
 
+    // ─── LEITURA DO CSV ───
+
     /**
-     * Lê o CSV usando PhpSpreadsheet para suporte robusto a encoding e formatos.
+     * Lê o CSV usando league/csv com detecção automática de encoding e delimitador.
+     * Aplica o mapeamento de colunas por posição (A, D, P, K etc).
      */
-    private function lerCsv(string $caminho): array
+    private function lerCsv(string $caminho, array $mapeamento, int $puloLinhas): array
     {
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-        $reader->setInputEncoding('UTF-8');
-        $reader->setDelimiter(',');
-        $reader->setEnclosure('"');
+        // Detectar encoding
+        $amostra = (string) file_get_contents($caminho, false, null, 0, 8192);
+        $encoding = mb_detect_encoding($amostra, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true);
 
-        // Tenta detectar delimitador automaticamente
-        $amostra = file_get_contents($caminho, false, null, 0, 4096);
-        if ($amostra !== false) {
-            $contVirgula = substr_count($amostra, ',');
-            $contPontoVirgula = substr_count($amostra, ';');
-            $contTab = substr_count($amostra, "\t");
+        // Detectar delimitador
+        $delimitador = $this->detectarDelimitador($amostra);
 
-            if ($contPontoVirgula > $contVirgula && $contPontoVirgula > $contTab) {
-                $reader->setDelimiter(';');
-            } elseif ($contTab > $contVirgula && $contTab > $contPontoVirgula) {
-                $reader->setDelimiter("\t");
-            }
+        // Criar reader league/csv
+        $csv = Reader::createFromPath($caminho, 'r');
+        $csv->setDelimiter($delimitador);
+        $csv->setEnclosure('"');
 
-            // Detecta encoding
-            $encoding = mb_detect_encoding($amostra, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true);
-            if ($encoding && $encoding !== 'UTF-8') {
-                $reader->setInputEncoding($encoding);
-            }
+        // Converter encoding para UTF-8 se necessário
+        if ($encoding && $encoding !== 'UTF-8') {
+            CharsetConverter::addTo($csv, $encoding, 'UTF-8');
         }
 
-        $spreadsheet = $reader->load($caminho);
-        $sheet = $spreadsheet->getActiveSheet();
-        $dados = $sheet->toArray(null, true, true, false);
+        // Ler todas as linhas como array
+        $todasLinhas = iterator_to_array($csv->getRecords(), false);
 
-        if (empty($dados)) {
-            return [];
-        }
+        // Pular linhas de metadados — procurar o cabeçalho real
+        $inicioLeitura = $this->encontrarInicioDados($todasLinhas, $puloLinhas, $mapeamento);
 
-        // Primeira linha = cabeçalho — converte null para string vazia
-        $cabecalho = array_map(
-            'trim',
-            array_map(function($val) {
-                return strtolower((string)$val);
-            }, $dados[0])
-        );
-
+        // Extrair dados
         $linhas = [];
-        for ($i = 1; $i < count($dados); $i++) {
-            $row = $dados[$i];
+        for ($i = $inicioLeitura; $i < count($todasLinhas); $i++) {
+            $row = $todasLinhas[$i];
 
-            // Ignora linhas totalmente vazias
-            $temDado = false;
-            foreach ($row as $cel) {
-                if ($cel !== null && trim((string)$cel) !== '') {
-                    $temDado = true;
-                    break;
-                }
-            }
-            if (!$temDado) continue;
+            // Extrair código da coluna mapeada
+            $colCodigo = $mapeamento['codigo'] ?? self::MAPEAMENTO_PADRAO['codigo'];
+            $codigo = trim((string) ($row[$colCodigo] ?? ''));
 
-            // Mapeia coluna → valor usando cabeçalho
-            $registro = [];
-            foreach ($cabecalho as $colIdx => $nomeColuna) {
-                if ($nomeColuna !== '') {
-                    $registro[$nomeColuna] = isset($row[$colIdx]) ? trim((string)$row[$colIdx]) : '';
-                }
+            // Pula linhas sem código (vazias ou subtotais)
+            if ($codigo === '' || $this->isLinhaMetadados($codigo)) {
+                continue;
             }
 
-            $linhas[] = $registro;
+            // Extrair campos pelo mapeamento de colunas
+            $colNome = $mapeamento['complemento'] ?? self::MAPEAMENTO_PADRAO['complemento'];
+            $colDependencia = $mapeamento['dependencia'] ?? self::MAPEAMENTO_PADRAO['dependencia'];
+            $colLocalidade = $mapeamento['localidade'] ?? self::MAPEAMENTO_PADRAO['localidade'];
+
+            $nomeCompleto = trim((string) ($row[$colNome] ?? ''));
+            $dependencia = trim((string) ($row[$colDependencia] ?? ''));
+            $localidade = trim((string) ($row[$colLocalidade] ?? ''));
+
+            // Parsear o campo "Nome" → tipo_bem_codigo + descricao + bem + complemento
+            $dadosParsed = $this->parsearNome($nomeCompleto);
+
+            $linhas[] = [
+                'codigo' => $codigo,
+                'descricao_completa' => $nomeCompleto,
+                'tipo_bem_codigo' => (string) $dadosParsed['tipo_bem_codigo'],
+                'bem' => $dadosParsed['bem'],
+                'complemento' => $dadosParsed['complemento'],
+                'dependencia' => strtoupper($dependencia),
+                'localidade' => $localidade,
+                '_linha_original' => $i + 1, // 1-indexed para o usuário
+            ];
         }
-
-        $spreadsheet->disconnectWorksheets();
-        unset($spreadsheet);
 
         return $linhas;
     }
+
+    /**
+     * Detecta o delimitador mais provável do CSV.
+     */
+    private function detectarDelimitador(string $amostra): string
+    {
+        $contVirgula = substr_count($amostra, ',');
+        $contPontoVirgula = substr_count($amostra, ';');
+        $contTab = substr_count($amostra, "\t");
+
+        if ($contPontoVirgula > $contVirgula && $contPontoVirgula > $contTab) {
+            return ';';
+        }
+        if ($contTab > $contVirgula && $contTab > $contPontoVirgula) {
+            return "\t";
+        }
+
+        return ',';
+    }
+
+    /**
+     * Encontra o índice da primeira linha de DADOS (logo após o cabeçalho).
+     * Usa pulo_linhas como ponto de partida, mas tenta auto-detectar se possível.
+     */
+    private function encontrarInicioDados(array $linhas, int $puloLinhas, array $mapeamento): int
+    {
+        $totalLinhas = count($linhas);
+
+        // Tenta encontrar a linha de cabeçalho automaticamente
+        // Procura por uma linha cujo primeiro campo não-vazio contenha "Código" ou "codigo"
+        for ($i = 0; $i < min($totalLinhas, $puloLinhas + 10); $i++) {
+            $primeiraCol = trim((string) ($linhas[$i][0] ?? ''));
+            $primeiraColNorm = $this->removerAcentos(strtolower($primeiraCol));
+
+            if ($primeiraColNorm === 'codigo') {
+                // Encontrou a linha de cabeçalho → dados começam na próxima
+                return $i + 1;
+            }
+        }
+
+        // Fallback: pular as linhas configuradas + 1 (para o cabeçalho)
+        $inicio = $puloLinhas + 1;
+        return min($inicio, $totalLinhas);
+    }
+
+    /**
+     * Verifica se uma linha é metadado/subtotal (não é dado de produto).
+     */
+    private function isLinhaMetadados(string $codigo): bool
+    {
+        // Linhas de subtotal, totais, nomes de grupo etc.
+        $codigoNorm = strtolower(trim($codigo));
+
+        $palavrasMetadados = [
+            'total', 'subtotal', 'soma', 'resumo', 'grupo',
+            'relatório', 'relatorio', 'congregação', 'congregacao',
+            'dependência', 'dependencia', 'página', 'pagina', 'folha',
+        ];
+
+        foreach ($palavrasMetadados as $palavra) {
+            if (str_contains($codigoNorm, $palavra)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Parseia o campo "Nome" do relatório para extrair tipo_bem, bem e complemento.
+     * Formato esperado: "TIPO_CODE - TIPO_DESC BEM COMPLEMENTO"
+     * Exemplo: "70 - REFORMA EDIFICACAO E ALVENARIA REFORMA"
+     */
+    private function parsearNome(string $nome): array
+    {
+        $resultado = [
+            'tipo_bem_codigo' => '',
+            'descricao_apos_tipo' => $nome,
+            'bem' => $nome,
+            'complemento' => '',
+        ];
+
+        if (empty($nome)) {
+            return $resultado;
+        }
+
+        // Tenta extrair código tipo_bem: "70 - ..." ou "4 - ..."
+        if (preg_match('/^\s*(\d{1,3})(?:[\.,]\d+)?\s*[\-–—]\s*(.+)$/u', $nome, $m)) {
+            $resultado['tipo_bem_codigo'] = $m[1];
+            $textoAposCodigo = trim($m[2]);
+            $resultado['descricao_apos_tipo'] = $textoAposCodigo;
+
+            // O texto após o tipo é: "TIPO_DESC BEM COMPLEMENTO"
+            // Tentamos separar bem e complemento por " - " se existir
+            if (preg_match('/^(.+?)\s+\-\s+(.+)$/u', $textoAposCodigo, $parts)) {
+                $resultado['bem'] = trim($parts[1]);
+                $resultado['complemento'] = trim($parts[2]);
+            } else {
+                // Sem separador, tudo é "bem"
+                $resultado['bem'] = $textoAposCodigo;
+                $resultado['complemento'] = '';
+            }
+        }
+
+        return $resultado;
+    }
+
+    // ─── CONFIGURAÇÕES ───
+
+    /**
+     * Carrega configurações da tabela `configuracoes`.
+     */
+    private function carregarConfiguracoes(): array
+    {
+        try {
+            $stmt = $this->conexao->query("SELECT * FROM configuracoes LIMIT 1");
+            $config = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $config ?: [
+                'pulo_linhas' => (string) self::PULO_LINHAS_PADRAO,
+                'mapeamento_colunas' => 'codigo=A;complemento=D;dependencia=P;localidade=K',
+            ];
+        } catch (Exception $e) {
+            return [
+                'pulo_linhas' => (string) self::PULO_LINHAS_PADRAO,
+                'mapeamento_colunas' => 'codigo=A;complemento=D;dependencia=P;localidade=K',
+            ];
+        }
+    }
+
+    /**
+     * Parseia o mapeamento de colunas "codigo=A;complemento=D;dependencia=P;localidade=K"
+     * e converte letras em índices numéricos (A=0, B=1, ..., P=15).
+     */
+    private function parsearMapeamento(string $mapeamentoStr): array
+    {
+        $mapeamento = self::MAPEAMENTO_PADRAO;
+
+        if (empty($mapeamentoStr)) {
+            return $mapeamento;
+        }
+
+        $pares = explode(';', $mapeamentoStr);
+        foreach ($pares as $par) {
+            $partes = explode('=', $par, 2);
+            if (count($partes) !== 2) continue;
+
+            $campo = trim(strtolower($partes[0]));
+            $letra = trim(strtoupper($partes[1]));
+
+            if (!empty($campo) && !empty($letra)) {
+                $mapeamento[$campo] = $this->letraParaIndice($letra);
+            }
+        }
+
+        return $mapeamento;
+    }
+
+    /**
+     * Converte letra de coluna Excel em índice numérico (A=0, B=1, ... Z=25, AA=26).
+     */
+    private function letraParaIndice(string $letra): int
+    {
+        $letra = strtoupper($letra);
+        $indice = 0;
+
+        for ($i = 0; $i < strlen($letra); $i++) {
+            $indice = $indice * 26 + (ord($letra[$i]) - ord('A') + 1);
+        }
+
+        return $indice - 1;
+    }
+
+    // ─── ANÁLISE E DIFF ───
 
     /**
      * Analisa uma linha individual do CSV vs banco de dados.
@@ -200,8 +390,8 @@ class CsvParserService
         int $comumId
     ): array {
         $codigo = $dadosCsv['codigo'] ?? '';
-        $descricaoCompleta = $dadosCsv['descricao'] ?? '';
-        $tipoBemCodigo = $dadosCsv['tipo_bem'] ?? '';
+        $descricaoCompleta = $dadosCsv['descricao_completa'] ?? '';
+        $tipoBemCodigo = $dadosCsv['tipo_bem_codigo'] ?? '';
         $bem = $dadosCsv['bem'] ?? '';
         $complemento = $dadosCsv['complemento'] ?? '';
         $dependenciaDescricao = $dadosCsv['dependencia'] ?? '';
@@ -210,8 +400,8 @@ class CsvParserService
             throw new Exception('Código vazio na linha');
         }
 
-        // Resolve tipo_bem e dependência dos nomes para informação
-        $tipoBemDesc = $tiposBens[$tipoBemCodigo] ?? 'Tipo ' . $tipoBemCodigo;
+        // Resolve tipo_bem e dependência para exibição
+        $tipoBemDesc = $tiposBens[$tipoBemCodigo] ?? ($tipoBemCodigo !== '' ? 'Tipo ' . $tipoBemCodigo : '');
         $depDescNorm = trim(strtoupper($dependenciaDescricao));
 
         // Dados normalizados do CSV
@@ -225,12 +415,11 @@ class CsvParserService
             'dependencia_descricao' => $depDescNorm ?: $dependenciaDescricao,
         ];
 
-        // Verifica se produto existe no banco
+        // Verifica se produto existe no banco (busca por código uppercase)
         $chave = strtoupper(trim($codigo));
         $produtoDb = $produtosExistentes[$chave] ?? null;
 
         if (!$produtoDb) {
-            // NOVO — não existe no banco
             return [
                 'status' => self::STATUS_NOVO,
                 'dados_csv' => $dadosNormalizados,
@@ -240,31 +429,31 @@ class CsvParserService
             ];
         }
 
-        // EXISTENTE — calcula diferenças
+        // Calcula diferenças campo a campo
         $diferencas = [];
 
-        if ($produtoDb['descricao_completa'] !== $descricaoCompleta) {
+        if (trim($produtoDb['descricao_completa']) !== trim($descricaoCompleta)) {
             $diferencas['descricao_completa'] = [
                 'antes' => $produtoDb['descricao_completa'],
                 'depois' => $descricaoCompleta,
             ];
         }
 
-        if ($produtoDb['tipo_bem_codigo'] != $tipoBemCodigo) {
+        if ((string) ($produtoDb['tipo_bem_codigo'] ?? '') != $tipoBemCodigo) {
             $diferencas['tipo_bem'] = [
-                'antes' => $produtoDb['tipo_bem_codigo'] . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
+                'antes' => ($produtoDb['tipo_bem_codigo'] ?? '') . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
                 'depois' => $tipoBemCodigo . ' - ' . $tipoBemDesc,
             ];
         }
 
-        if ($produtoDb['bem'] !== $bem) {
+        if (trim($produtoDb['bem'] ?? '') !== trim($bem)) {
             $diferencas['bem'] = [
-                'antes' => $produtoDb['bem'],
+                'antes' => $produtoDb['bem'] ?? '',
                 'depois' => $bem,
             ];
         }
 
-        if (($produtoDb['complemento'] ?? '') !== $complemento) {
+        if (trim($produtoDb['complemento'] ?? '') !== trim($complemento)) {
             $diferencas['complemento'] = [
                 'antes' => $produtoDb['complemento'] ?? '',
                 'depois' => $complemento,
@@ -288,8 +477,8 @@ class CsvParserService
                 'id_produto' => $produtoDb['id_produto'],
                 'codigo' => $produtoDb['codigo'],
                 'descricao_completa' => $produtoDb['descricao_completa'],
-                'tipo_bem' => $produtoDb['tipo_bem_codigo'] . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
-                'bem' => $produtoDb['bem'],
+                'tipo_bem' => ($produtoDb['tipo_bem_codigo'] ?? '') . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
+                'bem' => $produtoDb['bem'] ?? '',
                 'complemento' => $produtoDb['complemento'] ?? '',
                 'dependencia' => $produtoDb['dependencia_descricao'] ?? '',
             ],
@@ -298,9 +487,10 @@ class CsvParserService
         ];
     }
 
+    // ─── CARREGAMENTO DO BANCO (Identity Map) ───
+
     /**
-     * Pré-carrega TODOS os produtos do comum indexados por código (uppercase).
-     * Evita N+1 queries — padrão Identity Map.
+     * Pré-carrega TODOS os produtos do comum indexados por código uppercase.
      */
     private function carregarProdutosDoComum(int $comumId): array
     {
@@ -335,19 +525,27 @@ class CsvParserService
 
         $mapa = [];
         foreach ($rows as $row) {
-            $mapa[$row['codigo']] = $row['descricao'];
+            $mapa[(string) $row['codigo']] = $row['descricao'];
         }
 
         return $mapa;
     }
 
     /**
-     * Carrega dependências do comum indexadas por descrição (uppercase).
+     * Carrega dependências indexadas por descrição uppercase.
      */
     private function carregarDependencias(int $comumId): array
     {
-        $stmt = $this->conexao->prepare("SELECT id, descricao FROM dependencias WHERE comum_id = :comum_id");
-        $stmt->execute([':comum_id' => $comumId]);
+        try {
+            $stmt = $this->conexao->prepare(
+                "SELECT id, descricao FROM dependencias WHERE comum_id = :comum_id"
+            );
+            $stmt->execute([':comum_id' => $comumId]);
+        } catch (Exception $e) {
+            // Se tabela não tem coluna comum_id, carrega todas
+            $stmt = $this->conexao->query("SELECT id, descricao FROM dependencias");
+        }
+
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $mapa = [];
@@ -358,9 +556,21 @@ class CsvParserService
         return $mapa;
     }
 
+    // ─── UTILITÁRIOS ───
+
+    /**
+     * Remove acentos de uma string (para comparação).
+     */
+    private function removerAcentos(string $str): string
+    {
+        $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str);
+        return $converted !== false ? $converted : $str;
+    }
+
+    // ─── PERSISTÊNCIA DA ANÁLISE ───
+
     /**
      * Salva resultado da análise como JSON no storage/tmp.
-     * Retorna o caminho do arquivo JSON.
      */
     public function salvarAnalise(int $importacaoId, array $analise): string
     {
