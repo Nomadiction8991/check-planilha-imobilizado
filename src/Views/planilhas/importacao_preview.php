@@ -6,6 +6,12 @@ $importacaoId = $importacao_id ?? 0;
 $importacao = $importacao ?? [];
 $resumo = $resumo ?? [];
 $registros = $registros ?? [];
+$paginaAtual = $pagina ?? 1;
+$totalPaginas = $total_paginas ?? 1;
+$totalRegistros = $total_registros ?? 0;
+$itensPorPagina = $itens_por_pagina ?? 50;
+$filtroStatus = $filtro_status ?? 'todos';
+$acoesSalvas = $acoes_salvas ?? [];
 
 ob_start();
 ?>
@@ -164,18 +170,29 @@ ob_start();
             </div>
             <div class="col-auto">
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-outline-secondary filtro-btn active" data-filtro="todos">
-                        TODOS
-                    </button>
-                    <button type="button" class="btn btn-outline-success filtro-btn" data-filtro="novo">
-                        NOVOS
-                    </button>
-                    <button type="button" class="btn btn-outline-warning filtro-btn" data-filtro="atualizar">
-                        ALTERAR
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary filtro-btn" data-filtro="sem_alteracao">
-                        IGUAL
-                    </button>
+                    <?php
+                    $filtros = [
+                        'todos' => 'TODOS',
+                        'novo' => 'NOVOS',
+                        'atualizar' => 'ALTERAR',
+                        'sem_alteracao' => 'IGUAL',
+                    ];
+                    $filtroClasses = [
+                        'todos' => 'btn-outline-secondary',
+                        'novo' => 'btn-outline-success',
+                        'atualizar' => 'btn-outline-warning',
+                        'sem_alteracao' => 'btn-outline-secondary',
+                    ];
+                    foreach ($filtros as $key => $label):
+                        $isActive = ($filtroStatus === $key) ? ' active' : '';
+                        $btnClass = $filtroClasses[$key] ?? 'btn-outline-secondary';
+                        $href = '?id=' . $importacaoId . '&filtro=' . $key . '&pagina=1';
+                    ?>
+                        <a href="<?= $href ?>" class="btn <?= $btnClass ?> filtro-btn<?= $isActive ?>"
+                           onclick="salvarAcoesAntes(event, this.href)">
+                            <?= $label ?>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <div class="col-auto ms-auto">
@@ -190,6 +207,18 @@ ob_start();
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Info da página -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <small class="text-muted">
+            Mostrando <?= number_format(min(($paginaAtual - 1) * $itensPorPagina + 1, $totalRegistros)) ?>
+            a <?= number_format(min($paginaAtual * $itensPorPagina, $totalRegistros)) ?>
+            de <?= number_format($totalRegistros) ?> registros
+        </small>
+        <?php if ($totalPaginas > 1): ?>
+            <small class="text-muted">Página <?= $paginaAtual ?> de <?= $totalPaginas ?></small>
+        <?php endif; ?>
     </div>
 
     <!-- Tabela de Registros -->
@@ -216,6 +245,11 @@ ob_start();
                     $diferencas = $reg['diferencas'] ?? [];
                     $linhaCsv = $reg['linha_csv'] ?? ($idx + 1);
                     $acaoSugerida = $reg['acao_sugerida'] ?? 'pular';
+
+                    // Se o usuário já salvou uma ação para esta linha, usar ela
+                    if (isset($acoesSalvas[(string)$linhaCsv])) {
+                        $acaoSugerida = $acoesSalvas[(string)$linhaCsv];
+                    }
 
                     $badgeClass = match ($status) {
                         'novo' => 'badge-novo',
@@ -315,6 +349,61 @@ ob_start();
         </table>
     </div>
 
+    <!-- Paginação -->
+    <?php if ($totalPaginas > 1): ?>
+        <nav aria-label="Paginação do preview" class="mt-3">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                <?php if ($paginaAtual > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="#"
+                           onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $paginaAtual - 1 ?>')">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+                <?php
+                $inicio = max(1, $paginaAtual - 3);
+                $fim = min($totalPaginas, $paginaAtual + 3);
+                if ($inicio > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="#"
+                           onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=1')">1</a>
+                    </li>
+                    <?php if ($inicio > 2): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $inicio; $i <= $fim; $i++): ?>
+                    <li class="page-item <?= $i == $paginaAtual ? 'active' : '' ?>">
+                        <a class="page-link" href="#"
+                           onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $i ?>')">
+                            <?= $i ?>
+                        </a>
+                    </li>
+                <?php endfor; ?>
+
+                <?php if ($fim < $totalPaginas): ?>
+                    <?php if ($fim < $totalPaginas - 1): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
+                    <li class="page-item">
+                        <a class="page-link" href="#"
+                           onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $totalPaginas ?>')">
+                            <?= $totalPaginas ?>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+                <?php if ($paginaAtual < $totalPaginas): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="#"
+                           onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $paginaAtual + 1 ?>')">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    <?php endif; ?>
+
     <!-- Barra de Confirmação Fixa -->
     <div class="card mt-3">
         <div class="card-body d-flex justify-content-between align-items-center py-2">
@@ -327,7 +416,8 @@ ob_start();
                 <a href="/planilhas/importar" class="btn btn-outline-secondary me-2">
                     <i class="bi bi-x-lg me-1"></i>CANCELAR
                 </a>
-                <button type="submit" class="btn btn-primary" id="btn-confirmar">
+                <button type="submit" class="btn btn-primary" id="btn-confirmar"
+                        onclick="return salvarAntesDeConfirmar()">
                     <i class="bi bi-check-lg me-1"></i>CONFIRMAR IMPORTAÇÃO
                 </button>
             </div>
@@ -339,22 +429,56 @@ ob_start();
 (() => {
     'use strict';
 
-    // ─── Filtros de status ───
-    document.querySelectorAll('.filtro-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+    const IMPORTACAO_ID = <?= (int)$importacaoId ?>;
 
-            const filtro = this.dataset.filtro;
-            document.querySelectorAll('.registro-row').forEach(row => {
-                if (filtro === 'todos' || row.dataset.status === filtro) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+    // ─── Coletar ações da página atual ───
+    function coletarAcoesPagina() {
+        const acoes = {};
+        document.querySelectorAll('.select-acao').forEach(select => {
+            const row = select.closest('tr');
+            const linha = row?.dataset?.linha;
+            if (linha) acoes[linha] = select.value;
         });
-    });
+        // Incluir hidden inputs (erros)
+        document.querySelectorAll('input[type="hidden"][name^="acao["]').forEach(input => {
+            const match = input.name.match(/acao\[(\d+)\]/);
+            if (match) acoes[match[1]] = input.value;
+        });
+        return acoes;
+    }
+
+    // ─── Salvar ações via AJAX ───
+    async function salvarAcoes() {
+        const acoes = coletarAcoesPagina();
+        if (Object.keys(acoes).length === 0) return true;
+
+        try {
+            const resp = await fetch('/planilhas/preview/salvar-acoes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ importacao_id: IMPORTACAO_ID, acoes: acoes })
+            });
+            const data = await resp.json();
+            return data.sucesso === true;
+        } catch (e) {
+            console.error('Erro ao salvar ações:', e);
+            return false;
+        }
+    }
+
+    // ─── Salvar ações antes de navegar (paginação/filtros) ───
+    window.salvarAcoesAntes = async function(e, url) {
+        e.preventDefault();
+        await salvarAcoes();
+        window.location.href = url;
+    };
+
+    // ─── Salvar antes de confirmar ───
+    window.salvarAntesDeConfirmar = function() {
+        // As ações da página atual são enviadas pelo form normalmente
+        // As ações anteriores já estão na sessão
+        return true;
+    };
 
     // ─── Atualizar estilo da linha conforme ação selecionada ───
     window.atualizarEstiloLinha = function (select) {
@@ -370,16 +494,12 @@ ob_start();
         atualizarContadores();
     };
 
-    // ─── Ação em massa ───
+    // ─── Ação em massa (aplica na página atual visível) ───
     window.acaoEmMassa = function (acao) {
-        // Aplica apenas nas linhas VISÍVEIS (filtradas)
         document.querySelectorAll('.registro-row').forEach(row => {
-            if (row.style.display === 'none') return;
-
             const select = row.querySelector('.select-acao');
             if (!select) return;
 
-            // Verifica se a opção existe
             const opcao = select.querySelector(`option[value="${acao}"]`);
             if (opcao) {
                 select.value = acao;
@@ -388,7 +508,7 @@ ob_start();
         });
     };
 
-    // ─── Contadores de ações ───
+    // ─── Contadores de ações (só da página atual) ───
     function atualizarContadores() {
         let importar = 0, pular = 0, excluir = 0;
 
@@ -400,7 +520,6 @@ ob_start();
             }
         });
 
-        // Conta hidden (erros)
         document.querySelectorAll('input[type="hidden"][name^="acao"]').forEach(() => {
             pular++;
         });
@@ -408,17 +527,8 @@ ob_start();
         document.getElementById('contadores-acoes').innerHTML =
             `<strong class="text-success">${importar}</strong> importar · ` +
             `<strong class="text-secondary">${pular}</strong> pular · ` +
-            `<strong class="text-danger">${excluir}</strong> excluir`;
-
-        // Desabilita botão se nada para importar
-        const btn = document.getElementById('btn-confirmar');
-        if (importar === 0 && excluir === 0) {
-            btn.disabled = true;
-            btn.textContent = 'NENHUMA AÇÃO SELECIONADA';
-        } else {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>CONFIRMAR IMPORTAÇÃO';
-        }
+            `<strong class="text-danger">${excluir}</strong> excluir` +
+            ` <span class="text-muted">(esta página)</span>`;
     }
 
     // ─── Confirmação antes de submeter ───
@@ -436,10 +546,8 @@ ob_start();
         }
     });
 
-    // Inicializa contadores
+    // Inicializa contadores e estilos
     atualizarContadores();
-
-    // Inicializa estilos das linhas
     document.querySelectorAll('.select-acao').forEach(select => {
         atualizarEstiloLinha(select);
     });

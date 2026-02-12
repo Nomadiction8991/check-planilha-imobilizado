@@ -125,12 +125,78 @@ class PlanilhaController extends BaseController
             return;
         }
 
+        // Paginação: 50 registros por página
+        $todosRegistros = $analise['registros'];
+        $totalRegistros = count($todosRegistros);
+        $itensPorPagina = 50;
+        $paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
+        $totalPaginas = max(1, (int) ceil($totalRegistros / $itensPorPagina));
+        $paginaAtual = min($paginaAtual, $totalPaginas);
+        $offset = ($paginaAtual - 1) * $itensPorPagina;
+
+        // Filtro por status
+        $filtroStatus = $_GET['filtro'] ?? 'todos';
+        if ($filtroStatus !== 'todos') {
+            $todosRegistros = array_values(array_filter($todosRegistros, function ($reg) use ($filtroStatus) {
+                return ($reg['status'] ?? '') === $filtroStatus;
+            }));
+            $totalRegistros = count($todosRegistros);
+            $totalPaginas = max(1, (int) ceil($totalRegistros / $itensPorPagina));
+            $paginaAtual = min($paginaAtual, $totalPaginas);
+            $offset = ($paginaAtual - 1) * $itensPorPagina;
+        }
+
+        $registrosPagina = array_slice($todosRegistros, $offset, $itensPorPagina);
+
+        // Carrega ações salvas anteriormente na sessão
+        $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
+
         $this->renderizar('planilhas/importacao_preview', [
             'importacao_id' => $importacaoId,
             'importacao' => $importacao,
             'resumo' => $analise['resumo'],
-            'registros' => $analise['registros'],
+            'registros' => $registrosPagina,
+            'pagina' => $paginaAtual,
+            'total_paginas' => $totalPaginas,
+            'total_registros' => $totalRegistros,
+            'itens_por_pagina' => $itensPorPagina,
+            'filtro_status' => $filtroStatus,
+            'acoes_salvas' => $acoesSalvas,
         ]);
+    }
+
+    /**
+     * AJAX: Salva ações selecionadas da página atual na sessão.
+     */
+    public function salvarAcoesPreview(): void
+    {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['erro' => 'Método não permitido']);
+            exit;
+        }
+
+        $dados = json_decode(file_get_contents('php://input'), true);
+        $importacaoId = (int) ($dados['importacao_id'] ?? 0);
+        $acoes = $dados['acoes'] ?? [];
+
+        if ($importacaoId <= 0) {
+            echo json_encode(['erro' => 'ID inválido']);
+            exit;
+        }
+
+        // Mescla com ações já salvas na sessão
+        if (!isset($_SESSION['preview_acoes_' . $importacaoId])) {
+            $_SESSION['preview_acoes_' . $importacaoId] = [];
+        }
+
+        foreach ($acoes as $linhaCsv => $acao) {
+            $_SESSION['preview_acoes_' . $importacaoId][$linhaCsv] = $acao;
+        }
+
+        echo json_encode(['sucesso' => true, 'total_salvas' => count($_SESSION['preview_acoes_' . $importacaoId])]);
+        exit;
     }
 
     /**
@@ -150,11 +216,27 @@ class PlanilhaController extends BaseController
             return;
         }
 
-        // Coleta ações do formulário: acao[linha_csv] = importar|pular|excluir
-        $acoes = $_POST['acao'] ?? [];
+        // Mescla ações salvas via AJAX (páginas anteriores) com ações do formulário (página atual)
+        $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
+        $acoesFormulario = $_POST['acao'] ?? [];
+        $acoes = array_merge($acoesSalvas, $acoesFormulario);
 
-        // Salva ações em session para o processamento assíncrono
+        // Para registros sem ação definida, carrega a ação sugerida da análise
+        $analise = $this->csvParserService->carregarAnalise($importacaoId);
+        if ($analise) {
+            foreach ($analise['registros'] as $reg) {
+                $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                if ($linhaCsv !== '' && !isset($acoes[$linhaCsv])) {
+                    $acoes[$linhaCsv] = $reg['acao_sugerida'] ?? 'pular';
+                }
+            }
+        }
+
+        // Salva ações completas em session para o processamento assíncrono
         $_SESSION['importacao_acoes_' . $importacaoId] = $acoes;
+
+        // Limpa ações temporárias do preview
+        unset($_SESSION['preview_acoes_' . $importacaoId]);
 
         // Redireciona para a tela de progresso
         $this->redirecionar('/planilhas/progresso?id=' . $importacaoId);
