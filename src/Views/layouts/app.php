@@ -66,25 +66,27 @@ if (!isset($content)) {
 
     <!-- Custom CSS Adicional -->
     <?php
-        // Suporte para caminhos de CSS por view que podem apontar para '/assets/...' ou '/public/assets/...'
-        $linkHref = null;
-        if (isset($customCssPath)) {
-            $fsA = __DIR__ . '/../../../' . ltrim($customCssPath, '/');
-            $fsB = __DIR__ . '/../../../public/' . ltrim($customCssPath, '/');
-            if (file_exists($fsA)) {
-                $linkHref = $customCssPath;
-                $linkHref .= '?v=' . filemtime($fsA);
-            } elseif (file_exists($fsB)) {
-                // serve pelo webroot sem o /public prefix
-                $linkHref = '/' . ltrim($customCssPath, '/');
-                $linkHref .= '?v=' . filemtime($fsB);
-            }
+    // Suporte para caminhos de CSS por view que podem apontar para '/assets/...' ou '/public/assets/...'
+    $linkHref = null;
+    if (isset($customCssPath)) {
+        $fsA = __DIR__ . '/../../../' . ltrim($customCssPath, '/');
+        $fsB = __DIR__ . '/../../../public/' . ltrim($customCssPath, '/');
+        if (file_exists($fsA)) {
+            $linkHref = $customCssPath;
+            $linkHref .= '?v=' . filemtime($fsA);
+        } elseif (file_exists($fsB)) {
+            // serve pelo webroot sem o /public prefix
+            $linkHref = '/' . ltrim($customCssPath, '/');
+            $linkHref .= '?v=' . filemtime($fsB);
         }
+    }
     ?>
     <?php if ($linkHref): ?>
         <link rel="stylesheet" href="<?= $linkHref ?>">
     <?php elseif (isset($customCss) && $customCss): ?>
-        <style><?= $customCss ?></style>
+        <style>
+            <?= $customCss ?>
+        </style>
     <?php endif; ?>
 </head>
 
@@ -94,7 +96,7 @@ if (!isset($content)) {
             <?php
             // Variáveis para header, footer e conteúdo
             $pageTitle = $pageTitle ?? ($tituloPagina ?? null);
-            $userName  = $userName ?? \App\Core\SessionManager::getUserName() ?? '';
+            $userName  = \App\Core\SessionManager::getUserName() ?? '';
             $menuPath  = $menuPath ?? '/menu';
             $homePath  = $homePath ?? '/planilhas/visualizar';
             $logoutPath = $logoutPath ?? '/logout';
@@ -107,7 +109,7 @@ if (!isset($content)) {
                     $conexao = \App\Core\ConnectionManager::getConnection();
                     $comumRepo = new \App\Repositories\ComumRepository($conexao);
                     $comuns = $comumRepo->buscarTodos();
-                    
+
                     // Garante que comum_id está definida (usa SessionManager)
                     $comumAtualId = \App\Core\SessionManager::ensureComumId();
                 } catch (\Exception $e) {
