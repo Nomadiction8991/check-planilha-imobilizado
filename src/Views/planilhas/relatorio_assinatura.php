@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
- 
+
 
 
 
@@ -26,93 +26,122 @@ ob_start();
 </div>
 
 <script>
-(function(){
-    const canvas = document.getElementById('sign_canvas');
-    const wrapper = document.getElementById('canvasWrapper');
-    const btnFull = document.getElementById('btnFull');
-    const btnSave = document.getElementById('btnSave');
-    const btnClear = document.getElementById('btnClear');
-    const btnCancel = document.getElementById('btnCancel');
-    let signaturePad = null;
+    (function() {
+        const canvas = document.getElementById('sign_canvas');
+        const wrapper = document.getElementById('canvasWrapper');
+        const btnFull = document.getElementById('btnFull');
+        const btnSave = document.getElementById('btnSave');
+        const btnClear = document.getElementById('btnClear');
+        const btnCancel = document.getElementById('btnCancel');
+        let signaturePad = null;
 
-    function resizeCanvasForLandscape(width) {
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        // Desired width may be larger than viewport; wrapper is scrollable
-        const cssW = width || Math.max(1200, Math.floor(Math.max(vw, vh) * 1.2));
-        const cssH = Math.max(90, Math.floor(cssW / 8));
-        canvas.style.width = cssW + 'px';
-        canvas.style.height = cssH + 'px';
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = Math.floor(cssW * dpr);
-        canvas.height = Math.floor(cssH * dpr);
-        const ctx = canvas.getContext('2d');
-        try{ ctx.setTransform(1,0,0,1,0,0); } catch(e){}
-        ctx.scale(dpr, dpr);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0,0,cssW,cssH);
-        ctx.lineWidth = 2; ctx.lineCap = 'round';
-    }
-
-    function initSIGNATUREPAD() {
-        if (typeof SIGNATUREPAD === 'undefined') {
-            const s = document.createElement('script');
-            s.src = 'https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js';
-            s.onload = function(){
-                signaturePad = new SIGNATUREPAD(canvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
-            };
-            document.head.appendChild(s);
-        } else {
-            signaturePad = new SIGNATUREPAD(canvas, { backgroundColor: 'rgb(255,255,255)', penColor: 'black' });
+        function resizeCanvasForLandscape(width) {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            // Desired width may be larger than viewport; wrapper is scrollable
+            const cssW = width || Math.max(1200, Math.floor(Math.max(vw, vh) * 1.2));
+            const cssH = Math.max(90, Math.floor(cssW / 8));
+            canvas.style.width = cssW + 'px';
+            canvas.style.height = cssH + 'px';
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = Math.floor(cssW * dpr);
+            canvas.height = Math.floor(cssH * dpr);
+            const ctx = canvas.getContext('2d');
+            try {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+            } catch (e) {}
+            ctx.scale(dpr, dpr);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, cssW, cssH);
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
         }
-    }
 
-    // Try to enter fullscreen and lock orientation on user gesture
-    async function enterFullscreenAndLock(){
-        try{
-            if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
-            if (screen && screen.orientation && screen.orientation.lock) {
-                try{ await screen.orientation.lock('landscape'); } catch(e){}
+        function initSIGNATUREPAD() {
+            if (typeof SIGNATUREPAD === 'undefined') {
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js';
+                s.onload = function() {
+                    signaturePad = new SIGNATUREPAD(canvas, {
+                        backgroundColor: 'rgb(255,255,255)',
+                        penColor: 'black'
+                    });
+                };
+                document.head.appendChild(s);
+            } else {
+                signaturePad = new SIGNATUREPAD(canvas, {
+                    backgroundColor: 'rgb(255,255,255)',
+                    penColor: 'black'
+                });
             }
-        }catch(e){ console.warn('fullscreen/orientation failed', e); }
-    }
+        }
 
-    btnFull.addEventListener('click', async function(){
-        await enterFullscreenAndLock();
+        // Try to enter fullscreen and lock orientation on user gesture
+        async function enterFullscreenAndLock() {
+            try {
+                if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+                if (screen && screen.orientation && screen.orientation.lock) {
+                    try {
+                        await screen.orientation.lock('landscape');
+                    } catch (e) {}
+                }
+            } catch (e) {
+                console.warn('fullscreen/orientation failed', e);
+            }
+        }
+
+        btnFull.addEventListener('click', async function() {
+            await enterFullscreenAndLock();
+            resizeCanvasForLandscape();
+            initSIGNATUREPAD();
+            // scroll to center
+            try {
+                wrapper.scrollLeft = Math.max(0, (canvas.clientWidth - wrapper.clientWidth) / 2);
+            } catch (e) {}
+        });
+
+        btnClear.addEventListener('click', function() {
+            if (signaturePad) signaturePad.clear();
+            try {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                resizeCanvasForLandscape(canvas.clientWidth);
+            } catch (e) {}
+        });
+
+        btnCancel.addEventListener('click', function() {
+            // clear temporary storage and go back
+            try {
+                localStorage.removeItem('signature_temp');
+            } catch (e) {}
+            history.back();
+        });
+
+        btnSave.addEventListener('click', function() {
+            let data = null;
+            if (signaturePad) {
+                if (signaturePad.isEmpty()) data = null;
+                else data = signaturePad.toDataURL('image/png');
+            } else {
+                data = canvas.toDataURL('image/png');
+            }
+            if (!data) {
+                if (!confirm('Assinatura vazia. Deseja salvar em branco?')) return;
+            }
+            try {
+                localStorage.setItem('signature_temp', data);
+            } catch (e) {
+                console.error(e);
+            }
+            // go back to previous page where importer/editor will pick up the value
+            history.back();
+        });
+
+        // initial layout
         resizeCanvasForLandscape();
+        // initialize signature pad immediately (non-fullscreen) for convenience
         initSIGNATUREPAD();
-        // scroll to center
-        try{ wrapper.scrollLeft = Math.max(0, (canvas.clientWidth - wrapper.clientWidth)/2); }catch(e){}
-    });
-
-    btnClear.addEventListener('click', function(){ if (signaturePad) signaturePad.clear(); try{ const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); resizeCanvasForLandscape(canvas.clientWidth); }catch(e){} });
-
-    btnCancel.addEventListener('click', function(){
-        // clear temporary storage and go back
-        try{ localStorage.removeItem('signature_temp'); }catch(e){}
-        history.back();
-    });
-
-    btnSave.addEventListener('click', function(){
-        let data = null;
-        if (signaturePad) {
-            if (signaturePad.isEmpty()) data = null; else data = signaturePad.toDataURL('image/png');
-        } else {
-            data = canvas.toDataURL('image/png');
-        }
-        if (!data) {
-            if (!confirm('Assinatura vazia. Deseja salvar em branco?')) return;
-        }
-        try{ localStorage.setItem('signature_temp', data); } catch(e){ console.error(e); }
-        // go back to previous page where importer/editor will pick up the value
-        history.back();
-    });
-
-    // initial layout
-    resizeCanvasForLandscape();
-    // initialize signature pad immediately (non-fullscreen) for convenience
-    initSIGNATUREPAD();
-})();
+    })();
 </script>
 
 <?php
@@ -123,5 +152,3 @@ $contentFile = $tempFile;
 include __DIR__ . '/../layouts/app.php';
 unlink($tempFile);
 ?>
-
-

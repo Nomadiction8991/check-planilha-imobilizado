@@ -45,8 +45,8 @@ ob_start();
                 <i class="bi bi-chat-square-text me-2"></i>
                 <?php echo htmlspecialchars(to_uppercase('observações'), ENT_QUOTES, 'UTF-8'); ?>
             </label>
-            <textarea class="form-control text-uppercase" id="observacoes" name="observacoes" rows="6" 
-                      placeholder="<?php echo htmlspecialchars(to_uppercase('digite as observações do produto...'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(to_uppercase($check['observacoes'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
+            <textarea class="form-control text-uppercase" id="observacoes" name="observacoes" rows="6"
+                placeholder="<?php echo htmlspecialchars(to_uppercase('digite as observações do produto...'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(to_uppercase($check['observacoes'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
             <div class="form-text"><?php echo htmlspecialchars(to_uppercase('deixe em branco para remover as observações'), ENT_QUOTES, 'UTF-8'); ?></div>
         </div>
     </div>
