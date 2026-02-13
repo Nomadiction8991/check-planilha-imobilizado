@@ -70,13 +70,11 @@ try {
         FROM planilhas p
         WHERE $where
         ORDER BY p.data_posicao DESC, p.id DESC
-        LIMIT :limite OFFSET :offset";
+        LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
     $stmt = $conexao->prepare($sql);
     foreach ($params as $k => $v) {
         $stmt->bindValue($k, $v);
     }
-    $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $planilhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {

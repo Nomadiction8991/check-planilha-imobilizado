@@ -18,7 +18,7 @@ abstract class BaseRepository implements RepositoryInterface
         $this->conexao = $conexao;
     }
 
-    
+
     public function buscarPorId(int $id): ?array
     {
         $sql = "SELECT * FROM {$this->tabela} WHERE {$this->chavePrimaria} = :id";
@@ -30,14 +30,14 @@ abstract class BaseRepository implements RepositoryInterface
         return $resultado ?: null;
     }
 
-    
+
     public function buscarTodos(): array
     {
         $sql = "SELECT * FROM {$this->tabela}";
         return $this->conexao->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    
+
     public function criar(array $dados): int
     {
         $colunas = implode(', ', array_keys($dados));
@@ -54,7 +54,7 @@ abstract class BaseRepository implements RepositoryInterface
         return (int) $this->conexao->lastInsertId();
     }
 
-    
+
     public function atualizar(int $id, array $dados): bool
     {
         $sets = [];
@@ -74,7 +74,7 @@ abstract class BaseRepository implements RepositoryInterface
         return $stmt->execute();
     }
 
-    
+
     public function deletar(int $id): bool
     {
         $sql = "DELETE FROM {$this->tabela} WHERE {$this->chavePrimaria} = :id";
@@ -83,7 +83,7 @@ abstract class BaseRepository implements RepositoryInterface
         return $stmt->execute();
     }
 
-    
+
     public function contar(string $where = '', array $params = []): int
     {
         $sql = "SELECT COUNT(*) FROM {$this->tabela}";
@@ -100,7 +100,7 @@ abstract class BaseRepository implements RepositoryInterface
         return (int) $stmt->fetchColumn();
     }
 
-    
+
     protected function paginar(int $pagina, int $limite, string $where = '', array $params = [], string $orderBy = ''): array
     {
         $offset = ($pagina - 1) * $limite;
@@ -112,11 +112,9 @@ abstract class BaseRepository implements RepositoryInterface
         if ($orderBy) {
             $sql .= " ORDER BY {$orderBy}";
         }
-        $sql .= " LIMIT :limite OFFSET :offset";
+        $sql .= " LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
 
         $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);

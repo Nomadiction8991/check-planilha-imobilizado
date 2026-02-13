@@ -399,13 +399,11 @@ class PlanilhaController extends BaseController
                 LEFT JOIN dependencias ed ON p.editado_dependencia_id = ed.id
                 WHERE $whereClause 
                 ORDER BY p.codigo ASC 
-                LIMIT :limite OFFSET :offset";
+                LIMIT " . (int)$itensPorPagina . " OFFSET " . (int)$offset;
         $stmtProdutos = $this->conexao->prepare($sql);
         foreach ($params as $key => $value) {
             $stmtProdutos->bindValue($key, $value);
         }
-        $stmtProdutos->bindValue(':limite', $itensPorPagina, PDO::PARAM_INT);
-        $stmtProdutos->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmtProdutos->execute();
         $produtos = $stmtProdutos->fetchAll(PDO::FETCH_ASSOC);
 

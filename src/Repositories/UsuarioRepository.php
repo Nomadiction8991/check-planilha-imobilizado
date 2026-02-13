@@ -10,7 +10,7 @@ class UsuarioRepository extends BaseRepository
 {
     protected string $tabela = 'usuarios';
 
-    
+
     public function buscarPorEmail(string $email): ?array
     {
         $emailUpper = mb_strtoupper($email, 'UTF-8');
@@ -24,7 +24,7 @@ class UsuarioRepository extends BaseRepository
         return $resultado ?: null;
     }
 
-    
+
     public function buscarPorCpf(string $cpf): ?array
     {
         $sql = "SELECT * FROM {$this->tabela} WHERE cpf = :cpf";
@@ -36,14 +36,14 @@ class UsuarioRepository extends BaseRepository
         return $resultado ?: null;
     }
 
-    
+
     public function buscarPaginadoComFiltros(int $pagina, int $limite, array $filtros = []): array
     {
         $offset = ($pagina - 1) * $limite;
         $where = [];
         $params = [];
 
-        
+
         if (!empty($filtros['busca'])) {
             $where[] = '(LOWER(nome) LIKE :busca_nome OR LOWER(email) LIKE :busca_email)';
             $buscaLower = '%' . mb_strtolower($filtros['busca'], 'UTF-8') . '%';
@@ -51,7 +51,7 @@ class UsuarioRepository extends BaseRepository
             $params[':busca_email'] = $buscaLower;
         }
 
-        
+
         if (isset($filtros['status']) && $filtros['status'] !== '' && in_array($filtros['status'], ['0', '1'], true)) {
             $where[] = 'ativo = :status';
             $params[':status'] = $filtros['status'];
@@ -59,10 +59,10 @@ class UsuarioRepository extends BaseRepository
 
         $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';
 
-        
+
         $totalGeral = (int) $this->conexao->query("SELECT COUNT(*) FROM {$this->tabela}")->fetchColumn();
 
-        
+
         $sqlCount = "SELECT COUNT(*) FROM {$this->tabela}" . $whereSql;
         $stmtCount = $this->conexao->prepare($sqlCount);
         foreach ($params as $key => $value) {
@@ -71,11 +71,10 @@ class UsuarioRepository extends BaseRepository
         $stmtCount->execute();
         $total = (int) $stmtCount->fetchColumn();
 
-        
-        $sql = "SELECT * FROM {$this->tabela}" . $whereSql . " ORDER BY nome ASC LIMIT :limite OFFSET :offset";
+
+        $sql = "SELECT * FROM {$this->tabela}" . $whereSql . " ORDER BY nome ASC LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
         $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
@@ -94,7 +93,7 @@ class UsuarioRepository extends BaseRepository
         ];
     }
 
-    
+
     public function emailExiste(string $email, ?int $ignorarId = null): bool
     {
         $emailUpper = mb_strtoupper($email, 'UTF-8');
@@ -114,7 +113,7 @@ class UsuarioRepository extends BaseRepository
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    
+
     public function cpfExiste(string $cpf, ?int $ignorarId = null): bool
     {
         $sql = "SELECT id FROM {$this->tabela} WHERE cpf = :cpf";
@@ -132,15 +131,15 @@ class UsuarioRepository extends BaseRepository
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    
+
     public function criarUsuario(array $dados): int
     {
-        
+
         if (isset($dados['email'])) {
             $dados['email'] = mb_strtoupper($dados['email'], 'UTF-8');
         }
 
-        
+
         if (isset($dados['senha'])) {
             $dados['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
         }
@@ -148,18 +147,18 @@ class UsuarioRepository extends BaseRepository
         return $this->criar($dados);
     }
 
-    
+
     public function atualizarUsuario(int $id, array $dados): bool
     {
-        
+
         if (isset($dados['email'])) {
             $dados['email'] = mb_strtoupper($dados['email'], 'UTF-8');
         }
 
-        
+
         if (isset($dados['senha'])) {
             if (trim($dados['senha']) === '') {
-                unset($dados['senha']); 
+                unset($dados['senha']);
             } else {
                 $dados['senha'] = password_hash($dados['senha'], PASSWORD_DEFAULT);
             }
@@ -168,7 +167,7 @@ class UsuarioRepository extends BaseRepository
         return $this->atualizar($id, $dados);
     }
 
-    
+
     public function autenticar(string $email, string $senha): ?array
     {
         $usuario = $this->buscarPorEmail($email);
@@ -177,12 +176,12 @@ class UsuarioRepository extends BaseRepository
             return null;
         }
 
-        
+
         if (!password_verify($senha, $usuario['senha'])) {
             return null;
         }
 
-        
+
         if ($usuario['ativo'] != 1) {
             throw new Exception('Usuário inativo.');
         }

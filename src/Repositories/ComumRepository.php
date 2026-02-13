@@ -10,7 +10,7 @@ class ComumRepository extends BaseRepository
 {
     protected string $tabela = 'comums';
 
-    
+
     public function buscarPaginado(string $busca = '', int $limite = 10, int $offset = 0): array
     {
         $params = [];
@@ -25,11 +25,9 @@ class ComumRepository extends BaseRepository
         if ($where) {
             $sql .= " WHERE {$where}";
         }
-        $sql .= " ORDER BY codigo ASC LIMIT :limite OFFSET :offset";
+        $sql .= " ORDER BY codigo ASC LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
 
         $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
@@ -39,7 +37,7 @@ class ComumRepository extends BaseRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    
+
     public function contarComFiltro(string $busca = ''): int
     {
         $params = [];
@@ -53,7 +51,7 @@ class ComumRepository extends BaseRepository
         return $this->contar($where, $params);
     }
 
-    
+
     public function buscarPorCodigo(int $codigo): ?array
     {
         $sql = "SELECT * FROM {$this->tabela} WHERE codigo = :codigo";
@@ -65,7 +63,7 @@ class ComumRepository extends BaseRepository
         return $resultado ?: null;
     }
 
-    
+
     public function buscarPorCnpj(string $cnpj): ?array
     {
         $sql = "SELECT * FROM {$this->tabela} WHERE cnpj = :cnpj";
@@ -77,13 +75,13 @@ class ComumRepository extends BaseRepository
         return $resultado ?: null;
     }
 
-    
+
     public function normalizarCnpj(string $cnpj): string
     {
         return preg_replace('/\D+/', '', trim($cnpj));
     }
 
-    
+
     public function gerarCnpjUnico(string $cnpjBase, int $codigo, ?int $ignorarId = null): string
     {
         $cnpjLimpo = $this->normalizarCnpj($cnpjBase);
@@ -97,7 +95,7 @@ class ComumRepository extends BaseRepository
             $stmt->execute();
             $existente = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            
+
             if (!$existente || ($ignorarId !== null && (int)$existente['id'] === (int)$ignorarId)) {
                 return $cnpjFinal;
             }
@@ -110,7 +108,7 @@ class ComumRepository extends BaseRepository
         }
     }
 
-    
+
     public function garantirPorCodigo(int $codigo, array $dados = []): int
     {
         if ($codigo <= 0) {
@@ -120,7 +118,7 @@ class ComumRepository extends BaseRepository
         $existente = $this->buscarPorCodigo($codigo);
 
         if ($existente) {
-            
+
             if (!empty($dados)) {
                 $updates = [];
                 $params = [':id' => (int)$existente['id']];
@@ -166,7 +164,7 @@ class ComumRepository extends BaseRepository
             return (int)$existente['id'];
         }
 
-        
+
         $dadosInsert = [
             'codigo' => $codigo,
             'cnpj' => null,
@@ -179,12 +177,12 @@ class ComumRepository extends BaseRepository
         return $this->criar($dadosInsert);
     }
 
-    
+
     public function extrairCodigo(string $comumTexto): int
     {
         $comumTexto = trim($comumTexto);
 
-        
+
         if (preg_match('/BR\s*(\d{2})\D?(\d{4})/i', $comumTexto, $matches)) {
             return (int)($matches[1] . $matches[2]);
         }
@@ -195,7 +193,7 @@ class ComumRepository extends BaseRepository
         return 0;
     }
 
-    
+
     public function extrairDescricao(string $comumTexto): string
     {
         $comumTexto = trim($comumTexto);
@@ -217,7 +215,7 @@ class ComumRepository extends BaseRepository
         return '';
     }
 
-    
+
     public function processarComum(string $comumTexto, array $dados = []): int
     {
         if (empty($comumTexto)) {

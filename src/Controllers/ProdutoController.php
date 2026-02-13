@@ -3,15 +3,22 @@
 namespace App\Controllers;
 
 use App\Core\ConnectionManager;
+use App\Services\TipoBemService;
+use App\Repositories\TipoBemRepository;
 use PDO;
 
 class ProdutoController extends BaseController
 {
     private PDO $conexao;
+    private TipoBemService $tipoBemService;
 
     public function __construct(?PDO $conexao = null)
     {
         $this->conexao = $conexao ?? ConnectionManager::getConnection();
+
+        // Inicializa TipoBemService
+        $tipoBemRepo = new TipoBemRepository($this->conexao);
+        $this->tipoBemService = new TipoBemService($tipoBemRepo);
     }
 
     public function index(): void
@@ -42,8 +49,14 @@ class ProdutoController extends BaseController
         $totalRegistros = 0;
         $totalPaginas = 1;
 
-        // TODO: Implementar busca de tipos de bens, códigos de bens e dependências
-        $tiposBens = [];
+        // Busca tipos de bens, códigos de bens e dependências
+        try {
+            $tiposBens = $this->tipoBemService->buscarTodos();
+        } catch (\Throwable $e) {
+            error_log('Erro ao buscar tipos_bens: ' . $e->getMessage());
+            $tiposBens = [];
+        }
+
         $bemCodigos = [];
         $dependencias = [];
 
@@ -76,7 +89,18 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->renderizar('produtos/produto_criar', ['comum_id' => $comumId]);
+        // Carrega tipos de bens
+        try {
+            $tiposBens = $this->tipoBemService->buscarTodos();
+        } catch (\Throwable $e) {
+            error_log('Erro ao buscar tipos_bens: ' . $e->getMessage());
+            $tiposBens = [];
+        }
+
+        $this->renderizar('produtos/produto_criar', [
+            'comum_id' => $comumId,
+            'tipos_bens' => $tiposBens
+        ]);
     }
 
     public function store(): void
@@ -99,7 +123,18 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->renderizar('produtos/produto_editar', ['id' => $id]);
+        // Carrega tipos de bens
+        try {
+            $tiposBens = $this->tipoBemService->buscarTodos();
+        } catch (\Throwable $e) {
+            error_log('Erro ao buscar tipos_bens: ' . $e->getMessage());
+            $tiposBens = [];
+        }
+
+        $this->renderizar('produtos/produto_editar', [
+            'id' => $id,
+            'tipos_bens' => $tiposBens
+        ]);
     }
 
     public function update(): void

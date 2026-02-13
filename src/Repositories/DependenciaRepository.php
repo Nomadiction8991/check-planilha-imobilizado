@@ -23,11 +23,9 @@ class DependenciaRepository extends BaseRepository
         if ($where) {
             $sql .= " WHERE {$where}";
         }
-        $sql .= " ORDER BY descricao ASC LIMIT :limite OFFSET :offset";
+        $sql .= " ORDER BY descricao ASC LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
 
         $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
@@ -47,11 +45,9 @@ class DependenciaRepository extends BaseRepository
             $params[':busca'] = '%' . $busca . '%';
         }
 
-        $sql = "SELECT * FROM {$this->tabela} WHERE {$where} ORDER BY descricao ASC LIMIT :limite OFFSET :offset";
+        $sql = "SELECT * FROM {$this->tabela} WHERE {$where} ORDER BY descricao ASC LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
 
         $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
