@@ -1,11 +1,14 @@
 <?php
 
-
-
+// Carregar configurações da aplicação
+$appConfig = require __DIR__ . '/../../../config/app.php';
+$projectRoot = $appConfig['project_root'];
+$siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
 
 $manifest_path = '/manifest-prod.json';
 
-$pageTitle = $pageTitle ?? 'ANVY - GESTÃO DE PLANILHAS';
+// Usar título da config ou do pageTitle passado, com fallback
+$pageTitle = $pageTitle ?? $siteTitle;
 $backUrl = $backUrl ?? null;
 $headerActions = $headerActions ?? '';
 $customCss = $customCss ?? '';
@@ -34,12 +37,16 @@ if (!isset($content)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+
     <!-- PWA - Progressive Web App -->
     <link rel="manifest" href="<?= $manifest_path ?>">
     <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CheckPlanilha">
+    <meta name="apple-mobile-web-app-title" content="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>">
     <link rel="apple-touch-icon" href="/assets/images/logo.png">
 
     <!-- Bootstrap 5.3 CSS -->
