@@ -202,7 +202,9 @@ class ProdutoController extends BaseController
     public function etiqueta(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            // Renderiza a view de copiar etiquetas
+            // Garante que id_planilha esteja disponível na view
+            $id_planilha = $_GET['id'] ?? \App\Core\SessionManager::ensureComumId();
+            $conexao = $this->conexao;
             require_once __DIR__ . '/../Views/planilhas/produto_copiar_etiquetas.php';
             return;
         }

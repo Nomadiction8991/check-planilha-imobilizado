@@ -298,19 +298,22 @@ if (false && !empty($acesso_bloqueado)) {
 
         /* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
         .floating-buttons-container {
-            position: fixed !important;
-            bottom: 20px !important;
-            right: 20px !important;
+            position: sticky !important;
+            bottom: 10px !important;
+            float: right !important;
             z-index: 1040 !important;
             display: flex !important;
             flex-direction: column !important;
-            gap: 15px !important;
+            gap: 12px !important;
             align-items: center !important;
+            pointer-events: none;
+            margin-top: -130px;
         }
 
         .floating-btn {
-            width: 60px !important;
-            height: 60px !important;
+            pointer-events: auto;
+            width: 50px !important;
+            height: 50px !important;
             border-radius: 50% !important;
             border: none !important;
             cursor: pointer !important;
@@ -1105,73 +1108,6 @@ ob_start();
 ?>
 
 <style>
-    /* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
-    .floating-buttons-container {
-        position: fixed !important;
-        bottom: 20px !important;
-        right: 20px !important;
-        z-index: 1040 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 15px !important;
-        align-items: center !important;
-    }
-
-    .floating-btn {
-        width: 60px !important;
-        height: 60px !important;
-        border-radius: 50% !important;
-        border: none !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 24px !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
-        background: white !important;
-        color: #333 !important;
-        padding: 0 !important;
-        line-height: 1 !important;
-    }
-
-    .floating-btn:hover {
-        transform: scale(1.15) !important;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
-    }
-
-    .floating-btn:active {
-        transform: scale(0.95) !important;
-    }
-
-    .floating-btn.mic {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-    }
-
-    .floating-btn.cam {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-        color: white !important;
-    }
-
-    .floating-btn.listening {
-        animation: pulse-float 1.5s infinite !important;
-    }
-
-    @keyframes pulse-float {
-
-        0%,
-        100% {
-            transform: scale(1) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
-        }
-
-        50% {
-            transform: scale(1.1) !important;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
-        }
-    }
-
     /* ===== MODAL DE CÂMERA EM TELA INTEIRA ===== */
     .camera-fullscreen-modal {
         position: fixed !important;

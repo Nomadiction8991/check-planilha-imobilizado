@@ -2,6 +2,8 @@
 $pageTitle = 'PROGRESSO DA IMPORTAÇÃO';
 $backUrl = null;
 $importacaoId = $importacao_id ?? 0;
+
+ob_start();
 ?>
 
 <div class="container-fluid py-3">
@@ -13,53 +15,53 @@ $importacaoId = $importacao_id ?? 0;
         <div class="card-body">
             <!-- Status -->
             <div class="mb-3 text-center">
-                <h5 id="status-text">Preparando importação...</h5>
+                <h6 id="status-text">Preparando importação...</h6>
             </div>
 
             <!-- Barra de Progresso -->
             <div class="mb-3">
-                <div class="progress" style="height: 30px;">
+                <div class="progress" style="height: 25px;">
                     <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
                         role="progressbar"
                         style="width: 0%"
                         aria-valuenow="0"
                         aria-valuemin="0"
                         aria-valuemax="100">
-                        <span id="progress-text">0%</span>
+                        <span id="progress-text" style="font-size: 0.85rem;">0%</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Informações Detalhadas -->
-            <div class="row text-center">
-                <div class="col-md-3">
-                    <div class="border rounded p-3 mb-2">
-                        <h6 class="text-muted mb-1">TOTAL DE LINHAS</h6>
-                        <h4 id="total-linhas" class="mb-0">-</h4>
+            <!-- Informações Detalhadas (2 colunas para caber no mobile 400px) -->
+            <div class="row text-center g-2">
+                <div class="col-6">
+                    <div class="border rounded p-2 mb-1">
+                        <small class="text-muted d-block">TOTAL</small>
+                        <strong id="total-linhas">-</strong>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="border rounded p-3 mb-2">
-                        <h6 class="text-muted mb-1">PROCESSADAS</h6>
-                        <h4 id="linhas-processadas" class="mb-0 text-primary">-</h4>
+                <div class="col-6">
+                    <div class="border rounded p-2 mb-1">
+                        <small class="text-muted d-block">PROCESSADAS</small>
+                        <strong id="linhas-processadas" class="text-primary">-</strong>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="border rounded p-3 mb-2">
-                        <h6 class="text-muted mb-1">SUCESSO</h6>
-                        <h4 id="linhas-sucesso" class="mb-0 text-success">-</h4>
+                <div class="col-6">
+                    <div class="border rounded p-2 mb-1">
+                        <small class="text-muted d-block">SUCESSO</small>
+                        <strong id="linhas-sucesso" class="text-success">-</strong>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="border rounded p-3 mb-2">
-                        <h6 class="text-muted mb-1">ERROS</h6>
-                        <h4 id="linhas-erro" class="mb-0 text-danger">-</h4>
+                <div class="col-6">
+                    <div class="border rounded p-2 mb-1">
+                        <small class="text-muted d-block">ERROS</small>
+                        <strong id="linhas-erro" class="text-danger">-</strong>
                     </div>
                 </div>
             </div>
 
             <!-- Status do Arquivo -->
-            <div class="mt-3">
+            <div class="mt-2">
                 <small class="text-muted">
                     <i class="bi bi-file-earmark-text me-1"></i>
                     <span id="arquivo-nome">Carregando...</span>
@@ -79,12 +81,12 @@ $importacaoId = $importacao_id ?? 0;
                     <span id="sucesso-linhas">0</span> linhas importadas com sucesso.
                     <span id="sucesso-erros-txt"></span>
                 </p>
-                <div class="mt-3">
-                    <a href="/planilhas/visualizar" class="btn btn-primary">
-                        <i class="bi bi-eye me-2"></i>VISUALIZAR PRODUTOS
+                <div class="mt-3 d-grid gap-2">
+                    <a href="/planilhas/visualizar" class="btn btn-primary btn-sm">
+                        <i class="bi bi-eye me-1"></i>VISUALIZAR PRODUTOS
                     </a>
-                    <a href="/planilhas/importar" class="btn btn-secondary">
-                        <i class="bi bi-upload me-2"></i>NOVA IMPORTAÇÃO
+                    <a href="/planilhas/importar" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-upload me-1"></i>NOVA IMPORTAÇÃO
                     </a>
                 </div>
             </div>
@@ -93,20 +95,17 @@ $importacaoId = $importacao_id ?? 0;
 </div>
 
 <script>
-    const importacaoId = <?= $importacaoId ?>;
+    const importacaoId = <?= (int)$importacaoId ?>;
     let processamentoIniciado = false;
     let intervaloAtualizacao = null;
 
-    // Inicia processamento
     function iniciarProcessamento() {
         if (processamentoIniciado) return;
         processamentoIniciado = true;
 
         fetch('/planilhas/processar-arquivo', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'id=' + importacaoId
             })
             .then(response => response.json())
@@ -116,12 +115,9 @@ $importacaoId = $importacao_id ?? 0;
                     pararAtualizacao();
                 }
             })
-            .catch(error => {
-                console.error('Erro ao processar:', error);
-            });
+            .catch(error => console.error('Erro ao processar:', error));
     }
 
-    // Atualiza progresso
     function atualizarProgresso() {
         fetch('/planilhas/api/progresso?id=' + importacaoId)
             .then(response => response.json())
@@ -132,14 +128,12 @@ $importacaoId = $importacao_id ?? 0;
                     return;
                 }
 
-                // Atualiza informações
                 document.getElementById('total-linhas').textContent = data.total_linhas.toLocaleString();
                 document.getElementById('linhas-processadas').textContent = data.linhas_processadas.toLocaleString();
                 document.getElementById('linhas-sucesso').textContent = data.linhas_sucesso.toLocaleString();
                 document.getElementById('linhas-erro').textContent = data.linhas_erro.toLocaleString();
                 document.getElementById('arquivo-nome').textContent = data.arquivo_nome;
 
-                // Atualiza barra de progresso
                 const porcentagem = Math.round(data.porcentagem);
                 const progressBar = document.getElementById('progress-bar');
                 const progressText = document.getElementById('progress-text');
@@ -148,7 +142,6 @@ $importacaoId = $importacao_id ?? 0;
                 progressBar.setAttribute('aria-valuenow', porcentagem);
                 progressText.textContent = porcentagem + '%';
 
-                // Atualiza status
                 let statusTexto = 'Processando...';
                 if (data.status === 'aguardando') {
                     statusTexto = 'Aguardando início...';
@@ -170,9 +163,7 @@ $importacaoId = $importacao_id ?? 0;
 
                 document.getElementById('status-text').textContent = statusTexto;
             })
-            .catch(error => {
-                console.error('Erro ao buscar progresso:', error);
-            });
+            .catch(error => console.error('Erro ao buscar progresso:', error));
     }
 
     function mostrarErro(mensagem) {
@@ -182,12 +173,9 @@ $importacaoId = $importacao_id ?? 0;
 
     function mostrarSucesso(sucesso, erros) {
         document.getElementById('sucesso-linhas').textContent = sucesso.toLocaleString();
-
         if (erros > 0) {
-            document.getElementById('sucesso-erros-txt').textContent =
-                erros + ' linha(s) com erro.';
+            document.getElementById('sucesso-erros-txt').textContent = erros + ' linha(s) com erro.';
         }
-
         document.getElementById('sucesso-container').style.display = 'block';
     }
 
@@ -198,50 +186,25 @@ $importacaoId = $importacao_id ?? 0;
         }
     }
 
-    // Inicia quando a página carregar
     document.addEventListener('DOMContentLoaded', function() {
-        // Primeira atualização imediata
         atualizarProgresso();
-
-        // Inicia processamento em background
         setTimeout(iniciarProcessamento, 500);
-
-        // Atualiza a cada 1 segundo
-        intervaloAtualizacao = setInterval(atualizarProgresso, 1000);
+        intervaloAtualizacao = setInterval(atualizarProgresso, 1500);
     });
 
-    // Para de atualizar se o usuário sair da página
-    window.addEventListener('beforeunload', function() {
-        pararAtualizacao();
-    });
+    window.addEventListener('beforeunload', function() { pararAtualizacao(); });
 </script>
 
 <style>
-    .progress {
-        background-color: #e9ecef;
-        border-radius: 0.5rem;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        font-size: 1rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: width 0.3s ease;
-    }
-
-    #progress-text {
-        color: white;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-    }
-
-    .border.rounded {
-        transition: all 0.3s ease;
-    }
-
-    .border.rounded:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+    .progress { background-color: #e9ecef; border-radius: 0.5rem; overflow: hidden; }
+    .progress-bar { font-weight: 600; display: flex; align-items: center; justify-content: center; transition: width 0.3s ease; }
+    #progress-text { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
 </style>
+
+<?php
+$contentHtml = ob_get_clean();
+$contentFile = __DIR__ . '/../../../storage/tmp/temp_progresso_' . uniqid() . '.php';
+file_put_contents($contentFile, $contentHtml);
+include __DIR__ . '/../layouts/app.php';
+@unlink($contentFile);
+?>

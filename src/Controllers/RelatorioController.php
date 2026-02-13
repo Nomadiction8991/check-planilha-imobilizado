@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\ConnectionManager;
+use App\Core\SessionManager;
 use PDO;
 
 class RelatorioController extends BaseController
@@ -16,7 +17,13 @@ class RelatorioController extends BaseController
 
     public function relatorio141(): void
     {
-        $this->renderizar('planilhas/relatorio141_view');
+        $comumId = SessionManager::ensureComumId();
+        $idPlanilha = $_GET['id'] ?? $comumId;
+
+        $this->renderizar('planilhas/relatorio141_view', [
+            'id_planilha' => $idPlanilha,
+            'comum_id' => $comumId,
+        ]);
     }
 
     public function visualizar(): void
@@ -27,11 +34,22 @@ class RelatorioController extends BaseController
             return;
         }
 
-        $this->renderizar('planilhas/relatorio_visualizar', ['formulario' => $formulario]);
+        $comumId = SessionManager::ensureComumId();
+
+        $this->renderizar('planilhas/relatorio_visualizar', [
+            'formulario' => $formulario,
+            'id_planilha' => $_GET['id'] ?? $comumId,
+            'comum_id' => $comumId,
+        ]);
     }
 
     public function assinatura(): void
     {
-        $this->renderizar('planilhas/relatorio_assinatura');
+        $comumId = SessionManager::ensureComumId();
+
+        $this->renderizar('planilhas/relatorio_assinatura', [
+            'id_planilha' => $_GET['id'] ?? $comumId,
+            'comum_id' => $comumId,
+        ]);
     }
 }

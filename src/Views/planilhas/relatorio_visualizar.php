@@ -3,8 +3,9 @@ require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 // NOTA: RelatorioViewController foi removido na migração app/ → src/
 // Este arquivo precisa ser migrado para usar RelatorioController via rota MVC
 
-$id_planilha = $_GET['id'] ?? null;
-$formulario = $_GET['form'] ?? '14.1';
+$id_planilha = $_GET['id'] ?? ($id_planilha ?? null);
+$formulario = $formulario ?? ($_GET['form'] ?? '14.1');
+$comum_id = $comum_id ?? $id_planilha;
 
 if (!$id_planilha) {
     header('Location: ' . base_url('/'));

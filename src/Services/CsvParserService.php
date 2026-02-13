@@ -582,6 +582,7 @@ class CsvParserService
 
     /**
      * Salva resultado da análise como JSON no storage/tmp.
+     * Usa JSON compacto (sem PRETTY_PRINT) para reduzir tamanho em disco.
      */
     public function salvarAnalise(int $importacaoId, array $analise): string
     {
@@ -592,7 +593,7 @@ class CsvParserService
 
         $caminho = $dir . '/analise_' . $importacaoId . '.json';
 
-        $json = json_encode($analise, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $json = json_encode($analise, JSON_UNESCAPED_UNICODE);
         if ($json === false) {
             throw new Exception('Erro ao serializar análise: ' . json_last_error_msg());
         }

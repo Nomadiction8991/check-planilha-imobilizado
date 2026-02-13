@@ -37,6 +37,10 @@ class PlanilhaController extends BaseController
         }
 
         try {
+            // Garante limites adequados para processar CSV grande
+            set_time_limit(120);
+            ini_set('memory_limit', '128M');
+
             SessionManager::ensureComumId();
             $comumId = SessionManager::getComumId();
             $usuarioId = SessionManager::getUserId();

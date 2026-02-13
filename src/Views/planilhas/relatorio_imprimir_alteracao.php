@@ -3,7 +3,7 @@ require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
 
 
-$id_planilha = $_GET['id'] ?? null;
+$id_planilha = $_GET['id'] ?? ($id_planilha ?? null);
 if (!$id_planilha) {
   header('Location: ' . base_url('/'));
   exit;
