@@ -2,10 +2,12 @@
 require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
 $pageTitle = 'Importar Planilha';
-$backUrl = base_url('/');
+$backUrl = base_url('/planilhas/visualizar');
 
 ob_start();
 ?>
+
+<?= \App\Helpers\AlertHelper::fromQuery() ?>
 
 <form action="/planilhas/importar" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
     <!-- Arquivo CSV -->
@@ -55,8 +57,5 @@ ob_start();
 
 <?php
 $contentHtml = ob_get_clean();
-$contentFile = __DIR__ . '/../../../temp_importar_planilha_content_' . uniqid() . '.php';
-file_put_contents($contentFile, $contentHtml);
 include __DIR__ . '/../layouts/app.php';
-@unlink($contentFile);
 ?>

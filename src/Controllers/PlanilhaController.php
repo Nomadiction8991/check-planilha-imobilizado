@@ -23,6 +23,10 @@ class PlanilhaController extends BaseController
 
     public function importar(): void
     {
+        if (!SessionManager::isAuthenticated()) {
+            $this->redirecionar('/login');
+            return;
+        }
         $this->renderizar('planilhas/planilha_importar');
     }
 
@@ -45,8 +49,13 @@ class PlanilhaController extends BaseController
             $comumId = SessionManager::getComumId();
             $usuarioId = SessionManager::getUserId();
 
-            if (!$comumId || !$usuarioId) {
-                throw new \Exception('Sessão inválida');
+            if (!$usuarioId) {
+                $this->redirecionar('/login');
+                return;
+            }
+
+            if (!$comumId) {
+                throw new \Exception('Selecione um Comum antes de importar');
             }
 
             // Valida upload — aceita 'arquivo_csv' e 'arquivo' (compatibilidade)
@@ -99,7 +108,7 @@ class PlanilhaController extends BaseController
         } catch (\Exception $e) {
             error_log('Erro ao processar importação: ' . $e->getMessage());
             $this->setMensagem('Erro: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/planilhas/importar');
+            $this->redirecionar('/planilhas/importar?error=' . urlencode($e->getMessage()));
         }
     }
 
@@ -296,6 +305,12 @@ class PlanilhaController extends BaseController
 
     public function visualizar(): void
     {
+        // Se veio ?comum_id= pela URL (clique na listagem), atualiza a sessão
+        $comumIdUrl = (int) ($_GET['comum_id'] ?? 0);
+        if ($comumIdUrl > 0) {
+            \App\Core\SessionManager::set('comum_id', $comumIdUrl);
+        }
+
         // Garante que comum_id está definida na sessão
         $comumId = \App\Core\SessionManager::ensureComumId();
 

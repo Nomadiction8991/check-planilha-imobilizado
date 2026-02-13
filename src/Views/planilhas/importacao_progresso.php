@@ -203,8 +203,5 @@ ob_start();
 
 <?php
 $contentHtml = ob_get_clean();
-$contentFile = __DIR__ . '/../../../storage/tmp/temp_progresso_' . uniqid() . '.php';
-file_put_contents($contentFile, $contentHtml);
 include __DIR__ . '/../layouts/app.php';
-@unlink($contentFile);
 ?>

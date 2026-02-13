@@ -113,6 +113,16 @@ if (!isset($content)) {
             <?php include __DIR__ . '/partials/header_mobile.php'; ?>
 
             <main class="app-content celular-screen">
+                <?php
+                // Exibir mensagens flash da sessão (setMensagem do BaseController)
+                if (!empty($_SESSION['mensagem'])) {
+                    $tipoAlerta = $_SESSION['tipo_mensagem'] ?? 'info';
+                    $msgHtml = htmlspecialchars($_SESSION['mensagem'], ENT_QUOTES, 'UTF-8');
+                    echo "<div class=\"alert alert-{$tipoAlerta} alert-dismissible fade show\" role=\"alert\">{$msgHtml}"
+                       . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button></div>';
+                    unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
+                }
+                ?>
                 <?= $content ?? '' ?>
             </main>
 
@@ -140,7 +150,7 @@ if (!isset($content)) {
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                window.location.href = '/comuns';
+                window.location.href = '/planilhas/visualizar';
             }
         }
     </script>

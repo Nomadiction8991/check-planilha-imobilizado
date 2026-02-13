@@ -631,8 +631,5 @@ ob_start();
 
 <?php
 $contentHtml = ob_get_clean();
-$contentFile = __DIR__ . '/../../../temp_preview_content_' . uniqid() . '.php';
-file_put_contents($contentFile, $contentHtml);
 include __DIR__ . '/../layouts/app.php';
-@unlink($contentFile);
 ?>

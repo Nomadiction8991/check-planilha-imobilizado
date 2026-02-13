@@ -1,24 +1,21 @@
 <?php
 require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
-// NOTA: RelatorioViewController foi removido na migração app/ → src/
-// Este arquivo precisa ser migrado para usar RelatorioController via rota MVC
 
-$id_planilha = $_GET['id'] ?? ($id_planilha ?? null);
-$formulario = $formulario ?? ($_GET['form'] ?? '14.1');
+// Variáveis recebidas do RelatorioController
+$id_planilha = $id_planilha ?? null;
+$formulario = $formulario ?? '14.1';
 $comum_id = $comum_id ?? $id_planilha;
 
 if (!$id_planilha) {
-    header('Location: ' . base_url('/'));
-    exit;
+    echo '<div class="alert alert-warning">Nenhuma planilha selecionada.</div>';
+    return;
 }
 
-// TODO: Migrar para RelatorioController via rota MVC (/relatorios/visualizar)
-// RelatorioViewController foi removido na migração app/ → src/
-// Por enquanto, exibe mensagem de funcionalidade em migração
 $dados = [];
-$templatePath = dirname(__DIR__, 2) . "/relatorios/{$formulario}.html";
+$templatePath = dirname(__DIR__, 2) . "/relatorios/" . basename($formulario) . ".html";
 if (!file_exists($templatePath)) {
-    die("Template do formulário {$formulario} não encontrado");
+    echo '<div class="alert alert-danger">Template do formulário ' . htmlspecialchars($formulario, ENT_QUOTES, 'UTF-8') . ' não encontrado</div>';
+    return;
 }
 
 $templateCompleto = file_get_contents($templatePath);

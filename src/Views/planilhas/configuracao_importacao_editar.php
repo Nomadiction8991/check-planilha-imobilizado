@@ -219,10 +219,6 @@ $contentHtml = ob_get_clean();
 
 
 
-$contentHtmlFinal = $contentHtml;
-$tempFile = __DIR__ . '/../../../temp_editar_planilha_' . uniqid() . '.php';
-file_put_contents($tempFile, $contentHtmlFinal);
-$contentFile = $tempFile;
+$contentHtml = $contentHtmlFinal ?? $contentHtml;
 include __DIR__ . '/../layouts/app.php';
-unlink($tempFile);
 ?>

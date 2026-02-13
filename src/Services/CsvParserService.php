@@ -519,7 +519,7 @@ class CsvParserService
 
         $mapa = [];
         foreach ($rows as $row) {
-            $chave = strtoupper(trim($row['codigo']));
+            $chave = strtoupper(trim((string) ($row['codigo'] ?? '')));
             $mapa[$chave] = $row;
         }
 
@@ -561,7 +561,7 @@ class CsvParserService
 
         $mapa = [];
         foreach ($rows as $row) {
-            $mapa[strtoupper(trim($row['descricao']))] = $row['id'];
+            $mapa[strtoupper(trim((string) ($row['descricao'] ?? '')))] = $row['id'];
         }
 
         return $mapa;

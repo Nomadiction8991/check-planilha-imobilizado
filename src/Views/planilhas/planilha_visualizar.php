@@ -1,22 +1,10 @@
 <?php
 require_once dirname(__DIR__, 2) . '/Helpers/BootstrapLoader.php';
 
+// Usar comum_id passado pelo controller
+$comum_id = $comum_id ?? 0;
 
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Cache-Control: post-check=0, pre-check=0', false);
-header('Pragma: no-cache');
-header('Expires: 0');
-
-
-// Usar comum_id passado pelo controller ou da sessão
-$comum_id = $comum_id ?? (int)($_SESSION['comum_id'] ?? 0);
-
-if ($comum_id <= 0) {
-    header('Location: ' . base_url('/comuns'));
-    exit;
-}
-
-// Dados serão fornecidos pelo controller ou carregados inline
+// Dados serão fornecidos pelo controller
 $PRODUTOS = $produtos ?? [];
 $erro_PRODUTOS = $erro_produtos ?? '';
 $filtro_STATUS = $filtro_status ?? '';
@@ -24,7 +12,7 @@ $filtro_STATUS = $filtro_status ?? '';
 
 $id_planilha = $comum_id;
 $pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'VISUALIZAR Planilha');
-$backUrl = base_url('/');
+$backUrl = base_url('/comuns');
 
 
 if (false && !empty($acesso_bloqueado)) {
@@ -32,7 +20,7 @@ if (false && !empty($acesso_bloqueado)) {
 
 
     $pageTitle = 'Importação Desatualizada';
-    $backUrl = base_url('/');
+    $backUrl = base_url('/comuns');
 
     ob_start();
 ?>
@@ -1096,10 +1084,7 @@ if (false && !empty($acesso_bloqueado)) {
     </script>
 <?php
     $contentHtml = ob_get_clean();
-    $contentFile = __DIR__ . '/../../../temp_bloqueio_' . uniqid() . '.php';
-    file_put_contents($contentFile, $contentHtml);
     include_once __DIR__ . '/../layouts/app.php';
-    @unlink($contentFile);
     exit;
 }
 
@@ -2583,14 +2568,5 @@ ob_start();
 
 $contentHtml = ob_get_clean();
 
-
-$tempFile = __DIR__ . '/../../../temp_view_planilha_content_' . uniqid() . '.php';
-file_put_contents($tempFile, $contentHtml);
-$contentFile = $tempFile;
-
-
 include __DIR__ . '/../layouts/app.php';
-
-
-unlink($tempFile);
 ?>

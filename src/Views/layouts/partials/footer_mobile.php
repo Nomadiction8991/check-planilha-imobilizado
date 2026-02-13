@@ -11,7 +11,7 @@
  * - A função JavaScript `goBack()` já existe nos layouts principais.
  * - Não altera rotas — apenas fornece a marcação para inclusão nos layouts.
  */
-$homePath = $homePath ?? '/comuns';
+$homePath = $homePath ?? '/planilhas/visualizar';
 $logoutPath = $logoutPath ?? '/logout';
 ?>
 
