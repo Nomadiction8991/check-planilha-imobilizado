@@ -81,17 +81,10 @@ class TipoBemRepository extends BaseRepository
         $sql = "SELECT * FROM {$this->table} 
                 {$where} 
                 ORDER BY codigo ASC 
-                LIMIT :limite OFFSET :offset";
+                LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
 
         $stmt = $this->conexao->prepare($sql);
-
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-
-        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
+        $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

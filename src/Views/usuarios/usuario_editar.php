@@ -28,16 +28,7 @@ $backUrl = '/usuarios' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
 ob_start();
 ?>
 
-<style>
-    .signature-preview-canvas {
-        pointer-events: none;
-    }
-
-
-    .signature-preview-canvas {
-        pointer-events: none;
-    }
-</style>
+<link href="/assets/css/usuarios/usuario_editar.css" rel="stylesheet">
 
 
 <?php if (!empty($mensagem)): ?>

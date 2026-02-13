@@ -208,19 +208,7 @@
     </div>
 </div>
 
-<style>
-    .text-uppercase {
-        text-transform: uppercase !important;
-    }
-
-    .form-label {
-        font-weight: 500;
-    }
-
-    .card {
-        border: none;
-    }
-</style>
+<link href="/assets/css/comuns/edit.css" rel="stylesheet">
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

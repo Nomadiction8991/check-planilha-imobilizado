@@ -41,16 +41,7 @@ if (defined('PUBLIC_REGISTER')) {
 ob_start();
 ?>
 
-<style>
-    .signature-preview-canvas {
-        pointer-events: none;
-    }
-
-
-    .signature-preview-canvas {
-        pointer-events: none;
-    }
-</style>
+<link href="/assets/css/usuarios/usuario_criar.css" rel="stylesheet">
 
 
 <?php if (!empty($mensagem)): ?>

@@ -39,46 +39,7 @@ $backUrl = '/planilhas/visualizar?id=' . $id_planilha . '&comum_id=' . $id_plani
 ob_start();
 ?>
 
-<style>
-    .PRODUTO-card {
-        border-left: 4px solid #dee2e6;
-        transition: all 0.3s;
-    }
-
-    .PRODUTO-card.assinado {
-        border-left-color: #198754;
-        background-color: #f8fff8;
-    }
-
-    .PRODUTO-card.selecionado {
-        border-left-color: #0d6efd;
-        background-color: #f0f7ff;
-    }
-
-    .PRODUTO-card:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-
-    .PRODUTO-card {
-        border-left: 4px solid #dee2e6;
-        transition: all 0.3s;
-    }
-
-    .PRODUTO-card.assinado {
-        border-left-color: #198754;
-        background-color: #f8fff8;
-    }
-
-    .PRODUTO-card.selecionado {
-        border-left-color: #0d6efd;
-        background-color: #f0f7ff;
-    }
-
-    .PRODUTO-card:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-</style>
+<link href="/assets/css/produtos/produtos_assinar.css" rel="stylesheet">
 
 
 

@@ -8,712 +8,715 @@ $backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $
 ob_start();
 ?>
 
-<style>
-    .text-uppercase-input {
-        text-transform: uppercase;
-    }
-
-
-    /* Estilos para o boto de microfone */
-    .mic-btn {
-        /* herda totalmente o estilo do .btn (Bootstrap) */
-        cursor: pointer;
-        padding: 0.5rem;
-        transition: all 0.3s ease;
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .mic-btn:focus,
-    .mic-btn:active {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-
-    .mic-btn .material-icons-round {
-        color: white !important;
-        transition: color 0.3s ease;
-    }
-
-    .mic-btn.listening .material-icons-round {
-        color: #dc3545 !important;
-        /* vermelho quando gravando */
-        animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-
-        0%,
-        100% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.15);
-        }
-    }
-
-    /* Garantir que botes do input-group no se movam */
-    .input-group .btn {
-        transform: none !important;
-    }
-
-    .input-group .btn:hover,
-    .input-group .btn:focus,
-    .input-group .btn:active {
-        transform: none !important;
-    }
-
-    .mic-btn .material-icons-round {
-        font-size: 20px;
-        vertical-align: middle;
-    }
-
-    /* Estilos padro para todos os dispositivos (mobile-first) */
-    .input-group {
-        flex-wrap: nowrap !important;
-        display: flex !important;
-    }
-
-    .input-group .form-control {
-        min-width: 0;
-        flex: 1 1 auto !important;
-        /* Input preenche o espao restante */
-    }
-
-    .input-group>.btn {
-        flex: 0 0 15% !important;
-        /* Botes ocupam 15% cada */
-        min-width: 45px !important;
-        max-width: 60px !important;
-        padding: 0.375rem 0.25rem !important;
-        font-size: 1.1rem !important;
-    }
-
-    .input-group>.btn .material-icons-round,
-    .input-group>.btn i {
-        font-size: 20px !important;
-    }
-
-    /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
-    .linha-pendente {
-        background-color: #ffffff;
-        border-left: none;
-    }
-
-    .linha-checado {
-        background-color: #d4f4dd;
-        border-left: 4px solid #10b759;
-    }
-
-    .linha-observacao {
-        background-color: #fff4e6;
-        border-left: 4px solid #fb8c00;
-    }
-
-    .linha-imprimir {
-        background-color: #e3f2fd;
-        border-left: 4px solid #1976d2;
-    }
-
-    .linha-dr {
-        background-color: #F1F3F5;
-        border-left: 4px solid #6C757D;
-    }
-
-    .linha-editado {
-        background-color: #F3E5F5;
-        border-left: 4px solid #8E24AA;
-    }
-
-    .linha-checado {
-        background-color: #E9F7EF;
-    }
-
-    .linha-imprimir {
-        background-color: #E8F4FF;
-    }
-
-    .linha-observacao {
-        background-color: #FFF8E1;
-    }
-
-    /* Aviso de tipo no identificado - amarelo ouro forte */
-    .tipo-nao-identificado {
-        border-left: 4px solid #fdd835 !important;
-    }
-
-    /* Aes: usar padro Bootstrap para botes e manter largura proporcional */
-    .acao-container .btn {
-        aspect-ratio: 1 / 1;
-        width: 48px;
-        min-width: 48px;
-        max-width: 48px;
-        height: 48px;
-        padding: 0 !important;
-        display: inline-flex !important;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        border-radius: 0.85rem;
-        transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
-    }
-
-    .acao-container .btn:not([disabled]):not(.disabled):hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
-    }
-
-    .acao-container .btn:not([disabled]):not(.disabled):hover {
-        transform: translateY(-1px);
-        ¤ // Iniciar bufferrios
-        $headerActions .='
- <li><a class="dropdown-item" href="/relatorios/14-1?id=' . $comum_id . '&comum_id=' . $comum_id . '"><i class="bi bi-file-earmark-pdf me-2"></i>' . htmlspecialchars(to_uppercase(' Relatrio 14.1'), ENT_QUOTES, ' UTF-8') . '
-        </a>$headerActions .='
- <li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Sair </a></li></ul></div>';
-
-        // Iniciar buffer para capturar o contedo
-        ob_start();
-        ?><style>
-
-        /* Estilos para o botºo de microfone */
-        .mic-btn {
-            /* herda totalmente o estilo do .btn (Bootstrap) */
-            cursor: pointer;
-            padding: 0.5rem;
-            transition: all 0.3s ease;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mic-btn:focus,
-        .mic-btn:active {
-            transform: none !important;
-            box-shadow: none !important;
-        }
-
-        .mic-btn .material-icons-round {
-            color: white !important;
-            transition: color 0.3s ease;
-        }
-
-        .mic-btn.listening .material-icons-round {
-            color: #dc3545 !important;
-            /* vermelho quando gravando */
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.15);
-            }
-        }
-
-        /* Garantir que botes do input-group nºo se movam */
-        .input-group .btn {
-            transform: none !important;
-        }
-
-        .input-group .btn:hover,
-        .input-group .btn:focus,
-        .input-group .btn:active {
-            transform: none !important;
-        }
-
-        .mic-btn .material-icons-round {
-            font-size: 20px;
-            vertical-align: middle;
-        }
-
-        /* Estilos padrºo para todos os dispositivos (mobile-first) */
-        .input-group {
-            flex-wrap: nowrap !important;
-            display: flex !important;
-        }
-
-        .input-group .form-control {
-            min-width: 0;
-            flex: 1 1 auto !important;
-            /* Input preenche o espaºo restante */
-        }
-
-        .input-group>.btn {
-            flex: 0 0 15% !important;
-            /* Botes ocupam 15% cada */
-            min-width: 45px !important;
-            max-width: 60px !important;
-            padding: 0.375rem 0.25rem !important;
-            font-size: 1.1rem !important;
-        }
-
-        .input-group>.btn .material-icons-round,
-        .input-group>.btn i {
-            font-size: 20px !important;
-        }
-
-        /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
-        .linha-pendente {
-            background-color: #ffffff;
-            border-left: none;
-        }
-
-        .linha-checado {
-            background-color: #d4f4dd;
-            border-left: 4px solid #10b759;
-        }
-
-        .linha-observacao {
-            background-color: #fff4e6;
-            border-left: 4px solid #fb8c00;
-        }
-
-        .linha-imprimir {
-            background-color: #e3f2fd;
-            border-left: 4px solid #1976d2;
-        }
-
-        .linha-dr {
-            background-color: #F1F3F5;
-            border-left: 4px solid #6C757D;
-        }
-
-        .linha-editado {
-            background-color: #F3E5F5;
-            border-left: 4px solid #8E24AA;
-        }
-
-        .linha-checado {
-            background-color: #E9F7EF;
-        }
-
-        .linha-imprimir {
-            background-color: #E8F4FF;
-        }
-
-        .linha-observacao {
-            background-color: #FFF8E1;
-        }
-
-        /* Aviso de tipo nºo identificado - amarelo ouro forte */
-        .tipo-nao-identificado {
-            border-left: 4px solid #fdd835 !important;
-        }
-
-        /* Aes: usar padro Bootstrap para botes e manter largura proporcional */
-        .acao-container .btn {
-            aspect-ratio: 1 / 1;
-            width: 48px;
-            min-width: 48px;
-            max-width: 48px;
-            height: 48px;
-            padding: 0 !important;
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            border-radius: 0.85rem;
-            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
-        }
-
-        .acao-container .btn[disabled],
-        .acao-container .btn.disabled {
-            pointer-events: none;
-            opacity: 0.55;
-        }
-
-        /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
-        .acao-container .btn.disabled-visually {
-            pointer-events: auto;
-            opacity: 0.45;
-            filter: grayscale(0.18);
-        }
-
-        .acao-container .btn.disabled-visually:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Cores dos botes (paleta coerente com tema) */
-        .acao-container .action-check button {
-            border-color: #28A745;
-            color: #28A745;
-        }
-
-        .acao-container .action-check button.active,
-        .acao-container .action-check button:hover {
-            background: #28A745;
-            color: #fff;
-        }
-
-        .acao-container .action-imprimir button {
-            border-color: #0D6EFD;
-            color: #0D6EFD;
-        }
-
-        .acao-container .action-imprimir button.active,
-        .acao-container .action-imprimir button:hover {
-            background: #0D6EFD;
-            color: #fff;
-        }
-
-        /* Aparncia quando o boto de imprimir estiver bloqueado (produto editado) */
-        .acao-container .action-imprimir button[disabled] {
-            opacity: 0.45;
-            cursor: not-allowed;
-            filter: grayscale(20%);
-        }
-
-        .acao-container .action-observacao {
-            border-color: #FB8C00 !important;
-            color: #FB8C00 !important;
-        }
-
-        .acao-container .action-observacao:hover {
-            background: #FB8C00 !important;
-            color: #fff !important;
-        }
-
-        .acao-container .action-etiqueta {
-            border-color: #6F42C1 !important;
-            color: #6F42C1 !important;
-        }
-
-        .acao-container .action-etiqueta:hover {
-            background: #6F42C1 !important;
-            color: #fff !important;
-        }
-
-        .acao-container .action-signatarios {
-            border-color: #17A2B8 !important;
-            color: #17A2B8 !important;
-        }
-
-        .acao-container .action-signatarios:hover {
-            background: #17A2B8 !important;
-            color: #fff !important;
-        }
-
-        .acao-container .action-editar {
-            border-color: #6C757D !important;
-            color: #6C757D !important;
-        }
-
-        .acao-container .action-editar:hover {
-            background: #6C757D !important;
-            color: #fff !important;
-        }
-
-        /* Indicadores de estado (para botes com toggle) */
-        .acao-container .btn.active {
-            transform: scale(1.05);
-            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.18);
-        }
-
-        /* Linha com produtos em diferentes estados */
-        .linha-pendente {
-            background-color: #ffffff;
-            border-left: none;
-        }
-
-        .linha-checado {
-            background-color: #d4f4dd;
-            border-left: 4px solid #10b759;
-        }
-
-        .linha-observacao {
-            background-color: #fff4e6;
-            border-left: 4px solid #fb8c00;
-        }
-
-        .linha-imprimir {
-            background-color: #e3f2fd;
-            border-left: 4px solid #1976d2;
-        }
-
-        .linha-dr {
-            background-color: #F1F3F5;
-            border-left: 4px solid #6C757D;
-        }
-
-        .linha-editado {
-            background-color: #F3E5F5;
-            border-left: 4px solid #8E24AA;
-        }
-
-        .linha-checado {
-            background-color: #E9F7EF;
-        }
-
-        .linha-imprimir {
-            background-color: #E8F4FF;
-        }
-
-        .linha-observacao {
-            background-color: #FFF8E1;
-        }
-
-        /* Aviso de tipo no identificado - amarelo ouro forte */
-        .tipo-nao-identificado {
-            border-left: 4px solid #fdd835 !important;
-        }
-
-        /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
-        .acao-container .btn.disabled-visually {
-            pointer-events: auto;
-            opacity: 0.45;
-            filter: grayscale(0.18);
-        }
-
-        .acao-container .btn.disabled-visually:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Cores dos botes (paleta coerente com tema) */
-        .acao-container .action-check button {
-            border-color: #28A745;
-            color: #28A745;
-        }
-
-        .acao-container .action-check button.active,
-        .acao-container .action-check button:hover {
-            background: #28A745;
-            color: #fff;
-        }
-
-        .acao-container .action-imprimir button {
-            border-color: #0D6EFD;
-            color: #0D6EFD;
-        }
-
-        .acao-container .action-imprimir button.active,
-        .acao-container .action-imprimir button:hover {
-            background: #0D6EFD;
-            color: #fff;
-        }
-
-        /* Aparncia quando o boto de imprimir estiver bloqueado (produto editado) */
-        .acao-container .action-imprimir button[disabled] {
-            opacity: 0.45;
-            cursor: not-allowed;
-            filter: grayscale(20%);
-        }
-
-        .acao-container .action-observacao {
-            border-color: #FB8C00 !important;
-            color: #FB8C00 !important;
-        }
-
-        .acao-container .action-observacao.active,
-        .acao-container .action-observacao:hover {
-            background: #FB8C00;
-            color: #fff !important;
-        }
-
-        /* Garantir que o cone dentro do boto de observao fique branco quando ativo */
-        .acao-container .action-observacao.active i,
-        .acao-container .action-observacao:hover i {
-            color: #fff !important;
-        }
-
-        .acao-container .action-editar {
-            border-color: #6F42C1 !important;
-            color: #6F42C1 !important;
-        }
-
-        .acao-container .action-editar.active,
-        .acao-container .action-editar:hover {
-            background: #6F42C1;
-            color: #fff !important;
-        }
-
-        /* Garantir que o cone dentro do boto tambm fique branco quando ativo */
-        .acao-container .action-editar.active i,
-        .acao-container .action-editar:hover i {
-            color: #fff !important;
-        }
-
-        .acao-container form,
-        .acao-container a {
-            margin: 0;
-        }
-
-        .edicao-pendente {
-            background: #6F42C1;
-            color: #fff;
-            padding: 0.5rem 0.6rem;
-            border-radius: 8px;
-            margin: 3px 0 0.5rem;
-            border: 1px solid #6F42C1;
-        }
-
-        .observacao-PRODUTO {
-            background: #D4AF37;
-            color: #fff;
-            padding: 0.5rem 0.6rem;
-            border-radius: 8px;
-            margin: 3px 0 0.5rem;
-            border: 1px solid #D4AF37;
-        }
-
-        .info-PRODUTO {
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        .codigo-PRODUTO {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .acao-container {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 0.5rem;
-        }
-
-        .legend-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(160px, 1fr));
-            gap: 0.5rem;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            display: inline-block;
-        }
-
-        .legend-checked {
-            background-color: #28A745;
-        }
-
-        .legend-observacao {
-            background-color: #F59E0B;
-        }
-
-        .legend-imprimir {
-            background-color: #0D6EFD;
-        }
-
-        .legend-editado {
-            background-color: #8E24AA;
-        }
-
-        /* Forcar cores dos botoes de acao e icones quando ativos */
-        .acao-container .action-imprimir button {
-            border-color: #0D6EFD !important;
-            color: #0D6EFD !important;
-        }
-
-        .acao-container .action-imprimir button.active,
-        .acao-container .action-imprimir button:hover {
-            background: linear-gradient(135deg, #0D6EFD 0%, #0A58CA 100%) !important;
-            color: #fff !important;
-            box-shadow: 0 6px 14px rgba(13, 110, 253, 0.3);
-        }
-
-        .acao-container .action-imprimir button.active i,
-        .acao-container .action-imprimir button:hover i {
-            color: #fff !important;
-        }
-
-        .acao-container .action-observacao {
-            border-color: #F59E0B !important;
-            color: #F59E0B !important;
-        }
-
-        .acao-container .action-observacao.active,
-        .acao-container .action-observacao:hover {
-            background: linear-gradient(135deg, #F59E0B 0%, #F2C94C 100%) !important;
-            color: #fff !important;
-            box-shadow: 0 6px 14px rgba(245, 158, 11, 0.3);
-        }
-
-        .acao-container .action-observacao.active i,
-        .acao-container .action-observacao:hover i {
-            color: #fff !important;
-        }
-
-        .acao-container .action-editar {
-            border-color: #6F42C1 !important;
-            color: #6F42C1 !important;
-        }
-
-        .acao-container .action-editar.active,
-        .acao-container .action-editar:hover {
-            background: linear-gradient(135deg, #6F42C1 0%, #4B2A7D 100%) !important;
-            color: #fff !important;
-            box-shadow: 0 6px 14px rgba(111, 66, 193, 0.3);
-        }
-
-        .acao-container .action-editar.active i,
-        .acao-container .action-editar:hover i {
-            color: #fff !important;
-        }
-
-        .edicao-pendente {
-            background: linear-gradient(135deg, #6F42C1 0%, #4B2A7D 100%);
-            color: #fff;
-            padding: 0.5rem 0.6rem;
-            border-radius: 10px;
-            margin: 3px 0 0.5rem;
-            border: 1px solid #4B2A7D;
-            box-shadow: 0 8px 16px rgba(111, 66, 193, 0.25);
-        }
-
-        .observacao-PRODUTO {
-            background: linear-gradient(135deg, #F59E0B 0%, #F2C94C 100%);
-            color: #fff;
-            padding: 0.5rem 0.6rem;
-            border-radius: 10px;
-            margin: 3px 0 0.5rem;
-            border: 1px solid #E7B93D;
-            box-shadow: 0 8px 16px rgba(245, 158, 11, 0.25);
-        }
-</style>
+<link href="/assets/css/produtos/produto_editar.css" rel="stylesheet">
 
 
 
 
 <script>
     // Mapeamento de tipos de bens e suas opçÁµes de bem
-    const tiposBensOpcoes = <?php echo json_encode(array_reduce($tipos_bens, function ($carry, $item) {
+    const tiposBensOpcoes
+    cursor: pointer;
+    padding: 0.5 rem;
+    transition: all 0.3 s ease;
+    position: relative;
+    display: inline - flex;
+    align - items: center;
+    justify - content: center;
+    }
 
-                                $opcoes = [];
-                                if (!empty($item['descricao'])) {
-                                    $partes = explode('/', $item['descricao']);
-                                    $opcoes = array_map('trim', $partes);
-                                }
-                                $carry[$item['id']] = [
-                                    'codigo' => $item['codigo'],
-                                    'descricao' => $item['descricao'],
-                                    'opcoes' => $opcoes
-                                ];
-                                return $carry;
-                            }, [])); ?>;
+    .mic - btn: focus,
+        .mic - btn: active {
+            transform: none!important;
+            box - shadow: none!important;
+        }
+
+        .mic - btn.material - icons - round {
+            color: white!important;
+            transition: color 0.3 s ease;
+        }
+
+        .mic - btn.listening.material - icons - round {
+            color: #dc3545!important;
+            /* vermelho quando gravando */
+            animation: pulse 1.5 s infinite;
+        }
+
+    @keyframes pulse {
+
+        0 % ,
+            100 % {
+                transform: scale(1);
+            }
+
+        50 % {
+            transform: scale(1.15);
+        }
+    }
+
+    /* Garantir que botes do input-group no se movam */
+    .input - group.btn {
+            transform: none!important;
+        }
+
+        .input - group.btn: hover,
+        .input - group.btn: focus,
+        .input - group.btn: active {
+            transform: none!important;
+        }
+
+        .mic - btn.material - icons - round {
+            font - size: 20 px;
+            vertical - align: middle;
+        }
+
+        /* Estilos padro para todos os dispositivos (mobile-first) */
+        .input - group {
+            flex - wrap: nowrap!important;
+            display: flex!important;
+        }
+
+        .input - group.form - control {
+            min - width: 0;
+            flex: 1 1 auto!important;
+            /* Input preenche o espao restante */
+        }
+
+        .input - group > .btn {
+            flex: 0 0 15 % !important;
+            /* Botes ocupam 15% cada */
+            min - width: 45 px!important;
+            max - width: 60 px!important;
+            padding: 0.375 rem 0.25 rem!important;
+            font - size: 1.1 rem!important;
+        }
+
+        .input - group > .btn.material - icons - round,
+        .input - group > .btn i {
+            font - size: 20 px!important;
+        }
+
+        /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
+        .linha - pendente {
+            background - color: #ffffff;
+            border - left: none;
+        }
+
+        .linha - checado {
+            background - color: #d4f4dd;
+            border - left: 4 px solid #10b759;
+    }
+
+    .linha-observacao {
+        background-color: # fff4e6;
+            border - left: 4 px solid #fb8c00;
+        }
+
+        .linha - imprimir {
+            background - color: #e3f2fd;
+            border - left: 4 px solid #1976d2;
+    }
+
+    .linha-dr {
+        background-color: # F1F3F5;
+            border - left: 4 px solid #6C757D;
+    }
+
+    .linha-editado {
+        background-color: # F3E5F5;
+            border - left: 4 px solid #8E24AA;
+    }
+
+    .linha-checado {
+        background-color: # E9F7EF;
+        }
+
+        .linha - imprimir {
+            background - color: #E8F4FF;
+        }
+
+        .linha - observacao {
+            background - color: #FFF8E1;
+        }
+
+        /* Aviso de tipo no identificado - amarelo ouro forte */
+        .tipo - nao - identificado {
+            border - left: 4 px solid #fdd835!important;
+        }
+
+        /* Aes: usar padro Bootstrap para botes e manter largura proporcional */
+        .acao - container.btn {
+            aspect - ratio: 1 / 1;
+            width: 48 px;
+            min - width: 48 px;
+            max - width: 48 px;
+            height: 48 px;
+            padding: 0!important;
+            display: inline - flex!important;
+            align - items: center;
+            justify - content: center;
+            font - size: 1.2 rem;
+            border - radius: 0.85 rem;
+            transition: transform 0.18 s ease, box - shadow 0.18 s ease, background - color 0.18 s ease, color 0.18 s ease;
+        }
+
+        .acao - container.btn: not([disabled]): not(.disabled): hover {
+            transform: translateY(-1 px);
+            box - shadow: 0 6 px 18 px rgba(15, 23, 42, 0.12);
+        }
+
+        .acao - container.btn: not([disabled]): not(.disabled): hover {
+            transform: translateY(-1 px);¤ // Iniciar bufferrios
+            $headerActions. = ' <
+            li > < a class = "dropdown-item"
+            href = "/relatorios/14-1?id=' . $comum_id . '&comum_id=' . $comum_id . '" > < i class = "bi bi-file-earmark-pdf me-2" > < /i>' . htmlspecialchars(to_uppercase(' Relatrio 14.1'), ENT_QUOTES, ' UTF-8') . ' <
+            /a>$headerActions .=' <
+            li > < hr class = "dropdown-divider" > < /li><li><a class="dropdown-item" href="/logout
+            "><i class="
+            bi bi - box - arrow - right me - 2 "></i>Sair </a></li></ul></div>';
+
+            // Iniciar buffer para capturar o contedo
+            ob_start(); ?
+            > < style >
+
+            /* Estilos para o botºo de microfone */
+            .mic - btn {
+                /* herda totalmente o estilo do .btn (Bootstrap) */
+                cursor: pointer;
+                padding: 0.5 rem;
+                transition: all 0.3 s ease;
+                position: relative;
+                display: inline - flex;
+                align - items: center;
+                justify - content: center;
+            }
+
+            .mic - btn : focus,
+            .mic - btn: active {
+                    transform: none!important;
+                    box - shadow: none!important;
+                }
+
+                .mic - btn.material - icons - round {
+                    color: white!important;
+                    transition: color 0.3 s ease;
+                }
+
+                .mic - btn.listening.material - icons - round {
+                    color: #dc3545!important;
+                    /* vermelho quando gravando */
+                    animation: pulse 1.5 s infinite;
+                }
+
+            @keyframes pulse {
+
+                0 % ,
+                    100 % {
+                        transform: scale(1);
+                    }
+
+                50 % {
+                    transform: scale(1.15);
+                }
+            }
+
+            /* Garantir que botes do input-group nºo se movam */
+            .input - group.btn {
+                transform: none!important;
+            }
+
+            .input - group.btn: hover,
+            .input - group.btn: focus,
+            .input - group.btn: active {
+                    transform: none!important;
+                }
+
+                .mic - btn.material - icons - round {
+                    font - size: 20 px;
+                    vertical - align: middle;
+                }
+
+                /* Estilos padrºo para todos os dispositivos (mobile-first) */
+                .input - group {
+                    flex - wrap: nowrap!important;
+                    display: flex!important;
+                }
+
+                .input - group.form - control {
+                    min - width: 0;
+                    flex: 1 1 auto!important;
+                    /* Input preenche o espaºo restante */
+                }
+
+                .input - group > .btn {
+                    flex: 0 0 15 % !important;
+                    /* Botes ocupam 15% cada */
+                    min - width: 45 px!important;
+                    max - width: 60 px!important;
+                    padding: 0.375 rem 0.25 rem!important;
+                    font - size: 1.1 rem!important;
+                }
+
+                .input - group > .btn.material - icons - round,
+            .input - group > .btn i {
+                font - size: 20 px!important;
+            }
+
+            /* Cores das linhas baseadas no STATUS - Paleta marcante e diferenciada */
+            .linha - pendente {
+                background - color: #ffffff;
+                border - left: none;
+            }
+
+            .linha - checado {
+                background - color: #d4f4dd;
+                border - left: 4 px solid #10b759;
+        }
+
+        .linha-observacao {
+            background-color: # fff4e6;
+                border - left: 4 px solid #fb8c00;
+            }
+
+            .linha - imprimir {
+                background - color: #e3f2fd;
+                border - left: 4 px solid #1976d2;
+        }
+
+        .linha-dr {
+            background-color: # F1F3F5;
+                border - left: 4 px solid #6C757D;
+        }
+
+        .linha-editado {
+            background-color: # F3E5F5;
+                border - left: 4 px solid #8E24AA;
+        }
+
+        .linha-checado {
+            background-color: # E9F7EF;
+            }
+
+            .linha - imprimir {
+                background - color: #E8F4FF;
+            }
+
+            .linha - observacao {
+                background - color: #FFF8E1;
+            }
+
+            /* Aviso de tipo nºo identificado - amarelo ouro forte */
+            .tipo - nao - identificado {
+                border - left: 4 px solid #fdd835!important;
+            }
+
+            /* Aes: usar padro Bootstrap para botes e manter largura proporcional */
+            .acao - container.btn {
+                aspect - ratio: 1 / 1;
+                width: 48 px;
+                min - width: 48 px;
+                max - width: 48 px;
+                height: 48 px;
+                padding: 0!important;
+                display: inline - flex!important;
+                align - items: center;
+                justify - content: center;
+                font - size: 1.2 rem;
+                border - radius: 0.85 rem;
+                transition: transform 0.18 s ease, box - shadow 0.18 s ease, background - color 0.18 s ease, color 0.18 s ease;
+            }
+
+            .acao - container.btn[disabled],
+            .acao - container.btn.disabled {
+                pointer - events: none;
+                opacity: 0.55;
+            }
+
+            /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
+            .acao - container.btn.disabled - visually {
+                pointer - events: auto;
+                opacity: 0.45;
+                filter: grayscale(0.18);
+            }
+
+            .acao - container.btn.disabled - visually: hover {
+                    transform: none;
+                    box - shadow: none;
+                }
+
+                /* Cores dos botes (paleta coerente com tema) */
+                .acao - container.action - check button {
+                    border - color: #28A745;
+            color: # 28 A745;
+                }
+
+                .acao - container.action - check button.active,
+            .acao - container.action - check button: hover {
+                    background: #28A745;
+            color: # fff;
+                }
+
+                .acao - container.action - imprimir button {
+                    border - color: #0D6EFD;
+            color: # 0 D6EFD;
+                }
+
+                .acao - container.action - imprimir button.active,
+            .acao - container.action - imprimir button: hover {
+                    background: #0D6EFD;
+            color: # fff;
+                }
+
+                /* Aparncia quando o boto de imprimir estiver bloqueado (produto editado) */
+                .acao - container.action - imprimir button[disabled] {
+                    opacity: 0.45;
+                    cursor: not - allowed;
+                    filter: grayscale(20 % );
+                }
+
+                .acao - container.action - observacao {
+                    border - color: #FB8C00!important;
+                    color: #FB8C00!important;
+                }
+
+                .acao - container.action - observacao: hover {
+                    background: #FB8C00!important;
+                    color: #fff!important;
+                }
+
+                .acao - container.action - etiqueta {
+                    border - color: #6F42C1 !important;
+            color: # 6 F42C1!important;
+                }
+
+                .acao - container.action - etiqueta: hover {
+                    background: #6F42C1 !important;
+            color: # fff!important;
+                }
+
+                .acao - container.action - signatarios {
+                    border - color: #17A2B8 !important;
+            color: # 17 A2B8!important;
+                }
+
+                .acao - container.action - signatarios: hover {
+                    background: #17A2B8 !important;
+            color: # fff!important;
+                }
+
+                .acao - container.action - editar {
+                    border - color: #6C757D !important;
+            color: # 6 C757D!important;
+                }
+
+                .acao - container.action - editar: hover {
+                    background: #6C757D !important;
+            color: # fff!important;
+                }
+
+                /* Indicadores de estado (para botes com toggle) */
+                .acao - container.btn.active {
+                    transform: scale(1.05);
+                    box - shadow: 0 0 0 3 px rgba(40, 167, 69, 0.18);
+                }
+
+                /* Linha com produtos em diferentes estados */
+                .linha - pendente {
+                    background - color: #ffffff;
+                    border - left: none;
+                }
+
+                .linha - checado {
+                    background - color: #d4f4dd;
+                    border - left: 4 px solid #10b759;
+        }
+
+        .linha-observacao {
+            background-color: # fff4e6;
+                    border - left: 4 px solid #fb8c00;
+                }
+
+                .linha - imprimir {
+                    background - color: #e3f2fd;
+                    border - left: 4 px solid #1976d2;
+        }
+
+        .linha-dr {
+            background-color: # F1F3F5;
+                    border - left: 4 px solid #6C757D;
+        }
+
+        .linha-editado {
+            background-color: # F3E5F5;
+                    border - left: 4 px solid #8E24AA;
+        }
+
+        .linha-checado {
+            background-color: # E9F7EF;
+                }
+
+                .linha - imprimir {
+                    background - color: #E8F4FF;
+                }
+
+                .linha - observacao {
+                    background - color: #FFF8E1;
+                }
+
+                /* Aviso de tipo no identificado - amarelo ouro forte */
+                .tipo - nao - identificado {
+                    border - left: 4 px solid #fdd835!important;
+                }
+
+                /* Boto visualmente desabilitado (mas clicvel quando necessrio, ex: imprimir que autocheca) */
+                .acao - container.btn.disabled - visually {
+                    pointer - events: auto;
+                    opacity: 0.45;
+                    filter: grayscale(0.18);
+                }
+
+                .acao - container.btn.disabled - visually: hover {
+                    transform: none;
+                    box - shadow: none;
+                }
+
+                /* Cores dos botes (paleta coerente com tema) */
+                .acao - container.action - check button {
+                    border - color: #28A745;
+            color: # 28 A745;
+                }
+
+                .acao - container.action - check button.active,
+            .acao - container.action - check button: hover {
+                    background: #28A745;
+            color: # fff;
+                }
+
+                .acao - container.action - imprimir button {
+                    border - color: #0D6EFD;
+            color: # 0 D6EFD;
+                }
+
+                .acao - container.action - imprimir button.active,
+            .acao - container.action - imprimir button: hover {
+                    background: #0D6EFD;
+            color: # fff;
+                }
+
+                /* Aparncia quando o boto de imprimir estiver bloqueado (produto editado) */
+                .acao - container.action - imprimir button[disabled] {
+                    opacity: 0.45;
+                    cursor: not - allowed;
+                    filter: grayscale(20 % );
+                }
+
+                .acao - container.action - observacao {
+                    border - color: #FB8C00!important;
+                    color: #FB8C00!important;
+                }
+
+                .acao - container.action - observacao.active,
+            .acao - container.action - observacao: hover {
+                    background: #FB8C00;
+                    color: #fff!important;
+                }
+
+                /* Garantir que o cone dentro do boto de observao fique branco quando ativo */
+                .acao - container.action - observacao.active i,
+            .acao - container.action - observacao: hover i {
+                    color: #fff!important;
+                }
+
+                .acao - container.action - editar {
+                    border - color: #6F42C1 !important;
+            color: # 6 F42C1!important;
+                }
+
+                .acao - container.action - editar.active,
+            .acao - container.action - editar: hover {
+                    background: #6F42C1;
+            color: # fff!important;
+                }
+
+                /* Garantir que o cone dentro do boto tambm fique branco quando ativo */
+                .acao - container.action - editar.active i,
+            .acao - container.action - editar: hover i {
+                    color: #fff!important;
+                }
+
+                .acao - container form,
+            .acao - container a {
+                margin: 0;
+            }
+
+            .edicao - pendente {
+                background: #6F42C1;
+            color: # fff;
+                padding: 0.5 rem 0.6 rem;
+                border - radius: 8 px;
+                margin: 3 px 0 0.5 rem;
+                border: 1 px solid #6F42C1;
+        }
+
+        .observacao-PRODUTO {
+            background: # D4AF37;
+                color: #fff;
+                padding: 0.5 rem 0.6 rem;
+                border - radius: 8 px;
+                margin: 3 px 0 0.5 rem;
+                border: 1 px solid #D4AF37;
+            }
+
+            .info - PRODUTO {
+                font - size: 0.9 rem;
+                color: #555;
+        }
+
+        .codigo-PRODUTO {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: # 333;
+            }
+
+            .acao - container {
+                display: flex;
+                gap: 0.5 rem;
+                flex - wrap: wrap;
+                margin - top: 0.5 rem;
+            }
+
+            .legend - grid {
+                display: grid;
+                grid - template - columns: repeat(2, minmax(160 px, 1 fr));
+                gap: 0.5 rem;
+            }
+
+            .legend - item {
+                display: flex;
+                align - items: center;
+                gap: 0.6 rem;
+                font - size: 0.85 rem;
+                text - transform: uppercase;
+                font - weight: 600;
+            }
+
+            .legend - color {
+                width: 12 px;
+                height: 12 px;
+                border - radius: 2 px;
+                display: inline - block;
+            }
+
+            .legend - checked {
+                background - color: #28A745;
+        }
+
+        .legend-observacao {
+            background-color: # F59E0B;
+            }
+
+            .legend - imprimir {
+                background - color: #0D6EFD;
+        }
+
+        .legend-editado {
+            background-color: # 8E24 AA;
+            }
+
+            /* Forcar cores dos botoes de acao e icones quando ativos */
+            .acao - container.action - imprimir button {
+                border - color: #0D6EFD !important;
+            color: # 0 D6EFD!important;
+            }
+
+            .acao - container.action - imprimir button.active,
+            .acao - container.action - imprimir button: hover {
+                    background: linear - gradient(135 deg, #0D6EFD 0%, # 0 A58CA 100 % ) !important;
+                    color: #fff!important;
+                    box - shadow: 0 6 px 14 px rgba(13, 110, 253, 0.3);
+                }
+
+                .acao - container.action - imprimir button.active i,
+            .acao - container.action - imprimir button: hover i {
+                    color: #fff!important;
+                }
+
+                .acao - container.action - observacao {
+                    border - color: #F59E0B!important;
+                    color: #F59E0B!important;
+                }
+
+                .acao - container.action - observacao.active,
+            .acao - container.action - observacao: hover {
+                    background: linear - gradient(135 deg, #F59E0B 0 % , #F2C94C 100 % ) !important;
+                    color: #fff!important;
+                    box - shadow: 0 6 px 14 px rgba(245, 158, 11, 0.3);
+                }
+
+                .acao - container.action - observacao.active i,
+            .acao - container.action - observacao: hover i {
+                    color: #fff!important;
+                }
+
+                .acao - container.action - editar {
+                    border - color: #6F42C1 !important;
+            color: # 6 F42C1!important;
+                }
+
+                .acao - container.action - editar.active,
+            .acao - container.action - editar: hover {
+                    background: linear - gradient(135 deg, #6F42C1 0%, # 4 B2A7D 100 % ) !important;
+                    color: #fff!important;
+                    box - shadow: 0 6 px 14 px rgba(111, 66, 193, 0.3);
+                }
+
+                .acao - container.action - editar.active i,
+            .acao - container.action - editar: hover i {
+                    color: #fff!important;
+                }
+
+                .edicao - pendente {
+                    background: linear - gradient(135 deg, #6F42C1 0%, # 4 B2A7D 100 % );
+                    color: #fff;
+                    padding: 0.5 rem 0.6 rem;
+                    border - radius: 10 px;
+                    margin: 3 px 0 0.5 rem;
+                    border: 1 px solid #4B2A7D;
+            box-shadow: 0 8px 16px rgba(111, 66, 193, 0.25);
+        }
+
+        .observacao-PRODUTO {
+            background: linear-gradient(135deg, # F59E0B 0 % ,
+                    #F2C94C 100 % );
+            color: #fff;
+            padding: 0.5 rem 0.6 rem;
+            border - radius: 10 px;
+            margin: 3 px 0 0.5 rem;
+            border: 1 px solid #E7B93D;
+            box - shadow: 0 8 px 16 px rgba(245, 158, 11, 0.25);
+        } <
+        /style>
+
+
+
+
+        <
+        script >
+        // Mapeamento de tipos de bens e suas opçÁµes de bem
+        const tiposBensOpcoes = <?php echo json_encode(array_reduce($tipos_bens, function ($carry, $item) {
+
+                                    $opcoes = [];
+                                    if (!empty($item['descricao'])) {
+                                        $partes = explode('/', $item['descricao']);
+                                        $opcoes = array_map('trim', $partes);
+                                    }
+                                    $carry[$item['id']] = [
+                                        'codigo' => $item['codigo'],
+                                        'descricao' => $item['descricao'],
+                                        'opcoes' => $opcoes
+                                    ];
+                                    return $carry;
+                                }, [])); ?>;
 
     document.addEventListener('DOMContentLoaded', function() {
         const selectTipoBEM = document.getElementById('novo_tipo_bem_id');

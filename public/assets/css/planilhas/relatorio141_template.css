@@ -1,0 +1,77 @@
+/* Estilos para checkboxes */
+input[type="checkbox"] {
+    width: 14px !important;
+    height: 14px !important;
+    margin-right: 5px;
+    cursor: pointer;
+    border: 2px solid #333 !important;
+    background-color: #fff !important;
+    accent-color: #000 !important;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #000 !important;
+    accent-color: #000 !important;
+}
+
+input[type="checkbox"]:focus {
+    outline: none;
+}
+
+/* Estilos para campos editáveis */
+.a4 input[type="text"],
+.a4 textarea {
+    border: 1px dotted #ccc;
+    padding: 2px 4px;
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+}
+
+.a4 input[type="text"]:focus,
+.a4 textarea:focus {
+    outline: none;
+    border: 1px solid #667eea;
+    background-color: #f0f4ff;
+    box-shadow: 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.a4 input[type="text"].editado,
+.a4 textarea.editado {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #000;
+}
+
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .a4 {
+        page-break-after: always;
+    }
+
+    .a4:last-child {
+        page-break-after: auto;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    /* Remove estilos de foco e edição na impressão */
+    .a4 input[type="text"],
+    .a4 textarea {
+        border: none;
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .a4 input[type="text"].editado,
+    .a4 textarea.editado {
+        background-color: transparent;
+        border: none;
+    }
+}

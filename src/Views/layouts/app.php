@@ -119,7 +119,7 @@ if (!isset($content)) {
                     $tipoAlerta = $_SESSION['tipo_mensagem'] ?? 'info';
                     $msgHtml = htmlspecialchars($_SESSION['mensagem'], ENT_QUOTES, 'UTF-8');
                     echo "<div class=\"alert alert-{$tipoAlerta} alert-dismissible fade show\" role=\"alert\">{$msgHtml}"
-                       . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button></div>';
+                        . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button></div>';
                     unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
                 }
                 ?>

@@ -105,7 +105,9 @@ ob_start();
 
         fetch('/planilhas/processar-arquivo', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
                 body: 'id=' + importacaoId
             })
             .then(response => response.json())
@@ -192,14 +194,12 @@ ob_start();
         intervaloAtualizacao = setInterval(atualizarProgresso, 1500);
     });
 
-    window.addEventListener('beforeunload', function() { pararAtualizacao(); });
+    window.addEventListener('beforeunload', function() {
+        pararAtualizacao();
+    });
 </script>
 
-<style>
-    .progress { background-color: #e9ecef; border-radius: 0.5rem; overflow: hidden; }
-    .progress-bar { font-weight: 600; display: flex; align-items: center; justify-content: center; transition: width 0.3s ease; }
-    #progress-text { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-</style>
+<link href="/assets/css/planilhas/importacao_progresso.css" rel="stylesheet">
 
 <?php
 $contentHtml = ob_get_clean();

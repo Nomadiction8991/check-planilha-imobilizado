@@ -1,0 +1,45 @@
+.info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: none;
+}
+
+.info-value {
+    color: #212529;
+    font-size: 0.95rem;
+    margin-bottom: 0.85rem;
+}
+
+.badge-info-flag {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+}
+
+.card-header-contrast {
+    /* Use same gradient and sizing as the list card header for visual consistency */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 12px 12px 0 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.card-header-contrast h5,
+.card-header-contrast i {
+    color: #fff;
+}
+
+.card-header-contrast h5 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.card-header-contrast i {
+    font-size: 1.1rem;
+}
