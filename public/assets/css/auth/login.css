@@ -4,6 +4,20 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.row {
+    width: 100%;
+    margin: 0;
 }
 
 .login-card {
@@ -11,19 +25,40 @@ body {
     border-radius: 15px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    max-width: 400px;
+    max-width: 450px;
     width: 100%;
+    margin: 0 auto;
 }
 
 .login-header {
     background: #667eea;
     color: white;
-    padding: 2rem;
+    padding: 2.5rem 2rem;
     text-align: center;
 }
 
+.login-header h2 {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.login-header p {
+    margin-bottom: 0;
+    opacity: 0.95;
+}
+
 .login-body {
-    padding: 2rem;
+    padding: 2.5rem 2rem;
+}
+
+.form-control {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
 .btn-login {

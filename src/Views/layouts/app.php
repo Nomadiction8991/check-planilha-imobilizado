@@ -8,7 +8,8 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
 
 $manifest_path = '/manifest-prod.json';
 
-// Usar título da config ou do pageTitle passado, com fallback
+// Título do <head> sempre fixo, título visual da página pode variar
+$headTitle = $siteTitle;
 $pageTitle = $pageTitle ?? $siteTitle;
 $backUrl = $backUrl ?? null;
 $headerActions = $headerActions ?? '';
@@ -36,7 +37,7 @@ if (!isset($content)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= htmlspecialchars($headTitle, ENT_QUOTES, 'UTF-8') ?></title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/assets/images/logo.png">

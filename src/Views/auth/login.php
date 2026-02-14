@@ -8,7 +8,7 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - <?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?></title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/assets/images/logo.png">
