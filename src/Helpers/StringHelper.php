@@ -80,15 +80,27 @@ class StringHelper
     {
         $fieldsByTable = [
             'usuarios' => [
-                'nome', 'email', 'tipo', 'nome_conjuge',
-                'endereco_logradouro', 'endereco_numero', 'endereco_complemento',
-                'endereco_bairro', 'endereco_cidade', 'endereco_estado',
+                'nome',
+                'email',
+                'tipo',
+                'nome_conjuge',
+                'endereco_logradouro',
+                'endereco_numero',
+                'endereco_complemento',
+                'endereco_bairro',
+                'endereco_cidade',
+                'endereco_estado',
             ],
             'comuns' => ['descricao', 'administracao', 'cidade'],
             'dependencias' => ['descricao'],
             'produtos' => [
-                'descricao', 'tipo', 'marca', 'modelo',
-                'numero_serie', 'cor', 'especificacoes',
+                'descricao',
+                'tipo',
+                'marca',
+                'modelo',
+                'numero_serie',
+                'cor',
+                'especificacoes',
             ],
         ];
 

@@ -6,7 +6,7 @@ namespace App\Services;
 
 class ProdutoParserService
 {
-    
+
     private array $config;
 
     public function __construct(array $config = [])
@@ -14,13 +14,13 @@ class ProdutoParserService
         $this->config = $config;
     }
 
-    
+
     public function normalizar(string $str): string
     {
         $str = trim($str);
         $str = preg_replace('/\s+/', ' ', $str);
 
-        
+
         $s = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str);
         if ($s === false) {
             $s = $str;
@@ -29,7 +29,7 @@ class ProdutoParserService
         return strtoupper($s);
     }
 
-    
+
     public function normalizarChar(string $char): string
     {
         $s = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $char);
@@ -40,7 +40,7 @@ class ProdutoParserService
         return strtoupper($s);
     }
 
-    
+
     public function gerarVariacoes(string $str): array
     {
         $str = trim($str);
@@ -51,20 +51,20 @@ class ProdutoParserService
         $strNorm = $this->normalizar($str);
         $variacoes = [$strNorm];
 
-        
+
         $palavras = preg_split('/\s+/', $strNorm);
 
         if (count($palavras) === 1) {
-            
+
             if (substr($strNorm, -1) === 'S' && strlen($strNorm) > 2) {
-                
+
                 $variacoes[] = substr($strNorm, 0, -1);
             } else {
-                
+
                 $variacoes[] = $strNorm . 'S';
             }
         } else {
-            
+
             $primeiraPalavra = $palavras[0];
             $resto = implode(' ', array_slice($palavras, 1));
 
@@ -83,7 +83,7 @@ class ProdutoParserService
         return array_unique($variacoes);
     }
 
-    
+
     public function matchFuzzy(string $str1, string $str2): bool
     {
         $vars1 = $this->gerarVariacoes($str1);
@@ -100,7 +100,7 @@ class ProdutoParserService
         return false;
     }
 
-    
+
     public function colunaParaIndice(string $coluna): int
     {
         $coluna = strtoupper($coluna);
@@ -114,24 +114,24 @@ class ProdutoParserService
         return $indice - 1;
     }
 
-    
+
     public function extrairCodigoPrefixo(string $texto): array
     {
         $codigoDetectado = null;
 
-        
+
         if (preg_match('/^\s*(\d{1,3})(?:[\.,]\d+)?\s*\-\s*/u', $texto, $m)) {
             $codigoDetectado = (int) $m[1];
             $texto = preg_replace('/^\s*' . preg_quote($m[0], '/') . '/u', '', $texto);
         } elseif (preg_match('/^\s*OT-?\d+\s*\-\s*/iu', $texto)) {
-            
+
             $texto = preg_replace('/^\s*OT-?\d+\s*\-\s*/iu', '', $texto);
         }
 
         return [$codigoDetectado, trim($texto)];
     }
 
-    
+
     public function construirAliasesTipos(array $tiposBens): array
     {
         $tiposAliases = [];
@@ -139,12 +139,12 @@ class ProdutoParserService
         foreach ($tiposBens as $tb) {
             $desc = (string) $tb['descricao'];
 
-            
+
             $aliases = array_filter(
                 array_map('trim', preg_split('/\s*\/\s*/', $desc))
             );
 
-            
+
             $aliasesExpandidos = [];
             foreach ($aliases as $alias) {
                 $variacoes = $this->gerarVariacoes($alias);
@@ -165,7 +165,7 @@ class ProdutoParserService
         return $tiposAliases;
     }
 
-    
+
     public function detectarTipo(string $texto, ?int $codigoDetectado, array $tiposAliases): array
     {
         $tipo = [
@@ -177,7 +177,7 @@ class ProdutoParserService
 
         $textoNorm = $this->normalizar($texto);
 
-        
+
         if ($codigoDetectado !== null) {
             foreach ($tiposAliases as $tb) {
                 if ((int) $tb['codigo'] === $codigoDetectado) {
@@ -192,7 +192,7 @@ class ProdutoParserService
             }
         }
 
-        
+
         $melhor = null;
 
         foreach ($tiposAliases as $tb) {
@@ -222,7 +222,7 @@ class ProdutoParserService
         return [$tipo, trim($texto)];
     }
 
-    
+
     public function extrairBenComplemento(
         string $texto,
         ?array $tipoAliases = null,
@@ -231,17 +231,17 @@ class ProdutoParserService
     ): array {
         $texto = trim($texto);
 
-        
+
         if ($tipoDescricao && !empty($tipoDescricao) && $aliasesOriginais) {
             $tipoDescNorm = $this->normalizar($tipoDescricao);
             $textoNorm = $this->normalizar($texto);
 
-            
+
             if (strpos($textoNorm, $tipoDescNorm) === 0) {
                 $textoAposTipo = trim(substr($texto, strlen($tipoDescricao)));
                 $textoAposTipo = preg_replace('/^[\s\-–—\/]+/u', '', $textoAposTipo);
 
-                
+
                 $aliasNoInicio = $this->temAliasNoInicio($textoAposTipo, $aliasesOriginais);
                 if ($aliasNoInicio) {
                     $texto = $textoAposTipo;
@@ -249,12 +249,12 @@ class ProdutoParserService
             }
         }
 
-        
+
         if (preg_match('/^(.+?)\s+\-\s+(.+)$/u', $texto, $m)) {
             return [trim($m[1]), trim($m[2])];
         }
 
-        
+
         if ($tipoAliases && !empty($tipoAliases)) {
             $resultado = $this->extrairBenPorAlias($texto, $tipoAliases, $aliasesOriginais);
             if ($resultado) {
@@ -262,11 +262,11 @@ class ProdutoParserService
             }
         }
 
-        
+
         return [$texto, ''];
     }
 
-    
+
     private function temAliasNoInicio(string $texto, array $aliasesOriginais): bool
     {
         $textoNorm = $this->normalizar($texto);
@@ -283,18 +283,18 @@ class ProdutoParserService
         return false;
     }
 
-    
+
     private function extrairBenPorAlias(string $texto, array $tipoAliases, ?array $aliasesOriginais): ?array
     {
         $textoNorm = $this->normalizar($texto);
 
-        
+
         $aliasRepetido = $this->detectarAliasRepetido($textoNorm, $aliasesOriginais);
 
-        
+
         $aliasesOrdenados = $this->ordenarAliases($tipoAliases, $aliasRepetido);
 
-        
+
         foreach ($aliasesOrdenados as $aliasNorm) {
             if ($aliasNorm === '') {
                 continue;
@@ -314,7 +314,7 @@ class ProdutoParserService
         return null;
     }
 
-    
+
     private function detectarAliasRepetido(string $textoNorm, ?array $aliasesOriginais): ?array
     {
         if (!$aliasesOriginais) {
@@ -337,7 +337,7 @@ class ProdutoParserService
         return $maxRepeticoes > 1 ? [$aliasRepetido, $maxRepeticoes] : null;
     }
 
-    
+
     private function ordenarAliases(array $tipoAliases, ?array $aliasRepetido): array
     {
         $aliasesOrdenados = $tipoAliases;
@@ -357,7 +357,7 @@ class ProdutoParserService
         return $aliasesOrdenados;
     }
 
-    
+
     private function extrairBenPorVariacao(
         string $texto,
         string $textoNorm,
@@ -370,23 +370,23 @@ class ProdutoParserService
             return null;
         }
 
-        
+
         $matchLen = mb_strlen($m[1]);
         $posOrig = $this->encontrarPosicaoOriginal($texto, $matchLen);
 
         $ben = trim(mb_substr($texto, 0, $posOrig));
         $resto = trim(mb_substr($texto, $posOrig));
 
-        
+
         $resto = preg_replace('/^[\s\-–—\/]+/u', '', $resto);
 
-        
+
         $resto = $this->removerAliasesSequenciais($resto, $aliasesOrdenados);
 
         return [$ben, $resto];
     }
 
-    
+
     private function encontrarPosicaoOriginal(string $texto, int $matchLen): int
     {
         $acumuladoNorm = '';
@@ -403,7 +403,7 @@ class ProdutoParserService
         return $posOrig;
     }
 
-    
+
     private function removerAliasesSequenciais(string $resto, array $aliasesOrdenados): string
     {
         $removeuAlgo = true;
@@ -438,7 +438,7 @@ class ProdutoParserService
         return $resto;
     }
 
-    
+
     public function removerBenDoComplemento(string $ben, string $complemento): string
     {
         if ($ben === '' || $complemento === '') {
@@ -451,14 +451,14 @@ class ProdutoParserService
         return trim(preg_replace('/\s+/', ' ', $complemento));
     }
 
-    
+
     public function aplicarSinonimos(string $ben, string $complemento, ?string $tipoDesc): array
     {
         $benNorm = $this->normalizar($ben);
         $compNorm = $this->normalizar($complemento);
         $tipoNorm = $this->normalizar((string) $tipoDesc);
 
-        
+
         if (!empty($this->config['synonyms'])) {
             foreach ($this->config['synonyms'] as $tipoKey => $map) {
                 if ($this->normalizar($tipoKey) === $tipoNorm) {
@@ -472,7 +472,7 @@ class ProdutoParserService
             }
         }
 
-        
+
         if (!empty($this->config['global_synonyms'])) {
             foreach ($this->config['global_synonyms'] as $from => $to) {
                 if (strpos($compNorm, $this->normalizar($from)) !== false) {
@@ -482,13 +482,13 @@ class ProdutoParserService
             }
         }
 
-        
+
         $complemento = $this->removerBenDoComplemento(strtoupper($ben), strtoupper($complemento));
 
         return [$ben, $complemento];
     }
 
-    
+
     public function forcarBenEmAliases(string $ben, ?string $tipoDesc, ?string $aliasUsado = null): string
     {
         $tokens = array_map('trim', preg_split('/\s*\/\s*/', (string) $tipoDesc));
@@ -496,14 +496,14 @@ class ProdutoParserService
         $tokensNorm = array_map([$this, 'normalizar'], $tokens);
         $benNorm = $this->normalizar($ben);
 
-        
+
         foreach ($tokensNorm as $i => $tNorm) {
             if ($tNorm !== '' && $tNorm === $benNorm) {
                 return $tokensUpper[$i];
             }
         }
 
-        
+
         if (!empty($aliasUsado)) {
             $aliasNorm = $this->normalizar($aliasUsado);
             foreach ($tokensNorm as $i => $tNorm) {
@@ -513,7 +513,7 @@ class ProdutoParserService
             }
         }
 
-        
+
         foreach ($tokensUpper as $tok) {
             if (trim($tok) !== '') {
                 return strtoupper($tok);
@@ -523,7 +523,7 @@ class ProdutoParserService
         return strtoupper($ben);
     }
 
-    
+
     public function montarDescricao(
         int $qtd,
         ?int $tipoCodigo,

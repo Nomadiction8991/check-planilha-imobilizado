@@ -11,7 +11,7 @@ class FormHelper
     {
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
-    
+
     public static function text(string $name, string $label, string $value = '', array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -44,7 +44,7 @@ class FormHelper
         return $html;
     }
 
-    
+
     public static function password(string $name, string $label, array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -73,7 +73,7 @@ class FormHelper
         return $html;
     }
 
-    
+
     public static function email(string $name, string $label, string $value = '', array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -104,7 +104,7 @@ class FormHelper
         return $html;
     }
 
-    
+
     public static function select(string $name, string $label, array $options, string $selected = '', array $attributes = []): string
     {
         $id = $attributes['id'] ?? $name;
@@ -139,7 +139,7 @@ class FormHelper
         return $html;
     }
 
-    
+
     public static function textarea(string $name, string $label, string $value = '', array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -171,7 +171,7 @@ class FormHelper
         return $html;
     }
 
-    
+
     public static function checkbox(string $name, string $label, bool $checked = false, array $options = []): string
     {
         $id = $options['id'] ?? $name;
@@ -197,7 +197,7 @@ class FormHelper
         return $html;
     }
 
-    
+
     public static function buttons(string $submitText = 'SALVAR', string $cancelUrl = null): string
     {
         $html = '<div class="d-grid gap-2">';
