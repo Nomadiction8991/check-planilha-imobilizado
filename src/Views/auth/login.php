@@ -13,6 +13,15 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/assets/images/logo.png">
 
+    <!-- PWA - Progressive Web App -->
+    <link rel="manifest" href="/manifest-prod.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/assets/css/auth/login.css" rel="stylesheet">
 </head>
@@ -60,6 +69,9 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- PWA Install Manager -->
+    <script src="/assets/js/pwa-install.js"></script>
 </body>
 
 </html>

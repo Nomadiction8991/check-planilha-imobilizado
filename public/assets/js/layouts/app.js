@@ -1,19 +1,7 @@
 /**
  * app.js – Scripts do layout principal (app.php)
+ * Nota: Service Worker é registrado em pwa-install.js
  */
-
-// PWA Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js')
-            .then(function (reg) {
-                console.log('Service Worker registrado:', reg.scope);
-            })
-            .catch(function (err) {
-                console.error('Erro ao registrar Service Worker:', err);
-            });
-    });
-}
 
 // Função para voltar (igual ao botão do navegador)
 function goBack() {

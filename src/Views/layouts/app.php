@@ -142,6 +142,9 @@ if (!isset($content)) {
     <!-- Bootstrap 5.3 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- PWA Install Manager -->
+    <script src="/assets/js/pwa-install.js"></script>
+
     <!-- Scripts do Layout App -->
     <script src="/assets/js/layouts/app.js"></script>
 

@@ -1,24 +1,64 @@
 {
-  "name": "Check Planilha",
+  "name": "Check Planilha - Sistema de Gestão",
   "short_name": "CheckPlanilha",
-  "description": "Sistema de Gestão de Planilhas e Produtos",
+  "description": "Sistema de Gestão de Planilhas e Produtos - Controle de Patrimônio e Inventário",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
+  "categories": ["productivity", "business"],
+  "lang": "pt-BR",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/assets/images/logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/assets/images/logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Ver Planilhas",
+      "short_name": "Planilhas",
+      "description": "Acessar planilhas de produtos",
+      "url": "/spreadsheets/view",
+      "icons": [{
+        "src": "/assets/images/logo.png",
+        "sizes": "192x192"
+      }]
+    },
+    {
+      "name": "Menu Principal",
+      "short_name": "Menu",
+      "description": "Abrir menu principal",
+      "url": "/menu",
+      "icons": [{
+        "src": "/assets/images/logo.png",
+        "sizes": "192x192"
+      }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }
