@@ -401,6 +401,13 @@ class UsuarioController extends BaseController
 
         try {
             $input = json_decode(file_get_contents('php://input'), true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'JSON inválido: ' . json_last_error_msg()]);
+                exit;
+            }
+
             $comumId = (int) ($input['comum_id'] ?? 0);
 
             if ($comumId <= 0) {
@@ -417,16 +424,20 @@ class UsuarioController extends BaseController
             }
 
             // Atualizar comum_id do usuário
-            $this->usuarioRepository->atualizar($usuarioId, ['comum_id' => $comumId]);
+            $resultado = $this->usuarioRepository->atualizarUsuario($usuarioId, ['comum_id' => $comumId]);
+
+            if (!$resultado) {
+                throw new \Exception('Falha ao atualizar comum_id no banco de dados');
+            }
 
             // Atualizar sessão
             SessionManager::setComumId($comumId);
 
             echo json_encode(['success' => true, 'message' => 'Comum selecionada com sucesso']);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log('ERROR UsuarioController::selecionarComum: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Erro ao selecionar comum']);
+            echo json_encode(['success' => false, 'message' => 'Erro ao selecionar comum: ' . $e->getMessage()]);
         }
         exit;
     }

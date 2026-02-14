@@ -9,9 +9,16 @@ document.addEventListener('DOMContentLoaded', function () {
         var comumId = this.value;
         if (!comumId) return;
 
+        // Obter token CSRF da meta tag
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
         fetch('/users/select-church', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
             body: JSON.stringify({ comum_id: comumId })
         })
         .then(function (response) { return response.json(); })
