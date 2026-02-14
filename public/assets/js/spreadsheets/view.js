@@ -363,16 +363,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.querySelector('button[type="submit"],input[type="submit"]');
     }
 
-    let micBtn = document.getElementById('btnMic');
+    let micBtn = document.getElementById('btnMic') || document.getElementById('btnFloatingMic');
     if (!micBtn) return;
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
         micBtn.setAttribute('aria-disabled', 'true');
         micBtn.title = 'Reconhecimento de voz não suportado neste navegador';
-        const iconNF = micBtn.querySelector('.material-icons-round');
+        const iconNF = micBtn.querySelector('.material-icons-round') || micBtn.querySelector('i');
         if (iconNF) {
-            iconNF.textContent = 'mic_off';
+            if (iconNF.classList.contains('material-icons-round')) {
+                iconNF.textContent = 'mic_off';
+            } else {
+                iconNF.className = 'bi bi-mic-mute-fill';
+            }
         }
         micBtn.addEventListener('click', () => {
             alert('Reconhecimento de voz não suportado neste navegador. Use o botão de câmera ou digite o código.');
@@ -465,9 +469,13 @@ document.addEventListener('DOMContentLoaded', () => {
     rec.maxAlternatives = 3;
 
     function setMicIcon(listening) {
-        const icon = micBtn.querySelector('.material-icons-round');
+        const icon = micBtn.querySelector('.material-icons-round') || micBtn.querySelector('i');
         if (icon) {
-            icon.textContent = listening ? 'graphic_eq' : 'mic';
+            if (icon.classList.contains('material-icons-round')) {
+                icon.textContent = listening ? 'graphic_eq' : 'mic';
+            } else if (icon.classList.contains('bi')) {
+                icon.className = listening ? 'bi bi-mic-fill text-danger' : 'bi bi-mic-fill';
+            }
         }
     }
 
@@ -536,8 +544,6 @@ function initFloatingButtons() {
 
     const btnFloatingMic = document.getElementById('btnFloatingMic');
     const btnFloatingCam = document.getElementById('btnFloatingCam');
-    const btnMicOriginal = document.getElementById('btnMic');
-    const btnCamOriginal = document.getElementById('btnCam');
     const cameraFullscreenModal = document.getElementById('cameraFullscreenModal');
     const cameraCloseBtn = document.getElementById('cameraCloseBtn');
 
@@ -546,16 +552,8 @@ function initFloatingButtons() {
         return;
     }
 
-    // Conectar botão flutuante de microfone ao botão original
-    if (btnMicOriginal) {
-        btnFloatingMic.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Clicado botão flutuante de microfone');
-            btnMicOriginal.click();
-        });
-        console.log('✓ Botão flutuante de microfone conectado');
-    }
+    // Botão flutuante de microfone já está conectado pela função de reconhecimento de voz
+    console.log('✓ Botão flutuante de microfone configurado');
 
     // Conectar botão flutuante de câmera para abrir modal fullscreen
     if (btnFloatingCam && cameraFullscreenModal) {
