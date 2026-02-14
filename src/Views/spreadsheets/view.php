@@ -396,7 +396,7 @@ if (false && !empty($acesso_bloqueado)) {
         }
 
         /* Quagga viewport wrapper - div criado dinamicamente pelo Quagga */
-        .camera-scanner-container > div {
+        .camera-scanner-container>div {
             position: absolute !important;
             top: 0 !important;
             left: 0 !important;
@@ -1167,15 +1167,18 @@ ob_start();
     }
 
     @keyframes pulse-mic {
-        0%, 100% {
+
+        0%,
+        100% {
             transform: scale(1) !important;
             box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4) !important;
         }
+
         50% {
             transform: scale(1.15) !important;
             box-shadow: 0 0 0 8px rgba(255, 107, 107, 0.2),
-                        0 0 0 16px rgba(255, 107, 107, 0.1),
-                        0 6px 24px rgba(255, 107, 107, 0.6) !important;
+                0 0 0 16px rgba(255, 107, 107, 0.1),
+                0 6px 24px rgba(255, 107, 107, 0.6) !important;
         }
     }
 </style>
