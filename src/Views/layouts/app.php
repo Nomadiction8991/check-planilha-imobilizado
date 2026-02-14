@@ -143,6 +143,9 @@ if (!isset($content)) {
     <!-- Bootstrap 5.3 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- CSRF Global — DEVE ser o primeiro JS após Bootstrap -->
+    <script src="/assets/js/csrf-global.js"></script>
+
     <!-- PWA Install Manager -->
     <script src="/assets/js/pwa-install.js"></script>
 

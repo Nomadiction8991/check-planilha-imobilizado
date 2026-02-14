@@ -85,13 +85,7 @@ if (!in_array($chaveRota, $rotasPublicas, true)) {
 // CSRF validation for POST (except login)
 if ($metodo === 'POST' && $chaveRota !== 'POST /login') {
     $csrfToken = $_POST['_csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
-    
-    // Debug temporário
-    error_log("CSRF Debug - Route: {$chaveRota}");
-    error_log("CSRF Debug - Token enviado: " . ($csrfToken ?? 'NULL'));
-    error_log("CSRF Debug - Token sessão: " . ($_SESSION['_csrf_token'] ?? 'NULL'));
-    error_log("CSRF Debug - Headers: " . json_encode(getallheaders()));
-    
+
     if (!CsrfService::validate($csrfToken)) {
         if (is_ajax_request()) {
             json_response(['error' => true, 'message' => 'Token CSRF inválido. Recarregue a página.'], 403);

@@ -17,6 +17,7 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="csrf-token" content="<?= \App\Core\CsrfService::getToken() ?>">
     <title><?php echo $pageTitle ?? 'Anvy - Gestão de Planilhas'; ?></title>
 
     <!-- PWA - Progressive Web App -->
@@ -75,6 +76,9 @@ $manifest_path = ($ambiente_manifest === 'dev') ? '/dev/manifest-dev.json' : '/m
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- CSRF Global — DEVE ser o primeiro JS após Bootstrap -->
+    <script src="/assets/js/csrf-global.js"></script>
 
     <!-- Variáveis PHP para o Service Worker -->
     <script>

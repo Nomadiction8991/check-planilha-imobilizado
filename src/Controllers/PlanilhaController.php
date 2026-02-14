@@ -272,7 +272,7 @@ class PlanilhaController extends BaseController
     }
 
     /**
-     * PASSO 3: Confirma importação — recebe ações do usuário e processa.
+     * PASSO 3: Confirma importação — recebe ações do usuário e processa diretamente.
      */
     public function confirmarImportacao(): void
     {
@@ -288,30 +288,54 @@ class PlanilhaController extends BaseController
             return;
         }
 
-        // Mescla ações salvas via AJAX (páginas anteriores) com ações do formulário (página atual)
-        $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
-        $acoesFormulario = $_POST['acao'] ?? [];
-        $acoes = array_merge($acoesSalvas, $acoesFormulario);
+        try {
+            set_time_limit(120);
+            ini_set('memory_limit', '128M');
 
-        // Para registros sem ação definida, carrega a ação sugerida da análise
-        $analise = $this->csvParserService->carregarAnalise($importacaoId);
-        if ($analise) {
-            foreach ($analise['registros'] as $reg) {
-                $linhaCsv = (string) ($reg['linha_csv'] ?? '');
-                if ($linhaCsv !== '' && !isset($acoes[$linhaCsv])) {
-                    $acoes[$linhaCsv] = $reg['acao_sugerida'] ?? 'pular';
+            // Mescla ações salvas via AJAX (páginas anteriores) com ações do formulário (página atual)
+            $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
+            $acoesFormulario = $_POST['acao'] ?? [];
+            $acoes = array_merge($acoesSalvas, $acoesFormulario);
+
+            // Para registros sem ação definida, carrega a ação sugerida da análise
+            $analise = $this->csvParserService->carregarAnalise($importacaoId);
+            if ($analise) {
+                foreach ($analise['registros'] as $reg) {
+                    $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                    if ($linhaCsv !== '' && !isset($acoes[$linhaCsv])) {
+                        $acoes[$linhaCsv] = $reg['acao_sugerida'] ?? 'pular';
+                    }
                 }
             }
+
+            // Processar importação diretamente
+            if ($analise) {
+                $resultado = $this->importacaoService->processarComAcoes($importacaoId, $acoes, $analise);
+            } else {
+                $resultado = $this->importacaoService->processar($importacaoId);
+            }
+
+            // Limpa dados temporários
+            unset(
+                $_SESSION['preview_acoes_' . $importacaoId],
+                $_SESSION['importacao_acoes_' . $importacaoId]
+            );
+            $this->csvParserService->limparAnalise($importacaoId);
+
+            $sucesso = $resultado['sucesso'] ?? 0;
+            $erros = $resultado['erro'] ?? 0;
+            $msg = "{$sucesso} linha(s) importada(s) com sucesso.";
+            if ($erros > 0) {
+                $msg .= " {$erros} linha(s) com erro.";
+            }
+
+            $this->setMensagem($msg, $erros > 0 ? 'warning' : 'success');
+            $this->redirecionar('/spreadsheets/view');
+        } catch (\Exception $e) {
+            error_log('Erro ao confirmar importação: ' . $e->getMessage());
+            $this->setMensagem('Erro ao importar: ' . $e->getMessage(), 'danger');
+            $this->redirecionar('/spreadsheets/import');
         }
-
-        // Salva ações completas em session para o processamento assíncrono
-        $_SESSION['importacao_acoes_' . $importacaoId] = $acoes;
-
-        // Limpa ações temporárias do preview
-        unset($_SESSION['preview_acoes_' . $importacaoId]);
-
-        // Redireciona para a tela de progresso
-        $this->redirecionar('/spreadsheets/progress?id=' . $importacaoId);
     }
 
     public function visualizar(): void
@@ -369,117 +393,5 @@ class PlanilhaController extends BaseController
             'filtro_status'       => $filtros['status'],
             'filtro_codigo'       => $filtros['codigo'],
         ]);
-    }
-
-    public function progresso(): void
-    {
-        $importacaoId = (int) ($_GET['id'] ?? 0);
-
-        if ($importacaoId <= 0) {
-            $this->redirecionar('/spreadsheets/import?erro=' . urlencode('ID de importação inválido'));
-            return;
-        }
-
-        $this->renderizar('spreadsheets/import-progress', [
-            'importacao_id' => $importacaoId
-        ]);
-    }
-
-    public function apiProgresso(): void
-    {
-        header('Content-Type: application/json');
-
-        $importacaoId = (int) ($_GET['id'] ?? 0);
-
-        if ($importacaoId <= 0) {
-            echo json_encode(['erro' => 'ID inválido']);
-            exit;
-        }
-
-        try {
-            $progresso = $this->importacaoService->buscarProgresso($importacaoId);
-
-            if (!$progresso) {
-                echo json_encode(['erro' => 'Importação não encontrada']);
-                exit;
-            }
-
-            echo json_encode([
-                'id' => $progresso['id'],
-                'status' => $progresso['status'],
-                'total_linhas' => $progresso['total_linhas'],
-                'linhas_processadas' => $progresso['linhas_processadas'],
-                'linhas_sucesso' => $progresso['linhas_sucesso'],
-                'linhas_erro' => $progresso['linhas_erro'],
-                'porcentagem' => $progresso['porcentagem'],
-                'arquivo_nome' => $progresso['arquivo_nome'],
-                'mensagem_erro' => $progresso['mensagem_erro'],
-                'iniciada_em' => $progresso['iniciada_em'],
-                'concluida_em' => $progresso['concluida_em']
-            ]);
-        } catch (\Exception $e) {
-            echo json_encode(['erro' => $e->getMessage()]);
-        }
-
-        exit;
-    }
-
-    public function processarArquivo(): void
-    {
-        header('Content-Type: application/json');
-
-        $importacaoId = (int) ($_POST['id'] ?? 0);
-
-        if ($importacaoId <= 0) {
-            echo json_encode(['erro' => 'ID inválido']);
-            exit;
-        }
-
-        try {
-            set_time_limit(0);
-            ignore_user_abort(true);
-
-            // Verifica se há ações do preview na sessão
-            $acoes = $_SESSION['importacao_acoes_' . $importacaoId] ?? null;
-
-            if ($acoes !== null) {
-                // Fluxo NOVO: processar com ações selecionadas pelo usuário
-                $analise = $this->csvParserService->carregarAnalise($importacaoId);
-
-                if (!$analise) {
-                    echo json_encode(['erro' => 'Análise não encontrada. Refaça o upload.']);
-                    exit;
-                }
-
-                $resultado = $this->importacaoService->processarComAcoes($importacaoId, $acoes, $analise);
-
-                // Limpa dados temporários
-                unset($_SESSION['importacao_acoes_' . $importacaoId]);
-                $this->csvParserService->limparAnalise($importacaoId);
-
-                echo json_encode([
-                    'sucesso' => true,
-                    'linhas_sucesso' => $resultado['sucesso'],
-                    'linhas_erro' => $resultado['erro'],
-                    'linhas_puladas' => $resultado['pulados'] ?? 0,
-                    'linhas_excluidas' => $resultado['excluidos'] ?? 0,
-                    'erros' => array_slice($resultado['erros'], 0, 10)
-                ]);
-            } else {
-                // Fluxo LEGADO: processar tudo sem preview
-                $resultado = $this->importacaoService->processar($importacaoId);
-
-                echo json_encode([
-                    'sucesso' => true,
-                    'linhas_sucesso' => $resultado['sucesso'],
-                    'linhas_erro' => $resultado['erro'],
-                    'erros' => array_slice($resultado['erros'], 0, 10)
-                ]);
-            }
-        } catch (\Exception $e) {
-            echo json_encode(['erro' => $e->getMessage()]);
-        }
-
-        exit;
     }
 }

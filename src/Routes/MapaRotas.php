@@ -79,9 +79,6 @@ class MapaRotas
             'POST /spreadsheets/preview/save-actions' => [PlanilhaController::class, 'salvarAcoesPreview'],
             'POST /spreadsheets/preview/bulk-action' => [PlanilhaController::class, 'acaoMassaPreview'],
             'POST /spreadsheets/confirm' => [PlanilhaController::class, 'confirmarImportacao'],
-            'GET /spreadsheets/progress' => [PlanilhaController::class, 'progresso'],
-            'POST /spreadsheets/process-file' => [PlanilhaController::class, 'processarArquivo'],
-            'GET /spreadsheets/api/progress' => [PlanilhaController::class, 'apiProgresso'],
 
 
             'GET /reports/14-1' => [RelatorioController::class, 'relatorio141'],
