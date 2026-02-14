@@ -390,16 +390,34 @@ if (false && !empty($acesso_bloqueado)) {
             flex: 1 !important;
             position: relative !important;
             overflow: hidden !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
             width: 100% !important;
             height: 100% !important;
             background: #000 !important;
         }
 
-        .camera-scanner-container video,
+        /* Quagga viewport wrapper - div criado dinamicamente pelo Quagga */
+        .camera-scanner-container > div {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .camera-scanner-container video {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+
         .camera-scanner-container canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
             width: 100% !important;
             height: 100% !important;
             object-fit: cover !important;
@@ -1094,69 +1112,72 @@ ob_start();
 ?>
 
 <style>
-/* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
-.floating-buttons-container {
-    position: absolute !important;
-    bottom: 90px !important;
-    right: 16px !important;
-    z-index: 1040 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 15px !important;
-    align-items: flex-end !important;
-}
+    /* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
+    .floating-buttons-container {
+        position: absolute !important;
+        bottom: 90px !important;
+        right: 16px !important;
+        z-index: 1040 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        align-items: flex-end !important;
+    }
 
-.floating-btn {
-    width: 56px !important;
-    height: 56px !important;
-    border-radius: 50% !important;
-    border: none !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 24px !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
-    background: white !important;
-    color: #333 !important;
-    padding: 0 !important;
-    line-height: 1 !important;
-}
-
-.floating-btn:hover {
-    transform: scale(1.1) !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
-}
-
-.floating-btn:active {
-    transform: scale(0.95) !important;
-}
-
-.floating-btn.mic {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
-}
-
-.floating-btn.cam {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-    color: white !important;
-}
-
-.floating-btn.listening {
-    animation: pulse-float 1.5s infinite !important;
-}
-
-@keyframes pulse-float {
-    0%, 100% {
-        transform: scale(1) !important;
+    .floating-btn {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 50% !important;
+        border: none !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        transition: all 0.3s ease !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+        background: white !important;
+        color: #333 !important;
+        padding: 0 !important;
+        line-height: 1 !important;
     }
-    50% {
-        transform: scale(1.15) !important;
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4) !important;
+
+    .floating-btn:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
     }
-}
+
+    .floating-btn:active {
+        transform: scale(0.95) !important;
+    }
+
+    .floating-btn.mic {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+    }
+
+    .floating-btn.cam {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        color: white !important;
+    }
+
+    .floating-btn.listening {
+        animation: pulse-mic 1.2s ease-in-out infinite !important;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%) !important;
+    }
+
+    @keyframes pulse-mic {
+        0%, 100% {
+            transform: scale(1) !important;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4) !important;
+        }
+        50% {
+            transform: scale(1.15) !important;
+            box-shadow: 0 0 0 8px rgba(255, 107, 107, 0.2),
+                        0 0 0 16px rgba(255, 107, 107, 0.1),
+                        0 6px 24px rgba(255, 107, 107, 0.6) !important;
+        }
+    }
 </style>
 
 <link rel="stylesheet" href="/assets/css/spreadsheets/view.css">

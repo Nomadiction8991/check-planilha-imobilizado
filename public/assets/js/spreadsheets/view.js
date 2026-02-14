@@ -366,6 +366,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let micBtn = document.getElementById('btnMic') || document.getElementById('btnFloatingMic');
     if (!micBtn) return;
 
+    // Verificar se está em HTTPS (necessário para reconhecimento de voz)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        console.warn('⚠️  Reconhecimento de voz requer HTTPS');
+        micBtn.setAttribute('aria-disabled', 'true');
+        micBtn.title = 'Reconhecimento de voz requer HTTPS';
+        const iconWarn = micBtn.querySelector('.material-icons-round') || micBtn.querySelector('i');
+        if (iconWarn) {
+            if (iconWarn.classList.contains('material-icons-round')) {
+                iconWarn.textContent = 'mic_off';
+            } else {
+                iconWarn.className = 'bi bi-mic-mute-fill';
+            }
+        }
+        micBtn.addEventListener('click', () => {
+            const httpsUrl = 'https://' + location.hostname + ':8443' + location.pathname + location.search;
+            if (confirm('⚠️ Reconhecimento de voz requer HTTPS!\n\nDeseja ser redirecionado para a versão segura?\n\n' + httpsUrl)) {
+                location.href = httpsUrl;
+            }
+        });
+        return;
+    }
+
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
         micBtn.setAttribute('aria-disabled', 'true');
@@ -464,9 +486,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const rec = new SR();
     rec.lang = 'pt-BR';
-    rec.continuous = false;
-    rec.interimResults = false;
+    rec.continuous = true;  // Mantém escutando continuamente
+    rec.interimResults = true;  // Mostra resultados intermediários
     rec.maxAlternatives = 3;
+
+    let isListening = false;
 
     function setMicIcon(listening) {
         const icon = micBtn.querySelector('.material-icons-round') || micBtn.querySelector('i');
@@ -480,44 +504,100 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startListening() {
+        if (isListening) return;
+        
         try {
+            console.log('Iniciando reconhecimento de voz...');
             rec.start();
+            isListening = true;
             micBtn.classList.add('listening');
             micBtn.setAttribute('aria-pressed', 'true');
             setMicIcon(true);
-        } catch (e) {}
+            console.log('Reconhecimento de voz iniciado. Fale o código...');
+        } catch (e) {
+            console.error('Erro ao iniciar reconhecimento:', e);
+            alert('Erro ao iniciar o microfone: ' + e.message);
+        }
     }
 
     function stopListening() {
+        if (!isListening) return;
+        
         try {
+            console.log('Parando reconhecimento de voz...');
             rec.stop();
-        } catch (e) {}
+        } catch (e) {
+            console.error('Erro ao parar reconhecimento:', e);
+        }
+        
+        isListening = false;
         micBtn.classList.remove('listening');
         micBtn.setAttribute('aria-pressed', 'false');
         setMicIcon(false);
     }
 
+    rec.onstart = () => {
+        console.log('✓ Microfone ativo - pode falar agora!');
+    };
+
     rec.onresult = (e) => {
-        const best = e.results[0][0].transcript || '';
-        const codigo = extraiCodigoFalado(best);
-        stopListening();
-        if (!codigo) {
-            alert('No entendi o código. Tente soletrar: "um dois trs"');
-            return;
+        console.log('Resultado recebido:', e);
+        
+        // Procurar primeiro resultado final
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+                const transcript = e.results[i][0].transcript || '';
+                console.log('Transcrição final:', transcript);
+                
+                const codigo = extraiCodigoFalado(transcript);
+                
+                if (codigo) {
+                    console.log('Código extraído:', codigo);
+                    stopListening();
+                    preencherEEnviar(codigo);
+                } else {
+                    console.log('Nenhum código numérico encontrado na fala');
+                }
+            } else {
+                // Resultado intermediário - apenas log
+                const transcript = e.results[i][0].transcript || '';
+                console.log('Intermediário:', transcript);
+            }
         }
-        preencherEEnviar(codigo);
     };
 
     rec.onerror = (e) => {
+        console.error('Erro no reconhecimento de voz:', e.error);
         stopListening();
-        if (e.error === 'not-allowed') alert('Permita o acesso ao microfone para usar a busca por voz.');
+        
+        if (e.error === 'not-allowed') {
+            alert('❌ Permita o acesso ao microfone para usar a busca por voz.\n\nVerifique as permissões do navegador.');
+        } else if (e.error === 'no-speech') {
+            console.log('Nenhuma fala detectada. Tente novamente.');
+        } else if (e.error === 'aborted') {
+            console.log('Reconhecimento abortado pelo usuário.');
+        } else if (e.error === 'network') {
+            alert('❌ Erro de rede. Verifique sua conexão com a internet.');
+        } else {
+            alert('❌ Erro no reconhecimento de voz: ' + e.error);
+        }
     };
 
-    rec.onend = () => micBtn.classList.remove('listening');
+    rec.onend = () => {
+        console.log('Reconhecimento finalizado');
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.setAttribute('aria-pressed', 'false');
+        setMicIcon(false);
+    };
 
     micBtn.addEventListener('click', () => {
-        if (micBtn.classList.contains('listening')) stopListening();
-        else startListening();
+        console.log('Botão de microfone clicado. isListening:', isListening);
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening();
+        }
     });
 
     document.addEventListener('keydown', (ev) => {
@@ -645,18 +725,12 @@ function startFullscreenScanner() {
     if (!container) return;
 
     const constraints = {
-        width: {
-            ideal: 1920
-        },
-        height: {
-            ideal: 1080
-        }
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
     };
 
     if (fullscreenSelectedDeviceId) {
-        constraints.deviceId = {
-            exact: fullscreenSelectedDeviceId
-        };
+        constraints.deviceId = { exact: fullscreenSelectedDeviceId };
     } else {
         constraints.facingMode = 'environment';
     }
@@ -695,8 +769,38 @@ function startFullscreenScanner() {
         console.log('√ Câmera fullscreen iniciada!');
         Quagga.start();
 
-        // Capturar stream
+        // Forçar viewport wrapper do Quagga a preencher 100% do container
+        const viewport = container.querySelector('div:not(.camera-overlay)');
+        if (viewport && viewport !== container) {
+            viewport.style.position = 'absolute';
+            viewport.style.top = '0';
+            viewport.style.left = '0';
+            viewport.style.width = '100%';
+            viewport.style.height = '100%';
+        }
+
+        // Forçar video e canvas a preencher o container
         const videoElement = container.querySelector('video');
+        if (videoElement) {
+            videoElement.style.position = 'absolute';
+            videoElement.style.top = '0';
+            videoElement.style.left = '0';
+            videoElement.style.width = '100%';
+            videoElement.style.height = '100%';
+            videoElement.style.objectFit = 'cover';
+        }
+
+        const canvasElement = container.querySelector('canvas');
+        if (canvasElement) {
+            canvasElement.style.position = 'absolute';
+            canvasElement.style.top = '0';
+            canvasElement.style.left = '0';
+            canvasElement.style.width = '100%';
+            canvasElement.style.height = '100%';
+            canvasElement.style.objectFit = 'cover';
+        }
+
+        // Capturar stream
         if (videoElement && videoElement.srcObject) {
             fullscreenCurrentStream = videoElement.srcObject;
             const videoTracks = fullscreenCurrentStream.getVideoTracks();
