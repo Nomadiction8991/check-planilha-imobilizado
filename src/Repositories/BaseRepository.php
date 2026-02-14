@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Contracts\RepositoryInterface;
 use PDO;
-use PDOException;
-
 
 abstract class BaseRepository implements RepositoryInterface
 {
@@ -13,11 +13,13 @@ abstract class BaseRepository implements RepositoryInterface
     protected string $tabela;
     protected string $chavePrimaria = 'id';
 
+    /** @var string[] Allowed column names for this table (whitelist for dynamic SQL) */
+    protected array $colunas = [];
+
     public function __construct(PDO $conexao)
     {
         $this->conexao = $conexao;
     }
-
 
     public function buscarPorId(int $id): ?array
     {
@@ -30,16 +32,15 @@ abstract class BaseRepository implements RepositoryInterface
         return $resultado ?: null;
     }
 
-
     public function buscarTodos(): array
     {
         $sql = "SELECT * FROM {$this->tabela}";
         return $this->conexao->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
     public function criar(array $dados): int
     {
+        $dados = $this->filterColumns($dados);
         $colunas = implode(', ', array_keys($dados));
         $placeholders = ':' . implode(', :', array_keys($dados));
 
@@ -54,9 +55,9 @@ abstract class BaseRepository implements RepositoryInterface
         return (int) $this->conexao->lastInsertId();
     }
 
-
     public function atualizar(int $id, array $dados): bool
     {
+        $dados = $this->filterColumns($dados);
         $sets = [];
         foreach (array_keys($dados) as $coluna) {
             $sets[] = "{$coluna} = :{$coluna}";
@@ -74,7 +75,6 @@ abstract class BaseRepository implements RepositoryInterface
         return $stmt->execute();
     }
 
-
     public function deletar(int $id): bool
     {
         $sql = "DELETE FROM {$this->tabela} WHERE {$this->chavePrimaria} = :id";
@@ -83,11 +83,10 @@ abstract class BaseRepository implements RepositoryInterface
         return $stmt->execute();
     }
 
-
     public function contar(string $where = '', array $params = []): int
     {
         $sql = "SELECT COUNT(*) FROM {$this->tabela}";
-        if ($where) {
+        if ($where !== '') {
             $sql .= " WHERE {$where}";
         }
 
@@ -100,26 +99,23 @@ abstract class BaseRepository implements RepositoryInterface
         return (int) $stmt->fetchColumn();
     }
 
-
     protected function paginar(int $pagina, int $limite, string $where = '', array $params = [], string $orderBy = ''): array
     {
         $offset = ($pagina - 1) * $limite;
 
         $sql = "SELECT * FROM {$this->tabela}";
-        if ($where) {
+        if ($where !== '') {
             $sql .= " WHERE {$where}";
         }
-        if ($orderBy) {
+        if ($orderBy !== '') {
             $sql .= " ORDER BY {$orderBy}";
         }
-        $sql .= " LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
+        $sql .= " LIMIT " . (int) $limite . " OFFSET " . (int) $offset;
 
         $stmt = $this->conexao->prepare($sql);
-
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
-
         $stmt->execute();
         $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -127,11 +123,23 @@ abstract class BaseRepository implements RepositoryInterface
         $totalPaginas = $total > 0 ? (int) ceil($total / $limite) : 1;
 
         return [
-            'dados' => $dados,
-            'total' => $total,
-            'pagina' => $pagina,
-            'limite' => $limite,
-            'totalPaginas' => $totalPaginas
+            'dados'        => $dados,
+            'total'        => $total,
+            'pagina'       => $pagina,
+            'limite'       => $limite,
+            'totalPaginas' => $totalPaginas,
         ];
+    }
+
+    /**
+     * Filter array keys to only allowed column names (prevents SQL injection via column names).
+     */
+    private function filterColumns(array $dados): array
+    {
+        if (empty($this->colunas)) {
+            return $dados;
+        }
+
+        return array_intersect_key($dados, array_flip($this->colunas));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Core\ViewRenderer;
@@ -39,17 +41,17 @@ abstract class BaseController
         $_SESSION['tipo_mensagem'] = $tipo;
     }
 
-    protected function input(string $chave, $padrao = null)
+    protected function input(string $chave, mixed $padrao = null): mixed
     {
         return $_REQUEST[$chave] ?? $padrao;
     }
 
-    protected function query(string $chave, $padrao = null)
+    protected function query(string $chave, mixed $padrao = null): mixed
     {
         return $_GET[$chave] ?? $padrao;
     }
 
-    protected function post(string $chave, $padrao = null)
+    protected function post(string $chave, mixed $padrao = null): mixed
     {
         return $_POST[$chave] ?? $padrao;
     }

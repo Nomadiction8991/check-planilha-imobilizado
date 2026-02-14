@@ -1,6 +1,6 @@
 <?php
 
-
+declare(strict_types=1);
 
 if (!defined('APP_BOOTSTRAPPED')) {
     define('APP_BOOTSTRAPPED', true);
@@ -8,18 +8,21 @@ if (!defined('APP_BOOTSTRAPPED')) {
         define('BASE_PATH', dirname(__DIR__));
     }
 
+    // Autoload (single point of inclusion)
+    require_once BASE_PATH . '/vendor/autoload.php';
 
-
-
+    // Session — single unified configuration
     if (session_status() !== PHP_SESSION_ACTIVE) {
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
         session_start([
             'cookie_httponly' => true,
-            'cookie_secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+            'cookie_secure'  => $isSecure,
             'cookie_samesite' => 'Lax',
         ]);
     }
 
-
+    // Charset
     if (!headers_sent()) {
         header('Content-Type: text/html; charset=UTF-8');
     }
@@ -31,21 +34,18 @@ if (!defined('APP_BOOTSTRAPPED')) {
         mb_http_output('UTF-8');
     }
 
-
+    // Timezone
     date_default_timezone_set('America/Cuiaba');
 
-
-    require_once BASE_PATH . '/vendor/autoload.php';
-
-    // Funções globais de compatibilidade (env, auth, string, csv)
+    // Legacy compatibility functions
     require_once BASE_PATH . '/src/Helpers/GlobalFunctions.php';
     loadEnv(BASE_PATH . '/.env');
 
-    // Conexão com banco e configurações da aplicação
+    // Database and URL config
     require_once BASE_PATH . '/config/database.php';
     require_once BASE_PATH . '/config/app_config.php';
 
-
+    // Logging
     $logDir = BASE_PATH . '/storage/logs';
     if (!is_dir($logDir)) {
         @mkdir($logDir, 0775, true);
@@ -53,14 +53,15 @@ if (!defined('APP_BOOTSTRAPPED')) {
     ini_set('log_errors', '1');
     ini_set('error_log', $logDir . '/app.log');
 
-
+    // Utility functions
     function is_ajax_request(): bool
     {
-        $byHeader = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower((string) $_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-        $byAccept = isset($_SERVER['HTTP_ACCEPT']) && stripos((string) $_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
+        $byHeader = isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower((string) $_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        $byAccept = isset($_SERVER['HTTP_ACCEPT'])
+            && stripos((string) $_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
         return $byHeader || $byAccept;
     }
-
 
     function json_response(array $payload, int $statusCode = 200): void
     {
@@ -73,9 +74,8 @@ if (!defined('APP_BOOTSTRAPPED')) {
         exit;
     }
 
-
-    function sanitize_text($value): string
+    function sanitize_text(mixed $value): string
     {
-        return trim((string) $value);
+        return htmlspecialchars(trim((string) $value), ENT_QUOTES, 'UTF-8');
     }
 }

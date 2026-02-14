@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Partial: footer_mobile.php
  * Rodapé móvel com três botões: Voltar (usa goBack()), Início, Sair (logout).

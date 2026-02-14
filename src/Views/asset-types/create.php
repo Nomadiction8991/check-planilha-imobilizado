@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 $pageTitle = 'CADASTRAR TIPO DE BEM';
 $backUrl = null;
 ?>

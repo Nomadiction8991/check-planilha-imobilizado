@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
+use App\Exceptions\AuthenticationException;
 use App\Services\AuthService;
 use App\Repositories\UsuarioRepository;
 use App\Core\ConnectionManager;
+use App\Core\ViewRenderer;
 
-class AuthController
+class AuthController extends BaseController
 {
     private AuthService $authService;
 
@@ -20,11 +24,11 @@ class AuthController
         $this->authService = $authService;
     }
 
-    public function login()
+    public function login(): void
     {
         if ($this->authService->isAuthenticated()) {
-            header('Location: /spreadsheets/view');
-            exit;
+            $this->redirecionar('/spreadsheets/view');
+            return;
         }
 
         $erro = '';
@@ -34,33 +38,36 @@ class AuthController
             $sucesso = 'Cadastro realizado com sucesso! Faça login para continuar.';
         }
 
-        require __DIR__ . '/../Views/auth/login.php';
+        $this->renderizar('auth/login', [
+            'erro' => $erro,
+            'sucesso' => $sucesso,
+        ]);
     }
 
-    public function authenticate()
+    public function authenticate(): void
     {
-        $email = mb_strtoupper(trim($_POST['email'] ?? ''), 'UTF-8');
-        $senha = trim($_POST['senha'] ?? '');
+        $email = mb_strtoupper(trim($this->post('email', '')), 'UTF-8');
+        $senha = trim($this->post('senha', ''));
 
         try {
             if (empty($email) || empty($senha)) {
-                throw new \Exception('E-mail e senha são obrigatórios.');
+                throw new AuthenticationException('E-mail e senha são obrigatórios.');
             }
 
             $this->authService->authenticate($email, $senha);
 
-            header('Location: /spreadsheets/view');
-            exit;
+            $this->redirecionar('/spreadsheets/view');
         } catch (\Exception $e) {
-            $erro = $e->getMessage();
-            require __DIR__ . '/../Views/auth/login.php';
+            $this->renderizar('auth/login', [
+                'erro' => $e->getMessage(),
+                'sucesso' => '',
+            ]);
         }
     }
 
-    public function logout()
+    public function logout(): void
     {
         $this->authService->logout();
-        header('Location: /login');
-        exit;
+        $this->redirecionar('/login');
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Carregar configurações da aplicação
 $appConfig = require __DIR__ . '/../../../config/app.php';
 $projectRoot = $appConfig['project_root'];
@@ -109,8 +111,8 @@ if (!isset($content)) {
                     $comumRepo = new \App\Repositories\ComumRepository($conexao);
                     $comuns = $comumRepo->buscarTodos();
 
-                    // Garante que comum_id está definida (usa SessionManager)
-                    $comumAtualId = \App\Core\SessionManager::ensureComumId();
+                    // comum_id já é garantida pelo index.php via UserSessionService
+                    $comumAtualId = \App\Core\SessionManager::getComumId();
                 } catch (\Exception $e) {
                     error_log('Erro ao carregar comuns: ' . $e->getMessage());
                 }

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 $appConfig = require dirname(__DIR__, 3) . '/config/app.php';
 $projectRoot = $appConfig['project_root'];
 $pageTitle = 'CONFERÊNCIA DA IMPORTAÇÃO';

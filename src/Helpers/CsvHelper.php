@@ -1,5 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+namespace App\Helpers;
+
+use InvalidArgumentException;
+use RuntimeException;
 
 class CsvHelper
 {

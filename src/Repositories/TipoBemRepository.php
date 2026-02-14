@@ -1,21 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use PDO;
 
 class TipoBemRepository extends BaseRepository
 {
-    protected string $table = 'tipos_bens';
-
-    public function __construct(PDO $conexao)
-    {
-        parent::__construct($conexao);
-    }
+    protected string $tabela = 'tipos_bens';
 
     public function criar(array $dados): int
     {
-        $sql = "INSERT INTO {$this->table} (codigo, descricao) 
+        $sql = "INSERT INTO {$this->tabela} (codigo, descricao) 
                 VALUES (:codigo, :descricao)";
 
         $stmt = $this->conexao->prepare($sql);
@@ -29,7 +26,7 @@ class TipoBemRepository extends BaseRepository
 
     public function atualizar(int $id, array $dados): bool
     {
-        $sql = "UPDATE {$this->table} 
+        $sql = "UPDATE {$this->tabela} 
                 SET codigo = :codigo, descricao = :descricao 
                 WHERE id = :id";
 
@@ -43,14 +40,14 @@ class TipoBemRepository extends BaseRepository
 
     public function deletar(int $id): bool
     {
-        $sql = "DELETE FROM {$this->table} WHERE id = :id";
+        $sql = "DELETE FROM {$this->tabela} WHERE id = :id";
         $stmt = $this->conexao->prepare($sql);
         return $stmt->execute(['id' => $id]);
     }
 
     public function buscarPorId(int $id): ?array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id";
+        $sql = "SELECT * FROM {$this->tabela} WHERE id = :id";
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute(['id' => $id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -60,7 +57,7 @@ class TipoBemRepository extends BaseRepository
 
     public function buscarPorCodigo(int $codigo): ?array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE codigo = :codigo";
+        $sql = "SELECT * FROM {$this->tabela} WHERE codigo = :codigo";
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute(['codigo' => $codigo]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -78,7 +75,7 @@ class TipoBemRepository extends BaseRepository
             $params[':busca'] = "%{$busca}%";
         }
 
-        $sql = "SELECT * FROM {$this->table} 
+        $sql = "SELECT * FROM {$this->tabela} 
                 {$where} 
                 ORDER BY codigo ASC 
                 LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
@@ -99,7 +96,7 @@ class TipoBemRepository extends BaseRepository
             $params[':busca'] = "%{$busca}%";
         }
 
-        $sql = "SELECT COUNT(*) FROM {$this->table} {$where}";
+        $sql = "SELECT COUNT(*) FROM {$this->tabela} {$where}";
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute($params);
 
@@ -108,7 +105,7 @@ class TipoBemRepository extends BaseRepository
 
     public function buscarTodos(): array
     {
-        $sql = "SELECT * FROM {$this->table} ORDER BY codigo ASC";
+        $sql = "SELECT * FROM {$this->tabela} ORDER BY codigo ASC";
         $stmt = $this->conexao->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

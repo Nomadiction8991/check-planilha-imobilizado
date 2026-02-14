@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Core\ConnectionManager;
@@ -8,17 +10,15 @@ use PDO;
 
 class RelatorioController extends BaseController
 {
-    private PDO $conexao;
-
     public function __construct(?PDO $conexao = null)
     {
-        $this->conexao = $conexao ?? ConnectionManager::getConnection();
+        // Dependencies handled by repositories if needed in the future
     }
 
     public function relatorio141(): void
     {
-        $comumId = SessionManager::ensureComumId();
-        $idPlanilha = $_GET['id'] ?? $comumId;
+        $comumId = SessionManager::getComumId();
+        $idPlanilha = $this->query('id', $comumId);
 
         $this->renderizar('reports/report-141', [
             'id_planilha' => $idPlanilha,
@@ -34,22 +34,22 @@ class RelatorioController extends BaseController
             return;
         }
 
-        $comumId = SessionManager::ensureComumId();
+        $comumId = SessionManager::getComumId();
 
         $this->renderizar('reports/view', [
-            'formulario' => $formulario,
-            'id_planilha' => $_GET['id'] ?? $comumId,
-            'comum_id' => $comumId,
+            'formulario'  => $formulario,
+            'id_planilha' => $this->query('id', $comumId),
+            'comum_id'    => $comumId,
         ]);
     }
 
     public function assinatura(): void
     {
-        $comumId = SessionManager::ensureComumId();
+        $comumId = SessionManager::getComumId();
 
         $this->renderizar('reports/signature', [
-            'id_planilha' => $_GET['id'] ?? $comumId,
-            'comum_id' => $comumId,
+            'id_planilha' => $this->query('id', $comumId),
+            'comum_id'    => $comumId,
         ]);
     }
 }

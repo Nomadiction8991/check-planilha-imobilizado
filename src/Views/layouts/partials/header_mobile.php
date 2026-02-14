@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Partial: header_mobile.php
  * Cabeçalho móvel com seletor de comum

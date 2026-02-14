@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * View: Editar Comum
  * Formulário moderno para edição de comuns usando arquitetura MVC

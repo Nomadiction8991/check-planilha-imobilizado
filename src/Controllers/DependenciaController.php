@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Services\DependenciaService;
 use App\Repositories\DependenciaRepository;
-use App\Core\ViewRenderer;
 use App\Core\ConnectionManager;
 use App\Core\SessionManager;
 use PDO;
@@ -25,7 +26,6 @@ class DependenciaController extends BaseController
 
     public function index(): void
     {
-        SessionManager::ensureComumId();
         $comumId = SessionManager::getComumId();
 
         $busca = trim($this->query('busca', ''));
@@ -120,7 +120,6 @@ class DependenciaController extends BaseController
         }
 
         try {
-            SessionManager::ensureComumId();
             $comumId = SessionManager::getComumId();
 
             $dados = [

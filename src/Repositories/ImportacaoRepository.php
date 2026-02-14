@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use PDO;
 
 class ImportacaoRepository extends BaseRepository
 {
-    protected string $table = 'importacoes';
+    protected string $tabela = 'importacoes';
 
     public function criar(array $dados): int
     {
-        $sql = "INSERT INTO {$this->table} 
+        $sql = "INSERT INTO {$this->tabela} 
                 (usuario_id, comum_id, arquivo_nome, arquivo_caminho, total_linhas, status, iniciada_em) 
                 VALUES (:usuario_id, :comum_id, :arquivo_nome, :arquivo_caminho, :total_linhas, :status, NOW())";
 
@@ -71,7 +73,7 @@ class ImportacaoRepository extends BaseRepository
             return false;
         }
 
-        $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE id = :id";
+        $sql = "UPDATE {$this->tabela} SET " . implode(', ', $sets) . " WHERE id = :id";
         $stmt = $this->conexao->prepare($sql);
 
         return $stmt->execute($params);
@@ -79,7 +81,7 @@ class ImportacaoRepository extends BaseRepository
 
     public function buscarPorId(int $id): ?array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id";
+        $sql = "SELECT * FROM {$this->tabela} WHERE id = :id";
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute([':id' => $id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -89,7 +91,7 @@ class ImportacaoRepository extends BaseRepository
 
     public function buscarUltimaPorUsuario(int $usuarioId): ?array
     {
-        $sql = "SELECT * FROM {$this->table} 
+        $sql = "SELECT * FROM {$this->tabela} 
                 WHERE usuario_id = :usuario_id 
                 ORDER BY created_at DESC 
                 LIMIT 1";
@@ -103,7 +105,7 @@ class ImportacaoRepository extends BaseRepository
 
     public function buscarEmAndamento(): array
     {
-        $sql = "SELECT * FROM {$this->table} 
+        $sql = "SELECT * FROM {$this->tabela} 
                 WHERE status IN ('aguardando', 'processando') 
                 ORDER BY created_at ASC";
 

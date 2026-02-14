@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Partial: celular_container.php
  * Uso: envolve o conteúdo dentro de um frame que simula a tela de um celular.

@@ -1,7 +1,14 @@
 <?php
 
-require_once __DIR__ . '/../Repositories/ComumRepository.php';
+declare(strict_types=1);
 
+namespace App\Services;
+
+use App\Core\ConnectionManager;
+use App\Repositories\ComumRepository;
+use InvalidArgumentException;
+use PDO;
+use RuntimeException;
 
 class Relatorio141Service
 {
@@ -14,8 +21,7 @@ class Relatorio141Service
         $this->comumRepository = $comumRepository;
 
         if ($pdo === null) {
-            require_once __DIR__ . '/../Core/ConnectionManager.php';
-            $pdo = ConnectionManager::getInstance()->getConnection();
+            $pdo = ConnectionManager::getConnection();
         }
 
         $this->pdo = $pdo;

@@ -1,24 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Core\ConnectionManager;
 use App\Core\SessionManager;
+use App\Repositories\ComumRepository;
+use App\Repositories\DependenciaRepository;
+use App\Repositories\ProdutoRepository;
 use App\Services\ImportacaoService;
 use App\Services\CsvParserService;
 use PDO;
 
 class PlanilhaController extends BaseController
 {
-    private PDO $conexao;
     private ImportacaoService $importacaoService;
     private CsvParserService $csvParserService;
+    private ComumRepository $comumRepository;
+    private ProdutoRepository $produtoRepository;
+    private DependenciaRepository $dependenciaRepository;
 
     public function __construct(?PDO $conexao = null)
     {
-        $this->conexao = $conexao ?? ConnectionManager::getConnection();
-        $this->importacaoService = new ImportacaoService($this->conexao);
-        $this->csvParserService = new CsvParserService($this->conexao);
+        $conexao = $conexao ?? ConnectionManager::getConnection();
+
+        $this->importacaoService = new ImportacaoService($conexao);
+        $this->csvParserService = new CsvParserService($conexao);
+        $this->comumRepository = new ComumRepository($conexao);
+        $this->produtoRepository = new ProdutoRepository($conexao);
+        $this->dependenciaRepository = new DependenciaRepository($conexao);
     }
 
     public function importar(): void
@@ -45,7 +56,7 @@ class PlanilhaController extends BaseController
             set_time_limit(120);
             ini_set('memory_limit', '128M');
 
-            SessionManager::ensureComumId();
+            SessionManager::start();
             $comumId = SessionManager::getComumId();
             $usuarioId = SessionManager::getUserId();
 
@@ -306,124 +317,57 @@ class PlanilhaController extends BaseController
     public function visualizar(): void
     {
         // Se veio ?comum_id= pela URL (clique na listagem), atualiza a sessão
-        $comumIdUrl = (int) ($_GET['comum_id'] ?? 0);
+        $comumIdUrl = (int) ($this->query('comum_id', 0));
         if ($comumIdUrl > 0) {
-            \App\Core\SessionManager::set('comum_id', $comumIdUrl);
+            SessionManager::set('comum_id', $comumIdUrl);
         }
 
-        // Garante que comum_id está definida na sessão
-        $comumId = \App\Core\SessionManager::ensureComumId();
+        $comumId = SessionManager::getComumId();
 
         if (!$comumId || $comumId <= 0) {
-            // Se não há comum disponível, redireciona para comuns
             $this->redirecionar('/churches?erro=Nenhuma comum disponível');
             return;
         }
 
         // Buscar dados da comum
-        $stmt = $this->conexao->prepare("SELECT * FROM comums WHERE id = :id");
-        $stmt->bindValue(':id', $comumId, PDO::PARAM_INT);
-        $stmt->execute();
-        $planilha = $stmt->fetch(PDO::FETCH_ASSOC);
+        $planilha = $this->comumRepository->buscarPorId($comumId);
 
         if (!$planilha) {
             $this->redirecionar('/churches?erro=Comum não encontrada');
             return;
         }
 
-        // Formatar dados da planilha/comum
         $planilha['comum_descricao'] = $planilha['descricao'] ?? 'Comum';
 
-        // Buscar produtos da comum com paginação
-        $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-        $itensPorPagina = 50;
-        $offset = ($paginaAtual - 1) * $itensPorPagina;
-
         // Filtros
-        $filtroNome = $_GET['nome'] ?? '';
-        $filtroDependencia = $_GET['dependencia'] ?? '';
-        $filtroStatus = $_GET['status'] ?? '';
-        $filtroCodigo = $_GET['filtro_codigo'] ?? '';
+        $paginaAtual = max(1, (int) ($this->query('pagina', 1)));
+        $itensPorPagina = 50;
 
-        // Montar query com filtros
-        $where = ['p.comum_id = :comum_id'];
-        $params = [':comum_id' => $comumId];
+        $filtros = [
+            'nome'        => $this->query('nome', ''),
+            'dependencia' => $this->query('dependencia', ''),
+            'status'      => $this->query('status', ''),
+            'codigo'      => $this->query('filtro_codigo', ''),
+        ];
 
-        if ($filtroNome !== '') {
-            $where[] = '(p.descricao_completa LIKE :nome OR p.bem LIKE :nome)';
-            $params[':nome'] = '%' . $filtroNome . '%';
-        }
-
-        if ($filtroDependencia !== '') {
-            $where[] = 'p.dependencia_id = :dependencia';
-            $params[':dependencia'] = (int)$filtroDependencia;
-        }
-
-        if ($filtroCodigo !== '') {
-            $where[] = 'p.codigo LIKE :codigo';
-            $params[':codigo'] = '%' . $filtroCodigo . '%';
-        }
-
-        if ($filtroStatus === 'checado') {
-            $where[] = 'p.checado = 1';
-        } elseif ($filtroStatus === 'observacao') {
-            $where[] = 'p.observacao != ""';
-        } elseif ($filtroStatus === 'etiqueta') {
-            $where[] = 'p.imprimir_etiqueta = 1';
-        } elseif ($filtroStatus === 'pendente') {
-            $where[] = 'p.checado = 0';
-        } elseif ($filtroStatus === 'editado') {
-            $where[] = 'p.editado = 1';
-        }
-
-        $whereClause = implode(' AND ', $where);
-
-        // Contar total de produtos
-        $stmtCount = $this->conexao->prepare("SELECT COUNT(*) FROM produtos p WHERE $whereClause");
-        foreach ($params as $key => $value) {
-            $stmtCount->bindValue($key, $value);
-        }
-        $stmtCount->execute();
-        $totalProdutos = (int)$stmtCount->fetchColumn();
-        $totalPaginas = ceil($totalProdutos / $itensPorPagina);
-
-        // Buscar produtos com JOINs para pegar descrições
-        $sql = "SELECT p.*, 
-                       tb.codigo as tipo_codigo, 
-                       tb.descricao as tipo_desc,
-                       d.descricao as dependencia_desc,
-                       COALESCE(ed.descricao, '') as editado_dependencia_desc
-                FROM produtos p
-                LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
-                LEFT JOIN dependencias d ON p.dependencia_id = d.id
-                LEFT JOIN dependencias ed ON p.editado_dependencia_id = ed.id
-                WHERE $whereClause 
-                ORDER BY p.codigo ASC 
-                LIMIT " . (int)$itensPorPagina . " OFFSET " . (int)$offset;
-        $stmtProdutos = $this->conexao->prepare($sql);
-        foreach ($params as $key => $value) {
-            $stmtProdutos->bindValue($key, $value);
-        }
-        $stmtProdutos->execute();
-        $produtos = $stmtProdutos->fetchAll(PDO::FETCH_ASSOC);
+        // Buscar produtos via repository
+        $resultado = $this->produtoRepository->buscarParaPlanilha($comumId, $paginaAtual, $itensPorPagina, $filtros);
 
         // Buscar dependências para o filtro
-        $stmtDeps = $this->conexao->query("SELECT * FROM dependencias ORDER BY descricao ASC");
-        $dependencias = $stmtDeps->fetchAll(PDO::FETCH_ASSOC);
+        $dependencias = $this->dependenciaRepository->buscarTodos();
 
-        // Passar dados para a view
         $this->renderizar('spreadsheets/view', [
-            'comum_id' => $comumId,
-            'planilha' => $planilha,
-            'produtos' => $produtos,
-            'total_registros' => $totalProdutos,
-            'pagina' => $paginaAtual,
-            'total_paginas' => $totalPaginas,
+            'comum_id'            => $comumId,
+            'planilha'            => $planilha,
+            'produtos'            => $resultado['dados'],
+            'total_registros'     => $resultado['total'],
+            'pagina'              => $paginaAtual,
+            'total_paginas'       => $resultado['totalPaginas'],
             'dependencia_options' => $dependencias,
-            'filtro_nome' => $filtroNome,
-            'filtro_dependencia' => $filtroDependencia,
-            'filtro_status' => $filtroStatus,
-            'filtro_codigo' => $filtroCodigo,
+            'filtro_nome'         => $filtros['nome'],
+            'filtro_dependencia'  => $filtros['dependencia'],
+            'filtro_status'       => $filtros['status'],
+            'filtro_codigo'       => $filtros['codigo'],
         ]);
     }
 

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
+use App\Core\SessionManager;
 use App\Services\UsuarioService;
 use App\Repositories\UsuarioRepository;
 use App\Core\ViewRenderer;
@@ -12,6 +15,7 @@ use Exception;
 class UsuarioController extends BaseController
 {
     private UsuarioService $usuarioService;
+    private UsuarioRepository $usuarioRepository;
     private PDO $conexao;
 
     public function __construct(?PDO $conexao = null)
@@ -21,8 +25,8 @@ class UsuarioController extends BaseController
         }
 
         $this->conexao = $conexao;
-        $usuarioRepo = new UsuarioRepository($conexao);
-        $this->usuarioService = new UsuarioService($usuarioRepo);
+        $this->usuarioRepository = new UsuarioRepository($conexao);
+        $this->usuarioService = new UsuarioService($this->usuarioRepository);
     }
 
     public function index(): void
@@ -413,13 +417,10 @@ class UsuarioController extends BaseController
             }
 
             // Atualizar comum_id do usuário
-            $stmt = $this->conexao->prepare("UPDATE usuarios SET comum_id = :comum_id WHERE id = :id");
-            $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
-            $stmt->bindValue(':id', $usuarioId, PDO::PARAM_INT);
-            $stmt->execute();
+            $this->usuarioRepository->atualizar($usuarioId, ['comum_id' => $comumId]);
 
             // Atualizar sessão
-            $_SESSION['comum_id'] = $comumId;
+            SessionManager::setComumId($comumId);
 
             echo json_encode(['success' => true, 'message' => 'Comum selecionada com sucesso']);
         } catch (Exception $e) {
