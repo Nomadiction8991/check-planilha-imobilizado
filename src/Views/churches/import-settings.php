@@ -1,0 +1,269 @@
+<?php
+$appConfig = require dirname(__DIR__, 3) . '/config/app.php';
+$projectRoot = $appConfig['project_root'];
+require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
+
+
+
+$comum_id = $_GET['comum_id'] ?? null;
+
+if (!$comum_id) {
+    header('Location: ' . base_url('/'));
+    exit;
+}
+
+
+header('Location: /churches');
+exit;
+
+$pageTitle = $comum['descricao'];
+$backUrl = base_url('/');
+$fs = $_GET['filtro_STATUS'] ?? 'todas';
+$data_inicio_str = trim($_GET['data_inicio'] ?? '');
+$data_fim_str = trim($_GET['data_fim'] ?? '');
+
+
+$data_inicio_mysql = $data_inicio_str !== '' ? $data_inicio_str : null;
+$data_fim_mysql = $data_fim_str !== '' ? $data_fim_str : null;
+
+$planilhas = [];
+$total_registros = 0;
+
+try {
+    $conds = ['p.comum_id = :comum_id'];
+    $params = [':comum_id' => (int)$comum_id];
+
+
+    if ($data_inicio_mysql && $data_fim_mysql) {
+        $conds[] = 'p.data_posicao BETWEEN :data_inicio AND :data_fim';
+        $params[':data_inicio'] = $data_inicio_mysql;
+        $params[':data_fim'] = $data_fim_mysql;
+    } elseif ($data_inicio_mysql) {
+        $conds[] = 'p.data_posicao >= :data_inicio';
+        $params[':data_inicio'] = $data_inicio_mysql;
+    } elseif ($data_fim_mysql) {
+        $conds[] = 'p.data_posicao <= :data_fim';
+        $params[':data_fim'] = $data_fim_mysql;
+    }
+
+    if ($fs === 'ativas') {
+        $conds[] = 'p.ativo = 1';
+    } elseif ($fs === 'inativas') {
+        $conds[] = 'p.ativo = 0';
+    }
+
+    $where = implode(' AND ', $conds);
+    $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
+    $limite = 20;
+    $offset = ($pagina - 1) * $limite;
+
+
+    $sql_count = "SELECT COUNT(*) FROM planilhas p WHERE $where";
+    $stmt_count = $conexao->prepare($sql_count);
+    foreach ($params as $k => $v) {
+        $stmt_count->bindValue($k, $v);
+    }
+    $stmt_count->execute();
+    $total_registros = (int)$stmt_count->fetchColumn();
+
+    $total_paginas = (int)ceil($total_registros / $limite);
+
+    $sql = "SELECT p.id, p.comum_id, p.data_posicao, p.ativo
+        FROM planilhas p
+        WHERE $where
+        ORDER BY p.data_posicao DESC, p.id DESC
+        LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
+    $stmt = $conexao->prepare($sql);
+    foreach ($params as $k => $v) {
+        $stmt->bindValue($k, $v);
+    }
+    $stmt->execute();
+    $planilhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+
+    $erro_carregar = $e->getMessage();
+}
+
+ob_start();
+?>
+
+<!-- Card de Filtros (estilo similar   view da planilha) -->
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="bi bi-funnel me-2"></i>
+        Filtros
+    </div>
+    <div class="card-body">
+        <form method="GET" action="">
+            <input type="hidden" name="comum_id" value="<?php echo (int)$comum_id; ?>">
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="data_inicio">
+                        <i class="bi bi-calendar-date me-1"></i>
+                        Data inicial
+                    </label>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio"
+                        value="<?php echo $data_inicio_mysql ?? ''; ?>">
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="data_fim">
+                        <i class="bi bi-calendar-date me-1"></i>
+                        Data final
+                    </label>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim"
+                        value="<?php echo $data_fim_mysql ?? ''; ?>">
+                </div>
+            </div>
+
+            <div class="accordion" id="filtrosAvancados">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiltros">
+                            <i class="bi bi-sliders me-2"></i>
+                            Filtros Avan§ados
+                        </button>
+                    </h2>
+                    <div id="collapseFiltros" class="accordion-collapse collapse" data-bs-parent="#filtrosAvancados">
+                        <div class="accordion-body">
+                            <div class="mb-3">
+                                <label class="form-label" for="filtro_STATUS">STATUS</label>
+                                <select id="filtro_STATUS" name="filtro_STATUS" class="form-select">
+                                    <option value="todas" <?php echo $fs === 'todas' ? 'selected' : ''; ?>>Todas</option>
+                                    <option value="ativas" <?php echo $fs === 'ativas' ? 'selected' : ''; ?>>Ativas</option>
+                                    <option value="inativas" <?php echo $fs === 'inativas' ? 'selected' : ''; ?>>Inativas</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid mt-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-2"></i>
+                    Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer text-muted small">
+        <?php echo (int)$total_registros; ?> planilha(s) encontrada(s)
+    </div>
+</div>
+
+<!-- Card de Listagem -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+            <i class="bi bi-list me-2"></i>
+            Planilhas
+        </span>
+        <span class="badge bg-white text-dark"><?php echo (int)$total_registros; ?> itens (p¡g. <?php echo $pagina; ?>/<?php echo $total_paginas ?: 1; ?>)</span>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($erro_carregar)): ?>
+            <div class="alert alert-danger m-3">Erro ao carregar planilhas: <?php echo htmlspecialchars($erro_carregar); ?></div>
+        <?php else: ?>
+            <?php if (empty($planilhas)): ?>
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    Nenhuma planilha cadastrada para este comum
+                </div>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle text-center">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px">ID</th>
+                                <th>Data</th>
+                                <th>STATUS</th>
+                                <th style="width: 120px">A§µes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($planilhas as $planilha): ?>
+                                <?php
+                                $STATUS_badge = $planilha['ativo'] ? 'bg-success' : 'bg-secondary';
+                                $STATUS_texto = $planilha['ativo'] ? 'Ativa' : 'Inativa';
+
+
+                                $data_formatada = '-';
+                                if (!empty($planilha['data_posicao'])) {
+                                    $rawData = trim($planilha['data_posicao']);
+                                    $dt = null;
+
+                                    $formatos = ['Y-m-d', 'd/m/Y', 'm/d/Y', 'Y-m-d H:i:s', 'd/m/Y H:i:s', 'm/d/Y H:i:s'];
+                                    foreach ($formatos as $f) {
+                                        $dt = DateTime::createFromFormat($f, $rawData);
+                                        if ($dt) {
+                                            break;
+                                        }
+                                    }
+
+                                    if (!$dt) {
+                                        $ts = strtotime($rawData);
+                                        if ($ts) {
+                                            $dt = (new DateTime())->setTimestamp($ts);
+                                        }
+                                    }
+                                    if ($dt) {
+                                        $data_formatada = $dt->format('d/m/Y');
+                                    }
+                                }
+                                ?>
+                                <tr>
+                                    <td><strong><?php echo $planilha['id']; ?></strong></td>
+                                    <td><?php echo $data_formatada; ?></td>
+                                    <td><span class="badge <?php echo $STATUS_badge; ?>"><?php echo $STATUS_texto; ?></span></td>
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/spreadsheets/view?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="VISUALIZAR">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="/planilhas/configuracao?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="EDITAR">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+            <?php if ($total_paginas > 1): ?>
+                <nav aria-label="Pagina§£o" class="mt-3">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <?php if ($pagina > 1): ?>
+                            <li class="page-item"><a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina - 1])); ?>">&laquo;</a></li>
+                        <?php endif; ?>
+                        <?php
+                        $ini = max(1, $pagina - 2);
+                        $fim = min($total_paginas, $pagina + 2);
+                        for ($i = $ini; $i <= $fim; $i++): ?>
+                            <li class="page-item <?php echo $i == $pagina ? 'active' : ''; ?>">
+                                <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $i])); ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        <?php if ($pagina < $total_paginas): ?>
+                            <li class="page-item"><a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina + 1])); ?>">&raquo;</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<?php
+$contentHtml = ob_get_clean();
+$contentFile = $projectRoot . '/temp_content.php';
+file_put_contents($contentFile, $contentHtml);
+
+
+require_once $projectRoot . '/src/Views/layouts/app.php';
+
+
+@unlink($contentFile);
+?>

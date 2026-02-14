@@ -56,7 +56,7 @@ class ComumController extends BaseController
         int $totalGeral,
         int $totalPaginas
     ): void {
-        ViewRenderer::render('comuns/index', [
+        ViewRenderer::render('churches/index', [
             'pageTitle' => 'COMUNS',
             'backUrl' => null,
             'headerActions' => $this->gerarHeaderActions(),
@@ -102,9 +102,9 @@ class ComumController extends BaseController
             $cadastroOk = $this->verificarCadastroCompleto($comum);
 
             $qsEdit = http_build_query(['busca' => $busca, 'pagina' => $pagina]);
-            $editHref = '/comuns/editar?id=' . (int) $comum['id'] .
+            $editHref = '/churches/edit?id=' . (int) $comum['id'] .
                 ($qsEdit ? ('&' . $qsEdit) : '');
-            $viewHref = '/planilhas/visualizar?comum_id=' . (int) $comum['id'];
+            $viewHref = '/spreadsheets/view?comum_id=' . (int) $comum['id'];
 
             $html .= '<tr>';
             $html .= '<td class="fw-semibold text-uppercase">' . htmlspecialchars($comum['codigo']) . '</td>';
@@ -147,20 +147,20 @@ class ComumController extends BaseController
                 <i class="bi bi-list fs-5"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuPrincipal">
-                <li><a class="dropdown-item" href="/usuarios">
+                <li><a class="dropdown-item" href="/users">
                     <i class="bi bi-people me-2"></i>LISTAGEM DE USUÁRIOS</a></li>
-                <li><a class="dropdown-item" href="/dependencias">
+                <li><a class="dropdown-item" href="/departments">
                     <i class="bi bi-diagram-3 me-2"></i>LISTAGEM DE DEPENDÊNCIAS</a></li>';
 
         if (isset($_SESSION['usuario_id'])) {
             $actions .= '
-                <li><a class="dropdown-item" href="/usuarios/editar?id=' .
+                <li><a class="dropdown-item" href="/users/edit?id=' .
                 (int)$_SESSION['usuario_id'] . '">
                     <i class="bi bi-pencil-square me-2"></i>EDITAR MEU USUÁRIO</a></li>';
         }
 
         $actions .= '
-                <li><a class="dropdown-item" href="/planilhas/importar">
+                <li><a class="dropdown-item" href="/spreadsheets/import">
                     <i class="bi bi-upload me-2"></i>IMPORTAR PLANILHA</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="/logout">
@@ -215,7 +215,7 @@ class ComumController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->redirecionar('/comuns?erro=' . urlencode('ID inválido'));
+            $this->redirecionar('/churches?erro=' . urlencode('ID inválido'));
             return;
         }
 
@@ -224,7 +224,7 @@ class ComumController extends BaseController
 
             if (!$comum) {
                 $this->setMensagem('Comum não encontrado.', 'danger');
-                $this->redirecionar('/comuns');
+                $this->redirecionar('/churches');
                 return;
             }
 
@@ -232,9 +232,9 @@ class ComumController extends BaseController
             $busca = $this->query('busca', '');
             $pagina = $this->query('pagina', 1);
 
-            ViewRenderer::render('comuns/edit', [
+            ViewRenderer::render('churches/edit', [
                 'pageTitle' => 'EDITAR COMUM',
-                'backUrl' => '/comuns?busca=' . urlencode($busca) . '&pagina=' . $pagina,
+                'backUrl' => '/churches?busca=' . urlencode($busca) . '&pagina=' . $pagina,
                 'headerActions' => '',
                 'comum' => $comum,
                 'busca' => $busca,
@@ -243,21 +243,21 @@ class ComumController extends BaseController
         } catch (\Throwable $e) {
             error_log('Erro ComumController::edit: ' . $e->getMessage());
             $this->setMensagem('Erro ao carregar comum: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/comuns');
+            $this->redirecionar('/churches');
         }
     }
 
     public function update(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/comuns');
+            $this->redirecionar('/churches');
             return;
         }
 
         $id = (int) ($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->setMensagem('ID inválido.', 'danger');
-            $this->redirecionar('/comuns');
+            $this->redirecionar('/churches');
             return;
         }
 
@@ -288,7 +288,7 @@ class ComumController extends BaseController
             $pagina = $this->post('pagina', 1);
 
             $this->setMensagem('Comum atualizado com sucesso!', 'success');
-            $this->redirecionar('/comuns?busca=' . urlencode($busca) . '&pagina=' . $pagina);
+            $this->redirecionar('/churches?busca=' . urlencode($busca) . '&pagina=' . $pagina);
         } catch (\Throwable $e) {
             error_log('Erro ComumController::update: ' . $e->getMessage());
             $this->setMensagem('Erro ao atualizar comum: ' . $e->getMessage(), 'danger');
@@ -296,7 +296,7 @@ class ComumController extends BaseController
             // Voltar para edição com dados preservados
             $busca = $this->post('busca', '');
             $pagina = $this->post('pagina', 1);
-            $this->redirecionar('/comuns/editar?id=' . $id . '&busca=' . urlencode($busca) . '&pagina=' . $pagina);
+            $this->redirecionar('/churches/edit?id=' . $id . '&busca=' . urlencode($busca) . '&pagina=' . $pagina);
         }
     }
 }

@@ -38,10 +38,10 @@ class UsuarioController extends BaseController
         try {
             $resultado = $this->usuarioService->buscarPaginado($pagina, $limite, $filtros);
 
-            ViewRenderer::render('usuarios/index', [
+            ViewRenderer::render('users/index', [
                 'pageTitle' => 'USUÁRIOS',
-                'backUrl' => '/comuns',
-                'headerActions' => '<a href="/usuarios/criar" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>',
+                'backUrl' => '/churches',
+                'headerActions' => '<a href="/users/create" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>',
                 'usuarios' => $resultado['dados'],
                 'total' => $resultado['total'],
                 'pagina' => $pagina,
@@ -53,10 +53,10 @@ class UsuarioController extends BaseController
         } catch (\Throwable $e) {
             error_log('ERROR UsuarioController::index: ' . $e->getMessage());
 
-            ViewRenderer::render('usuarios/index', [
+            ViewRenderer::render('users/index', [
                 'pageTitle' => 'USUÁRIOS',
-                'backUrl' => '/comuns',
-                'headerActions' => '<a href="/usuarios/criar" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>',
+                'backUrl' => '/churches',
+                'headerActions' => '<a href="/users/create" class="btn-header-action" title="NOVO USUÁRIO"><i class="bi bi-plus-lg"></i></a>',
                 'usuarios' => [],
                 'total' => 0,
                 'pagina' => 1,
@@ -75,9 +75,9 @@ class UsuarioController extends BaseController
             return;
         }
 
-        ViewRenderer::render('usuarios/create', [
+        ViewRenderer::render('users/create', [
             'pageTitle' => 'NOVO USUÁRIO',
-            'backUrl' => '/usuarios',
+            'backUrl' => '/users',
             'headerActions' => '',
             'publicRegister' => false,
             'errors' => [],
@@ -110,14 +110,14 @@ class UsuarioController extends BaseController
         $id = (int) $this->query('id', 0);
 
         if ($id <= 0) {
-            $this->redirecionar('/usuarios?erro=ID inválido');
+            $this->redirecionar('/users?erro=ID inválido');
             return;
         }
 
         $usuario = $this->usuarioService->buscarPorId($id);
 
         if (!$usuario) {
-            $this->redirecionar('/usuarios?erro=Usuário não encontrado');
+            $this->redirecionar('/users?erro=Usuário não encontrado');
             return;
         }
 
@@ -162,10 +162,10 @@ class UsuarioController extends BaseController
             $this->usuarioService->deletar($id);
 
             $this->setMensagem('Usuário deletado com sucesso!', 'success');
-            $this->redirecionar('/usuarios');
+            $this->redirecionar('/users');
         } catch (Exception $e) {
             $this->setMensagem('Erro ao deletar usuário: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/usuarios');
+            $this->redirecionar('/users');
         }
     }
 
@@ -329,7 +329,7 @@ class UsuarioController extends BaseController
         }
 
         $query = http_build_query($retQ) . ($queryExtra ? '&' . $queryExtra : '');
-        $this->redirecionar('/usuarios?' . $query);
+        $this->redirecionar('/users?' . $query);
     }
 
     private function renderizarListagemLegada(array $dados): void
@@ -347,7 +347,7 @@ class UsuarioController extends BaseController
         $filtroStatus = $dados['filtros']['status'];
         $erro = $dados['erro'];
 
-        require __DIR__ . '/../Views/usuarios/usuarios_listar.php';
+        require __DIR__ . '/../Views/users/list.php';
     }
 
     private function renderizarFormularioLegado(array $dados): void
@@ -355,7 +355,7 @@ class UsuarioController extends BaseController
         $mensagem = $dados['erro'] ?? '';
         $tipo_mensagem = $mensagem ? 'error' : '';
 
-        require __DIR__ . '/../Views/usuarios/usuario_criar.php';
+        require __DIR__ . '/../Views/users/create-legacy.php';
     }
 
     private function renderizarFormularioEdicaoLegado(array $usuario, string $erro = ''): void
@@ -363,27 +363,27 @@ class UsuarioController extends BaseController
         $mensagem = $erro;
         $tipo_mensagem = $erro ? 'error' : '';
 
-        require __DIR__ . '/../Views/usuarios/usuario_editar.php';
+        require __DIR__ . '/../Views/users/edit.php';
     }
 
     /**
-     * Exibe detalhes de um usuário (GET /usuarios/ver?id=X)
+     * Exibe detalhes de um usuário (GET /users/show?id=X)
      */
     public function show(): void
     {
         $id = (int) $this->query('id', 0);
 
         if ($id <= 0) {
-            $this->redirecionar('/usuarios?erro=ID inválido');
+            $this->redirecionar('/users?erro=ID inválido');
             return;
         }
 
         $conexao = $this->conexao;
-        require __DIR__ . '/../Views/usuarios/usuario_ver.php';
+        require __DIR__ . '/../Views/users/show.php';
     }
 
     /**
-     * Seleciona a comum de trabalho do usuário (POST /usuarios/selecionar-comum)
+     * Seleciona a comum de trabalho do usuário (POST /users/select-church)
      */
     public function selecionarComum(): void
     {

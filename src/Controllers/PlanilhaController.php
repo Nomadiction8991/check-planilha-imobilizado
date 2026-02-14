@@ -27,7 +27,7 @@ class PlanilhaController extends BaseController
             $this->redirecionar('/login');
             return;
         }
-        $this->renderizar('planilhas/planilha_importar');
+        $this->renderizar('spreadsheets/import');
     }
 
     /**
@@ -36,7 +36,7 @@ class PlanilhaController extends BaseController
     public function processarImportacao(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/planilhas/importar');
+            $this->redirecionar('/spreadsheets/import');
             return;
         }
 
@@ -104,11 +104,11 @@ class PlanilhaController extends BaseController
             $this->csvParserService->salvarAnalise($importacaoId, $analise);
 
             // Redireciona para tela de preview (conferência)
-            $this->redirecionar('/planilhas/preview?id=' . $importacaoId);
+            $this->redirecionar('/spreadsheets/preview?id=' . $importacaoId);
         } catch (\Exception $e) {
             error_log('Erro ao processar importação: ' . $e->getMessage());
             $this->setMensagem('Erro: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/planilhas/importar?error=' . urlencode($e->getMessage()));
+            $this->redirecionar('/spreadsheets/import?error=' . urlencode($e->getMessage()));
         }
     }
 
@@ -120,21 +120,21 @@ class PlanilhaController extends BaseController
         $importacaoId = (int) ($_GET['id'] ?? 0);
 
         if ($importacaoId <= 0) {
-            $this->redirecionar('/planilhas/importar?erro=ID inválido');
+            $this->redirecionar('/spreadsheets/import?erro=ID inválido');
             return;
         }
 
         // Carrega dados da importação
         $importacao = $this->importacaoService->buscarProgresso($importacaoId);
         if (!$importacao) {
-            $this->redirecionar('/planilhas/importar?erro=Importação não encontrada');
+            $this->redirecionar('/spreadsheets/import?erro=Importação não encontrada');
             return;
         }
 
         // Carrega análise salva
         $analise = $this->csvParserService->carregarAnalise($importacaoId);
         if (!$analise) {
-            $this->redirecionar('/planilhas/importar?erro=Análise não encontrada');
+            $this->redirecionar('/spreadsheets/import?erro=Análise não encontrada');
             return;
         }
 
@@ -164,7 +164,7 @@ class PlanilhaController extends BaseController
         // Carrega ações salvas anteriormente na sessão
         $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
 
-        $this->renderizar('planilhas/importacao_preview', [
+        $this->renderizar('spreadsheets/import-preview', [
             'importacao_id' => $importacaoId,
             'importacao' => $importacao,
             'resumo' => $analise['resumo'],
@@ -266,14 +266,14 @@ class PlanilhaController extends BaseController
     public function confirmarImportacao(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/planilhas/importar');
+            $this->redirecionar('/spreadsheets/import');
             return;
         }
 
         $importacaoId = (int) ($_POST['importacao_id'] ?? 0);
 
         if ($importacaoId <= 0) {
-            $this->redirecionar('/planilhas/importar?erro=ID inválido');
+            $this->redirecionar('/spreadsheets/import?erro=ID inválido');
             return;
         }
 
@@ -300,7 +300,7 @@ class PlanilhaController extends BaseController
         unset($_SESSION['preview_acoes_' . $importacaoId]);
 
         // Redireciona para a tela de progresso
-        $this->redirecionar('/planilhas/progresso?id=' . $importacaoId);
+        $this->redirecionar('/spreadsheets/progress?id=' . $importacaoId);
     }
 
     public function visualizar(): void
@@ -316,7 +316,7 @@ class PlanilhaController extends BaseController
 
         if (!$comumId || $comumId <= 0) {
             // Se não há comum disponível, redireciona para comuns
-            $this->redirecionar('/comuns?erro=Nenhuma comum disponível');
+            $this->redirecionar('/churches?erro=Nenhuma comum disponível');
             return;
         }
 
@@ -327,7 +327,7 @@ class PlanilhaController extends BaseController
         $planilha = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$planilha) {
-            $this->redirecionar('/comuns?erro=Comum não encontrada');
+            $this->redirecionar('/churches?erro=Comum não encontrada');
             return;
         }
 
@@ -412,7 +412,7 @@ class PlanilhaController extends BaseController
         $dependencias = $stmtDeps->fetchAll(PDO::FETCH_ASSOC);
 
         // Passar dados para a view
-        $this->renderizar('planilhas/planilha_visualizar', [
+        $this->renderizar('spreadsheets/view', [
             'comum_id' => $comumId,
             'planilha' => $planilha,
             'produtos' => $produtos,
@@ -432,11 +432,11 @@ class PlanilhaController extends BaseController
         $importacaoId = (int) ($_GET['id'] ?? 0);
 
         if ($importacaoId <= 0) {
-            $this->redirecionar('/planilhas/importar?erro=' . urlencode('ID de importação inválido'));
+            $this->redirecionar('/spreadsheets/import?erro=' . urlencode('ID de importação inválido'));
             return;
         }
 
-        $this->renderizar('planilhas/importacao_progresso', [
+        $this->renderizar('spreadsheets/import-progress', [
             'importacao_id' => $importacaoId
         ]);
     }

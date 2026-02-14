@@ -68,8 +68,8 @@ if (!isset($content)) {
     // Suporte para caminhos de CSS por view que podem apontar para '/assets/...' ou '/public/assets/...'
     $linkHref = null;
     if (isset($customCssPath)) {
-        $fsA = __DIR__ . '/../../../' . ltrim($customCssPath, '/');
-        $fsB = __DIR__ . '/../../../public/' . ltrim($customCssPath, '/');
+        $fsA = $projectRoot . '/' . ltrim($customCssPath, '/');
+        $fsB = $projectRoot . '/public/' . ltrim($customCssPath, '/');
         if (file_exists($fsA)) {
             $linkHref = $customCssPath;
             $linkHref .= '?v=' . filemtime($fsA);
@@ -97,7 +97,7 @@ if (!isset($content)) {
             $pageTitle = $pageTitle ?? ($tituloPagina ?? null);
             $userName  = \App\Core\SessionManager::getUserName() ?? '';
             $menuPath  = $menuPath ?? '/menu';
-            $homePath  = $homePath ?? '/planilhas/visualizar';
+            $homePath  = $homePath ?? '/spreadsheets/view';
             $logoutPath = $logoutPath ?? '/logout';
 
             // Carregar comuns para o seletor (se usuário logado)
@@ -140,82 +140,8 @@ if (!isset($content)) {
     <!-- Bootstrap 5.3 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- PWA Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker registrado:', reg.scope))
-                    .catch(err => console.error('Erro ao registrar Service Worker:', err));
-            });
-        }
-    </script>
-
-    <!-- Função para voltar (igual ao botão do navegador) -->
-    <script>
-        function goBack() {
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.location.href = '/planilhas/visualizar';
-            }
-        }
-    </script>
-
-    <!-- Auto-dismiss alerts -->
-    <script>
-        (function() {
-            const AUTO_MS = 3000;
-            const FADE_MS = 1000;
-
-            function processAlert(el) {
-                if (!el || el.dataset._autoDismissProcessed) return;
-                el.dataset._autoDismissProcessed = '1';
-
-                // Remove botão fechar
-                const closeBtn = el.querySelector('.btn-close');
-                if (closeBtn) closeBtn.remove();
-
-                el.classList.add('fade');
-                el.style.transition = `opacity ${FADE_MS}ms ease`;
-
-                if (!el.classList.contains('show')) el.classList.add('show');
-
-                setTimeout(() => {
-                    el.classList.remove('show');
-                    setTimeout(() => el.remove(), FADE_MS + 20);
-                }, AUTO_MS);
-            }
-
-            document.querySelectorAll('.alert').forEach(processAlert);
-
-            const mo = new MutationObserver(muts => {
-                for (const m of muts) {
-                    for (const node of m.addedNodes) {
-                        if (!(node instanceof HTMLElement)) continue;
-                        if (node.classList && node.classList.contains('alert')) processAlert(node);
-                        node.querySelectorAll && node.querySelectorAll('.alert').forEach(processAlert);
-                    }
-                }
-            });
-            mo.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        })();
-    </script>
-
-    <!-- Modais dentro do wrapper -->
-    <script>
-        document.addEventListener('show.bs.modal', function(event) {
-            var appWrapper = document.querySelector('.mobile-wrapper');
-            if (!appWrapper) return;
-            var modal = event.target;
-            if (modal && modal.parentElement !== appWrapper) {
-                appWrapper.appendChild(modal);
-            }
-        });
-    </script>
+    <!-- Scripts do Layout App -->
+    <script src="/assets/js/layouts/app.js"></script>
 
     <!-- JavaScript Customizado -->
     <?php if ($customJs): ?>

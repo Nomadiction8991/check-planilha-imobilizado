@@ -1,0 +1,227 @@
+/* ==========================================================================
+   spreadsheets/view.css
+   Estilos extraídos de src/Views/spreadsheets/view.php
+   ========================================================================== */
+
+/* ===== MODAL DE CÂMERA EM TELA INTEIRA ===== */
+.camera-fullscreen-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: #000 !important;
+    z-index: 1050 !important;
+    display: none !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.camera-fullscreen-modal.show {
+    display: flex !important;
+}
+
+.camera-fullscreen-content {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+}
+
+.camera-scanner-container {
+    flex: 1 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: #000 !important;
+}
+
+.camera-scanner-container video,
+.camera-scanner-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+.camera-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.scanner-frame-fullscreen {
+    width: 80% !important;
+    max-width: 600px !important;
+    aspect-ratio: 1 !important;
+    border: 3px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.3s ease !important;
+}
+
+.scanner-frame-fullscreen.detected {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 9999px rgba(40, 167, 69, 0.3) !important;
+}
+
+.camera-controls {
+    background: rgba(0, 0, 0, 0.8) !important;
+    padding: 15px 20px !important;
+    display: flex !important;
+    gap: 15px !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1051 !important;
+}
+
+.camera-controls label {
+    color: white !important;
+    margin: 0 !important;
+    font-size: 0.9rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    white-space: nowrap !important;
+}
+
+.camera-controls select {
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    background: white !important;
+    color: #333 !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+}
+
+.camera-controls input[type="range"] {
+    cursor: pointer !important;
+    min-width: 100px !important;
+}
+
+.camera-close-btn {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 24px !important;
+    z-index: 1051 !important;
+    transition: all 0.3s ease !important;
+    color: #333 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.camera-close-btn:hover {
+    background: white !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+.camera-close-btn:active {
+    transform: scale(0.95) !important;
+}
+
+/* Ajuste de cores dos botões de ação na visualização */
+.acao-container .action-imprimir .btn {
+    border-color: #0D6EFD !important;
+    color: #0D6EFD !important;
+}
+
+.acao-container .action-imprimir .btn.active,
+.acao-container .action-imprimir .btn:hover {
+    background: linear-gradient(135deg, #0D6EFD 0%, #0A58CA 100%) !important;
+    border-color: #0A58CA !important;
+    color: #fff !important;
+    box-shadow: 0 6px 14px rgba(13, 110, 253, 0.3);
+}
+
+.acao-container .action-imprimir .btn.active i,
+.acao-container .action-imprimir .btn:hover i {
+    color: #fff !important;
+}
+
+.acao-container .action-observacao {
+    border-color: #F59E0B !important;
+    color: #F59E0B !important;
+}
+
+.acao-container .action-observacao.active,
+.acao-container .action-observacao:hover {
+    background: linear-gradient(135deg, #F59E0B 0%, #F2C94C 100%) !important;
+    border-color: #E7B93D !important;
+    color: #fff !important;
+    box-shadow: 0 6px 14px rgba(245, 158, 11, 0.3);
+}
+
+.acao-container .action-observacao.active i,
+.acao-container .action-observacao:hover i {
+    color: #fff !important;
+}
+
+.acao-container .action-editar {
+    border-color: #6F42C1 !important;
+    color: #6F42C1 !important;
+}
+
+.acao-container .action-editar.active,
+.acao-container .action-editar:hover {
+    background: linear-gradient(135deg, #6F42C1 0%, #4B2A7D 100%) !important;
+    border-color: #4B2A7D !important;
+    color: #fff !important;
+    box-shadow: 0 6px 14px rgba(111, 66, 193, 0.3);
+}
+
+.acao-container .action-editar.active i,
+.acao-container .action-editar:hover i {
+    color: #fff !important;
+}
+
+.edicao-pendente {
+    background: linear-gradient(135deg, #6F42C1 0%, #4B2A7D 100%) !important;
+    color: #fff !important;
+    padding: 0.5rem 0.6rem;
+    border-radius: 10px;
+    margin: 3px 3px 0.5rem;
+    border: 1px solid #4B2A7D;
+    box-shadow: 0 8px 16px rgba(111, 66, 193, 0.25);
+}
+
+.observacao-PRODUTO {
+    background: linear-gradient(135deg, #F59E0B 0%, #F2C94C 100%) !important;
+    color: #fff !important;
+    padding: 0.5rem 0.6rem;
+    border-radius: 10px;
+    margin: 3px 3px 0.5rem;
+    border: 1px solid #E7B93D;
+    box-shadow: 0 8px 16px rgba(245, 158, 11, 0.25);
+}

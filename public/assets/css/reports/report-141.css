@@ -1,0 +1,20 @@
+/* report-141.css — CSS extraído de src/Views/reports/report-141.php */
+
+.r141-root textarea,
+.r141-root input {
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+.r141-root textarea {
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.r141-root input[disabled] {
+    opacity: 1;
+    filter: none;
+}

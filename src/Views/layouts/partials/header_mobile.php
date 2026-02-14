@@ -50,38 +50,4 @@ function _fmtCodigoComum($codigo)
     </div>
 </div>
 
-<?php if (!empty($comuns)): ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selector = document.getElementById('comum-selector');
-            if (selector) {
-                selector.addEventListener('change', function() {
-                    const comumId = this.value;
-                    if (comumId) {
-                        fetch('/usuarios/selecionar-comum', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    comum_id: comumId
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    window.location.reload();
-                                } else {
-                                    alert('Erro ao selecionar comum: ' + (data.message || 'Erro desconhecido'));
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Erro:', error);
-                                alert('Erro ao selecionar comum');
-                            });
-                    }
-                });
-            }
-        });
-    </script>
-<?php endif; ?>
+<script src="/assets/js/layouts/header-mobile.js"></script>

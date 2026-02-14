@@ -1,0 +1,124 @@
+/* report-141-new.css — CSS extraído de src/Views/reports/report-141-new.php */
+
+/* Carrossel */
+.carousel-container {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+.carousel-page {
+    min-width: 100%;
+    flex-shrink: 0;
+}
+
+.carousel-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.carousel-nav button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.carousel-nav button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.carousel-info {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Formulário valores comuns */
+.valores-comuns {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.valores-comuns h6 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.form-grid label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.form-grid input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+/* Container A4 dentro do mobile wrapper */
+.a4-wrapper {
+    background: #fff;
+    border-radius: 8px;
+    overflow: auto;
+}
+
+.a4-content {
+    width: 100%;
+    overflow-x: auto;
+}
+
+@media print {
+    .valores-comuns,
+    .carousel-nav {
+        display: none !important;
+    }
+
+    .carousel-container {
+        overflow: visible !important;
+    }
+
+    .carousel-track {
+        display: block !important;
+        transform: none !important;
+    }
+
+    .carousel-page {
+        min-width: auto !important;
+        page-break-after: always;
+    }
+
+    .carousel-page:last-child {
+        page-break-after: auto;
+    }
+
+    .a4 {
+        margin: 0;
+    }
+}

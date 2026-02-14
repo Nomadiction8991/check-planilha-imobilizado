@@ -28,7 +28,7 @@ class ProdutoController extends BaseController
 
         // Se não tiver comum_id, redireciona para página de comuns
         if (!$comumId || $comumId <= 0) {
-            $this->redirecionar('/comuns?mensagem=' . urlencode('Selecione um Comum para ver os produtos'));
+            $this->redirecionar('/churches?mensagem=' . urlencode('Selecione um Comum para ver os produtos'));
             return;
         }
 
@@ -60,7 +60,7 @@ class ProdutoController extends BaseController
         $bemCodigos = [];
         $dependencias = [];
 
-        $this->renderizar('produtos/produtos_listar', [
+        $this->renderizar('products/index', [
             'comum_id' => $comumId,
             'produtos' => $produtos,
             'pagina' => $pagina,
@@ -85,7 +85,7 @@ class ProdutoController extends BaseController
 
         // Se não tiver comum_id, redireciona para página de comuns
         if (!$comumId || $comumId <= 0) {
-            $this->redirecionar('/comuns?mensagem=' . urlencode('Selecione um Comum para criar um produto'));
+            $this->redirecionar('/churches?mensagem=' . urlencode('Selecione um Comum para criar um produto'));
             return;
         }
 
@@ -97,7 +97,7 @@ class ProdutoController extends BaseController
             $tiposBens = [];
         }
 
-        $this->renderizar('produtos/produto_criar', [
+        $this->renderizar('products/create', [
             'comum_id' => $comumId,
             'tipos_bens' => $tiposBens
         ]);
@@ -106,7 +106,7 @@ class ProdutoController extends BaseController
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/produtos');
+            $this->redirecionar('/products');
             return;
         }
 
@@ -119,7 +119,7 @@ class ProdutoController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->redirecionar('/produtos?erro=ID inválido');
+            $this->redirecionar('/products?erro=ID inválido');
             return;
         }
 
@@ -131,7 +131,7 @@ class ProdutoController extends BaseController
             $tiposBens = [];
         }
 
-        $this->renderizar('produtos/produto_editar', [
+        $this->renderizar('products/edit', [
             'id' => $id,
             'tipos_bens' => $tiposBens
         ]);
@@ -140,7 +140,7 @@ class ProdutoController extends BaseController
     public function update(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/produtos');
+            $this->redirecionar('/products');
             return;
         }
 
@@ -200,13 +200,13 @@ class ProdutoController extends BaseController
     public function check(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/planilhas/visualizar');
+            $this->redirecionar('/spreadsheets/view');
             return;
         }
 
         $comumId = \App\Core\SessionManager::ensureComumId();
         if (!$comumId) {
-            $this->redirecionar('/planilhas/visualizar?erro=Comum não selecionada');
+            $this->redirecionar('/spreadsheets/view?erro=Comum não selecionada');
             return;
         }
 
@@ -214,7 +214,7 @@ class ProdutoController extends BaseController
         $checado = (int) ($_POST['checado'] ?? 0);
 
         if ($produtoId <= 0) {
-            $this->redirecionar('/planilhas/visualizar?erro=Produto inválido');
+            $this->redirecionar('/spreadsheets/view?erro=Produto inválido');
             return;
         }
 
@@ -227,10 +227,10 @@ class ProdutoController extends BaseController
             $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
             $stmt->execute();
 
-            $this->redirecionar('/planilhas/visualizar?sucesso=Produto atualizado');
+            $this->redirecionar('/spreadsheets/view?sucesso=Produto atualizado');
         } catch (\Exception $e) {
             error_log('Erro ao atualizar check: ' . $e->getMessage());
-            $this->redirecionar('/planilhas/visualizar?erro=Erro ao atualizar produto');
+            $this->redirecionar('/spreadsheets/view?erro=Erro ao atualizar produto');
         }
     }
 
@@ -240,14 +240,14 @@ class ProdutoController extends BaseController
             // Garante que id_planilha esteja disponível na view
             $id_planilha = $_GET['id'] ?? \App\Core\SessionManager::ensureComumId();
             $conexao = $this->conexao;
-            require_once __DIR__ . '/../Views/planilhas/produto_copiar_etiquetas.php';
+            require_once __DIR__ . '/../Views/spreadsheets/copy-labels.php';
             return;
         }
 
         // POST - marcar/desmarcar para impressão de etiqueta
         $comumId = \App\Core\SessionManager::ensureComumId();
         if (!$comumId) {
-            $this->redirecionar('/planilhas/visualizar?erro=Comum não selecionada');
+            $this->redirecionar('/spreadsheets/view?erro=Comum não selecionada');
             return;
         }
 
@@ -255,7 +255,7 @@ class ProdutoController extends BaseController
         $imprimir = (int) ($_POST['imprimir'] ?? 0);
 
         if ($produtoId <= 0) {
-            $this->redirecionar('/planilhas/visualizar?erro=Produto inválido');
+            $this->redirecionar('/spreadsheets/view?erro=Produto inválido');
             return;
         }
 
@@ -268,10 +268,10 @@ class ProdutoController extends BaseController
             $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
             $stmt->execute();
 
-            $this->redirecionar('/planilhas/visualizar?sucesso=Etiqueta atualizada');
+            $this->redirecionar('/spreadsheets/view?sucesso=Etiqueta atualizada');
         } catch (\Exception $e) {
             error_log('Erro ao atualizar etiqueta: ' . $e->getMessage());
-            $this->redirecionar('/planilhas/visualizar?erro=Erro ao atualizar etiqueta');
+            $this->redirecionar('/spreadsheets/view?erro=Erro ao atualizar etiqueta');
         }
     }
 

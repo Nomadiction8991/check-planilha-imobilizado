@@ -1,0 +1,10 @@
+@media print {
+  .app-header, .no-print { display: none !important; }
+  .app-container { padding: 0 !important; }
+  .mobile-wrapper { max-width: 100% !important; border-radius: 0 !important; box-shadow: none !important; }
+  .app-content { padding: 0 !important; background: #fff !important; }
+  table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
+}
+.table thead th { font-size: 12px; }
+.table td { font-size: 12px; }

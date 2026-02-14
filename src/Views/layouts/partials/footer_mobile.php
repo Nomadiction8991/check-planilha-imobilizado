@@ -4,14 +4,14 @@
  * Partial: footer_mobile.php
  * Rodapé móvel com três botões: Voltar (usa goBack()), Início, Sair (logout).
  * Variáveis aceitas (opcionais):
- *  - $homePath   (string) -> rota do botão Início (padrão: '/comuns')
+ *  - $homePath   (string) -> rota do botão Início (padrão: '/churches')
  *  - $logoutPath (string) -> rota para efetuar logout (padrão: '/logout')
  *
  * Observações:
  * - A função JavaScript `goBack()` já existe nos layouts principais.
  * - Não altera rotas — apenas fornece a marcação para inclusão nos layouts.
  */
-$homePath = $homePath ?? '/planilhas/visualizar';
+$homePath = $homePath ?? '/spreadsheets/view';
 $logoutPath = $logoutPath ?? '/logout';
 ?>
 

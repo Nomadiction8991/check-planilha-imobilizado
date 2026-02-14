@@ -34,7 +34,7 @@ class TipoBemController extends BaseController
             $total = $this->tipoBemService->contar($busca);
             $totalPaginas = $total > 0 ? (int) ceil($total / $limite) : 1;
 
-            ViewRenderer::render('tipos_bens/index', [
+            ViewRenderer::render('asset-types/index', [
                 'pageTitle' => 'TIPOS DE BENS',
                 'headerActions' => '',
                 'tipos' => $tipos,
@@ -47,7 +47,7 @@ class TipoBemController extends BaseController
             error_log('Erro TipoBemController::index: ' . $e->getMessage());
 
             // Renderiza a view mesmo com erro, mostrando lista vazia
-            ViewRenderer::render('tipos_bens/index', [
+            ViewRenderer::render('asset-types/index', [
                 'pageTitle' => 'TIPOS DE BENS',
                 'headerActions' => '',
                 'tipos' => [],
@@ -62,7 +62,7 @@ class TipoBemController extends BaseController
 
     public function create(): void
     {
-        ViewRenderer::render('tipos_bens/criar', [
+        ViewRenderer::render('asset-types/create', [
             'pageTitle' => 'CADASTRAR TIPO DE BEM',
             'headerActions' => ''
         ]);
@@ -71,7 +71,7 @@ class TipoBemController extends BaseController
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/tipos-bens');
+            $this->redirecionar('/asset-types');
             return;
         }
 
@@ -92,11 +92,11 @@ class TipoBemController extends BaseController
             $this->tipoBemService->criar($dados);
 
             $this->setMensagem('Tipo de bem cadastrado com sucesso!', 'success');
-            $this->redirecionar('/tipos-bens');
+            $this->redirecionar('/asset-types');
         } catch (\Throwable $e) {
             error_log('Erro TipoBemController::store: ' . $e->getMessage());
             $this->setMensagem('Erro ao cadastrar tipo de bem: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/tipos-bens/criar?erro=' . urlencode($e->getMessage()));
+            $this->redirecionar('/asset-types/create?erro=' . urlencode($e->getMessage()));
         }
     }
 
@@ -104,7 +104,7 @@ class TipoBemController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->redirecionar('/tipos-bens?erro=' . urlencode('ID inválido'));
+            $this->redirecionar('/asset-types?erro=' . urlencode('ID inválido'));
             return;
         }
 
@@ -113,11 +113,11 @@ class TipoBemController extends BaseController
 
             if (!$tipo) {
                 $this->setMensagem('Tipo de bem não encontrado.', 'danger');
-                $this->redirecionar('/tipos-bens');
+                $this->redirecionar('/asset-types');
                 return;
             }
 
-            ViewRenderer::render('tipos_bens/editar', [
+            ViewRenderer::render('asset-types/edit', [
                 'pageTitle' => 'EDITAR TIPO DE BEM',
                 'headerActions' => '',
                 'tipo' => $tipo
@@ -125,21 +125,21 @@ class TipoBemController extends BaseController
         } catch (\Throwable $e) {
             error_log('Erro TipoBemController::edit: ' . $e->getMessage());
             $this->setMensagem('Erro ao carregar tipo de bem: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/tipos-bens');
+            $this->redirecionar('/asset-types');
         }
     }
 
     public function update(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/tipos-bens');
+            $this->redirecionar('/asset-types');
             return;
         }
 
         $id = (int) ($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->setMensagem('ID inválido.', 'danger');
-            $this->redirecionar('/tipos-bens');
+            $this->redirecionar('/asset-types');
             return;
         }
 
@@ -160,11 +160,11 @@ class TipoBemController extends BaseController
             $this->tipoBemService->atualizar($id, $dados);
 
             $this->setMensagem('Tipo de bem atualizado com sucesso!', 'success');
-            $this->redirecionar('/tipos-bens');
+            $this->redirecionar('/asset-types');
         } catch (\Throwable $e) {
             error_log('Erro TipoBemController::update: ' . $e->getMessage());
             $this->setMensagem('Erro ao atualizar tipo de bem: ' . $e->getMessage(), 'danger');
-            $this->redirecionar('/tipos-bens/editar?id=' . $id);
+            $this->redirecionar('/asset-types/edit?id=' . $id);
         }
     }
 

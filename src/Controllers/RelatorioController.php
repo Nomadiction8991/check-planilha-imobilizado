@@ -20,7 +20,7 @@ class RelatorioController extends BaseController
         $comumId = SessionManager::ensureComumId();
         $idPlanilha = $_GET['id'] ?? $comumId;
 
-        $this->renderizar('planilhas/relatorio141_view', [
+        $this->renderizar('reports/report-141', [
             'id_planilha' => $idPlanilha,
             'comum_id' => $comumId,
         ]);
@@ -30,13 +30,13 @@ class RelatorioController extends BaseController
     {
         $formulario = $_GET['formulario'] ?? '';
         if (empty($formulario)) {
-            $this->redirecionar('/comuns?erro=Formulário não especificado');
+            $this->redirecionar('/churches?erro=Formulário não especificado');
             return;
         }
 
         $comumId = SessionManager::ensureComumId();
 
-        $this->renderizar('planilhas/relatorio_visualizar', [
+        $this->renderizar('reports/view', [
             'formulario' => $formulario,
             'id_planilha' => $_GET['id'] ?? $comumId,
             'comum_id' => $comumId,
@@ -47,7 +47,7 @@ class RelatorioController extends BaseController
     {
         $comumId = SessionManager::ensureComumId();
 
-        $this->renderizar('planilhas/relatorio_assinatura', [
+        $this->renderizar('reports/signature', [
             'id_planilha' => $_GET['id'] ?? $comumId,
             'comum_id' => $comumId,
         ]);

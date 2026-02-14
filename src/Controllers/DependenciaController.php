@@ -60,7 +60,7 @@ class DependenciaController extends BaseController
         int $totalGeral,
         int $totalPaginas
     ): void {
-        $this->renderizar('dependencias/dependencias_listar', [
+        $this->renderizar('departments/index', [
             'dependencias' => $dependencias,
             'busca' => $busca,
             'pagina' => $pagina,
@@ -75,7 +75,7 @@ class DependenciaController extends BaseController
     {
         error_log('Erro no DependenciaController: ' . $e->getMessage());
 
-        $this->renderizar('dependencias/dependencias_listar', [
+        $this->renderizar('departments/index', [
             'dependencias' => [],
             'busca' => $busca,
             'pagina' => $pagina,
@@ -109,13 +109,13 @@ class DependenciaController extends BaseController
 
     public function create(): void
     {
-        $this->renderizar('dependencias/dependencia_criar');
+        $this->renderizar('departments/create');
     }
 
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/dependencias');
+            $this->redirecionar('/departments');
             return;
         }
 
@@ -129,9 +129,9 @@ class DependenciaController extends BaseController
             ];
 
             $this->dependenciaService->criar($dados);
-            $this->redirecionar('/dependencias?success=1');
+            $this->redirecionar('/departments?success=1');
         } catch (\Exception $e) {
-            $this->redirecionar('/dependencias/criar?erro=' . urlencode($e->getMessage()));
+            $this->redirecionar('/departments/create?erro=' . urlencode($e->getMessage()));
         }
     }
 
@@ -139,17 +139,17 @@ class DependenciaController extends BaseController
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id <= 0) {
-            $this->redirecionar('/dependencias?erro=ID inválido');
+            $this->redirecionar('/departments?erro=ID inválido');
             return;
         }
 
         $dependencia = $this->dependenciaService->buscarPorId($id);
         if (!$dependencia) {
-            $this->redirecionar('/dependencias?erro=Dependência não encontrada');
+            $this->redirecionar('/departments?erro=Dependência não encontrada');
             return;
         }
 
-        $this->renderizar('dependencias/dependencia_editar', [
+        $this->renderizar('departments/edit', [
             'id' => $id,
             'dependencia' => $dependencia,
         ]);
@@ -158,13 +158,13 @@ class DependenciaController extends BaseController
     public function update(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirecionar('/dependencias');
+            $this->redirecionar('/departments');
             return;
         }
 
         $id = (int) ($_POST['id'] ?? 0);
         if ($id <= 0) {
-            $this->redirecionar('/dependencias?erro=ID inválido');
+            $this->redirecionar('/departments?erro=ID inválido');
             return;
         }
 
@@ -174,9 +174,9 @@ class DependenciaController extends BaseController
             ];
 
             $this->dependenciaService->atualizar($id, $dados);
-            $this->redirecionar('/dependencias?success=1');
+            $this->redirecionar('/departments?success=1');
         } catch (\Exception $e) {
-            $this->redirecionar('/dependencias/editar?id=' . $id . '&erro=' . urlencode($e->getMessage()));
+            $this->redirecionar('/departments/edit?id=' . $id . '&erro=' . urlencode($e->getMessage()));
         }
     }
 
