@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 
 $pageTitle = 'EDITAR TIPO DE BEM';
 $backUrl = null;

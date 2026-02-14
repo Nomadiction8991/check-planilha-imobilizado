@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 
 $pageTitle = 'TIPOS DE BENS';
 $backUrl = null;

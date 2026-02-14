@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 $appConfig = require dirname(__DIR__, 3) . '/config/app.php';
 $projectRoot = $appConfig['project_root'];
 require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';

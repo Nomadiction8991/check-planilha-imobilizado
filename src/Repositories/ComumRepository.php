@@ -19,8 +19,9 @@ class ComumRepository extends BaseRepository
         $where = '';
 
         if ($busca !== '') {
-            $where = "(codigo LIKE :busca OR descricao LIKE :busca)";
-            $params[':busca'] = '%' . $busca . '%';
+            $where = "(codigo LIKE :busca_cod OR descricao LIKE :busca_desc)";
+            $params[':busca_cod'] = '%' . $busca . '%';
+            $params[':busca_desc'] = '%' . $busca . '%';
         }
 
         $sql = "SELECT * FROM {$this->tabela}";
@@ -46,8 +47,9 @@ class ComumRepository extends BaseRepository
         $where = '';
 
         if ($busca !== '') {
-            $where = "(codigo LIKE :busca OR descricao LIKE :busca)";
-            $params[':busca'] = '%' . $busca . '%';
+            $where = "(codigo LIKE :busca_cod OR descricao LIKE :busca_desc)";
+            $params[':busca_cod'] = '%' . $busca . '%';
+            $params[':busca_desc'] = '%' . $busca . '%';
         }
 
         return $this->contar($where, $params);

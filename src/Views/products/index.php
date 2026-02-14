@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 
 $appConfig = require dirname(__DIR__, 3) . '/config/app.php';
 $projectRoot = $appConfig['project_root'];
@@ -69,8 +68,8 @@ ob_start();
                                 <select id="filtro_bem" name="filtro_bem" class="form-select">
                                     <option value="">Todos</option>
                                     <?php foreach ($bem_codigos as $bem): ?>
-                                        <option value="<?php echo htmlspecialchars($bem['tipo_ben']); ?>" <?php echo $filtro_bem == $bem['tipo_ben'] ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($bem['tipo_ben']); ?>
+                                        <option value="<?php echo htmlspecialchars((string) $bem); ?>" <?php echo ($filtro_bem ?? '') == $bem ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars((string) $bem); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -92,9 +91,9 @@ ob_start();
                                 <label for="filtro_status" class="form-label">STATUS</label>
                                 <select id="filtro_status" name="filtro_status" class="form-select">
                                     <option value="">Todos</option>
-                                    <option value="com_nota" <?php echo $filtro_status === 'com_nota' ? 'selected' : ''; ?>>Com Nota</option>
-                                    <option value="com_14_1" <?php echo $filtro_status === 'com_14_1' ? 'selected' : ''; ?>>Com 14.1</option>
-                                    <option value="sem_status" <?php echo $filtro_status === 'sem_status' ? 'selected' : ''; ?>>Sem STATUS</option>
+                                    <option value="com_nota" <?php echo ($filtro_STATUS ?? '') === 'com_nota' ? 'selected' : ''; ?>>Com Nota</option>
+                                    <option value="com_14_1" <?php echo ($filtro_STATUS ?? '') === 'com_14_1' ? 'selected' : ''; ?>>Com 14.1</option>
+                                    <option value="sem_status" <?php echo ($filtro_STATUS ?? '') === 'sem_status' ? 'selected' : ''; ?>>Sem STATUS</option>
                                 </select>
                             </div>
                         </div>
@@ -168,7 +167,7 @@ ob_start();
                             <td>
                                 <div class="d-flex gap-2">
                                     <div class="form-check mt-1">
-                                        <input class="form-check-input PRODUTO-checkbox" type="checkbox" value="<?php echo $PRODUTO['id']; ?>" id="PRODUTO_<?php echo $PRODUTO['id']; ?>">
+                                        <input class="form-check-input PRODUTO-checkbox" type="checkbox" value="<?php echo $PRODUTO['id_produto']; ?>" id="PRODUTO_<?php echo $PRODUTO['id_produto']; ?>">
                                     </div>
                                     <div class="flex-grow-1">
                                         <!-- Linha 1: Descrio -->
@@ -189,7 +188,7 @@ ob_start();
                                                 <?php endif; ?>
                                             </div>
                                             <div class="btn-group btn-group-sm">
-                                                <a class="btn btn-outline-primary btn-sm" title="EDITAR" href="/products/edit?id_produto=<?php echo $PRODUTO['id']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
+                                                <a class="btn btn-outline-primary btn-sm" title="EDITAR" href="/products/edit?id_produto=<?php echo $PRODUTO['id_produto']; ?>&comum_id=<?php echo $comum_id; ?>&<?php echo gerarParametrosFiltro(true); ?>">
                                                     <i class="bi bi-pencil-fill"></i>
                                                 </a>
                                             </div>

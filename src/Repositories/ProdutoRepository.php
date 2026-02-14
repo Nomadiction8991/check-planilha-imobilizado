@@ -37,7 +37,7 @@ class ProdutoRepository extends BaseRepository
         }
 
         if (!empty($filtros['filtro_bem'])) {
-            $where[] = 'p.codigo_bem = :bem';
+            $where[] = 'p.codigo = :bem';
             $params[':bem'] = $filtros['filtro_bem'];
         }
 
@@ -146,7 +146,7 @@ class ProdutoRepository extends BaseRepository
 
     public function buscarDistintosCodigos(int $comumId): array
     {
-        $sql = "SELECT DISTINCT codigo_bem FROM {$this->tabela} WHERE comum_id = :comum_id AND codigo_bem IS NOT NULL ORDER BY codigo_bem";
+        $sql = "SELECT DISTINCT codigo FROM {$this->tabela} WHERE comum_id = :comum_id AND codigo IS NOT NULL ORDER BY codigo";
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
         $stmt->execute();
@@ -163,8 +163,9 @@ class ProdutoRepository extends BaseRepository
         $params = [':comum_id' => $comumId];
 
         if (!empty($filtros['nome'])) {
-            $where[] = '(p.descricao_completa LIKE :nome OR p.bem LIKE :nome)';
-            $params[':nome'] = '%' . $filtros['nome'] . '%';
+            $where[] = '(p.descricao_completa LIKE :nome_desc OR p.bem LIKE :nome_bem)';
+            $params[':nome_desc'] = '%' . $filtros['nome'] . '%';
+            $params[':nome_bem'] = '%' . $filtros['nome'] . '%';
         }
 
         if (!empty($filtros['dependencia'])) {

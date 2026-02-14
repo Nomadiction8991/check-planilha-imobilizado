@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 
 $appConfig = require dirname(__DIR__, 3) . '/config/app.php';
 $projectRoot = $appConfig['project_root'];
@@ -1167,8 +1166,8 @@ ob_start();
                                     <option value=""><?php echo htmlspecialchars(to_uppercase('Todas'), ENT_QUOTES, 'UTF-8'); ?></option>
                                     <?php foreach ($dependencia_options as $dep): ?>
                                         <?php
-                                        $depId = $dep['id'] ?? '';
-                                        $depDesc = $dep['descricao'] ?? $depId;
+                                        $depId = (string) ($dep['id'] ?? '');
+                                        $depDesc = (string) ($dep['descricao'] ?? $depId);
                                         ?>
                                         <option value="<?php echo htmlspecialchars($depId); ?>"
                                             <?php echo ($filtro_dependencia ?? '') == $depId ? 'selected' : ''; ?>>

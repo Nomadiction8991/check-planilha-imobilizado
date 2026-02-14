@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 
 // Carregar configurações da aplicação
 $appConfig = require __DIR__ . '/../../../config/app.php';

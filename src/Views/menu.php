@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 
 // View: Menu (página que centraliza lógica de cabeçalho / footer / navegação)
 // Esta view é carregada por ViewRenderer::render('menu') e é exibida dentro de `app.php`.

@@ -1,10 +1,18 @@
+<?php
+$appConfig = $appConfig ?? require dirname(__DIR__, 3) . '/config/app.php';
+$siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Check Planilha</title>
+    <title>Login - <?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?></title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/assets/css/auth/login.css" rel="stylesheet">
 </head>

@@ -1,6 +1,9 @@
 <?php
 
+use App\Helpers\StringHelper;
+use App\Helpers\CsvHelper;
 use App\Middleware\AuthMiddleware;
+use App\Core\SessionManager;
 
 /**
  * GlobalFunctions.php
@@ -13,17 +16,10 @@ use App\Middleware\AuthMiddleware;
  *
  * @deprecated Código novo deve usar as classes diretamente:
  *   - StringHelper::toUppercase() em vez de to_uppercase()
- *   - AuthMiddleware::getInstance()->isAuthenticated() em vez de isLoggedIn()
+ *   - SessionManager::isAuthenticated() em vez de isLoggedIn()
  *   - CsvHelper::normalizarEncodingCsv() em vez de ip_normalizar_csv_encoding()
  *   - LerEnv::obter() em vez de env()
  */
-
-// ─────────────────────────────────────────────
-// Dependências (classes sem namespace / require manual)
-// ─────────────────────────────────────────────
-require_once __DIR__ . '/StringHelper.php';
-require_once __DIR__ . '/CsvHelper.php';
-require_once __DIR__ . '/../Middleware/AuthMiddleware.php';
 
 // ═══════════════════════════════════════════════
 //  ENV HELPERS  (substituem app/helpers/env_helper.php)
@@ -80,31 +76,31 @@ if (!function_exists('env')) {
 
 if (!function_exists('isLoggedIn')) {
     /**
-     * @deprecated Use AuthMiddleware::getInstance()->isAuthenticated()
+     * @deprecated Use SessionManager::isAuthenticated()
      */
     function isLoggedIn(): bool
     {
-        return AuthMiddleware::getInstance()->isAuthenticated();
+        return SessionManager::isAuthenticated();
     }
 }
 
 if (!function_exists('isAdmin')) {
     /**
-     * @deprecated Use AuthMiddleware::getInstance()->isAdmin()
+     * @deprecated Use SessionManager::get('is_admin')
      */
     function isAdmin(): bool
     {
-        return AuthMiddleware::getInstance()->isAdmin();
+        return (bool) SessionManager::get('is_admin', false);
     }
 }
 
 if (!function_exists('isDoador')) {
     /**
-     * @deprecated Use AuthMiddleware::getInstance()->isDoador()
+     * @deprecated Use SessionManager::get('is_doador')
      */
     function isDoador(): bool
     {
-        return AuthMiddleware::getInstance()->isDoador();
+        return (bool) SessionManager::get('is_doador', false);
     }
 }
 
