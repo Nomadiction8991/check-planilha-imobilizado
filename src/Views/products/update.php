@@ -7,7 +7,7 @@ require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
 
 $pageTitle = 'EDITAR PRODUTO';
-$backUrl = '/products?id=' . urlencode($id_planilha) . '&' . gerarParametrosFiltro();
+$backUrl = '/products/view?id=' . urlencode($id_planilha ?? '') . '&' . gerarParametrosFiltro();
 
 ob_start();
 ?>

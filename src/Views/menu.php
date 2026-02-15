@@ -17,8 +17,7 @@ $customCssPath = $customCssPath ?? '/assets/css/menu.css';
                 <i class="bi bi-list-ul" aria-hidden="true"></i>Listagens
             </button>
             <ul class="submenu">
-                <li><a href="/spreadsheets/view"><i class="bi bi-eye" aria-hidden="true"></i>Produtos</a></li>
-                <li><a href="/products"><i class="bi bi-list" aria-hidden="true"></i>Produtos Cadastrados</a></li>
+                <li><a href="/products/view"><i class="bi bi-eye" aria-hidden="true"></i>Produtos</a></li>
                 <li><a href="/churches"><i class="bi bi-building" aria-hidden="true"></i>Igrejas</a></li>
                 <li><a href="/asset-types"><i class="bi bi-box-seam" aria-hidden="true"></i>Tipos de Bens</a></li>
                 <li><a href="/users"><i class="bi bi-people" aria-hidden="true"></i>Usuários</a></li>

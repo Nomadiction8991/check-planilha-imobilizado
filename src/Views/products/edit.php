@@ -7,6 +7,21 @@ require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
 
 $pageTitle = to_uppercase('editar produto');
+$pagina = $pagina ?? 1;
+$filtro_nome = $filtro_nome ?? '';
+$filtro_dependencia = $filtro_dependencia ?? '';
+$filtro_codigo = $filtro_codigo ?? '';
+$filtro_STATUS = $filtro_STATUS ?? '';
+$id_produto = $id_produto ?? 0;
+$comum_id = $comum_id ?? 0;
+$dependencias = $dependencias ?? [];
+$novo_tipo_bem_id = $novo_tipo_bem_id ?? null;
+$novo_bem = $novo_bem ?? '';
+$novo_complemento = $novo_complemento ?? '';
+$nova_dependencia_id = $nova_dependencia_id ?? null;
+$mensagem = $mensagem ?? '';
+$tipo_mensagem = $tipo_mensagem ?? '';
+$produto = $produto ?? [];
 $backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
 
 ob_start();
@@ -33,7 +48,7 @@ ob_start();
                                 }, [])); ?>;
     window._novoBem = <?php echo json_encode(!empty($novo_bem) ? mb_strtoupper($novo_bem, 'UTF-8') : ''); ?>;
 </script>
-<script src="/assets/js/produtos/edit.js"></script>
+<script src="/assets/js/products/edit.js"></script>
 
 <?php if (!empty($mensagem)): ?>
     <div class="alert alert-<?php echo $tipo_mensagem === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show">
@@ -49,7 +64,12 @@ ob_start();
     <input type="hidden" name="filtro_codigo" value="<?php echo htmlspecialchars($filtro_codigo); ?>">
     <input type="hidden" name="STATUS" value="<?php echo htmlspecialchars($filtro_STATUS); ?>">
 
+    <!-- DADOS DO PRODUTO -->
     <div class="card mb-3">
+        <div class="card-header">
+            <i class="bi bi-box-seam me-2"></i>
+            <?php echo to_uppercase('Dados do Produto'); ?>
+        </div>
         <div class="card-body">
             <!-- TIPO DE BEM -->
             <div class="mb-3">
@@ -69,7 +89,7 @@ ob_start();
                 <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Selecione o tipo de bem para desbloquear o campo "BEM"'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
-            <!-- BEM (sempre visível, desabilitado até escolher tipo) -->
+            <!-- BEM -->
             <div class="mb-3" id="div_bem">
                 <label for="novo_bem" class="form-label">
                     <i class="bi bi-box me-1"></i>
@@ -92,7 +112,7 @@ ob_start();
                 <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Deixe em branco para NÃO alterar. Ex: COR PRETA + MARCA XYZ + 1,80M X 0,80M'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
-            <!-- DEPENDÁŠNCIA -->
+            <!-- DEPENDÊNCIA -->
             <div class="mb-3">
                 <label for="nova_dependencia_id" class="form-label">
                     <i class="bi bi-building me-1"></i>
@@ -107,6 +127,90 @@ ob_start();
                         </option>
                     <?php endforeach; ?>
                 </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- RELATÓRIO 14.1 -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            <?php echo to_uppercase('Relatório 14.1'); ?>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="imprimir_14_1" name="imprimir_14_1" value="1"
+                        <?php echo ((int)($produto['imprimir_14_1'] ?? 0) === 1) ? 'checked' : ''; ?>>
+                    <label class="form-check-label" for="imprimir_14_1">
+                        <?php echo to_uppercase('Imprimir no Relatório 14.1'); ?>
+                    </label>
+                </div>
+                <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Marque para incluir este produto no relatório 14.1'), ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="condicao_14_1" class="form-label">
+                    <i class="bi bi-clipboard-check me-1"></i>
+                    <?php echo to_uppercase('Condição 14.1'); ?>
+                </label>
+                <select class="form-select" id="condicao_14_1" name="condicao_14_1">
+                    <option value=""><?php echo htmlspecialchars(to_uppercase('-- Selecione --'), ENT_QUOTES, 'UTF-8'); ?></option>
+                    <?php
+                    $condicoes = ['BOM', 'REGULAR', 'RUIM', 'INSERVÍVEL'];
+                    $condicaoAtual = mb_strtoupper(trim($produto['condicao_14_1'] ?? ''), 'UTF-8');
+                    foreach ($condicoes as $cond): ?>
+                        <option value="<?php echo $cond; ?>" <?php echo ($condicaoAtual === $cond) ? 'selected' : ''; ?>>
+                            <?php echo $cond; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Condição atual do produto para o relatório'), ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTA FISCAL -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="bi bi-receipt me-2"></i>
+            <?php echo to_uppercase('Nota Fiscal'); ?>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-6">
+                    <label for="nota_numero" class="form-label">
+                        <?php echo to_uppercase('Número'); ?>
+                    </label>
+                    <input type="number" class="form-control" id="nota_numero" name="nota_numero"
+                        value="<?php echo htmlspecialchars((string)($produto['nota_numero'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                        placeholder="Nº da nota">
+                </div>
+                <div class="col-6">
+                    <label for="nota_data" class="form-label">
+                        <?php echo to_uppercase('Data'); ?>
+                    </label>
+                    <input type="date" class="form-control" id="nota_data" name="nota_data"
+                        value="<?php echo htmlspecialchars($produto['nota_data'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-6">
+                    <label for="nota_valor" class="form-label">
+                        <?php echo to_uppercase('Valor (R$)'); ?>
+                    </label>
+                    <input type="text" class="form-control" id="nota_valor" name="nota_valor"
+                        value="<?php echo htmlspecialchars($produto['nota_valor'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                        placeholder="0,00">
+                </div>
+                <div class="col-6">
+                    <label for="nota_fornecedor" class="form-label">
+                        <?php echo to_uppercase('Fornecedor'); ?>
+                    </label>
+                    <input type="text" class="form-control text-uppercase-input" id="nota_fornecedor" name="nota_fornecedor"
+                        value="<?php echo htmlspecialchars($produto['nota_fornecedor'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                        placeholder="Nome do fornecedor">
+                </div>
             </div>
         </div>
     </div>

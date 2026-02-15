@@ -6,7 +6,7 @@ $projectRoot = $appConfig['project_root'];
 require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
 $pageTitle = 'Importar Planilha';
-$backUrl = base_url('/spreadsheets/view');
+$backUrl = base_url('/products/view');
 
 ob_start();
 ?>

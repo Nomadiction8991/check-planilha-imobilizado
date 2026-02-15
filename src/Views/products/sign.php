@@ -38,7 +38,7 @@ $stmt->execute();
 $PRODUTOS = $stmt->fetchAll();
 
 $pageTitle = 'Assinar PRODUTOS';
-$backUrl = '/spreadsheets/view?id=' . $id_planilha . '&comum_id=' . $id_planilha;
+$backUrl = '/products/view?id=' . $id_planilha . '&comum_id=' . $id_planilha;
 
 ob_start();
 ?>

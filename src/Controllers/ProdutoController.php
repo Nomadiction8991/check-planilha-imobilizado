@@ -31,120 +31,373 @@ class ProdutoController extends BaseController
         $this->tipoBemService = new TipoBemService($tipoBemRepo);
     }
 
-    public function index(): void
+    // ─── helpers privados ───────────────────────────────────────────
+
+    private function obterComumIdOuRedirecionar(string $mensagem = 'Selecione uma igreja'): ?int
     {
         $comumId = SessionManager::getComumId();
-
         if (!$comumId || $comumId <= 0) {
-            $this->redirecionar('/churches?mensagem=' . urlencode('Selecione um Comum para ver os produtos'));
-            return;
+            $this->redirecionar('/churches?mensagem=' . urlencode($mensagem));
+            return null;
         }
+        return $comumId;
+    }
 
-        $pagina = max(1, (int) ($this->query('pagina', 1)));
-        $limite = 10;
-
-        $filtros = [
-            'filtro_complemento' => trim($this->query('filtro_complemento', '')),
-            'pesquisa_id'        => trim($this->query('pesquisa_id', '')),
-            'filtro_tipo_ben'    => trim($this->query('filtro_tipo_ben', '')),
-            'filtro_bem'         => trim($this->query('filtro_bem', '')),
-            'filtro_dependencia' => trim($this->query('filtro_dependencia', '')),
-            'filtro_STATUS'      => trim($this->query('filtro_STATUS', '')),
-        ];
-
-        $resultado = $this->produtoRepository->buscarPorComumPaginado($comumId, $pagina, $limite, $filtros);
-
+    private function obterTiposBens(): array
+    {
         try {
-            $tiposBens = $this->tipoBemService->buscarTodos();
+            return $this->tipoBemService->buscarTodos();
         } catch (\Throwable $e) {
             error_log('Erro ao buscar tipos_bens: ' . $e->getMessage());
-            $tiposBens = [];
+            return [];
         }
-
-        $bemCodigos = $this->produtoRepository->buscarDistintosCodigos($comumId);
-        $dependencias = $this->dependenciaRepository->buscarTodos();
-
-        $this->renderizar('products/index', [
-            'comum_id'           => $comumId,
-            'produtos'           => $resultado['dados'],
-            'pagina'             => $resultado['pagina'],
-            'total_paginas'      => $resultado['totalPaginas'],
-            'total_registros'    => $resultado['total'],
-            'filtro_complemento' => $filtros['filtro_complemento'],
-            'pesquisa_id'        => $filtros['pesquisa_id'],
-            'filtro_tipo_ben'    => $filtros['filtro_tipo_ben'],
-            'filtro_bem'         => $filtros['filtro_bem'],
-            'filtro_dependencia' => $filtros['filtro_dependencia'],
-            'filtro_STATUS'      => $filtros['filtro_STATUS'],
-            'tipos_bens'         => $tiposBens,
-            'bem_codigos'        => $bemCodigos,
-            'dependencias'       => $dependencias,
-        ]);
     }
+
+    private function obterDependencias(): array
+    {
+        try {
+            return $this->dependenciaRepository->buscarTodos();
+        } catch (\Throwable $e) {
+            error_log('Erro ao buscar dependências: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Extrai os parâmetros de filtro da query string (usados para voltar à listagem).
+     */
+    private function extrairFiltros(): array
+    {
+        return [
+            'pagina'             => max(1, (int) $this->query('pagina', 1)),
+            'filtro_nome'        => trim($this->query('nome', '')),
+            'filtro_dependencia' => trim($this->query('dependencia', '')),
+            'filtro_codigo'      => trim($this->query('filtro_codigo', '')),
+            'filtro_STATUS'      => trim($this->query('status', $this->query('filtro_STATUS', ''))),
+        ];
+    }
+
+    /**
+     * Monta a URL de retorno para /products/view preservando filtros.
+     */
+    private function urlRetorno(?int $comumId = null): string
+    {
+        $params = [];
+        if ($comumId) {
+            $params['comum_id'] = $comumId;
+        }
+        $filtros = $this->extrairFiltros();
+        if ($filtros['pagina'] > 1)             $params['pagina']           = $filtros['pagina'];
+        if ($filtros['filtro_nome'] !== '')      $params['nome']             = $filtros['filtro_nome'];
+        if ($filtros['filtro_dependencia'] !== '') $params['dependencia']    = $filtros['filtro_dependencia'];
+        if ($filtros['filtro_codigo'] !== '')    $params['filtro_codigo']    = $filtros['filtro_codigo'];
+        if ($filtros['filtro_STATUS'] !== '')    $params['status']           = $filtros['filtro_STATUS'];
+
+        $qs = http_build_query($params);
+        return '/products/view' . ($qs ? '?' . $qs : '');
+    }
+
+    // ─── CRUD ───────────────────────────────────────────────────────
 
     public function create(): void
     {
-        $comumId = SessionManager::getComumId();
-
-        if (!$comumId || $comumId <= 0) {
-            $this->redirecionar('/churches?mensagem=' . urlencode('Selecione um Comum para criar um produto'));
-            return;
-        }
-
-        try {
-            $tiposBens = $this->tipoBemService->buscarTodos();
-        } catch (\Throwable $e) {
-            error_log('Erro ao buscar tipos_bens: ' . $e->getMessage());
-            $tiposBens = [];
-        }
+        $comumId = $this->obterComumIdOuRedirecionar('Selecione uma igreja para criar um produto');
+        if ($comumId === null) return;
 
         $this->renderizar('products/create', [
-            'comum_id'   => $comumId,
-            'tipos_bens' => $tiposBens,
+            'comum_id'     => $comumId,
+            'tipos_bens'   => $this->obterTiposBens(),
+            'dependencias' => $this->obterDependencias(),
+            'erros'        => [],
         ]);
     }
 
     public function store(): void
     {
         if (!$this->isPost()) {
-            $this->redirecionar('/products');
+            $this->redirecionar('/products/create');
             return;
         }
 
-        http_response_code(501);
-        die('Funcionalidade em implementação.');
+        $comumId = $this->obterComumIdOuRedirecionar();
+        if ($comumId === null) return;
+
+        // Coletar dados do formulário
+        $codigo         = trim($this->post('codigo', ''));
+        $idTipoBem      = (int) $this->post('id_tipo_ben', 0);
+        $bem            = mb_strtoupper(trim($this->post('tipo_ben', '')), 'UTF-8');
+        $complemento    = mb_strtoupper(trim($this->post('complemento', '')), 'UTF-8');
+        $dependenciaId  = (int) $this->post('id_dependencia', 0);
+        $multiplicador  = max(1, (int) $this->post('multiplicador', 1));
+        $imprimir141    = (int) $this->post('imprimir_14_1', 0);
+        $condicao141    = mb_strtoupper(trim($this->post('condicao_14_1', '')), 'UTF-8');
+        $notaNumero     = $this->post('nota_numero', '');
+        $notaData       = $this->post('nota_data', '');
+        $notaValor      = trim($this->post('nota_valor', ''));
+        $notaFornecedor = mb_strtoupper(trim($this->post('nota_fornecedor', '')), 'UTF-8');
+
+        // Validação
+        $erros = [];
+        if ($idTipoBem <= 0)     $erros[] = 'Selecione um Tipo de Bem.';
+        if ($bem === '')         $erros[] = 'Selecione um Bem.';
+        if ($complemento === '') $erros[] = 'Informe o complemento.';
+        if ($dependenciaId <= 0) $erros[] = 'Selecione uma Dependência.';
+
+        if (!empty($erros)) {
+            $this->renderizar('products/create', [
+                'comum_id'     => $comumId,
+                'tipos_bens'   => $this->obterTiposBens(),
+                'dependencias' => $this->obterDependencias(),
+                'erros'        => $erros,
+            ]);
+            return;
+        }
+
+        // Montar descrição completa
+        $tiposBens = $this->obterTiposBens();
+        $tipoDesc = '';
+        $tipoCodigo = '';
+        foreach ($tiposBens as $tb) {
+            if ((int)$tb['id'] === $idTipoBem) {
+                $tipoCodigo = $tb['codigo'] ?? '';
+                $tipoDesc   = $tb['descricao'] ?? '';
+                break;
+            }
+        }
+        $partes = [];
+        if ($tipoCodigo && $tipoDesc) $partes[] = mb_strtoupper($tipoCodigo . ' - ' . $tipoDesc, 'UTF-8');
+        if ($bem !== '')               $partes[] = $bem;
+        if ($complemento !== '')       $partes[] = $complemento;
+        $descricaoCompleta = implode(' - ', $partes);
+
+        try {
+            for ($i = 0; $i < $multiplicador; $i++) {
+                $this->produtoRepository->criar([
+                    'comum_id'                 => $comumId,
+                    'codigo'                   => $codigo !== '' ? $codigo : null,
+                    'descricao_completa'       => $descricaoCompleta,
+                    'descricao_velha'          => '',
+                    'editado_descricao_completa' => '',
+                    'tipo_bem_id'              => $idTipoBem,
+                    'editado_tipo_bem_id'      => 0,
+                    'bem'                      => $bem,
+                    'editado_bem'              => '',
+                    'complemento'              => $complemento,
+                    'editado_complemento'      => '',
+                    'dependencia_id'           => $dependenciaId,
+                    'editado_dependencia_id'   => 0,
+                    'novo'                     => 1,
+                    'checado'                  => 0,
+                    'editado'                  => 0,
+                    'imprimir_etiqueta'        => 0,
+                    'imprimir_14_1'            => $imprimir141,
+                    'condicao_14_1'            => $condicao141 !== '' ? $condicao141 : null,
+                    'nota_numero'              => $notaNumero !== '' ? (int)$notaNumero : null,
+                    'nota_data'                => $notaData !== '' ? $notaData : null,
+                    'nota_valor'               => $notaValor !== '' ? $notaValor : null,
+                    'nota_fornecedor'          => $notaFornecedor !== '' ? $notaFornecedor : null,
+                    'observacao'               => '',
+                    'ativo'                    => 1,
+                ]);
+            }
+
+            $msg = $multiplicador > 1
+                ? urlencode("$multiplicador produtos cadastrados com sucesso")
+                : urlencode('Produto cadastrado com sucesso');
+            $this->redirecionar('/products/view?comum_id=' . $comumId . '&sucesso=' . $msg);
+        } catch (\Exception $e) {
+            error_log('Erro ao cadastrar produto: ' . $e->getMessage());
+            $this->renderizar('products/create', [
+                'comum_id'     => $comumId,
+                'tipos_bens'   => $this->obterTiposBens(),
+                'dependencias' => $this->obterDependencias(),
+                'erros'        => ['Erro ao salvar produto: ' . $e->getMessage()],
+            ]);
+        }
     }
 
     public function edit(): void
     {
-        $id = (int) ($this->query('id', 0));
-        if ($id <= 0) {
-            $this->redirecionar('/products?erro=ID inválido');
+        $comumId = $this->obterComumIdOuRedirecionar();
+        if ($comumId === null) return;
+
+        $idProduto = (int) ($this->query('id_produto', $this->query('id', 0)));
+        if ($idProduto <= 0) {
+            $this->redirecionar('/products/view?erro=' . urlencode('ID do produto inválido'));
             return;
         }
 
-        try {
-            $tiposBens = $this->tipoBemService->buscarTodos();
-        } catch (\Throwable $e) {
-            error_log('Erro ao buscar tipos_bens: ' . $e->getMessage());
-            $tiposBens = [];
+        $produto = $this->produtoRepository->buscarPorId($idProduto);
+        if (!$produto) {
+            $this->redirecionar('/products/view?erro=' . urlencode('Produto não encontrado'));
+            return;
         }
 
+        $filtros = $this->extrairFiltros();
+
         $this->renderizar('products/edit', [
-            'id'         => $id,
-            'tipos_bens' => $tiposBens,
+            'id_produto'         => $idProduto,
+            'produto'            => $produto,
+            'comum_id'           => $comumId,
+            'tipos_bens'         => $this->obterTiposBens(),
+            'dependencias'       => $this->obterDependencias(),
+            'pagina'             => $filtros['pagina'],
+            'filtro_nome'        => $filtros['filtro_nome'],
+            'filtro_dependencia' => $filtros['filtro_dependencia'],
+            'filtro_codigo'      => $filtros['filtro_codigo'],
+            'filtro_STATUS'      => $filtros['filtro_STATUS'],
+            // Valores editados (já salvos) para pré-preencher o form
+            'novo_tipo_bem_id'   => $produto['editado_tipo_bem_id'] ?: null,
+            'novo_bem'           => $produto['editado_bem'] !== '' ? $produto['editado_bem'] : $produto['bem'],
+            'novo_complemento'   => $produto['editado_complemento'] ?? '',
+            'nova_dependencia_id' => $produto['editado_dependencia_id'] ?: null,
+            'mensagem'           => '',
+            'tipo_mensagem'      => '',
         ]);
     }
 
     public function update(): void
     {
         if (!$this->isPost()) {
-            $this->redirecionar('/products');
+            $this->redirecionar('/products/view');
             return;
         }
 
-        http_response_code(501);
-        die('Funcionalidade em implementação.');
+        $comumId = $this->obterComumIdOuRedirecionar();
+        if ($comumId === null) return;
+
+        $idProduto = (int) ($this->query('id_produto', $this->query('id', 0)));
+        if ($idProduto <= 0) {
+            $this->redirecionar('/products/view?erro=' . urlencode('Produto inválido'));
+            return;
+        }
+
+        $produto = $this->produtoRepository->buscarPorId($idProduto);
+        if (!$produto) {
+            $this->redirecionar('/products/view?erro=' . urlencode('Produto não encontrado'));
+            return;
+        }
+
+        // Coletar dados editados do formulário
+        $novoTipoBemId    = $this->post('novo_tipo_bem_id', '');
+        $novoBem          = mb_strtoupper(trim($this->post('novo_bem', '')), 'UTF-8');
+        $novoComplemento  = mb_strtoupper(trim($this->post('novo_complemento', '')), 'UTF-8');
+        $novaDependencia  = $this->post('nova_dependencia_id', '');
+
+        // Campos diretos (não editado_)
+        $imprimir141    = $this->post('imprimir_14_1', null);
+        $condicao141    = trim($this->post('condicao_14_1', ''));
+        $notaNumero     = $this->post('nota_numero', '');
+        $notaData       = $this->post('nota_data', '');
+        $notaValor      = trim($this->post('nota_valor', ''));
+        $notaFornecedor = mb_strtoupper(trim($this->post('nota_fornecedor', '')), 'UTF-8');
+
+        // Montar dados para atualização (campos editados)
+        $dadosUpdate = [
+            'editado' => 0, // será marcado como 1 se algo mudar
+        ];
+
+        $temEdicao = false;
+
+        if ($novoTipoBemId !== '' && (int)$novoTipoBemId > 0) {
+            $dadosUpdate['editado_tipo_bem_id'] = (int)$novoTipoBemId;
+            $temEdicao = true;
+        }
+
+        if ($novoBem !== '') {
+            $dadosUpdate['editado_bem'] = $novoBem;
+            $temEdicao = true;
+        }
+
+        if ($novoComplemento !== '') {
+            $dadosUpdate['editado_complemento'] = $novoComplemento;
+            $temEdicao = true;
+        }
+
+        if ($novaDependencia !== '' && (int)$novaDependencia > 0) {
+            $dadosUpdate['editado_dependencia_id'] = (int)$novaDependencia;
+            $temEdicao = true;
+        }
+
+        // Campos diretos: imprimir 14.1, condição, nota fiscal
+        $dadosUpdate['imprimir_14_1'] = $imprimir141 !== null ? 1 : 0;
+        if ($condicao141 !== '') {
+            $dadosUpdate['condicao_14_1'] = mb_strtoupper($condicao141, 'UTF-8');
+        } else {
+            $dadosUpdate['condicao_14_1'] = '';
+        }
+        $dadosUpdate['nota_numero']     = $notaNumero !== '' ? (int)$notaNumero : null;
+        $dadosUpdate['nota_data']       = $notaData !== '' ? $notaData : null;
+        $dadosUpdate['nota_valor']      = $notaValor !== '' ? $notaValor : null;
+        $dadosUpdate['nota_fornecedor'] = $notaFornecedor !== '' ? $notaFornecedor : null;
+
+        if ($temEdicao) {
+            $dadosUpdate['editado'] = 1;
+
+            // Montar descrição editada completa
+            $tiposBens = $this->obterTiposBens();
+            $tipoBemFinalId = (int)($dadosUpdate['editado_tipo_bem_id'] ?? $produto['editado_tipo_bem_id'] ?? $produto['tipo_bem_id']);
+            $tipoCodigo = '';
+            $tipoDesc   = '';
+            foreach ($tiposBens as $tb) {
+                if ((int)$tb['id'] === $tipoBemFinalId) {
+                    $tipoCodigo = $tb['codigo'] ?? '';
+                    $tipoDesc   = $tb['descricao'] ?? '';
+                    break;
+                }
+            }
+
+            $bemFinal  = $dadosUpdate['editado_bem'] ?? ($produto['editado_bem'] !== '' ? $produto['editado_bem'] : $produto['bem']);
+            $compFinal = $dadosUpdate['editado_complemento'] ?? ($produto['editado_complemento'] !== '' ? $produto['editado_complemento'] : $produto['complemento']);
+
+            $partes = [];
+            if ($tipoCodigo && $tipoDesc) $partes[] = mb_strtoupper($tipoCodigo . ' - ' . $tipoDesc, 'UTF-8');
+            if ($bemFinal !== '')          $partes[] = mb_strtoupper($bemFinal, 'UTF-8');
+            if ($compFinal !== '')         $partes[] = mb_strtoupper($compFinal, 'UTF-8');
+
+            $dadosUpdate['editado_descricao_completa'] = implode(' - ', $partes);
+        }
+
+        try {
+            $this->produtoRepository->atualizar($idProduto, $dadosUpdate);
+
+            // Recuperar filtros do POST (enviados como hidden fields)
+            $pagina     = $this->post('pagina', '1');
+            $nome       = $this->post('nome', '');
+            $dep        = $this->post('dependencia', '');
+            $codigo     = $this->post('filtro_codigo', '');
+            $status     = $this->post('STATUS', '');
+
+            $params = ['comum_id' => $comumId, 'sucesso' => 'Produto atualizado com sucesso'];
+            if ($pagina > 1)    $params['pagina']       = $pagina;
+            if ($nome !== '')   $params['nome']         = $nome;
+            if ($dep !== '')    $params['dependencia']   = $dep;
+            if ($codigo !== '') $params['filtro_codigo'] = $codigo;
+            if ($status !== '') $params['status']        = $status;
+
+            $this->redirecionar('/products/view?' . http_build_query($params));
+        } catch (\Exception $e) {
+            error_log('Erro ao atualizar produto: ' . $e->getMessage());
+            $filtros = $this->extrairFiltros();
+            $this->renderizar('products/edit', [
+                'id_produto'         => $idProduto,
+                'produto'            => $produto,
+                'comum_id'           => $comumId,
+                'tipos_bens'         => $this->obterTiposBens(),
+                'dependencias'       => $this->obterDependencias(),
+                'pagina'             => $filtros['pagina'],
+                'filtro_nome'        => $filtros['filtro_nome'],
+                'filtro_dependencia' => $filtros['filtro_dependencia'],
+                'filtro_codigo'      => $filtros['filtro_codigo'],
+                'filtro_STATUS'      => $filtros['filtro_STATUS'],
+                'novo_tipo_bem_id'   => $novoTipoBemId,
+                'novo_bem'           => $novoBem,
+                'novo_complemento'   => $novoComplemento,
+                'nova_dependencia_id' => $novaDependencia,
+                'mensagem'           => 'Erro ao atualizar: ' . $e->getMessage(),
+                'tipo_mensagem'      => 'danger',
+            ]);
+        }
     }
 
     public function delete(): void
@@ -154,9 +407,67 @@ class ProdutoController extends BaseController
             return;
         }
 
-        $this->jsonErro('Funcionalidade em implementação.', 501);
+        $comumId = $this->obterComumIdOuRedirecionar();
+        if ($comumId === null) return;
+
+        $produtoId = (int) ($this->post('produto_id', 0));
+        if ($produtoId <= 0) {
+            $this->jsonErro('Produto inválido', 400);
+            return;
+        }
+
+        try {
+            // Soft delete: marca como inativo
+            $this->produtoRepository->atualizar($produtoId, ['ativo' => 0]);
+            $this->json(['sucesso' => true, 'mensagem' => 'Produto removido com sucesso']);
+        } catch (\Exception $e) {
+            error_log('Erro ao deletar produto: ' . $e->getMessage());
+            $this->jsonErro('Erro ao remover produto', 500);
+        }
     }
 
+    // ─── Observação ─────────────────────────────────────────────────
+
+    /**
+     * GET /products/observation — renderiza o formulário de observação.
+     */
+    public function observacaoForm(): void
+    {
+        $comumId = $this->obterComumIdOuRedirecionar();
+        if ($comumId === null) return;
+
+        $idProduto = (int) ($this->query('id_produto', 0));
+        if ($idProduto <= 0) {
+            $this->redirecionar('/products/view?erro=' . urlencode('Produto inválido'));
+            return;
+        }
+
+        $produto = $this->produtoRepository->buscarPorId($idProduto);
+        if (!$produto) {
+            $this->redirecionar('/products/view?erro=' . urlencode('Produto não encontrado'));
+            return;
+        }
+
+        $filtros = $this->extrairFiltros();
+
+        $this->renderizar('products/observation', [
+            'id_produto'         => $idProduto,
+            'produto'            => $produto,
+            'comum_id'           => $comumId,
+            'pagina'             => $filtros['pagina'],
+            'filtro_nome'        => $filtros['filtro_nome'],
+            'filtro_dependencia' => $filtros['filtro_dependencia'],
+            'filtro_codigo'      => $filtros['filtro_codigo'],
+            'filtro_STATUS'      => $filtros['filtro_STATUS'],
+            'check'              => ['observacoes' => $produto['observacao'] ?? ''],
+            'mensagem'           => '',
+            'tipo_mensagem'      => '',
+        ]);
+    }
+
+    /**
+     * POST /products/observation — salva a observação (form submit ou AJAX).
+     */
     public function observacao(): void
     {
         if (!$this->isPost()) {
@@ -166,37 +477,68 @@ class ProdutoController extends BaseController
 
         $comumId = SessionManager::getComumId();
         if (!$comumId) {
-            $this->jsonErro('Comum não selecionada', 400);
+            if ($this->isAjax()) {
+                $this->jsonErro('Comum não selecionada', 400);
+            } else {
+                $this->redirecionar('/products/view?erro=' . urlencode('Comum não selecionada'));
+            }
             return;
         }
 
-        $produtoId = (int) ($this->post('produto_id', 0));
-        $observacao = trim($this->post('observacao', ''));
+        $produtoId  = (int) ($this->post('produto_id', $this->query('id_produto', 0)));
+        $observacao = mb_strtoupper(trim($this->post('observacoes', $this->post('observacao', ''))), 'UTF-8');
 
         if ($produtoId <= 0) {
-            $this->jsonErro('Produto inválido', 400);
+            if ($this->isAjax()) {
+                $this->jsonErro('Produto inválido', 400);
+            } else {
+                $this->redirecionar('/products/view?erro=' . urlencode('Produto inválido'));
+            }
             return;
         }
 
         try {
             $this->produtoRepository->atualizarObservacao($produtoId, $comumId, $observacao);
-            $this->json(['sucesso' => true, 'mensagem' => 'Observação salva com sucesso']);
+
+            if ($this->isAjax()) {
+                $this->json(['sucesso' => true, 'mensagem' => 'Observação salva com sucesso']);
+            } else {
+                // Redirecionar de volta para /products/view com filtros
+                $params = ['comum_id' => $comumId, 'sucesso' => urlencode('Observação salva com sucesso')];
+                $pagina = $this->post('pagina', '');
+                $nome   = $this->post('nome', '');
+                $dep    = $this->post('dependencia', '');
+                $codigo = $this->post('filtro_codigo', '');
+                $status = $this->post('status', '');
+                if ($pagina !== '' && (int)$pagina > 1) $params['pagina']       = $pagina;
+                if ($nome !== '')   $params['nome']         = $nome;
+                if ($dep !== '')    $params['dependencia']   = $dep;
+                if ($codigo !== '') $params['filtro_codigo'] = $codigo;
+                if ($status !== '') $params['status']        = $status;
+                $this->redirecionar('/products/view?' . http_build_query($params));
+            }
         } catch (\Exception $e) {
             error_log('Erro ao salvar observação: ' . $e->getMessage());
-            $this->jsonErro('Erro ao salvar observação', 500);
+            if ($this->isAjax()) {
+                $this->jsonErro('Erro ao salvar observação', 500);
+            } else {
+                $this->redirecionar('/products/view?erro=' . urlencode('Erro ao salvar observação'));
+            }
         }
     }
+
+    // ─── Check / Etiqueta / Assinatura ──────────────────────────────
 
     public function check(): void
     {
         if (!$this->isPost()) {
-            $this->redirecionar('/spreadsheets/view');
+            $this->redirecionar('/products/view');
             return;
         }
 
         $comumId = SessionManager::getComumId();
         if (!$comumId) {
-            $this->redirecionar('/spreadsheets/view?erro=Comum não selecionada');
+            $this->redirecionar('/products/view?erro=Comum não selecionada');
             return;
         }
 
@@ -204,16 +546,16 @@ class ProdutoController extends BaseController
         $checado = (int) ($this->post('checado', 0));
 
         if ($produtoId <= 0) {
-            $this->redirecionar('/spreadsheets/view?erro=Produto inválido');
+            $this->redirecionar('/products/view?erro=Produto inválido');
             return;
         }
 
         try {
             $this->produtoRepository->atualizarChecado($produtoId, $comumId, $checado);
-            $this->redirecionar('/spreadsheets/view?sucesso=Produto atualizado');
+            $this->redirecionar('/products/view?sucesso=Produto atualizado');
         } catch (\Exception $e) {
             error_log('Erro ao atualizar check: ' . $e->getMessage());
-            $this->redirecionar('/spreadsheets/view?erro=Erro ao atualizar produto');
+            $this->redirecionar('/products/view?erro=Erro ao atualizar produto');
         }
     }
 
@@ -231,7 +573,7 @@ class ProdutoController extends BaseController
 
         $comumId = SessionManager::getComumId();
         if (!$comumId) {
-            $this->redirecionar('/spreadsheets/view?erro=Comum não selecionada');
+            $this->redirecionar('/products/view?erro=Comum não selecionada');
             return;
         }
 
@@ -239,16 +581,16 @@ class ProdutoController extends BaseController
         $imprimir = (int) ($this->post('imprimir', 0));
 
         if ($produtoId <= 0) {
-            $this->redirecionar('/spreadsheets/view?erro=Produto inválido');
+            $this->redirecionar('/products/view?erro=Produto inválido');
             return;
         }
 
         try {
             $this->produtoRepository->atualizarEtiqueta($produtoId, $comumId, $imprimir);
-            $this->redirecionar('/spreadsheets/view?sucesso=Etiqueta atualizada');
+            $this->redirecionar('/products/view?sucesso=Etiqueta atualizada');
         } catch (\Exception $e) {
             error_log('Erro ao atualizar etiqueta: ' . $e->getMessage());
-            $this->redirecionar('/spreadsheets/view?erro=Erro ao atualizar etiqueta');
+            $this->redirecionar('/products/view?erro=Erro ao atualizar etiqueta');
         }
     }
 

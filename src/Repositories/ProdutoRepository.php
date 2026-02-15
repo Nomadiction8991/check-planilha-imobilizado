@@ -11,6 +11,18 @@ class ProdutoRepository extends BaseRepository
     protected string $tabela = 'produtos';
     protected string $chavePrimaria = 'id_produto';
 
+    /** @var string[] Whitelist de colunas permitidas para INSERT/UPDATE */
+    protected array $colunas = [
+        'comum_id', 'codigo', 'descricao_completa', 'descricao_velha',
+        'editado_descricao_completa', 'tipo_bem_id', 'editado_tipo_bem_id',
+        'bem', 'editado_bem', 'complemento', 'editado_complemento',
+        'dependencia_id', 'editado_dependencia_id', 'novo', 'checado',
+        'editado', 'imprimir_etiqueta', 'imprimir_14_1', 'condicao_14_1',
+        'observacao', 'nota_numero', 'nota_data', 'nota_valor',
+        'nota_fornecedor', 'administrador_acessor_id', 'doador_conjugue_id', 'ativo',
+        'bem_identificado', 'nome_planilha',
+    ];
+
     public function buscarPorComumPaginado(
         int $comumId,
         int $pagina = 1,

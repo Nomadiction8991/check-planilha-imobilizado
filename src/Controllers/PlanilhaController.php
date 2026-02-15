@@ -330,7 +330,7 @@ class PlanilhaController extends BaseController
             }
 
             $this->setMensagem($msg, $erros > 0 ? 'warning' : 'success');
-            $this->redirecionar('/spreadsheets/view');
+            $this->redirecionar('/products/view');
         } catch (\Exception $e) {
             error_log('Erro ao confirmar importação: ' . $e->getMessage());
             $this->setMensagem('Erro ao importar: ' . $e->getMessage(), 'danger');

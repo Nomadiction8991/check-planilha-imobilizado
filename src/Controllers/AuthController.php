@@ -27,7 +27,7 @@ class AuthController extends BaseController
     public function login(): void
     {
         if ($this->authService->isAuthenticated()) {
-            $this->redirecionar('/spreadsheets/view');
+            $this->redirecionar('/products/view');
             return;
         }
 
@@ -56,7 +56,7 @@ class AuthController extends BaseController
 
             $this->authService->authenticate($email, $senha);
 
-            $this->redirecionar('/spreadsheets/view');
+            $this->redirecionar('/products/view');
         } catch (\Exception $e) {
             $this->renderizar('auth/login', [
                 'erro' => $e->getMessage(),

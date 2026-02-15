@@ -42,7 +42,7 @@
       "name": "Ver Planilhas",
       "short_name": "Planilhas",
       "description": "Acessar planilhas de produtos",
-      "url": "/spreadsheets/view",
+      "url": "/products/view",
       "icons": [{
         "src": "/assets/images/logo.png",
         "sizes": "192x192"

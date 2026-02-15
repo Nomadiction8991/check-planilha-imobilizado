@@ -10,7 +10,7 @@ $id_planilha = $comum_id;
 $PRODUTOS = $produtos ?? [];
 
 $pageTitle = 'VISUALIZAR PRODUTOS';
-$backUrl = '/spreadsheets/view?id=' . urlencode($comum_id) . '&comum_id=' . urlencode($comum_id);
+$backUrl = '/products/view?id=' . urlencode($comum_id) . '&comum_id=' . urlencode($comum_id);
 $customCssPath = '/public/assets/css/generated_custom.css';
 
 ob_start();

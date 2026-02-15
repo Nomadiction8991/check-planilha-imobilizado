@@ -29,7 +29,7 @@ if (file_exists($templatePath)) {
 }
 
 $pageTitle = 'Relatório 14.1';
-$backUrl = '/spreadsheets/view?comum_id=' . urlencode($comum_id ?? $id_planilha);
+$backUrl = '/products/view?comum_id=' . urlencode($comum_id ?? $id_planilha);
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuRelatorio" data-bs-toggle="dropdown" aria-expanded="false">

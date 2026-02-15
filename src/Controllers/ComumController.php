@@ -106,7 +106,7 @@ class ComumController extends BaseController
             $qsEdit = http_build_query(['busca' => $busca, 'pagina' => $pagina]);
             $editHref = '/churches/edit?id=' . (int) $comum['id'] .
                 ($qsEdit ? ('&' . $qsEdit) : '');
-            $viewHref = '/spreadsheets/view?comum_id=' . (int) $comum['id'];
+            $viewHref = '/products/view?comum_id=' . (int) $comum['id'];
 
             $html .= '<tr>';
             $html .= '<td class="fw-semibold text-uppercase">' . htmlspecialchars($comum['codigo']) . '</td>';

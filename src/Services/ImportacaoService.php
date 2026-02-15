@@ -227,6 +227,8 @@ class ImportacaoService
         $bem = $dadosCsv['bem'] ?? '';
         $complemento = $dadosCsv['complemento'] ?? '';
         $dependenciaDescricao = $dadosCsv['dependencia_descricao'] ?? '';
+        $bemIdentificado = $dadosCsv['bem_identificado'] ?? true;
+        $nomePlanilha = $dadosCsv['nome_original'] ?? $descricaoCompleta;
 
         $tipoBemId = $this->buscarOuCriarTipoBem($tipoBemCodigo);
         $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);
@@ -238,7 +240,9 @@ class ImportacaoService
                 'tipo_bem_id' => $tipoBemId,
                 'bem' => $bem,
                 'complemento' => $complemento,
-                'dependencia_id' => $dependenciaId
+                'dependencia_id' => $dependenciaId,
+                'bem_identificado' => $bemIdentificado ? 1 : 0,
+                'nome_planilha' => $nomePlanilha,
             ]);
         } else {
             $this->criarProduto([
@@ -255,13 +259,15 @@ class ImportacaoService
                 'editado_complemento' => $complemento,
                 'dependencia_id' => $dependenciaId,
                 'editado_dependencia_id' => $dependenciaId,
-                'novo' => 1,
+                'novo' => 0,
                 'checado' => 0,
                 'editado' => 0,
                 'imprimir_etiqueta' => 0,
                 'imprimir_14_1' => 0,
                 'observacao' => '',
-                'ativo' => 1
+                'ativo' => 1,
+                'bem_identificado' => $bemIdentificado ? 1 : 0,
+                'nome_planilha' => $nomePlanilha,
             ]);
         }
     }
@@ -291,6 +297,37 @@ class ImportacaoService
         $stmt->execute([
             ':codigo' => $codigo,
             ':descricao' => 'Tipo ' . $codigo
+        ]);
+
+        return (int) $this->conexao->lastInsertId();
+    }
+
+    /**
+     * Busca ou cria uma comum pelo código extraído da localidade.
+     * Código extraído: "BR 09-0038" → "09-0038"
+     */
+    private function buscarOuCriarComum(string $codigoComum): int
+    {
+        if (empty($codigoComum)) {
+            throw new Exception('Código da comum vazio — não é possível identificar a comum');
+        }
+
+        // Buscar comum pelo código
+        $stmt = $this->conexao->prepare("SELECT id FROM comums WHERE codigo = :codigo LIMIT 1");
+        $stmt->execute([':codigo' => $codigoComum]);
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($resultado) {
+            return (int) $resultado['id'];
+        }
+
+        // Comum não encontrada → criar automaticamente
+        $descricaoComum = 'Comum ' . $codigoComum;
+        
+        $stmt = $this->conexao->prepare("INSERT INTO comums (codigo, descricao) VALUES (:codigo, :descricao)");
+        $stmt->execute([
+            ':codigo' => $codigoComum,
+            ':descricao' => $descricaoComum
         ]);
 
         return (int) $this->conexao->lastInsertId();
@@ -572,7 +609,7 @@ class ImportacaoService
                 'editado_complemento' => $complemento,
                 'dependencia_id' => $dependenciaId,
                 'editado_dependencia_id' => $dependenciaId,
-                'novo' => 1,
+                'novo' => 0,
                 'checado' => 0,
                 'editado' => 0,
                 'imprimir_etiqueta' => 0,

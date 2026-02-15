@@ -220,7 +220,7 @@ ob_start();
                                     <td><span class="badge <?php echo $STATUS_badge; ?>"><?php echo $STATUS_texto; ?></span></td>
                                     <td>
                                         <div class="d-flex justify-content-center gap-2">
-                                            <a href="/spreadsheets/view?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="VISUALIZAR">
+                                            <a href="/products/view?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-primary" title="VISUALIZAR">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <a href="/planilhas/configuracao?id=<?php echo $planilha['id']; ?>" class="btn btn-sm btn-warning" title="EDITAR">

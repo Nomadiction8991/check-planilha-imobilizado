@@ -100,7 +100,7 @@ if (!isset($content)) {
             $pageTitle = $pageTitle ?? ($tituloPagina ?? null);
             $userName  = \App\Core\SessionManager::getUserName() ?? '';
             $menuPath  = $menuPath ?? '/menu';
-            $homePath  = $homePath ?? '/spreadsheets/view';
+            $homePath  = $homePath ?? '/products/view';
             $logoutPath = $logoutPath ?? '/logout';
 
             // Carregar comuns para o seletor (se usuário logado)

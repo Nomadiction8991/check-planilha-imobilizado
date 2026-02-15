@@ -7,7 +7,7 @@ require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
 
 $pageTitle = 'Relatório 14.1';
-$backUrl = '/spreadsheets/view?id=' . urlencode($id_planilha);
+$backUrl = '/products/view?id=' . urlencode($id_planilha);
 $customCssPath = '/assets/css/reports/report-141-new.css';
 
 

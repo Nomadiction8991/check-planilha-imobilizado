@@ -8,7 +8,7 @@ function goBack() {
     if (window.history.length > 1) {
         window.history.back();
     } else {
-        window.location.href = '/spreadsheets/view';
+        window.location.href = '/products/view';
     }
 }
 

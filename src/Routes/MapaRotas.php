@@ -59,12 +59,13 @@ class MapaRotas
             'POST /departments/delete' => [DependenciaController::class, 'delete'],
 
 
-            'GET /products' => [ProdutoController::class, 'index'],
+            'GET /products/view' => [PlanilhaController::class, 'visualizar'],
             'GET /products/create' => [ProdutoController::class, 'create'],
             'POST /products/create' => [ProdutoController::class, 'store'],
             'GET /products/edit' => [ProdutoController::class, 'edit'],
             'POST /products/edit' => [ProdutoController::class, 'update'],
             'POST /products/delete' => [ProdutoController::class, 'delete'],
+            'GET /products/observation' => [ProdutoController::class, 'observacaoForm'],
             'POST /products/observation' => [ProdutoController::class, 'observacao'],
             'POST /products/check' => [ProdutoController::class, 'check'],
             'GET /products/label' => [ProdutoController::class, 'etiqueta'],
@@ -74,7 +75,7 @@ class MapaRotas
 
             'GET /spreadsheets/import' => [PlanilhaController::class, 'importar'],
             'POST /spreadsheets/import' => [PlanilhaController::class, 'processarImportacao'],
-            'GET /spreadsheets/view' => [PlanilhaController::class, 'visualizar'],
+            'GET /spreadsheets/view' => [PlanilhaController::class, 'visualizar'],  // Mantido para compatibilidade, redireciona
             'GET /spreadsheets/preview' => [PlanilhaController::class, 'preview'],
             'POST /spreadsheets/preview/save-actions' => [PlanilhaController::class, 'salvarAcoesPreview'],
             'POST /spreadsheets/preview/bulk-action' => [PlanilhaController::class, 'acaoMassaPreview'],

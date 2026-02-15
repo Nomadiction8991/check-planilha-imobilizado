@@ -217,7 +217,7 @@ if ($mostrar_novos) $total_mostrar += $total_novos;
 
 
 $pageTitle = 'Imprimir Alterações';
-$backUrl = '/spreadsheets/view?id=' . $id_planilha . '&comum_id=' . $id_planilha;
+$backUrl = '/products/view?id=' . $id_planilha . '&comum_id=' . $id_planilha;
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuAlteracao" data-bs-toggle="dropdown" aria-expanded="false">

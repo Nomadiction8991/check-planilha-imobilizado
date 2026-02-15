@@ -38,7 +38,7 @@ if ($start !== false && $end !== false) {
 }
 
 $pageTitle = "Relatório {$formulario}";
-$backUrl = '/spreadsheets/view?id=' . urlencode($id_planilha);
+$backUrl = '/products/view?id=' . urlencode($id_planilha);
 $headerActions = '
     <div class="dropdown">
         <button class="btn-header-action" type="button" id="menuRelatorio" data-bs-toggle="dropdown">

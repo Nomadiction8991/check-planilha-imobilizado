@@ -189,8 +189,22 @@ class CsvParserService
             $dependencia = trim((string) ($row[$colDependencia] ?? ''));
             $localidade = trim((string) ($row[$colLocalidade] ?? ''));
 
-            // Parsear o campo "Nome" → tipo_bem_codigo + descricao + bem + complemento
+            // Parsear o campo "Nome" → tipo_bem_codigo + descricao + bem + complemento + dependencia_inline
             $dadosParsed = $this->parsearNome($nomeCompleto);
+
+            // Extrair código da comum da localidade (ex: "BR 09-0038" → "09-0038")
+            $codigoComum = $this->extrairCodigoComum($localidade);
+
+            // Usar dependência inline se disponível, senão usa coluna dependência
+            $dependenciaFinal = !empty($dadosParsed['dependencia_inline']) 
+                ? $dadosParsed['dependencia_inline'] 
+                : strtoupper($dependencia);
+
+            // Validar se o bem foi identificado corretamente
+            $bemIdentificado = $this->validarBemIdentificado(
+                $dadosParsed['bem'], 
+                $dadosParsed['tipo_bem_codigo']
+            );
 
             $linhas[] = [
                 'codigo' => $codigo,
@@ -198,8 +212,12 @@ class CsvParserService
                 'tipo_bem_codigo' => (string) $dadosParsed['tipo_bem_codigo'],
                 'bem' => $dadosParsed['bem'],
                 'complemento' => $dadosParsed['complemento'],
-                'dependencia' => strtoupper($dependencia),
+                'dependencia' => $dependenciaFinal,
                 'localidade' => $localidade,
+                'codigo_comum' => $codigoComum,
+                'nome_original' => $dadosParsed['nome_original'],
+                'quantidade' => $dadosParsed['quantidade'],
+                'bem_identificado' => $bemIdentificado,
                 '_linha_original' => $i + 1, // 1-indexed para o usuário
             ];
         }
@@ -287,8 +305,16 @@ class CsvParserService
 
     /**
      * Parseia o campo "Nome" do relatório para extrair tipo_bem, bem e complemento.
-     * Formato esperado: "TIPO_CODE - TIPO_DESC BEM COMPLEMENTO"
-     * Exemplo: "70 - REFORMA EDIFICACAO E ALVENARIA REFORMA"
+     * 
+     * Formato do CSV: "4 - CADEIRA CADEIRA TRIBUNA ALMOFADADA PULPITO"
+     * Onde:
+     *   4 = código do tipo_bem
+     *   Texto após "-" = BEM + COMPLEMENTO (separação inteligente usando lista de bens do tipo)
+     * 
+     * O tipo_bem tem descricao como "CADEIRA" ou "CADEIRA / MESA". 
+     * Precisamos identificar qual opção aparece no texto para separar BEM do COMPLEMENTO.
+     * 
+     * Também suporta formato personalizado: "1x - Banco 2,50m [Banheiro]"
      */
     private function parsearNome(string $nome): array
     {
@@ -297,31 +323,229 @@ class CsvParserService
             'descricao_apos_tipo' => $nome,
             'bem' => $nome,
             'complemento' => '',
+            'quantidade' => 1,
+            'dependencia_inline' => '',
+            'nome_original' => $nome,
         ];
 
         if (empty($nome)) {
             return $resultado;
         }
 
-        // Tenta extrair código tipo_bem: "70 - ..." ou "4 - ..."
+        // FORMATO PERSONALIZADO: "1x - Banco 2,50m [Banheiro]"
+        if (preg_match('/^(\d+)x\s*\-\s*(.+)$/ui', $nome, $m)) {
+            $quantidade = (int) $m[1];
+            $restoNome = trim($m[2]);
+
+            // Extrair dependência entre colchetes
+            $dependenciaInline = '';
+            if (preg_match('/^(.+?)\s*\[([^\]]+)\]\s*$/u', $restoNome, $depMatch)) {
+                $restoNome = trim($depMatch[1]);
+                $dependenciaInline = trim($depMatch[2]);
+            }
+
+            // Separar bem e complemento
+            if (preg_match('/^([A-ZÀ-Ú\s]+?)\s+((?:\d|[A-ZÀ-Ú]+\s+\d).+)$/ui', $restoNome, $bemMatch)) {
+                $bem = mb_strtoupper(trim($bemMatch[1]), 'UTF-8');
+                $complemento = mb_strtoupper(trim($bemMatch[2]), 'UTF-8');
+            } else {
+                $bem = mb_strtoupper($restoNome, 'UTF-8');
+                $complemento = '';
+            }
+
+            $resultado['quantidade'] = $quantidade;
+            $resultado['bem'] = $bem;
+            $resultado['complemento'] = $complemento;
+            $resultado['dependencia_inline'] = mb_strtoupper($dependenciaInline, 'UTF-8');
+            $resultado['descricao_apos_tipo'] = $restoNome;
+            
+            return $resultado;
+        }
+
+        // FORMATO CSV: "4 - CADEIRA CADEIRA TRIBUNA ALMOFADADA PULPITO"
         if (preg_match('/^\s*(\d{1,3})(?:[\.,]\d+)?\s*[\-–—]\s*(.+)$/u', $nome, $m)) {
             $resultado['tipo_bem_codigo'] = $m[1];
             $textoAposCodigo = trim($m[2]);
             $resultado['descricao_apos_tipo'] = $textoAposCodigo;
 
-            // O texto após o tipo é: "TIPO_DESC BEM COMPLEMENTO"
-            // Tentamos separar bem e complemento por " - " se existir
-            if (preg_match('/^(.+?)\s+\-\s+(.+)$/u', $textoAposCodigo, $parts)) {
-                $resultado['bem'] = trim($parts[1]);
-                $resultado['complemento'] = trim($parts[2]);
+            // Buscar as opções de bens do tipo_bem no banco
+            $bensDoTipo = $this->obterBensDoTipo($m[1]);
+            
+            if (!empty($bensDoTipo)) {
+                // ──────────────────────────────────────────────────────────
+                // O formato CSV é: [ECO_TIPO_DESC] [BEM_SELECIONADO] [COMPLEMENTO]
+                // Ex: "CADEIRA CADEIRA TRIBUNA ALMOFADADA PULPITO"
+                //      ^^^^^^^ eco     ^^^^^^^ BEM  ^^^^^^^^^^^^^^^^^^^^^^^^ complemento
+                // Ex: "BANCO DE MADEIRA / GENUFLEXÓRIO BANCOS DE MADEIRA 2,50 M"
+                //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ eco  ^^^^^^^^^^^^^^^^^^ BEM+compl
+                //
+                // PASSO 1: Remover o "eco" da descrição do tipo_bem do início do texto
+                // PASSO 2: Identificar o BEM no texto restante
+                // ──────────────────────────────────────────────────────────
+                
+                usort($bensDoTipo, fn($a, $b) => mb_strlen($b) - mb_strlen($a));
+                
+                $textoUpper = mb_strtoupper($textoAposCodigo, 'UTF-8');
+                $textoNorm = $this->removerAcentos($textoUpper);
+                $bemEncontrado = false;
+                
+                // ── PASSO 1: Remover eco da descrição do tipo ──
+                // O CSV ecoa todas as opções do tipo separadas por " / "
+                // Remover cada opção que aparece na ordem do início do texto
+                $textoRestante = $textoUpper;
+                $textoRestanteNorm = $textoNorm;
+                
+                foreach ($bensDoTipo as $opcao) {
+                    $opcaoUpper = mb_strtoupper(trim($opcao), 'UTF-8');
+                    $opcaoNorm = $this->removerAcentos($opcaoUpper);
+                    
+                    if (strpos($textoRestanteNorm, $opcaoNorm) === 0) {
+                        // Remover esta opção do início
+                        $textoRestante = mb_substr($textoRestante, mb_strlen($opcaoUpper));
+                        $textoRestanteNorm = substr($textoRestanteNorm, strlen($opcaoNorm));
+                        // Remover separadores residuais (espaço, /, -)
+                        $textoRestante = preg_replace('/^\s*[\/\-\|]+\s*/', ' ', $textoRestante);
+                        $textoRestante = trim($textoRestante);
+                        $textoRestanteNorm = preg_replace('/^\s*[\/\-\|]+\s*/', ' ', $textoRestanteNorm);
+                        $textoRestanteNorm = trim($textoRestanteNorm);
+                    }
+                }
+                
+                // ── PASSO 2: Identificar BEM no texto restante ──
+                if (!empty($textoRestante)) {
+                    foreach ($bensDoTipo as $bemOpcao) {
+                        $bemOpcaoUpper = mb_strtoupper(trim($bemOpcao), 'UTF-8');
+                        $bemOpcaoNorm = $this->removerAcentos($bemOpcaoUpper);
+                        
+                        if (strpos($textoRestanteNorm, $bemOpcaoNorm) === 0) {
+                            $resultado['bem'] = $bemOpcaoUpper;
+                            $complemento = trim(mb_substr($textoRestante, mb_strlen($bemOpcaoUpper)));
+                            $complemento = preg_replace('/^[\s\-\/]+/', '', $complemento);
+                            $resultado['complemento'] = mb_strtoupper($complemento, 'UTF-8');
+                            $bemEncontrado = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!$bemEncontrado) {
+                        // BEM não correspondeu exatamente → usar primeira opção do tipo
+                        // e todo o texto restante como complemento
+                        $resultado['bem'] = mb_strtoupper(trim($bensDoTipo[0]), 'UTF-8');
+                        $resultado['complemento'] = mb_strtoupper($textoRestante, 'UTF-8');
+                        $bemEncontrado = true;
+                    }
+                }
+                
+                if (!$bemEncontrado) {
+                    // Nenhum eco removido → fallback: match direto no texto completo
+                    foreach ($bensDoTipo as $bemOpcao) {
+                        $bemOpcaoNorm = $this->removerAcentos(mb_strtoupper(trim($bemOpcao), 'UTF-8'));
+                        if (strpos($textoNorm, $bemOpcaoNorm) === 0) {
+                            $resultado['bem'] = mb_strtoupper(trim($bemOpcao), 'UTF-8');
+                            $resto = trim(mb_substr($textoUpper, mb_strlen(trim($bemOpcao))));
+                            $resto = preg_replace('/^[\s\-\/]+/', '', $resto);
+                            $resultado['complemento'] = $resto;
+                            $bemEncontrado = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!$bemEncontrado) {
+                    $resultado['bem'] = $textoUpper;
+                    $resultado['complemento'] = '';
+                }
             } else {
-                // Sem separador, tudo é "bem"
-                $resultado['bem'] = $textoAposCodigo;
-                $resultado['complemento'] = '';
+                // Sem dados do tipo_bem → fallback: tenta separar por " - "
+                if (preg_match('/^(.+?)\s+\-\s+(.+)$/u', $textoAposCodigo, $parts)) {
+                    $resultado['bem'] = trim($parts[1]);
+                    $resultado['complemento'] = trim($parts[2]);
+                } else {
+                    $resultado['bem'] = $textoAposCodigo;
+                    $resultado['complemento'] = '';
+                }
             }
         }
 
         return $resultado;
+    }
+
+    /**
+     * Busca as opções de bens de um tipo_bem pelo código.
+     * A descricao do tipo_bem contém as opções separadas por "/".
+     * Exemplo: tipo 4 → descricao = "CADEIRA" → retorna ["CADEIRA"]
+     * Exemplo: tipo 1 → descricao = "BANCO DE MADEIRA/GENUFLEXORIO" → retorna ["BANCO DE MADEIRA", "GENUFLEXORIO"]
+     * 
+     * @return string[] Lista de opções de bens
+     */
+    private function obterBensDoTipo(string $tipoBemCodigo): array
+    {
+        if (empty($tipoBemCodigo)) {
+            return [];
+        }
+
+        try {
+            $stmt = $this->conexao->prepare("SELECT descricao FROM tipos_bens WHERE codigo = :codigo LIMIT 1");
+            $stmt->execute([':codigo' => $tipoBemCodigo]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row || empty($row['descricao'])) {
+                return [];
+            }
+
+            return array_map('trim', explode('/', $row['descricao']));
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Extrai o código da comum da coluna "Localidade".
+     * Formato: "BR 09-0038" → retorna "09-0038"
+     * Extrai apenas os números mantendo hífens e zeros à esquerda.
+     */
+    private function extrairCodigoComum(string $localidade): string
+    {
+        if (empty($localidade)) {
+            return '';
+        }
+
+        // Remove letras e espaços, mantém apenas números e hífen
+        // "BR 09-0038" → "09-0038"
+        $codigo = preg_replace('/[^0-9\-]/', '', $localidade);
+        
+        return trim($codigo);
+    }
+
+    /**
+     * Valida se o "bem" extraído existe na lista de bens do tipo_bem correspondente.
+     * Retorna true se identificado, false se não encontrado na lista.
+     */
+    private function validarBemIdentificado(string $bem, string $tipoBemCodigo): bool
+    {
+        if (empty($bem) || empty($tipoBemCodigo)) {
+            return false;
+        }
+
+        $bensDisponiveis = $this->obterBensDoTipo($tipoBemCodigo);
+        
+        if (empty($bensDisponiveis)) {
+            return false;
+        }
+
+        $bemNormalizado = mb_strtoupper(trim($bem), 'UTF-8');
+
+        foreach ($bensDisponiveis as $bemDisponivel) {
+            $bemDisponivelUpper = mb_strtoupper(trim($bemDisponivel), 'UTF-8');
+            if ($bemDisponivelUpper === $bemNormalizado) {
+                return true;
+            }
+            if (str_contains($bemDisponivelUpper, $bemNormalizado) || str_contains($bemNormalizado, $bemDisponivelUpper)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // ─── CONFIGURAÇÕES ───

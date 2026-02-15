@@ -30,7 +30,7 @@ if ($_REQUEST_METHOD === 'POST') {
 
     if (!$PRODUTO_id || !$id_planilha) {
         $query_string = http_build_query(array_merge(['id' => $id_planilha], $filtros));
-        header('Location: /spreadsheets/view?' . $query_string);
+        header('Location: /products/view?' . $query_string);
         exit;
     }
 
@@ -53,7 +53,7 @@ if ($_REQUEST_METHOD === 'POST') {
                 $filtros,
                 ['erro' => 'Não é possível desmarcar o check se o produto estiver marcado para impressão.']
             ));
-            header('Location: /spreadsheets/view?' . $query_string);
+            header('Location: /products/view?' . $query_string);
             exit;
         }
 
@@ -66,7 +66,7 @@ if ($_REQUEST_METHOD === 'POST') {
 
 
         $query_string = http_build_query(array_merge(['id' => $comum_id, 'comum_id' => $comum_id], $filtros));
-        header('Location: /spreadsheets/view?' . $query_string);
+        header('Location: /products/view?' . $query_string);
         exit;
     } catch (Exception $e) {
         $query_string = http_build_query(array_merge(
@@ -74,7 +74,7 @@ if ($_REQUEST_METHOD === 'POST') {
             $filtros,
             ['erro' => 'Erro ao processar check: ' . $e->getMessage()]
         ));
-        header('Location: /spreadsheets/view?' . $query_string);
+        header('Location: /products/view?' . $query_string);
         exit;
     }
 } else {

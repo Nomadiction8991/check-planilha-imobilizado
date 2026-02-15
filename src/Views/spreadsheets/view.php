@@ -998,6 +998,72 @@ if (false && !empty($acesso_bloqueado)) {
                 color: #333;
             }
 
+            /* Header do card: código + tag */
+            .produto-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.3rem;
+            }
+
+            .tag-cadastro-novo {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                background: #28A745;
+                color: #fff;
+                font-size: 0.65rem;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 12px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+                line-height: 1.4;
+            }
+
+            .tag-cadastro-novo i {
+                font-size: 0.6rem;
+            }
+
+            /* Tag de atenção para bem não identificado */
+            .tag-bem-nao-identificado {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                background: #DC3545;
+                color: #fff;
+                font-size: 0.65rem;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 12px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+                line-height: 1.4;
+                animation: pulse-red 2s ease-in-out infinite;
+            }
+
+            .tag-bem-nao-identificado i {
+                font-size: 0.6rem;
+            }
+
+            @keyframes pulse-red {
+                0%, 100% {
+                    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+                }
+                50% {
+                    box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+                }
+            }
+
+            /* Produto com bem não identificado - bordas vermelhas */
+            .list-group-item.bem-nao-identificado {
+                border: 3px solid #DC3545 !important;
+                border-left: 6px solid #DC3545 !important;
+                background-color: #FFF5F5 !important;
+            }
+
             .acao-container {
                 display: flex;
                 gap: 0.5rem;
@@ -1378,9 +1444,10 @@ ob_start();
                 <?php
                 $produtoId = $p['id_PRODUTO'] ?? $p['id_produto'] ?? $p['ID_PRODUTO'] ?? ($p['ID_PRODUTO'] ?? '');
                 $produtoId = intval($produtoId);
+                $bemNaoIdentificado = isset($p['bem_identificado']) && (int)$p['bem_identificado'] === 0;
                 ?>
                 <div
-                    class="list-group-item <?php echo $classe; ?><?php echo $tipo_invalido ? ' tipo-nao-identificado' : ''; ?>"
+                    class="list-group-item <?php echo $classe; ?><?php echo $tipo_invalido ? ' tipo-nao-identificado' : ''; ?><?php echo $bemNaoIdentificado ? ' bem-nao-identificado' : ''; ?>"
                     data-produto-id="<?php echo $produtoId; ?>"
                     data-ativo="<?php echo (int) $p['ativo']; ?>"
                     data-checado="<?php echo (int) $p['checado']; ?>"
@@ -1388,9 +1455,21 @@ ob_start();
                     data-observacao="<?php echo htmlspecialchars($p['observacao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                     data-editado="<?php echo (int) $p['editado']; ?>"
                     <?php echo $tipo_invalido ? 'title="Tipo de bem não identificado"' : ''; ?>>
-                    <!-- Código -->
-                    <div class="codigo-PRODUTO">
-                        <?php echo htmlspecialchars($p['codigo']); ?>
+                    <!-- Header: Código + Tag -->
+                    <div class="produto-header">
+                        <div class="codigo-PRODUTO" style="margin-bottom: 0;">
+                            <?php echo htmlspecialchars($p['codigo']); ?>
+                        </div>
+                        <?php if (!empty($p['novo'])): ?>
+                            <span class="tag-cadastro-novo">
+                                <i class="bi bi-tag-fill"></i> NOVO
+                            </span>
+                        <?php endif; ?>
+                        <?php if ($bemNaoIdentificado): ?>
+                            <span class="tag-bem-nao-identificado">
+                                <i class="bi bi-exclamation-triangle-fill"></i> ATENÇÃO
+                            </span>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Edição Pendente -->
@@ -1447,11 +1526,36 @@ ob_start();
 
                     <!-- Informações -->
                     <div class="info-PRODUTO">
-                        <?php echo htmlspecialchars($p['descricao_completa']); ?><br>
-                        <?php if (!empty($p['descricao_velha'])): ?>
-                            <small style="font-size: 0.7em; color: #666; opacity: 0.8;">
-                                <?php echo htmlspecialchars($p['descricao_velha']); ?>
-                            </small><br>
+                        <?php
+                        // Construir nome personalizado: 1x - (TIPO_DESC) BEM COMPLEMENTO [DEPENDENCIA]
+                        $tipoDescExibir = $p['tipo_desc'] ?? '';
+                        $bemExibir = !empty($p['editado_bem']) ? $p['editado_bem'] : ($p['bem'] ?? '');
+                        $compExibir = !empty($p['editado_complemento']) ? $p['editado_complemento'] : ($p['complemento'] ?? '');
+                        $depExibir = !empty($p['editado_dependencia_desc']) ? $p['editado_dependencia_desc'] : ($p['dependencia_desc'] ?? '');
+
+                        $nomePersonalizado = '1x - ';
+                        if (!empty($tipoDescExibir)) {
+                            $nomePersonalizado .= '(' . mb_strtoupper($tipoDescExibir, 'UTF-8') . ') ';
+                        }
+                        if (!empty($bemExibir)) {
+                            $nomePersonalizado .= mb_strtoupper($bemExibir, 'UTF-8');
+                        }
+                        if (!empty($compExibir)) {
+                            $nomePersonalizado .= ' ' . mb_strtoupper($compExibir, 'UTF-8');
+                        }
+                        if (!empty($depExibir)) {
+                            $nomePersonalizado .= ' [' . mb_strtoupper($depExibir, 'UTF-8') . ']';
+                        }
+                        ?>
+                        <strong><?php echo htmlspecialchars(trim($nomePersonalizado)); ?></strong><br>
+                        <?php
+                        // Mostrar nome original da planilha embaixo (menor, sem bold)
+                        $nomePlanilha = $p['nome_planilha'] ?? $p['descricao_completa'] ?? '';
+                        if (!empty($nomePlanilha)):
+                        ?>
+                            <small style="font-size: 0.75em; color: #888; font-weight: normal;">
+                                <?php echo htmlspecialchars($nomePlanilha); ?>
+                            </small>
                         <?php endif; ?>
                     </div>
 
@@ -1481,7 +1585,7 @@ ob_start();
                             <input type="hidden" name="produto_id" value="<?php echo $produtoId; ?>">
                             <input type="hidden" name="imprimir" value="<?php echo ($p['imprimir_etiqueta'] ?? 0) ? '0' : '1'; ?>">
                             <button type="submit" class="btn btn-outline-info btn-sm <?php echo ($p['imprimir_etiqueta'] ?? 0) == 1 ? 'active' : ''; ?>" title="Etiqueta" <?php echo $imprimirDisabled ? 'disabled' : ''; ?>">
-                                <i class="bi bi-printer-fill"></i>
+                                <i class="bi bi-tag-fill"></i>
                             </button>
                         </form>
 

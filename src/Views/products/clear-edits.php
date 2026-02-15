@@ -21,7 +21,7 @@ $filtro_STATUS = $_GET['STATUS'] ?? '';
 function redirectBack($params)
 {
     $qs = http_build_query($params);
-    header('Location: /spreadsheets/view?' . $qs);
+    header('Location: /products/view?' . $qs);
     exit;
 }
 

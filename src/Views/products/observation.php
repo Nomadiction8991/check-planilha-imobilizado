@@ -8,11 +8,12 @@ require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
 $pageTitle = to_uppercase('observacoes');
 $filtroStatus = $filtro_status ?? ($filtro_STATUS ?? '');
-$backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtroStatus);
+$backUrl = getReturnUrl($comum_id ?? null, $pagina ?? null, $filtro_nome ?? null, $filtro_dependencia ?? null, $filtro_codigo ?? null, $filtroStatus);
 
 $produtoDados = $produto ?? [];
 $descricaoCompleta = isset($descricaoCompleta) ? $descricaoCompleta : trim($produtoDados['editado_descricao_completa'] ?? $produtoDados['descricao_completa'] ?? $produtoDados['descricao'] ?? '');
 $codigoProduto = $produtoDados['codigo'] ?? '';
+$idProdutoObs = $id_produto ?? ($produtoDados['id_produto'] ?? 0);
 
 ob_start();
 ?>
@@ -36,11 +37,12 @@ ob_start();
     </div>
 </div>
 
-<form method="POST">
-    <input type="hidden" name="pagina" value="<?php echo $pagina; ?>">
-    <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome, ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia, ENT_QUOTES, 'UTF-8'); ?>">
-    <input type="hidden" name="filtro_codigo" value="<?php echo htmlspecialchars($filtro_codigo, ENT_QUOTES, 'UTF-8'); ?>">
+<form method="POST" action="/products/observation?id_produto=<?php echo $idProdutoObs; ?>">
+    <input type="hidden" name="produto_id" value="<?php echo $idProdutoObs; ?>">
+    <input type="hidden" name="pagina" value="<?php echo $pagina ?? 1; ?>">
+    <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" name="filtro_codigo" value="<?php echo htmlspecialchars($filtro_codigo ?? '', ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtroStatus, ENT_QUOTES, 'UTF-8'); ?>">
 
     <div class="card mb-3">

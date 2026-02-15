@@ -337,7 +337,7 @@ if (!function_exists('getReturnUrl')) {
         if ($filtro_status) $params['filtro_STATUS'] = $filtro_status;
 
         $qs = http_build_query($params);
-        return '/produtos' . ($qs ? '?' . $qs : '');
+        return '/products/view' . ($qs ? '?' . $qs : '');
     }
 }
 

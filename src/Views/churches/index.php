@@ -89,7 +89,7 @@ $limite = $limite ?? 10;
 
 
                     $editUrl = ViewHelper::urlComQuery('/churches/edit', ['id' => $comum['id']]);
-                    $viewUrl = ViewHelper::urlComQuery('/spreadsheets/view', ['comum_id' => $comum['id']]);
+                    $viewUrl = ViewHelper::urlComQuery('/products/view', ['comum_id' => $comum['id']]);
                     ?>
                     <tr>
                         <td class="fw-semibold text-uppercase">

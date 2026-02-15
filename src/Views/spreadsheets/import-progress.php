@@ -86,7 +86,7 @@ ob_start();
                     <span id="sucesso-erros-txt"></span>
                 </p>
                 <div class="mt-3 d-grid gap-2">
-                    <a href="/spreadsheets/view" class="btn btn-primary btn-sm">
+                    <a href="/products/view" class="btn btn-primary btn-sm">
                         <i class="bi bi-eye me-1"></i>VISUALIZAR PRODUTOS
                     </a>
                     <a href="/spreadsheets/import" class="btn btn-secondary btn-sm">
