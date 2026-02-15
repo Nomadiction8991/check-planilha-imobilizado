@@ -65,30 +65,30 @@ $erros = 0;
 foreach ($produtos as $i => $prod) {
     $idProduto = $prod['id_produto'];
     $nomePlanilha = $prod['nome_planilha'];
-    
+
     try {
         // Re-parsear o nome da planilha usando a lógica corrigida
         $parsed = $refMethod->invoke($parser, $nomePlanilha);
-        
+
         $novoBem = $parsed['bem'] ?? $prod['bem'];
         $novoComplemento = $parsed['complemento'] ?? '';
-        
+
         // Verificar se houve mudança
         $mudou = ($novoBem !== $prod['bem']) || ($novoComplemento !== $prod['complemento']);
-        
+
         if ($mudou) {
             // Determinar editado_bem: se era cópia do bem antigo, atualizar também
             $novoEditadoBem = $prod['editado_bem'];
             if ($prod['editado_bem'] === $prod['bem'] || empty($prod['editado_bem'])) {
                 $novoEditadoBem = $novoBem;
             }
-            
+
             // Determinar editado_complemento: se era cópia do complemento antigo, atualizar também
             $novoEditadoCompl = $prod['editado_complemento'];
             if ($prod['editado_complemento'] === $prod['complemento'] || empty($prod['editado_complemento'])) {
                 $novoEditadoCompl = $novoComplemento;
             }
-            
+
             if (!$dryRun) {
                 $updateStmt->execute([
                     ':bem'                  => $novoBem,
@@ -98,9 +98,9 @@ foreach ($produtos as $i => $prod) {
                     ':id'                   => $idProduto,
                 ]);
             }
-            
+
             $atualizados++;
-            
+
             // Mostrar os primeiros 20 para acompanhamento
             if ($atualizados <= 20) {
                 echo "  #{$idProduto}: bem=[{$novoBem}] compl=[{$novoComplemento}]\n";
@@ -113,7 +113,7 @@ foreach ($produtos as $i => $prod) {
         $erros++;
         echo "  ERRO ID={$idProduto}: {$e->getMessage()}\n";
     }
-    
+
     // Progresso a cada 500
     if (($i + 1) % 500 === 0) {
         echo "  ... processados " . ($i + 1) . "/{$total}\n";

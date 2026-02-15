@@ -1049,9 +1049,12 @@ if (false && !empty($acesso_bloqueado)) {
             }
 
             @keyframes pulse-red {
-                0%, 100% {
+
+                0%,
+                100% {
                     box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
                 }
+
                 50% {
                     box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
                 }

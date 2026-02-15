@@ -196,13 +196,13 @@ class CsvParserService
             $codigoComum = $this->extrairCodigoComum($localidade);
 
             // Usar dependência inline se disponível, senão usa coluna dependência
-            $dependenciaFinal = !empty($dadosParsed['dependencia_inline']) 
-                ? $dadosParsed['dependencia_inline'] 
+            $dependenciaFinal = !empty($dadosParsed['dependencia_inline'])
+                ? $dadosParsed['dependencia_inline']
                 : strtoupper($dependencia);
 
             // Validar se o bem foi identificado corretamente
             $bemIdentificado = $this->validarBemIdentificado(
-                $dadosParsed['bem'], 
+                $dadosParsed['bem'],
                 $dadosParsed['tipo_bem_codigo']
             );
 
@@ -358,7 +358,7 @@ class CsvParserService
             $resultado['complemento'] = $complemento;
             $resultado['dependencia_inline'] = mb_strtoupper($dependenciaInline, 'UTF-8');
             $resultado['descricao_apos_tipo'] = $restoNome;
-            
+
             return $resultado;
         }
 
@@ -370,7 +370,7 @@ class CsvParserService
 
             // Buscar as opções de bens do tipo_bem no banco
             $bensDoTipo = $this->obterBensDoTipo($m[1]);
-            
+
             if (!empty($bensDoTipo)) {
                 // ──────────────────────────────────────────────────────────
                 // O formato CSV é: [ECO_TIPO_DESC] [BEM_SELECIONADO] [COMPLEMENTO]
@@ -382,23 +382,23 @@ class CsvParserService
                 // PASSO 1: Remover o "eco" da descrição do tipo_bem do início do texto
                 // PASSO 2: Identificar o BEM no texto restante
                 // ──────────────────────────────────────────────────────────
-                
+
                 usort($bensDoTipo, fn($a, $b) => mb_strlen($b) - mb_strlen($a));
-                
+
                 $textoUpper = mb_strtoupper($textoAposCodigo, 'UTF-8');
                 $textoNorm = $this->removerAcentos($textoUpper);
                 $bemEncontrado = false;
-                
+
                 // ── PASSO 1: Remover eco da descrição do tipo ──
                 // O CSV ecoa todas as opções do tipo separadas por " / "
                 // Remover cada opção que aparece na ordem do início do texto
                 $textoRestante = $textoUpper;
                 $textoRestanteNorm = $textoNorm;
-                
+
                 foreach ($bensDoTipo as $opcao) {
                     $opcaoUpper = mb_strtoupper(trim($opcao), 'UTF-8');
                     $opcaoNorm = $this->removerAcentos($opcaoUpper);
-                    
+
                     if (strpos($textoRestanteNorm, $opcaoNorm) === 0) {
                         // Remover esta opção do início
                         $textoRestante = mb_substr($textoRestante, mb_strlen($opcaoUpper));
@@ -410,13 +410,13 @@ class CsvParserService
                         $textoRestanteNorm = trim($textoRestanteNorm);
                     }
                 }
-                
+
                 // ── PASSO 2: Identificar BEM no texto restante ──
                 if (!empty($textoRestante)) {
                     foreach ($bensDoTipo as $bemOpcao) {
                         $bemOpcaoUpper = mb_strtoupper(trim($bemOpcao), 'UTF-8');
                         $bemOpcaoNorm = $this->removerAcentos($bemOpcaoUpper);
-                        
+
                         if (strpos($textoRestanteNorm, $bemOpcaoNorm) === 0) {
                             $resultado['bem'] = $bemOpcaoUpper;
                             $complemento = trim(mb_substr($textoRestante, mb_strlen($bemOpcaoUpper)));
@@ -426,7 +426,7 @@ class CsvParserService
                             break;
                         }
                     }
-                    
+
                     if (!$bemEncontrado) {
                         // BEM não correspondeu exatamente → usar primeira opção do tipo
                         // e todo o texto restante como complemento
@@ -435,7 +435,7 @@ class CsvParserService
                         $bemEncontrado = true;
                     }
                 }
-                
+
                 if (!$bemEncontrado) {
                     // Nenhum eco removido → fallback: match direto no texto completo
                     foreach ($bensDoTipo as $bemOpcao) {
@@ -450,7 +450,7 @@ class CsvParserService
                         }
                     }
                 }
-                
+
                 if (!$bemEncontrado) {
                     $resultado['bem'] = $textoUpper;
                     $resultado['complemento'] = '';
@@ -513,7 +513,7 @@ class CsvParserService
         // Remove letras e espaços, mantém apenas números e hífen
         // "BR 09-0038" → "09-0038"
         $codigo = preg_replace('/[^0-9\-]/', '', $localidade);
-        
+
         return trim($codigo);
     }
 
@@ -528,7 +528,7 @@ class CsvParserService
         }
 
         $bensDisponiveis = $this->obterBensDoTipo($tipoBemCodigo);
-        
+
         if (empty($bensDisponiveis)) {
             return false;
         }

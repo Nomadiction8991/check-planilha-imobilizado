@@ -323,7 +323,7 @@ class ImportacaoService
 
         // Comum não encontrada → criar automaticamente
         $descricaoComum = 'Comum ' . $codigoComum;
-        
+
         $stmt = $this->conexao->prepare("INSERT INTO comums (codigo, descricao) VALUES (:codigo, :descricao)");
         $stmt->execute([
             ':codigo' => $codigoComum,
