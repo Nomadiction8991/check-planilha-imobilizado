@@ -53,11 +53,10 @@ $mostrar_pendentes = isset($_GET['mostrar_pendentes']);
 $mostrar_checados = isset($_GET['mostrar_checados']);
 $mostrar_observacao = isset($_GET['mostrar_observacao']);
 $mostrar_checados_observacao = isset($_GET['mostrar_checados_observacao']);
-$mostrar_dr = isset($_GET['mostrar_dr']);
 $mostrar_etiqueta = isset($_GET['mostrar_etiqueta']);
 $mostrar_alteracoes = isset($_GET['mostrar_alteracoes']);
 $mostrar_novos = isset($_GET['mostrar_novos']);
-$filtro_dependencia = isset($_GET['dependencia']) && $_GET['dependencia'] !== '' ? (int)$_GET['dependencia'] : '';
+$filtro_dependencia = isset($_GET['dependencia']) && $_GET['dependencia'] !== '' ? (int)$_GET['dependencia'] : ''; 
 
 try {
 
@@ -130,7 +129,7 @@ if (!empty($dependencia_options)) {
   }
 }
 
-$PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_checados_observacao = $PRODUTOS_dr = $PRODUTOS_etiqueta = $PRODUTOS_alteracoes = $PRODUTOS_novos = [];
+$PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_checados_observacao = $PRODUTOS_etiqueta = $PRODUTOS_alteracoes = $PRODUTOS_novos = []; 
 foreach ($todos_PRODUTOS as $PRODUTO) {
 
   $nome_editado = trim($PRODUTO['nome_editado'] ?? '');
@@ -162,9 +161,7 @@ foreach ($todos_PRODUTOS as $PRODUTO) {
     $PRODUTOS_etiqueta[] = $PRODUTO;
   }
 
-  if ($esta_no_dr) {
-    $PRODUTOS_dr[] = $PRODUTO;
-  } elseif ($esta_etiqueta) {
+  if ($esta_etiqueta) {
     $PRODUTOS_etiqueta[] = $PRODUTO;
   } elseif ($tem_observacao && $esta_checado) {
     $PRODUTOS_checados_observacao[] = $PRODUTO;
@@ -182,11 +179,11 @@ $total_pendentes = count($PRODUTOS_pendentes);
 $total_checados = count($PRODUTOS_checados);
 $total_observacao = count($PRODUTOS_observacao);
 $total_checados_observacao = count($PRODUTOS_checados_observacao);
-$total_dr = count($PRODUTOS_dr);
+
 $total_etiqueta = count($PRODUTOS_etiqueta);
 $total_alteracoes = count($PRODUTOS_alteracoes);
 $total_novos = count($PRODUTOS_novos);
-$total_geral = count($todos_PRODUTOS);
+$total_geral = count($todos_PRODUTOS); 
 
 
 if (isset($_GET['debug'])) {
@@ -211,9 +208,8 @@ if ($mostrar_pendentes) $total_mostrar += $total_pendentes;
 if ($mostrar_checados) $total_mostrar += $total_checados;
 if ($mostrar_observacao) $total_mostrar += $total_observacao;
 if ($mostrar_checados_observacao) $total_mostrar += $total_checados_observacao;
-if ($mostrar_dr) $total_mostrar += $total_dr;
 if ($mostrar_etiqueta) $total_mostrar += $total_etiqueta;
-if ($mostrar_alteracoes) $total_mostrar += $total_alteracoes;
+if ($mostrar_alteracoes) $total_mostrar += $total_alteracoes; 
 if ($mostrar_novos) $total_mostrar += $total_novos;
 
 
@@ -285,8 +281,7 @@ ob_start();
           </div>
           <div class="col-12">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="secDR" name="mostrar_dr" value="1" <?php echo $mostrar_dr ? 'checked' : ''; ?>>
-              <label class="form-check-label" for="secDR">Devolução (DR) (<?php echo $total_dr; ?>)</label>
+
             </div>
           </div>
           <div class="col-12">
@@ -352,7 +347,7 @@ ob_start();
       <li><strong>Checados:</strong> <?php echo $total_checados; ?></li>
       <li><strong>Com observação:</strong> <?php echo $total_observacao; ?></li>
       <li><strong>Checados + observação:</strong> <?php echo $total_checados_observacao; ?></li>
-      <li><strong>DR:</strong> <?php echo $total_dr; ?></li>
+
       <li><strong>Etiqueta:</strong> <?php echo $total_etiqueta; ?></li>
       <li><strong>Pendentes:</strong> <?php echo $total_pendentes; ?></li>
       <li><strong>Com alterações:</strong> <?php echo $total_alteracoes; ?></li>
@@ -507,31 +502,7 @@ ob_start();
     </div>
   <?php endif; ?>
 
-  <?php if ($mostrar_dr && $total_dr > 0): ?>
-    <div class="card mb-3">
-      <div class="card-header">Devolução (DR) (<?php echo $total_dr; ?>)</div>
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-sm table-striped align-middle mb-0">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Descrição</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($PRODUTOS_dr as $PRODUTO): ?>
-                <tr>
-                  <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
-                  <td class="table-danger"><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  <?php endif; ?>
+
 
   <?php if ($mostrar_etiqueta && $total_etiqueta > 0): ?>
     <div class="card mb-3">
