@@ -73,6 +73,10 @@ class ImportacaoService
             throw new Exception('Importação não encontrada');
         }
 
+        // Limpar erros anterior desta importação para registrar apenas os novos
+        $stmtDeleteErros = $this->conexao->prepare('DELETE FROM import_erros WHERE importacao_id = :id');
+        $stmtDeleteErros->execute([':id' => $importacaoId]);
+
         $this->importacaoRepo->atualizar($importacaoId, [
             'status' => 'processando',
             'iniciada_em' => date('Y-m-d H:i:s')
@@ -523,6 +527,10 @@ class ImportacaoService
         if (!file_exists($importacao['arquivo_caminho'])) {
             throw new Exception('Arquivo não encontrado');
         }
+
+        // Limpar erros anteriores desta importação para registrar apenas os novos
+        $stmtDeleteErros = $this->conexao->prepare('DELETE FROM import_erros WHERE importacao_id = :id');
+        $stmtDeleteErros->execute([':id' => $importacaoId]);
 
         $this->importacaoRepo->atualizar($importacaoId, [
             'status' => 'processando',
