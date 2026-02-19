@@ -76,7 +76,7 @@ class ErrosImportacaoController extends BaseController
             'erros'          => $erros,
             'pagina'         => $paginaAtual,
             'total_paginas'  => $totalPaginas,
-            'total_registros'=> $totalRegistros,
+            'total_registros' => $totalRegistros,
         ]);
     }
 
@@ -140,11 +140,11 @@ class ErrosImportacaoController extends BaseController
                 $erro['codigo']       ?? '',
                 $erro['localidade']   ?? '',
                 $erro['codigo_comum'] ?? '',
-                $erro['descricao_csv']?? '',
+                $erro['descricao_csv'] ?? '',
                 $erro['bem']          ?? '',
                 $erro['complemento']  ?? '',
                 $erro['dependencia']  ?? '',
-                $erro['mensagem_erro']?? '',
+                $erro['mensagem_erro'] ?? '',
                 ($erro['resolvido'] ?? 0) ? 'Sim' : 'Não',
                 $erro['created_at']   ?? '',
             ], ';');

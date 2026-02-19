@@ -66,69 +66,69 @@ ob_start();
 
     <!-- Igrejas Detectadas -->
     <?php if (!empty($comunsDetectadas)): ?>
-    <div class="card mb-3">
-        <div class="card-header py-2 d-flex align-items-center gap-2">
-            <i class="bi bi-building"></i>
-            <strong class="small text-uppercase">Igrejas Detectadas (<?= count($comunsDetectadas) ?>)</strong>
+        <div class="card mb-3">
+            <div class="card-header py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-building"></i>
+                <strong class="small text-uppercase">Igrejas Detectadas (<?= count($comunsDetectadas) ?>)</strong>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm table-bordered mb-0 tabela-igrejas">
+                    <thead>
+                        <tr>
+                            <th style="width:80px" class="text-center">STATUS</th>
+                            <th>IGREJA</th>
+                            <th style="width: 220px">AÇÃO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($comunsDetectadas as $comumInfo):
+                            $codigoComum     = $comumInfo['codigo'];
+                            $statusComum     = $statusPorComum[$codigoComum] ?? 'iguais';
+                            $isIguais        = ($statusComum === 'iguais');
+                            $statusLabel     = match ($statusComum) {
+                                'novo'      => 'NOVOS',
+                                'atualizar' => 'ALTERAÇÕES',
+                                default     => 'IGUAIS',
+                            };
+                            $statusBadge     = match ($statusComum) {
+                                'novo'      => 'bg-success',
+                                'atualizar' => 'bg-warning text-dark',
+                                default     => 'bg-secondary',
+                            };
+                            $acaoSalvaIgreja = $isIguais ? 'pular' : ($igrejasSalvas[$codigoComum] ?? 'pular');
+                        ?>
+                            <tr>
+                                <td class="text-center">
+                                    <span class="badge <?= $statusBadge ?>">
+                                        <?= $statusLabel ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark font-monospace" style="font-size:.8rem">
+                                        <?= htmlspecialchars($codigoComum) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm select-igreja"
+                                        name="igrejas[<?= htmlspecialchars($codigoComum) ?>]"
+                                        data-codigo="<?= htmlspecialchars($codigoComum) ?>"
+                                        <?= $isIguais ? 'disabled' : '' ?>>
+                                        <option value="pular"
+                                            <?= (!in_array($acaoSalvaIgreja, ['importar'])) ? 'selected' : '' ?>>
+                                            ⊘ Não Importar
+                                        </option>
+                                        <option value="importar"
+                                            <?= $acaoSalvaIgreja === 'importar' ? 'selected' : '' ?>>
+                                            ✔ Importar
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="card-body p-0">
-            <table class="table table-sm table-bordered mb-0 tabela-igrejas">
-                <thead>
-                    <tr>
-                        <th style="width:80px" class="text-center">STATUS</th>
-                        <th>IGREJA</th>
-                        <th style="width: 220px">AÇÃO</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($comunsDetectadas as $comumInfo):
-                        $codigoComum     = $comumInfo['codigo'];
-                        $statusComum     = $statusPorComum[$codigoComum] ?? 'iguais';
-                        $isIguais        = ($statusComum === 'iguais');
-                        $statusLabel     = match ($statusComum) {
-                            'novo'      => 'NOVOS',
-                            'atualizar' => 'ALTERAÇÕES',
-                            default     => 'IGUAIS',
-                        };
-                        $statusBadge     = match ($statusComum) {
-                            'novo'      => 'bg-success',
-                            'atualizar' => 'bg-warning text-dark',
-                            default     => 'bg-secondary',
-                        };
-                        $acaoSalvaIgreja = $isIguais ? 'pular' : ($igrejasSalvas[$codigoComum] ?? 'pular');
-                    ?>
-                    <tr>
-                        <td class="text-center">
-                            <span class="badge <?= $statusBadge ?>">
-                                <?= $statusLabel ?>
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge bg-dark font-monospace" style="font-size:.8rem">
-                                <?= htmlspecialchars($codigoComum) ?>
-                            </span>
-                        </td>
-                        <td>
-                            <select class="form-select form-select-sm select-igreja"
-                                    name="igrejas[<?= htmlspecialchars($codigoComum) ?>]"
-                                    data-codigo="<?= htmlspecialchars($codigoComum) ?>"
-                                    <?= $isIguais ? 'disabled' : '' ?>>
-                                <option value="pular"
-                                    <?= (!in_array($acaoSalvaIgreja, ['importar'])) ? 'selected' : '' ?>>
-                                    ⊘ Não Importar
-                                </option>
-                                <option value="importar"
-                                    <?= $acaoSalvaIgreja === 'importar' ? 'selected' : '' ?>>
-                                    ✔ Importar
-                                </option>
-                            </select>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
     <?php endif; ?>
 
     <!-- Barra de Confirmação -->
@@ -142,7 +142,7 @@ ob_start();
                     <i class="bi bi-check-lg me-1"></i>Importar
                 </button>
                 <button type="button" class="btn btn-danger w-100" id="btn-importar-tudo"
-                        onclick="importarTudo()">
+                    onclick="importarTudo()">
                     <i class="bi bi-check-all me-1"></i>Importar Tudo
                 </button>
             </div>

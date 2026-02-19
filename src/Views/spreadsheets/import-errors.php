@@ -37,7 +37,7 @@ ob_start();
         </a>
         <?php if ($totalRegistros > 0): ?>
             <a href="/spreadsheets/import-errors/download?importacao_id=<?= $importacaoId ?>"
-               class="btn btn-outline-success btn-sm">
+                class="btn btn-outline-success btn-sm">
                 <i class="bi bi-download me-1"></i>Baixar CSV
             </a>
         <?php endif; ?>
@@ -86,11 +86,11 @@ ob_start();
                         </td>
                         <td class="small">
                             <?php
-                                $bem  = trim($erro['bem'] ?? '');
-                                $comp = trim($erro['complemento'] ?? '');
-                                echo htmlspecialchars($bem);
-                                if ($bem && $comp) echo ' ';
-                                echo htmlspecialchars($comp);
+                            $bem  = trim($erro['bem'] ?? '');
+                            $comp = trim($erro['complemento'] ?? '');
+                            echo htmlspecialchars($bem);
+                            if ($bem && $comp) echo ' ';
+                            echo htmlspecialchars($comp);
                             ?>
                         </td>
                         <td class="small">
@@ -102,9 +102,9 @@ ob_start();
                         <td class="text-center">
                             <div class="form-check form-switch d-flex justify-content-center m-0">
                                 <input class="form-check-input chk-resolvido"
-                                       type="checkbox"
-                                       data-id="<?= (int)$erro['id'] ?>"
-                                       <?= $erro['resolvido'] ? 'checked' : '' ?>>
+                                    type="checkbox"
+                                    data-id="<?= (int)$erro['id'] ?>"
+                                    <?= $erro['resolvido'] ? 'checked' : '' ?>>
                             </div>
                         </td>
                     </tr>
@@ -120,20 +120,20 @@ ob_start();
                 <?php if ($paginaAtual > 1): ?>
                     <li class="page-item">
                         <a class="page-link"
-                           href="?importacao_id=<?= $importacaoId ?>&pagina=<?= $paginaAtual - 1 ?>">
+                            href="?importacao_id=<?= $importacaoId ?>&pagina=<?= $paginaAtual - 1 ?>">
                             <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
                 <?php endif; ?>
 
                 <?php
-                    $inicio = max(1, $paginaAtual - 3);
-                    $fim    = min($totalPaginas, $paginaAtual + 3);
-                    for ($p = $inicio; $p <= $fim; $p++):
+                $inicio = max(1, $paginaAtual - 3);
+                $fim    = min($totalPaginas, $paginaAtual + 3);
+                for ($p = $inicio; $p <= $fim; $p++):
                 ?>
                     <li class="page-item <?= $p === $paginaAtual ? 'active' : '' ?>">
                         <a class="page-link"
-                           href="?importacao_id=<?= $importacaoId ?>&pagina=<?= $p ?>">
+                            href="?importacao_id=<?= $importacaoId ?>&pagina=<?= $p ?>">
                             <?= $p ?>
                         </a>
                     </li>
@@ -142,7 +142,7 @@ ob_start();
                 <?php if ($paginaAtual < $totalPaginas): ?>
                     <li class="page-item">
                         <a class="page-link"
-                           href="?importacao_id=<?= $importacaoId ?>&pagina=<?= $paginaAtual + 1 ?>">
+                            href="?importacao_id=<?= $importacaoId ?>&pagina=<?= $paginaAtual + 1 ?>">
                             <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
@@ -154,31 +154,36 @@ ob_start();
 <?php endif; ?>
 
 <script>
-document.querySelectorAll('.chk-resolvido').forEach(chk => {
-    chk.addEventListener('change', async function () {
-        const erroId   = parseInt(this.dataset.id, 10);
-        const resolvido = this.checked;
-        const row = document.getElementById('erro-row-' + erroId);
+    document.querySelectorAll('.chk-resolvido').forEach(chk => {
+        chk.addEventListener('change', async function() {
+            const erroId = parseInt(this.dataset.id, 10);
+            const resolvido = this.checked;
+            const row = document.getElementById('erro-row-' + erroId);
 
-        try {
-            const resp = await fetch('/spreadsheets/import-errors/resolver', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ erro_id: erroId, resolvido: resolvido })
-            });
-            const data = await resp.json();
-            if (data.sucesso) {
-                row?.classList.toggle('table-success', resolvido);
-            } else {
+            try {
+                const resp = await fetch('/spreadsheets/import-errors/resolver', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        erro_id: erroId,
+                        resolvido: resolvido
+                    })
+                });
+                const data = await resp.json();
+                if (data.sucesso) {
+                    row?.classList.toggle('table-success', resolvido);
+                } else {
+                    this.checked = !resolvido; // reverte
+                    console.error('Erro ao atualizar status:', data.erro);
+                }
+            } catch (e) {
                 this.checked = !resolvido; // reverte
-                console.error('Erro ao atualizar status:', data.erro);
+                console.error('Falha de conexão:', e);
             }
-        } catch (e) {
-            this.checked = !resolvido; // reverte
-            console.error('Falha de conexão:', e);
-        }
+        });
     });
-});
 </script>
 
 <?php
