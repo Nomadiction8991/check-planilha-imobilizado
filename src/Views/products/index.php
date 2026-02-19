@@ -196,7 +196,7 @@ ob_start();
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="d-flex gap-1 flex-wrap">
                                                 <?php if (!empty($PRODUTO['codigo'])): ?>
-                                                    <span class="badge bg-info text-dark"><?php echo htmlspecialchars($PRODUTO['codigo']); ?></span>
+                                                    <span class="badge bg-info text-dark"><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></span>
                                                 <?php endif; ?>
                                                 <?php if (isset($PRODUTO['condicao_141']) && ($PRODUTO['condicao_141'] == 1 || $PRODUTO['condicao_141'] == 3)): ?>
                                                     <span class="badge bg-warning text-dark">Nota</span>

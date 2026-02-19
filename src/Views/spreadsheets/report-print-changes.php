@@ -419,7 +419,7 @@ ob_start();
                 $texto_novo = implode('<br>', $novo);
                 ?>
                 <tr>
-                  <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
+                  <td><strong><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></strong></td>
                   <td><?php echo $texto_antigo; ?></td>
                   <td><?php echo $texto_novo; ?></td>
                 </tr>
@@ -445,7 +445,7 @@ ob_start();
               </tr>
             </thead>
             <tbody><?php foreach ($PRODUTOS_pendentes as $PRODUTO): ?><tr>
-                  <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
+                  <td><strong><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
                   <td><?php echo htmlspecialchars($PRODUTO['dependencia'] ?? ''); ?></td>
                 </tr><?php endforeach; ?></tbody>
@@ -468,7 +468,7 @@ ob_start();
               </tr>
             </thead>
             <tbody><?php foreach ($PRODUTOS_checados as $PRODUTO): ?><tr>
-                  <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
+                  <td><strong><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
                 </tr><?php endforeach; ?></tbody>
           </table>
@@ -491,7 +491,7 @@ ob_start();
               </tr>
             </thead>
             <tbody><?php foreach ($PRODUTOS_observacao as $PRODUTO): ?><tr>
-                  <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
+                  <td><strong><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
                   <td class="fst-italic"><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
                 </tr><?php endforeach; ?></tbody>
@@ -515,7 +515,7 @@ ob_start();
               </tr>
             </thead>
             <tbody><?php foreach ($PRODUTOS_checados_observacao as $PRODUTO): ?><tr>
-                  <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
+                  <td><strong><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
                   <td><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
                 </tr><?php endforeach; ?></tbody>
@@ -542,7 +542,7 @@ ob_start();
             <tbody>
               <?php foreach ($PRODUTOS_etiqueta as $PRODUTO): ?>
                 <tr>
-                  <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
+                  <td><strong><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
                 </tr>
               <?php endforeach; ?>

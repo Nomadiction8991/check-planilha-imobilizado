@@ -110,6 +110,20 @@ class ViewHelper
         return mb_substr($texto, 0, $limite, 'UTF-8') . '...';
     }
 
+    /**
+     * Retorna a parte curta do código (após a barra `/`).
+     * Ex.: "09-0038 / 000004" => "000004". Mantém o valor original se não houver '/'.
+     */
+    public static function formatarCodigoCurto(?string $codigo): string
+    {
+        if ($codigo === null) return '';
+        $codigo = trim((string)$codigo);
+        if ($codigo === '') return '';
+        $parts = preg_split('/\s*\/\s*/u', $codigo);
+        $last = $parts[count($parts) - 1] ?? $codigo;
+        return trim((string)$last);
+    }
+
     
     public static function urlComQuery(string $base, array $novosParams = []): string
     {

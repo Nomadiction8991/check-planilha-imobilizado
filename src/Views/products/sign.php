@@ -90,7 +90,7 @@ ob_start();
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="fw-semibold">
-                                        <?php echo htmlspecialchars($PRODUTO['codigo'] ?? 'S/N'); ?>
+                                        <?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? 'S/N')); ?>
                                         <?php if ($assinado_por_mim): ?>
                                             <span class="badge bg-success ms-2">
                                                 <i class="bi bi-check-circle"></i> Assinado por vocª
