@@ -979,6 +979,28 @@ if (false && !empty($acesso_bloqueado)) {
                 border: 1px solid #6F42C1;
             }
 
+            .relatorios-lista {
+                margin-top: 0.4rem;
+            }
+
+            .relatorios-subtitulo {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                opacity: 0.85;
+                letter-spacing: 0.05em;
+                display: block;
+            }
+
+            .relatorios-lista ul {
+                margin: 0.15rem 0 0 1.1rem;
+                padding: 0;
+                font-size: 0.85rem;
+            }
+
+            .relatorios-lista li {
+                list-style: disc;
+            }
+
             .observacao-PRODUTO {
                 background: #D4AF37;
                 color: #fff;
@@ -1490,10 +1512,13 @@ ob_start();
                         <?php endif; ?>
                     </div>
 
-                    <!-- Edição Pendente -->
-                    <?php if ($tem_edicao): ?>
+                    <!-- Edição Pendente / Impressão 14.1 -->
+                    <?php if ($tem_edicao || ($p['imprimir_14_1'] ?? 0) == 1): ?>
                         <div class="edicao-pendente">
-                            <strong><?php echo mb_strtoupper('EDITAR:', 'UTF-8'); ?></strong><br>
+                            <strong><?php echo mb_strtoupper('Editado:', 'UTF-8'); ?></strong>
+
+                            <?php if ($tem_edicao): ?>
+                            <br>
                             <?php
 
                             $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
@@ -1533,6 +1558,16 @@ ob_start();
 
                             echo htmlspecialchars($desc_editada_visivel);
                             ?><br>
+                            <?php endif; ?>
+
+                            <?php if (($p['imprimir_14_1'] ?? 0) == 1): ?>
+                                <div class="relatorios-lista">
+                                    <span class="relatorios-subtitulo">Relatórios</span>
+                                    <ul>
+                                        <li>14.1</li>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
