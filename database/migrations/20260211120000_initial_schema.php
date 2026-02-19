@@ -183,7 +183,62 @@ CREATE TABLE `import_job_processed` (
 SQL
                 );
 
-                // seeds removidos — todas as migrations foram consolidadas no esquema acima
+                // Seeds mantidos (apenas): `tipos_bens` e usuário administrador
+                $this->execute(<<<SQL
+INSERT INTO tipos_bens (codigo, descricao) VALUES
+(1, 'BANCO DE MADEIRA/GENUFLEXORIO'),
+(2, 'TRIBUNA/CRIADO MUDO'),
+(3, 'POLTRONA / SOFA'),
+(4, 'CADEIRA'),
+(5, 'GRADE DE MADEIRA P/ ORGAO'),
+(6, 'REFRIGERADOR/FREEZER/FRIGOBAR'),
+(7, 'MESA'),
+(8, 'ARMARIO'),
+(9, 'EQUIPAMENTOS DE LIMPEZA'),
+(10, 'ARQUIVO / GAVETEIRO'),
+(11, 'PRATELEIRA / ESTANTE'),
+(12, 'BALCAO/BANCADA'),
+(13, 'BEBEDOURO DAGUA / PURIFICADOR DE AGUA'),
+(14, 'VENTILADOR'),
+(15, 'RELOGIO DE PAREDE'),
+(16, 'PAINEL DE CONTROLE DE SOM'),
+(17, 'CAIXA DE SOM'),
+(18, 'MICROFONE'),
+(19, 'COMPUTADOR (CPU+MOUSE+TECLADO) / NOTEBOOK'),
+(20, 'IMPRESSORA'),
+(21, 'ORGAO E INSTRUMENTOS'),
+(22, 'CALCULADORA'),
+(23, 'EQUIPAMENTO DE ESCRITORIO'),
+(24, 'MAQUINAS E EQUIPAMENTOS DE COSTURA'),
+(25, 'EQUIPAMENTOS DE JARDINAGEM'),
+(26, 'FORNO / FOGAO / MICROONDAS'),
+(50, 'TERRENO'),
+(51, 'EQUIPAMENTO MEDICO HOSPITALAR'),
+(52, 'APARELHO TELEFONICO / APARELHO DE FAX'),
+(53, 'COPIADORA (XEROX) / SCANNER'),
+(54, 'COFRE'),
+(55, 'ESCADA'),
+(56, 'EXTINTOR'),
+(57, 'LAVADORAS / TANQUE ELETRICO'),
+(58, 'ESTANTES MUSICAIS E DE PARTITURAS / QUADRO MUSICAL'),
+(59, 'INVERSOR (NO-BREAK) / ESTABILIZADOR / CARREGADOR'),
+(60, 'CONSTRUCAO'),
+(61, 'CAIXA DE COLETA'),
+(62, 'BANQUETA'),
+(63, 'MONITOR / DATA SHOW'),
+(64, 'ANDAIME - LATERAL/TRAVA/RODA'),
+(65, 'FERRAMENTAS E MAQUINAS'),
+(66, 'CAMAS / BELICHES'),
+(67, 'TROCADOR PARA BEBE'),
+(68, 'EQUIPAMENTOS DE CLIMATIZACAO'),
+(69, 'SOFTWARE'),
+(70, 'REFORMA'),
+(80, 'INSTALACOES'),
+(99, 'DIVERSOS');
+SQL
+                );
+
+                $this->execute("INSERT INTO usuarios (nome, email, senha, ativo) VALUES ('Administrador', 'admin@checkplanilha.com', '\$2y\$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);");
         }
 
         public function down()
