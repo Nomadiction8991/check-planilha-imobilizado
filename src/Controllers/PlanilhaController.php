@@ -417,7 +417,7 @@ class PlanilhaController extends BaseController
 
         // Filtros
         $paginaAtual = max(1, (int) ($this->query('pagina', 1)));
-        $itensPorPagina = 50;
+        $itensPorPagina = 20; // limitar listagem de produtos a 20 por página (requisito do usuário)
 
         $filtros = [
             'nome'        => $this->query('nome', ''),
