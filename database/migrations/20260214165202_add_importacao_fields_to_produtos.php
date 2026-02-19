@@ -19,10 +19,7 @@ final class AddImportacaoFieldsToProdutos extends AbstractMigration
      */
     public function change(): void
     {
-        $this->execute(<<<SQL
-            ALTER TABLE produtos
-            ADD COLUMN bem_identificado TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Indica se o bem foi identificado corretamente na importação (1=sim, 0=não identificado)',
-            ADD COLUMN nome_planilha TEXT NULL COMMENT 'Nome original do item vindo da planilha (ex: 1x - Banco 2,50m [Banheiro])'
-        SQL);
+        // Consolidado em migration inicial — no-op
+        return;
     }
 }

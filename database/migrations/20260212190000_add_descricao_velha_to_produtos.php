@@ -6,17 +6,13 @@ class AddDescricaoVelhaToProdutos extends AbstractMigration
 {
     public function up(): void
     {
-        $this->execute("
-            ALTER TABLE produtos 
-            ADD COLUMN descricao_velha TEXT NULL AFTER descricao_completa
-        ");
+        // Consolidado em 20260211120000_initial_schema.php — no-op
+        return;
     }
 
     public function down(): void
     {
-        $this->execute("
-            ALTER TABLE produtos 
-            DROP COLUMN descricao_velha
-        ");
+        // No-op (consolidado)
+        return;
     }
 }

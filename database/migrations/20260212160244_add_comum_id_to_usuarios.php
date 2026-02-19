@@ -6,18 +6,7 @@ class AddComumIdToUsuarios extends AbstractMigration
 {
     public function change()
     {
-        $table = $this->table('usuarios');
-
-        $table->addColumn('comum_id', 'integer', [
-            'null' => true,
-            'after' => 'ativo',
-            'comment' => 'ID da comum que o usuário está trabalhando atualmente'
-        ])
-            ->addForeignKey('comum_id', 'comums', 'id', [
-                'delete' => 'SET_NULL',
-                'update' => 'CASCADE'
-            ])
-            ->addIndex(['comum_id'])
-            ->update();
+        // Consolidado em 20260211120000_initial_schema.php — no-op para evitar alterações duplicadas
+        return;
     }
 }

@@ -15,13 +15,13 @@ final class ResetNovoForImportedProducts extends AbstractMigration
 {
     public function up(): void
     {
-        // Todos os produtos existentes vieram de importação, então novo = 0
-        $this->execute('UPDATE produtos SET novo = 0 WHERE novo = 1');
+        // Consolidado no esquema inicial — no-op
+        return;
     }
 
     public function down(): void
     {
-        // Reverter: marcar todos como novo = 1 (estado anterior)
-        $this->execute('UPDATE produtos SET novo = 1 WHERE novo = 0');
+        // No-op (consolidado)
+        return;
     }
 }
