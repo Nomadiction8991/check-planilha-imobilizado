@@ -12,6 +12,7 @@ use App\Controllers\ProdutoController;
 use App\Controllers\PlanilhaController;
 use App\Controllers\RelatorioController;
 use App\Controllers\TipoBemController;
+use App\Controllers\ErrosImportacaoController;
 
 class MapaRotas
 {
@@ -80,6 +81,11 @@ class MapaRotas
             'POST /spreadsheets/preview/save-actions' => [PlanilhaController::class, 'salvarAcoesPreview'],
             'POST /spreadsheets/preview/bulk-action' => [PlanilhaController::class, 'acaoMassaPreview'],
             'POST /spreadsheets/confirm' => [PlanilhaController::class, 'confirmarImportacao'],
+
+
+            'GET /spreadsheets/import-errors'          => [ErrosImportacaoController::class, 'listar'],
+            'GET /spreadsheets/import-errors/download'  => [ErrosImportacaoController::class, 'downloadCsv'],
+            'POST /spreadsheets/import-errors/resolver' => [ErrosImportacaoController::class, 'marcarResolvido'],
 
 
             'GET /reports/14-1' => [RelatorioController::class, 'relatorio141'],

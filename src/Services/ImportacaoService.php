@@ -121,7 +121,7 @@ class ImportacaoService
                 $lote[] = $item;
 
                 if (count($lote) >= self::LOTE_SIZE) {
-                    $resultadoLote = $this->processarLoteComAcoes($lote, $comumIdFallback);
+                    $resultadoLote = $this->processarLoteComAcoes($lote, $comumIdFallback, $importacaoId);
                     $this->acumularResultado($resultado, $resultadoLote);
 
                     $processados += count($lote);
@@ -143,7 +143,7 @@ class ImportacaoService
 
             // Lote restante
             if (!empty($lote)) {
-                $resultadoLote = $this->processarLoteComAcoes($lote, $comumIdFallback);
+                $resultadoLote = $this->processarLoteComAcoes($lote, $comumIdFallback, $importacaoId);
                 $this->acumularResultado($resultado, $resultadoLote);
                 $processados += count($lote);
             }
@@ -172,7 +172,7 @@ class ImportacaoService
      * Processa um lote de registros com ações definidas pelo usuário.
      * Cada registro resolve sua própria comum via localidade do CSV.
      */
-    private function processarLoteComAcoes(array $lote, int $comumIdFallback): array
+    private function processarLoteComAcoes(array $lote, int $comumIdFallback, int $importacaoId = 0): array
     {
         $resultado = [
             'sucesso' => 0,
@@ -205,6 +205,10 @@ class ImportacaoService
                         'linha' => $registro['linha_csv'] ?? 0,
                         'mensagem' => $e->getMessage()
                     ];
+                    // Persiste o erro na tabela import_erros
+                    if ($importacaoId > 0) {
+                        $this->salvarErroImportacao($importacaoId, $registro, $e->getMessage());
+                    }
                 }
             }
 
@@ -215,6 +219,38 @@ class ImportacaoService
         }
 
         return $resultado;
+    }
+
+    /**
+     * Persiste um registro de erro na tabela import_erros.
+     */
+    private function salvarErroImportacao(int $importacaoId, array $registro, string $mensagem): void
+    {
+        try {
+            $dadosCsv = $registro['dados_csv'] ?? [];
+            $stmt = $this->conexao->prepare(
+                "INSERT INTO import_erros
+                    (importacao_id, linha_csv, codigo, localidade, codigo_comum,
+                     descricao_csv, bem, complemento, dependencia, mensagem_erro)
+                 VALUES
+                    (:importacao_id, :linha_csv, :codigo, :localidade, :codigo_comum,
+                     :descricao_csv, :bem, :complemento, :dependencia, :mensagem_erro)"
+            );
+            $stmt->execute([
+                ':importacao_id' => $importacaoId,
+                ':linha_csv'     => (string) ($registro['linha_csv'] ?? ''),
+                ':codigo'        => $dadosCsv['codigo'] ?? '',
+                ':localidade'    => $dadosCsv['localidade'] ?? '',
+                ':codigo_comum'  => $dadosCsv['codigo_comum'] ?? '',
+                ':descricao_csv' => $dadosCsv['descricao_completa'] ?? '',
+                ':bem'           => $dadosCsv['bem'] ?? '',
+                ':complemento'   => $dadosCsv['complemento'] ?? '',
+                ':dependencia'   => $dadosCsv['dependencia_descricao'] ?? '',
+                ':mensagem_erro' => $mensagem,
+            ]);
+        } catch (Exception $ex) {
+            error_log('Falha ao salvar erro de importação: ' . $ex->getMessage());
+        }
     }
 
     /**

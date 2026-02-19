@@ -6,18 +6,17 @@ $projectRoot = $appConfig['project_root'];
 $pageTitle = 'CONFERÊNCIA DA IMPORTAÇÃO';
 $backUrl = '/spreadsheets/import';
 
-$importacaoId = $importacao_id ?? 0;
-$importacao = $importacao ?? [];
-$resumo = $resumo ?? [];
-$registros = $registros ?? [];
-$paginaAtual = $pagina ?? 1;
-$totalPaginas = $total_paginas ?? 1;
-$totalRegistros = $total_registros ?? 0;
-$itensPorPagina = $itens_por_pagina ?? 50;
-$filtroStatus = $filtro_status ?? 'todos';
-$acoesSalvas = $acoes_salvas ?? [];
-$comunsDetectadas = $comuns_detectadas ?? [];
-$igrejas_salvas = $igrejas_salvas ?? [];
+$importacaoId     = $importacao_id      ?? 0;
+$importacao       = $importacao         ?? [];
+$resumo           = $resumo             ?? [];
+$registros        = $registros          ?? [];
+$paginaAtual      = $pagina             ?? 1;
+$totalPaginas     = $total_paginas      ?? 1;
+$totalRegistros   = $total_registros    ?? 0;
+$itensPorPagina   = $itens_por_pagina   ?? 20;
+$acoesSalvas      = $acoes_salvas       ?? [];
+$comunsDetectadas = $comuns_detectadas  ?? [];
+$igrejasSalvas    = $igrejas_salvas     ?? [];
 
 ob_start();
 ?>
@@ -26,132 +25,89 @@ ob_start();
 
 <form id="form-confirmar" action="/spreadsheets/confirm" method="POST">
     <input type="hidden" name="importacao_id" value="<?= $importacaoId ?>">
+    <input type="hidden" name="importar_tudo" id="importar_tudo_flag" value="0">
 
-    <!-- Cards de Resumo -->
-    <div class="row g-2 mb-3">
-        <div class="col-3">
-            <div class="resumo-card">
-                <h3 class="text-primary"><?= number_format($resumo['total'] ?? 0) ?></h3>
-                <small>TOTAL</small>
+    <!-- Cards de Resumo (fixo no topo) -->
+    <div class="resumo-sticky mb-3">
+        <div class="row g-2">
+            <div class="col">
+                <div class="resumo-card">
+                    <h3 class="text-primary"><?= number_format($resumo['total'] ?? 0) ?></h3>
+                    <small>TOTAL</small>
+                </div>
             </div>
-        </div>
-        <div class="col-3">
-            <div class="resumo-card">
-                <h3 class="text-success"><?= number_format($resumo['novos'] ?? 0) ?></h3>
-                <small>NOVOS</small>
+            <div class="col">
+                <div class="resumo-card">
+                    <h3 class="text-success"><?= number_format($resumo['novos'] ?? 0) ?></h3>
+                    <small>NOVOS</small>
+                </div>
             </div>
-        </div>
-        <div class="col-3">
-            <div class="resumo-card">
-                <h3 class="text-warning"><?= number_format($resumo['atualizar'] ?? 0) ?></h3>
-                <small>ALTERAR</small>
+            <div class="col">
+                <div class="resumo-card">
+                    <h3 class="text-warning"><?= number_format($resumo['atualizar'] ?? 0) ?></h3>
+                    <small>ALTERAÇÕES</small>
+                </div>
             </div>
-        </div>
-        <div class="col-3">
-            <div class="resumo-card">
-                <h3 class="text-secondary"><?= number_format($resumo['sem_alteracao'] ?? 0) ?></h3>
-                <small>IGUAL</small>
+            <div class="col">
+                <div class="resumo-card">
+                    <h3 class="text-secondary"><?= number_format($resumo['sem_alteracao'] ?? 0) ?></h3>
+                    <small>IGUAIS</small>
+                </div>
+            </div>
+            <div class="col">
+                <div class="resumo-card">
+                    <h3 class="text-danger"><?= number_format($resumo['exclusoes'] ?? 0) ?></h3>
+                    <small>EXCLUSÕES</small>
+                </div>
             </div>
         </div>
     </div>
-
-    <?php if (($resumo['erros'] ?? 0) > 0): ?>
-        <div class="alert alert-danger py-2 small mb-3">
-            <i class="bi bi-exclamation-triangle me-1"></i>
-            <?= $resumo['erros'] ?> linha(s) com erro de leitura serão ignoradas.
-        </div>
-    <?php endif; ?>
 
     <!-- Igrejas Detectadas -->
     <?php if (!empty($comunsDetectadas)): ?>
     <div class="card mb-3">
-        <div class="card-body small">
-            <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-building me-2"></i>
-                <strong>IGREJAS DETECTADAS NO CSV (<?= count($comunsDetectadas) ?>):</strong>
-            </div>
-
-            <div class="row gy-2">
-                <?php foreach ($comunsDetectadas as $comumInfo):
-                    $codigoComum = $comumInfo['codigo'];
-                    $salvo = ($igrejas_salvas[$codigoComum] ?? '');
-                ?>
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge <?= $comumInfo['existe'] ? 'bg-success' : 'bg-warning text-dark' ?> me-1">
-                            <?= htmlspecialchars($comumInfo['localidade']) ?>
-                            <?= $comumInfo['existe'] ? '' : ' (NOVA)' ?>
-                        </span>
-
-                        <select class="form-select form-select-sm select-igreja"
-                                name="igrejas[<?= htmlspecialchars($codigoComum) ?>]"
-                                data-codigo="<?= htmlspecialchars($codigoComum) ?>">
-                            <option value="" <?= $salvo === '' ? 'selected' : '' ?>>— Neutro —</option>
-                            <option value="importar" <?= $salvo === 'importar' ? 'selected' : '' ?>>Importar</option>
-                            <option value="pular" <?= $salvo === 'pular' ? 'selected' : '' ?>>Não importar</option>
-                        </select>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
+        <div class="card-header py-2 d-flex align-items-center gap-2">
+            <i class="bi bi-building"></i>
+            <strong class="small text-uppercase">Igrejas Detectadas (<?= count($comunsDetectadas) ?>)</strong>
         </div>
-    <?php endif; ?>
-
-    <!-- Barra de Filtros e Ações em Massa -->
-    <div class="acao-massa-bar mb-3">
-        <div class="row align-items-center">
-            <div class="col-auto">
-                <span class="fw-bold small text-uppercase">Filtrar:</span>
-            </div>
-            <div class="col-auto">
-                <div class="btn-group" role="group">
-                    <?php
-                    $filtros = [
-                        'todos' => 'TODOS',
-                        'novo' => 'NOVOS',
-                        'atualizar' => 'ALTERAR',
-                        'sem_alteracao' => 'IGUAL',
-                    ];
-                    $filtroClasses = [
-                        'todos' => 'btn-outline-secondary',
-                        'novo' => 'btn-outline-success',
-                        'atualizar' => 'btn-outline-warning',
-                        'sem_alteracao' => 'btn-outline-secondary',
-                    ];
-                    foreach ($filtros as $key => $label):
-                        $isActive = ($filtroStatus === $key) ? ' active' : '';
-                        $btnClass = $filtroClasses[$key] ?? 'btn-outline-secondary';
-                        $href = '?id=' . $importacaoId . '&filtro=' . $key . '&pagina=1';
+        <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0 tabela-igrejas">
+                <thead>
+                    <tr>
+                        <th>IGREJA / LOCALIDADE</th>
+                        <th style="width: 200px">AÇÃO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($comunsDetectadas as $comumInfo):
+                        $codigoComum = $comumInfo['codigo'];
+                        $acaoSalvaIgreja = $igrejasSalvas[$codigoComum] ?? 'pular';
                     ?>
-                        <a href="<?= $href ?>" class="btn <?= $btnClass ?> filtro-btn<?= $isActive ?>"
-                            onclick="salvarAcoesAntes(event, this.href)">
-                            <?= $label ?>
-                        </a>
+                    <tr>
+                        <td>
+                            <span class="badge <?= $comumInfo['existe'] ? 'bg-success' : 'bg-warning text-dark' ?>">
+                                <?= htmlspecialchars($comumInfo['localidade']) ?>
+                                <?php if (!$comumInfo['existe']): ?>
+                                    <i class="bi bi-plus-circle-fill ms-1"></i> NOVA
+                                <?php endif; ?>
+                            </span>
+                            <small class="text-muted ms-1 font-monospace"><?= htmlspecialchars($codigoComum) ?></small>
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm select-igreja"
+                                    name="igrejas[<?= htmlspecialchars($codigoComum) ?>]"
+                                    data-codigo="<?= htmlspecialchars($codigoComum) ?>">
+                                <option value="pular"    <?= $acaoSalvaIgreja !== 'importar' ? 'selected' : '' ?>>⊘ Não Importar</option>
+                                <option value="importar" <?= $acaoSalvaIgreja === 'importar' ? 'selected' : '' ?>>✔ Importar</option>
+                            </select>
+                        </td>
+                    </tr>
                     <?php endforeach; ?>
-                </div>
-            </div>
-            <div class="col-12 col-md-auto ms-md-auto mt-2 mt-md-0">
-                <span class="fw-bold small text-uppercase me-2 d-block d-md-inline mb-1 mb-md-0">Ação em massa:</span>
-                <div class="btn-group me-2" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-success" onclick="acaoEmMassa('importar')" title="Aplica apenas aos registros desta página">
-                        <i class="bi bi-check"></i> PÁGINA
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="acaoEmMassa('pular')" title="Pular registros desta página">
-                        <i class="bi bi-dash-circle"></i> PULAR PÁG.
-                    </button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-sm btn-success" onclick="acaoMassaTodos('importar')" title="Importar TODOS os <?= number_format($totalRegistros) ?> registros">
-                        <i class="bi bi-check-all"></i> IMPORTAR TODOS (<?= number_format($totalRegistros) ?>)
-                    </button>
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="acaoMassaTodos('pular')" title="Pular TODOS os registros">
-                        <i class="bi bi-dash-circle"></i> PULAR TODOS
-                    </button>
-                </div>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Info da página -->
     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -165,136 +121,130 @@ ob_start();
         <?php endif; ?>
     </div>
 
-    <!-- Tabela de Registros -->
+    <!-- Tabela de Produtos -->
     <div class="table-container">
         <table class="table table-sm table-bordered tabela-preview mb-0">
             <thead>
                 <tr>
-                    <th style="width: 40px">#</th>
                     <th style="width: 80px">STATUS</th>
                     <th style="width: 80px">CÓDIGO</th>
-                    <th style="width: 100px">LOCALIDADE</th>
                     <th>DESCRIÇÃO</th>
-                    <th>BEM</th>
-                    <th>COMPLEMENTO</th>
-                    <th>DEPENDÊNCIA</th>
-                    <th style="width: 110px">AÇÃO</th>
+                    <th>NOVA DESCRIÇÃO</th>
+                    <th style="width: 110px">IGREJA</th>
+                    <th style="width: 130px">DEPENDÊNCIA</th>
+                    <th style="width: 130px">AÇÃO</th>
                 </tr>
             </thead>
             <tbody id="tabela-body">
-                <?php foreach ($registros as $idx => $reg): ?>
-                    <?php
-                    $status = $reg['status'] ?? 'erro';
-                    $dadosCsv = $reg['dados_csv'] ?? [];
-                    $dadosDb = $reg['dados_db'] ?? [];
-                    $diferencas = $reg['diferencas'] ?? [];
-                    $linhaCsv = $reg['linha_csv'] ?? ($idx + 1);
+                <?php foreach ($registros as $idx => $reg):
+                    $status       = $reg['status']        ?? 'erro';
+                    $dadosCsv     = $reg['dados_csv']     ?? [];
+                    $linhaCsv     = $reg['linha_csv']     ?? ($idx + 1);
                     $acaoSugerida = $reg['acao_sugerida'] ?? 'pular';
 
-                    // Se o usuário já salvou uma ação para esta linha, usar ela
                     if (isset($acoesSalvas[(string)$linhaCsv])) {
                         $acaoSugerida = $acoesSalvas[(string)$linhaCsv];
                     }
 
+                    $novaDesc = trim(($dadosCsv['bem'] ?? '') . ' ' . ($dadosCsv['complemento'] ?? ''));
+                    if ($novaDesc === '') {
+                        $novaDesc = $dadosCsv['descricao_completa'] ?? '';
+                    }
+
                     $badgeClass = match ($status) {
-                        'novo' => 'badge-novo',
-                        'atualizar' => 'badge-atualizar',
+                        'novo'          => 'badge-novo',
+                        'atualizar'     => 'badge-atualizar',
                         'sem_alteracao' => 'badge-sem-alteracao',
-                        'erro' => 'badge-erro',
-                        default => 'badge-sem-alteracao'
+                        'excluir'       => 'badge-excluir',
+                        'erro'          => 'badge-erro',
+                        default         => 'badge-sem-alteracao'
                     };
 
                     $statusLabel = match ($status) {
-                        'novo' => 'NOVO',
-                        'atualizar' => 'ALTERAR',
+                        'novo'          => 'NOVO',
+                        'atualizar'     => 'ALTERAR',
                         'sem_alteracao' => 'IGUAL',
-                        'erro' => 'ERRO',
-                        default => $status
+                        'excluir'       => 'EXCLUIR',
+                        'erro'          => 'ERRO',
+                        default         => strtoupper($status)
                     };
-                    ?>
-                    <tr class="registro-row <?= $acaoSugerida === 'pular' ? 'acao-pular' : '' ?>"
-                        data-status="<?= $status ?>"
-                        data-linha="<?= $linhaCsv ?>"
-                        data-comum="<?= htmlspecialchars($dadosCsv['codigo_comum'] ?? '') ?>">
-                        <td class="text-center"><?= $linhaCsv ?></td>
-                        <td class="text-center">
-                            <span class="badge <?= $badgeClass ?>"><?= $statusLabel ?></span>
-                        </td>
-                        <td class="fw-bold"><?= htmlspecialchars($dadosCsv['codigo'] ?? '') ?></td>
 
-                        <!-- Localidade (igreja) -->
-                        <td class="small">
-                            <?= htmlspecialchars($dadosCsv['localidade'] ?? '') ?>
-                        </td>
+                    $rowClass = match ($acaoSugerida) {
+                        'pular'   => 'acao-pular',
+                        'excluir' => 'acao-excluir',
+                        default   => ''
+                    };
+                ?>
+                <tr class="registro-row <?= $rowClass ?>"
+                    data-status="<?= $status ?>"
+                    data-linha="<?= htmlspecialchars((string)$linhaCsv) ?>"
+                    data-comum="<?= htmlspecialchars($dadosCsv['codigo_comum'] ?? '') ?>">
 
-                        <!-- Descrição com diff -->
-                        <td class="diff-cell">
-                            <?php if (isset($diferencas['descricao_completa'])): ?>
-                                <span class="diff-antes"><?= htmlspecialchars($diferencas['descricao_completa']['antes']) ?></span>
-                                <br>
-                                <span class="diff-depois"><?= htmlspecialchars($diferencas['descricao_completa']['depois']) ?></span>
-                            <?php else: ?>
-                                <?= htmlspecialchars($dadosCsv['descricao_completa'] ?? '') ?>
-                            <?php endif; ?>
-                        </td>
+                    <td class="text-center">
+                        <span class="badge <?= $badgeClass ?>"><?= $statusLabel ?></span>
+                    </td>
 
-                        <!-- Bem com diff -->
-                        <td class="diff-cell">
-                            <?php if (isset($diferencas['bem'])): ?>
-                                <span class="diff-antes"><?= htmlspecialchars($diferencas['bem']['antes']) ?></span>
-                                <br>
-                                <span class="diff-depois"><?= htmlspecialchars($diferencas['bem']['depois']) ?></span>
-                            <?php else: ?>
-                                <?= htmlspecialchars($dadosCsv['bem'] ?? '') ?>
-                            <?php endif; ?>
-                        </td>
+                    <td class="fw-bold small"><?= htmlspecialchars($dadosCsv['codigo'] ?? '') ?></td>
 
-                        <!-- Complemento com diff -->
-                        <td class="diff-cell">
-                            <?php if (isset($diferencas['complemento'])): ?>
-                                <span class="diff-antes"><?= htmlspecialchars($diferencas['complemento']['antes']) ?></span>
-                                <br>
-                                <span class="diff-depois"><?= htmlspecialchars($diferencas['complemento']['depois']) ?></span>
-                            <?php else: ?>
-                                <?= htmlspecialchars($dadosCsv['complemento'] ?? '') ?>
-                            <?php endif; ?>
-                        </td>
+                    <td class="small" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                        title="<?= htmlspecialchars($dadosCsv['descricao_completa'] ?? '') ?>">
+                        <?= htmlspecialchars($dadosCsv['descricao_completa'] ?? '') ?>
+                    </td>
 
-                        <!-- Dependência com diff -->
-                        <td class="diff-cell">
-                            <?php if (isset($diferencas['dependencia'])): ?>
-                                <span class="diff-antes"><?= htmlspecialchars($diferencas['dependencia']['antes']) ?></span>
-                                <br>
-                                <span class="diff-depois"><?= htmlspecialchars($diferencas['dependencia']['depois']) ?></span>
-                            <?php else: ?>
-                                <?= htmlspecialchars($dadosCsv['dependencia_descricao'] ?? '') ?>
-                            <?php endif; ?>
-                        </td>
+                    <td class="small" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                        title="<?= htmlspecialchars($novaDesc) ?>">
+                        <?php if ($status === 'atualizar'): ?>
+                            <span class="text-success fw-semibold"><?= htmlspecialchars($novaDesc) ?></span>
+                        <?php else: ?>
+                            <?= htmlspecialchars($novaDesc) ?>
+                        <?php endif; ?>
+                    </td>
 
-                        <!-- Ação -->
-                        <td class="text-center">
-                            <?php if ($status === 'erro'): ?>
-                                <span class="text-danger small"><i class="bi bi-x-circle"></i> <?= htmlspecialchars($reg['erro'] ?? 'Erro') ?></span>
-                                <input type="hidden" name="acao[<?= $linhaCsv ?>]" value="pular">
-                            <?php else: ?>
-                                <select name="acao[<?= $linhaCsv ?>]"
+                    <td class="small">
+                        <?php
+                            $localRow = $dadosCsv['localidade']   ?? '';
+                            $codComum = $dadosCsv['codigo_comum'] ?? '';
+                            $lbl = $localRow !== '' ? $localRow : $codComum;
+                            if ($lbl !== '') {
+                                echo '<span class="badge bg-secondary" style="font-size:0.65rem">';
+                                echo htmlspecialchars($lbl);
+                                echo '</span>';
+                            }
+                        ?>
+                    </td>
+
+                    <td class="small" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                        title="<?= htmlspecialchars($dadosCsv['dependencia_descricao'] ?? '') ?>">
+                        <?= htmlspecialchars($dadosCsv['dependencia_descricao'] ?? '') ?>
+                    </td>
+
+                    <td class="text-center">
+                        <?php if ($status === 'erro'): ?>
+                            <span class="text-danger" style="font-size:0.75rem">
+                                <i class="bi bi-x-circle"></i> erro
+                            </span>
+                            <input type="hidden" name="acao[<?= htmlspecialchars((string)$linhaCsv) ?>]" value="pular">
+
+                        <?php elseif ($status === 'excluir'): ?>
+                            <select name="acao[<?= htmlspecialchars((string)$linhaCsv) ?>]"
                                     class="form-select form-select-sm select-acao"
                                     onchange="atualizarEstiloLinha(this)">
-                                    <option value="importar" <?= $acaoSugerida === 'importar' ? 'selected' : '' ?>>
-                                        <?= $status === 'novo' ? '✚ Importar' : '✎ Atualizar' ?>
-                                    </option>
-                                    <option value="pular" <?= $acaoSugerida === 'pular' ? 'selected' : '' ?>>
-                                        ⊘ Pular
-                                    </option>
-                                    <?php if ($status !== 'novo'): ?>
-                                        <option value="excluir">
-                                            ✕ Excluir
-                                        </option>
-                                    <?php endif; ?>
-                                </select>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
+                                <option value="excluir" <?= $acaoSugerida === 'excluir' ? 'selected' : '' ?>>&#x2715; Excluir</option>
+                                <option value="pular"   <?= $acaoSugerida === 'pular'   ? 'selected' : '' ?>>&#x2298; Manter</option>
+                            </select>
+
+                        <?php else: ?>
+                            <select name="acao[<?= htmlspecialchars((string)$linhaCsv) ?>]"
+                                    class="form-select form-select-sm select-acao"
+                                    onchange="atualizarEstiloLinha(this)">
+                                <option value="importar" <?= $acaoSugerida === 'importar' ? 'selected' : '' ?>>
+                                    <?= $status === 'novo' ? '&#x271A; Importar' : '&#x270e; Atualizar' ?>
+                                </option>
+                                <option value="pular" <?= $acaoSugerida === 'pular' ? 'selected' : '' ?>>&#x2298; Não Importar</option>
+                            </select>
+                        <?php endif; ?>
+                    </td>
+                </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
@@ -307,7 +257,7 @@ ob_start();
                 <?php if ($paginaAtual > 1): ?>
                     <li class="page-item">
                         <a class="page-link" href="#"
-                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $paginaAtual - 1 ?>')">
+                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&pagina=<?= $paginaAtual - 1 ?>')">
                             <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
@@ -315,11 +265,11 @@ ob_start();
 
                 <?php
                 $inicio = max(1, $paginaAtual - 3);
-                $fim = min($totalPaginas, $paginaAtual + 3);
+                $fim    = min($totalPaginas, $paginaAtual + 3);
                 if ($inicio > 1): ?>
                     <li class="page-item">
                         <a class="page-link" href="#"
-                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=1')">1</a>
+                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&pagina=1')">1</a>
                     </li>
                     <?php if ($inicio > 2): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
                 <?php endif; ?>
@@ -327,7 +277,7 @@ ob_start();
                 <?php for ($i = $inicio; $i <= $fim; $i++): ?>
                     <li class="page-item <?= $i == $paginaAtual ? 'active' : '' ?>">
                         <a class="page-link" href="#"
-                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $i ?>')">
+                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&pagina=<?= $i ?>')">
                             <?= $i ?>
                         </a>
                     </li>
@@ -337,7 +287,7 @@ ob_start();
                     <?php if ($fim < $totalPaginas - 1): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
                     <li class="page-item">
                         <a class="page-link" href="#"
-                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $totalPaginas ?>')">
+                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&pagina=<?= $totalPaginas ?>')">
                             <?= $totalPaginas ?>
                         </a>
                     </li>
@@ -346,7 +296,7 @@ ob_start();
                 <?php if ($paginaAtual < $totalPaginas): ?>
                     <li class="page-item">
                         <a class="page-link" href="#"
-                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&filtro=<?= $filtroStatus ?>&pagina=<?= $paginaAtual + 1 ?>')">
+                            onclick="salvarAcoesAntes(event, '?id=<?= $importacaoId ?>&pagina=<?= $paginaAtual + 1 ?>')">
                             <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
@@ -355,21 +305,22 @@ ob_start();
         </nav>
     <?php endif; ?>
 
-    <!-- Barra de Confirmação Fixa -->
+    <!-- Barra de Confirmação -->
     <div class="card mt-3">
-        <div class="card-body d-flex justify-content-between align-items-center py-2">
+        <div class="card-body d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
             <div>
-                <span class="text-muted small" id="contadores-acoes">
-                    Calculando...
-                </span>
+                <small class="text-muted" id="contadores-acoes">Calculando&hellip;</small>
             </div>
-            <div>
-                <a href="/spreadsheets/import" class="btn btn-outline-secondary me-2">
-                    <i class="bi bi-x-lg me-1"></i>CANCELAR
+            <div class="d-flex gap-2">
+                <a href="/spreadsheets/import" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg me-1"></i>Cancelar
                 </a>
-                <button type="submit" class="btn btn-primary" id="btn-confirmar"
-                    onclick="return salvarAntesDeConfirmar()">
-                    <i class="bi bi-check-lg me-1"></i>CONFIRMAR IMPORTAÇÃO
+                <button type="submit" class="btn btn-primary" id="btn-confirmar">
+                    <i class="bi bi-check-lg me-1"></i>Importar
+                </button>
+                <button type="button" class="btn btn-danger" id="btn-importar-tudo"
+                        onclick="importarTudo()">
+                    <i class="bi bi-check-all me-1"></i>Importar Tudo
                 </button>
             </div>
         </div>

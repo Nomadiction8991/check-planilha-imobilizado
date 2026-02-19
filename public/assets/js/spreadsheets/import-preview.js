@@ -13,7 +13,7 @@
         });
         // Incluir hidden inputs (erros)
         document.querySelectorAll('input[type="hidden"][name^="acao["]').forEach(input => {
-            const match = input.name.match(/acao\[(\d+)\]/);
+            const match = input.name.match(/acao\[([^\]]+)\]/);
             if (match) acoes[match[1]] = input.value;
         });
         return acoes;
@@ -43,18 +43,27 @@
         }
     }
 
-    // ─── Salvar ações antes de navegar (paginação/filtros) ───
+    // ─── Salvar igrejas via AJAX ───
+    async function salvarIgrejas(igrejas) {
+        try {
+            const resp = await fetch('/spreadsheets/preview/save-actions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ importacao_id: IMPORTACAO_ID, igrejas: igrejas })
+            });
+            const data = await resp.json();
+            return data.sucesso === true;
+        } catch (e) {
+            console.error('Erro ao salvar igrejas:', e);
+            return false;
+        }
+    }
+
+    // ─── Salvar ações antes de navegar (paginação) ───
     window.salvarAcoesAntes = async function(e, url) {
         e.preventDefault();
         await salvarAcoes();
         window.location.href = url;
-    };
-
-    // ─── Salvar antes de confirmar ───
-    window.salvarAntesDeConfirmar = function() {
-        // As ações da página atual são enviadas pelo form normalmente
-        // As ações anteriores já estão na sessão
-        return true;
     };
 
     // ─── Atualizar estilo da linha conforme ação selecionada ───
@@ -62,91 +71,42 @@
         const row = select.closest('tr');
         row.classList.remove('acao-pular', 'acao-excluir');
 
-        if (select.value === 'pular') {
-            row.classList.add('acao-pular');
-        } else if (select.value === 'excluir') {
-            row.classList.add('acao-excluir');
-        }
+        if (select.value === 'pular')   row.classList.add('acao-pular');
+        if (select.value === 'excluir') row.classList.add('acao-excluir');
 
         atualizarContadores();
     };
 
-    // ─── Ação em massa — PÁGINA ATUAL ───
-    window.acaoEmMassa = function(acao) {
-        document.querySelectorAll('.registro-row').forEach(row => {
-            const select = row.querySelector('.select-acao');
-            if (!select) return;
-
-            const opcao = select.querySelector(`option[value="${acao}"]`);
-            if (opcao) {
-                select.value = acao;
-                atualizarEstiloLinha(select);
-            }
-        });
-    };
-
-    // ─── Ação em massa — TODOS OS REGISTROS (todas as páginas) ───
-    window.acaoMassaTodos = async function(acao) {
-        const label = acao === 'importar' ? 'IMPORTAR' : 'PULAR';
-        if (!confirm(`Aplicar "${label}" a TODOS os registros de todas as páginas?`)) return;
-
-        // Primeiro salva ações da página atual
+    // ─── Importar Tudo (ignora seleções, processa tudo) ───
+    window.importarTudo = async function () {
+        if (!confirm('IMPORTAR TUDO: todos os registros serão processados ignorando qualquer seleção de igreja ou produto. Confirmar?')) return;
         await salvarAcoes();
-
-        try {
-            const resp = await fetch('/spreadsheets/preview/bulk-action', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    importacao_id: IMPORTACAO_ID,
-                    acao: acao
-                })
-            });
-            const data = await resp.json();
-            if (data.sucesso) {
-                // Atualiza os selects da página atual para refletir
-                acaoEmMassa(acao);
-                alert(`${label} aplicado a ${data.total_aplicadas.toLocaleString()} registros.`);
-            } else {
-                alert('Erro: ' + (data.erro || 'Falha ao aplicar ação'));
-            }
-        } catch (e) {
-            console.error('Erro ação em massa:', e);
-            alert('Erro de conexão ao aplicar ação.');
-        }
+        document.getElementById('importar_tudo_flag').value = '1';
+        document.getElementById('form-confirmar').submit();
     };
 
-    // ─── Contadores de ações (só da página atual) ───
+    // ─── Contadores de ações (página atual) ───
     function atualizarContadores() {
-        let importar = 0,
-            pular = 0,
-            excluir = 0;
+        let importar = 0, pular = 0, excluir = 0;
 
         document.querySelectorAll('.select-acao').forEach(select => {
             switch (select.value) {
-                case 'importar':
-                    importar++;
-                    break;
-                case 'pular':
-                    pular++;
-                    break;
-                case 'excluir':
-                    excluir++;
-                    break;
+                case 'importar': importar++; break;
+                case 'pular':    pular++;    break;
+                case 'excluir':  excluir++;  break;
             }
         });
 
-        document.querySelectorAll('input[type="hidden"][name^="acao"]').forEach(() => {
-            pular++;
-        });
+        document.querySelectorAll('input[type="hidden"][name^="acao"]').forEach(() => pular++);
 
-        document.getElementById('contadores-acoes').innerHTML =
-            `<strong class="text-success">${importar}</strong> importar · ` +
-            `<strong class="text-secondary">${pular}</strong> pular · ` +
-            `<strong class="text-danger">${excluir}</strong> excluir` +
-            ` <span class="text-muted">(esta página)</span>`;
+        const el = document.getElementById('contadores-acoes');
+        if (el) {
+            el.innerHTML =
+                `<strong class="text-success">${importar}</strong> importar · ` +
+                `<strong class="text-secondary">${pular}</strong> n/importar · ` +
+                `<strong class="text-danger">${excluir}</strong> excluir` +
+                ` <span class="text-muted">(esta página)</span>`;
+        }
     }
 
     // ─── Confirmação antes de submeter ───
@@ -165,48 +125,56 @@
     });
 
     // ─── Controle por IGREJA (select-igreja) ───
+    // acao='pular'    → encobre todos os produtos daquela igreja (seta para pular)
+    // acao='importar' → restaura cada produto ao seu valor natural (data-natural)
     function aplicarAcaoPorComum(codigoComum, acao) {
         if (!codigoComum) return;
-        document.querySelectorAll(`.registro-row[data-comum="${codigoComum}"]`).forEach(row => {
+        document.querySelectorAll(`.registro-row[data-comum="${CSS.escape(codigoComum)}"]`).forEach(row => {
             const select = row.querySelector('.select-acao');
             if (!select) return;
-            if (acao === '') return; // neutro — não altera linhas
-            const opcao = select.querySelector(`option[value="${acao}"]`);
+
+            const novoValor = (acao === 'importar')
+                ? (select.dataset.natural || select.value)
+                : 'pular';
+
+            const opcao = select.querySelector(`option[value="${novoValor}"]`);
             if (opcao) {
-                select.value = acao;
+                select.value = novoValor;
                 atualizarEstiloLinha(select);
             }
         });
     }
 
-    async function salvarIgrejas(igrejas) {
-        try {
-            const resp = await fetch('/spreadsheets/preview/save-actions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ importacao_id: IMPORTACAO_ID, igrejas: igrejas })
-            });
-            const data = await resp.json();
-            return data.sucesso === true;
-        } catch (e) {
-            console.error('Erro ao salvar igrejas:', e);
-            return false;
-        }
-    }
-
+    // Evento: select-igreja muda → cascata + persistência
     document.querySelectorAll('.select-igreja').forEach(sel => {
         sel.addEventListener('change', async function () {
             const codigo = this.dataset.codigo || '';
-            const valor = this.value || '';
+            const valor  = this.value || 'pular';
             aplicarAcaoPorComum(codigo, valor);
-            await salvarIgrejas({ [codigo]: valor });
             atualizarContadores();
+            await salvarAcoes();
+            await salvarIgrejas({ [codigo]: valor });
         });
     });
 
-    // Inicializa contadores e estilos
-    atualizarContadores();
+    // Evento: produto alterado manualmente → atualiza data-natural
     document.querySelectorAll('.select-acao').forEach(select => {
-        atualizarEstiloLinha(select);
+        select.addEventListener('change', function () {
+            this.dataset.natural = this.value;
+        });
+    });
+
+    // ─── Inicialização ───
+    document.addEventListener('DOMContentLoaded', () => {
+        // Guarda valor PHP-rendered de cada produto antes de qualquer js aplicação
+        document.querySelectorAll('.select-acao').forEach(select => {
+            select.dataset.natural = select.value;
+        });
+        // Aplica estado atual de cada select-igreja nas linhas de produto
+        document.querySelectorAll('.select-igreja').forEach(sel => {
+            aplicarAcaoPorComum(sel.dataset.codigo || '', sel.value || 'pular');
+        });
+        atualizarContadores();
+        document.querySelectorAll('.select-acao').forEach(select => atualizarEstiloLinha(select));
     });
 })();

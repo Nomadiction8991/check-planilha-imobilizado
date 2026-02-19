@@ -32,6 +32,7 @@ class CsvParserService
     public const STATUS_NOVO = 'novo';
     public const STATUS_ATUALIZAR = 'atualizar';
     public const STATUS_SEM_ALTERACAO = 'sem_alteracao';
+    public const STATUS_EXCLUIR = 'excluir';
 
     /** Ações disponíveis para o usuário */
     public const ACAO_IMPORTAR = 'importar';
@@ -134,7 +135,11 @@ class CsvParserService
             'atualizar' => 0,
             'sem_alteracao' => 0,
             'erros' => 0,
+            'exclusoes' => 0,
         ];
+
+        // Rastreia códigos vistos no CSV por comumId (para detectar exclusões)
+        $codigosPorComum = []; // comumId => [CODIGO_UPPER => true]
 
         foreach ($linhas as $idx => $linha) {
             $resumo['total']++;
@@ -143,6 +148,12 @@ class CsvParserService
                 // Determinar qual comum usar para esta linha
                 $codigoComum = $linha['codigo_comum'] ?? '';
                 $comumIdLinha = $mapaCodigoParaComumId[$codigoComum] ?? $comumIdFallback;
+
+                // Rastrear código no set da comum (para detectar exclusões depois)
+                $codigoRastr = strtoupper(trim($linha['codigo'] ?? ''));
+                if ($comumIdLinha > 0 && $codigoRastr !== '') {
+                    $codigosPorComum[$comumIdLinha][$codigoRastr] = true;
+                }
 
                 // Produtos e dependências desta comum
                 $produtosExistentes = $produtosPorComum[$comumIdLinha] ?? [];
@@ -177,6 +188,53 @@ class CsvParserService
                     'dados_csv' => $linha,
                     'dados_db' => null,
                     'diferencas' => [],
+                ];
+            }
+        }
+
+        // ── Detectar produtos do banco que NÃO estão no CSV (candidatos a exclusão) ──
+        // Apenas para igrejas conhecidas (comumId > 0) e produtos com código
+        foreach ($mapaCodigoParaComumId as $codigoComumExcl => $comumIdExcl) {
+            if ($comumIdExcl <= 0) continue;
+
+            $produtosDb = $produtosPorComum[$comumIdExcl] ?? [];
+            $codigosNoCSV = $codigosPorComum[$comumIdExcl] ?? [];
+
+            foreach ($produtosDb as $codigoUpper => $produto) {
+                if ($codigoUpper === '') continue;          // sem código → não exclui
+                if (isset($codigosNoCSV[$codigoUpper])) continue; // aparece no CSV → não exclui
+
+                // Produto tem código mas não está no CSV → candidato a exclusão
+                $linhaSintetica = 'ex' . $produto['id_produto'];
+                $resumo['exclusoes']++;
+
+                $registros[] = [
+                    'linha_csv'     => $linhaSintetica,
+                    'status'        => self::STATUS_EXCLUIR,
+                    'acao_sugerida' => self::ACAO_EXCLUIR,
+                    'dados_csv' => [
+                        'codigo'             => $produto['codigo'],
+                        'descricao_completa' => $produto['descricao_completa'],
+                        'tipo_bem_codigo'    => $produto['tipo_bem_codigo'] ?? '',
+                        'tipo_bem_descricao' => $produto['tipo_bem_descricao'] ?? '',
+                        'bem'                => $produto['bem'] ?? '',
+                        'complemento'        => $produto['complemento'] ?? '',
+                        'dependencia_descricao' => $produto['dependencia_descricao'] ?? '',
+                        'codigo_comum'       => $codigoComumExcl,
+                        'localidade'         => '',
+                        'nome_original'      => $produto['descricao_completa'],
+                        'bem_identificado'   => true,
+                    ],
+                    'dados_db' => [
+                        'id_produto'         => $produto['id_produto'],
+                        'codigo'             => $produto['codigo'],
+                        'descricao_completa' => $produto['descricao_completa'],
+                        'bem'                => $produto['bem'] ?? '',
+                        'complemento'        => $produto['complemento'] ?? '',
+                        'dependencia'        => $produto['dependencia_descricao'] ?? '',
+                    ],
+                    'diferencas' => [],
+                    'id_produto'    => $produto['id_produto'],
                 ];
             }
         }

@@ -148,26 +148,14 @@ class PlanilhaController extends BaseController
             return;
         }
 
-        // Paginação: 50 registros por página
+        // Paginação: 20 registros por página
         $todosRegistros = $analise['registros'];
         $totalRegistros = count($todosRegistros);
-        $itensPorPagina = 50;
+        $itensPorPagina = 20;
         $paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
         $totalPaginas = max(1, (int) ceil($totalRegistros / $itensPorPagina));
         $paginaAtual = min($paginaAtual, $totalPaginas);
         $offset = ($paginaAtual - 1) * $itensPorPagina;
-
-        // Filtro por status
-        $filtroStatus = $_GET['filtro'] ?? 'todos';
-        if ($filtroStatus !== 'todos') {
-            $todosRegistros = array_values(array_filter($todosRegistros, function ($reg) use ($filtroStatus) {
-                return ($reg['status'] ?? '') === $filtroStatus;
-            }));
-            $totalRegistros = count($todosRegistros);
-            $totalPaginas = max(1, (int) ceil($totalRegistros / $itensPorPagina));
-            $paginaAtual = min($paginaAtual, $totalPaginas);
-            $offset = ($paginaAtual - 1) * $itensPorPagina;
-        }
 
         $registrosPagina = array_slice($todosRegistros, $offset, $itensPorPagina);
 
@@ -184,7 +172,6 @@ class PlanilhaController extends BaseController
             'total_paginas' => $totalPaginas,
             'total_registros' => $totalRegistros,
             'itens_por_pagina' => $itensPorPagina,
-            'filtro_status' => $filtroStatus,
             'acoes_salvas' => $acoesSalvas,
             'comuns_detectadas' => $analise['comuns_detectadas'] ?? [],
             'igrejas_salvas' => $igrejasSalvas,
@@ -315,13 +302,27 @@ class PlanilhaController extends BaseController
             $acoesFormulario = $_POST['acao'] ?? [];
             $acoes = array_merge($acoesSalvas, $acoesFormulario);
 
+            // Flag de importação total (ignora seleções manuais)
+            $importarTudo = !empty($_POST['importar_tudo']);
+
             // Para registros sem ação definida, carrega a ação sugerida da análise
             $analise = $this->csvParserService->carregarAnalise($importacaoId);
             if ($analise) {
-                foreach ($analise['registros'] as $reg) {
-                    $linhaCsv = (string) ($reg['linha_csv'] ?? '');
-                    if ($linhaCsv !== '' && !isset($acoes[$linhaCsv])) {
-                        $acoes[$linhaCsv] = $reg['acao_sugerida'] ?? 'pular';
+                if ($importarTudo) {
+                    // Sobrescreve TUDO: importar exceto status=excluir → excluir
+                    $acoes = [];
+                    foreach ($analise['registros'] as $reg) {
+                        $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                        if ($linhaCsv === '') continue;
+                        $status = $reg['status'] ?? '';
+                        $acoes[$linhaCsv] = ($status === CsvParserService::STATUS_EXCLUIR) ? 'excluir' : 'importar';
+                    }
+                } else {
+                    foreach ($analise['registros'] as $reg) {
+                        $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                        if ($linhaCsv !== '' && !isset($acoes[$linhaCsv])) {
+                            $acoes[$linhaCsv] = $reg['acao_sugerida'] ?? 'pular';
+                        }
                     }
                 }
             }
@@ -331,7 +332,7 @@ class PlanilhaController extends BaseController
             $igrejasSessao = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
             $igrejasEscolhas = array_merge($igrejasSessao, $igrejasFormulario);
 
-            if ($analise && !empty($igrejasEscolhas)) {
+            if ($analise && !empty($igrejasEscolhas) && !$importarTudo) {
                 foreach ($analise['registros'] as $reg) {
                     $linhaCsv = (string) ($reg['linha_csv'] ?? '');
                     $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';

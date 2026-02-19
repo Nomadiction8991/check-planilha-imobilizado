@@ -13,9 +13,35 @@
     color: white !important;
 }
 
+.badge-excluir {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
 .badge-erro {
     background-color: #dc3545 !important;
     color: white !important;
+}
+
+.resumo-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    padding: 8px 0 4px;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 8px;
+}
+
+.tabela-igrejas th {
+    background: #f8f9fa;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabela-igrejas td {
+    vertical-align: middle;
 }
 
 .diff-antes {
