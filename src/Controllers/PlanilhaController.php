@@ -173,6 +173,7 @@ class PlanilhaController extends BaseController
 
         // Carrega ações salvas anteriormente na sessão
         $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
+        $igrejasSalvas = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
 
         $this->renderizar('spreadsheets/import-preview', [
             'importacao_id' => $importacaoId,
@@ -186,6 +187,7 @@ class PlanilhaController extends BaseController
             'filtro_status' => $filtroStatus,
             'acoes_salvas' => $acoesSalvas,
             'comuns_detectadas' => $analise['comuns_detectadas'] ?? [],
+            'igrejas_salvas' => $igrejasSalvas,
         ]);
     }
 
@@ -204,13 +206,14 @@ class PlanilhaController extends BaseController
         $dados = json_decode(file_get_contents('php://input'), true);
         $importacaoId = (int) ($dados['importacao_id'] ?? 0);
         $acoes = $dados['acoes'] ?? [];
+        $igrejas = $dados['igrejas'] ?? [];
 
         if ($importacaoId <= 0) {
             echo json_encode(['erro' => 'ID inválido']);
             exit;
         }
 
-        // Mescla com ações já salvas na sessão
+        // Mescla com ações já salvas na sessão (linhas)
         if (!isset($_SESSION['preview_acoes_' . $importacaoId])) {
             $_SESSION['preview_acoes_' . $importacaoId] = [];
         }
@@ -219,7 +222,22 @@ class PlanilhaController extends BaseController
             $_SESSION['preview_acoes_' . $importacaoId][$linhaCsv] = $acao;
         }
 
-        echo json_encode(['sucesso' => true, 'total_salvas' => count($_SESSION['preview_acoes_' . $importacaoId])]);
+        // Salva escolhas por igreja (se houver)
+        if (!isset($_SESSION['preview_igrejas_' . $importacaoId])) {
+            $_SESSION['preview_igrejas_' . $importacaoId] = [];
+        }
+        foreach ($igrejas as $codigo => $acaoIgreja) {
+            // aceitar apenas valores permitidos
+            if (in_array($acaoIgreja, ['', 'importar', 'pular'], true)) {
+                $_SESSION['preview_igrejas_' . $importacaoId][(string)$codigo] = $acaoIgreja;
+            }
+        }
+
+        echo json_encode([
+            'sucesso' => true,
+            'total_salvas' => count($_SESSION['preview_acoes_' . $importacaoId]),
+            'igrejas_salvas' => count($_SESSION['preview_igrejas_' . $importacaoId])
+        ]);
         exit;
     }
 
@@ -304,6 +322,24 @@ class PlanilhaController extends BaseController
                     $linhaCsv = (string) ($reg['linha_csv'] ?? '');
                     if ($linhaCsv !== '' && !isset($acoes[$linhaCsv])) {
                         $acoes[$linhaCsv] = $reg['acao_sugerida'] ?? 'pular';
+                    }
+                }
+            }
+
+            // Aplicar escolhas por igreja (POST tem precedência sobre sessão)
+            $igrejasFormulario = $_POST['igrejas'] ?? [];
+            $igrejasSessao = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
+            $igrejasEscolhas = array_merge($igrejasSessao, $igrejasFormulario);
+
+            if ($analise && !empty($igrejasEscolhas)) {
+                foreach ($analise['registros'] as $reg) {
+                    $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                    $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';
+                    if ($codigoComum !== '' && isset($igrejasEscolhas[$codigoComum])) {
+                        $acaoIgreja = $igrejasEscolhas[$codigoComum];
+                        if (in_array($acaoIgreja, ['importar', 'pular'], true) && $linhaCsv !== '') {
+                            $acoes[$linhaCsv] = $acaoIgreja;
+                        }
                     }
                 }
             }

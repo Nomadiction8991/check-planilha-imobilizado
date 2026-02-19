@@ -164,6 +164,46 @@
         }
     });
 
+    // ─── Controle por IGREJA (select-igreja) ───
+    function aplicarAcaoPorComum(codigoComum, acao) {
+        if (!codigoComum) return;
+        document.querySelectorAll(`.registro-row[data-comum="${codigoComum}"]`).forEach(row => {
+            const select = row.querySelector('.select-acao');
+            if (!select) return;
+            if (acao === '') return; // neutro — não altera linhas
+            const opcao = select.querySelector(`option[value="${acao}"]`);
+            if (opcao) {
+                select.value = acao;
+                atualizarEstiloLinha(select);
+            }
+        });
+    }
+
+    async function salvarIgrejas(igrejas) {
+        try {
+            const resp = await fetch('/spreadsheets/preview/save-actions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ importacao_id: IMPORTACAO_ID, igrejas: igrejas })
+            });
+            const data = await resp.json();
+            return data.sucesso === true;
+        } catch (e) {
+            console.error('Erro ao salvar igrejas:', e);
+            return false;
+        }
+    }
+
+    document.querySelectorAll('.select-igreja').forEach(sel => {
+        sel.addEventListener('change', async function () {
+            const codigo = this.dataset.codigo || '';
+            const valor = this.value || '';
+            aplicarAcaoPorComum(codigo, valor);
+            await salvarIgrejas({ [codigo]: valor });
+            atualizarContadores();
+        });
+    });
+
     // Inicializa contadores e estilos
     atualizarContadores();
     document.querySelectorAll('.select-acao').forEach(select => {

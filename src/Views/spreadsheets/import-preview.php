@@ -17,6 +17,7 @@ $itensPorPagina = $itens_por_pagina ?? 50;
 $filtroStatus = $filtro_status ?? 'todos';
 $acoesSalvas = $acoes_salvas ?? [];
 $comunsDetectadas = $comuns_detectadas ?? [];
+$igrejas_salvas = $igrejas_salvas ?? [];
 
 ob_start();
 ?>
@@ -63,26 +64,37 @@ ob_start();
 
     <!-- Igrejas Detectadas -->
     <?php if (!empty($comunsDetectadas)): ?>
-        <div class="alert alert-info py-2 small mb-3">
-            <i class="bi bi-building me-1"></i>
-            <strong>IGREJAS DETECTADAS NO CSV (<?= count($comunsDetectadas) ?>):</strong>
-            <div class="mt-1">
-                <?php foreach ($comunsDetectadas as $comumInfo): ?>
-                    <span class="badge <?= $comumInfo['existe'] ? 'bg-success' : 'bg-warning text-dark' ?> me-1 mb-1">
-                        <?= htmlspecialchars($comumInfo['localidade']) ?>
-                        <?= $comumInfo['existe'] ? '' : ' (NOVA)' ?>
-                    </span>
+    <div class="card mb-3">
+        <div class="card-body small">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-building me-2"></i>
+                <strong>IGREJAS DETECTADAS NO CSV (<?= count($comunsDetectadas) ?>):</strong>
+            </div>
+
+            <div class="row gy-2">
+                <?php foreach ($comunsDetectadas as $comumInfo):
+                    $codigoComum = $comumInfo['codigo'];
+                    $salvo = ($igrejas_salvas[$codigoComum] ?? '');
+                ?>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge <?= $comumInfo['existe'] ? 'bg-success' : 'bg-warning text-dark' ?> me-1">
+                            <?= htmlspecialchars($comumInfo['localidade']) ?>
+                            <?= $comumInfo['existe'] ? '' : ' (NOVA)' ?>
+                        </span>
+
+                        <select class="form-select form-select-sm select-igreja"
+                                name="igrejas[<?= htmlspecialchars($codigoComum) ?>]"
+                                data-codigo="<?= htmlspecialchars($codigoComum) ?>">
+                            <option value="" <?= $salvo === '' ? 'selected' : '' ?>>— Neutro —</option>
+                            <option value="importar" <?= $salvo === 'importar' ? 'selected' : '' ?>>Importar</option>
+                            <option value="pular" <?= $salvo === 'pular' ? 'selected' : '' ?>>Não importar</option>
+                        </select>
+                    </div>
+                </div>
                 <?php endforeach; ?>
             </div>
-            <?php
-            $novas = array_filter($comunsDetectadas, fn($c) => !$c['existe']);
-            if (!empty($novas)):
-            ?>
-                <div class="mt-1 text-warning">
-                    <i class="bi bi-plus-circle me-1"></i>
-                    <?= count($novas) ?> igreja(s) ser&atilde;o cadastradas automaticamente ao confirmar.
-                </div>
-            <?php endif; ?>
+
         </div>
     <?php endif; ?>
 
@@ -202,7 +214,8 @@ ob_start();
                     ?>
                     <tr class="registro-row <?= $acaoSugerida === 'pular' ? 'acao-pular' : '' ?>"
                         data-status="<?= $status ?>"
-                        data-linha="<?= $linhaCsv ?>">
+                        data-linha="<?= $linhaCsv ?>"
+                        data-comum="<?= htmlspecialchars($dadosCsv['codigo_comum'] ?? '') ?>">
                         <td class="text-center"><?= $linhaCsv ?></td>
                         <td class="text-center">
                             <span class="badge <?= $badgeClass ?>"><?= $statusLabel ?></span>
