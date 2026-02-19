@@ -6,10 +6,8 @@ class InitialSchema extends AbstractMigration
 {
         public function up()
         {
-                // Criar tabelas na ordem de dependências (esquema consolidado — sem seeds)
-
-                // comums.codigo como VARCHAR(50) (suporte multi-igreja)
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `comums` (
   `id` int NOT NULL AUTO_INCREMENT,
   `codigo` varchar(50) NOT NULL,
@@ -25,7 +23,8 @@ CREATE TABLE `comums` (
 SQL
                 );
 
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `configuracoes` (
   `posicao_data` varchar(255) NOT NULL DEFAULT 'D13',
   `pulo_linhas` varchar(255) NOT NULL DEFAULT '25',
@@ -35,8 +34,8 @@ CREATE TABLE `configuracoes` (
 SQL
                 );
 
-                // dependencias agora pertence a uma comum (comum_id) e tem unique composto
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `dependencias` (
   `id` int NOT NULL AUTO_INCREMENT,
   `comum_id` int DEFAULT NULL,
@@ -49,7 +48,8 @@ CREATE TABLE `dependencias` (
 SQL
                 );
 
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `tipos_bens` (
   `id` int NOT NULL AUTO_INCREMENT,
   `codigo` int NOT NULL,
@@ -59,8 +59,8 @@ CREATE TABLE `tipos_bens` (
 SQL
                 );
 
-                // usuarios com comum_id (nullable)
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nome` varchar(255) NOT NULL,
@@ -100,8 +100,8 @@ CREATE TABLE `usuarios` (
 SQL
                 );
 
-                // produtos — adicionadas colunas consolidadas e valores default apropriados
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `produtos` (
   `comum_id` int NOT NULL,
   `id_produto` int NOT NULL AUTO_INCREMENT,
@@ -142,8 +142,9 @@ CREATE TABLE `produtos` (
 SQL
                 );
 
-                // importacoes (consolidada)
-                $this->execute(<<<SQL
+
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `importacoes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `usuario_id` int NOT NULL,
@@ -172,7 +173,8 @@ CREATE TABLE `importacoes` (
 SQL
                 );
 
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 CREATE TABLE `import_job_processed` (
   `job_id` varchar(128) NOT NULL,
   `id_produto` int NOT NULL,
@@ -183,8 +185,8 @@ CREATE TABLE `import_job_processed` (
 SQL
                 );
 
-                // Seeds mantidos (apenas): `tipos_bens` e usuário administrador
-                $this->execute(<<<SQL
+                $this->execute(
+                        <<<SQL
 INSERT INTO tipos_bens (codigo, descricao) VALUES
 (1, 'BANCO DE MADEIRA/GENUFLEXORIO'),
 (2, 'TRIBUNA/CRIADO MUDO'),
@@ -243,7 +245,6 @@ SQL
 
         public function down()
         {
-                // Drop tables (ordem inversa das dependências)
                 $this->execute("DROP TABLE IF EXISTS importacoes");
                 $this->execute("DROP TABLE IF EXISTS import_job_processed");
                 $this->execute("DROP TABLE IF EXISTS produtos");
