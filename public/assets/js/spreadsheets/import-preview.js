@@ -73,8 +73,6 @@
 
         if (select.value === 'pular')   row.classList.add('acao-pular');
         if (select.value === 'excluir') row.classList.add('acao-excluir');
-
-        atualizarContadores();
     };
 
     // ─── Importar Tudo (ignora seleções, processa tudo) ───
@@ -85,29 +83,8 @@
         document.getElementById('form-confirmar').submit();
     };
 
-    // ─── Contadores de ações (página atual) ───
-    function atualizarContadores() {
-        let importar = 0, pular = 0, excluir = 0;
+    // contadores removidos — não utilizados nesta versão
 
-        document.querySelectorAll('.select-acao').forEach(select => {
-            switch (select.value) {
-                case 'importar': importar++; break;
-                case 'pular':    pular++;    break;
-                case 'excluir':  excluir++;  break;
-            }
-        });
-
-        document.querySelectorAll('input[type="hidden"][name^="acao"]').forEach(() => pular++);
-
-        const el = document.getElementById('contadores-acoes');
-        if (el) {
-            el.innerHTML =
-                `<strong class="text-success">${importar}</strong> importar · ` +
-                `<strong class="text-secondary">${pular}</strong> n/importar · ` +
-                `<strong class="text-danger">${excluir}</strong> excluir` +
-                ` <span class="text-muted">(esta página)</span>`;
-        }
-    }
 
     // ─── Confirmação antes de submeter ───
     document.getElementById('form-confirmar').addEventListener('submit', function(e) {
@@ -136,8 +113,5 @@
         });
     });
 
-    // ─── Inicialização ───
-    document.addEventListener('DOMContentLoaded', () => {
-        atualizarContadores();
-    });
+
 })();

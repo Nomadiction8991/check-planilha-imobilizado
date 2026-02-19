@@ -134,9 +134,6 @@ ob_start();
     <!-- Barra de Confirmação -->
     <div class="card mt-3">
         <div class="card-body py-2">
-            <div class="mb-2">
-                <small class="text-muted" id="contadores-acoes">Calculando&hellip;</small>
-            </div>
             <div class="d-flex flex-column gap-2">
                 <a href="/spreadsheets/import" class="btn btn-outline-secondary w-100">
                     <i class="bi bi-x-lg me-1"></i>Cancelar
