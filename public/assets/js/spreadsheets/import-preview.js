@@ -124,56 +124,27 @@
         }
     });
 
-    // ─── Controle por IGREJA (select-igreja) ───
-    // acao='pular'    → encobre todos os produtos daquela igreja (seta para pular)
-    // acao='importar' → restaura cada produto ao seu valor natural (data-natural)
-    function aplicarAcaoPorComum(codigoComum, acao) {
-        if (!codigoComum) return;
-        document.querySelectorAll(`.registro-row[data-comum="${CSS.escape(codigoComum)}"]`).forEach(row => {
-            const select = row.querySelector('.select-acao');
-            if (!select) return;
-
-            const novoValor = (acao === 'importar')
-                ? (select.dataset.natural || select.value)
-                : 'pular';
-
-            const opcao = select.querySelector(`option[value="${novoValor}"]`);
-            if (opcao) {
-                select.value = novoValor;
-                atualizarEstiloLinha(select);
-            }
-        });
-    }
-
-    // Evento: select-igreja muda → cascata + persistência
+    // ─── Evento: select-igreja muda → salva na sessão e recarrega a página ───
+    // (o servidor filtra os produtos conforme as igrejas com 'personalizado')
     document.querySelectorAll('.select-igreja').forEach(sel => {
         sel.addEventListener('change', async function () {
             const codigo = this.dataset.codigo || '';
             const valor  = this.value || 'pular';
-            aplicarAcaoPorComum(codigo, valor);
-            atualizarContadores();
-            await salvarAcoes();
             await salvarIgrejas({ [codigo]: valor });
+            window.location.reload();
         });
     });
 
-    // Evento: produto alterado manualmente → atualiza data-natural
+    // Evento: produto alterado manualmente → salva via AJAX
     document.querySelectorAll('.select-acao').forEach(select => {
         select.addEventListener('change', function () {
-            this.dataset.natural = this.value;
+            atualizarEstiloLinha(this);
+            atualizarContadores();
         });
     });
 
     // ─── Inicialização ───
     document.addEventListener('DOMContentLoaded', () => {
-        // Guarda valor PHP-rendered de cada produto antes de qualquer js aplicação
-        document.querySelectorAll('.select-acao').forEach(select => {
-            select.dataset.natural = select.value;
-        });
-        // Aplica estado atual de cada select-igreja nas linhas de produto
-        document.querySelectorAll('.select-igreja').forEach(sel => {
-            aplicarAcaoPorComum(sel.dataset.codigo || '', sel.value || 'pular');
-        });
         atualizarContadores();
         document.querySelectorAll('.select-acao').forEach(select => atualizarEstiloLinha(select));
     });

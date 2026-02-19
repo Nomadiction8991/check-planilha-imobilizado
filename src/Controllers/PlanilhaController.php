@@ -148,8 +148,36 @@ class PlanilhaController extends BaseController
             return;
         }
 
+        // Carrega sessão — necessária antes da filtragem de produtos
+        $acoesSalvas   = $_SESSION['preview_acoes_' . $importacaoId]   ?? [];
+        $igrejasSalvas = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
+
+        // ─── Status por comune: novo > atualizar > iguais (baseado em TODOS os registros) ───
+        $statusPorComum = [];
+        foreach ($analise['registros'] as $reg) {
+            $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';
+            $status      = $reg['status'] ?? '';
+            if ($codigoComum === '') continue;
+            if (!isset($statusPorComum[$codigoComum])) {
+                $statusPorComum[$codigoComum] = 'iguais';
+            }
+            if ($status === 'novo') {
+                $statusPorComum[$codigoComum] = 'novo';
+            } elseif ($status === 'atualizar' && $statusPorComum[$codigoComum] !== 'novo') {
+                $statusPorComum[$codigoComum] = 'atualizar';
+            }
+        }
+
+        // ─── Exibe na tabela apenas produtos de igrejas com ação 'personalizado' ───
+        $todosRegistros = array_values(array_filter(
+            $analise['registros'],
+            static function (array $reg) use ($igrejasSalvas): bool {
+                $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';
+                return ($igrejasSalvas[$codigoComum] ?? 'pular') === 'personalizado';
+            }
+        ));
+
         // Paginação: 20 registros por página
-        $todosRegistros = $analise['registros'];
         $totalRegistros = count($todosRegistros);
         $itensPorPagina = 20;
         $paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
@@ -159,22 +187,19 @@ class PlanilhaController extends BaseController
 
         $registrosPagina = array_slice($todosRegistros, $offset, $itensPorPagina);
 
-        // Carrega ações salvas anteriormente na sessão
-        $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
-        $igrejasSalvas = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
-
         $this->renderizar('spreadsheets/import-preview', [
-            'importacao_id' => $importacaoId,
-            'importacao' => $importacao,
-            'resumo' => $analise['resumo'],
-            'registros' => $registrosPagina,
-            'pagina' => $paginaAtual,
-            'total_paginas' => $totalPaginas,
-            'total_registros' => $totalRegistros,
+            'importacao_id'    => $importacaoId,
+            'importacao'       => $importacao,
+            'resumo'           => $analise['resumo'],
+            'registros'        => $registrosPagina,
+            'pagina'           => $paginaAtual,
+            'total_paginas'    => $totalPaginas,
+            'total_registros'  => $totalRegistros,
             'itens_por_pagina' => $itensPorPagina,
-            'acoes_salvas' => $acoesSalvas,
-            'comuns_detectadas' => $analise['comuns_detectadas'] ?? [],
-            'igrejas_salvas' => $igrejasSalvas,
+            'acoes_salvas'     => $acoesSalvas,
+            'comuns_detectadas'=> $analise['comuns_detectadas'] ?? [],
+            'igrejas_salvas'   => $igrejasSalvas,
+            'status_por_comum' => $statusPorComum,
         ]);
     }
 
@@ -215,7 +240,7 @@ class PlanilhaController extends BaseController
         }
         foreach ($igrejas as $codigo => $acaoIgreja) {
             // aceitar apenas valores permitidos
-            if (in_array($acaoIgreja, ['', 'importar', 'pular'], true)) {
+            if (in_array($acaoIgreja, ['', 'importar', 'pular', 'personalizado'], true)) {
                 $_SESSION['preview_igrejas_' . $importacaoId][(string)$codigo] = $acaoIgreja;
             }
         }

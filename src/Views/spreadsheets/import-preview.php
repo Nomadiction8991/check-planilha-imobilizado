@@ -17,6 +17,7 @@ $itensPorPagina   = $itens_por_pagina   ?? 20;
 $acoesSalvas      = $acoes_salvas       ?? [];
 $comunsDetectadas = $comuns_detectadas  ?? [];
 $igrejasSalvas    = $igrejas_salvas     ?? [];
+$statusPorComum   = $status_por_comum   ?? [];
 
 ob_start();
 ?>
@@ -74,31 +75,61 @@ ob_start();
             <table class="table table-sm table-bordered mb-0 tabela-igrejas">
                 <thead>
                     <tr>
-                        <th>IGREJA / LOCALIDADE</th>
-                        <th style="width: 200px">AÇÃO</th>
+                        <th style="width:80px" class="text-center">STATUS</th>
+                        <th>IGREJA</th>
+                        <th style="width: 220px">AÇÃO</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($comunsDetectadas as $comumInfo):
-                        $codigoComum = $comumInfo['codigo'];
-                        $acaoSalvaIgreja = $igrejasSalvas[$codigoComum] ?? 'pular';
+                        $codigoComum     = $comumInfo['codigo'];
+                        $statusComum     = $statusPorComum[$codigoComum] ?? 'iguais';
+                        $isIguais        = ($statusComum === 'iguais');
+                        $statusLabel     = match ($statusComum) {
+                            'novo'      => 'NOVOS',
+                            'atualizar' => 'ALTERAÇÕES',
+                            default     => 'IGUAIS',
+                        };
+                        $statusBadge     = match ($statusComum) {
+                            'novo'      => 'bg-success',
+                            'atualizar' => 'bg-warning text-dark',
+                            default     => 'bg-secondary',
+                        };
+                        $acaoSalvaIgreja = $isIguais ? 'pular' : ($igrejasSalvas[$codigoComum] ?? 'pular');
                     ?>
                     <tr>
-                        <td>
-                            <span class="badge <?= $comumInfo['existe'] ? 'bg-success' : 'bg-warning text-dark' ?>">
-                                <?= htmlspecialchars($comumInfo['localidade']) ?>
-                                <?php if (!$comumInfo['existe']): ?>
-                                    <i class="bi bi-plus-circle-fill ms-1"></i> NOVA
-                                <?php endif; ?>
+                        <td class="text-center">
+                            <span class="badge <?= $statusBadge ?>">
+                                <?= $statusLabel ?>
                             </span>
-                            <small class="text-muted ms-1 font-monospace"><?= htmlspecialchars($codigoComum) ?></small>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark font-monospace" style="font-size:.8rem">
+                                <?= htmlspecialchars($codigoComum) ?>
+                            </span>
+                            <?php if (!$comumInfo['existe']): ?>
+                                <span class="badge bg-warning text-dark ms-1 small">
+                                    <i class="bi bi-plus-circle-fill"></i> NOVA
+                                </span>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <select class="form-select form-select-sm select-igreja"
                                     name="igrejas[<?= htmlspecialchars($codigoComum) ?>]"
-                                    data-codigo="<?= htmlspecialchars($codigoComum) ?>">
-                                <option value="pular"    <?= $acaoSalvaIgreja !== 'importar' ? 'selected' : '' ?>>⊘ Não Importar</option>
-                                <option value="importar" <?= $acaoSalvaIgreja === 'importar' ? 'selected' : '' ?>>✔ Importar</option>
+                                    data-codigo="<?= htmlspecialchars($codigoComum) ?>"
+                                    <?= $isIguais ? 'disabled' : '' ?>>
+                                <option value="pular"
+                                    <?= (!in_array($acaoSalvaIgreja, ['importar', 'personalizado'])) ? 'selected' : '' ?>>
+                                    ⊘ Não Importar
+                                </option>
+                                <option value="importar"
+                                    <?= $acaoSalvaIgreja === 'importar' ? 'selected' : '' ?>>
+                                    ✔ Importar
+                                </option>
+                                <option value="personalizado"
+                                    <?= $acaoSalvaIgreja === 'personalizado' ? 'selected' : '' ?>>
+                                    ⚙ Personalizado
+                                </option>
                             </select>
                         </td>
                     </tr>
@@ -106,6 +137,14 @@ ob_start();
                 </tbody>
             </table>
         </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Estado vazio: nenhuma igreja com 'Personalizado' -->
+    <?php if ($totalRegistros === 0): ?>
+    <div class="alert alert-secondary d-flex align-items-center gap-3 py-3 mb-2">
+        <i class="bi bi-sliders2 fs-4 flex-shrink-0"></i>
+        <div>Selecione <strong>⚙ Personalizado</strong> em uma ou mais igrejas acima para visualizar e configurar os produtos individualmente.</div>
     </div>
     <?php endif; ?>
 
@@ -129,7 +168,6 @@ ob_start();
                     <th style="width: 80px">STATUS</th>
                     <th style="width: 80px">CÓDIGO</th>
                     <th>DESCRIÇÃO</th>
-                    <th>NOVA DESCRIÇÃO</th>
                     <th style="width: 110px">IGREJA</th>
                     <th style="width: 130px">DEPENDÊNCIA</th>
                     <th style="width: 130px">AÇÃO</th>
@@ -140,16 +178,9 @@ ob_start();
                     $status       = $reg['status']        ?? 'erro';
                     $dadosCsv     = $reg['dados_csv']     ?? [];
                     $linhaCsv     = $reg['linha_csv']     ?? ($idx + 1);
-                    $acaoSugerida = $reg['acao_sugerida'] ?? 'pular';
 
-                    if (isset($acoesSalvas[(string)$linhaCsv])) {
-                        $acaoSugerida = $acoesSalvas[(string)$linhaCsv];
-                    }
-
-                    $novaDesc = trim(($dadosCsv['bem'] ?? '') . ' ' . ($dadosCsv['complemento'] ?? ''));
-                    if ($novaDesc === '') {
-                        $novaDesc = $dadosCsv['descricao_completa'] ?? '';
-                    }
+                    // Padrão: 'pular' — o usuário define individualmente cada produto
+                    $acaoSugerida = $acoesSalvas[(string)$linhaCsv] ?? 'pular';
 
                     $badgeClass = match ($status) {
                         'novo'          => 'badge-novo',
@@ -189,15 +220,6 @@ ob_start();
                     <td class="small" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
                         title="<?= htmlspecialchars($dadosCsv['descricao_completa'] ?? '') ?>">
                         <?= htmlspecialchars($dadosCsv['descricao_completa'] ?? '') ?>
-                    </td>
-
-                    <td class="small" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                        title="<?= htmlspecialchars($novaDesc) ?>">
-                        <?php if ($status === 'atualizar'): ?>
-                            <span class="text-success fw-semibold"><?= htmlspecialchars($novaDesc) ?></span>
-                        <?php else: ?>
-                            <?= htmlspecialchars($novaDesc) ?>
-                        <?php endif; ?>
                     </td>
 
                     <td class="small">
