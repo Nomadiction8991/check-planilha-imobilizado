@@ -253,7 +253,7 @@ ob_start();
     <form method="GET" class="row g-3">
       <input type="hidden" name="id" value="<?php echo $id_planilha; ?>">
       <div class="col-12">
-        <label class="form-label">Seções a incluir</label>
+        <label class="form-label">Produtos:</label>
         <div class="row g-2">
           <div class="col-12">
             <div class="form-check">
@@ -270,7 +270,7 @@ ob_start();
           <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="secObs" name="mostrar_observacao" value="1" <?php echo $mostrar_observacao ? 'checked' : ''; ?>>
-              <label class="form-check-label" for="secObs">Com Observação (<?php echo $total_observacao; ?>)</label>
+              <label class="form-check-label" for="secObs">Com observação (<?php echo $total_observacao; ?>)</label>
             </div>
           </div>
           <div class="col-12">
@@ -282,7 +282,7 @@ ob_start();
           <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="secEtiq" name="mostrar_etiqueta" value="1" <?php echo $mostrar_etiqueta ? 'checked' : ''; ?>>
-              <label class="form-check-label" for="secEtiq">Imprimir etiqueta (<?php echo $total_etiqueta; ?>)</label>
+              <label class="form-check-label" for="secEtiq">Para impresao de etiquetas (<?php echo $total_etiqueta; ?>)</label>
             </div>
           </div>
           <div class="col-12">
@@ -294,7 +294,7 @@ ob_start();
           <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="secNovos" name="mostrar_novos" value="1" <?php echo $mostrar_novos ? 'checked' : ''; ?>>
-              <label class="form-check-label" for="secNovos">Cadastrados Novos (<?php echo $total_novos; ?>)</label>
+              <label class="form-check-label" for="secNovos">Novos (<?php echo $total_novos; ?>)</label>
             </div>
           </div>
         </div>
@@ -324,13 +324,13 @@ ob_start();
   <div class="card-body">
     <ul class="mb-0">
       <li><strong>Total de produtos:</strong> <?php echo $total_geral; ?></li>
+      <li class="mt-2"><strong>Produtos:</strong></li>
+      <li><strong>Pendentes:</strong> <?php echo $total_pendentes; ?></li>
       <li><strong>Checados:</strong> <?php echo $total_checados; ?></li>
       <li><strong>Com observação:</strong> <?php echo $total_observacao; ?></li>
       <li><strong>Checados com observação:</strong> <?php echo $total_checados_observacao; ?></li>
-
-      <li><strong>Etiqueta:</strong> <?php echo $total_etiqueta; ?></li>
-      <li><strong>Pendentes:</strong> <?php echo $total_pendentes; ?></li>
-      <li><strong>Com alterações:</strong> <?php echo $total_alteracoes; ?></li>
+      <li><strong>Para impresao de etiquetas:</strong> <?php echo $total_etiqueta; ?></li>
+      <li><strong>Editados:</strong> <?php echo $total_alteracoes; ?></li>
       <li><strong>Novos:</strong> <?php echo $total_novos; ?></li>
       <li class="mt-2"><strong>Total a ser impresso:</strong> <?php echo $total_mostrar; ?> PRODUTOS</li>
     </ul>
@@ -486,7 +486,7 @@ ob_start();
 
   <?php if ($mostrar_etiqueta && $total_etiqueta > 0): ?>
     <div class="card mb-3">
-      <div class="card-header">Imprimir etiqueta (<?php echo $total_etiqueta; ?>)</div>
+      <div class="card-header">Para impresao de etiquetas (<?php echo $total_etiqueta; ?>)</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-striped align-middle mb-0">
@@ -512,7 +512,7 @@ ob_start();
 
   <?php if ($mostrar_novos && $total_novos > 0): ?>
     <div class="card mb-3">
-      <div class="card-header">Cadastrados Novos (<?php echo $total_novos; ?>)</div>
+      <div class="card-header">Novos (<?php echo $total_novos; ?>)</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-striped align-middle mb-0">
