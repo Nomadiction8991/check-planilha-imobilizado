@@ -1183,7 +1183,7 @@ ob_start();
 <style>
     /* ===== BOTÕES FLUTUANTES - CANTO INFERIOR DIREITO ===== */
     .floating-buttons-container {
-        position: absolute !important;
+        position: fixed !important;
         bottom: 90px !important;
         right: 16px !important;
         z-index: 1040 !important;
@@ -1398,7 +1398,7 @@ ob_start();
             <i class="bi bi-box-seam me-2"></i>
             PRODUTOS
         </span>
-        <span class="badge bg-white text-dark"><?php echo htmlspecialchars(to_uppercase(count($PRODUTOS ?? []) . ' itens'), ENT_QUOTES, 'UTF-8'); ?></span>
+        <span class="badge bg-white text-dark"><?php echo htmlspecialchars(to_uppercase(($total_registros ?? 0) . ' itens — pg. ' . ($pagina ?? 1) . '/' . ($total_paginas ?? 1)), ENT_QUOTES, 'UTF-8'); ?></span>
     </div>
     <div class="list-group list-group-flush">
         <?php if ($PRODUTOS): ?>
@@ -1530,36 +1530,10 @@ ob_start();
                     <!-- Informações -->
                     <div class="info-PRODUTO">
                         <?php
-                        // Construir nome personalizado: 1x - (TIPO_DESC) BEM COMPLEMENTO [DEPENDENCIA]
-                        $tipoDescExibir = $p['tipo_desc'] ?? '';
-                        $bemExibir = !empty($p['editado_bem']) ? $p['editado_bem'] : ($p['bem'] ?? '');
-                        $compExibir = !empty($p['editado_complemento']) ? $p['editado_complemento'] : ($p['complemento'] ?? '');
-                        $depExibir = !empty($p['editado_dependencia_desc']) ? $p['editado_dependencia_desc'] : ($p['dependencia_desc'] ?? '');
-
-                        $nomePersonalizado = '1x - ';
-                        if (!empty($tipoDescExibir)) {
-                            $nomePersonalizado .= '(' . mb_strtoupper($tipoDescExibir, 'UTF-8') . ') ';
-                        }
-                        if (!empty($bemExibir)) {
-                            $nomePersonalizado .= mb_strtoupper($bemExibir, 'UTF-8');
-                        }
-                        if (!empty($compExibir)) {
-                            $nomePersonalizado .= ' ' . mb_strtoupper($compExibir, 'UTF-8');
-                        }
-                        if (!empty($depExibir)) {
-                            $nomePersonalizado .= ' [' . mb_strtoupper($depExibir, 'UTF-8') . ']';
-                        }
-                        ?>
-                        <strong><?php echo htmlspecialchars(trim($nomePersonalizado)); ?></strong><br>
-                        <?php
-                        // Mostrar nome original da planilha embaixo (menor, sem bold)
+                        // Exibe direto a descrição da planilha em negrito
                         $nomePlanilha = $p['nome_planilha'] ?? $p['descricao_completa'] ?? '';
-                        if (!empty($nomePlanilha)):
                         ?>
-                            <small style="font-size: 0.75em; color: #888; font-weight: normal;">
-                                <?php echo htmlspecialchars($nomePlanilha); ?>
-                            </small>
-                        <?php endif; ?>
+                        <strong><?php echo htmlspecialchars($nomePlanilha !== '' ? $nomePlanilha : ($p['descricao_completa'] ?? '')); ?></strong>
                     </div>
 
                     <!-- Ações -->
