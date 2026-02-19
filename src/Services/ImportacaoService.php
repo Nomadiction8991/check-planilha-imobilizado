@@ -276,6 +276,16 @@ class ImportacaoService
             $comumId = $comumIdFallback;
         }
 
+        // ── Fallback: extrair código da comum do próprio código do produto ──
+        // Formato: "09-0565 / 001495" → código da comum = "09-0565"
+        // Ocorre quando a coluna de localidade vem vazia no CSV.
+        if ($comumId <= 0 && !empty($codigo)) {
+            $codigoComumDoCodigo = $this->extrairCodigoComumDoCodigo($codigo);
+            if (!empty($codigoComumDoCodigo)) {
+                $comumId = $this->buscarOuCriarComum($codigoComumDoCodigo);
+            }
+        }
+
         if ($comumId <= 0) {
             throw new Exception('Não foi possível determinar a igreja (comum) para o produto: ' . $codigo);
         }
@@ -341,6 +351,24 @@ class ImportacaoService
         ]);
 
         return (int) $this->conexao->lastInsertId();
+    }
+
+    /**
+     * Extrai o código da comum a partir do código do produto.
+     *
+     * Formato esperado: "09-0565 / 001495"
+     * Retorna "09-0565" (tudo antes do " / ").
+     * Funciona também sem espaços: "09-0565/001495" → "09-0565".
+     */
+    private function extrairCodigoComumDoCodigo(string $codigo): string
+    {
+        // Divide pelo separador "/" com ou sem espaços ao redor
+        if (strpos($codigo, '/') !== false) {
+            $partes = explode('/', $codigo, 2);
+            return trim($partes[0]);
+        }
+
+        return '';
     }
 
     /**

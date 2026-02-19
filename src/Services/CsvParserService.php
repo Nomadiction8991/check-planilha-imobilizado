@@ -314,6 +314,15 @@ class CsvParserService
                 }
             }
 
+            // ── Fallback: extrair código da comum do código do produto ──────────────
+            // Quando a coluna de localidade está vazia e não há carry-forward
+            // (ex: CSV sem coluna de localidade), o código do produto traz o código
+            // da comum antes do "/": "09-0565 / 001495" → comum = "09-0565".
+            if (empty($codigoComum) && strpos($codigo, '/') !== false) {
+                $partes      = explode('/', $codigo, 2);
+                $codigoComum = trim($partes[0]);
+            }
+
             // ── Parse completo: extrai tipo_bem, bem e complemento do nome do CSV ──
             // parsearNome() separa "N - BEM COMPLEMENTO" em suas partes estruturadas.
             $parsed       = $this->parsearNome($nomeCompleto);
