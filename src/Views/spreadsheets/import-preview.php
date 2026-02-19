@@ -16,6 +16,7 @@ $totalRegistros = $total_registros ?? 0;
 $itensPorPagina = $itens_por_pagina ?? 50;
 $filtroStatus = $filtro_status ?? 'todos';
 $acoesSalvas = $acoes_salvas ?? [];
+$comunsDetectadas = $comuns_detectadas ?? [];
 
 ob_start();
 ?>
@@ -57,6 +58,31 @@ ob_start();
         <div class="alert alert-danger py-2 small mb-3">
             <i class="bi bi-exclamation-triangle me-1"></i>
             <?= $resumo['erros'] ?> linha(s) com erro de leitura serão ignoradas.
+        </div>
+    <?php endif; ?>
+
+    <!-- Igrejas Detectadas -->
+    <?php if (!empty($comunsDetectadas)): ?>
+        <div class="alert alert-info py-2 small mb-3">
+            <i class="bi bi-building me-1"></i>
+            <strong>IGREJAS DETECTADAS NO CSV (<?= count($comunsDetectadas) ?>):</strong>
+            <div class="mt-1">
+                <?php foreach ($comunsDetectadas as $comumInfo): ?>
+                    <span class="badge <?= $comumInfo['existe'] ? 'bg-success' : 'bg-warning text-dark' ?> me-1 mb-1">
+                        <?= htmlspecialchars($comumInfo['localidade']) ?>
+                        <?= $comumInfo['existe'] ? '' : ' (NOVA)' ?>
+                    </span>
+                <?php endforeach; ?>
+            </div>
+            <?php
+            $novas = array_filter($comunsDetectadas, fn($c) => !$c['existe']);
+            if (!empty($novas)):
+            ?>
+                <div class="mt-1 text-warning">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    <?= count($novas) ?> igreja(s) ser&atilde;o cadastradas automaticamente ao confirmar.
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 
@@ -135,6 +161,7 @@ ob_start();
                     <th style="width: 40px">#</th>
                     <th style="width: 80px">STATUS</th>
                     <th style="width: 80px">CÓDIGO</th>
+                    <th style="width: 100px">LOCALIDADE</th>
                     <th>DESCRIÇÃO</th>
                     <th>BEM</th>
                     <th>COMPLEMENTO</th>
@@ -181,6 +208,11 @@ ob_start();
                             <span class="badge <?= $badgeClass ?>"><?= $statusLabel ?></span>
                         </td>
                         <td class="fw-bold"><?= htmlspecialchars($dadosCsv['codigo'] ?? '') ?></td>
+
+                        <!-- Localidade (igreja) -->
+                        <td class="small">
+                            <?= htmlspecialchars($dadosCsv['localidade'] ?? '') ?>
+                        </td>
 
                         <!-- Descrição com diff -->
                         <td class="diff-cell">

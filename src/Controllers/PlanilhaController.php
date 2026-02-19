@@ -57,7 +57,7 @@ class PlanilhaController extends BaseController
             ini_set('memory_limit', '128M');
 
             SessionManager::start();
-            $comumId = SessionManager::getComumId();
+            $comumId = SessionManager::getComumId() ?? 0;
             $usuarioId = SessionManager::getUserId();
 
             if (!$usuarioId) {
@@ -65,9 +65,8 @@ class PlanilhaController extends BaseController
                 return;
             }
 
-            if (!$comumId) {
-                throw new \Exception('Selecione um Comum antes de importar');
-            }
+            // comumId é opcional — o CSV pode conter múltiplas igrejas (localidades)
+            // que serão detectadas automaticamente durante a análise
 
             // Valida upload — aceita 'arquivo_csv' e 'arquivo' (compatibilidade)
             $arquivo = null;
@@ -93,22 +92,22 @@ class PlanilhaController extends BaseController
                 mkdir($dirImportacao, 0777, true);
             }
 
-            $nomeArquivo = 'importacao_' . $comumId . '_' . time() . '.' . $extensao;
+            $nomeArquivo = 'importacao_' . ($comumId ?: 'multi') . '_' . time() . '.' . $extensao;
             $caminhoDestino = $dirImportacao . '/' . $nomeArquivo;
 
             if (!move_uploaded_file($arquivo['tmp_name'], $caminhoDestino)) {
                 throw new \Exception('Erro ao salvar arquivo');
             }
 
-            // Registra importação no banco
+            // Registra importação no banco (comum_id pode ser NULL para multi-igreja)
             $importacaoId = $this->importacaoService->iniciarImportacao(
                 $usuarioId,
-                $comumId,
+                $comumId ?: null,
                 $arquivo['name'],
                 $caminhoDestino
             );
 
-            // Analisa CSV vs banco de dados
+            // Analisa CSV vs banco de dados (detecta igrejas automaticamente)
             $analise = $this->csvParserService->analisar($caminhoDestino, $comumId);
 
             // Salva análise em JSON para a tela de preview
@@ -186,6 +185,7 @@ class PlanilhaController extends BaseController
             'itens_por_pagina' => $itensPorPagina,
             'filtro_status' => $filtroStatus,
             'acoes_salvas' => $acoesSalvas,
+            'comuns_detectadas' => $analise['comuns_detectadas'] ?? [],
         ]);
     }
 

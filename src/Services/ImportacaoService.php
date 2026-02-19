@@ -39,8 +39,9 @@ class ImportacaoService
 
     /**
      * PASSO 1: Registra a importação no banco de dados.
+     * O comumId pode ser NULL para importações multi-igreja (detectadas pelo CSV).
      */
-    public function iniciarImportacao(int $usuarioId, int $comumId, string $arquivoNome, string $arquivoCaminho): int
+    public function iniciarImportacao(int $usuarioId, ?int $comumId, string $arquivoNome, string $arquivoCaminho): int
     {
         $totalLinhas = $this->contarLinhasArquivo($arquivoCaminho);
 
@@ -85,7 +86,8 @@ class ImportacaoService
             'erros' => []
         ];
 
-        $comumId = $importacao['comum_id'];
+        // comumId da importação é fallback para linhas sem localidade
+        $comumIdFallback = $importacao['comum_id'] ?? 0;
         $registros = $analise['registros'] ?? [];
 
         // Filtra apenas os que têm ação definida
@@ -119,7 +121,7 @@ class ImportacaoService
                 $lote[] = $item;
 
                 if (count($lote) >= self::LOTE_SIZE) {
-                    $resultadoLote = $this->processarLoteComAcoes($lote, $comumId);
+                    $resultadoLote = $this->processarLoteComAcoes($lote, $comumIdFallback);
                     $this->acumularResultado($resultado, $resultadoLote);
 
                     $processados += count($lote);
@@ -141,7 +143,7 @@ class ImportacaoService
 
             // Lote restante
             if (!empty($lote)) {
-                $resultadoLote = $this->processarLoteComAcoes($lote, $comumId);
+                $resultadoLote = $this->processarLoteComAcoes($lote, $comumIdFallback);
                 $this->acumularResultado($resultado, $resultadoLote);
                 $processados += count($lote);
             }
@@ -168,8 +170,9 @@ class ImportacaoService
 
     /**
      * Processa um lote de registros com ações definidas pelo usuário.
+     * Cada registro resolve sua própria comum via localidade do CSV.
      */
-    private function processarLoteComAcoes(array $lote, int $comumId): array
+    private function processarLoteComAcoes(array $lote, int $comumIdFallback): array
     {
         $resultado = [
             'sucesso' => 0,
@@ -193,7 +196,7 @@ class ImportacaoService
                         }
                         $resultado['sucesso']++;
                     } elseif ($acao === CsvParserService::ACAO_IMPORTAR) {
-                        $this->processarRegistro($registro, $comumId);
+                        $this->processarRegistro($registro, $comumIdFallback);
                         $resultado['sucesso']++;
                     }
                 } catch (Exception $e) {
@@ -216,8 +219,10 @@ class ImportacaoService
 
     /**
      * Processa um registro individual (NOVO ou ATUALIZAR).
+     * Resolve a comum automaticamente pela localidade do CSV.
+     * Se a comum não existir, cria automaticamente.
      */
-    private function processarRegistro(array $registro, int $comumId): void
+    private function processarRegistro(array $registro, int $comumIdFallback): void
     {
         $dadosCsv = $registro['dados_csv'];
 
@@ -229,6 +234,18 @@ class ImportacaoService
         $dependenciaDescricao = $dadosCsv['dependencia_descricao'] ?? '';
         $bemIdentificado = $dadosCsv['bem_identificado'] ?? true;
         $nomePlanilha = $dadosCsv['nome_original'] ?? $descricaoCompleta;
+
+        // ── Resolver comumId pela localidade do CSV ──
+        $codigoComum = $dadosCsv['codigo_comum'] ?? '';
+        if (!empty($codigoComum)) {
+            $comumId = $this->buscarOuCriarComum($codigoComum);
+        } else {
+            $comumId = $comumIdFallback;
+        }
+
+        if ($comumId <= 0) {
+            throw new Exception('Não foi possível determinar a igreja (comum) para o produto: ' . $codigo);
+        }
 
         $tipoBemId = $this->buscarOuCriarTipoBem($tipoBemCodigo);
         $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);

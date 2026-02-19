@@ -58,9 +58,14 @@ class CsvParserService
 
     /**
      * Analisa um CSV e retorna resultado completo de análise.
-     * Compara cada linha do CSV com os dados existentes no banco.
+     * Detecta automaticamente as localidades (igrejas) no CSV.
+     * Cada localidade vira uma comum separada. Compara cada linha contra
+     * os produtos da respectiva comum.
+     *
+     * @param string $caminhoArquivo Caminho do arquivo CSV
+     * @param int    $comumIdFallback Comum padrão para linhas sem localidade (0 = nenhum)
      */
-    public function analisar(string $caminhoArquivo, int $comumId): array
+    public function analisar(string $caminhoArquivo, int $comumIdFallback = 0): array
     {
         if (!file_exists($caminhoArquivo)) {
             throw new Exception('Arquivo não encontrado: ' . $caminhoArquivo);
@@ -78,10 +83,49 @@ class CsvParserService
             throw new Exception('Arquivo CSV vazio ou sem dados válidos após pular ' . $puloLinhas . ' linhas de cabeçalho');
         }
 
-        // Pré-carregar dados do banco (evita N+1 queries — Identity Map)
-        $produtosExistentes = $this->carregarProdutosDoComum($comumId);
+        // ── Detectar localidades (igrejas) distintas no CSV ──
+        $codigosComuns = [];
+        foreach ($linhas as $linha) {
+            $cod = $linha['codigo_comum'] ?? '';
+            if ($cod !== '' && !isset($codigosComuns[$cod])) {
+                $codigosComuns[$cod] = $linha['localidade'] ?? $cod;
+            }
+        }
+
+        // ── Resolver cada código_comum → comumId (se já existir no banco) ──
+        $mapaCodigoParaComumId = []; // codigo_comum → comumId (0 se não existe ainda)
+        $comunsDetectadas = [];      // info para o preview
+
+        foreach ($codigosComuns as $codigoComum => $localidadeTexto) {
+            $comumId = $this->buscarComumPorCodigo($codigoComum);
+            $mapaCodigoParaComumId[$codigoComum] = $comumId;
+
+            $comunsDetectadas[] = [
+                'codigo' => $codigoComum,
+                'localidade' => $localidadeTexto,
+                'comum_id' => $comumId,
+                'existe' => $comumId > 0,
+            ];
+        }
+
+        // ── Pré-carregar produtos por-comum (Identity Map) ──
+        $produtosPorComum = []; // comumId → [codigo_upper => produto]
+        $dependenciasPorComum = [];
+
+        foreach ($mapaCodigoParaComumId as $codigoComum => $comumId) {
+            if ($comumId > 0 && !isset($produtosPorComum[$comumId])) {
+                $produtosPorComum[$comumId] = $this->carregarProdutosDoComum($comumId);
+                $dependenciasPorComum[$comumId] = $this->carregarDependencias($comumId);
+            }
+        }
+
+        // Fallback para linhas sem localidade
+        if ($comumIdFallback > 0 && !isset($produtosPorComum[$comumIdFallback])) {
+            $produtosPorComum[$comumIdFallback] = $this->carregarProdutosDoComum($comumIdFallback);
+            $dependenciasPorComum[$comumIdFallback] = $this->carregarDependencias($comumIdFallback);
+        }
+
         $tiposBens = $this->carregarTiposBens();
-        $dependencias = $this->carregarDependencias($comumId);
 
         $registros = [];
         $resumo = [
@@ -96,7 +140,15 @@ class CsvParserService
             $resumo['total']++;
 
             try {
-                $registro = $this->analisarLinha($linha, $produtosExistentes, $tiposBens, $dependencias, $comumId);
+                // Determinar qual comum usar para esta linha
+                $codigoComum = $linha['codigo_comum'] ?? '';
+                $comumIdLinha = $mapaCodigoParaComumId[$codigoComum] ?? $comumIdFallback;
+
+                // Produtos e dependências desta comum
+                $produtosExistentes = $produtosPorComum[$comumIdLinha] ?? [];
+                $dependencias = $dependenciasPorComum[$comumIdLinha] ?? [];
+
+                $registro = $this->analisarLinha($linha, $produtosExistentes, $tiposBens, $dependencias, $comumIdLinha);
                 $registro['linha_csv'] = $linha['_linha_original'] ?? ($idx + 1);
 
                 switch ($registro['status']) {
@@ -132,6 +184,7 @@ class CsvParserService
         return [
             'resumo' => $resumo,
             'registros' => $registros,
+            'comuns_detectadas' => $comunsDetectadas,
         ];
     }
 
@@ -650,6 +703,10 @@ class CsvParserService
             'bem' => $bem,
             'complemento' => $complemento,
             'dependencia_descricao' => $depDescNorm ?: $dependenciaDescricao,
+            'codigo_comum' => $dadosCsv['codigo_comum'] ?? '',
+            'localidade' => $dadosCsv['localidade'] ?? '',
+            'nome_original' => $dadosCsv['nome_original'] ?? $descricaoCompleta,
+            'bem_identificado' => $dadosCsv['bem_identificado'] ?? true,
         ];
 
         // Verifica se produto existe no banco (busca por código uppercase)
@@ -725,6 +782,23 @@ class CsvParserService
     }
 
     // ─── CARREGAMENTO DO BANCO (Identity Map) ───
+
+    /**
+     * Busca uma comum pelo código (sem criar).
+     * Retorna comumId ou 0 se não encontrada.
+     */
+    private function buscarComumPorCodigo(string $codigoComum): int
+    {
+        if (empty($codigoComum)) {
+            return 0;
+        }
+
+        $stmt = $this->conexao->prepare("SELECT id FROM comums WHERE codigo = :codigo LIMIT 1");
+        $stmt->execute([':codigo' => $codigoComum]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? (int) $row['id'] : 0;
+    }
 
     /**
      * Pré-carrega TODOS os produtos do comum indexados por código uppercase.
