@@ -6,13 +6,15 @@ $projectRoot = $appConfig['project_root'];
 require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
 
-$id_planilha = $_GET['id'] ?? null;
+// Prefer controller-provided variables; fallback to query param
+$id_planilha = $id_planilha ?? $comum_id ?? ($_GET['id'] ?? null);
 if (!$id_planilha) {
-    header('Location: ' . base_url('/'));
+    // sem comum selecionada, redireciona à listagem de igrejas (melhor UX que voltar pra home)
+    header('Location: ' . base_url('/churches'));
     exit;
 }
 
-$comum_id = $id_planilha;
+$comum_id = $comum_id ?? $id_planilha;
 
 
 try {
