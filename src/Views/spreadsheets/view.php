@@ -1532,8 +1532,13 @@ ob_start();
                         <?php
                         // Exibe direto a descrição da planilha em negrito
                         $nomePlanilha = $p['nome_planilha'] ?? $p['descricao_completa'] ?? '';
+                        $depInfo = trim($p['editado_dependencia_desc'] ?? '') ?: trim($p['dependencia_desc'] ?? '');
+                        $nomeExibido = $nomePlanilha !== '' ? $nomePlanilha : ($p['descricao_completa'] ?? '');
+                        if ($depInfo !== '') {
+                            $nomeExibido .= ' {' . mb_strtoupper($depInfo, 'UTF-8') . '}';
+                        }
                         ?>
-                        <strong><?php echo htmlspecialchars($nomePlanilha !== '' ? $nomePlanilha : ($p['descricao_completa'] ?? '')); ?></strong>
+                        <strong><?php echo htmlspecialchars($nomeExibido); ?></strong>
                     </div>
 
                     <!-- Ações -->
