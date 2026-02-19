@@ -5,6 +5,16 @@
   .app-content { padding: 0 !important; background: #fff !important; }
   table { page-break-inside: auto; }
   tr { page-break-inside: avoid; page-break-after: auto; }
+
+  /* Force card headers and muted text to print in black for better contrast */
+  .card-header, .card-header * { color: #000 !important; background-color: transparent !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .text-muted { color: #000 !important; }
+
+  /* Hide application footer and mobile footer when printing */
+  .app-footer, .footer-mobile, footer { display: none !important; }
+
+  /* Make cards print cleanly */
+  .card { box-shadow: none !important; background-color: #fff !important; }
 }
 .table thead th { font-size: 12px; }
 .table td { font-size: 12px; }
