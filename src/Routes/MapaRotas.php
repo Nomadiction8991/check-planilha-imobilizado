@@ -90,6 +90,7 @@ class MapaRotas
 
             'GET /reports/14-1' => [RelatorioController::class, 'relatorio141'],
             'GET /reports/view' => [RelatorioController::class, 'visualizar'],
+            'GET /reports/alteracoes' => [RelatorioController::class, 'alteracoes'],
             'GET /reports/signature' => [RelatorioController::class, 'assinatura'],
         ];
     }

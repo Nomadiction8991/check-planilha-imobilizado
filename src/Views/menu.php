@@ -44,7 +44,7 @@ $customCssPath = $customCssPath ?? '/assets/css/menu.css';
             </button>
             <ul class="submenu">
                 <li><a href="/reports/14-1"><i class="bi bi-journal-text" aria-hidden="true"></i>14.1</a></li>
-                <li><a href="/reports/view"><i class="bi bi-eye-fill" aria-hidden="true"></i>Alterações</a></li>
+                <li><a href="/reports/alteracoes"><i class="bi bi-eye-fill" aria-hidden="true"></i>Alterações</a></li>
             </ul>
         </li>
 

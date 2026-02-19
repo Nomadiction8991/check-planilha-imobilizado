@@ -52,4 +52,25 @@ class RelatorioController extends BaseController
             'comum_id'    => $comumId,
         ]);
     }
+
+    /**
+     * Abre a página de "Relatório de Alterações" (impressão).
+     * Rendeiriza a view existente em `spreadsheets/report-print-changes.php`.
+     */
+    public function alteracoes(): void
+    {
+        $comumId = SessionManager::getComumId();
+        $idPlanilha = $this->query('id', $comumId);
+
+        if (!$idPlanilha || $idPlanilha <= 0) {
+            // mantém comportamento consistente: direciona para seleção de comum
+            $this->redirecionar('/churches?erro=Selecione+uma+comum+para+ver+o+relat%C3%B3rio');
+            return;
+        }
+
+        $this->renderizar('spreadsheets/report-print-changes', [
+            'id_planilha' => $idPlanilha,
+            'comum_id'    => $comumId,
+        ]);
+    }
 }
