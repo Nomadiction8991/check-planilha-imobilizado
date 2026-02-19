@@ -96,21 +96,55 @@ ob_start();
             CONDIÇÃO 14.1
         </div>
         <div class="card-body">
-            <div class="mb-3">
-                <label for="condicao_14_1" class="form-label">CONDIÇÃO</label>
-                <select class="form-select" id="condicao_14_1" name="condicao_14_1">
-                    <option value="">-- SELECIONE --</option>
-                    <?php
-                    $condicoes = ['BOM', 'REGULAR', 'RUIM', 'INSERVÍVEL'];
-                    $condicaoPost = mb_strtoupper(trim($_POST['condicao_14_1'] ?? ''), 'UTF-8');
-                    foreach ($condicoes as $cond): ?>
-                        <option value="<?php echo $cond; ?>" <?php echo ($condicaoPost === $cond) ? 'selected' : ''; ?>>
-                            <?php echo $cond; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                    <div class="mb-3">
+                <label class="form-label">CONDIÇÃO</label>
+                <?php
+                $condicaoPost = trim($_POST['condicao_14_1'] ?? '');
+                $imprimirPost = isset($_POST['imprimir_14_1']) && (int)$_POST['imprimir_14_1'] === 1;
+                $opcoes141 = [
+                    '1' => 'O bem tem mais de cinco anos de uso e o documento fiscal de aquisição está anexo.',
+                    '2' => 'O bem tem mais de cinco anos de uso, porém o documento fiscal de aquisição foi extraviado.',
+                    '3' => 'O bem tem até cinco anos de uso e o documento fiscal de aquisição está anexo.',
+                ];
+                foreach ($opcoes141 as $valor => $texto): ?>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio"
+                            name="condicao_14_1"
+                            id="condicao_141_<?php echo $valor; ?>"
+                            value="<?php echo $valor; ?>"
+                            <?php echo ($condicaoPost === (string)$valor || ($condicaoPost === '' && $imprimirPost && $valor === '2')) ? 'checked' : ''; ?>>
+                        <label class="form-check-label small" for="condicao_141_<?php echo $valor; ?>">
+                            <?php echo htmlspecialchars($texto, ENT_QUOTES, 'UTF-8'); ?>
+                        </label>
+                    </div>
+                <?php endforeach; ?>
                 <div class="form-text">CONDIÇÃO ATUAL DO PRODUTO PARA O RELATÓRIO</div>
             </div>
+
+            <script>
+                (function () {
+                    var imprimir = document.getElementById('imprimir_14_1');
+                    if (!imprimir) return;
+                    var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
+
+                    function updateRequirement() {
+                        var required = imprimir.checked;
+                        radios.forEach(function (r) {
+                            if (required) r.setAttribute('required', 'required');
+                            else r.removeAttribute('required');
+                        });
+
+                        if (required && !radios.some(function (r) { return r.checked; })) {
+                            var def = document.getElementById('condicao_141_2');
+                            if (def) def.checked = true;
+                        }
+                    }
+
+                    imprimir.addEventListener('change', updateRequirement);
+                    // inicializar
+                    updateRequirement();
+                })();
+            </script>
         </div>
     </div>
 

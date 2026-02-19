@@ -131,6 +131,14 @@ class ProdutoController extends BaseController
         $multiplicador  = max(1, (int) $this->post('multiplicador', 1));
         $imprimir141    = (int) $this->post('imprimir_14_1', 0);
         $condicao141    = mb_strtoupper(trim($this->post('condicao_14_1', '')), 'UTF-8');
+
+        // Se imprimir 14.1 for marcado, garantir que condicao_14_1 seja 1|2|3 —
+        // quando vazio ou inválido, definir o padrão como '2' (documento extraviado)
+        if ($imprimir141 === 1) {
+            if (!in_array($condicao141, ['1', '2', '3'], true)) {
+                $condicao141 = '2';
+            }
+        }
         $notaNumero     = $this->post('nota_numero', '');
         $notaData       = $this->post('nota_data', '');
         $notaValor      = trim($this->post('nota_valor', ''));
@@ -287,6 +295,14 @@ class ProdutoController extends BaseController
         // Campos diretos (não editado_)
         $imprimir141    = $this->post('imprimir_14_1', null);
         $condicao141    = trim($this->post('condicao_14_1', ''));
+
+        // Se imprimir 14.1 estiver marcado, garantir valor válido (1|2|3) —
+        // caso contrário, definir padrão '2' (documento extraviado)
+        if ($imprimir141 !== null) {
+            if (!in_array($condicao141, ['1', '2', '3'], true)) {
+                $condicao141 = '2';
+            }
+        }
         $notaNumero     = $this->post('nota_numero', '');
         $notaData       = $this->post('nota_data', '');
         $notaValor      = trim($this->post('nota_valor', ''));
