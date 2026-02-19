@@ -310,7 +310,7 @@ ob_start();
 <div class="card mb-3">
   <div class="card-body text-center">
     <h5 class="mb-1 text-gradient">RELATÓRIO DE ALTERAÇÕES</h5>
-    <div class="text-muted">Planilha: <?php echo htmlspecialchars($planilha['comum']); ?></div>
+    <div class="text-muted"><?php echo htmlspecialchars($planilha['comum']); ?></div>
     <div class="small text-muted">Gerado em <?php echo date('d/m/Y H:i:s'); ?></div>
   </div>
     <!-- STATUS removed per UI request -->
@@ -324,7 +324,6 @@ ob_start();
   <div class="card-body">
     <ul class="mb-0">
       <li><strong>Total de produtos:</strong> <?php echo $total_geral; ?></li>
-      <li class="mt-2"><strong>Produtos:</strong></li>
       <li><strong>Pendentes:</strong> <?php echo $total_pendentes; ?></li>
       <li><strong>Checados:</strong> <?php echo $total_checados; ?></li>
       <li><strong>Com observação:</strong> <?php echo $total_observacao; ?></li>
@@ -332,7 +331,7 @@ ob_start();
       <li><strong>Para impresao de etiquetas:</strong> <?php echo $total_etiqueta; ?></li>
       <li><strong>Editados:</strong> <?php echo $total_alteracoes; ?></li>
       <li><strong>Novos:</strong> <?php echo $total_novos; ?></li>
-      <li class="mt-2"><strong>Total a ser impresso:</strong> <?php echo $total_mostrar; ?> PRODUTOS</li>
+      <li><strong>Total a ser impresso:</strong> <?php echo $total_mostrar; ?></li>
     </ul>
   </div>
 </div>
@@ -340,7 +339,7 @@ ob_start();
 <?php if ($total_geral > 0 && $total_mostrar > 0): ?>
   <?php if ($mostrar_alteracoes && $total_alteracoes > 0): ?>
     <div class="card mb-3">
-      <div class="card-header">PRODUTOS com alterações (<?php echo $total_alteracoes; ?>)</div>
+      <div class="card-header">Editados (<?php echo $total_alteracoes; ?>)</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-striped align-middle mb-0">
