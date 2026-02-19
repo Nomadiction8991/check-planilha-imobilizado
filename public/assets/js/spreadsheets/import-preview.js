@@ -124,34 +124,20 @@
         }
     });
 
-    // ─── Evento: select-igreja muda → salva ações + igrejas e recarrega ───
+    // ─── Evento: select-igreja muda → salva e recarrega ───
     document.querySelectorAll('.select-igreja').forEach(sel => {
         sel.addEventListener('change', async function () {
             const codigo = this.dataset.codigo || '';
             const valor  = this.value || 'pular';
-            // Salva ações de produtos da página atual antes de sair
-            await salvarAcoes();
-            // Salva escolha de igrejas
             await salvarIgrejas({ [codigo]: valor });
-            // Reload com cache-busting para garantir dados frescos
             const url = new URL(window.location.href);
             url.searchParams.set('_t', Date.now());
-            url.searchParams.delete('pagina');
             window.location.href = url.toString();
-        });
-    });
-
-    // Evento: produto alterado manualmente → salva via AJAX
-    document.querySelectorAll('.select-acao').forEach(select => {
-        select.addEventListener('change', function () {
-            atualizarEstiloLinha(this);
-            atualizarContadores();
         });
     });
 
     // ─── Inicialização ───
     document.addEventListener('DOMContentLoaded', () => {
         atualizarContadores();
-        document.querySelectorAll('.select-acao').forEach(select => atualizarEstiloLinha(select));
     });
 })();

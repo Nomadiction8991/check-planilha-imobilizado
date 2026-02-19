@@ -148,11 +148,11 @@ class PlanilhaController extends BaseController
             return;
         }
 
-        // Carrega sessão — necessária antes da filtragem de produtos
+        // Carrega sessão
         $acoesSalvas   = $_SESSION['preview_acoes_' . $importacaoId]   ?? [];
         $igrejasSalvas = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
 
-        // ─── Status por comune: novo > atualizar > iguais (baseado em TODOS os registros) ───
+        // Status por comune para a tabela de igrejas (novo > atualizar > iguais)
         $statusPorComum = [];
         foreach ($analise['registros'] as $reg) {
             $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';
@@ -168,34 +168,15 @@ class PlanilhaController extends BaseController
             }
         }
 
-        // ─── Exibe na tabela apenas produtos de igrejas com ação 'personalizado' ───
-        $todosRegistros = array_values(array_filter(
-            $analise['registros'],
-            static function (array $reg) use ($igrejasSalvas): bool {
-                $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';
-                return ($igrejasSalvas[$codigoComum] ?? 'pular') === 'personalizado';
-            }
-        ));
-
-        // Paginação: 20 registros por página
-        $totalRegistros = count($todosRegistros);
-        $itensPorPagina = 20;
-        $paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
-        $totalPaginas = max(1, (int) ceil($totalRegistros / $itensPorPagina));
-        $paginaAtual = min($paginaAtual, $totalPaginas);
-        $offset = ($paginaAtual - 1) * $itensPorPagina;
-
-        $registrosPagina = array_slice($todosRegistros, $offset, $itensPorPagina);
-
         $this->renderizar('spreadsheets/import-preview', [
             'importacao_id'    => $importacaoId,
             'importacao'       => $importacao,
             'resumo'           => $analise['resumo'],
-            'registros'        => $registrosPagina,
-            'pagina'           => $paginaAtual,
-            'total_paginas'    => $totalPaginas,
-            'total_registros'  => $totalRegistros,
-            'itens_por_pagina' => $itensPorPagina,
+            'registros'        => [],
+            'pagina'           => 1,
+            'total_paginas'    => 1,
+            'total_registros'  => 0,
+            'itens_por_pagina' => 20,
             'acoes_salvas'     => $acoesSalvas,
             'comuns_detectadas'=> $analise['comuns_detectadas'] ?? [],
             'igrejas_salvas'   => $igrejasSalvas,
