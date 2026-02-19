@@ -100,7 +100,6 @@ ob_start();
                 <label class="form-label">CONDIÇÃO</label>
                 <?php
                 $condicaoPost = trim($_POST['condicao_14_1'] ?? '');
-                $imprimirPost = isset($_POST['imprimir_14_1']) && (int)$_POST['imprimir_14_1'] === 1;
                 $opcoes141 = [
                     '1' => 'O bem tem mais de cinco anos de uso e o documento fiscal de aquisição está anexo.',
                     '2' => 'O bem tem mais de cinco anos de uso, porém o documento fiscal de aquisição foi extraviado.',
@@ -112,7 +111,7 @@ ob_start();
                             name="condicao_14_1"
                             id="condicao_141_<?php echo $valor; ?>"
                             value="<?php echo $valor; ?>"
-                            <?php echo ($condicaoPost === (string)$valor || ($condicaoPost === '' && $imprimirPost && $valor === '2')) ? 'checked' : ''; ?>>
+                            <?php echo ($condicaoPost === (string)$valor || ($condicaoPost === '' && $valor === '2')) ? 'checked' : ''; ?>>
                         <label class="form-check-label small" for="condicao_141_<?php echo $valor; ?>">
                             <?php echo htmlspecialchars($texto, ENT_QUOTES, 'UTF-8'); ?>
                         </label>
@@ -124,25 +123,30 @@ ob_start();
             <script>
                 (function () {
                     var imprimir = document.getElementById('imprimir_14_1');
-                    if (!imprimir) return;
                     var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
 
-                    function updateRequirement() {
-                        var required = imprimir.checked;
-                        radios.forEach(function (r) {
-                            if (required) r.setAttribute('required', 'required');
-                            else r.removeAttribute('required');
-                        });
-
-                        if (required && !radios.some(function (r) { return r.checked; })) {
+                    function ensureDefault() {
+                        if (!radios.some(function (r) { return r.checked; })) {
                             var def = document.getElementById('condicao_141_2');
                             if (def) def.checked = true;
                         }
                     }
 
-                    imprimir.addEventListener('change', updateRequirement);
-                    // inicializar
-                    updateRequirement();
+                    function updateRequirement() {
+                        var required = imprimir && imprimir.checked;
+                        radios.forEach(function (r) {
+                            if (required) r.setAttribute('required', 'required');
+                            else r.removeAttribute('required');
+                        });
+
+                        // garantir padrão sempre que não houver seleção
+                        ensureDefault();
+                    }
+
+                    // inicializar: garantir opção do meio quando nenhuma estiver selecionada
+                    ensureDefault();
+
+                    if (imprimir) imprimir.addEventListener('change', updateRequirement);
                 })();
             </script>
         </div>

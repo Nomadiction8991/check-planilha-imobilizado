@@ -192,14 +192,15 @@ ob_start();
                             else r.removeAttribute('required');
                         });
 
-                        if (required && !radios.some(function (r) { return r.checked; })) {
+                        // garantir opção do meio quando nenhuma estiver selecionada (sempre)
+                        if (!radios.some(function (r) { return r.checked; })) {
                             var def = document.getElementById('condicao_141_2');
                             if (def) def.checked = true;
                         }
                     }
 
                     imprimir.addEventListener('change', updateRequirement);
-                    // inicializar estado do requerimento
+                    // inicializar estado do requerimento e padrão
                     updateRequirement();
                 })();
             </script>
