@@ -375,7 +375,7 @@ ob_start();
                 <tr>
                   <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
                   <td><?php echo $texto_antigo; ?></td>
-                  <td class="table-warning"><?php echo $texto_novo; ?></td>
+                  <td><?php echo $texto_novo; ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -411,7 +411,7 @@ ob_start();
 
   <?php if ($mostrar_checados && $total_checados > 0): ?>
     <div class="card mb-3">
-      <div class="card-header">PRODUTOS checados (<?php echo $total_checados; ?>)</div>
+      <div class="card-header">Checados (<?php echo $total_checados; ?>)</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-striped align-middle mb-0">
@@ -424,7 +424,7 @@ ob_start();
             </thead>
             <tbody><?php foreach ($PRODUTOS_checados as $PRODUTO): ?><tr>
                   <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
-                  <td class="table-success"><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
+                  <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
                   <td><?php echo htmlspecialchars($PRODUTO['dependencia'] ?? ''); ?></td>
                 </tr><?php endforeach; ?></tbody>
           </table>
@@ -435,7 +435,7 @@ ob_start();
 
   <?php if ($mostrar_observacao && $total_observacao > 0): ?>
     <div class="card mb-3">
-      <div class="card-header">PRODUTOS com observação (<?php echo $total_observacao; ?>)</div>
+      <div class="card-header">Com observação (<?php echo $total_observacao; ?>)</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-striped align-middle mb-0">
@@ -449,7 +449,7 @@ ob_start();
             <tbody><?php foreach ($PRODUTOS_observacao as $PRODUTO): ?><tr>
                   <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
-                  <td class="table-warning fst-italic"><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
+                  <td class="fst-italic"><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
                 </tr><?php endforeach; ?></tbody>
           </table>
         </div>
@@ -472,8 +472,8 @@ ob_start();
             </thead>
             <tbody><?php foreach ($PRODUTOS_checados_observacao as $PRODUTO): ?><tr>
                   <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
-                  <td class="table-secondary"><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
-                  <td class="table-secondary"><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
+                  <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
+                  <td><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
                 </tr><?php endforeach; ?></tbody>
           </table>
         </div>
@@ -499,7 +499,7 @@ ob_start();
               <?php foreach ($PRODUTOS_etiqueta as $PRODUTO): ?>
                 <tr>
                   <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
-                  <td class="table-success"><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
+                  <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -524,7 +524,7 @@ ob_start();
             <tbody>
               <?php foreach ($PRODUTOS_novos as $PRODUTO): ?>
                 <tr>
-                  <td class="table-success"><strong><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></strong></td>
+                  <td><strong><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></strong></td>
                   <td class="text-center"><?php echo htmlspecialchars($PRODUTO['quantidade'] ?? 'N/A'); ?></td>
                 </tr>
               <?php endforeach; ?>

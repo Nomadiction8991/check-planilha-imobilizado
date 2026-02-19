@@ -8,3 +8,18 @@
 }
 .table thead th { font-size: 12px; }
 .table td { font-size: 12px; }
+/* Neutralize utility color classes inside these report tables and apply soft striping */
+.table.table-striped > tbody > tr:nth-of-type(odd) > td,
+.table.table-striped > tbody > tr:nth-of-type(odd) > th {
+  background-color: #ffffff !important;
+}
+.table.table-striped > tbody > tr:nth-of-type(even) > td,
+.table.table-striped > tbody > tr:nth-of-type(even) > th {
+  background-color: #fbfbfb !important; /* very light gray */
+}
+
+/* Ensure any remaining `table-*` utility classes don't color cells */
+.table td[class*="table-"] {
+  background-color: transparent !important;
+  color: inherit !important;
+}
