@@ -178,7 +178,7 @@ class PlanilhaController extends BaseController
             'total_registros'  => 0,
             'itens_por_pagina' => 20,
             'acoes_salvas'     => $acoesSalvas,
-            'comuns_detectadas'=> $analise['comuns_detectadas'] ?? [],
+            'comuns_detectadas' => $analise['comuns_detectadas'] ?? [],
             'igrejas_salvas'   => $igrejasSalvas,
             'status_por_comum' => $statusPorComum,
         ]);
@@ -390,10 +390,12 @@ class PlanilhaController extends BaseController
 
     public function visualizar(): void
     {
-        // Se veio ?comum_id= pela URL (clique na listagem), atualiza a sessão
+        // Se veio ?comum_id= pela URL (ex: clique na listagem de igrejas), atualiza a sessão.
+        // O header utiliza outro mecanismo (POST /users/select-church) que já atualiza a sessão;
+        // o JS de troca garante recarregar com o ?comum_id= correto para manter consistência.
         $comumIdUrl = (int) ($this->query('comum_id', 0));
         if ($comumIdUrl > 0) {
-            SessionManager::set('comum_id', $comumIdUrl);
+            SessionManager::setComumId($comumIdUrl);
         }
 
         $comumId = SessionManager::getComumId();
