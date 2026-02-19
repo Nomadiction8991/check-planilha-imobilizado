@@ -1398,7 +1398,6 @@ ob_start();
             <i class="bi bi-box-seam me-2"></i>
             PRODUTOS
         </span>
-        <span class="badge bg-white text-dark"><?php echo htmlspecialchars(to_uppercase(($total_registros ?? 0) . ' itens — pg. ' . ($pagina ?? 1) . '/' . ($total_paginas ?? 1)), ENT_QUOTES, 'UTF-8'); ?></span>
     </div>
     <div class="list-group list-group-flush">
         <?php if ($PRODUTOS): ?>
