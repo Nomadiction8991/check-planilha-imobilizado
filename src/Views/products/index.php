@@ -170,9 +170,26 @@ ob_start();
                                         <input class="form-check-input PRODUTO-checkbox" type="checkbox" value="<?php echo $PRODUTO['id_produto']; ?>" id="PRODUTO_<?php echo $PRODUTO['id_produto']; ?>">
                                     </div>
                                     <div class="flex-grow-1">
-                                        <!-- Linha 1: Descrio -->
+                                        <!-- Linha 1: Título formatado: {TIPO_BEM} DESCRIÇÃO {DEPENDÊNCIA} -->
                                         <div class="fw-semibold mb-2">
-                                            <?php echo htmlspecialchars($PRODUTO['descricao_completa']); ?>
+                                            <?php
+                                            $full = trim($PRODUTO['descricao_completa'] ?? '');
+
+                                            // Tentar extrair prefixo de tipo "COD - DESC" no início da descrição
+                                            $tipoPart = '';
+                                            $restDesc = $full;
+                                            if (preg_match('/^\s*(\d+\s*-\s*[^-]+)\s*-\s*(.*)$/u', $full, $m)) {
+                                                $tipoPart = '{' . mb_strtoupper(trim($m[1]), 'UTF-8') . '}';
+                                                $restDesc = trim($m[2]);
+                                            }
+
+                                            // Dependência (prefere dependencia_desc, senão editado_dependencia_desc)
+                                            $dep = trim((string)($PRODUTO['dependencia_desc'] ?? $PRODUTO['editado_dependencia_desc'] ?? ''));
+                                            $depPart = $dep !== '' ? ' {' . mb_strtoupper($dep, 'UTF-8') . '}' : '';
+
+                                            $title = trim(($tipoPart ? $tipoPart . ' ' : '') . $restDesc . ($depPart ? ' ' . $depPart : ''));
+                                            echo htmlspecialchars($title);
+                                            ?>
                                         </div>
                                         <!-- Linha 2: STATUS e Aes -->
                                         <div class="d-flex justify-content-between align-items-center">

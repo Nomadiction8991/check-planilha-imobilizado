@@ -239,10 +239,13 @@ class ProdutoRepository extends BaseRepository
         $sql = "SELECT p.*, 
                        tb.codigo AS tipo_codigo, 
                        tb.descricao AS tipo_desc,
+                       etb.codigo AS editado_tipo_codigo,
+                       etb.descricao AS editado_tipo_desc,
                        d.descricao AS dependencia_desc,
                        COALESCE(ed.descricao, '') AS editado_dependencia_desc
                 FROM produtos p
                 LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
+                LEFT JOIN tipos_bens etb ON p.editado_tipo_bem_id = etb.id
                 LEFT JOIN dependencias d ON p.dependencia_id = d.id
                 LEFT JOIN dependencias ed ON p.editado_dependencia_id = ed.id
                 WHERE {$whereSql} 

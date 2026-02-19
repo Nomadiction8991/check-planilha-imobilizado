@@ -1491,15 +1491,15 @@ ob_start();
                                 $desc_editada_visivel = preg_replace('/\s*-\s*/u', ' ', $desc_editada_visivel);
                                 $desc_editada_visivel = trim($desc_editada_visivel);
                             } else {
-                                $tipo_codigo_final = $p['tipo_codigo'];
-                                $tipo_desc_final = $p['tipo_desc'];
+                                $tipo_codigo_final = $p['editado_tipo_codigo'] ?: $p['tipo_codigo'];
+                                $tipo_desc_final = $p['editado_tipo_desc'] ?: $p['tipo_desc'];
                                 $ben_final = ($p['editado_bem'] !== '' ? $p['editado_bem'] : $p['bem']);
                                 $comp_final = ($p['editado_complemento'] !== '' ? $p['editado_complemento'] : $p['complemento']);
 
                                 $partes = [];
-                                if ($tipo_codigo_final && $tipo_desc_final) {
-                                    // mantém o hífen interno entre código e descrição do tipo
-                                    $partes[] = mb_strtoupper($tipo_codigo_final . ' - ' . $tipo_desc_final, 'UTF-8');
+                                if ($tipo_codigo_final || $tipo_desc_final) {
+                                    // tipo ficará entre chaves no título final — monta aqui sem chaves
+                                    $partes[] = mb_strtoupper(trim(($tipo_codigo_final ? $tipo_codigo_final . ' - ' : '') . $tipo_desc_final), 'UTF-8');
                                 }
                                 if ($ben_final !== '') {
                                     $partes[] = mb_strtoupper($ben_final, 'UTF-8');
@@ -1521,9 +1521,9 @@ ob_start();
                                 }
                             }
 
-                            // Anexar dependência editada/original entre colchetes no fim
+                            // Anexar dependência editada/original entre chaves no fim
                             if (!empty($dep_final)) {
-                                $desc_editada_visivel .= ' [' . mb_strtoupper($dep_final, 'UTF-8') . ']';
+                                $desc_editada_visivel .= ' {' . mb_strtoupper($dep_final, 'UTF-8') . '}';
                             }
 
                             echo htmlspecialchars($desc_editada_visivel);
@@ -1542,15 +1542,31 @@ ob_start();
                     <!-- Informações -->
                     <div class="info-PRODUTO">
                         <?php
-                        // Exibe direto a descrição da planilha em negrito
-                        $nomePlanilha = $p['nome_planilha'] ?? $p['descricao_completa'] ?? '';
-                        $depInfo = trim($p['editado_dependencia_desc'] ?? '') ?: trim($p['dependencia_desc'] ?? '');
-                        $nomeExibido = $nomePlanilha !== '' ? $nomePlanilha : ($p['descricao_completa'] ?? '');
-                        if ($depInfo !== '') {
-                            $nomeExibido .= ' {' . mb_strtoupper($depInfo, 'UTF-8') . '}';
+                        // Montar título padrão: {TIPO_BEM} DESCRIÇÃO {DEPENDÊNCIA}
+                        $tipoCodigo = trim((string)($p['tipo_codigo'] ?? ''));
+                        $tipoDesc = trim((string)($p['tipo_desc'] ?? ''));
+
+                        $tipoPart = '';
+                        if ($tipoCodigo !== '' || $tipoDesc !== '') {
+                            $tipoPart = '{' . mb_strtoupper(trim(($tipoCodigo ? $tipoCodigo . ' - ' : '') . $tipoDesc), 'UTF-8') . '}';
                         }
+
+                        // Descrição (prefere nome_planilha quando presente)
+                        $descricao = trim((string)($p['nome_planilha'] ?? $p['descricao_completa'] ?? ''));
+
+                        // Remover prefixo de tipo caso já exista na descricao para evitar duplicação
+                        if ($tipoCodigo !== '' && $tipoDesc !== '') {
+                            $prefixPattern = '/^\s*' . preg_quote($tipoCodigo, '/') . '\s*-\s*' . preg_quote($tipoDesc, '/') . '\s*-?\s*/i';
+                            $descricao = preg_replace($prefixPattern, '', $descricao) ?: $descricao;
+                        }
+
+                        // Usar a dependência originalmente importada (dependencia_desc)
+                        $depImport = trim((string)($p['dependencia_desc'] ?? ''));
+                        $depPart = $depImport !== '' ? ' {' . mb_strtoupper($depImport, 'UTF-8') . '}' : '';
+
+                        $titulo = trim(($tipoPart ? $tipoPart . ' ' : '') . $descricao . ($depPart ? ' ' . $depPart : ''));
                         ?>
-                        <strong><?php echo htmlspecialchars($nomeExibido); ?></strong>
+                        <strong><?php echo htmlspecialchars($titulo); ?></strong>
                     </div>
 
                     <!-- Ações -->
