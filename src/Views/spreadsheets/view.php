@@ -12,6 +12,7 @@ $comum_id = $comum_id ?? 0;
 $PRODUTOS = $produtos ?? [];
 $erro_PRODUTOS = $erro_produtos ?? '';
 $filtro_STATUS = $filtro_status ?? '';
+$erros_importacao_pendentes = $erros_importacao_pendentes ?? 0;
 
 
 $id_planilha = $comum_id;
@@ -1267,6 +1268,27 @@ ob_start();
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         Erro ao carregar PRODUTOS: <?php echo htmlspecialchars($erro_PRODUTOS); ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($erros_importacao_pendentes > 0): ?>
+    <!-- Alerta persistente de erros de importação — não tem botão X, some só quando todos resolvidos -->
+    <div class="alert alert-danger d-flex align-items-center gap-3 mb-3" role="alert"
+         style="border-left: 5px solid #842029; border-radius: 8px;">
+        <i class="bi bi-exclamation-octagon-fill fs-4 flex-shrink-0"></i>
+        <div class="flex-grow-1">
+            <strong>
+                <?php echo $erros_importacao_pendentes === 1
+                    ? '1 item com erro de importação'
+                    : $erros_importacao_pendentes . ' itens com erros de importação'; ?>
+            </strong>
+            — alguns produtos não foram importados corretamente e precisam de correção.
+            <br>
+            <a href="/spreadsheets/import-errors?comum_id=<?php echo (int)$comum_id; ?>"
+               class="alert-link fw-semibold">
+                <i class="bi bi-arrow-right-circle me-1"></i>Ver erros e baixar CSV para reimportar
+            </a>
+        </div>
     </div>
 <?php endif; ?>
 

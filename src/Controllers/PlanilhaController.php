@@ -432,18 +432,29 @@ class PlanilhaController extends BaseController
         // Buscar dependências para o filtro
         $dependencias = $this->dependenciaRepository->buscarTodos();
 
+        // Contar erros de importação pendentes (não resolvidos) para esta comum
+        $conexao = \App\Core\ConnectionManager::getConnection();
+        $stmtErros = $conexao->prepare(
+            'SELECT COUNT(*) FROM import_erros ie
+              JOIN importacoes imp ON ie.importacao_id = imp.id
+             WHERE imp.comum_id = :comum_id AND ie.resolvido = 0'
+        );
+        $stmtErros->execute([':comum_id' => $comumId]);
+        $errosPendentes = (int) $stmtErros->fetchColumn();
+
         $this->renderizar('spreadsheets/view', [
-            'comum_id'            => $comumId,
-            'planilha'            => $planilha,
-            'produtos'            => $resultado['dados'],
-            'total_registros'     => $resultado['total'],
-            'pagina'              => $paginaAtual,
-            'total_paginas'       => $resultado['totalPaginas'],
-            'dependencia_options' => $dependencias,
-            'filtro_nome'         => $filtros['nome'],
-            'filtro_dependencia'  => $filtros['dependencia'],
-            'filtro_status'       => $filtros['status'],
-            'filtro_codigo'       => $filtros['codigo'],
+            'comum_id'                    => $comumId,
+            'planilha'                    => $planilha,
+            'produtos'                    => $resultado['dados'],
+            'total_registros'             => $resultado['total'],
+            'pagina'                      => $paginaAtual,
+            'total_paginas'               => $resultado['totalPaginas'],
+            'dependencia_options'         => $dependencias,
+            'filtro_nome'                 => $filtros['nome'],
+            'filtro_dependencia'          => $filtros['dependencia'],
+            'filtro_status'               => $filtros['status'],
+            'filtro_codigo'               => $filtros['codigo'],
+            'erros_importacao_pendentes'  => $errosPendentes,
         ]);
     }
 }

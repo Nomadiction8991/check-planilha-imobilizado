@@ -26,13 +26,12 @@ echo "=== Correção BEM/COMPLEMENTO ===\n";
 echo $dryRun ? "[DRY-RUN] Nenhuma alteração será gravada.\n" : "[EXECUÇÃO REAL] Alterações serão gravadas no banco.\n";
 echo "\n";
 
-// Buscar todos os produtos com nome_planilha (importados via CSV)
+// Buscar todos os produtos marcados como importado (importados via CSV antigo)
 $stmt = $pdo->query('
-    SELECT p.id_produto, p.bem, p.editado_bem, p.complemento, p.editado_complemento, 
-           p.nome_planilha, tb.codigo as tb_cod, tb.descricao as tb_desc
+    SELECT p.id_produto, p.bem, p.editado_bem, p.complemento, p.editado_complemento, tb.codigo as tb_cod, tb.descricao as tb_desc
     FROM produtos p
     LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
-    WHERE p.nome_planilha IS NOT NULL AND p.nome_planilha != ""
+    WHERE p.importado = 1
     ORDER BY p.id_produto ASC
 ');
 
@@ -64,11 +63,12 @@ $erros = 0;
 
 foreach ($produtos as $i => $prod) {
     $idProduto = $prod['id_produto'];
-    $nomePlanilha = $prod['nome_planilha'];
+    // Para importações antigas o campo com o "Nome" original geralmente estava em `bem`
+    $nomeOriginal = $prod['bem'];
 
     try {
-        // Re-parsear o nome da planilha usando a lógica corrigida
-        $parsed = $refMethod->invoke($parser, $nomePlanilha);
+        // Re-parsear o nome original usando a lógica corrigida
+        $parsed = $refMethod->invoke($parser, $nomeOriginal);
 
         $novoBem = $parsed['bem'] ?? $prod['bem'];
         $novoComplemento = $parsed['complemento'] ?? '';

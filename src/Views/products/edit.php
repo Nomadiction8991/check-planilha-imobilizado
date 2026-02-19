@@ -180,20 +180,22 @@ ob_start();
             </div>
 
             <script>
-                (function () {
+                (function() {
                     var imprimir = document.getElementById('imprimir_14_1');
                     if (!imprimir) return;
                     var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
 
                     function updateRequirement() {
                         var required = imprimir.checked;
-                        radios.forEach(function (r) {
+                        radios.forEach(function(r) {
                             if (required) r.setAttribute('required', 'required');
                             else r.removeAttribute('required');
                         });
 
                         // garantir opção do meio quando nenhuma estiver selecionada (sempre)
-                        if (!radios.some(function (r) { return r.checked; })) {
+                        if (!radios.some(function(r) {
+                                return r.checked;
+                            })) {
                             var def = document.getElementById('condicao_141_2');
                             if (def) def.checked = true;
                         }

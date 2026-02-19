@@ -242,7 +242,7 @@ class ImportacaoService
                 ':codigo'        => $dadosCsv['codigo'] ?? '',
                 ':localidade'    => $dadosCsv['localidade'] ?? '',
                 ':codigo_comum'  => $dadosCsv['codigo_comum'] ?? '',
-                ':descricao_csv' => trim(($dadosCsv['bem'] ?? '') . ' ' . ($dadosCsv['complemento'] ?? '')),
+                ':descricao_csv' => $dadosCsv['nome_original'] ?? trim(($dadosCsv['bem'] ?? '') . ' ' . ($dadosCsv['complemento'] ?? '')),
                 ':bem'           => $dadosCsv['bem'] ?? '',
                 ':complemento'   => $dadosCsv['complemento'] ?? '',
                 ':dependencia'   => $dadosCsv['dependencia_descricao'] ?? '',

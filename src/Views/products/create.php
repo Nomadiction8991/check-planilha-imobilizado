@@ -96,7 +96,7 @@ ob_start();
             CONDIÇÃO 14.1
         </div>
         <div class="card-body">
-                    <div class="mb-3">
+            <div class="mb-3">
                 <label class="form-label">CONDIÇÃO</label>
                 <?php
                 $condicaoPost = trim($_POST['condicao_14_1'] ?? '');
@@ -121,12 +121,14 @@ ob_start();
             </div>
 
             <script>
-                (function () {
+                (function() {
                     var imprimir = document.getElementById('imprimir_14_1');
                     var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
 
                     function ensureDefault() {
-                        if (!radios.some(function (r) { return r.checked; })) {
+                        if (!radios.some(function(r) {
+                                return r.checked;
+                            })) {
                             var def = document.getElementById('condicao_141_2');
                             if (def) def.checked = true;
                         }
@@ -134,7 +136,7 @@ ob_start();
 
                     function updateRequirement() {
                         var required = imprimir && imprimir.checked;
-                        radios.forEach(function (r) {
+                        radios.forEach(function(r) {
                             if (required) r.setAttribute('required', 'required');
                             else r.removeAttribute('required');
                         });

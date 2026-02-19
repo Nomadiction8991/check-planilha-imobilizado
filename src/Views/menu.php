@@ -55,6 +55,7 @@ $customCssPath = $customCssPath ?? '/assets/css/menu.css';
             </button>
             <ul class="submenu">
                 <li><a href="/spreadsheets/import"><i class="bi bi-upload" aria-hidden="true"></i>Importar Planilha</a></li>
+                <li><a href="/spreadsheets/import-errors"><i class="bi bi-exclamation-octagon" aria-hidden="true"></i>Erros de Importação</a></li>
                 <li><a href="/products/label"><i class="bi bi-tags" aria-hidden="true"></i>Códigos de etiquetas</a></li>
             </ul>
         </li>
