@@ -1482,23 +1482,29 @@ ob_start();
                             <?php
 
                             $desc_editada_visivel = trim($p['editado_descricao_completa'] ?? '');
-                            if ($desc_editada_visivel === '') {
 
+                            // Dependência preferencialmente editada, senão a original
+                            $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
+
+                            if ($desc_editada_visivel !== '') {
+                                // remover traços usados como separadores (ex: " - ")
+                                $desc_editada_visivel = preg_replace('/\s*-\s*/u', ' ', $desc_editada_visivel);
+                                $desc_editada_visivel = trim($desc_editada_visivel);
+                            } else {
                                 $tipo_codigo_final = $p['tipo_codigo'];
                                 $tipo_desc_final = $p['tipo_desc'];
                                 $ben_final = ($p['editado_bem'] !== '' ? $p['editado_bem'] : $p['bem']);
                                 $comp_final = ($p['editado_complemento'] !== '' ? $p['editado_complemento'] : $p['complemento']);
-                                $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
 
                                 $partes = [];
                                 if ($tipo_codigo_final && $tipo_desc_final) {
+                                    // mantém o hífen interno entre código e descrição do tipo
                                     $partes[] = mb_strtoupper($tipo_codigo_final . ' - ' . $tipo_desc_final, 'UTF-8');
                                 }
                                 if ($ben_final !== '') {
                                     $partes[] = mb_strtoupper($ben_final, 'UTF-8');
                                 }
                                 if ($comp_final !== '') {
-
                                     $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
                                     if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
                                         $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
@@ -1506,14 +1512,20 @@ ob_start();
                                     }
                                     if ($comp_tmp !== '') $partes[] = $comp_tmp;
                                 }
-                                $desc_editada_visivel = implode(' - ', $partes);
-                                if ($dep_final) {
-                                    $desc_editada_visivel .= ' (' . mb_strtoupper($dep_final, 'UTF-8') . ')';
-                                }
+
+                                // juntar sem os traços separadores (apenas espaços entre as partes)
+                                $desc_editada_visivel = implode(' ', $partes);
+
                                 if ($desc_editada_visivel === '') {
                                     $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
                                 }
                             }
+
+                            // Anexar dependência editada/original entre colchetes no fim
+                            if (!empty($dep_final)) {
+                                $desc_editada_visivel .= ' [' . mb_strtoupper($dep_final, 'UTF-8') . ']';
+                            }
+
                             echo htmlspecialchars($desc_editada_visivel);
                             ?><br>
                         </div>
