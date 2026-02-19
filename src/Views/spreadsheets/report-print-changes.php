@@ -276,7 +276,7 @@ ob_start();
           <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="secChecObs" name="mostrar_checados_observacao" value="1" <?php echo $mostrar_checados_observacao ? 'checked' : ''; ?>>
-              <label class="form-check-label" for="secChecObs">Checados com Observação (<?php echo $total_checados_observacao; ?>)</label>
+              <label class="form-check-label" for="secChecObs">Checados com observação (<?php echo $total_checados_observacao; ?>)</label>
             </div>
           </div>
           <div class="col-12">
@@ -287,7 +287,7 @@ ob_start();
           <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="secEtiq" name="mostrar_etiqueta" value="1" <?php echo $mostrar_etiqueta ? 'checked' : ''; ?>>
-              <label class="form-check-label" for="secEtiq">Para Etiqueta (<?php echo $total_etiqueta; ?>)</label>
+              <label class="form-check-label" for="secEtiq">Imprimir etiqueta (<?php echo $total_etiqueta; ?>)</label>
             </div>
           </div>
           <div class="col-12">
@@ -318,23 +318,7 @@ ob_start();
     <div class="text-muted">Planilha: <?php echo htmlspecialchars($planilha['comum']); ?></div>
     <div class="small text-muted">Gerado em <?php echo date('d/m/Y H:i:s'); ?></div>
   </div>
-  <div class="card-footer">
-    <?php
-
-    if ($total_pendentes === $total_geral && $total_novos === 0) {
-      $STATUS_calc = 'Pendente';
-      $badge = 'secondary';
-    } elseif ($total_pendentes === 0) {
-      $STATUS_calc = 'Concluída';
-      $badge = 'success';
-    } else {
-      $STATUS_calc = 'Em Execução';
-      $badge = 'warning text-dark';
-    }
-    ?>
-    <div><strong>STATUS:</strong> <span class="badge bg-<?php echo $badge; ?>"><?php echo $STATUS_calc; ?></span></div>
-  </div>
-</div>
+    <!-- STATUS removed per UI request -->
 
 <!-- Resumo -->
 <div class="card mb-3">
@@ -343,10 +327,10 @@ ob_start();
   </div>
   <div class="card-body">
     <ul class="mb-0">
-      <li><strong>Total de PRODUTOS:</strong> <?php echo $total_geral; ?></li>
+      <li><strong>Total de produtos:</strong> <?php echo $total_geral; ?></li>
       <li><strong>Checados:</strong> <?php echo $total_checados; ?></li>
       <li><strong>Com observação:</strong> <?php echo $total_observacao; ?></li>
-      <li><strong>Checados + observação:</strong> <?php echo $total_checados_observacao; ?></li>
+      <li><strong>Checados com observação:</strong> <?php echo $total_checados_observacao; ?></li>
 
       <li><strong>Etiqueta:</strong> <?php echo $total_etiqueta; ?></li>
       <li><strong>Pendentes:</strong> <?php echo $total_pendentes; ?></li>
@@ -480,7 +464,7 @@ ob_start();
 
   <?php if ($mostrar_checados_observacao && $total_checados_observacao > 0): ?>
     <div class="card mb-3">
-      <div class="card-header">Checados + observação (<?php echo $total_checados_observacao; ?>)</div>
+      <div class="card-header">Checados com observação (<?php echo $total_checados_observacao; ?>)</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-striped align-middle mb-0">
@@ -506,7 +490,7 @@ ob_start();
 
   <?php if ($mostrar_etiqueta && $total_etiqueta > 0): ?>
     <div class="card mb-3">
-      <div class="card-header">Para Etiqueta (<?php echo $total_etiqueta; ?>)</div>
+      <div class="card-header">Imprimir etiqueta (<?php echo $total_etiqueta; ?>)</div>
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-sm table-striped align-middle mb-0">
