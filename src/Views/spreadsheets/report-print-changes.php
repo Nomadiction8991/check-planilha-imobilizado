@@ -66,11 +66,12 @@ try {
                      CAST(p.ativo AS SIGNED) as ativo, 
                      CAST(p.imprimir_etiqueta AS SIGNED) as imprimir, 
                      p.observacao as observacoes, 
-                     CAST(p.editado AS SIGNED) as editado, 
-                     p.editado_descricao_completa as nome_editado, 
-                     p.editado_dependencia_id as dependencia_editada,
-                     COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia,
-                     'comum' as origem
+                     CAST(p.editado AS SIGNED) as editado,
+                    NULLIF(CONCAT_WS(' ', p.editado_bem, p.editado_complemento), '') as nome_editado,
+                    p.editado_dependencia_id as dependencia_editada,
+                    COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia,
+                    NULLIF(CONCAT_WS(' ', p.bem, p.complemento), '') as descricao_completa,
+                    'comum' as origem
                      FROM produtos p
                      LEFT JOIN dependencias d_orig ON p.dependencia_id = d_orig.id
                      LEFT JOIN dependencias d_edit ON p.editado_dependencia_id = d_edit.id
@@ -133,7 +134,7 @@ $PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_chec
 foreach ($todos_PRODUTOS as $PRODUTO) {
 
   $nome_editado = trim($PRODUTO['nome_editado'] ?? '');
-  $nome_original = trim($PRODUTO['descricao_completa'] ?? ($PRODUTO['nome'] ?? ''));
+  $nome_original = trim($PRODUTO['descricao_completa'] ?? trim((($PRODUTO['bem'] ?? '') . ' ' . ($PRODUTO['complemento'] ?? ''))));
   $nome_atual = $nome_editado !== '' ? $nome_editado : $nome_original;
   $PRODUTO['nome_atual'] = $nome_atual !== '' ? $nome_atual : 'Sem descricao';
   $PRODUTO['nome_original'] = $nome_original;

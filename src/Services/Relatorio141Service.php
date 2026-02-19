@@ -75,7 +75,8 @@ class Relatorio141Service
         $sql = "SELECT 
                     p.id,
                     p.codigo,
-                    p.descricao_completa as descricao,
+                    CONCAT_WS(' ', p.bem, p.complemento) as descricao,
+                    CONCAT_WS(' ', p.bem, p.complemento) as descricao_completa,
                     p.observacao as obs,
                     p.marca,
                     p.modelo,

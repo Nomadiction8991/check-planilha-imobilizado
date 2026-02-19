@@ -11,7 +11,13 @@ $filtroStatus = $filtro_status ?? ($filtro_STATUS ?? '');
 $backUrl = getReturnUrl($comum_id ?? null, $pagina ?? null, $filtro_nome ?? null, $filtro_dependencia ?? null, $filtro_codigo ?? null, $filtroStatus);
 
 $produtoDados = $produto ?? [];
-$descricaoCompleta = isset($descricaoCompleta) ? $descricaoCompleta : trim($produtoDados['editado_descricao_completa'] ?? $produtoDados['descricao_completa'] ?? $produtoDados['descricao'] ?? '');
+$descricaoCompleta = isset($descricaoCompleta)
+    ? $descricaoCompleta
+    : trim(
+        ($produtoDados['editado_bem'] ?? '') !== ''
+            ? trim(($produtoDados['editado_bem'] ?? '') . ' ' . ($produtoDados['editado_complemento'] ?? ''))
+            : trim(($produtoDados['bem'] ?? '') . ' ' . ($produtoDados['complemento'] ?? ''))
+    );
 $codigoProduto = $produtoDados['codigo'] ?? '';
 $idProdutoObs = $id_produto ?? ($produtoDados['id_produto'] ?? 0);
 

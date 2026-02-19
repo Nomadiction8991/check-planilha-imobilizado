@@ -48,7 +48,7 @@ try {
                        editado_bem = '',
                        editado_complemento = '',
                        editado_dependencia_id = 0,
-                       editado_descricao_completa = '',
+
                        imprimir_etiqueta = 0,
                        checado = 0,
                        editado = 0

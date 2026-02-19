@@ -21,7 +21,7 @@ $coluna_assinatura = 'administrador_acessor_id';
 $sql = "SELECT 
             p.id_produto,
             p.codigo,
-            p.descricao_completa,
+            CONCAT_WS(' ', p.bem, p.complemento) as descricao_completa,
             p.complemento,
             p.imprimir_14_1,
             p.{$coluna_assinatura} as minha_assinatura,
