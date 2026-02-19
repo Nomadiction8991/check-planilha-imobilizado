@@ -980,15 +980,19 @@ if (false && !empty($acesso_bloqueado)) {
             }
 
             .relatorios-lista {
-                margin-top: 0.4rem;
+                margin-top: 0.7rem;
+                padding-top: 0.4rem;
+                border-top: 1px solid rgba(255,255,255,0.3);
             }
 
             .relatorios-subtitulo {
                 font-size: 0.75rem;
+                font-weight: 700;
                 text-transform: uppercase;
-                opacity: 0.85;
-                letter-spacing: 0.05em;
+                opacity: 0.90;
+                letter-spacing: 0.06em;
                 display: block;
+                margin-bottom: 0.15rem;
             }
 
             .relatorios-lista ul {

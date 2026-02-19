@@ -11,11 +11,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-pencil-square me-2"></i>
-                        <?= htmlspecialchars(mb_strtoupper('Editar Comum', 'UTF-8')) ?>
-                    </h5>
+                <div class="card-header">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    <?= htmlspecialchars(mb_strtoupper('Editar Comum', 'UTF-8')) ?>
                 </div>
                 <div class="card-body">
                     <?php if (!empty($_SESSION['mensagem'])): ?>
