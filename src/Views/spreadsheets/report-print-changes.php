@@ -493,7 +493,7 @@ ob_start();
             <tbody><?php foreach ($PRODUTOS_observacao as $PRODUTO): ?><tr>
                   <td><strong><?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? '')); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
-                  <td class="fst-italic"><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
+                  <td><?php echo htmlspecialchars($PRODUTO['observacoes']); ?></td>
                 </tr><?php endforeach; ?></tbody>
           </table>
         </div>
