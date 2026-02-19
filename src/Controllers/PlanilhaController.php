@@ -245,10 +245,17 @@ class PlanilhaController extends BaseController
             }
         }
 
+        // Guarda contadores antes de fechar a sessão
+        $totalAcoes   = count($_SESSION['preview_acoes_' . $importacaoId]);
+        $totalIgrejas = count($_SESSION['preview_igrejas_' . $importacaoId]);
+
+        // Garante que a sessão é escrita antes da resposta (crucial para reload AJAX)
+        session_write_close();
+
         echo json_encode([
             'sucesso' => true,
-            'total_salvas' => count($_SESSION['preview_acoes_' . $importacaoId]),
-            'igrejas_salvas' => count($_SESSION['preview_igrejas_' . $importacaoId])
+            'total_salvas' => $totalAcoes,
+            'igrejas_salvas' => $totalIgrejas
         ]);
         exit;
     }

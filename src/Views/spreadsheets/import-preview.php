@@ -107,11 +107,6 @@ ob_start();
                             <span class="badge bg-dark font-monospace" style="font-size:.8rem">
                                 <?= htmlspecialchars($codigoComum) ?>
                             </span>
-                            <?php if (!$comumInfo['existe']): ?>
-                                <span class="badge bg-warning text-dark ms-1 small">
-                                    <i class="bi bi-plus-circle-fill"></i> NOVA
-                                </span>
-                            <?php endif; ?>
                         </td>
                         <td>
                             <select class="form-select form-select-sm select-igreja"
@@ -140,13 +135,14 @@ ob_start();
     </div>
     <?php endif; ?>
 
-    <!-- Estado vazio: nenhuma igreja com 'Personalizado' -->
-    <?php if ($totalRegistros === 0): ?>
-    <div class="alert alert-secondary d-flex align-items-center gap-3 py-3 mb-2">
-        <i class="bi bi-sliders2 fs-4 flex-shrink-0"></i>
-        <div>Selecione <strong>⚙ Personalizado</strong> em uma ou mais igrejas acima para visualizar e configurar os produtos individualmente.</div>
+    <!-- Dica: selecionar Personalizado (sempre visível) -->
+    <div class="resumo-sticky alert alert-secondary d-flex align-items-center gap-3 py-2 mb-2" style="top:72px;z-index:99">
+        <i class="bi bi-sliders2 fs-5 flex-shrink-0"></i>
+        <div class="small">
+            Selecione <strong>⚙ Personalizado</strong> em uma ou mais igrejas para configurar produtos individualmente.
+            Igrejas com <strong>✔ Importar</strong> processam tudo; com <strong>⊘ Não Importar</strong> pulam tudo.
+        </div>
     </div>
-    <?php endif; ?>
 
     <!-- Info da página -->
     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -329,18 +325,18 @@ ob_start();
 
     <!-- Barra de Confirmação -->
     <div class="card mt-3">
-        <div class="card-body d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
-            <div>
+        <div class="card-body py-2">
+            <div class="mb-2">
                 <small class="text-muted" id="contadores-acoes">Calculando&hellip;</small>
             </div>
-            <div class="d-flex gap-2">
-                <a href="/spreadsheets/import" class="btn btn-outline-secondary">
+            <div class="d-flex flex-column gap-2">
+                <a href="/spreadsheets/import" class="btn btn-outline-secondary w-100">
                     <i class="bi bi-x-lg me-1"></i>Cancelar
                 </a>
-                <button type="submit" class="btn btn-primary" id="btn-confirmar">
+                <button type="submit" class="btn btn-primary w-100" id="btn-confirmar">
                     <i class="bi bi-check-lg me-1"></i>Importar
                 </button>
-                <button type="button" class="btn btn-danger" id="btn-importar-tudo"
+                <button type="button" class="btn btn-danger w-100" id="btn-importar-tudo"
                         onclick="importarTudo()">
                     <i class="bi bi-check-all me-1"></i>Importar Tudo
                 </button>

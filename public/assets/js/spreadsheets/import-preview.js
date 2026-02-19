@@ -124,14 +124,20 @@
         }
     });
 
-    // ─── Evento: select-igreja muda → salva na sessão e recarrega a página ───
-    // (o servidor filtra os produtos conforme as igrejas com 'personalizado')
+    // ─── Evento: select-igreja muda → salva ações + igrejas e recarrega ───
     document.querySelectorAll('.select-igreja').forEach(sel => {
         sel.addEventListener('change', async function () {
             const codigo = this.dataset.codigo || '';
             const valor  = this.value || 'pular';
+            // Salva ações de produtos da página atual antes de sair
+            await salvarAcoes();
+            // Salva escolha de igrejas
             await salvarIgrejas({ [codigo]: valor });
-            window.location.reload();
+            // Reload com cache-busting para garantir dados frescos
+            const url = new URL(window.location.href);
+            url.searchParams.set('_t', Date.now());
+            url.searchParams.delete('pagina');
+            window.location.href = url.toString();
         });
     });
 
