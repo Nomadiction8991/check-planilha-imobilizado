@@ -150,22 +150,40 @@ ob_start();
             </div>
 
             <div class="mb-3">
-                <label for="condicao_14_1" class="form-label">
+                <label class="form-label">
                     <i class="bi bi-clipboard-check me-1"></i>
-                    <?php echo to_uppercase('Condição 14.1'); ?>
+                    <?php echo to_uppercase('Situação do Bem (Formulário 14.1)'); ?>
                 </label>
-                <select class="form-select" id="condicao_14_1" name="condicao_14_1">
-                    <option value=""><?php echo htmlspecialchars(to_uppercase('-- Selecione --'), ENT_QUOTES, 'UTF-8'); ?></option>
-                    <?php
-                    $condicoes = ['BOM', 'REGULAR', 'RUIM', 'INSERVÍVEL'];
-                    $condicaoAtual = mb_strtoupper(trim($produto['condicao_14_1'] ?? ''), 'UTF-8');
-                    foreach ($condicoes as $cond): ?>
-                        <option value="<?php echo $cond; ?>" <?php echo ($condicaoAtual === $cond) ? 'selected' : ''; ?>>
-                            <?php echo $cond; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Condição atual do produto para o relatório'), ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php
+                $condicaoAtual = trim($produto['condicao_14_1'] ?? '');
+                $opcoes141 = [
+                    '1' => 'O bem tem mais de cinco anos de uso e o documento fiscal de aquisição está anexo.',
+                    '2' => 'O bem tem mais de cinco anos de uso, porém o documento fiscal de aquisição foi extraviado.',
+                    '3' => 'O bem tem até cinco anos de uso e o documento fiscal de aquisição está anexo.',
+                ];
+                foreach ($opcoes141 as $valor => $texto): ?>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio"
+                            name="condicao_14_1"
+                            id="condicao_141_<?php echo $valor; ?>"
+                            value="<?php echo $valor; ?>"
+                            <?php echo ($condicaoAtual === (string)$valor) ? 'checked' : ''; ?>>
+                        <label class="form-check-label small" for="condicao_141_<?php echo $valor; ?>">
+                            <?php echo htmlspecialchars($texto, ENT_QUOTES, 'UTF-8'); ?>
+                        </label>
+                    </div>
+                <?php endforeach; ?>
+                <div class="form-check mb-1">
+                    <input class="form-check-input" type="radio"
+                        name="condicao_14_1"
+                        id="condicao_141_none"
+                        value=""
+                        <?php echo ($condicaoAtual === '') ? 'checked' : ''; ?>>
+                    <label class="form-check-label small text-muted" for="condicao_141_none">
+                        Nenhuma / Não aplicável
+                    </label>
+                </div>
+                <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Situação conforme declaração de doação de bem móvel'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
         </div>
     </div>
