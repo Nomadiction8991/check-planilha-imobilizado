@@ -281,11 +281,6 @@ ob_start();
           </div>
           <div class="col-12">
             <div class="form-check">
-
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="secEtiq" name="mostrar_etiqueta" value="1" <?php echo $mostrar_etiqueta ? 'checked' : ''; ?>>
               <label class="form-check-label" for="secEtiq">Imprimir etiqueta (<?php echo $total_etiqueta; ?>)</label>
             </div>
