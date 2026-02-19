@@ -51,8 +51,8 @@ select.form-select,
 }
 
 .card-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background-color: #333 !important;
+    color: #fff !important;
     border: none;
     border-radius: 12px 12px 0 0 !important;
     font-weight: 600;
