@@ -343,6 +343,11 @@ ob_start();
       <div class="col-12 d-grid">
         <button type="submit" class="btn btn-success"><i class="bi bi-funnel me-2"></i>Aplicar filtros</button>
       </div>
+      <div class="col-12 d-grid mt-2 no-print">
+        <button type="button" class="btn btn-outline-primary" onclick="window.print()" title="Imprimir relatório (Ctrl+P)">
+          <i class="bi bi-printer me-2"></i>Imprimir
+        </button>
+      </div>
     </form>
   </div>
 </div>
