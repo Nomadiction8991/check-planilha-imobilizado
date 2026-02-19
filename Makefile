@@ -1,4 +1,4 @@
-.PHONY: up down ip
+.PHONY: up down ip docker-ip
 
 up:
 	docker compose up --build -d
@@ -16,3 +16,5 @@ ip:
 	fi; \
 	echo "Host IP addresses: $$(hostname -I)"; \
 	echo "Open: http://localhost:8080 or https://localhost:8443";
+
+docker-ip: ip
