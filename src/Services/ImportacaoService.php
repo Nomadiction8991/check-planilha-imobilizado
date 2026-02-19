@@ -283,7 +283,9 @@ class ImportacaoService
             throw new Exception('Não foi possível determinar a igreja (comum) para o produto: ' . $codigo);
         }
 
-        $tipoBemId = $this->buscarOuCriarTipoBem($tipoBemCodigo);
+        // Usa o código do tipo_bem extraído do prefixo numérico; se não houver,
+        // usa 99 (DIVERSOS) para não quebrar a constraint NOT NULL de tipo_bem_id.
+        $tipoBemId    = $this->buscarOuCriarTipoBem(!empty($tipoBemCodigo) ? $tipoBemCodigo : '99');
         $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);
 
         if ($registro['status'] === CsvParserService::STATUS_ATUALIZAR && !empty($registro['id_produto'])) {

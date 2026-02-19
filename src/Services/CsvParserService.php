@@ -279,6 +279,8 @@ class CsvParserService
 
         // Extrair dados
         $linhas = [];
+        $ultimaLocalidade  = '';  // carry-forward: localidade do último registro válido
+        $ultimoCodigoComum = '';  // carry-forward: codigo_comum do último registro válido
         for ($i = $inicioLeitura; $i < count($todasLinhas); $i++) {
             $row = $todasLinhas[$i];
 
@@ -296,40 +298,48 @@ class CsvParserService
             $colDependencia = $mapeamento['dependencia'] ?? self::MAPEAMENTO_PADRAO['dependencia'];
             $colLocalidade = $mapeamento['localidade'] ?? self::MAPEAMENTO_PADRAO['localidade'];
 
-            $nomeCompleto = trim((string) ($row[$colNome] ?? ''));
-            $dependencia = trim((string) ($row[$colDependencia] ?? ''));
-            $localidade = trim((string) ($row[$colLocalidade] ?? ''));
+            $nomeCompleto    = trim((string) ($row[$colNome]        ?? ''));
+            $dependencia    = trim((string) ($row[$colDependencia]  ?? ''));
+            $localidade     = trim((string) ($row[$colLocalidade]   ?? ''));
 
-            // Parsear o campo "Nome" → tipo_bem_codigo + descricao + bem + complemento + dependencia_inline
-            $dadosParsed = $this->parsearNome($nomeCompleto);
+            // ── Carry-forward de localidade ──────────────────────────────────────────
+            // O CSV do imobilizado CCB exibe a localidade apenas na 1ª linha de cada
+            // grupo; as linhas seguintes deixam essa coluna em branco.  Quando isso
+            // ocorre, reutiliza a última localidade válida vista.
+            if (empty($localidade) && !empty($ultimaLocalidade)) {
+                $localidade    = $ultimaLocalidade;
+                $codigoComum   = $ultimoCodigoComum;
+            } else {
+                $codigoComum = $this->extrairCodigoComum($localidade);
+                if (!empty($localidade)) {
+                    $ultimaLocalidade  = $localidade;
+                    $ultimoCodigoComum = $codigoComum;
+                }
+            }
 
-            // Extrair código da comum da localidade (ex: "BR 09-0038" → "09-0038")
-            $codigoComum = $this->extrairCodigoComum($localidade);
+            // ── Tipo de bem: extrai apenas o prefixo numérico (ex: "4 - CADEIRA…" → "4") ──
+            // Não tenta descobrir bem/complemento — usa o nome completo como bem.
+            $tipoBemCodigo = '';
+            if (preg_match('/^\s*(\d{1,3})\s*[-\x{2013}\x{2014}]/u', $nomeCompleto, $tipoBemMatch)) {
+                $tipoBemCodigo = $tipoBemMatch[1];
+            }
 
-            // Usar dependência inline se disponível, senão usa coluna dependência
-            $dependenciaFinal = !empty($dadosParsed['dependencia_inline'])
-                ? $dadosParsed['dependencia_inline']
-                : strtoupper($dependencia);
-
-            // Validar se o bem foi identificado corretamente
-            $bemIdentificado = $this->validarBemIdentificado(
-                $dadosParsed['bem'],
-                $dadosParsed['tipo_bem_codigo']
-            );
+            // Dependência vem direto da coluna da planilha (sem parse inline)
+            $dependenciaFinal = strtoupper($dependencia);
 
             $linhas[] = [
-                'codigo' => $codigo,
-                'descricao_completa' => $nomeCompleto,
-                'tipo_bem_codigo' => (string) $dadosParsed['tipo_bem_codigo'],
-                'bem' => $dadosParsed['bem'],
-                'complemento' => $dadosParsed['complemento'],
-                'dependencia' => $dependenciaFinal,
-                'localidade' => $localidade,
-                'codigo_comum' => $codigoComum,
-                'nome_original' => $dadosParsed['nome_original'],
-                'quantidade' => $dadosParsed['quantidade'],
-                'bem_identificado' => $bemIdentificado,
-                '_linha_original' => $i + 1, // 1-indexed para o usuário
+                'codigo'            => $codigo,
+                'descricao_completa'=> $nomeCompleto,
+                'tipo_bem_codigo'   => $tipoBemCodigo,
+                'bem'               => $nomeCompleto,  // nome completo sem parsing adicional
+                'complemento'       => '',
+                'dependencia'       => $dependenciaFinal,
+                'localidade'        => $localidade,
+                'codigo_comum'      => $codigoComum,
+                'nome_original'     => $nomeCompleto,
+                'quantidade'        => 1,
+                'bem_identificado'  => !empty($tipoBemCodigo),
+                '_linha_original'   => $i + 1,
             ];
         }
 
@@ -791,27 +801,8 @@ class CsvParserService
             ];
         }
 
-        if ((string) ($produtoDb['tipo_bem_codigo'] ?? '') != $tipoBemCodigo) {
-            $diferencas['tipo_bem'] = [
-                'antes' => ($produtoDb['tipo_bem_codigo'] ?? '') . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
-                'depois' => $tipoBemCodigo . ' - ' . $tipoBemDesc,
-            ];
-        }
-
-        if (trim($produtoDb['bem'] ?? '') !== trim($bem)) {
-            $diferencas['bem'] = [
-                'antes' => $produtoDb['bem'] ?? '',
-                'depois' => $bem,
-            ];
-        }
-
-        if (trim($produtoDb['complemento'] ?? '') !== trim($complemento)) {
-            $diferencas['complemento'] = [
-                'antes' => $produtoDb['complemento'] ?? '',
-                'depois' => $complemento,
-            ];
-        }
-
+        // bem / complemento / tipo_bem não fazem mais parte do critério de diff —
+        // a comparação é apenas pela descricao_completa e pela dependência.
         $depDbDesc = trim(strtoupper($produtoDb['dependencia_descricao'] ?? ''));
         if ($depDbDesc !== $depDescNorm) {
             $diferencas['dependencia'] = [
