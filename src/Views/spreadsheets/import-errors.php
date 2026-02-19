@@ -165,13 +165,9 @@ ob_start();
         <table class="table table-sm table-bordered table-hover align-middle table-erros">
             <thead class="table-dark">
                 <tr>
-                    <th style="width:90px">Código</th>
+                    <th style="width:110px">Código</th>
                     <th>Descrição CSV</th>
-                    <th style="width:160px">Bem / Complemento</th>
-                    <th style="width:140px">Dependência</th>
-                    <th style="width:150px">Motivo do Erro</th>
-                    <th style="width:80px">Data</th>
-                    <th style="width:100px" class="text-center">Resolvido</th>
+                    <th style="width:220px">Motivo do Erro</th>
                 </tr>
             </thead>
             <tbody id="tabela-erros-body">
@@ -179,11 +175,6 @@ ob_start();
                     <?php
                     $eResolvido = (bool) ($erro['resolvido'] ?? false);
                     $rowClass   = $eResolvido ? 'erro-row-resolvido' : 'erro-row-pendente';
-                    $bem  = trim($erro['bem'] ?? '');
-                    $comp = trim($erro['complemento'] ?? '');
-                    $dataFormatada = !empty($erro['created_at'])
-                        ? date('d/m/y H:i', strtotime($erro['created_at']))
-                        : '—';
                     ?>
                     <tr id="erro-row-<?= (int)$erro['id'] ?>" class="<?= $rowClass ?>">
 
@@ -199,58 +190,12 @@ ob_start();
 
                         <!-- Descrição CSV (nome original) -->
                         <td>
-                            <span class="fw-semibold">
-                                <?= htmlspecialchars($erro['descricao_csv'] ?? '') ?>
-                            </span>
-                            <?php if (!empty($erro['localidade'])): ?>
-                                <br>
-                                <span class="text-muted" style="font-size:0.75rem;">
-                                    <i class="bi bi-building me-1"></i>
-                                    <?= htmlspecialchars($erro['localidade']) ?>
-                                    <?php if (!empty($erro['codigo_comum'])): ?>
-                                        (<?= htmlspecialchars($erro['codigo_comum']) ?>)
-                                    <?php endif; ?>
-                                </span>
-                            <?php endif; ?>
+                            <?= htmlspecialchars($erro['descricao_csv'] ?? '') ?>
                         </td>
-
-                        <!-- Bem / Complemento -->
-                        <td>
-                            <?php if ($bem || $comp): ?>
-                                <span class="fw-semibold"><?= htmlspecialchars($bem) ?></span>
-                                <?php if ($comp): ?>
-                                    <br><span class="text-muted"><?= htmlspecialchars($comp) ?></span>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <span class="text-muted">—</span>
-                            <?php endif; ?>
-                        </td>
-
-                        <!-- Dependência -->
-                        <td><?= htmlspecialchars($erro['dependencia'] ?? '—') ?></td>
 
                         <!-- Motivo -->
                         <td class="msg-erro-text">
                             <?= htmlspecialchars($erro['mensagem_erro'] ?? '') ?>
-                        </td>
-
-                        <!-- Data -->
-                        <td class="text-muted"><?= $dataFormatada ?></td>
-
-                        <!-- Toggle Resolvido -->
-                        <td class="text-center">
-                            <div class="form-check form-switch d-flex justify-content-center align-items-center m-0 gap-2">
-                                <input class="form-check-input chk-resolvido"
-                                       type="checkbox"
-                                       data-id="<?= (int)$erro['id'] ?>"
-                                       <?= $eResolvido ? 'checked' : '' ?>
-                                       title="<?= $eResolvido ? 'Clique para marcar como pendente' : 'Clique para marcar como resolvido' ?>">
-                                <span class="badge rounded-pill chk-badge"
-                                      style="font-size:0.68rem;"
-                                      id="badge-<?= (int)$erro['id'] ?>">
-                                    <?= $eResolvido ? '<span class="badge badge-resolvido">OK</span>' : '<span class="badge badge-pendente">PEND</span>' ?>
-                                </span>
-                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
