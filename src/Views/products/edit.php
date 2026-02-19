@@ -167,22 +167,15 @@ ob_start();
                             name="condicao_14_1"
                             id="condicao_141_<?php echo $valor; ?>"
                             value="<?php echo $valor; ?>"
-                            <?php echo ($condicaoAtual === (string)$valor) ? 'checked' : ''; ?>>
+                            <?php echo (
+                                $condicaoAtual === (string)$valor ||
+                                ($condicaoAtual === '' && $valor === '2')
+                            ) ? 'checked' : ''; ?>>
                         <label class="form-check-label small" for="condicao_141_<?php echo $valor; ?>">
                             <?php echo htmlspecialchars($texto, ENT_QUOTES, 'UTF-8'); ?>
                         </label>
                     </div>
                 <?php endforeach; ?>
-                <div class="form-check mb-1">
-                    <input class="form-check-input" type="radio"
-                        name="condicao_14_1"
-                        id="condicao_141_none"
-                        value=""
-                        <?php echo ($condicaoAtual === '') ? 'checked' : ''; ?>>
-                    <label class="form-check-label small text-muted" for="condicao_141_none">
-                        Nenhuma / Não aplicável
-                    </label>
-                </div>
                 <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Situação conforme declaração de doação de bem móvel'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
         </div>
