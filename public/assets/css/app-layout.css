@@ -132,10 +132,11 @@ body.modal-open {
     overflow: hidden;
 }
 
-/* Global print adjustments: remove shadows and ensure headers print clearly */
+/* Global print adjustments: remove shadows, dark header background, white header text, and add 1px border */
 @media print {
-    .card { box-shadow: none !important; }
-    .card-header { color: #000 !important; background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .card { box-shadow: none !important; background-color: #fff !important; border: 1px solid #333 !important; }
+    .card-header { background-color: #333 !important; color: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .card-header * { color: inherit !important; }
     .app-footer, .footer-mobile, footer { display: none !important; }
 }
 
