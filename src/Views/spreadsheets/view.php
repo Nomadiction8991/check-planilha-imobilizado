@@ -1447,10 +1447,9 @@ ob_start();
                 <?php
                 $produtoId = $p['id_PRODUTO'] ?? $p['id_produto'] ?? $p['ID_PRODUTO'] ?? ($p['ID_PRODUTO'] ?? '');
                 $produtoId = intval($produtoId);
-                $bemNaoIdentificado = isset($p['bem_identificado']) && (int)$p['bem_identificado'] === 0;
                 ?>
                 <div
-                    class="list-group-item <?php echo $classe; ?><?php echo $tipo_invalido ? ' tipo-nao-identificado' : ''; ?><?php echo $bemNaoIdentificado ? ' bem-nao-identificado' : ''; ?>"
+                    class="list-group-item <?php echo $classe; ?><?php echo $tipo_invalido ? ' tipo-nao-identificado' : ''; ?>"
                     data-produto-id="<?php echo $produtoId; ?>"
                     data-ativo="<?php echo (int) $p['ativo']; ?>"
                     data-checado="<?php echo (int) $p['checado']; ?>"
@@ -1468,11 +1467,6 @@ ob_start();
                                 <i class="bi bi-tag-fill"></i> NOVO
                             </span>
                         <?php endif; ?>
-                        <?php if ($bemNaoIdentificado): ?>
-                            <span class="tag-bem-nao-identificado">
-                                <i class="bi bi-exclamation-triangle-fill"></i> ATENÇÃO
-                            </span>
-                        <?php endif; ?>
                     </div>
 
                     <!-- Edição Pendente -->
@@ -1481,44 +1475,34 @@ ob_start();
                             <strong><?php echo mb_strtoupper('EDITAR:', 'UTF-8'); ?></strong><br>
                             <?php
 
-                            $desc_editada_visivel = trim($p['editado_descricao_completa'] ?? '');
-
-                            // Dependência preferencialmente editada, senão a original
                             $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
 
-                            if ($desc_editada_visivel !== '') {
-                                // remover traços usados como separadores (ex: " - ")
-                                $desc_editada_visivel = preg_replace('/\s*-\s*/u', ' ', $desc_editada_visivel);
-                                $desc_editada_visivel = trim($desc_editada_visivel);
-                            } else {
-                                $tipo_codigo_final = $p['editado_tipo_codigo'] ?: $p['tipo_codigo'];
-                                $tipo_desc_final = $p['editado_tipo_desc'] ?: $p['tipo_desc'];
-                                $ben_final = ($p['editado_bem'] !== '' ? $p['editado_bem'] : $p['bem']);
-                                $comp_final = ($p['editado_complemento'] !== '' ? $p['editado_complemento'] : $p['complemento']);
+                            // Sempre montar a descrição editada a partir das partes
+                            $tipo_codigo_final = $p['editado_tipo_codigo'] ?: $p['tipo_codigo'];
+                            $tipo_desc_final = $p['editado_tipo_desc'] ?: $p['tipo_desc'];
+                            $ben_final = !empty($p['editado_bem']) ? $p['editado_bem'] : ($p['bem'] ?? '');
+                            $comp_final = !empty($p['editado_complemento']) ? $p['editado_complemento'] : ($p['complemento'] ?? '');
 
-                                $partes = [];
-                                if ($tipo_codigo_final || $tipo_desc_final) {
-                                    // tipo ficará entre chaves no título final — monta aqui sem chaves
-                                    $partes[] = mb_strtoupper(trim(($tipo_codigo_final ? $tipo_codigo_final . ' - ' : '') . $tipo_desc_final), 'UTF-8');
+                            $partes = [];
+                            if ($tipo_codigo_final || $tipo_desc_final) {
+                                $partes[] = mb_strtoupper(trim(($tipo_codigo_final ? $tipo_codigo_final . ' - ' : '') . $tipo_desc_final), 'UTF-8');
+                            }
+                            if ($ben_final !== '') {
+                                $partes[] = mb_strtoupper($ben_final, 'UTF-8');
+                            }
+                            if ($comp_final !== '') {
+                                $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
+                                if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
+                                    $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
+                                    $comp_tmp = preg_replace('/^[\s\-\/]+/', '', $comp_tmp);
                                 }
-                                if ($ben_final !== '') {
-                                    $partes[] = mb_strtoupper($ben_final, 'UTF-8');
-                                }
-                                if ($comp_final !== '') {
-                                    $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
-                                    if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
-                                        $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
-                                        $comp_tmp = preg_replace('/^[\s\-\/]+/', '', $comp_tmp);
-                                    }
-                                    if ($comp_tmp !== '') $partes[] = $comp_tmp;
-                                }
+                                if ($comp_tmp !== '') $partes[] = $comp_tmp;
+                            }
 
-                                // juntar sem os traços separadores (apenas espaços entre as partes)
-                                $desc_editada_visivel = implode(' ', $partes);
+                            $desc_editada_visivel = implode(' ', $partes);
 
-                                if ($desc_editada_visivel === '') {
-                                    $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
-                                }
+                            if ($desc_editada_visivel === '') {
+                                $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
                             }
 
                             // Anexar dependência editada/original entre chaves no fim
@@ -1542,7 +1526,7 @@ ob_start();
                     <!-- Informações -->
                     <div class="info-PRODUTO">
                         <?php
-                        // Montar título padrão: {TIPO_BEM} DESCRIÇÃO {DEPENDÊNCIA}
+                        // Montar título padrão: {TIPO_BEM} BEM COMPLEMENTO {DEPENDÊNCIA}
                         $tipoCodigo = trim((string)($p['tipo_codigo'] ?? ''));
                         $tipoDesc = trim((string)($p['tipo_desc'] ?? ''));
 
@@ -1551,14 +1535,10 @@ ob_start();
                             $tipoPart = '{' . mb_strtoupper(trim(($tipoCodigo ? $tipoCodigo . ' - ' : '') . $tipoDesc), 'UTF-8') . '}';
                         }
 
-                        // Descrição (prefere nome_planilha quando presente)
-                        $descricao = trim((string)($p['nome_planilha'] ?? $p['descricao_completa'] ?? ''));
-
-                        // Remover prefixo de tipo caso já exista na descricao para evitar duplicação
-                        if ($tipoCodigo !== '' && $tipoDesc !== '') {
-                            $prefixPattern = '/^\s*' . preg_quote($tipoCodigo, '/') . '\s*-\s*' . preg_quote($tipoDesc, '/') . '\s*-?\s*/i';
-                            $descricao = preg_replace($prefixPattern, '', $descricao) ?: $descricao;
-                        }
+                        // Descrição: bem + complemento dos campos estruturados
+                        $bemOriginal  = trim((string)($p['bem'] ?? ''));
+                        $compOriginal = trim((string)($p['complemento'] ?? ''));
+                        $descricao    = $bemOriginal . ($compOriginal !== '' ? ' ' . $compOriginal : '');
 
                         // Usar a dependência originalmente importada (dependencia_desc)
                         $depImport = trim((string)($p['dependencia_desc'] ?? ''));

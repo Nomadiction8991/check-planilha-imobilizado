@@ -213,25 +213,22 @@ class CsvParserService
                     'status'        => self::STATUS_EXCLUIR,
                     'acao_sugerida' => self::ACAO_EXCLUIR,
                     'dados_csv' => [
-                        'codigo'             => $produto['codigo'],
-                        'descricao_completa' => $produto['descricao_completa'],
-                        'tipo_bem_codigo'    => $produto['tipo_bem_codigo'] ?? '',
-                        'tipo_bem_descricao' => $produto['tipo_bem_descricao'] ?? '',
-                        'bem'                => $produto['bem'] ?? '',
-                        'complemento'        => $produto['complemento'] ?? '',
+                        'codigo'                => $produto['codigo'],
+                        'tipo_bem_codigo'       => $produto['tipo_bem_codigo'] ?? '',
+                        'tipo_bem_descricao'    => $produto['tipo_bem_descricao'] ?? '',
+                        'bem'                   => $produto['bem'] ?? '',
+                        'complemento'           => $produto['complemento'] ?? '',
                         'dependencia_descricao' => $produto['dependencia_descricao'] ?? '',
-                        'codigo_comum'       => $codigoComumExcl,
-                        'localidade'         => '',
-                        'nome_original'      => $produto['descricao_completa'],
-                        'bem_identificado'   => true,
+                        'codigo_comum'          => $codigoComumExcl,
+                        'localidade'            => '',
+                        'nome_original'         => trim(($produto['bem'] ?? '') . ' ' . ($produto['complemento'] ?? '')),
                     ],
                     'dados_db' => [
-                        'id_produto'         => $produto['id_produto'],
-                        'codigo'             => $produto['codigo'],
-                        'descricao_completa' => $produto['descricao_completa'],
-                        'bem'                => $produto['bem'] ?? '',
-                        'complemento'        => $produto['complemento'] ?? '',
-                        'dependencia'        => $produto['dependencia_descricao'] ?? '',
+                        'id_produto'  => $produto['id_produto'],
+                        'codigo'      => $produto['codigo'],
+                        'bem'         => $produto['bem'] ?? '',
+                        'complemento' => $produto['complemento'] ?? '',
+                        'dependencia' => $produto['dependencia_descricao'] ?? '',
                     ],
                     'diferencas' => [],
                     'id_produto'    => $produto['id_produto'],
@@ -317,28 +314,26 @@ class CsvParserService
                 }
             }
 
-            // ── Tipo de bem: extrai apenas o prefixo numérico (ex: "4 - CADEIRA…" → "4") ──
-            // Não tenta descobrir bem/complemento — usa o nome completo como bem.
-            $tipoBemCodigo = '';
-            if (preg_match('/^\s*(\d{1,3})\s*[-\x{2013}\x{2014}]/u', $nomeCompleto, $tipoBemMatch)) {
-                $tipoBemCodigo = $tipoBemMatch[1];
-            }
+            // ── Parse completo: extrai tipo_bem, bem e complemento do nome do CSV ──
+            // parsearNome() separa "N - BEM COMPLEMENTO" em suas partes estruturadas.
+            $parsed       = $this->parsearNome($nomeCompleto);
+            $tipoBemCodigo = $parsed['tipo_bem_codigo'] ?: '';
+            $bem           = $parsed['bem'] ?: $nomeCompleto;    // fallback: nome completo
+            $complemento   = $parsed['complemento'] ?: '';
 
             // Dependência vem direto da coluna da planilha (sem parse inline)
             $dependenciaFinal = strtoupper($dependencia);
 
             $linhas[] = [
                 'codigo'            => $codigo,
-                'descricao_completa'=> $nomeCompleto,
                 'tipo_bem_codigo'   => $tipoBemCodigo,
-                'bem'               => $nomeCompleto,  // nome completo sem parsing adicional
-                'complemento'       => '',
+                'bem'               => $bem,
+                'complemento'       => $complemento,
                 'dependencia'       => $dependenciaFinal,
                 'localidade'        => $localidade,
                 'codigo_comum'      => $codigoComum,
                 'nome_original'     => $nomeCompleto,
                 'quantidade'        => 1,
-                'bem_identificado'  => !empty($tipoBemCodigo),
                 '_linha_original'   => $i + 1,
             ];
         }
@@ -748,7 +743,6 @@ class CsvParserService
         int $comumId
     ): array {
         $codigo = $dadosCsv['codigo'] ?? '';
-        $descricaoCompleta = $dadosCsv['descricao_completa'] ?? '';
         $tipoBemCodigo = $dadosCsv['tipo_bem_codigo'] ?? '';
         $bem = $dadosCsv['bem'] ?? '';
         $complemento = $dadosCsv['complemento'] ?? '';
@@ -765,7 +759,6 @@ class CsvParserService
         // Dados normalizados do CSV
         $dadosNormalizados = [
             'codigo' => $codigo,
-            'descricao_completa' => $descricaoCompleta,
             'tipo_bem_codigo' => $tipoBemCodigo,
             'tipo_bem_descricao' => $tipoBemDesc,
             'bem' => $bem,
@@ -773,8 +766,7 @@ class CsvParserService
             'dependencia_descricao' => $depDescNorm ?: $dependenciaDescricao,
             'codigo_comum' => $dadosCsv['codigo_comum'] ?? '',
             'localidade' => $dadosCsv['localidade'] ?? '',
-            'nome_original' => $dadosCsv['nome_original'] ?? $descricaoCompleta,
-            'bem_identificado' => $dadosCsv['bem_identificado'] ?? true,
+            'nome_original' => $dadosCsv['nome_original'] ?? $bem,
         ];
 
         // Verifica se produto existe no banco (busca por código uppercase)
@@ -794,15 +786,20 @@ class CsvParserService
         // Calcula diferenças campo a campo
         $diferencas = [];
 
-        if (trim($produtoDb['descricao_completa']) !== trim($descricaoCompleta)) {
-            $diferencas['descricao_completa'] = [
-                'antes' => $produtoDb['descricao_completa'],
-                'depois' => $descricaoCompleta,
+        if (trim($produtoDb['bem'] ?? '') !== trim($bem)) {
+            $diferencas['bem'] = [
+                'antes' => $produtoDb['bem'],
+                'depois' => $bem,
             ];
         }
 
-        // bem / complemento / tipo_bem não fazem mais parte do critério de diff —
-        // a comparação é apenas pela descricao_completa e pela dependência.
+        if (trim($produtoDb['complemento'] ?? '') !== trim($complemento)) {
+            $diferencas['complemento'] = [
+                'antes' => $produtoDb['complemento'],
+                'depois' => $complemento,
+            ];
+        }
+
         $depDbDesc = trim(strtoupper($produtoDb['dependencia_descricao'] ?? ''));
         if ($depDbDesc !== $depDescNorm) {
             $diferencas['dependencia'] = [
@@ -817,12 +814,11 @@ class CsvParserService
             'status' => $status,
             'dados_csv' => $dadosNormalizados,
             'dados_db' => [
-                'id_produto' => $produtoDb['id_produto'],
-                'codigo' => $produtoDb['codigo'],
-                'descricao_completa' => $produtoDb['descricao_completa'],
-                'tipo_bem' => ($produtoDb['tipo_bem_codigo'] ?? '') . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
-                'bem' => $produtoDb['bem'] ?? '',
+                'id_produto'  => $produtoDb['id_produto'],
+                'codigo'      => $produtoDb['codigo'],
+                'bem'         => $produtoDb['bem'] ?? '',
                 'complemento' => $produtoDb['complemento'] ?? '',
+                'tipo_bem'    => ($produtoDb['tipo_bem_codigo'] ?? '') . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
                 'dependencia' => $produtoDb['dependencia_descricao'] ?? '',
             ],
             'diferencas' => $diferencas,
@@ -854,7 +850,7 @@ class CsvParserService
      */
     private function carregarProdutosDoComum(int $comumId): array
     {
-        $sql = "SELECT p.id_produto, p.codigo, p.descricao_completa, p.bem, p.complemento,
+        $sql = "SELECT p.id_produto, p.codigo, p.bem, p.complemento,
                        tb.codigo AS tipo_bem_codigo, tb.descricao AS tipo_bem_descricao,
                        d.descricao AS dependencia_descricao
                 FROM produtos p

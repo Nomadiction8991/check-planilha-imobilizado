@@ -170,24 +170,25 @@ ob_start();
                                         <input class="form-check-input PRODUTO-checkbox" type="checkbox" value="<?php echo $PRODUTO['id_produto']; ?>" id="PRODUTO_<?php echo $PRODUTO['id_produto']; ?>">
                                     </div>
                                     <div class="flex-grow-1">
-                                        <!-- Linha 1: Título formatado: {TIPO_BEM} DESCRIÇÃO {DEPENDÊNCIA} -->
+                                        <!-- Linha 1: Título formatado: {TIPO_BEM} BEM COMPLEMENTO {DEPENDÊNCIA} -->
                                         <div class="fw-semibold mb-2">
                                             <?php
-                                            $full = trim($PRODUTO['descricao_completa'] ?? '');
-
-                                            // Tentar extrair prefixo de tipo "COD - DESC" no início da descrição
+                                            // Montar {TIPO} BEM COMPLEMENTO {DEPENDÊNCIA}
+                                            $tipoCod  = trim((string)($PRODUTO['tipo_bem_codigo'] ?? ''));
+                                            $tipoDesc = trim((string)($PRODUTO['tipo_bem_descricao'] ?? ''));
                                             $tipoPart = '';
-                                            $restDesc = $full;
-                                            if (preg_match('/^\s*(\d+\s*-\s*[^-]+)\s*-\s*(.*)$/u', $full, $m)) {
-                                                $tipoPart = '{' . mb_strtoupper(trim($m[1]), 'UTF-8') . '}';
-                                                $restDesc = trim($m[2]);
+                                            if ($tipoCod !== '' || $tipoDesc !== '') {
+                                                $tipoPart = '{' . mb_strtoupper(trim(($tipoCod ? $tipoCod . ' - ' : '') . $tipoDesc), 'UTF-8') . '}';
                                             }
 
-                                            // Dependência (prefere dependencia_desc, senão editado_dependencia_desc)
-                                            $dep = trim((string)($PRODUTO['dependencia_desc'] ?? $PRODUTO['editado_dependencia_desc'] ?? ''));
+                                            $bemProd  = trim((string)($PRODUTO['bem'] ?? ''));
+                                            $compProd = trim((string)($PRODUTO['complemento'] ?? ''));
+                                            $descProd = mb_strtoupper($bemProd . ($compProd !== '' ? ' ' . $compProd : ''), 'UTF-8');
+
+                                            $dep = trim((string)($PRODUTO['dependencia_descricao'] ?? $PRODUTO['dependencia_desc'] ?? ''));
                                             $depPart = $dep !== '' ? ' {' . mb_strtoupper($dep, 'UTF-8') . '}' : '';
 
-                                            $title = trim(($tipoPart ? $tipoPart . ' ' : '') . $restDesc . ($depPart ? ' ' . $depPart : ''));
+                                            $title = trim(($tipoPart ? $tipoPart . ' ' : '') . $descProd . $depPart);
                                             echo htmlspecialchars($title);
                                             ?>
                                         </div>

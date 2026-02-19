@@ -15,18 +15,16 @@ class ProdutoRepository extends BaseRepository
     protected array $colunas = [
         'comum_id',
         'codigo',
-        'descricao_completa',
-        'descricao_velha',
-        'editado_descricao_completa',
         'tipo_bem_id',
-        'editado_tipo_bem_id',
         'bem',
-        'editado_bem',
         'complemento',
-        'editado_complemento',
         'dependencia_id',
+        'editado_tipo_bem_id',
+        'editado_bem',
+        'editado_complemento',
         'editado_dependencia_id',
         'novo',
+        'importado',
         'checado',
         'editado',
         'imprimir_etiqueta',
@@ -38,10 +36,7 @@ class ProdutoRepository extends BaseRepository
         'nota_valor',
         'nota_fornecedor',
         'administrador_acessor_id',
-        'doador_conjugue_id',
         'ativo',
-        'bem_identificado',
-        'nome_planilha',
     ];
 
     public function buscarPorComumPaginado(
@@ -196,9 +191,9 @@ class ProdutoRepository extends BaseRepository
         $params = [':comum_id' => $comumId];
 
         if (!empty($filtros['nome'])) {
-            $where[] = '(p.descricao_completa LIKE :nome_desc OR p.bem LIKE :nome_bem)';
-            $params[':nome_desc'] = '%' . $filtros['nome'] . '%';
+            $where[] = '(p.bem LIKE :nome_bem OR p.complemento LIKE :nome_comp)';
             $params[':nome_bem'] = '%' . $filtros['nome'] . '%';
+            $params[':nome_comp'] = '%' . $filtros['nome'] . '%';
         }
 
         if (!empty($filtros['dependencia'])) {

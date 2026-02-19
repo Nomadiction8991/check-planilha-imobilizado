@@ -159,51 +159,28 @@ class ProdutoController extends BaseController
             return;
         }
 
-        // Montar descrição completa
-        $tiposBens = $this->obterTiposBens();
-        $tipoDesc = '';
-        $tipoCodigo = '';
-        foreach ($tiposBens as $tb) {
-            if ((int)$tb['id'] === $idTipoBem) {
-                $tipoCodigo = $tb['codigo'] ?? '';
-                $tipoDesc   = $tb['descricao'] ?? '';
-                break;
-            }
-        }
-        $partes = [];
-        if ($tipoCodigo && $tipoDesc) $partes[] = mb_strtoupper($tipoCodigo . ' - ' . $tipoDesc, 'UTF-8');
-        if ($bem !== '')               $partes[] = $bem;
-        if ($complemento !== '')       $partes[] = $complemento;
-        $descricaoCompleta = implode(' - ', $partes);
-
         try {
             for ($i = 0; $i < $multiplicador; $i++) {
                 $this->produtoRepository->criar([
-                    'comum_id'                 => $comumId,
-                    'codigo'                   => $codigo !== '' ? $codigo : null,
-                    'descricao_completa'       => $descricaoCompleta,
-                    'descricao_velha'          => '',
-                    'editado_descricao_completa' => '',
-                    'tipo_bem_id'              => $idTipoBem,
-                    'editado_tipo_bem_id'      => 0,
-                    'bem'                      => $bem,
-                    'editado_bem'              => '',
-                    'complemento'              => $complemento,
-                    'editado_complemento'      => '',
-                    'dependencia_id'           => $dependenciaId,
-                    'editado_dependencia_id'   => 0,
-                    'novo'                     => 1,
-                    'checado'                  => 0,
-                    'editado'                  => 0,
-                    'imprimir_etiqueta'        => 0,
-                    'imprimir_14_1'            => $imprimir141,
-                    'condicao_14_1'            => $condicao141 !== '' ? $condicao141 : null,
-                    'nota_numero'              => $notaNumero !== '' ? (int)$notaNumero : null,
-                    'nota_data'                => $notaData !== '' ? $notaData : null,
-                    'nota_valor'               => $notaValor !== '' ? $notaValor : null,
-                    'nota_fornecedor'          => $notaFornecedor !== '' ? $notaFornecedor : null,
-                    'observacao'               => '',
-                    'ativo'                    => 1,
+                    'comum_id'           => $comumId,
+                    'codigo'             => $codigo !== '' ? $codigo : null,
+                    'tipo_bem_id'        => $idTipoBem,
+                    'bem'                => $bem,
+                    'complemento'        => $complemento,
+                    'dependencia_id'     => $dependenciaId,
+                    'novo'               => 1,
+                    'importado'          => 0,
+                    'checado'            => 0,
+                    'editado'            => 0,
+                    'imprimir_etiqueta'  => 0,
+                    'imprimir_14_1'      => $imprimir141,
+                    'condicao_14_1'      => $condicao141 !== '' ? $condicao141 : null,
+                    'nota_numero'        => $notaNumero !== '' ? (int)$notaNumero : null,
+                    'nota_data'          => $notaData !== '' ? $notaData : null,
+                    'nota_valor'         => $notaValor !== '' ? $notaValor : null,
+                    'nota_fornecedor'    => $notaFornecedor !== '' ? $notaFornecedor : null,
+                    'observacao'         => '',
+                    'ativo'              => 1,
                 ]);
             }
 
@@ -254,7 +231,7 @@ class ProdutoController extends BaseController
             'filtro_STATUS'      => $filtros['filtro_STATUS'],
             // Valores editados (já salvos) para pré-preencher o form
             'novo_tipo_bem_id'   => $produto['editado_tipo_bem_id'] ?: null,
-            'novo_bem'           => $produto['editado_bem'] !== '' ? $produto['editado_bem'] : $produto['bem'],
+            'novo_bem'           => !empty($produto['editado_bem']) ? $produto['editado_bem'] : $produto['bem'],
             'novo_complemento'   => $produto['editado_complemento'] ?? '',
             'nova_dependencia_id' => $produto['editado_dependencia_id'] ?: null,
             'mensagem'           => '',
@@ -345,29 +322,6 @@ class ProdutoController extends BaseController
 
         if ($temEdicao) {
             $dadosUpdate['editado'] = 1;
-
-            // Montar descrição editada completa
-            $tiposBens = $this->obterTiposBens();
-            $tipoBemFinalId = (int)($dadosUpdate['editado_tipo_bem_id'] ?? $produto['editado_tipo_bem_id'] ?? $produto['tipo_bem_id']);
-            $tipoCodigo = '';
-            $tipoDesc   = '';
-            foreach ($tiposBens as $tb) {
-                if ((int)$tb['id'] === $tipoBemFinalId) {
-                    $tipoCodigo = $tb['codigo'] ?? '';
-                    $tipoDesc   = $tb['descricao'] ?? '';
-                    break;
-                }
-            }
-
-            $bemFinal  = $dadosUpdate['editado_bem'] ?? ($produto['editado_bem'] !== '' ? $produto['editado_bem'] : $produto['bem']);
-            $compFinal = $dadosUpdate['editado_complemento'] ?? ($produto['editado_complemento'] !== '' ? $produto['editado_complemento'] : $produto['complemento']);
-
-            $partes = [];
-            if ($tipoCodigo && $tipoDesc) $partes[] = mb_strtoupper($tipoCodigo . ' - ' . $tipoDesc, 'UTF-8');
-            if ($bemFinal !== '')          $partes[] = mb_strtoupper($bemFinal, 'UTF-8');
-            if ($compFinal !== '')         $partes[] = mb_strtoupper($compFinal, 'UTF-8');
-
-            $dadosUpdate['editado_descricao_completa'] = implode(' - ', $partes);
         }
 
         try {

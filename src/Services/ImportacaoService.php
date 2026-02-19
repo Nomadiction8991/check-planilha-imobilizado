@@ -242,7 +242,7 @@ class ImportacaoService
                 ':codigo'        => $dadosCsv['codigo'] ?? '',
                 ':localidade'    => $dadosCsv['localidade'] ?? '',
                 ':codigo_comum'  => $dadosCsv['codigo_comum'] ?? '',
-                ':descricao_csv' => $dadosCsv['descricao_completa'] ?? '',
+                ':descricao_csv' => trim(($dadosCsv['bem'] ?? '') . ' ' . ($dadosCsv['complemento'] ?? '')),
                 ':bem'           => $dadosCsv['bem'] ?? '',
                 ':complemento'   => $dadosCsv['complemento'] ?? '',
                 ':dependencia'   => $dadosCsv['dependencia_descricao'] ?? '',
@@ -263,13 +263,10 @@ class ImportacaoService
         $dadosCsv = $registro['dados_csv'];
 
         $codigo = $dadosCsv['codigo'] ?? '';
-        $descricaoCompleta = $dadosCsv['descricao_completa'] ?? '';
         $tipoBemCodigo = $dadosCsv['tipo_bem_codigo'] ?? '';
         $bem = $dadosCsv['bem'] ?? '';
         $complemento = $dadosCsv['complemento'] ?? '';
         $dependenciaDescricao = $dadosCsv['dependencia_descricao'] ?? '';
-        $bemIdentificado = $dadosCsv['bem_identificado'] ?? true;
-        $nomePlanilha = $dadosCsv['nome_original'] ?? $descricaoCompleta;
 
         // ── Resolver comumId pela localidade do CSV ──
         $codigoComum = $dadosCsv['codigo_comum'] ?? '';
@@ -290,39 +287,28 @@ class ImportacaoService
 
         if ($registro['status'] === CsvParserService::STATUS_ATUALIZAR && !empty($registro['id_produto'])) {
             $this->atualizarProduto($registro['id_produto'], [
-                'descricao_completa' => $descricaoCompleta,
-                'descricao_velha' => $descricaoCompleta,
-                'tipo_bem_id' => $tipoBemId,
-                'bem' => $bem,
-                'complemento' => $complemento,
+                'tipo_bem_id'    => $tipoBemId,
+                'bem'            => $bem,
+                'complemento'    => $complemento,
                 'dependencia_id' => $dependenciaId,
-                'bem_identificado' => $bemIdentificado ? 1 : 0,
-                'nome_planilha' => $nomePlanilha,
+                'importado'      => 1,
             ]);
         } else {
             $this->criarProduto([
-                'comum_id' => $comumId,
-                'codigo' => $codigo,
-                'descricao_completa' => $descricaoCompleta,
-                'descricao_velha' => $descricaoCompleta,
-                'editado_descricao_completa' => $descricaoCompleta,
-                'tipo_bem_id' => $tipoBemId,
-                'editado_tipo_bem_id' => $tipoBemId,
-                'bem' => $bem,
-                'editado_bem' => $bem,
-                'complemento' => $complemento,
-                'editado_complemento' => $complemento,
+                'comum_id'       => $comumId,
+                'codigo'         => $codigo,
+                'tipo_bem_id'    => $tipoBemId,
+                'bem'            => $bem,
+                'complemento'    => $complemento,
                 'dependencia_id' => $dependenciaId,
-                'editado_dependencia_id' => $dependenciaId,
-                'novo' => 0,
-                'checado' => 0,
-                'editado' => 0,
+                'novo'           => 0,
+                'importado'      => 1,
+                'checado'        => 0,
+                'editado'        => 0,
                 'imprimir_etiqueta' => 0,
-                'imprimir_14_1' => 0,
-                'observacao' => '',
-                'ativo' => 1,
-                'bem_identificado' => $bemIdentificado ? 1 : 0,
-                'nome_planilha' => $nomePlanilha,
+                'imprimir_14_1'  => 0,
+                'observacao'     => '',
+                'ativo'          => 1,
             ]);
         }
     }
@@ -627,7 +613,6 @@ class ImportacaoService
         $mapa = array_flip($cabecalho);
 
         $codigo = $dados[$mapa['codigo']] ?? '';
-        $descricaoCompleta = $dados[$mapa['descricao']] ?? '';
         $tipoBemCodigo = $dados[$mapa['tipo_bem']] ?? '';
         $bem = $dados[$mapa['bem']] ?? '';
         $complemento = $dados[$mapa['complemento']] ?? '';
@@ -642,35 +627,28 @@ class ImportacaoService
 
         if ($produtoExistente) {
             $this->atualizarProduto($produtoExistente['id_produto'], [
-                'descricao_completa' => $descricaoCompleta,
-                'descricao_velha' => $descricaoCompleta,
-                'tipo_bem_id' => $tipoBemId,
-                'bem' => $bem,
-                'complemento' => $complemento,
-                'dependencia_id' => $dependenciaId
+                'tipo_bem_id'    => $tipoBemId,
+                'bem'            => $bem,
+                'complemento'    => $complemento,
+                'dependencia_id' => $dependenciaId,
+                'importado'      => 1,
             ]);
         } else {
             $this->criarProduto([
-                'comum_id' => $comumId,
-                'codigo' => $codigo,
-                'descricao_completa' => $descricaoCompleta,
-                'descricao_velha' => $descricaoCompleta,
-                'editado_descricao_completa' => $descricaoCompleta,
-                'tipo_bem_id' => $tipoBemId,
-                'editado_tipo_bem_id' => $tipoBemId,
-                'bem' => $bem,
-                'editado_bem' => $bem,
-                'complemento' => $complemento,
-                'editado_complemento' => $complemento,
+                'comum_id'       => $comumId,
+                'codigo'         => $codigo,
+                'tipo_bem_id'    => $tipoBemId,
+                'bem'            => $bem,
+                'complemento'    => $complemento,
                 'dependencia_id' => $dependenciaId,
-                'editado_dependencia_id' => $dependenciaId,
-                'novo' => 0,
-                'checado' => 0,
-                'editado' => 0,
+                'novo'           => 0,
+                'importado'      => 1,
+                'checado'        => 0,
+                'editado'        => 0,
                 'imprimir_etiqueta' => 0,
-                'imprimir_14_1' => 0,
-                'observacao' => '',
-                'ativo' => 1
+                'imprimir_14_1'  => 0,
+                'observacao'     => '',
+                'ativo'          => 1,
             ]);
         }
     }
