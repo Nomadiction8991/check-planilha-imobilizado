@@ -66,12 +66,20 @@ try {
                      CAST(p.imprimir_etiqueta AS SIGNED) as imprimir, 
                      p.observacao as observacoes, 
                      CAST(p.editado AS SIGNED) as editado,
+                     tb.codigo AS tipo_codigo,
+                     tb.descricao AS tipo_desc,
+                     etb.codigo AS editado_tipo_codigo,
+                     etb.descricao AS editado_tipo_desc,
                     NULLIF(CONCAT_WS(' ', p.editado_bem, p.editado_complemento), '') as nome_editado,
                     p.editado_dependencia_id as dependencia_editada,
+                    d_orig.descricao AS dependencia_desc,
+                    d_edit.descricao AS editado_dependencia_desc,
                     COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia,
                     NULLIF(CONCAT_WS(' ', p.bem, p.complemento), '') as descricao_completa,
                     'comum' as origem
                      FROM produtos p
+                     LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
+                     LEFT JOIN tipos_bens etb ON p.editado_tipo_bem_id = etb.id
                      LEFT JOIN dependencias d_orig ON p.dependencia_id = d_orig.id
                      LEFT JOIN dependencias d_edit ON p.editado_dependencia_id = d_edit.id
                      WHERE p.comum_id = :id_comum";
@@ -130,13 +138,46 @@ if (!empty($dependencia_options)) {
 }
 
 $PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_checados_observacao = $PRODUTOS_etiqueta = $PRODUTOS_alteracoes = $PRODUTOS_novos = []; 
+
+// Helper: build display title like in `spreadsheets/view.php` (tipo + bem + complemento + {dependencia})
+function _build_produto_titulo(array $p, bool $useEdited = false): string {
+  $tipoCodigo = trim((string)($useEdited ? ($p['editado_tipo_codigo'] ?? '') : ($p['tipo_codigo'] ?? '')));
+  $tipoDesc = trim((string)($useEdited ? ($p['editado_tipo_desc'] ?? '') : ($p['tipo_desc'] ?? '')));
+  $tipoPart = '';
+  if ($tipoCodigo !== '' || $tipoDesc !== '') {
+    $tipoPart = '{' . mb_strtoupper(trim(($tipoCodigo ? $tipoCodigo . ' - ' : '') . $tipoDesc), 'UTF-8') . '}';
+  }
+
+  $bem = trim((string)($useEdited ? ($p['editado_bem'] ?? '') : ($p['bem'] ?? '')));
+  $comp = trim((string)($useEdited ? ($p['editado_complemento'] ?? '') : ($p['complemento'] ?? '')));
+
+  // remove redundant prefix in complemento (if it starts with bem)
+  $descricao = $bem;
+  if ($comp !== '') {
+    $compTmp = $comp;
+    if ($bem !== '' && mb_strtoupper(mb_substr($compTmp, 0, mb_strlen($bem), 'UTF-8'), 'UTF-8') === mb_strtoupper($bem, 'UTF-8')) {
+      $compTmp = trim(mb_substr($compTmp, mb_strlen($bem), null, 'UTF-8'));
+      $compTmp = preg_replace('/^[\s\-\/]+/u', '', $compTmp);
+    }
+    if ($compTmp !== '') $descricao .= ($descricao !== '' ? ' ' : '') . $compTmp;
+  }
+
+  $depImport = trim((string)($useEdited ? ($p['editado_dependencia_desc'] ?? $p['dependencia_desc'] ?? '') : ($p['dependencia_desc'] ?? '')));
+  $depPart = $depImport !== '' ? ' {' . mb_strtoupper($depImport, 'UTF-8') . '}' : '';
+
+  $titulo = trim(($tipoPart ? $tipoPart . ' ' : '') . $descricao . ($depPart ? ' ' . $depPart : ''));
+  return $titulo === '' ? 'Sem descricao' : $titulo;
+}
+
 foreach ($todos_PRODUTOS as $PRODUTO) {
 
-  $nome_editado = trim($PRODUTO['nome_editado'] ?? '');
-  $nome_original = trim($PRODUTO['descricao_completa'] ?? trim((($PRODUTO['bem'] ?? '') . ' ' . ($PRODUTO['complemento'] ?? ''))));
-  $nome_atual = $nome_editado !== '' ? $nome_editado : $nome_original;
-  $PRODUTO['nome_atual'] = $nome_atual !== '' ? $nome_atual : 'Sem descricao';
-  $PRODUTO['nome_original'] = $nome_original;
+  // construir nomes como na view principal (tipo + bem + complemento + {dependencia})
+  $PRODUTO['nome_original'] = _build_produto_titulo($PRODUTO, false);
+  if ((int)($PRODUTO['editado'] ?? 0) === 1 || !empty(trim((string)($PRODUTO['nome_editado'] ?? '')))) {
+    $PRODUTO['nome_atual'] = _build_produto_titulo($PRODUTO, true);
+  } else {
+    $PRODUTO['nome_atual'] = $PRODUTO['nome_original'];
+  }
 
 
   if (($PRODUTO['origem'] ?? '') === 'cadastro') {
@@ -419,13 +460,11 @@ ob_start();
               <tr>
                 <th>Código</th>
                 <th>Descrição</th>
-                <th>Dependência</th>
               </tr>
             </thead>
             <tbody><?php foreach ($PRODUTOS_checados as $PRODUTO): ?><tr>
                   <td><strong><?php echo htmlspecialchars($PRODUTO['codigo']); ?></strong></td>
                   <td><?php echo htmlspecialchars($PRODUTO['nome_atual']); ?></td>
-                  <td><?php echo htmlspecialchars($PRODUTO['dependencia'] ?? ''); ?></td>
                 </tr><?php endforeach; ?></tbody>
           </table>
         </div>
