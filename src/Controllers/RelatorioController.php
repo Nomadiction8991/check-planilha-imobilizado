@@ -68,9 +68,13 @@ class RelatorioController extends BaseController
             return;
         }
 
+        // Fornecer a conexão PDO à view (algumas views usam $conexao diretamente)
+        $conexao = ConnectionManager::getConnection();
+
         $this->renderizar('spreadsheets/report-print-changes', [
             'id_planilha' => $idPlanilha,
             'comum_id'    => $comumId,
+            'conexao'     => $conexao,
         ]);
     }
 }
