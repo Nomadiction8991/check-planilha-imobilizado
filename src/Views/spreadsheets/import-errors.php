@@ -71,39 +71,19 @@ ob_start();
                 <small class="text-muted fw-normal">— <?= $nomeArquivo ?></small>
             <?php endif; ?>
         </h5>
-
-        <!-- Resumo: pendentes e resolvidos -->
-        <div class="d-flex gap-3 contador-resumo mt-1">
-            <span>
-                <span class="badge badge-pendente rounded-pill me-1"><?= $resumo['pendentes'] ?></span>
-                pendente<?= $resumo['pendentes'] !== 1 ? 's' : '' ?>
-            </span>
-            <span>
-                <span class="badge badge-resolvido rounded-pill me-1"><?= $resumo['resolvidos'] ?></span>
-                resolvido<?= $resumo['resolvidos'] !== 1 ? 's' : '' ?>
-            </span>
-            <?php if ($modo === 'importacao' && !empty($importacao['iniciada_em'])): ?>
-                <span class="text-muted">
-                    <i class="bi bi-clock me-1"></i>
-                    <?= htmlspecialchars($importacao['iniciada_em']) ?>
-                </span>
-            <?php endif; ?>
-        </div>
     </div>
 
-    <!-- Botões de ação -->
-    <div class="d-flex gap-2 flex-wrap">
-        <a href="<?= $backUrl ?>" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i><?= $backLabel ?>
-        </a>
-        <?php if ($downloadUrl && $resumo['pendentes'] > 0): ?>
+    <!-- Botão de download CSV -->
+    <?php if ($downloadUrl && $resumo['pendentes'] > 0): ?>
+        <div class="d-flex gap-2 flex-wrap">
             <a href="<?= $downloadUrl ?>" class="btn btn-success btn-sm">
                 <i class="bi bi-download me-1"></i>Baixar CSV para reimportar
                 <span class="badge bg-white text-success ms-1"><?= $resumo['pendentes'] ?>
                     it<?= $resumo['pendentes'] !== 1 ? 'ens' : 'em' ?></span>
             </a>
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php endif; ?>
+
 </div>
 
 <!-- ── Alerta: ainda há pendentes ────────────────────────────────────────── -->
