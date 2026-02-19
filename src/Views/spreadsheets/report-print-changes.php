@@ -314,6 +314,7 @@ ob_start();
     <div class="small text-muted">Gerado em <?php echo date('d/m/Y H:i:s'); ?></div>
   </div>
     <!-- STATUS removed per UI request -->
+  </div>
 
 <!-- Resumo -->
 <div class="card mb-3">
