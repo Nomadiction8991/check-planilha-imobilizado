@@ -7,7 +7,7 @@ require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
 
 
-$templatePath = $projectRoot . '/relatorios/14-1.html';
+$templatePath = $projectRoot . '/src/Views/reports/14-1.html';
 $templateCompleto = '';
 if (file_exists($templatePath)) {
     $templateCompleto = file_get_contents($templatePath);
