@@ -8,9 +8,7 @@
 ?>
 
 <div class="container-fluid page-editar-comum">
-    <div class="row justify-content-center">
-        <div class="col-11 col-sm-11 col-md-10 col-lg-9 col-xl-8">
-            <div class="card">
+    <div class="card">
                 <div class="card-header">
                     <i class="bi bi-pencil-square"></i>
                     <?= htmlspecialchars(mb_strtoupper('Editar Comum', 'UTF-8')) ?>
@@ -202,8 +200,6 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </div>
     </div>
 </div>
 
