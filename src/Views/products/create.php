@@ -201,7 +201,7 @@ ob_start();
     window._postTipoBen = <?php echo json_encode($_POST['tipo_ben'] ?? null); ?>;
     window._postIdTipoBen = <?php echo json_encode($_POST['id_tipo_ben'] ?? null); ?>;
 </script>
-<script src="/assets/js/produtos/create.js"></script>
+<script src="/assets/js/products/create.js"></script>
 
 <?php
 $contentHtml = ob_get_clean();
