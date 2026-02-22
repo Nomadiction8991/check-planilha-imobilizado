@@ -19,15 +19,15 @@ class PaginationHelper
             return '';
         }
 
-        $html = '<nav aria-label="Paginação">';
-        $html .= '<ul class="pagination justify-content-center">';
+        $html = '<nav aria-label="Paginação" class="mt-3">';
+        $html .= '<ul class="pagination pagination-sm justify-content-center mb-0">';
 
         
         if ($paginaAtual > 1) {
             $prevUrl = self::buildUrl($baseUrl, array_merge($queryParams, ['pagina' => $paginaAtual - 1]));
-            $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$prevUrl}\">ANTERIOR</a></li>";
+            $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$prevUrl}\"><i class=\"bi bi-chevron-left\"></i></a></li>";
         } else {
-            $html .= '<li class="page-item disabled"><span class="page-link">ANTERIOR</span></li>';
+            $html .= '<li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>';
         }
 
         
@@ -72,9 +72,9 @@ class PaginationHelper
         
         if ($paginaAtual < $totalPaginas) {
             $nextUrl = self::buildUrl($baseUrl, array_merge($queryParams, ['pagina' => $paginaAtual + 1]));
-            $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$nextUrl}\">PRÓXIMO</a></li>";
+            $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$nextUrl}\"><i class=\"bi bi-chevron-right\"></i></a></li>";
         } else {
-            $html .= '<li class="page-item disabled"><span class="page-link">PRÓXIMO</span></li>';
+            $html .= '<li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>';
         }
 
         $html .= '</ul>';

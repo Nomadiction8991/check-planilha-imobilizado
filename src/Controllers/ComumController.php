@@ -28,7 +28,7 @@ class ComumController extends BaseController
     {
         $busca = trim($this->query('busca', ''));
         $pagina = max(1, (int) $this->query('pagina', 1));
-        $limite = 10;
+        $limite = 20;
         $offset = ($pagina - 1) * $limite;
 
         try {

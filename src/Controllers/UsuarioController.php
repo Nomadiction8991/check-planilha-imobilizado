@@ -32,7 +32,7 @@ class UsuarioController extends BaseController
     public function index(): void
     {
         $pagina = max(1, (int) $this->query('pagina', 1));
-        $limite = 10;
+        $limite = 20;
 
         $filtros = [
             'busca' => trim($this->query('busca', '')),
