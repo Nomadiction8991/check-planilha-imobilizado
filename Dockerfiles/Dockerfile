@@ -7,9 +7,8 @@ RUN apt-get update \
     unzip \
     curl \
     git \
-    openssl \
     && docker-php-ext-install gd zip mysqli pdo pdo_mysql \
-    && a2enmod rewrite ssl \
+    && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html
@@ -26,4 +25,4 @@ COPY Dockerfiles/php.ini /usr/local/etc/php/conf.d/dev.ini
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
 
-EXPOSE 80 443
+EXPOSE 80

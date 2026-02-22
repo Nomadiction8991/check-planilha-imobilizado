@@ -6,11 +6,9 @@ services:
     image: checkplanilha:local
     ports:
       - "8080:80"
-      - "8443:443"
     volumes:
       - ./:/var/www/html
       - ./Dockerfiles/php.ini:/usr/local/etc/php/conf.d/dev.ini:ro
-      - ./Dockerfiles/ssl:/etc/ssl:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
