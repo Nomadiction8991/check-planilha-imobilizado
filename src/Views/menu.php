@@ -32,7 +32,7 @@ $customCssPath = $customCssPath ?? '/assets/css/menu.css';
             <ul class="submenu">
                 <li><a href="/products/create"><i class="bi bi-plus-circle" aria-hidden="true"></i>Produto</a></li>
                 <li><a href="/asset-types/create"><i class="bi bi-box-seam" aria-hidden="true"></i>Tipo de Bem</a></li>
-                <li><a href="/departments"><i class="bi bi-link-45deg" aria-hidden="true"></i>Dependências</a></li>
+                <li><a href="/departments/create"><i class="bi bi-link-45deg" aria-hidden="true"></i>Dependências</a></li>
                 <li><a href="/users/create"><i class="bi bi-person-plus" aria-hidden="true"></i>Usuário</a></li>
             </ul>
         </li>
