@@ -115,6 +115,11 @@ class ComumController extends BaseController
             $html .= '<div class="btn-group btn-group-sm" role="group">';
             $html .= '<a class="btn btn-outline-primary" href="' . $editHref . '" title="Editar">' .
                 '<i class="bi bi-pencil"></i></a>';
+            $html .= '<button type="button" class="btn btn-outline-danger btn-delete-products" ' .
+                'data-comum-id="' . (int) $comum['id'] . '" ' .
+                'data-comum-nome="' . htmlspecialchars($comum['descricao'], ENT_QUOTES) . '" ' .
+                'title="Excluir todos os produtos">' .
+                '<i class="bi bi-trash3"></i></button>';
             $html .= '</div>';
             $html .= '</td>';
             $html .= '</tr>';
@@ -207,6 +212,46 @@ class ComumController extends BaseController
         extract($dados);
 
         require __DIR__ . '/../../index.php';
+    }
+
+    public function deleteProducts(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirecionar('/churches');
+            return;
+        }
+
+        $comumId = (int) ($_POST['comum_id'] ?? 0);
+        if ($comumId <= 0) {
+            $this->setMensagem('ID de comum inválido.', 'danger');
+            $this->redirecionar('/churches');
+            return;
+        }
+
+        try {
+            $comum = $this->comumService->buscarPorId($comumId);
+            if (!$comum) {
+                $this->setMensagem('Comum não encontrado.', 'danger');
+                $this->redirecionar('/churches');
+                return;
+            }
+
+            $conexao = \App\Core\ConnectionManager::getConnection();
+            $stmt = $conexao->prepare('DELETE FROM produtos WHERE comum_id = :comum_id');
+            $stmt->bindValue(':comum_id', $comumId, \PDO::PARAM_INT);
+            $stmt->execute();
+            $total = $stmt->rowCount();
+
+            $this->setMensagem(
+                "Todos os {$total} produto(s) do comum " . strtoupper($comum['descricao']) . ' foram excluídos.',
+                'success'
+            );
+        } catch (\Throwable $e) {
+            error_log('Erro ComumController::deleteProducts: ' . $e->getMessage());
+            $this->setMensagem('Erro ao excluir produtos: ' . $e->getMessage(), 'danger');
+        }
+
+        $this->redirecionar('/churches');
     }
 
     public function edit(): void

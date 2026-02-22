@@ -29,6 +29,7 @@ class MapaRotas
             'GET /churches' => [ComumController::class, 'index'],
             'GET /churches/edit' => [ComumController::class, 'edit'],
             'POST /churches/edit' => [ComumController::class, 'update'],
+            'POST /churches/delete-products' => [ComumController::class, 'deleteProducts'],
 
             // Menu (página que centraliza cabeçalho / footer / navegação)
             'GET /menu' => [\App\Controllers\MenuController::class, 'index'],

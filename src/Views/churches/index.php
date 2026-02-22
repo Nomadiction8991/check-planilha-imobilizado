@@ -106,6 +106,14 @@ $limite = $limite ?? 10;
                                     title="EDITAR COMUM">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger btn-delete-products"
+                                    data-comum-id="<?= (int)$comum['id'] ?>"
+                                    data-comum-nome="<?= ViewHelper::e($comum['descricao'] ?? '') ?>"
+                                    title="EXCLUIR TODOS OS PRODUTOS">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -136,6 +144,35 @@ $limite = $limite ?? 10;
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCELAR</button>
                 <a href="#" id="btnCompletarCadastro" class="btn btn-primary">COMPLETAR CADASTRO</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar exclusão de todos os produtos -->
+<div class="modal fade" id="modalDeleteProdutos" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    EXCLUIR PRODUTOS
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja excluir <strong>TODOS OS PRODUTOS</strong> do comum:</p>
+                <p class="fw-bold text-uppercase" id="modalDeleteNomeComum"></p>
+                <p class="text-danger mb-0"><i class="bi bi-exclamation-circle me-1"></i>Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCELAR</button>
+                <form id="formDeleteProdutos" method="POST" action="/churches/delete-products" class="d-inline">
+                    <input type="hidden" name="comum_id" id="deleteComumId">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash3 me-1"></i>EXCLUIR TUDO
+                    </button>
+                </form>
             </div>
         </div>
     </div>
