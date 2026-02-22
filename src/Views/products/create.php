@@ -79,13 +79,7 @@ ob_start();
                 <div class="invalid-feedback">Selecione a DEPENDÊNCIA.</div>
             </div>
 
-            <div class="mb-2">
-                <label class="form-label">STATUS</label>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="imprimir_14_1" name="imprimir_14_1" value="1" <?php echo (isset($_POST['imprimir_14_1']) && $_POST['imprimir_14_1'] == 1) ? 'checked' : ''; ?>>
-                    <label class="form-check-label" for="imprimir_14_1">IMPRIMIR 14.1</label>
-                </div>
-            </div>
+            <!-- removido: STATUS (imprimir 14.1 agora fica no card de CONDIÇÃO 14.1, para ficar igual à tela de edição) -->
         </div>
     </div>
 
@@ -97,6 +91,11 @@ ob_start();
         </div>
         <div class="card-body">
             <div class="mb-3">
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="imprimir_14_1" name="imprimir_14_1" value="1" <?php echo (isset($_POST['imprimir_14_1']) && $_POST['imprimir_14_1'] == 1) ? 'checked' : ''; ?> >
+                    <label class="form-check-label" for="imprimir_14_1">IMPRIMIR 14.1</label>
+                </div>
+
                 <label class="form-label">CONDIÇÃO</label>
                 <?php
                 $condicaoPost = trim($_POST['condicao_14_1'] ?? '');
