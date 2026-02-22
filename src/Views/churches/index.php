@@ -106,15 +106,6 @@ $limite = $limite ?? 10;
                                     title="EDITAR COMUM">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-secondary btn-view-planilha"
-                                    data-cadastro-ok="<?= $cadastroCompleto ? '1' : '0' ?>"
-                                    data-edit-url="<?= ViewHelper::e($editUrl) ?>"
-                                    data-view-url="<?= ViewHelper::e($viewUrl) ?>"
-                                    title="VISUALIZAR PLANILHA">
-                                    <i class="bi bi-eye"></i>
-                                </button>
                             </div>
                         </td>
                     </tr>

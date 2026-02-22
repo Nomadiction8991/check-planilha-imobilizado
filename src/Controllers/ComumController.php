@@ -115,10 +115,6 @@ class ComumController extends BaseController
             $html .= '<div class="btn-group btn-group-sm" role="group">';
             $html .= '<a class="btn btn-outline-primary" href="' . $editHref . '" title="Editar">' .
                 '<i class="bi bi-pencil"></i></a>';
-            $html .= '<a class="btn btn-outline-secondary btn-view-planilha" href="' . $viewHref . '" ' .
-                'data-cadastro-ok="' . ($cadastroOk ? '1' : '0') . '" ' .
-                'data-edit-url="' . $editHref . '" title="Visualizar planilha">' .
-                '<i class="bi bi-eye"></i></a>';
             $html .= '</div>';
             $html .= '</td>';
             $html .= '</tr>';
