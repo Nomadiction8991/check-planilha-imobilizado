@@ -281,14 +281,6 @@ class UsuarioController extends BaseController
             throw new Exception('Telefone inválido.');
         }
 
-        if (
-            empty($dados['endereco_cep']) || empty($dados['endereco_logradouro']) ||
-            empty($dados['endereco_numero']) || empty($dados['endereco_bairro']) ||
-            empty($dados['endereco_cidade']) || empty($dados['endereco_estado'])
-        ) {
-            throw new Exception('Todos os campos de endereço (CEP, logradouro, número, bairro, cidade e estado) são obrigatórios.');
-        }
-
         if ($dados['casado']) {
             if (empty($dados['nome_conjuge'])) {
                 throw new Exception('O nome do cônjuge é obrigatório.');
