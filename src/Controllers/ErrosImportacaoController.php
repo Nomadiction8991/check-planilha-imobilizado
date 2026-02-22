@@ -183,8 +183,8 @@ class ErrosImportacaoController extends BaseController
         if (empty($erros)) {
             $this->redirecionar(
                 '/spreadsheets/import-errors?'
-                . ($comumId > 0 ? 'comum_id=' . $comumId : 'importacao_id=' . $importacaoId)
-                . '&aviso=Nenhum+erro+pendente+para+baixar'
+                    . ($comumId > 0 ? 'comum_id=' . $comumId : 'importacao_id=' . $importacaoId)
+                    . '&aviso=Nenhum+erro+pendente+para+baixar'
             );
             return;
         }
@@ -329,4 +329,3 @@ class ErrosImportacaoController extends BaseController
         ];
     }
 }
-

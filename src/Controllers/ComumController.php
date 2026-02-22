@@ -179,6 +179,8 @@ class ComumController extends BaseController
         .table-hover tbody tr { cursor: pointer; }
         .input-group .btn-clear { border-top-left-radius: 0; border-bottom-left-radius: 0; }
         .table.table-center thead th, .table.table-center tbody td { text-align: center; vertical-align: middle; }
+        /* Página de igrejas não usa o header escuro (#333) — mantém estilo padrão Bootstrap */
+        .card-header { background-color: #f8f9fa !important; color: #212529 !important; }
         ';
     }
 
@@ -238,6 +240,7 @@ class ComumController extends BaseController
                 'pageTitle' => 'EDITAR COMUM',
                 'backUrl' => '/churches?busca=' . urlencode($busca) . '&pagina=' . $pagina,
                 'headerActions' => '',
+                'customCss' => $this->getCustomCss(),
                 'comum' => $comum,
                 'busca' => $busca,
                 'pagina' => $pagina

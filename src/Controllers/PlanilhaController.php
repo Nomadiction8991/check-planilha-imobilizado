@@ -400,17 +400,34 @@ class PlanilhaController extends BaseController
 
         $comumId = SessionManager::getComumId();
 
+        // Auto-recuperação: se comum_id não estiver na sessão (ex: container reiniciado),
+        // busca a primeira comum disponível no banco para não redirecionar para /churches.
         if (!$comumId || $comumId <= 0) {
-            $this->redirecionar('/churches?erro=Nenhuma comum disponível');
-            return;
+            $comuns = $this->comumRepository->buscarTodos();
+            if (!empty($comuns)) {
+                $comumId = (int) $comuns[0]['id'];
+                SessionManager::setComumId($comumId);
+            } else {
+                $this->redirecionar('/churches?sucesso=Cadastre uma comum para começar a usar o sistema');
+                return;
+            }
         }
 
         // Buscar dados da comum
         $planilha = $this->comumRepository->buscarPorId($comumId);
 
+        // Se a comum_id da sessão for inválida, tenta a primeira disponível
         if (!$planilha) {
-            $this->redirecionar('/churches?erro=Comum não encontrada');
-            return;
+            $comuns = $this->comumRepository->buscarTodos();
+            if (!empty($comuns)) {
+                $comumId = (int) $comuns[0]['id'];
+                SessionManager::setComumId($comumId);
+                $planilha = $this->comumRepository->buscarPorId($comumId);
+            }
+            if (!$planilha) {
+                $this->redirecionar('/churches?erro=Comum não encontrada');
+                return;
+            }
         }
 
         $planilha['comum_descricao'] = $planilha['descricao'] ?? 'Comum';
