@@ -1,11 +1,107 @@
-.text-uppercase {
-    text-transform: uppercase !important;
+/* ========================================================
+   Estilos da página: Editar Comum (Igrejas)
+   Todos os seletores são escopados em #formEditarComum ou
+   .page-editar-comum para não vazar para o resto do layout.
+   ======================================================== */
+
+/* Wrapper da página */
+.page-editar-comum {
+    padding: 20px 0;
 }
 
-.form-label {
-    font-weight: 500;
-}
-
-.card {
+/* Card principal */
+.page-editar-comum .card {
     border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
+}
+
+.page-editar-comum .card-header {
+    background: linear-gradient(90deg, #2f5061 0%, #3b6a78 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 12px 18px;
+    border-radius: 12px 12px 0 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-editar-comum .card-body {
+    padding: 24px;
+}
+
+/* Labels */
+.page-editar-comum .form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #444;
+    margin-bottom: 4px;
+    display: block;            /* bloco: input fica embaixo */
+}
+
+.page-editar-comum .form-label i {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+/* Inputs e selects */
+.page-editar-comum .form-control,
+.page-editar-comum .form-select {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 9px 12px;
+    font-size: 0.93rem;
+    background-color: #fff;
+}
+
+.page-editar-comum .form-control:focus,
+.page-editar-comum .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.20);
+}
+
+/* Maiúsculas apenas nos campos que precisam */
+.page-editar-comum .text-uppercase {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+/* Ajuste fino para campos de documento/telefone */
+.page-editar-comum #cnpj,
+.page-editar-comum #telefone {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.05em;
+}
+
+/* Linha de ações (Salvar / Cancelar) */
+.page-editar-comum .form-actions {
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.page-editar-comum .form-actions .btn {
+    min-width: 140px;
+}
+
+/* Responsivo: empilha botões e os estica em telas pequenas */
+@media (max-width: 576px) {
+    .page-editar-comum .form-actions {
+        flex-direction: column-reverse;
+    }
+    .page-editar-comum .form-actions .btn {
+        width: 100%;
+    }
+}
+
+/* Impressão */
+@media print {
+    .page-editar-comum .card-header {
+        background: #fff !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important;
+    }
 }

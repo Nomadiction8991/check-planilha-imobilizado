@@ -238,7 +238,7 @@ class ComumController extends BaseController
                 'pageTitle' => 'EDITAR COMUM',
                 'backUrl' => '/churches?busca=' . urlencode($busca) . '&pagina=' . $pagina,
                 'headerActions' => '',
-                'customCss' => $this->getCustomCss(),
+                'customCssPath' => '/assets/css/comuns/edit.css',
                 'comum' => $comum,
                 'busca' => $busca,
                 'pagina' => $pagina

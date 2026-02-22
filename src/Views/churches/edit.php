@@ -7,12 +7,12 @@
  */
 ?>
 
-<div class="container-fluid py-4">
+<div class="container-fluid page-editar-comum">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow-sm">
+            <div class="card">
                 <div class="card-header">
-                    <i class="bi bi-pencil-square me-2"></i>
+                    <i class="bi bi-pencil-square"></i>
                     <?= htmlspecialchars(mb_strtoupper('Editar Comum', 'UTF-8')) ?>
                 </div>
                 <div class="card-body">
@@ -190,7 +190,7 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 d-flex gap-2">
+                        <div class="form-actions">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-check-lg me-1"></i>
                                 Salvar Alterações
@@ -206,7 +206,5 @@
         </div>
     </div>
 </div>
-
-<link href="/assets/css/comuns/edit.css" rel="stylesheet">
 
 <script src="/assets/js/comuns/edit.js"></script>
