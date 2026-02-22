@@ -68,14 +68,14 @@
                                     <i class="bi bi-file-earmark-text me-1"></i>
                                     CNPJ
                                 </label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="cnpj"
-                                    name="cnpj"
-                                    value="<?= htmlspecialchars($comum['cnpj'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                    maxlength="18"
-                                    placeholder="00.000.000/0000-00">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="cnpj"
+                                        name="cnpj"
+                                        value="<?= htmlspecialchars($comum['cnpj'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                        maxlength="18"
+                                        placeholder="00.000.000/0000-00">
                             </div>
 
                             <!-- Administração -->
@@ -125,5 +125,17 @@
                 </div>
     </div>
 </div>
+
+<!-- InputMask para CNPJ (formatação no cliente) -->
+<script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var el = document.getElementById('cnpj');
+        if (el) {
+            // Máscara 00.000.000/0000-00 e limpa entrada incompleta
+            Inputmask({ mask: '99.999.999/9999-99', clearIncomplete: true }).mask(el);
+        }
+    });
+</script>
 
 <script src="/assets/js/comuns/edit.js"></script>

@@ -103,9 +103,10 @@ ob_start();
                         value="<?php echo htmlspecialchars(to_uppercase($usuario['email']), ENT_QUOTES, 'UTF-8'); ?>" required>
                 </div>
 
-                <div class="alert alert-info">
+                <!-- Nota fixa sobre senha: não utilizar a classe 'alert' para evitar auto-dismiss do layout JS -->
+                <div class="bg-info text-white p-2 rounded" role="note" aria-label="Nota sobre senha">
                     <i class="bi bi-info-circle me-2"></i>
-                    DEIXE OS CAMPOS DE SENHA EM BRANCO PARA MANTER A SENHA ATUAL
+                    <strong>Nota:</strong> DEIXE OS CAMPOS DE SENHA EM BRANCO PARA MANTER A SENHA ATUAL
                 </div>
 
                 <div class="row g-3">

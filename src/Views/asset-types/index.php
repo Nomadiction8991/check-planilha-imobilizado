@@ -65,7 +65,7 @@ $limite      = $limite      ?? 20;
                 <thead class="table-light">
                     <tr>
                         <th>DESCRIÇÃO</th>
-                        <th width="80" class="text-center">ÇÕES</th>
+                        <th width="80" class="text-center"><?php echo htmlspecialchars(to_uppercase('Ações'), ENT_QUOTES, 'UTF-8'); ?></th>
                     </tr>
                 </thead>
                 <tbody>

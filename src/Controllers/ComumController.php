@@ -325,15 +325,13 @@ class ComumController extends BaseController
         }
 
         try {
+            // Apenas campos presentes na tabela `comums` e no formulário
             $dados = [
                 'codigo' => trim($_POST['codigo'] ?? ''),
                 'descricao' => trim($_POST['descricao'] ?? ''),
                 'cnpj' => trim($_POST['cnpj'] ?? ''),
                 'administracao' => trim($_POST['administracao'] ?? ''),
-                'cidade' => trim($_POST['cidade'] ?? ''),
-                'estado' => trim($_POST['estado'] ?? ''),
-                'endereco' => trim($_POST['endereco'] ?? ''),
-                'telefone' => trim($_POST['telefone'] ?? '')
+                'cidade' => trim($_POST['cidade'] ?? '')
             ];
 
             // Validações básicas
