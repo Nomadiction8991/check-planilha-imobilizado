@@ -1519,7 +1519,7 @@ ob_start();
                     <!-- Edição Pendente / Impressão 14.1 -->
                     <?php if ($tem_edicao || ($p['imprimir_14_1'] ?? 0) == 1): ?>
                         <div class="edicao-pendente">
-                            <strong><?php echo mb_strtoupper('Editado:', 'UTF-8'); ?></strong>
+                            <strong><?php echo mb_convert_case('Edição', MB_CASE_TITLE, 'UTF-8') . ':'; ?></strong>
 
                             <?php if ($tem_edicao): ?>
                                 <br>
@@ -1566,10 +1566,26 @@ ob_start();
 
                             <?php if (($p['imprimir_14_1'] ?? 0) == 1): ?>
                                 <div class="relatorios-lista">
-                                    <span class="relatorios-subtitulo">Relatórios</span>
+                                    <strong class="relatorios-subtitulo">Relatórios</strong>
                                     <ul>
                                         <li>14.1</li>
                                     </ul>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php
+                            // Exibir dados da Nota Fiscal se existirem
+                            $nota_numero = trim((string)($p['nota_numero'] ?? ''));
+                            $nota_data = trim((string)($p['nota_data'] ?? ''));
+                            $nota_valor = trim((string)($p['nota_valor'] ?? ''));
+                            $nota_fornecedor = trim((string)($p['nota_fornecedor'] ?? ''));
+                            if ($nota_numero !== '' || $nota_data !== '' || $nota_valor !== '' || $nota_fornecedor !== ''): ?>
+                                <div class="nota-fiscal-lista mt-2">
+                                    <strong>Nota Fiscal:</strong><br>
+                                    <?php if ($nota_numero !== ''): ?>Número: <?php echo htmlspecialchars($nota_numero, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                    <?php if ($nota_data !== ''): ?>Data: <?php echo htmlspecialchars($nota_data, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                    <?php if ($nota_valor !== ''): ?>Valor: <?php echo htmlspecialchars($nota_valor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                    <?php if ($nota_fornecedor !== ''): ?>Fornecedor: <?php echo htmlspecialchars($nota_fornecedor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
