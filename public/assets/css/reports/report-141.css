@@ -18,3 +18,11 @@
     opacity: 1;
     filter: none;
 }
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+/* Garantir que o A4 impresso permanece com fundo branco */
+.r141-root .a4 {
+    background: #fff;
+}
