@@ -982,7 +982,7 @@ if (false && !empty($acesso_bloqueado)) {
             .relatorios-lista {
                 margin-top: 0.7rem;
                 padding-top: 0.4rem;
-                border-top: 1px solid rgba(255,255,255,0.3);
+                border-top: 1px solid rgba(255, 255, 255, 0.3);
             }
 
             .relatorios-subtitulo {
@@ -1522,46 +1522,46 @@ ob_start();
                             <strong><?php echo mb_strtoupper('Editado:', 'UTF-8'); ?></strong>
 
                             <?php if ($tem_edicao): ?>
-                            <br>
-                            <?php
+                                <br>
+                                <?php
 
-                            $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
+                                $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
 
-                            // Sempre montar a descrição editada a partir das partes
-                            $tipo_codigo_final = $p['editado_tipo_codigo'] ?: $p['tipo_codigo'];
-                            $tipo_desc_final = $p['editado_tipo_desc'] ?: $p['tipo_desc'];
-                            $ben_final = !empty($p['editado_bem']) ? $p['editado_bem'] : ($p['bem'] ?? '');
-                            $comp_final = !empty($p['editado_complemento']) ? $p['editado_complemento'] : ($p['complemento'] ?? '');
+                                // Sempre montar a descrição editada a partir das partes
+                                $tipo_codigo_final = $p['editado_tipo_codigo'] ?: $p['tipo_codigo'];
+                                $tipo_desc_final = $p['editado_tipo_desc'] ?: $p['tipo_desc'];
+                                $ben_final = !empty($p['editado_bem']) ? $p['editado_bem'] : ($p['bem'] ?? '');
+                                $comp_final = !empty($p['editado_complemento']) ? $p['editado_complemento'] : ($p['complemento'] ?? '');
 
-                            $partes = [];
-                            if ($tipo_codigo_final || $tipo_desc_final) {
-                                $partes[] = mb_strtoupper(trim(($tipo_codigo_final ? $tipo_codigo_final . ' - ' : '') . $tipo_desc_final), 'UTF-8');
-                            }
-                            if ($ben_final !== '') {
-                                $partes[] = mb_strtoupper($ben_final, 'UTF-8');
-                            }
-                            if ($comp_final !== '') {
-                                $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
-                                if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
-                                    $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
-                                    $comp_tmp = preg_replace('/^[\s\-\/]+/', '', $comp_tmp);
+                                $partes = [];
+                                if ($tipo_codigo_final || $tipo_desc_final) {
+                                    $partes[] = mb_strtoupper(trim(($tipo_codigo_final ? $tipo_codigo_final . ' - ' : '') . $tipo_desc_final), 'UTF-8');
                                 }
-                                if ($comp_tmp !== '') $partes[] = $comp_tmp;
-                            }
+                                if ($ben_final !== '') {
+                                    $partes[] = mb_strtoupper($ben_final, 'UTF-8');
+                                }
+                                if ($comp_final !== '') {
+                                    $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
+                                    if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
+                                        $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
+                                        $comp_tmp = preg_replace('/^[\s\-\/]+/', '', $comp_tmp);
+                                    }
+                                    if ($comp_tmp !== '') $partes[] = $comp_tmp;
+                                }
 
-                            $desc_editada_visivel = implode(' ', $partes);
+                                $desc_editada_visivel = implode(' ', $partes);
 
-                            if ($desc_editada_visivel === '') {
-                                $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
-                            }
+                                if ($desc_editada_visivel === '') {
+                                    $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
+                                }
 
-                            // Anexar dependência editada/original entre chaves no fim
-                            if (!empty($dep_final)) {
-                                $desc_editada_visivel .= ' {' . mb_strtoupper($dep_final, 'UTF-8') . '}';
-                            }
+                                // Anexar dependência editada/original entre chaves no fim
+                                if (!empty($dep_final)) {
+                                    $desc_editada_visivel .= ' {' . mb_strtoupper($dep_final, 'UTF-8') . '}';
+                                }
 
-                            echo htmlspecialchars($desc_editada_visivel);
-                            ?><br>
+                                echo htmlspecialchars($desc_editada_visivel);
+                                ?><br>
                             <?php endif; ?>
 
                             <?php if (($p['imprimir_14_1'] ?? 0) == 1): ?>

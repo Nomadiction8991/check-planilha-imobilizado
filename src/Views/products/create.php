@@ -92,7 +92,7 @@ ob_start();
         <div class="card-body">
             <div class="mb-3">
                 <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="imprimir_14_1" name="imprimir_14_1" value="1" <?php echo (isset($_POST['imprimir_14_1']) && $_POST['imprimir_14_1'] == 1) ? 'checked' : ''; ?> >
+                    <input class="form-check-input" type="checkbox" id="imprimir_14_1" name="imprimir_14_1" value="1" <?php echo (isset($_POST['imprimir_14_1']) && $_POST['imprimir_14_1'] == 1) ? 'checked' : ''; ?>>
                     <label class="form-check-label" for="imprimir_14_1">IMPRIMIR 14.1</label>
                 </div>
 

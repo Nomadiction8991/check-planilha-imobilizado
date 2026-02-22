@@ -56,7 +56,7 @@ $mostrar_checados_observacao = isset($_GET['mostrar_checados_observacao']);
 $mostrar_etiqueta = isset($_GET['mostrar_etiqueta']);
 $mostrar_alteracoes = isset($_GET['mostrar_alteracoes']);
 $mostrar_novos = isset($_GET['mostrar_novos']);
-$filtro_dependencia = isset($_GET['dependencia']) && $_GET['dependencia'] !== '' ? (int)$_GET['dependencia'] : ''; 
+$filtro_dependencia = isset($_GET['dependencia']) && $_GET['dependencia'] !== '' ? (int)$_GET['dependencia'] : '';
 
 try {
 
@@ -137,10 +137,11 @@ if (!empty($dependencia_options)) {
   }
 }
 
-$PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_checados_observacao = $PRODUTOS_etiqueta = $PRODUTOS_alteracoes = $PRODUTOS_novos = []; 
+$PRODUTOS_pendentes = $PRODUTOS_checados = $PRODUTOS_observacao = $PRODUTOS_checados_observacao = $PRODUTOS_etiqueta = $PRODUTOS_alteracoes = $PRODUTOS_novos = [];
 
 // Helper: build display title like in `spreadsheets/view.php` (tipo + bem + complemento + {dependencia})
-function _build_produto_titulo(array $p, bool $useEdited = false): string {
+function _build_produto_titulo(array $p, bool $useEdited = false): string
+{
   $tipoCodigo = trim((string)($useEdited ? ($p['editado_tipo_codigo'] ?? '') : ($p['tipo_codigo'] ?? '')));
   $tipoDesc = trim((string)($useEdited ? ($p['editado_tipo_desc'] ?? '') : ($p['tipo_desc'] ?? '')));
   $tipoPart = '';
@@ -224,7 +225,7 @@ $total_checados_observacao = count($PRODUTOS_checados_observacao);
 $total_etiqueta = count($PRODUTOS_etiqueta);
 $total_alteracoes = count($PRODUTOS_alteracoes);
 $total_novos = count($PRODUTOS_novos);
-$total_geral = count($todos_PRODUTOS); 
+$total_geral = count($todos_PRODUTOS);
 
 
 if (isset($_GET['debug'])) {
@@ -250,7 +251,7 @@ if ($mostrar_checados) $total_mostrar += $total_checados;
 if ($mostrar_observacao) $total_mostrar += $total_observacao;
 if ($mostrar_checados_observacao) $total_mostrar += $total_checados_observacao;
 if ($mostrar_etiqueta) $total_mostrar += $total_etiqueta;
-if ($mostrar_alteracoes) $total_mostrar += $total_alteracoes; 
+if ($mostrar_alteracoes) $total_mostrar += $total_alteracoes;
 if ($mostrar_novos) $total_mostrar += $total_novos;
 
 
@@ -359,8 +360,8 @@ ob_start();
     <div class="text-muted"><?php echo htmlspecialchars($planilha['comum']); ?></div>
     <div class="small text-muted">Gerado em <?php echo date('d/m/Y H:i:s'); ?></div>
   </div>
-    <!-- STATUS removed per UI request -->
-  </div>
+  <!-- STATUS removed per UI request -->
+</div>
 
 <!-- Resumo -->
 <div class="card mb-3">
