@@ -78,10 +78,18 @@ ob_start();
                     TIPO DE BEM
                 </label>
                 <select class="form-select" id="novo_tipo_bem_id" name="novo_tipo_bem_id">
-                    <option value=""><?php echo htmlspecialchars(to_uppercase('-- Não alterar --'), ENT_QUOTES, 'UTF-8'); ?></option>
                     <?php foreach ($tipos_bens as $tb): ?>
                         <option value="<?php echo $tb['id']; ?>"
-                            <?php echo (isset($novo_tipo_bem_id) && $novo_tipo_bem_id == $tb['id']) ? 'selected' : ''; ?>>
+                            <?php
+                            // Selecionar valor editado se existir, caso contrário selecionar o valor padrão do produto
+                            $selectedTipo = false;
+                            if (!is_null($novo_tipo_bem_id) && $novo_tipo_bem_id !== '') {
+                                $selectedTipo = ($novo_tipo_bem_id == $tb['id']);
+                            } else {
+                                $selectedTipo = (isset($produto['tipo_bem_id']) && $produto['tipo_bem_id'] == $tb['id']);
+                            }
+                            echo $selectedTipo ? 'selected' : '';
+                            ?>>
                             <?php echo htmlspecialchars($tb['codigo'] . ' - ' . $tb['descricao']); ?>
                         </option>
                     <?php endforeach; ?>
@@ -119,10 +127,18 @@ ob_start();
                     DEPENDÊNCIA
                 </label>
                 <select class="form-select" id="nova_dependencia_id" name="nova_dependencia_id">
-                    <option value=""><?php echo htmlspecialchars(to_uppercase('-- Não alterar --'), ENT_QUOTES, 'UTF-8'); ?></option>
                     <?php foreach ($dependencias as $dep): ?>
                         <option value="<?php echo $dep['id']; ?>"
-                            <?php echo (isset($nova_dependencia_id) && $nova_dependencia_id == $dep['id']) ? 'selected' : ''; ?>>
+                            <?php
+                            // Selecionar dependência editada se existir, caso contrário selecionar o valor padrão do produto
+                            $selectedDep = false;
+                            if (!is_null($nova_dependencia_id) && $nova_dependencia_id !== '') {
+                                $selectedDep = ($nova_dependencia_id == $dep['id']);
+                            } else {
+                                $selectedDep = (isset($produto['dependencia_id']) && $produto['dependencia_id'] == $dep['id']);
+                            }
+                            echo $selectedDep ? 'selected' : '';
+                            ?>>
                             <?php echo htmlspecialchars($dep['descricao']); ?>
                         </option>
                     <?php endforeach; ?>
