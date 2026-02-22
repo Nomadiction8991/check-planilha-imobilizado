@@ -51,8 +51,8 @@ select.form-select,
 }
 
 .card-header {
-    background-color: #333 !important;
-    color: #fff !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     border: none;
     border-radius: 12px 12px 0 0 !important;
     font-weight: 600;
@@ -132,11 +132,9 @@ body.modal-open {
     overflow: hidden;
 }
 
-/* Global print adjustments: remove shadows, dark header background, white header text, and add 1px border */
+/* Global print adjustments: remove shadows and hide footer */
 @media print {
-    .card { box-shadow: none !important; background-color: #fff !important; border: 1px solid #333 !important; }
-    .card-header { background-color: #333 !important; color: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .card-header * { color: inherit !important; }
+    .card { box-shadow: none !important; background-color: #fff !important; border: 1px solid #ccc !important; }
     .app-footer, .footer-mobile, footer { display: none !important; }
 }
 
