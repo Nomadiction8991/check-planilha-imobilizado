@@ -94,10 +94,3 @@ $limite = $limite ?? 10;
 
 <!-- Paginação -->
 <?= PaginationHelper::render($pagina, $totalPaginas, '/users', ['busca' => $busca]) ?>
-
-<!-- Botão Novo Usuário -->
-<div class="mt-3">
-    <a href="/users/create" class="btn btn-success w-100">
-        <i class="bi bi-person-plus me-2"></i>NOVO USUÁRIO
-    </a>
-</div>
