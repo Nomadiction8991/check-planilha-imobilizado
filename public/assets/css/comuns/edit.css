@@ -93,22 +93,14 @@
 .page-editar-comum .form-actions {
     margin-top: 24px;
     display: flex;
+    flex-direction: column; /* força coluna única para os botões */
     gap: 10px;
-    align-items: center;
+    align-items: stretch; /* botão ocupa toda largura */
 }
 
 .page-editar-comum .form-actions .btn {
-    min-width: 140px;
-}
-
-/* Responsivo: empilha botões e os estica em telas pequenas */
-@media (max-width: 576px) {
-    .page-editar-comum .form-actions {
-        flex-direction: column-reverse;
-    }
-    .page-editar-comum .form-actions .btn {
-        width: 100%;
-    }
+    width: 100% !important;
+    min-width: 0;
 }
 
 /* Impressão */
