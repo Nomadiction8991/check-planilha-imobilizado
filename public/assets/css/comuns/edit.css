@@ -23,8 +23,9 @@
 }
 
 .page-editar-comum .card-header {
-    background: linear-gradient(90deg, #2f5061 0%, #3b6a78 100%);
-    color: #ffffff;
+    /* Não sobrescrever o cabeçalho global do app — usar o padrão do layout */
+    background: none;
+    color: inherit;
     font-weight: 700;
     font-size: 1rem;
     padding: 12px 18px;
@@ -64,8 +65,15 @@
 
 .page-editar-comum .form-control:focus,
 .page-editar-comum .form-select:focus {
+    /* manter foco neutro para combinar com estilo global */
     border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.20);
+    box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.12);
+}
+
+/* Forçar campos em coluna única (cada coluna ocupa 100%) */
+.page-editar-comum .card-body .row.g-3 > div {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
 }
 
 /* Maiúsculas apenas nos campos que precisam */
