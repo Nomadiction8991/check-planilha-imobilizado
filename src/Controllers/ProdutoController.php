@@ -569,4 +569,56 @@ class ProdutoController extends BaseController
 
         $this->jsonErro('Funcionalidade em implementação.', 501);
     }
+
+    /**
+     * GET /products/clear-edits
+     * Limpa os campos editados de um produto e redireciona de volta para a listagem.
+     */
+    public function clearEdits(): void
+    {
+        $idProduto = (int) ($this->query('id_PRODUTO', $this->query('id_produto', $this->query('id', 0))));
+        $comumId = (int) ($this->query('comum_id', $this->query('id', 0)));
+
+        $pagina = $this->query('pagina', 1);
+        $nome = $this->query('nome', '');
+        $dependencia = $this->query('dependencia', '');
+        $filtro_codigo = $this->query('filtro_codigo', '');
+        $status = $this->query('STATUS', $this->query('status', ''));
+
+        $params = ['id' => $comumId, 'comum_id' => $comumId, 'pagina' => $pagina, 'nome' => $nome, 'dependencia' => $dependencia, 'filtro_codigo' => $filtro_codigo, 'status' => $status, 'STATUS' => $status];
+
+        if ($idProduto <= 0 || $comumId <= 0) {
+            $params['erro'] = 'Parâmetros inválidos';
+            $this->redirecionar('/products/view?' . http_build_query($params));
+            return;
+        }
+
+        try {
+            $sql = "UPDATE produtos 
+                   SET editado_tipo_bem_id = 0,
+                       editado_bem = '',
+                       editado_complemento = '',
+                       editado_dependencia_id = 0,
+
+                       imprimir_etiqueta = 0,
+                       checado = 0,
+                       editado = 0
+                   WHERE id_produto = :id_produto 
+                     AND comum_id = :comum_id";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':id_produto', $idProduto, \PDO::PARAM_INT);
+            $stmt->bindValue(':comum_id', $comumId, \PDO::PARAM_INT);
+            $stmt->execute();
+
+            $params['sucesso'] = 'Edições limpas com sucesso!';
+            $this->redirecionar('/products/view?' . http_build_query($params));
+            return;
+        } catch (\Exception $e) {
+            error_log('Erro clearEdits: ' . $e->getMessage());
+            $params['erro'] = 'Erro ao limpar edições: ' . $e->getMessage();
+            $this->redirecionar('/products/view?' . http_build_query($params));
+            return;
+        }
+    }
 }
