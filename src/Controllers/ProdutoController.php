@@ -232,7 +232,7 @@ class ProdutoController extends BaseController
             // Valores editados (já salvos) para pré-preencher o form
             'novo_tipo_bem_id'   => $produto['editado_tipo_bem_id'] ?: null,
             'novo_bem'           => !empty($produto['editado_bem']) ? $produto['editado_bem'] : $produto['bem'],
-            'novo_complemento'   => $produto['editado_complemento'] ?? '',
+            'novo_complemento'   => !empty($produto['editado_complemento']) ? $produto['editado_complemento'] : ($produto['complemento'] ?? ''),
             'nova_dependencia_id' => $produto['editado_dependencia_id'] ?: null,
             'mensagem'           => '',
             'tipo_mensagem'      => '',
