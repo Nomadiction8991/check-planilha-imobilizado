@@ -1,41 +1,47 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // --- Modal: Cadastro Incompleto ---
-    const elModalCadastro = document.getElementById('modalCadastroIncompleto');
-    if (elModalCadastro) {
-        const modalCadastro = new bootstrap.Modal(elModalCadastro);
-        const btnCompletar = document.getElementById('btnCompletarCadastro');
-
-        document.querySelectorAll('.btn-view-planilha').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const cadastroCompleto = this.dataset.cadastroOk === '1';
-                const editUrl = this.dataset.editUrl;
-                const viewUrl = this.dataset.viewUrl;
-
-                if (!cadastroCompleto) {
-                    btnCompletar.href = editUrl;
-                    modalCadastro.show();
-                } else {
-                    window.location.href = viewUrl;
-                }
-            });
-        });
-    }
+document.addEventListener('DOMContentLoaded', function () {
 
     // --- Modal: Excluir todos os produtos da comum ---
     const elModalDelete = document.getElementById('modalDeleteProdutos');
     if (elModalDelete) {
         const modalDelete = new bootstrap.Modal(elModalDelete);
-        const nomeComumEl = document.getElementById('modalDeleteNomeComum');
+        const nomeComumEl   = document.getElementById('modalDeleteNomeComum');
         const deleteComumIdEl = document.getElementById('deleteComumId');
+        const countMsgEl    = document.getElementById('modalDeleteCount');
+        const btnConfirm    = document.getElementById('btnConfirmDeleteProdutos');
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const btn = e.target.closest('.btn-delete-products');
             if (!btn) return;
 
-            nomeComumEl.textContent = btn.dataset.comumNome;
-            deleteComumIdEl.value = btn.dataset.comumId;
+            const comumId   = btn.dataset.comumId;
+            const comumNome = btn.dataset.comumNome;
+
+            // Reseta estado visual
+            nomeComumEl.textContent  = comumNome;
+            deleteComumIdEl.value    = comumId;
+            countMsgEl.textContent   = 'Carregando...';
+            btnConfirm.disabled      = true;
+
             modalDelete.show();
+
+            // Busca a quantidade de produtos via AJAX
+            fetch('/churches/products-count?comum_id=' + encodeURIComponent(comumId))
+                .then(r => r.json())
+                .then(data => {
+                    const n = data.count || 0;
+                    if (n === 0) {
+                        countMsgEl.innerHTML = '<span class="text-muted">Nenhum produto cadastrado nesta comum.</span>';
+                        btnConfirm.disabled = true;
+                    } else {
+                        countMsgEl.innerHTML =
+                            'Serão excluídos <strong class="text-danger">' + n + ' produto(s)</strong>.';
+                        btnConfirm.disabled = false;
+                    }
+                })
+                .catch(() => {
+                    countMsgEl.textContent = 'Não foi possível obter a contagem.';
+                    btnConfirm.disabled = false; // permite mesmo assim
+                });
         });
     }
 });

@@ -161,15 +161,18 @@ $limite = $limite ?? 10;
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Deseja excluir <strong>TODOS OS PRODUTOS</strong> do comum:</p>
-                <p class="fw-bold text-uppercase" id="modalDeleteNomeComum"></p>
-                <p class="text-danger mb-0"><i class="bi bi-exclamation-circle me-1"></i>Esta ação não pode ser desfeita.</p>
+                <p class="mb-1">Deseja excluir <strong>TODOS OS PRODUTOS</strong> do comum:</p>
+                <p class="fw-bold text-uppercase mb-2" id="modalDeleteNomeComum"></p>
+                <p class="mb-2" id="modalDeleteCount">Carregando...</p>
+                <p class="text-danger mb-0 small">
+                    <i class="bi bi-exclamation-circle me-1"></i>Esta ação <strong>não pode ser desfeita</strong>.
+                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCELAR</button>
                 <form id="formDeleteProdutos" method="POST" action="/churches/delete-products" class="d-inline">
                     <input type="hidden" name="comum_id" id="deleteComumId">
-                    <button type="submit" class="btn btn-danger">
+                    <button type="submit" id="btnConfirmDeleteProdutos" class="btn btn-danger" disabled>
                         <i class="bi bi-trash3 me-1"></i>EXCLUIR TUDO
                     </button>
                 </form>
@@ -179,4 +182,4 @@ $limite = $limite ?? 10;
 </div>
 
 <!-- JavaScript -->
-<script src="/assets/js/comuns/index.js"></script>
+<script src="/assets/js/churches/index.js"></script>

@@ -214,6 +214,25 @@ class ComumController extends BaseController
         require __DIR__ . '/../../index.php';
     }
 
+    public function productsCount(): void
+    {
+        $comumId = (int) ($_GET['comum_id'] ?? 0);
+        if ($comumId <= 0) {
+            $this->json(['count' => 0, 'error' => 'ID inválido'], 400);
+            return;
+        }
+        try {
+            $conexao = \App\Core\ConnectionManager::getConnection();
+            $stmt = $conexao->prepare('SELECT COUNT(*) FROM produtos WHERE comum_id = :id');
+            $stmt->bindValue(':id', $comumId, \PDO::PARAM_INT);
+            $stmt->execute();
+            $count = (int) $stmt->fetchColumn();
+            $this->json(['count' => $count]);
+        } catch (\Throwable $e) {
+            $this->json(['count' => 0, 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function deleteProducts(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
