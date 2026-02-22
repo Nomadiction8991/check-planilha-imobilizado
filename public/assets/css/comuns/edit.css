@@ -9,6 +9,15 @@
     padding: 20px 0;
 }
 
+/* Garante ~95% de largura no mobile onde col-11 (~91%) ficaria estreito */
+@media (max-width: 767px) {
+    .page-editar-comum > .row > [class*="col-"] {
+        width: 95%;
+        max-width: 95%;
+        flex: 0 0 95%;
+    }
+}
+
 /* Card principal */
 .page-editar-comum .card {
     border: none;

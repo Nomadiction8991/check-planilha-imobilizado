@@ -9,7 +9,7 @@
 
 <div class="container-fluid page-editar-comum">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-11 col-sm-11 col-md-10 col-lg-9 col-xl-8">
             <div class="card">
                 <div class="card-header">
                     <i class="bi bi-pencil-square"></i>
