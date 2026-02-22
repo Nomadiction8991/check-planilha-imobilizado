@@ -12,12 +12,16 @@ class TipoBemRepository extends BaseRepository
 
     public function criar(array $dados): int
     {
+        // Auto-gera codigo como próximo valor sequencial
+        $maxStmt = $this->conexao->query("SELECT COALESCE(MAX(codigo), 0) FROM {$this->tabela}");
+        $proximoCodigo = (int) $maxStmt->fetchColumn() + 1;
+
         $sql = "INSERT INTO {$this->tabela} (codigo, descricao) 
                 VALUES (:codigo, :descricao)";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute([
-            'codigo' => $dados['codigo'],
+            'codigo'   => $proximoCodigo,
             'descricao' => $dados['descricao']
         ]);
 
@@ -27,13 +31,12 @@ class TipoBemRepository extends BaseRepository
     public function atualizar(int $id, array $dados): bool
     {
         $sql = "UPDATE {$this->tabela} 
-                SET codigo = :codigo, descricao = :descricao 
+                SET descricao = :descricao 
                 WHERE id = :id";
 
         $stmt = $this->conexao->prepare($sql);
         return $stmt->execute([
-            'id' => $id,
-            'codigo' => $dados['codigo'],
+            'id'       => $id,
             'descricao' => $dados['descricao']
         ]);
     }

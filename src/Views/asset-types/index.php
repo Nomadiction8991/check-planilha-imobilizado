@@ -1,127 +1,111 @@
 <?php
 
+use App\Helpers\{AlertHelper, PaginationHelper, ViewHelper};
 
-$pageTitle = 'TIPOS DE BENS';
-$backUrl = null;
+$tipos       = $tipos       ?? [];
+$total       = $total       ?? 0;
+$pagina      = $pagina      ?? 1;
+$totalPaginas = $totalPaginas ?? 1;
+$busca       = $busca       ?? '';
+$limite      = $limite      ?? 20;
 ?>
 
-<div class="container-fluid py-3">
-    <?php if (isset($_GET['sucesso'])): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?= htmlspecialchars($_GET['sucesso'], ENT_QUOTES, 'UTF-8') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+<!-- Alertas -->
+<?= AlertHelper::fromQuery() ?>
 
-    <?php if (isset($_GET['erro'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?= htmlspecialchars($_GET['erro'], ENT_QUOTES, 'UTF-8') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($erro)): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-box-seam me-2"></i>TIPOS DE BENS</span>
-            <a href="/asset-types/create" class="btn btn-light btn-sm" style="color: #6f42c1; border-color: #e0e0e0;">
-                <i class="bi bi-plus-circle me-1"></i>NOVO
-            </a>
-        </div>
-        <div class="card-body">
-            <!-- Busca -->
-            <div class="mb-3">
-                <form method="GET" action="/asset-types">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="busca"
-                            placeholder="Buscar por código ou descrição..."
-                            value="<?= htmlspecialchars($busca ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                        <button class="btn btn-outline-secondary" type="submit">
-                            <i class="bi bi-search"></i>
-                        </button>
-                        <?php if (!empty($busca)): ?>
-                            <a href="/asset-types" class="btn btn-outline-secondary">
-                                <i class="bi bi-x"></i>
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                </form>
+<!-- Card de Pesquisa -->
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="bi bi-search me-2"></i>PESQUISAR TIPO DE BEM
+    </div>
+    <div class="card-body">
+        <form method="GET" action="/asset-types" class="row g-2">
+            <div class="col-12">
+                <label for="busca" class="form-label">DESCRIÇÃO</label>
+                <div class="input-group">
+                    <input
+                        type="text"
+                        name="busca"
+                        id="busca"
+                        class="form-control text-uppercase"
+                        value="<?= htmlspecialchars($busca, ENT_QUOTES, 'UTF-8') ?>"
+                        placeholder="DIGITE A DESCRIÇÃO">
+                    <?php if ($busca): ?>
+                        <a href="/asset-types" class="btn btn-outline-secondary" title="LIMPAR">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
             </div>
-
-            <!-- Tabela -->
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>CÓDIGO</th>
-                            <th>DESCRIÇÃO</th>
-                            <th class="text-center">AÇÕES</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($tipos)): ?>
-                            <tr>
-                                <td colspan="3" class="text-center py-4 text-muted">
-                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                                    NENHUM TIPO DE BEM ENCONTRADO
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($tipos as $tipo): ?>
-                                <tr>
-                                    <td class="fw-semibold"><?= htmlspecialchars($tipo['codigo'], ENT_QUOTES, 'UTF-8') ?></td>
-                                    <td><?= htmlspecialchars($tipo['descricao'], ENT_QUOTES, 'UTF-8') ?></td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="/asset-types/<?= htmlspecialchars($tipo['id'], ENT_QUOTES, 'UTF-8') ?>/edit"
-                                                class="btn btn-outline-primary" title="Editar">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-2"></i>BUSCAR
+                </button>
             </div>
-
-            <!-- Paginação -->
-            <?php if ($totalPaginas > 1): ?>
-                <nav>
-                    <ul class="pagination pagination-sm justify-content-center">
-                        <?php if ($pagina > 1): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?busca=<?= urlencode($busca ?? '') ?>&pagina=<?= $pagina - 1 ?>">
-                                    Anterior
-                                </a>
-                            </li>
-                        <?php endif; ?>
-
-                        <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
-                            <li class="page-item <?= $i === $pagina ? 'active' : '' ?>">
-                                <a class="page-link" href="?busca=<?= urlencode($busca ?? '') ?>&pagina=<?= $i ?>">
-                                    <?= $i ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-
-                        <?php if ($pagina < $totalPaginas): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?busca=<?= urlencode($busca ?? '') ?>&pagina=<?= $pagina + 1 ?>">
-                                    Próxima
-                                </a>
-                            </li>
-                        <?php endif; ?>
-                    </ul>
-                </nav>
-            <?php endif; ?>
-        </div>
+        </form>
     </div>
 </div>
+
+<!-- Informações de Resultado -->
+<?= PaginationHelper::info($total, $pagina, $limite) ?>
+
+<!-- Card de Listagem -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-box-seam me-2"></i>TIPOS DE BENS
+    </div>
+    <div class="card-body p-0">
+
+        <?php if (isset($erro)): ?>
+            <div class="alert alert-danger m-3"><?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php endif; ?>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>DESCRIÇÃO</th>
+                        <th width="80" class="text-center">ÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($tipos)): ?>
+                        <tr>
+                            <td colspan="2" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                NENHUM TIPO DE BEM ENCONTRADO
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($tipos as $tipo): ?>
+                            <tr>
+                                <td class="text-uppercase">
+                                    <?= htmlspecialchars($tipo['descricao'], ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td class="text-center">
+                                    <a
+                                        href="/asset-types/<?= (int)$tipo['id'] ?>/edit"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="EDITAR">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- Botão Novo -->
+<div class="mt-3">
+    <a href="/asset-types/create" class="btn btn-primary w-100">
+        <i class="bi bi-plus-circle me-2"></i>NOVO TIPO DE BEM
+    </a>
+</div>
+
+<!-- Paginação -->
+<?= PaginationHelper::render($pagina, $totalPaginas, '/asset-types', ['busca' => $busca]) ?>

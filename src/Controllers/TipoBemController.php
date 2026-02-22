@@ -38,10 +38,12 @@ class TipoBemController extends BaseController
 
             ViewRenderer::render('asset-types/index', [
                 'pageTitle' => 'TIPOS DE BENS',
+                'backUrl'   => null,
                 'headerActions' => '',
                 'tipos' => $tipos,
                 'busca' => $busca,
                 'pagina' => $pagina,
+                'limite' => $limite,
                 'total' => $total,
                 'totalPaginas' => $totalPaginas
             ]);
@@ -51,10 +53,12 @@ class TipoBemController extends BaseController
             // Renderiza a view mesmo com erro, mostrando lista vazia
             ViewRenderer::render('asset-types/index', [
                 'pageTitle' => 'TIPOS DE BENS',
+                'backUrl'   => null,
                 'headerActions' => '',
                 'tipos' => [],
                 'busca' => $busca,
                 'pagina' => 1,
+                'limite' => $limite,
                 'total' => 0,
                 'totalPaginas' => 1,
                 'erro' => 'Erro ao carregar tipos de bens: ' . $e->getMessage()
@@ -65,7 +69,8 @@ class TipoBemController extends BaseController
     public function create(): void
     {
         ViewRenderer::render('asset-types/create', [
-            'pageTitle' => 'CADASTRAR TIPO DE BEM',
+            'pageTitle' => 'NOVO TIPO DE BEM',
+            'backUrl'   => '/asset-types',
             'headerActions' => ''
         ]);
     }
@@ -79,14 +84,10 @@ class TipoBemController extends BaseController
 
         try {
             $dados = [
-                'codigo' => trim($_POST['codigo'] ?? ''),
                 'descricao' => trim($_POST['descricao'] ?? '')
             ];
 
             // Validações
-            if (empty($dados['codigo'])) {
-                throw new \Exception('Código é obrigatório.');
-            }
             if (empty($dados['descricao'])) {
                 throw new \Exception('Descrição é obrigatória.');
             }
@@ -121,6 +122,7 @@ class TipoBemController extends BaseController
 
             ViewRenderer::render('asset-types/edit', [
                 'pageTitle' => 'EDITAR TIPO DE BEM',
+                'backUrl'   => '/asset-types',
                 'headerActions' => '',
                 'tipo' => $tipo
             ]);
@@ -147,14 +149,10 @@ class TipoBemController extends BaseController
 
         try {
             $dados = [
-                'codigo' => trim($_POST['codigo'] ?? ''),
                 'descricao' => trim($_POST['descricao'] ?? '')
             ];
 
             // Validações
-            if (empty($dados['codigo'])) {
-                throw new \Exception('Código é obrigatório.');
-            }
             if (empty($dados['descricao'])) {
                 throw new \Exception('Descrição é obrigatória.');
             }
