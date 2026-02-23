@@ -1330,11 +1330,11 @@ ob_start();
             <input type="hidden" name="comum_id" value="<?php echo $comum_id; ?>">
 
             <div class="mb-3">
-                <label class="form-label" for="codigo">
+                <label class="form-label" for="filtro_codigo">
                     <i class="bi bi-upc-scan me-1"></i>
                     <?php echo htmlspecialchars(to_uppercase('Código do Produto'), ENT_QUOTES, 'UTF-8'); ?>
                 </label>
-                <input type="text" class="form-control" id="codigo" name="codigo"
+                <input type="text" class="form-control" id="filtro_codigo" name="filtro_codigo"
                     style="border-radius: 8px !important;"
                     value="<?php echo htmlspecialchars($filtro_codigo ?? ''); ?>"
                     placeholder="<?php echo htmlspecialchars(to_uppercase('Digite, fale ou escaneie o código...'), ENT_QUOTES, 'UTF-8'); ?>">
