@@ -7,7 +7,7 @@ namespace App\Helpers;
 
 class PaginationHelper
 {
-    
+
     public static function render(
         int $paginaAtual,
         int $totalPaginas,
@@ -22,7 +22,7 @@ class PaginationHelper
         $html = '<nav aria-label="Paginação" class="mt-3">';
         $html .= '<ul class="pagination pagination-sm justify-content-center mb-0">';
 
-        
+
         if ($paginaAtual > 1) {
             $prevUrl = self::buildUrl($baseUrl, array_merge($queryParams, ['pagina' => $paginaAtual - 1]));
             $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$prevUrl}\"><i class=\"bi bi-chevron-left\"></i></a></li>";
@@ -30,16 +30,16 @@ class PaginationHelper
             $html .= '<li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>';
         }
 
-        
+
         $inicio = max(1, $paginaAtual - floor($maxLinks / 2));
         $fim = min($totalPaginas, $inicio + $maxLinks - 1);
 
-        
+
         if ($fim - $inicio < $maxLinks - 1) {
             $inicio = max(1, $fim - $maxLinks + 1);
         }
 
-        
+
         if ($inicio > 1) {
             $firstUrl = self::buildUrl($baseUrl, array_merge($queryParams, ['pagina' => 1]));
             $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$firstUrl}\">1</a></li>";
@@ -49,7 +49,7 @@ class PaginationHelper
             }
         }
 
-        
+
         for ($i = $inicio; $i <= $fim; $i++) {
             if ($i == $paginaAtual) {
                 $html .= "<li class=\"page-item active\"><span class=\"page-link\">{$i}</span></li>";
@@ -59,7 +59,7 @@ class PaginationHelper
             }
         }
 
-        
+
         if ($fim < $totalPaginas) {
             if ($fim < $totalPaginas - 1) {
                 $html .= '<li class="page-item disabled"><span class="page-link">...</span></li>';
@@ -69,7 +69,7 @@ class PaginationHelper
             $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$lastUrl}\">{$totalPaginas}</a></li>";
         }
 
-        
+
         if ($paginaAtual < $totalPaginas) {
             $nextUrl = self::buildUrl($baseUrl, array_merge($queryParams, ['pagina' => $paginaAtual + 1]));
             $html .= "<li class=\"page-item\"><a class=\"page-link\" href=\"{$nextUrl}\"><i class=\"bi bi-chevron-right\"></i></a></li>";
@@ -83,10 +83,10 @@ class PaginationHelper
         return $html;
     }
 
-    
+
     private static function buildUrl(string $baseUrl, array $params): string
     {
-        
+
         $params = array_filter($params, function ($value) {
             return $value !== '' && $value !== null;
         });
@@ -99,7 +99,7 @@ class PaginationHelper
         return $baseUrl . $separator . http_build_query($params);
     }
 
-    
+
     public static function info(int $total, int $paginaAtual, int $itensPorPagina): string
     {
         if ($total === 0) {

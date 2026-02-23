@@ -594,7 +594,7 @@ class ProdutoController extends BaseController
         }
 
         try {
-                        $sql = "UPDATE produtos 
+            $sql = "UPDATE produtos 
                                      SET editado_tipo_bem_id = 0,
                                              editado_bem = '',
                                              editado_complemento = '',

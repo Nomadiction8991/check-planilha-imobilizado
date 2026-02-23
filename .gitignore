@@ -4,7 +4,6 @@
 
 # Environment / secrets
 .env
-.env.*
 
 # IDE / editor
 .vscode/

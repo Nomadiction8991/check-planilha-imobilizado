@@ -1583,9 +1583,9 @@ ob_start();
                                 <div class="nota-fiscal-lista mt-2">
                                     <strong>Nota Fiscal:</strong><br>
                                     <?php if ($nota_numero !== ''): ?>Número: <?php echo htmlspecialchars($nota_numero, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
-                                    <?php if ($nota_data !== ''): ?>Data: <?php echo htmlspecialchars($nota_data, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
-                                    <?php if ($nota_valor !== ''): ?>Valor: <?php echo htmlspecialchars($nota_valor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
-                                    <?php if ($nota_fornecedor !== ''): ?>Fornecedor: <?php echo htmlspecialchars($nota_fornecedor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                <?php if ($nota_data !== ''): ?>Data: <?php echo htmlspecialchars($nota_data, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                            <?php if ($nota_valor !== ''): ?>Valor: <?php echo htmlspecialchars($nota_valor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                        <?php if ($nota_fornecedor !== ''): ?>Fornecedor: <?php echo htmlspecialchars($nota_fornecedor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         </div>

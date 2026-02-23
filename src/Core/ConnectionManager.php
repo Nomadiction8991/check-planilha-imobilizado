@@ -50,8 +50,8 @@ class ConnectionManager
     {
         return self::$config ?? [
             'host'     => LerEnv::obter('DB_HOST', '127.0.0.1'),
-            'database' => LerEnv::obter('DB_NAME', LerEnv::obter('DB_DATABASE', 'ellobackup')),
-            'username' => LerEnv::obter('DB_USER', LerEnv::obter('DB_USERNAME', 'root')),
+            'database' => LerEnv::obter('DB_NAME', LerEnv::obter('DB_DATABASE', 'anvycomb_checkplanilha')),
+            'username' => LerEnv::obter('DB_USER', LerEnv::obter('DB_USERNAME', 'anvycomb_checkplanilha')),
             'password' => LerEnv::obter('DB_PASS', LerEnv::obter('DB_PASSWORD', '')),
             'charset'  => LerEnv::obter('DB_CHARSET', 'utf8mb4'),
             'port'     => LerEnv::obter('DB_PORT', '3306'),

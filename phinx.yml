@@ -7,10 +7,10 @@ environments:
     default_environment: development
     development:
         adapter: mysql
-        host: db
-        name: checkplanilha
-        user: checkplanilha
-        pass: checkplanilha123
+        host: 127.0.0.1
+        name: anvycomb_checkplanilha
+        user: anvycomb_checkplanilha
+        pass: 
         port: 3306
         charset: utf8mb4
 
