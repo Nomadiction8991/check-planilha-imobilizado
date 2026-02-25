@@ -305,7 +305,8 @@ class ImportacaoService
         $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);
 
         if ($registro['status'] === CsvParserService::STATUS_ATUALIZAR && !empty($registro['id_produto'])) {
-            $this->atualizarProduto($registro['id_produto'], [
+            // id_produto pode ser string vindo do CSV/DB; converter para int
+            $this->atualizarProduto((int) $registro['id_produto'], [
                 'tipo_bem_id'    => $tipoBemId,
                 'bem'            => $bem,
                 'complemento'    => $complemento,
