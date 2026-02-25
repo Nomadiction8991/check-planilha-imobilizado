@@ -291,7 +291,7 @@ ob_start();
 
 <!-- Assinaturas removidas: campos e validações relacionados a assinaturas foram removidos em razão da alteração do esquema de banco de dados. -->
 
-<script src="/assets/js/usuarios/create-legacy.js"></script>
+<script src="/assets/js/users/create-legacy.js"></script>
 
 <?php
 $contentHtml = ob_get_clean();

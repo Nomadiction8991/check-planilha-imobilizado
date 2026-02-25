@@ -223,4 +223,4 @@ $old = $old ?? [];
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
-<script src="/assets/js/usuarios/create.js"></script>
+<script src="/assets/js/users/create.js"></script>

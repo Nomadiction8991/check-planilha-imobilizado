@@ -251,7 +251,7 @@ ob_start();
         window._editUserRgDigits = '<?php echo preg_replace('/\D/', '', $usuario['rg'] ?? ''); ?>';
         window._editUserRgConjugeDigits = '<?php echo preg_replace('/\D/', '', $usuario['rg_conjuge'] ?? ''); ?>';
     </script>
-    <script src="/assets/js/usuarios/edit.js"></script>
+    <script src="/assets/js/users/edit.js"></script>
 <?php endif; ?>
 
 <?php
