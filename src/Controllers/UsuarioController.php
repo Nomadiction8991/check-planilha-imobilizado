@@ -95,6 +95,10 @@ class UsuarioController extends BaseController
     {
         try {
             $dados = $this->coletarDadosFormulario();
+        // ao cadastrar novo usuário garantimos ativo=1 se não informado
+        if (!isset($dados['ativo'])) {
+            $dados['ativo'] = 1;
+        }
 
             $this->validarUsuario($dados);
 

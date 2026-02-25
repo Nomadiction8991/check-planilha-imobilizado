@@ -14,6 +14,8 @@ $old = $old ?? [];
 <?php endif; ?>
 
 <form method="POST" id="formUsuario">
+    <!-- novo usuário inicia ativo por padrão -->
+    <input type="hidden" name="ativo" value="1">
     <!-- Tipo de usuário para registro público -->
     <?php if ($publicRegister): ?>
         <input type="hidden" name="tipo" value="DOADOR/CÔNJUGE">
