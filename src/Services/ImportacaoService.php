@@ -91,7 +91,9 @@ class ImportacaoService
         ];
 
         // comumId da importação é fallback para linhas sem localidade
-        $comumIdFallback = $importacao['comum_id'] ?? 0;
+        // certificar que esteja em formato inteiro, pois vindo do banco pode ser string
+        $comumIdFallback = (int) ($importacao['comum_id'] ?? 0);
+
         $registros = $analise['registros'] ?? [];
 
         // Filtra apenas os que têm ação definida
@@ -176,6 +178,9 @@ class ImportacaoService
      * Processa um lote de registros com ações definidas pelo usuário.
      * Cada registro resolve sua própria comum via localidade do CSV.
      */
+    // O tipo de $comumIdFallback é declarado como int para evitar o erro de
+    // TypeError observado em ambientes de produção quando a coluna retornava
+    // valor string. A chamada acima garante conversão.
     private function processarLoteComAcoes(array $lote, int $comumIdFallback, int $importacaoId = 0): array
     {
         $resultado = [
