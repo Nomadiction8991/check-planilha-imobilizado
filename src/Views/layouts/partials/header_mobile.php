@@ -43,7 +43,13 @@ function _fmtCodigoComum($codigo)
             <select id="comum-selector" class="form-select form-select-sm" aria-label="Selecionar Comum">
                 <?php foreach ($comuns as $comum): ?>
                     <option value="<?= (int)$comum['id'] ?>" <?= (int)$comum['id'] === (int)$comumAtualId ? 'selected' : '' ?>>
-                        <?= htmlspecialchars(_fmtCodigoComum($comum['codigo']), ENT_QUOTES, 'UTF-8') ?>
+                        <?php
+                        $label = _fmtCodigoComum($comum['codigo']);
+                        if (!empty($comum['descricao'])) {
+                            $label .= ' - ' . strtoupper($comum['descricao']);
+                        }
+                        echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+                        ?>
                     </option>
                 <?php endforeach; ?>
             </select>
