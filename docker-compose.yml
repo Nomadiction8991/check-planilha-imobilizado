@@ -3,7 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/Dockerfile
-    image: checkplanilha:local
+    image: checkplanilha:latest
+    restart: always
     ports:
       - "8080:80"
     volumes:
