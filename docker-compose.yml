@@ -4,9 +4,10 @@ services:
       context: .
       dockerfile: Dockerfiles/Dockerfile
     image: checkplanilha:latest
+    container_name: checkplanilha
     restart: always
     ports:
-      - "8080:80"
+      - "7841:80"
     volumes:
       - ./:/var/www/html
       - ./Dockerfiles/php.ini:/usr/local/etc/php/conf.d/dev.ini:ro
@@ -23,13 +24,14 @@ services:
   db:
     image: mysql:8.0
     restart: always
+    container_name: checkplanilha_mysql
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: checkplanilha
       MYSQL_USER: checkplanilha
       MYSQL_PASSWORD: checkplanilha123
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
 
