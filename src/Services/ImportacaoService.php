@@ -312,24 +312,44 @@ class ImportacaoService
                 'complemento'    => $complemento,
                 'dependencia_id' => $dependenciaId,
                 'importado'      => 1,
+                'ativo'          => 1, // reativa produto caso estivesse inativo
             ]);
         } else {
-            $this->criarProduto([
-                'comum_id'       => $comumId,
-                'codigo'         => $codigo,
-                'tipo_bem_id'    => $tipoBemId,
-                'bem'            => $bem,
-                'complemento'    => $complemento,
-                'dependencia_id' => $dependenciaId,
-                'novo'           => 0,
-                'importado'      => 1,
-                'checado'        => 0,
-                'editado'        => 0,
-                'imprimir_etiqueta' => 0,
-                'imprimir_14_1'  => 0,
-                'observacao'     => '',
-                'ativo'          => 1,
-            ]);
+            // Guarda de segurança: verificar em tempo real se já existe produto com
+            // este código antes de inserir. Protege contra:
+            //  1. Linhas duplicadas no mesmo CSV
+            //  2. Cache de análise desatualizado entre o preview e o processamento
+            //  3. Produto desativado que não appareceu na análise
+            $existente = $this->buscarProdutoPorCodigo($codigo);
+
+            if ($existente) {
+                // Produto já existe (ativo ou não) → atualizar em vez de duplicar
+                $this->atualizarProduto((int) $existente['id_produto'], [
+                    'tipo_bem_id'    => $tipoBemId,
+                    'bem'            => $bem,
+                    'complemento'    => $complemento,
+                    'dependencia_id' => $dependenciaId,
+                    'importado'      => 1,
+                    'ativo'          => 1, // reativa se estava inativo
+                ]);
+            } else {
+                $this->criarProduto([
+                    'comum_id'          => $comumId,
+                    'codigo'            => $codigo,
+                    'tipo_bem_id'       => $tipoBemId,
+                    'bem'               => $bem,
+                    'complemento'       => $complemento,
+                    'dependencia_id'    => $dependenciaId,
+                    'novo'              => 0,
+                    'importado'         => 1,
+                    'checado'           => 0,
+                    'editado'           => 0,
+                    'imprimir_etiqueta' => 0,
+                    'imprimir_14_1'     => 0,
+                    'observacao'        => '',
+                    'ativo'             => 1,
+                ]);
+            }
         }
     }
 
@@ -438,6 +458,22 @@ class ImportacaoService
         ]);
 
         return (int) $this->conexao->lastInsertId();
+    }
+
+    /**
+     * Busca um produto pelo código (case-insensitive).
+     * Retorna o registro completo ou NULL se não encontrado.
+     * Inclui produtos inativos para evitar duplicatas durante a importação.
+     */
+    private function buscarProdutoPorCodigo(string $codigo): ?array
+    {
+        $stmt = $this->conexao->prepare(
+            "SELECT id_produto, ativo FROM produtos WHERE UPPER(codigo) = UPPER(:codigo) LIMIT 1"
+        );
+        $stmt->execute([':codigo' => $codigo]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ?: null;
     }
 
     private function atualizarProduto(int $id, array $dados): void

@@ -201,8 +201,9 @@ class CsvParserService
             $codigosNoCSV = $codigosPorComum[$comumIdExcl] ?? [];
 
             foreach ($produtosDb as $codigoUpper => $produto) {
-                if ($codigoUpper === '') continue;          // sem código → não exclui
-                if (isset($codigosNoCSV[$codigoUpper])) continue; // aparece no CSV → não exclui
+                if ($codigoUpper === '') continue;                  // sem código → não exclui
+                if (isset($codigosNoCSV[$codigoUpper])) continue;  // aparece no CSV → não exclui
+                if (($produto['ativo'] ?? 1) == 0) continue;       // já inativo → não sugerir exclusão novamente
 
                 // Produto tem código mas não está no CSV → candidato a exclusão
                 $linhaSintetica = 'ex' . $produto['id_produto'];
@@ -795,6 +796,14 @@ class CsvParserService
         // Calcula diferenças campo a campo
         $diferencas = [];
 
+        // Produto estava desativado → reativação é considerada uma alteração
+        if (($produtoDb['ativo'] ?? 1) == 0) {
+            $diferencas['ativo'] = [
+                'antes' => 'inativo',
+                'depois' => 'ativo',
+            ];
+        }
+
         if (trim($produtoDb['bem'] ?? '') !== trim($bem)) {
             $diferencas['bem'] = [
                 'antes' => $produtoDb['bem'],
@@ -829,6 +838,7 @@ class CsvParserService
                 'complemento' => $produtoDb['complemento'] ?? '',
                 'tipo_bem'    => ($produtoDb['tipo_bem_codigo'] ?? '') . ' - ' . ($produtoDb['tipo_bem_descricao'] ?? ''),
                 'dependencia' => $produtoDb['dependencia_descricao'] ?? '',
+                'ativo'       => (int) ($produtoDb['ativo'] ?? 1),
             ],
             'diferencas' => $diferencas,
             'id_produto' => $produtoDb['id_produto'],
@@ -856,16 +866,19 @@ class CsvParserService
 
     /**
      * Pré-carrega TODOS os produtos do comum indexados por código uppercase.
+     * Inclui produtos inativos (ativo=0) para evitar que sejam re-inseridos
+     * como duplicatas durante a importação — eles serão reativados se aparecerem
+     * de volta no CSV.
      */
     private function carregarProdutosDoComum(int $comumId): array
     {
-        $sql = "SELECT p.id_produto, p.codigo, p.bem, p.complemento,
+        $sql = "SELECT p.id_produto, p.codigo, p.bem, p.complemento, p.ativo,
                        tb.codigo AS tipo_bem_codigo, tb.descricao AS tipo_bem_descricao,
                        d.descricao AS dependencia_descricao
                 FROM produtos p
                 LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
                 LEFT JOIN dependencias d ON p.dependencia_id = d.id
-                WHERE p.comum_id = :comum_id AND p.ativo = 1";
+                WHERE p.comum_id = :comum_id";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute([':comum_id' => $comumId]);
