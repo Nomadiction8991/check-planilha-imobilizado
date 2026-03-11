@@ -1,10 +1,12 @@
 <?php
 
-
 /**
  * View: Editar Comum
  * Formulário moderno para edição de comuns usando arquitetura MVC
  */
+$headScripts = [
+    ['src' => 'https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js', 'integrity' => 'sha384-dfIriABtoG8NhQWdmr5AP3BeMlhjjQXtqMH5mUVINWvjSe9+9IXLSwUb89C86VOP', 'crossorigin' => 'anonymous'],
+];
 ?>
 
 <div class="container-fluid page-editar-comum">
@@ -14,16 +16,6 @@
             <?= htmlspecialchars(mb_strtoupper('Editar Comum', 'UTF-8')) ?>
         </div>
         <div class="card-body">
-            <?php if (!empty($_SESSION['mensagem'])): ?>
-                <div class="alert alert-<?= htmlspecialchars($_SESSION['tipo_mensagem'] ?? 'info') ?> alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars($_SESSION['mensagem']) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php
-                unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
-                ?>
-            <?php endif; ?>
-
             <form method="POST" action="/churches/edit" id="formEditarComum">
                 <input type="hidden" name="id" value="<?= (int)$comum['id'] ?>">
                 <input type="hidden" name="busca" value="<?= htmlspecialchars($busca ?? '', ENT_QUOTES, 'UTF-8') ?>">
@@ -126,19 +118,5 @@
     </div>
 </div>
 
-<!-- InputMask para CNPJ (formatação no cliente) -->
-<script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var el = document.getElementById('cnpj');
-        if (el) {
-            // Máscara 00.000.000/0000-00 e limpa entrada incompleta
-            Inputmask({
-                mask: '99.999.999/9999-99',
-                clearIncomplete: true
-            }).mask(el);
-        }
-    });
-</script>
-
-<script src="/assets/js/comuns/edit.js"></script>
+<!-- InputMask para CNPJ (Inputmask carregado via headScripts) -->
+<script src="/assets/js/churches/edit.js"></script>

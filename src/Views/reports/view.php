@@ -62,108 +62,7 @@ $headerActions = '
 
 // CSS customizado carregado via layout (arquivo externo não existe mais)
 
-function preencherCampo($html, $id, $valor)
-{
-    if (empty($valor)) return $html;
-
-    $valor = htmlspecialchars($valor, ENT_QUOTES, 'UTF-8');
-
-    $pattern = '/(<textarea[^>]*id=["\']' . preg_quote($id, '/') . '["\'][^>]*>).*?(<\/textarea>)/s';
-    $html = preg_replace($pattern, '$1' . $valor . '$2', $html);
-
-    $pattern = '/(<input[^>]*id=["\']' . preg_quote($id, '/') . '["\'][^>]*value=["\'])[^"\']*(["\'])/';
-    $html = preg_replace($pattern, '$1' . $valor . '$2', $html);
-
-    return $html;
-}
-
-function preencherCheckbox($html, $id, $checked)
-{
-    if (!$checked) return $html;
-
-    $pattern = '/(<input[^>]*id=["\']' . preg_quote($id, '/') . '["\'][^>]*)(\/?>)/';
-    $replacement = '$1 checked$2';
-    return preg_replace($pattern, $replacement, $html);
-}
-
-function preencherFormulario141($html, $produto, $planilha)
-{
-    $html = preencherCampo($html, 'input1', date('d/m/Y'));
-    $html = preencherCampo($html, 'input2', $planilha['administracao'] ?? '');
-    $html = preencherCampo($html, 'input3', $planilha['cidade'] ?? '');
-    $html = preencherCampo($html, 'input4', $planilha['setor'] ?? '');
-    $html = preencherCampo($html, 'input5', $planilha['cnpj'] ?? '');
-    $html = preencherCampo($html, 'input7', $planilha['comum'] ?? '');
-
-    $html = preencherCampo($html, 'input8', $produto['descricao_completa'] ?? '');
-    $html = preencherCampo($html, 'input9', $produto['nota_numero'] ?? '');
-    $html = preencherCampo($html, 'input10', $produto['nota_data'] ?? '');
-    $html = preencherCampo($html, 'input11', $produto['nota_valor'] ?? '');
-    $html = preencherCampo($html, 'input12', $produto['nota_fornecedor'] ?? '');
-
-    if (!empty($produto['condicao_14_1'])) {
-        $html = preencherCheckbox($html, 'input' . (13 + (int)$produto['condicao_14_1']), true);
-    }
-
-    if (!empty($produto['doador_nome'])) {
-        $html = preencherCampo($html, 'input17', $produto['doador_nome']);
-        $html = preencherCampo($html, 'input19', $produto['doador_endereco'] ?? '');
-        $html = preencherCampo($html, 'input21', $produto['doador_cpf'] ?? '');
-        $html = preencherCampo($html, 'input23', $produto['doador_rg'] ?? '');
-
-        if ($produto['doador_casado']) {
-            $html = preencherCampo($html, 'input18', $produto['doador_nome_conjuge'] ?? '');
-            $html = preencherCampo($html, 'input20', $produto['doador_endereco'] ?? '');
-            $html = preencherCampo($html, 'input22', $produto['doador_cpf_conjuge'] ?? '');
-            $html = preencherCampo($html, 'input24', $produto['doador_rg_conjuge'] ?? '');
-        }
-    }
-
-    $html = preencherCampo($html, 'input27', $produto['administrador_nome'] ?? '');
-    $html = preencherCampo($html, 'input29', $produto['doador_nome'] ?? '');
-
-    return $html;
-}
-
-function preencherFormulario142($html, $produto, $planilha)
-{
-    $html = preencherCampo($html, 'data_emissao', date('d/m/Y'));
-    $html = preencherCampo($html, 'administracao', $planilha['administracao'] ?? '');
-    $html = preencherCampo($html, 'cidade', $planilha['cidade'] ?? '');
-    $html = preencherCampo($html, 'cnpj', $planilha['cnpj'] ?? '');
-    $html = preencherCampo($html, 'descricao_bem', $produto['descricao_completa'] ?? '');
-    return $html;
-}
-
-function preencherFormulario143($html, $produto, $planilha)
-{
-    return preencherFormulario142($html, $produto, $planilha);
-}
-
-function preencherFormulario144($html, $produto, $planilha)
-{
-    return preencherFormulario142($html, $produto, $planilha);
-}
-
-function preencherFormulario145($html, $produto, $planilha)
-{
-    return preencherFormulario142($html, $produto, $planilha);
-}
-
-function preencherFormulario146($html, $produto, $planilha)
-{
-    return preencherFormulario142($html, $produto, $planilha);
-}
-
-function preencherFormulario147($html, $produto, $planilha)
-{
-    return preencherFormulario142($html, $produto, $planilha);
-}
-
-function preencherFormulario148($html, $produto, $planilha)
-{
-    return preencherFormulario142($html, $produto, $planilha);
-}
+$reportFiller = new \App\Services\ReportFillerService();
 
 ob_start();
 ?>
@@ -188,13 +87,7 @@ ob_start();
                 <div class="a4-viewport">
                     <div class="a4-scaled">
                         <?php
-                        $htmlPreenchido = $a4Block;
-
-                        $funcao = 'preencherFormulario' . str_replace('.', '', $formulario);
-                        if (function_exists($funcao)) {
-                            $htmlPreenchido = $funcao($htmlPreenchido, $produto, $planilha);
-                        }
-
+                        $htmlPreenchido = $reportFiller->preencher($formulario, $a4Block, $produto, $planilha);
                         echo $htmlPreenchido;
                         ?>
                     </div>

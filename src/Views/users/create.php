@@ -6,6 +6,9 @@ use App\Helpers\{AlertHelper, FormHelper, ViewHelper};
 $publicRegister = $publicRegister ?? false;
 $errors = $errors ?? [];
 $old = $old ?? [];
+$headScripts = [
+    ['src' => 'https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js', 'integrity' => 'sha384-dfIriABtoG8NhQWdmr5AP3BeMlhjjQXtqMH5mUVINWvjSe9+9IXLSwUb89C86VOP', 'crossorigin' => 'anonymous'],
+];
 ?>
 
 <!-- Alertas de Erro -->
@@ -29,7 +32,8 @@ $old = $old ?? [];
         <div class="card-body">
             <?= FormHelper::text('nome', 'NOME COMPLETO', $old['nome'] ?? '', [
                 'required' => true,
-                'placeholder' => 'DIGITE O NOME COMPLETO'
+                'placeholder' => 'DIGITE O NOME COMPLETO',
+                'autocomplete' => 'name'
             ]) ?>
 
             <div class="row g-3">
@@ -55,13 +59,15 @@ $old = $old ?? [];
                     <?= FormHelper::text('telefone', 'TELEFONE', $old['telefone'] ?? '', [
                         'required' => true,
                         'id' => 'telefone',
-                        'placeholder' => '(00) 00000-0000'
+                        'placeholder' => '(00) 00000-0000',
+                        'autocomplete' => 'tel'
                     ]) ?>
                 </div>
             </div>
 
             <?= FormHelper::email('email', 'EMAIL', $old['email'] ?? '', [
-                'required' => true
+                'required' => true,
+                'autocomplete' => 'email'
             ]) ?>
 
             <div class="row g-3">
@@ -69,7 +75,8 @@ $old = $old ?? [];
                     <?= FormHelper::password('senha', 'SENHA', [
                         'required' => true,
                         'id' => 'senha',
-                        'help' => 'Mínimo de 6 caracteres'
+                        'help' => 'Mínimo de 6 caracteres',
+                        'autocomplete' => 'new-password'
                     ]) ?>
                 </div>
 
@@ -141,7 +148,8 @@ $old = $old ?? [];
             <?= FormHelper::text('endereco_cep', 'CEP', $old['endereco_cep'] ?? '', [
                 'id' => 'cep',
                 'placeholder' => '00000-000',
-                'help' => 'Preencha para buscar automaticamente'
+                'help' => 'Preencha para buscar automaticamente',
+                'autocomplete' => 'postal-code'
             ]) ?>
 
             <?= FormHelper::text('endereco_logradouro', 'LOGRADOURO', $old['endereco_logradouro'] ?? '', [
@@ -222,7 +230,5 @@ $old = $old ?? [];
     ) ?>
 </form>
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
+<!-- Scripts: máscaras de campos (Inputmask carregado via headScripts) -->
 <script src="/assets/js/users/create.js"></script>

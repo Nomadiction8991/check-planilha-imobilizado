@@ -123,7 +123,7 @@ ob_start();
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiltros">
                             <i class="bi bi-sliders me-2"></i>
-                            Filtros Avan§ados
+                            Filtros Avançados
                         </button>
                     </h2>
                     <div id="collapseFiltros" class="accordion-collapse collapse" data-bs-parent="#filtrosAvancados">

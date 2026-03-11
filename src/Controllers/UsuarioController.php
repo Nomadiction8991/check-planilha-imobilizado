@@ -14,9 +14,10 @@ use Exception;
 
 class UsuarioController extends BaseController
 {
+    private const ITENS_POR_PAGINA = 20;
+
     private UsuarioService $usuarioService;
     private UsuarioRepository $usuarioRepository;
-    private PDO $conexao;
 
     public function __construct(?PDO $conexao = null)
     {
@@ -24,7 +25,6 @@ class UsuarioController extends BaseController
             $conexao = ConnectionManager::getConnection();
         }
 
-        $this->conexao = $conexao;
         $this->usuarioRepository = new UsuarioRepository($conexao);
         $this->usuarioService = new UsuarioService($this->usuarioRepository);
     }
@@ -32,7 +32,7 @@ class UsuarioController extends BaseController
     public function index(): void
     {
         $pagina = max(1, (int) $this->query('pagina', 1));
-        $limite = 20;
+        $limite = self::ITENS_POR_PAGINA;
 
         $filtros = [
             'busca' => trim($this->query('busca', '')),
@@ -334,36 +334,34 @@ class UsuarioController extends BaseController
 
     private function renderizarListagemLegada(array $dados): void
     {
-        extract($dados);
-
-        $conexao = ConnectionManager::getConnection();
-
-        $usuarios = $dados['usuarios'];
-        $total_registros = $dados['total'];
-        $total_registros_all = $dados['totalGeral'];
-        $total_paginas = $dados['totalPaginas'];
-        $pagina = $dados['pagina'];
-        $filtroNome = $dados['filtros']['busca'];
-        $filtroStatus = $dados['filtros']['status'];
-        $erro = $dados['erro'];
-
-        require __DIR__ . '/../Views/users/list.php';
+        ViewRenderer::render('users/list', [
+            'usuarios'            => $dados['usuarios'],
+            'total_registros'     => $dados['total'],
+            'total_registros_all' => $dados['totalGeral'],
+            'total_paginas'       => $dados['totalPaginas'],
+            'pagina'              => $dados['pagina'],
+            'filtroNome'          => $dados['filtros']['busca'],
+            'filtroStatus'        => $dados['filtros']['status'],
+            'erro'                => $dados['erro'],
+        ]);
     }
 
     private function renderizarFormularioLegado(array $dados): void
     {
-        $mensagem = $dados['erro'] ?? '';
-        $tipo_mensagem = $mensagem ? 'error' : '';
-
-        require __DIR__ . '/../Views/users/create-legacy.php';
+        ViewRenderer::render('users/create-legacy', [
+            'mensagem'      => $dados['erro'] ?? '',
+            'tipo_mensagem' => !empty($dados['erro']) ? 'error' : '',
+            'dados'         => $dados['dados'] ?? [],
+        ]);
     }
 
     private function renderizarFormularioEdicaoLegado(array $usuario, string $erro = ''): void
     {
-        $mensagem = $erro;
-        $tipo_mensagem = $erro ? 'error' : '';
-
-        require __DIR__ . '/../Views/users/edit.php';
+        ViewRenderer::render('users/edit', [
+            'usuario'       => $usuario,
+            'mensagem'      => $erro,
+            'tipo_mensagem' => $erro ? 'error' : '',
+        ]);
     }
 
     /**
@@ -378,8 +376,9 @@ class UsuarioController extends BaseController
             return;
         }
 
-        $conexao = $this->conexao;
-        require __DIR__ . '/../Views/users/show.php';
+        ViewRenderer::render('users/show', [
+            'id' => $id,
+        ]);
     }
 
     /**

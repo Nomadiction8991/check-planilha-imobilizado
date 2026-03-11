@@ -73,8 +73,7 @@ document.addEventListener('show.bs.modal', function (event) {
             var swPath = config.swPath || '/sw.js';
             navigator.serviceWorker.register(swPath)
                 .then(function (registration) {
-                    console.log('Service Worker registrado com sucesso:', registration.scope);
-                    console.log('Ambiente:', config.ambiente || 'prod');
+                    // SW registrado com sucesso
                 })
                 .catch(function (err) {
                     console.error('Falha ao registrar Service Worker:', err);

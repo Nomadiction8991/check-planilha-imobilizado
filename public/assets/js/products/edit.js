@@ -1,5 +1,27 @@
 // Mapeamento de tipos de bens e suas opções de bem
-const tiposBensOpcoes = window._tiposBensOpcoes || {};
+const tiposBensOpcoes = (window._appConfig && window._appConfig.tiposBensOpcoes) || {};
+
+// Controle dos radios de condição 14.1
+(function () {
+    var imprimir = document.getElementById('imprimir_14_1');
+    if (!imprimir) return;
+    var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
+
+    function updateRequirement() {
+        var required = imprimir.checked;
+        radios.forEach(function (r) {
+            if (required) r.setAttribute('required', 'required');
+            else r.removeAttribute('required');
+        });
+        if (!radios.some(function (r) { return r.checked; })) {
+            var def = document.getElementById('condicao_141_2');
+            if (def) def.checked = true;
+        }
+    }
+
+    imprimir.addEventListener('change', updateRequirement);
+    updateRequirement();
+}());
 
 document.addEventListener('DOMContentLoaded', function() {
     const selectTipoBEM = document.getElementById('novo_tipo_bem_id');
@@ -58,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Pré-preencher BEM usando o valor já processado pelo controller (editado ou original)
-    const bemPrefill = window._novoBem || '';
+    const bemPrefill = (window._appConfig && window._appConfig.novoBem) || '';
     if (bemPrefill) {
         if (selectTipoBEM.value) {
             atualizarOpcoesBEM();

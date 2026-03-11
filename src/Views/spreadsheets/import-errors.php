@@ -38,59 +38,16 @@ if ($modo === 'comum') {
     $queryStr    = '';
 }
 
+$customCssPath = '/assets/css/planilhas/import-errors.css';
+
 ob_start();
 ?>
-
-<style>
-    .erro-row-pendente td {
-        background-color: rgba(220, 53, 69, 0.04) !important;
-    }
-
-    .erro-row-resolvido td {
-        background-color: rgba(25, 135, 84, 0.06) !important;
-        opacity: 0.75;
-    }
-
-    .badge-pendente {
-        background-color: #dc3545;
-    }
-
-    .badge-resolvido {
-        background-color: #198754;
-    }
-
-    .msg-erro-text {
-        color: #b02a37;
-        font-size: 0.82rem;
-        line-height: 1.35;
-    }
-
-    .table-erros th {
-        white-space: nowrap;
-        font-size: 0.8rem;
-    }
-
-    .table-erros td {
-        font-size: 0.83rem;
-        vertical-align: middle;
-    }
-
-    .codigo-cell {
-        font-family: monospace;
-        font-weight: 700;
-        font-size: 0.9rem;
-    }
-
-    .contador-resumo {
-        font-size: 0.9rem;
-    }
-</style>
 
 <!-- ── Cabeçalho ─────────────────────────────────────────────────────────── -->
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
 
     <div>
-        <h5 class="mb-1">
+        <h2 class="h5 mb-1">
             <i class="bi bi-exclamation-octagon-fill text-danger me-2"></i>
             Erros de Importação
             <?php if ($modo === 'comum'): ?>
@@ -98,7 +55,7 @@ ob_start();
             <?php elseif ($modo === 'importacao' && !empty($importacao['arquivo_nome'])): ?>
                 <small class="text-muted fw-normal">— <?= $nomeArquivo ?></small>
             <?php endif; ?>
-        </h5>
+        </h2>
     </div>
 
     <!-- Botão de download CSV -->
@@ -246,87 +203,8 @@ ob_start();
 
 <?php endif; ?>
 
-<!-- ── JavaScript: toggle resolvido via AJAX ─────────────────────────────── -->
-<script>
-    (function() {
-        const body = document.getElementById('tabela-erros-body');
-        if (!body) return;
-
-        const toastFn = (msg, ok) => {
-            // Fallback simples — usa o toast do Bootstrap se disponível
-            const el = document.createElement('div');
-            el.className = `alert alert-${ok ? 'success' : 'danger'} position-fixed` +
-                ' bottom-0 end-0 m-3 py-2 px-3 shadow';
-            el.style.cssText = 'z-index:9999;min-width:220px;font-size:.85rem;border-radius:8px';
-            el.textContent = msg;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 2800);
-        };
-
-        body.addEventListener('change', async function(e) {
-            const chk = e.target;
-            if (!chk.classList.contains('chk-resolvido')) return;
-
-            const erroId = parseInt(chk.dataset.id, 10);
-            const resolvido = chk.checked;
-            const row = document.getElementById('erro-row-' + erroId);
-            const badge = document.getElementById('badge-' + erroId);
-
-            // Feedback imediato
-            chk.disabled = true;
-            if (row) {
-                row.className = resolvido ? 'erro-row-resolvido' : 'erro-row-pendente';
-            }
-            if (badge) {
-                badge.innerHTML = resolvido ?
-                    '<span class="badge badge-resolvido">OK</span>' :
-                    '<span class="badge badge-pendente">PEND</span>';
-            }
-
-            try {
-                const resp = await fetch('/spreadsheets/import-errors/resolver', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        erro_id: erroId,
-                        resolvido: resolvido
-                    })
-                });
-                const data = await resp.json();
-
-                if (!data.sucesso) {
-                    throw new Error(data.erro || 'Erro desconhecido');
-                }
-
-                // Atualiza o contador de pendentes na UI
-                const info = document.getElementById('contador-pendentes-info');
-                if (info && typeof data.pendentes === 'number') {
-                    info.dataset.pendentes = data.pendentes;
-                }
-
-                toastFn(
-                    resolvido ? 'Marcado como resolvido ✓' : 'Reaberto como pendente',
-                    data.sucesso
-                );
-
-            } catch (ex) {
-                // Reverte em caso de falha
-                chk.checked = !resolvido;
-                if (row) row.className = !resolvido ? 'erro-row-resolvido' : 'erro-row-pendente';
-                if (badge) {
-                    badge.innerHTML = !resolvido ?
-                        '<span class="badge badge-resolvido">OK</span>' :
-                        '<span class="badge badge-pendente">PEND</span>';
-                }
-                toastFn('Falha ao salvar: ' + ex.message, false);
-            } finally {
-                chk.disabled = false;
-            }
-        });
-    }());
-</script>
+<!-- JavaScript: toggle resolvido via AJAX -->
+<script src="/assets/js/spreadsheets/import-errors.js"></script>
 
 <?php
 $contentHtml = ob_get_clean();

@@ -1,6 +1,19 @@
 /**
  * header-mobile.js – Seletor de comum no header mobile
  */
+
+function mostrarErroHeader(mensagem) {
+    var container = document.querySelector('.app-content') || document.body;
+    var el = document.createElement('div');
+    el.className = 'alert alert-danger alert-dismissible fade show';
+    el.setAttribute('role', 'alert');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i><span></span>'
+        + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    el.querySelector('span').textContent = mensagem;
+    container.insertBefore(el, container.firstChild);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     var selector = document.getElementById('comum-selector');
     if (!selector) return;
@@ -34,13 +47,13 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 selector.disabled = false;
                 console.error('Erro ao selecionar comum:', data);
-                alert('Erro ao selecionar comum: ' + (data.message || 'Erro desconhecido'));
+                mostrarErroHeader('Erro ao selecionar comum: ' + (data.message || 'Erro desconhecido'));
             }
         })
         .catch(function (error) {
             selector.disabled = false;
             console.error('Erro ao selecionar comum:', error);
-            alert('Erro de comunicação ao trocar de igreja.');
+            mostrarErroHeader('Erro de comunicação ao trocar de igreja.');
         });
     });
 });

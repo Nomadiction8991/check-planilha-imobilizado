@@ -11,7 +11,7 @@ $pagina = $pagina ?? 1;
 $filtro_nome = $filtro_nome ?? '';
 $filtro_dependencia = $filtro_dependencia ?? '';
 $filtro_codigo = $filtro_codigo ?? '';
-$filtro_STATUS = $filtro_STATUS ?? '';
+$filtro_status = $filtro_status ?? '';
 $id_produto = $id_produto ?? 0;
 $comum_id = $comum_id ?? 0;
 $dependencias = $dependencias ?? [];
@@ -22,37 +22,35 @@ $nova_dependencia_id = $nova_dependencia_id ?? null;
 $mensagem = $mensagem ?? '';
 $tipo_mensagem = $tipo_mensagem ?? '';
 $produto = $produto ?? [];
-$backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_STATUS);
+$backUrl = getReturnUrl($comum_id, $pagina, $filtro_nome, $filtro_dependencia, $filtro_codigo, $filtro_status);
+$customCssPath = '/assets/css/produtos/produto_editar.css';
 
 ob_start();
 ?>
 
-<link href="/assets/css/produtos/produto_editar.css" rel="stylesheet">
-
-
-
-
 <script>
-    window._tiposBensOpcoes = <?php echo json_encode(array_reduce($tipos_bens, function ($carry, $item) {
-                                    $opcoes = [];
-                                    if (!empty($item['descricao'])) {
-                                        $partes = explode('/', $item['descricao']);
-                                        $opcoes = array_map('trim', $partes);
-                                    }
-                                    $carry[$item['id']] = [
-                                        'codigo' => $item['codigo'],
-                                        'descricao' => $item['descricao'],
-                                        'opcoes' => $opcoes
-                                    ];
-                                    return $carry;
-                                }, [])); ?>;
-    window._novoBem = <?php echo json_encode(!empty($novo_bem) ? mb_strtoupper($novo_bem, 'UTF-8') : ''); ?>;
+    window._appConfig = {
+        tiposBensOpcoes: <?php echo json_encode(array_reduce($tipos_bens, function ($carry, $item) {
+                                $opcoes = [];
+                                if (!empty($item['descricao'])) {
+                                    $partes = explode('/', $item['descricao']);
+                                    $opcoes = array_map('trim', $partes);
+                                }
+                                $carry[$item['id']] = [
+                                    'codigo' => $item['codigo'],
+                                    'descricao' => $item['descricao'],
+                                    'opcoes' => $opcoes
+                                ];
+                                return $carry;
+                            }, [])); ?>,
+        novoBem: <?php echo json_encode(!empty($novo_bem) ? mb_strtoupper($novo_bem, 'UTF-8') : ''); ?>
+    };
 </script>
-<script src="/assets/js/products/edit.js"></script>
+<script src="/assets/js/products/edit.js" defer></script>
 
 <?php if (!empty($mensagem)): ?>
     <div class="alert alert-<?php echo $tipo_mensagem === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show">
-        <?php echo $mensagem; ?>
+        <?= \App\Helpers\ViewHelper::e($mensagem) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
@@ -62,7 +60,7 @@ ob_start();
     <input type="hidden" name="nome" value="<?php echo htmlspecialchars($filtro_nome); ?>">
     <input type="hidden" name="dependencia" value="<?php echo htmlspecialchars($filtro_dependencia); ?>">
     <input type="hidden" name="filtro_codigo" value="<?php echo htmlspecialchars($filtro_codigo); ?>">
-    <input type="hidden" name="STATUS" value="<?php echo htmlspecialchars($filtro_STATUS); ?>">
+    <input type="hidden" name="status" value="<?php echo htmlspecialchars($filtro_status); ?>">
 
     <!-- DADOS DO PRODUTO -->
     <div class="card mb-3">
@@ -195,33 +193,6 @@ ob_start();
                 <div class="form-text"><?php echo htmlspecialchars(to_uppercase('Situação conforme declaração de doação de bem móvel'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
 
-            <script>
-                (function() {
-                    var imprimir = document.getElementById('imprimir_14_1');
-                    if (!imprimir) return;
-                    var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
-
-                    function updateRequirement() {
-                        var required = imprimir.checked;
-                        radios.forEach(function(r) {
-                            if (required) r.setAttribute('required', 'required');
-                            else r.removeAttribute('required');
-                        });
-
-                        // garantir opção do meio quando nenhuma estiver selecionada (sempre)
-                        if (!radios.some(function(r) {
-                                return r.checked;
-                            })) {
-                            var def = document.getElementById('condicao_141_2');
-                            if (def) def.checked = true;
-                        }
-                    }
-
-                    imprimir.addEventListener('change', updateRequirement);
-                    // inicializar estado do requerimento e padrão
-                    updateRequirement();
-                })();
-            </script>
         </div>
     </div>
 
@@ -277,7 +248,7 @@ ob_start();
 </form>
 
 <div class="mt-3">
-    <a href="/products/clear-edits?id=<?php echo $comum_id; ?>&comum_id=<?php echo $comum_id; ?>&id_PRODUTO=<?php echo $id_produto; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&status=<?php echo urlencode($filtro_STATUS); ?>"
+    <a href="/products/clear-edits?id=<?php echo $comum_id; ?>&comum_id=<?php echo $comum_id; ?>&id_PRODUTO=<?php echo $id_produto; ?>&pagina=<?php echo $pagina; ?>&nome=<?php echo urlencode($filtro_nome); ?>&dependencia=<?php echo urlencode($filtro_dependencia); ?>&filtro_codigo=<?php echo urlencode($filtro_codigo); ?>&status=<?php echo urlencode($filtro_status); ?>"
         class="btn btn-outline-danger w-100">
         <i class="bi bi-trash3 me-2"></i>
         <?php echo htmlspecialchars(to_uppercase('Limpar Edições'), ENT_QUOTES, 'UTF-8'); ?>

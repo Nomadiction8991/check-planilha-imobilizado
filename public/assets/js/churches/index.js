@@ -30,11 +30,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     const n = data.count || 0;
                     if (n === 0) {
-                        countMsgEl.innerHTML = '<span class="text-muted">Nenhum produto cadastrado nesta comum.</span>';
+                        countMsgEl.textContent = '';
+                        const spanMuted = document.createElement('span');
+                        spanMuted.className = 'text-muted';
+                        spanMuted.textContent = 'Nenhum produto cadastrado nesta comum.';
+                        countMsgEl.appendChild(spanMuted);
                         btnConfirm.disabled = true;
                     } else {
-                        countMsgEl.innerHTML =
-                            'Serão excluídos <strong class="text-danger">' + n + ' produto(s)</strong>.';
+                        countMsgEl.textContent = '';
+                        const strong = document.createElement('strong');
+                        strong.className = 'text-danger';
+                        strong.textContent = n + ' produto(s)';
+                        countMsgEl.append('Serão excluídos ', strong, '.');
                         btnConfirm.disabled = false;
                     }
                 })

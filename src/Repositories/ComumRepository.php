@@ -10,7 +10,7 @@ use Exception;
 
 class ComumRepository extends BaseRepository
 {
-    protected string $tabela = 'comums';
+    protected string $tabela = 'comuns';
 
 
     public function buscarPaginado(string $busca = '', int $limite = 10, int $offset = 0): array

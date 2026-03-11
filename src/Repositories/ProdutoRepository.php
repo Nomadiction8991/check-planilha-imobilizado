@@ -182,6 +182,36 @@ class ProdutoRepository extends BaseRepository
     }
 
     /**
+     * Limpa todos os campos de edição e marcações de um produto específico.
+     * Equivale a "desfazer edições manuais" feitas pelo usuário.
+     */
+    public function limparEdicoes(int $idProduto, int $comumId): bool
+    {
+        $sql = "UPDATE {$this->tabela}
+                   SET editado_tipo_bem_id = 0,
+                       editado_bem = '',
+                       editado_complemento = '',
+                       editado_dependencia_id = 0,
+                       imprimir_etiqueta = 0,
+                       checado = 0,
+                       imprimir_14_1 = 0,
+                       condicao_14_1 = '',
+                       nota_numero = NULL,
+                       nota_data = NULL,
+                       nota_valor = NULL,
+                       nota_fornecedor = '',
+                       editado = 0
+                 WHERE id_produto = :id_produto
+                   AND comum_id = :comum_id";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->bindValue(':id_produto', $idProduto, PDO::PARAM_INT);
+        $stmt->bindValue(':comum_id', $comumId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
      * Buscar produtos para a view de planilha com JOINs completos e filtros.
      */
     public function buscarParaPlanilha(int $comumId, int $pagina, int $limite, array $filtros = []): array

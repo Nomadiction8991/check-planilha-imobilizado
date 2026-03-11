@@ -68,12 +68,14 @@ class MapaRotas
             'GET /products/edit' => [ProdutoController::class, 'edit'],
             'POST /products/edit' => [ProdutoController::class, 'update'],
             'POST /products/delete' => [ProdutoController::class, 'delete'],
+            'POST /products/bulk-delete' => [ProdutoController::class, 'bulkDelete'],
             'GET /products/observation' => [ProdutoController::class, 'observacaoForm'],
             'POST /products/observation' => [ProdutoController::class, 'observacao'],
             'POST /products/check' => [ProdutoController::class, 'check'],
             'GET /products/label' => [ProdutoController::class, 'etiqueta'],
             'GET /products/clear-edits' => [ProdutoController::class, 'clearEdits'],
             'POST /products/label' => [ProdutoController::class, 'etiqueta'],
+            'GET /products/sign'  => [ProdutoController::class, 'signView'],
             'POST /products/sign' => [ProdutoController::class, 'assinar'],
 
 

@@ -1,3 +1,23 @@
+// Helper: feedback Bootstrap inline
+function showFlash(type, message) {
+    var el = document.createElement('div');
+    el.className = 'alert alert-' + type + ' alert-dismissible fade show';
+    el.setAttribute('role', 'alert');
+    el.setAttribute('aria-live', 'polite');
+    var iconName = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
+    var iconEl = document.createElement('i');
+    iconEl.className = 'bi bi-' + iconName + ' me-2';
+    var msgSpan = document.createElement('span');
+    msgSpan.textContent = message;
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn-close';
+    closeBtn.setAttribute('data-bs-dismiss', 'alert');
+    el.append(iconEl, msgSpan, closeBtn);
+    var container = document.querySelector('.app-content') || document.body;
+    container.insertBefore(el, container.firstChild);
+}
+
 function selecionarTodos() {
     document.querySelectorAll('.PRODUTO-checkbox').forEach(cb => {
         cb.checked = true;
@@ -28,7 +48,7 @@ function assinarPRODUTOS() {
         .map(cb => cb.value);
 
     if (selecionados.length === 0) {
-        alert('Selecione pelo menos um PRODUTO para assinar');
+        showFlash('warning', 'Selecione pelo menos um PRODUTO para assinar');
         return;
     }
 
@@ -44,7 +64,7 @@ function desassinarPRODUTOS() {
         .map(cb => cb.value);
 
     if (selecionados.length === 0) {
-        alert('Selecione pelo menos um PRODUTO para remover a assinatura');
+        showFlash('warning', 'Selecione pelo menos um PRODUTO para remover a assinatura');
         return;
     }
 
@@ -67,14 +87,13 @@ function executarAcao(acao, PRODUTOS) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
-                location.reload();
+                showFlash('success', data.message);
+                setTimeout(() => location.reload(), 1000);
             } else {
-                alert('Erro: ' + data.message);
+                showFlash('danger', 'Erro: ' + data.message);
             }
         })
-        .catch(error => {
-            alert('Erro ao processar solicitação');
-            console.error(error);
+        .catch(() => {
+            showFlash('danger', 'Erro ao processar solicitação');
         });
 }

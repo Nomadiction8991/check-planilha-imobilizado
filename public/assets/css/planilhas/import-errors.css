@@ -1,0 +1,42 @@
+.erro-row-pendente td {
+    background-color: rgba(220, 53, 69, 0.04) !important;
+}
+
+.erro-row-resolvido td {
+    background-color: rgba(25, 135, 84, 0.06) !important;
+    opacity: 0.75;
+}
+
+.badge-pendente {
+    background-color: #dc3545;
+}
+
+.badge-resolvido {
+    background-color: #198754;
+}
+
+.msg-erro-text {
+    color: #b02a37;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.table-erros th {
+    white-space: nowrap;
+    font-size: 0.8rem;
+}
+
+.table-erros td {
+    font-size: 0.83rem;
+    vertical-align: middle;
+}
+
+.codigo-cell {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.contador-resumo {
+    font-size: 0.9rem;
+}

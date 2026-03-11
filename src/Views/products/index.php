@@ -24,24 +24,23 @@ ob_start();
     <div class="card-body">
         <form method="GET">
             <input type="hidden" name="comum_id" value="<?php echo htmlspecialchars($comum_id); ?>">
-            <input type="hidden" name="comum_id" value="<?php echo htmlspecialchars($comum_id); ?>">
 
-            <!-- Campo principal de busca por DESCRIO -->
+            <!-- Campo principal de busca por DESCRIÇÃO -->
             <div class="mb-3">
                 <label for="filtro_complemento" class="form-label">
                     <i class="bi bi-search me-1"></i>
-                    Pesquisar por Descrio
+                    Pesquisar por Descrição
                 </label>
                 <input type="text" id="filtro_complemento" name="filtro_complemento" class="form-control" value="<?php echo htmlspecialchars($filtro_complemento); ?>" placeholder="Digite para buscar...">
             </div>
 
-            <!-- Filtros Avanados recolhveis -->
+            <!-- Filtros Avançados recolhíveis -->
             <div class="accordion" id="filtrosAvancados">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFiltros">
                             <i class="bi bi-sliders me-2"></i>
-                            Filtros Avanados
+                            Filtros Avançados
                         </button>
                     </h2>
                     <div id="collapseFiltros" class="accordion-collapse collapse" data-bs-parent="#filtrosAvancados">
@@ -76,7 +75,7 @@ ob_start();
                             </div>
 
                             <div class="mb-3">
-                                <label for="filtro_dependencia" class="form-label">DEPENDNCIA</label>
+                                <label for="filtro_dependencia" class="form-label">DEPENDÊNCIA</label>
                                 <select id="filtro_dependencia" name="filtro_dependencia" class="form-select">
                                     <option value="">Todas</option>
                                     <?php foreach ($dependencias as $dep): ?>
@@ -91,9 +90,9 @@ ob_start();
                                 <label for="filtro_status" class="form-label">STATUS</label>
                                 <select id="filtro_status" name="filtro_status" class="form-select">
                                     <option value="">Todos</option>
-                                    <option value="com_nota" <?php echo ($filtro_STATUS ?? '') === 'com_nota' ? 'selected' : ''; ?>>Com Nota</option>
-                                    <option value="com_14_1" <?php echo ($filtro_STATUS ?? '') === 'com_14_1' ? 'selected' : ''; ?>>Com 14.1</option>
-                                    <option value="sem_status" <?php echo ($filtro_STATUS ?? '') === 'sem_status' ? 'selected' : ''; ?>>Sem STATUS</option>
+                                    <option value="com_nota" <?php echo ($filtro_status ?? '') === 'com_nota' ? 'selected' : ''; ?>>Com Nota</option>
+                                    <option value="com_14_1" <?php echo ($filtro_status ?? '') === 'com_14_1' ? 'selected' : ''; ?>>Com 14.1</option>
+                                    <option value="sem_status" <?php echo ($filtro_status ?? '') === 'sem_status' ? 'selected' : ''; ?>>Sem STATUS</option>
                                 </select>
                             </div>
                         </div>
@@ -113,10 +112,10 @@ ob_start();
 
 </div>
 
-<!-- BOTO DE EXCLUSO EM MASSA (inicialmente oculto) -->
+<!-- BOTÃO DE EXCLUSÃO EM MASSA (inicialmente oculto) -->
 <div id="deleteButtonContainer" class="card mb-3" style="display: none;">
     <div class="card-body">
-        <form method="POST" id="deleteForm" action="/products/delete">
+        <form method="POST" id="deleteForm" action="/products/bulk-delete">
             <input type="hidden" name="id_planilha" value="<?php echo htmlspecialchars($id_planilha); ?>">
             <div id="selectedProducts"></div>
             <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
@@ -192,7 +191,7 @@ ob_start();
                                             echo htmlspecialchars($title);
                                             ?>
                                         </div>
-                                        <!-- Linha 2: STATUS e Aes -->
+                                        <!-- Linha 2: STATUS e Ações -->
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="d-flex gap-1 flex-wrap">
                                                 <?php if (!empty($PRODUTO['codigo'])): ?>
@@ -220,7 +219,7 @@ ob_start();
                     <tr>
                         <td class="text-center text-muted py-4">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                            <?php echo ($pesquisa_id || $filtro_tipo_ben || $filtro_bem || $filtro_complemento || $filtro_dependencia || $filtro_STATUS)
+                            <?php echo ($pesquisa_id || $filtro_tipo_ben || $filtro_bem || $filtro_complemento || $filtro_dependencia || $filtro_status)
                                 ? 'Nenhum PRODUTO encontrado com os filtros aplicados.'
                                 : 'Nenhum PRODUTO cadastrado para esta planilha.'; ?>
                         </td>

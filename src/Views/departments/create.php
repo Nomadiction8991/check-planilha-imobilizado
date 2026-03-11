@@ -13,7 +13,7 @@ ob_start();
 
 <?php if (!empty($mensagem)): ?>
     <div class="alert alert-<?php echo $tipo_mensagem === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show">
-        <?php echo $mensagem; ?>
+        <?= \App\Helpers\ViewHelper::e($mensagem) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
@@ -42,17 +42,7 @@ ob_start();
             </div>
         </form>
 
-        <script>
-            // Validação do formulário (criar)
-            document.getElementById('formDependenciaCreate').addEventListener('submit', function(e) {
-                const descricao = document.getElementById('descricao').value.trim();
-                if (!descricao) {
-                    e.preventDefault();
-                    alert('<?php echo htmlspecialchars(to_uppercase("A descrição é obrigatória!"), ENT_QUOTES, 'UTF-8'); ?>');
-                    return false;
-                }
-            });
-        </script>
+        <script src="/assets/js/departments/create.js"></script>
     </div>
 </div>
 

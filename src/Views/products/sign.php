@@ -1,52 +1,20 @@
 <?php
 
-
 $appConfig = require dirname(__DIR__, 3) . '/config/app.php';
 $projectRoot = $appConfig['project_root'];
 require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
 
+// Dados fornecidos pelo ProdutoController::signView()
+$id_planilha = $id_planilha ?? 0;
+$usuario_id  = $usuario_id  ?? (isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 0);
+$PRODUTOS    = $PRODUTOS    ?? [];
 
-$id_planilha = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if (!$id_planilha) {
-    header('Location: ' . base_url('/'));
-    exit;
-}
-
-$usuario_id = isset($_SESSION['usuario_id']) ? (int)$_SESSION['usuario_id'] : 0;
-
-
-$coluna_assinatura = 'administrador_acessor_id';
-
-
-$sql = "SELECT 
-            p.id_produto,
-            p.codigo,
-            CONCAT_WS(' ', p.bem, p.complemento) as descricao_completa,
-            p.complemento,
-            p.imprimir_14_1,
-            p.{$coluna_assinatura} as minha_assinatura,
-            tb.descricao as tipo_descricao,
-            d.descricao as dependencia_descricao
-        FROM produtos p
-        LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
-        LEFT JOIN dependencias d ON p.dependencia_id = d.id
-        WHERE p.comum_id = :id_comum AND p.ativo = 1
-        ORDER BY p.id_produto ASC";
-$stmt = $conexao->prepare($sql);
-$stmt->bindValue(':id_comum', $id_planilha);
-$stmt->execute();
-$PRODUTOS = $stmt->fetchAll();
-
-$pageTitle = 'Assinar PRODUTOS';
-$backUrl = '/products/view?id=' . $id_planilha . '&comum_id=' . $id_planilha;
+$pageTitle      = 'Assinar PRODUTOS';
+$backUrl        = '/products/view?id=' . $id_planilha . '&comum_id=' . $id_planilha;
+$customCssPath  = '/assets/css/produtos/produtos_assinar.css';
 
 ob_start();
 ?>
-
-<link href="/assets/css/produtos/produtos_assinar.css" rel="stylesheet">
-
-
-
 
 <div class="alert alert-info">
     <i class="bi bi-info-circle me-2"></i>
@@ -71,13 +39,12 @@ ob_start();
     </div>
     <div class="card-body">
         <?php if (empty($PRODUTOS)): ?>
-            <p class="text-muted text-center mb-0">Nenhum PRODUTO disponvel nesta comum.</p>
+            <p class="text-muted text-center mb-0">Nenhum PRODUTO disponível nesta comum.</p>
         <?php else: ?>
             <div id="PRODUTOSContainer">
                 <?php foreach ($PRODUTOS as $PRODUTO): ?>
                     <?php
                     $assinado_por_mim = ($PRODUTO['minha_assinatura'] == $usuario_id);
-                    $pode_desassinar = $assinado_por_mim;
                     ?>
                     <div class="card PRODUTO-card mb-2 <?php echo $assinado_por_mim ? 'assinado' : ''; ?>" data-PRODUTO-id="<?php echo $PRODUTO['id_produto']; ?>">
                         <div class="card-body py-2">
@@ -93,12 +60,12 @@ ob_start();
                                         <?php echo \App\Helpers\ViewHelper::e(\App\Helpers\ViewHelper::formatarCodigoCurto($PRODUTO['codigo'] ?? 'S/N')); ?>
                                         <?php if ($assinado_por_mim): ?>
                                             <span class="badge bg-success ms-2">
-                                                <i class="bi bi-check-circle"></i> Assinado por vocª
+                                                <i class="bi bi-check-circle"></i> Assinado por você
                                             </span>
                                         <?php endif; ?>
                                         <?php if ($PRODUTO['imprimir_14_1']): ?>
                                             <span class="badge bg-info ms-2">
-                                                <i class="bi bi-file-earmark-pdf"></i> No relat³rio 14.1
+                                                <i class="bi bi-file-earmark-pdf"></i> No relatório 14.1
                                             </span>
                                         <?php endif; ?>
                                     </div>

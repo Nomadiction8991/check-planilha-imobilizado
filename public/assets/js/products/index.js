@@ -1,44 +1,45 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const confirmButton = document.getElementById('confirmDeleteButton');
-    const deleteForm = document.getElementById('deleteForm');
+document.addEventListener('DOMContentLoaded', function () {
+    inicializarConfirmacaoExclusao();
+    inicializarSelecaoProdutos();
+});
+
+function inicializarConfirmacaoExclusao() {
+    var confirmButton = document.getElementById('confirmDeleteButton');
+    var deleteForm = document.getElementById('deleteForm');
     if (confirmButton && deleteForm) {
-        confirmButton.addEventListener('click', function() {
+        confirmButton.addEventListener('click', function () {
             deleteForm.submit();
         });
     }
-});
+}
 
-document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.PRODUTO-checkbox');
-    const deleteButtonContainer = document.getElementById('deleteButtonContainer');
-    const selectedProductsDiv = document.getElementById('selectedProducts');
-    const countSelected = document.getElementById('countSelected');
-    const deleteForm = document.getElementById('deleteForm');
+function inicializarSelecaoProdutos() {
+    var checkboxes = document.querySelectorAll('.PRODUTO-checkbox');
+    var deleteButtonContainer = document.getElementById('deleteButtonContainer');
+    var selectedProductsDiv = document.getElementById('selectedProducts');
+    var countSelected = document.getElementById('countSelected');
 
     function atualizarContagem() {
-        const checados = document.querySelectorAll('.PRODUTO-checkbox:checked').length;
-        countSelected.textContent = checados;
+        var checados = document.querySelectorAll('.PRODUTO-checkbox:checked').length;
+        if (countSelected) countSelected.textContent = checados;
 
-        // Mostrar/ocultar container de exclusão
-        if (checados > 0) {
-            deleteButtonContainer.style.display = 'block';
-        } else {
-            deleteButtonContainer.style.display = 'none';
+        if (deleteButtonContainer) {
+            deleteButtonContainer.style.display = checados > 0 ? 'block' : 'none';
         }
 
-        // ATUALIZAR inputs ocultos com IDs selecionados
-        selectedProductsDiv.innerHTML = '';
-        document.querySelectorAll('.PRODUTO-checkbox:checked').forEach(checkbox => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'ids_PRODUTOS[]';
-            input.value = checkbox.value;
-            selectedProductsDiv.appendChild(input);
-        });
+        if (selectedProductsDiv) {
+            selectedProductsDiv.innerHTML = '';
+            document.querySelectorAll('.PRODUTO-checkbox:checked').forEach(function (checkbox) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids_PRODUTOS[]';
+                input.value = checkbox.value;
+                selectedProductsDiv.appendChild(input);
+            });
+        }
     }
 
-    // Adicionar listener em cada checkbox
-    checkboxes.forEach(checkbox => {
+    checkboxes.forEach(function (checkbox) {
         checkbox.addEventListener('change', atualizarContagem);
     });
-});
+}

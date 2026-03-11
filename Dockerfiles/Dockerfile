@@ -14,6 +14,11 @@ RUN apt-get update \
 WORKDIR /var/www/html
 COPY . /var/www/html
 
+# Criar diretórios de storage e garantir permissões corretas para www-data
+RUN mkdir -p storage/tmp storage/importacao storage/importation storage/logs \
+    && chown -R www-data:www-data storage \
+    && chmod -R 775 storage
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY Dockerfiles/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

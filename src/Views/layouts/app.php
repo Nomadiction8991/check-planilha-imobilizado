@@ -15,6 +15,8 @@ $backUrl = $backUrl ?? null;
 $headerActions = $headerActions ?? '';
 $customCss = $customCss ?? '';
 $customJs = $customJs ?? '';
+$showHeader = $showHeader ?? true;
+$showFooter = $showFooter ?? true;
 
 // Compatibilidade com views legadas que definiam $conteudo / $contentHtml / $contentFile
 if (!isset($content)) {
@@ -36,7 +38,7 @@ if (!isset($content)) {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= \App\Core\CsrfService::getToken() ?>">
     <title><?= htmlspecialchars($headTitle, ENT_QUOTES, 'UTF-8') ?></title>
 
@@ -53,18 +55,22 @@ if (!isset($content)) {
     <link rel="apple-touch-icon" href="/assets/images/logo.png">
 
     <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+        crossorigin="anonymous">
 
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+        integrity="sha384-QuGBSgV5Im3DzL2z+8Ko9/hqNy/N0O7zwvXAtfd1MvPKWa/UbeLV65cfm4BV5Wgq"
+        crossorigin="anonymous">
 
     <!-- Estilos do Layout App (globals) -->
-    <link rel="stylesheet" href="/assets/css/app-layout.css">
+    <link rel="stylesheet" href="/assets/css/app-layout.css?v=<?= filemtime($projectRoot . '/public/assets/css/app-layout.css') ?>">
 
     <!-- Estilos por partial -->
-    <link rel="stylesheet" href="/assets/css/celular-container.css">
-    <link rel="stylesheet" href="/assets/css/header-mobile.css">
-    <link rel="stylesheet" href="/assets/css/footer-mobile.css">
+    <link rel="stylesheet" href="/assets/css/celular-container.css?v=<?= filemtime($projectRoot . '/public/assets/css/celular-container.css') ?>">
+    <link rel="stylesheet" href="/assets/css/header-mobile.css?v=<?= filemtime($projectRoot . '/public/assets/css/header-mobile.css') ?>">
+    <link rel="stylesheet" href="/assets/css/footer-mobile.css?v=<?= filemtime($projectRoot . '/public/assets/css/footer-mobile.css') ?>">
 
     <!-- Custom CSS Adicional -->
     <?php
@@ -89,6 +95,15 @@ if (!isset($content)) {
         <style>
             <?= $customCss ?>
         </style>
+    <?php endif; ?>
+
+    <!-- Scripts externos solicitados pela view (ex: Inputmask CDN) -->
+    <?php if (!empty($headScripts) && is_array($headScripts)): ?>
+        <?php foreach ($headScripts as $hs): ?>
+            <script src="<?= htmlspecialchars($hs['src'], ENT_QUOTES, 'UTF-8') ?>"
+                <?= !empty($hs['integrity']) ? 'integrity="' . htmlspecialchars($hs['integrity'], ENT_QUOTES, 'UTF-8') . '"' : '' ?>
+                <?= !empty($hs['crossorigin']) ? 'crossorigin="' . htmlspecialchars($hs['crossorigin'], ENT_QUOTES, 'UTF-8') . '"' : '' ?>></script>
+        <?php endforeach; ?>
     <?php endif; ?>
 </head>
 
@@ -120,7 +135,9 @@ if (!isset($content)) {
             }
             ?>
 
-            <?php include __DIR__ . '/partials/header_mobile.php'; ?>
+            <?php if ($showHeader): ?>
+                <?php include __DIR__ . '/partials/header_mobile.php'; ?>
+            <?php endif; ?>
 
             <main class="app-content celular-screen">
                 <?php
@@ -136,12 +153,16 @@ if (!isset($content)) {
                 <?= $content ?? '' ?>
             </main>
 
-            <?php include __DIR__ . '/partials/footer_mobile.php'; ?>
+            <?php if ($showFooter): ?>
+                <?php include __DIR__ . '/partials/footer_mobile.php'; ?>
+            <?php endif; ?>
         </div>
     </div>
 
     <!-- Bootstrap 5.3 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
 
     <!-- CSRF Global — DEVE ser o primeiro JS após Bootstrap -->
     <script src="/assets/js/csrf-global.js"></script>
@@ -151,6 +172,9 @@ if (!isset($content)) {
 
     <!-- Scripts do Layout App -->
     <script src="/assets/js/layouts/app.js"></script>
+
+    <!-- Submit lock: feedback visual em formulários lentos -->
+    <script src="/assets/js/utils/form-submit-lock.js" defer></script>
 
     <!-- JavaScript Customizado -->
     <?php if ($customJs): ?>

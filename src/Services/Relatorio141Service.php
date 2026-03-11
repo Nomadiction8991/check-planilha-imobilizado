@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Core\ConnectionManager;
 use App\Repositories\ComumRepository;
 use InvalidArgumentException;
 use PDO;
@@ -15,16 +14,10 @@ class Relatorio141Service
     private ComumRepository $comumRepository;
     private PDO $pdo;
 
-
-    public function __construct(ComumRepository $comumRepository, ?PDO $pdo = null)
+    public function __construct(ComumRepository $comumRepository, PDO $pdo)
     {
         $this->comumRepository = $comumRepository;
-
-        if ($pdo === null) {
-            $pdo = ConnectionManager::getConnection();
-        }
-
-        $this->pdo = $pdo;
+        $this->pdo             = $pdo;
     }
 
 

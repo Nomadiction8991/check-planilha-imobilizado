@@ -19,12 +19,12 @@ $comunsDetectadas = $comuns_detectadas  ?? [];
 $igrejasSalvas    = $igrejas_salvas     ?? [];
 $statusPorComum   = $status_por_comum   ?? [];
 
+$customCssPath = '/assets/css/planilhas/importacao_preview.css';
+
 ob_start();
 ?>
 
-<link href="/assets/css/planilhas/importacao_preview.css" rel="stylesheet">
-
-<form id="form-confirmar" action="/spreadsheets/confirm" method="POST">
+<form id="form-confirmar" action="/spreadsheets/confirm" method="POST" data-submit-lock>
     <input type="hidden" name="importacao_id" value="<?= $importacaoId ?>">
     <input type="hidden" name="importar_tudo" id="importar_tudo_flag" value="0">
 
@@ -33,31 +33,31 @@ ob_start();
         <div class="row g-2">
             <div class="col">
                 <div class="resumo-card">
-                    <h3 class="text-primary"><?= number_format($resumo['total'] ?? 0) ?></h3>
+                    <h2 class="h3 text-primary"><?= number_format($resumo['total'] ?? 0) ?></h2>
                     <small>TOTAL</small>
                 </div>
             </div>
             <div class="col">
                 <div class="resumo-card">
-                    <h3 class="text-success"><?= number_format($resumo['novos'] ?? 0) ?></h3>
+                    <h2 class="h3 text-success"><?= number_format($resumo['novos'] ?? 0) ?></h2>
                     <small>NOVOS</small>
                 </div>
             </div>
             <div class="col">
                 <div class="resumo-card">
-                    <h3 class="text-warning"><?= number_format($resumo['atualizar'] ?? 0) ?></h3>
+                    <h2 class="h3 text-warning"><?= number_format($resumo['atualizar'] ?? 0) ?></h2>
                     <small>ALTERAÇÕES</small>
                 </div>
             </div>
             <div class="col">
                 <div class="resumo-card">
-                    <h3 class="text-secondary"><?= number_format($resumo['sem_alteracao'] ?? 0) ?></h3>
+                    <h2 class="h3 text-secondary"><?= number_format($resumo['sem_alteracao'] ?? 0) ?></h2>
                     <small>IGUAIS</small>
                 </div>
             </div>
             <div class="col">
                 <div class="resumo-card">
-                    <h3 class="text-danger"><?= number_format($resumo['exclusoes'] ?? 0) ?></h3>
+                    <h2 class="h3 text-danger"><?= number_format($resumo['exclusoes'] ?? 0) ?></h2>
                     <small>EXCLUSÕES</small>
                 </div>
             </div>

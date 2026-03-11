@@ -23,7 +23,7 @@ ob_start();
     </div>
 <?php endif; ?>
 
-<form method="POST" id="form-PRODUTO" class="needs-validation" novalidate>
+<form method="POST" id="form-PRODUTO" class="needs-validation" novalidate data-submit-lock>
     <div class="card mb-3">
         <div class="card-body">
             <div class="mb-3">
@@ -119,37 +119,6 @@ ob_start();
                 <div class="form-text">CONDIÇÃO ATUAL DO PRODUTO PARA O RELATÓRIO</div>
             </div>
 
-            <script>
-                (function() {
-                    var imprimir = document.getElementById('imprimir_14_1');
-                    var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
-
-                    function ensureDefault() {
-                        if (!radios.some(function(r) {
-                                return r.checked;
-                            })) {
-                            var def = document.getElementById('condicao_141_2');
-                            if (def) def.checked = true;
-                        }
-                    }
-
-                    function updateRequirement() {
-                        var required = imprimir && imprimir.checked;
-                        radios.forEach(function(r) {
-                            if (required) r.setAttribute('required', 'required');
-                            else r.removeAttribute('required');
-                        });
-
-                        // garantir padrão sempre que não houver seleção
-                        ensureDefault();
-                    }
-
-                    // inicializar: garantir opção do meio quando nenhuma estiver selecionada
-                    ensureDefault();
-
-                    if (imprimir) imprimir.addEventListener('change', updateRequirement);
-                })();
-            </script>
         </div>
     </div>
 
@@ -197,10 +166,12 @@ ob_start();
 </form>
 
 <script>
-    window._postTipoBen = <?php echo json_encode($_POST['tipo_ben'] ?? null); ?>;
-    window._postIdTipoBen = <?php echo json_encode($_POST['id_tipo_ben'] ?? null); ?>;
+    window._appConfig = {
+        postTipoBen: <?php echo json_encode($_POST['tipo_ben'] ?? null); ?>,
+        postIdTipoBen: <?php echo json_encode($_POST['id_tipo_ben'] ?? null); ?>
+    };
 </script>
-<script src="/assets/js/products/create.js"></script>
+<script src="/assets/js/products/create.js" defer></script>
 
 <?php
 $contentHtml = ob_get_clean();

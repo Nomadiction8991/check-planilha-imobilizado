@@ -5,7 +5,8 @@ $appConfig = require dirname(__DIR__, 3) . '/config/app.php';
 $projectRoot = $appConfig['project_root'];
 $pageTitle = 'PROGRESSO DA IMPORTAÇÃO';
 $backUrl = null;
-$importacaoId = $importacao_id ?? 0;
+$importacaoId  = $importacao_id ?? 0;
+$customCssPath = '/assets/css/planilhas/importacao_progresso.css';
 
 ob_start();
 ?>
@@ -73,13 +74,13 @@ ob_start();
             </div>
 
             <!-- Mensagem de Erro -->
-            <div id="erro-container" class="alert alert-danger mt-3" style="display: none;">
+            <div id="erro-container" class="alert alert-danger mt-3" role="alert" aria-live="assertive" style="display: none;">
                 <h6><i class="bi bi-exclamation-triangle me-2"></i>ERRO</h6>
                 <p id="erro-mensagem" class="mb-0"></p>
             </div>
 
             <!-- Mensagem de Sucesso -->
-            <div id="sucesso-container" class="alert alert-success mt-3" style="display: none;">
+            <div id="sucesso-container" class="alert alert-success mt-3" role="alert" aria-live="polite" style="display: none;">
                 <h6><i class="bi bi-check-circle me-2"></i>IMPORTAÇÃO CONCLUÍDA!</h6>
                 <p class="mb-0">
                     <span id="sucesso-linhas">0</span> linhas importadas com sucesso.
@@ -102,8 +103,6 @@ ob_start();
     window._importacaoId = <?= (int)$importacaoId ?>;
 </script>
 <script src="/assets/js/spreadsheets/import-progress.js"></script>
-
-<link href="/assets/css/planilhas/importacao_progresso.css" rel="stylesheet">
 
 <?php
 $contentHtml = ob_get_clean();

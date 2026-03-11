@@ -1,56 +1,66 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Auto-uppercase para campos específicos
-    const upperFields = document.querySelectorAll('.text-uppercase');
-    upperFields.forEach(field => {
-        field.addEventListener('input', function() {
+    var upperFields = document.querySelectorAll('.text-uppercase');
+    upperFields.forEach(function (field) {
+        field.addEventListener('input', function () {
             this.value = this.value.toUpperCase();
         });
     });
 
-    // Máscara de CNPJ
-    const cnpjField = document.getElementById('cnpj');
+    // Máscara de CNPJ via Inputmask (carregado antes deste script)
+    var cnpjField = document.getElementById('cnpj');
     if (cnpjField) {
-        cnpjField.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 14) {
-                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-                value = value.replace(/(\d{4})(\d)/, '$1-$2');
-                e.target.value = value;
-            }
-        });
-    }
-
-    // Máscara de telefone
-    const telefoneField = document.getElementById('telefone');
-    if (telefoneField) {
-        telefoneField.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 11) {
-                if (value.length <= 10) {
-                    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+        if (typeof Inputmask !== 'undefined') {
+            Inputmask({
+                mask: '99.999.999/9999-99',
+                clearIncomplete: true
+            }).mask(cnpjField);
+        } else {
+            // Fallback: máscara manual caso a biblioteca não esteja disponível
+            cnpjField.addEventListener('input', function (e) {
+                var value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 14) {
+                    value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                    value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
                     value = value.replace(/(\d{4})(\d)/, '$1-$2');
-                } else {
-                    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
-                    value = value.replace(/(\d{5})(\d)/, '$1-$2');
+                    e.target.value = value;
                 }
-                e.target.value = value;
-            }
-        });
+            });
+        }
     }
 
-    // Validação do formulário
-    const form = document.getElementById('formEditarComum');
+    // Validação do formulário com feedback Bootstrap
+    var form = document.getElementById('formEditarComum');
     if (form) {
-        form.addEventListener('submit', function(e) {
-            const codigo = document.getElementById('codigo').value.trim();
-            const descricao = document.getElementById('descricao').value.trim();
+        form.addEventListener('submit', function (e) {
+            var codigoInput = document.getElementById('codigo');
+            var descricaoInput = document.getElementById('descricao');
+            var valido = true;
 
-            if (!codigo || !descricao) {
+            [codigoInput, descricaoInput].forEach(function (input) {
+                if (!input) return;
+                if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    valido = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            if (!valido) {
                 e.preventDefault();
-                alert('Código e Descrição são obrigatórios!');
                 return false;
+            }
+        });
+
+        // Remover estado inválido ao digitar
+        ['codigo', 'descricao'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function () {
+                    this.classList.remove('is-invalid');
+                });
             }
         });
     }

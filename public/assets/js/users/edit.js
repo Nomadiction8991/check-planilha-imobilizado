@@ -31,7 +31,7 @@
                     } else {
                         rgInput.removeAttribute('disabled');
                         if (typeof Inputmask !== 'undefined') Inputmask.remove('#rg');
-                        rgInput.value = formatRgDigits(window._editUserRgDigits || '');
+                        rgInput.value = formatRgDigits((window._appConfig && window._appConfig.editUserRgDigits) || '');
                     }
                 }
                 if (rgIgualEl) rgInput.addEventListener('input', function() {
@@ -59,7 +59,7 @@
                     } else {
                         rgConjInput.removeAttribute('disabled');
                         if (typeof Inputmask !== 'undefined') Inputmask.remove('#rg_conjuge');
-                        rgConjInput.value = formatRgDigits(window._editUserRgConjugeDigits || '');
+                        rgConjInput.value = formatRgDigits((window._appConfig && window._appConfig.editUserRgConjugeDigits) || '');
                     }
                 }
                 if (rgConjIgualEl) rgConjInput.addEventListener('input', function() {
@@ -112,9 +112,6 @@
                 const setVisibility = () => {
                     card.style.display = casadoCb.checked ? '' : 'none';
                     setRequiredOnConjuge(casadoCb.checked);
-                    try {
-                        console.debug('usuario_editar: casado = ' + (casadoCb.checked ? 'true' : 'false'));
-                    } catch (e) {}
                 };
                 casadoCb.addEventListener('change', setVisibility);
                 setVisibility();
@@ -193,9 +190,17 @@ function showFlash(type, message) {
     const el = document.createElement('div');
     el.className = 'alert alert-' + type + ' alert-dismissible fade show';
     el.setAttribute('role', 'alert');
-    const icon = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
-    el.innerHTML = '<i class="bi bi-' + icon + ' me-2"></i><span></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
-    el.querySelector('span').textContent = message;
+    el.setAttribute('aria-live', 'polite');
+    const iconName = (type === 'success') ? 'check-circle' : 'exclamation-triangle';
+    const iconEl = document.createElement('i');
+    iconEl.className = 'bi bi-' + iconName + ' me-2';
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = message;
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn-close';
+    closeBtn.setAttribute('data-bs-dismiss', 'alert');
+    el.append(iconEl, msgSpan, closeBtn);
     const container = document.querySelector('.app-content .container-fluid') || document.querySelector('.app-content') || document.body;
     container.insertBefore(el, container.firstChild);
 }

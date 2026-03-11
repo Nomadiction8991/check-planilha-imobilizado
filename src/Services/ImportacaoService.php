@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Repositories\ImportacaoRepository;
-use App\Core\ConnectionManager;
 use PDO;
 use Exception;
 
@@ -31,9 +30,9 @@ class ImportacaoService
     private PDO $conexao;
     private const LOTE_SIZE = 100;
 
-    public function __construct(?PDO $conexao = null)
+    public function __construct(PDO $conexao)
     {
-        $this->conexao = $conexao ?? ConnectionManager::getConnection();
+        $this->conexao = $conexao;
         $this->importacaoRepo = new ImportacaoRepository($this->conexao);
     }
 
@@ -412,7 +411,7 @@ class ImportacaoService
         }
 
         // Buscar comum pelo código
-        $stmt = $this->conexao->prepare("SELECT id FROM comums WHERE codigo = :codigo LIMIT 1");
+        $stmt = $this->conexao->prepare("SELECT id FROM comuns WHERE codigo = :codigo LIMIT 1");
         $stmt->execute([':codigo' => $codigoComum]);
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -423,13 +422,24 @@ class ImportacaoService
         // Comum não encontrada → criar automaticamente
         $descricaoComum = 'Comum ' . $codigoComum;
 
-        $stmt = $this->conexao->prepare("INSERT INTO comums (codigo, descricao) VALUES (:codigo, :descricao)");
+        $stmt = $this->conexao->prepare("INSERT INTO comuns (codigo, descricao) VALUES (:codigo, :descricao)");
         $stmt->execute([
             ':codigo' => $codigoComum,
             ':descricao' => $descricaoComum
         ]);
 
-        return (int) $this->conexao->lastInsertId();
+        $novoId = (int) $this->conexao->lastInsertId();
+
+        error_log(
+            sprintf(
+                '[ImportacaoService] Nova comum criada automaticamente: código="%s", descrição="%s", id=%d',
+                $codigoComum,
+                $descricaoComum,
+                $novoId
+            )
+        );
+
+        return $novoId;
     }
 
     private function buscarOuCriarDependencia(string $descricao, int $comumId): int
@@ -478,6 +488,40 @@ class ImportacaoService
 
     private function atualizarProduto(int $id, array $dados): void
     {
+        // Whitelist de colunas permitidas para evitar injeção de nomes de colunas arbitrários.
+        $colunasPermitidas = [
+            'comum_id',
+            'codigo',
+            'tipo_bem_id',
+            'bem',
+            'complemento',
+            'dependencia_id',
+            'editado_tipo_bem_id',
+            'editado_bem',
+            'editado_complemento',
+            'editado_dependencia_id',
+            'novo',
+            'importado',
+            'checado',
+            'editado',
+            'imprimir_etiqueta',
+            'imprimir_14_1',
+            'condicao_14_1',
+            'observacao',
+            'nota_numero',
+            'nota_data',
+            'nota_valor',
+            'nota_fornecedor',
+            'administrador_acessor_id',
+            'ativo',
+        ];
+
+        $dados = array_intersect_key($dados, array_flip($colunasPermitidas));
+
+        if (empty($dados)) {
+            return;
+        }
+
         $sets = [];
         $params = [':id' => $id];
 
@@ -510,17 +554,26 @@ class ImportacaoService
     private function contarLinhasArquivo(string $caminho): int
     {
         $arquivo = fopen($caminho, 'r');
-        $linhas = 0;
 
-        fgets($arquivo);
-
-        while (!feof($arquivo)) {
-            if (fgets($arquivo)) {
-                $linhas++;
-            }
+        if ($arquivo === false) {
+            throw new Exception('Não foi possível abrir o arquivo para contagem de linhas: ' . $caminho);
         }
 
-        fclose($arquivo);
+        $linhas = 0;
+
+        try {
+            // Pula a primeira linha (cabeçalho)
+            fgets($arquivo);
+
+            while (!feof($arquivo)) {
+                if (fgets($arquivo)) {
+                    $linhas++;
+                }
+            }
+        } finally {
+            fclose($arquivo);
+        }
+
         return $linhas;
     }
 
@@ -551,183 +604,4 @@ class ImportacaoService
         $resultado['erros'] = array_merge($resultado['erros'], $resultadoLote['erros']);
     }
 
-    // ─── Método legado para compatibilidade (processar sem preview) ───
-
-    /**
-     * Processa todas as linhas do CSV diretamente (sem preview).
-     * Mantido para compatibilidade, mas o fluxo recomendado é:
-     *   CsvParserService::analisar() → preview → processarComAcoes()
-     */
-    public function processar(int $importacaoId): array
-    {
-        $importacao = $this->importacaoRepo->buscarPorId($importacaoId);
-
-        if (!$importacao) {
-            throw new Exception('Importação não encontrada');
-        }
-
-        if (!file_exists($importacao['arquivo_caminho'])) {
-            throw new Exception('Arquivo não encontrado');
-        }
-
-        // Limpar erros anteriores desta importação para registrar apenas os novos
-        $stmtDeleteErros = $this->conexao->prepare('DELETE FROM import_erros WHERE importacao_id = :id');
-        $stmtDeleteErros->execute([':id' => $importacaoId]);
-
-        $this->importacaoRepo->atualizar($importacaoId, [
-            'status' => 'processando',
-            'iniciada_em' => date('Y-m-d H:i:s')
-        ]);
-
-        $resultado = [
-            'sucesso' => 0,
-            'erro' => 0,
-            'erros' => []
-        ];
-
-        try {
-            $arquivo = fopen($importacao['arquivo_caminho'], 'r');
-
-            if (!$arquivo) {
-                throw new Exception('Não foi possível abrir o arquivo');
-            }
-
-            $cabecalho = fgetcsv($arquivo, 0, ',');
-
-            $linhaAtual = 0;
-            $lote = [];
-            $totalLinhas = $importacao['total_linhas'];
-
-            while (($linha = fgetcsv($arquivo, 0, ',')) !== false) {
-                $linhaAtual++;
-
-                $lote[] = [
-                    'numero' => $linhaAtual,
-                    'dados' => $linha
-                ];
-
-                if (count($lote) >= self::LOTE_SIZE) {
-                    $resultadoLote = $this->processarLoteLegado($lote, $cabecalho, $importacao['comum_id']);
-
-                    $resultado['sucesso'] += $resultadoLote['sucesso'];
-                    $resultado['erro'] += $resultadoLote['erro'];
-                    $resultado['erros'] = array_merge($resultado['erros'], $resultadoLote['erros']);
-
-                    $porcentagem = ($linhaAtual / $totalLinhas) * 100;
-                    $this->importacaoRepo->atualizar($importacaoId, [
-                        'linhas_processadas' => $linhaAtual,
-                        'linhas_sucesso' => $resultado['sucesso'],
-                        'linhas_erro' => $resultado['erro'],
-                        'porcentagem' => round($porcentagem, 2)
-                    ]);
-
-                    $lote = [];
-                    gc_collect_cycles();
-                }
-            }
-
-            if (!empty($lote)) {
-                $resultadoLote = $this->processarLoteLegado($lote, $cabecalho, $importacao['comum_id']);
-                $resultado['sucesso'] += $resultadoLote['sucesso'];
-                $resultado['erro'] += $resultadoLote['erro'];
-                $resultado['erros'] = array_merge($resultado['erros'], $resultadoLote['erros']);
-
-                $this->importacaoRepo->atualizar($importacaoId, [
-                    'linhas_processadas' => $linhaAtual,
-                    'linhas_sucesso' => $resultado['sucesso'],
-                    'linhas_erro' => $resultado['erro'],
-                    'porcentagem' => 100
-                ]);
-            }
-
-            fclose($arquivo);
-
-            $this->importacaoRepo->atualizar($importacaoId, [
-                'status' => 'concluida',
-                'concluida_em' => date('Y-m-d H:i:s')
-            ]);
-        } catch (Exception $e) {
-            $this->importacaoRepo->atualizar($importacaoId, [
-                'status' => 'erro',
-                'mensagem_erro' => $e->getMessage(),
-                'concluida_em' => date('Y-m-d H:i:s')
-            ]);
-            throw $e;
-        }
-
-        return $resultado;
-    }
-
-    private function processarLoteLegado(array $lote, array $cabecalho, int $comumId): array
-    {
-        $resultado = ['sucesso' => 0, 'erro' => 0, 'erros' => []];
-
-        $this->conexao->beginTransaction();
-
-        try {
-            foreach ($lote as $item) {
-                try {
-                    $this->processarLinhaLegada($item['dados'], $cabecalho, $comumId);
-                    $resultado['sucesso']++;
-                } catch (Exception $e) {
-                    $resultado['erro']++;
-                    $resultado['erros'][] = [
-                        'linha' => $item['numero'],
-                        'mensagem' => $e->getMessage()
-                    ];
-                }
-            }
-            $this->conexao->commit();
-        } catch (Exception $e) {
-            $this->conexao->rollBack();
-            throw $e;
-        }
-
-        return $resultado;
-    }
-
-    private function processarLinhaLegada(array $dados, array $cabecalho, int $comumId): void
-    {
-        $mapa = array_flip($cabecalho);
-
-        $codigo = $dados[$mapa['codigo']] ?? '';
-        $tipoBemCodigo = $dados[$mapa['tipo_bem']] ?? '';
-        $bem = $dados[$mapa['bem']] ?? '';
-        $complemento = $dados[$mapa['complemento']] ?? '';
-        $dependenciaDescricao = $dados[$mapa['dependencia']] ?? '';
-
-        $tipoBemId = $this->buscarOuCriarTipoBem($tipoBemCodigo);
-        $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);
-
-        $stmt = $this->conexao->prepare("SELECT * FROM produtos WHERE codigo = :codigo AND comum_id = :comum_id");
-        $stmt->execute([':codigo' => $codigo, ':comum_id' => $comumId]);
-        $produtoExistente = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($produtoExistente) {
-            $this->atualizarProduto($produtoExistente['id_produto'], [
-                'tipo_bem_id'    => $tipoBemId,
-                'bem'            => $bem,
-                'complemento'    => $complemento,
-                'dependencia_id' => $dependenciaId,
-                'importado'      => 1,
-            ]);
-        } else {
-            $this->criarProduto([
-                'comum_id'       => $comumId,
-                'codigo'         => $codigo,
-                'tipo_bem_id'    => $tipoBemId,
-                'bem'            => $bem,
-                'complemento'    => $complemento,
-                'dependencia_id' => $dependenciaId,
-                'novo'           => 0,
-                'importado'      => 1,
-                'checado'        => 0,
-                'editado'        => 0,
-                'imprimir_etiqueta' => 0,
-                'imprimir_14_1'  => 0,
-                'observacao'     => '',
-                'ativo'          => 1,
-            ]);
-        }
-    }
 }

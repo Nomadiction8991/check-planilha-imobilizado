@@ -16,7 +16,7 @@ $pagina = $_GET['pagina'] ?? 1;
 $filtro_nome = $_GET['nome'] ?? '';
 $filtro_dependencia = $_GET['dependencia'] ?? '';
 $filtro_codigo = $_GET['filtro_codigo'] ?? '';
-$filtro_STATUS = $_GET['STATUS'] ?? '';
+$filtro_status = $_GET['status'] ?? $_GET['filtro_status'] ?? '';
 
 function redirectBack($params)
 {
@@ -34,8 +34,8 @@ if (!$id_PRODUTO || !$comum_id) {
         'dependencia' => $filtro_dependencia,
         'filtro_codigo' => $filtro_codigo,
         'codigo' => $filtro_codigo,
-        'status' => $filtro_STATUS,
-        'STATUS' => $filtro_STATUS,
+        'status' => $filtro_status,
+
         'erro' => 'Parâmetros inválidos'
     ]);
 }
@@ -76,8 +76,8 @@ try {
         'dependencia' => $filtro_dependencia,
         'filtro_codigo' => $filtro_codigo,
         'codigo' => $filtro_codigo,
-        'status' => $filtro_STATUS,
-        'STATUS' => $filtro_STATUS,
+        'status' => $filtro_status,
+
         'sucesso' => $msg
     ]);
 } catch (Exception $e) {
@@ -89,8 +89,8 @@ try {
         'dependencia' => $filtro_dependencia,
         'filtro_codigo' => $filtro_codigo,
         'codigo' => $filtro_codigo,
-        'status' => $filtro_STATUS,
-        'STATUS' => $filtro_STATUS,
+        'status' => $filtro_status,
+
         'erro' => 'Erro ao limpar edições: ' . $e->getMessage()
     ]);
 }

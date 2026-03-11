@@ -13,8 +13,8 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-/* Campos em maiúsculas por padrão */
-input.form-control:not([type="password"]),
+/* Campos em maiúsculas por padrão (excluindo senha e email) */
+input.form-control:not([type="password"]):not([type="email"]),
 textarea.form-control,
 select.form-select,
 .text-uppercase {

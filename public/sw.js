@@ -30,19 +30,14 @@ const DYNAMIC_CACHE_PATTERNS = [
 
 // Instalação - cacheia arquivos estáticos
 self.addEventListener('install', event => {
-  console.log('[SW] Instalando Service Worker...', CACHE_VERSION);
-  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Cache criado:', CACHE_NAME);
-        return cache.addAll(STATIC_CACHE).catch(err => {
-          console.warn('[SW] Erro ao cachear alguns arquivos:', err);
+        return cache.addAll(STATIC_CACHE).catch(() => {
           // Continuar mesmo com falhas parciais
         });
       })
       .then(() => {
-        console.log('[SW] Instalação concluída');
         return self.skipWaiting(); // Ativar imediatamente
       })
   );
@@ -50,22 +45,18 @@ self.addEventListener('install', event => {
 
 // Ativação - limpa caches antigos e assume controle
 self.addEventListener('activate', event => {
-  console.log('[SW] Ativando Service Worker...', CACHE_VERSION);
-  
   event.waitUntil(
     caches.keys()
       .then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
             if (cacheName !== CACHE_NAME && cacheName.startsWith('checkplanilha-')) {
-              console.log('[SW] Removendo cache antigo:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log('[SW] Ativação concluída');
         return self.clients.claim(); // Assumir controle imediatamente
       })
   );
@@ -108,8 +99,7 @@ self.addEventListener('fetch', event => {
           });
         })
         .catch(() => {
-          // Fallback genérico para assets
-          console.warn('[SW] Asset offline:', request.url);
+          // Fallback genérico para assets — silencioso em produção
         })
     );
     return;
@@ -133,7 +123,6 @@ self.addEventListener('fetch', event => {
         // Fallback para cache em caso de offline
         return caches.match(request).then(cachedResponse => {
           if (cachedResponse) {
-            console.log('[SW] Servindo do cache (offline):', request.url);
             return cachedResponse;
           }
           

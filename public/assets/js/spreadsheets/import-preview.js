@@ -3,6 +3,46 @@
 
     const IMPORTACAO_ID = window._importacaoId;
 
+    // ─── Modal de confirmação Bootstrap genérico ───
+    function confirmarBootstrap(mensagem) {
+        return new Promise(function (resolve) {
+            // Reutiliza modal existente na página ou cria um temporário
+            var modalId = 'modalConfirmacaoImportacao';
+            var existing = document.getElementById(modalId);
+            if (existing) existing.remove();
+
+            var modalHtml = '<div class="modal fade" id="' + modalId + '" tabindex="-1" aria-modal="true" role="dialog">'
+                + '<div class="modal-dialog modal-dialog-centered">'
+                + '<div class="modal-content">'
+                + '<div class="modal-header"><h5 class="modal-title">Confirmação</h5>'
+                + '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>'
+                + '<div class="modal-body">' + mensagem + '</div>'
+                + '<div class="modal-footer">'
+                + '<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>'
+                + '<button type="button" class="btn btn-danger" id="' + modalId + 'Confirm">Confirmar</button>'
+                + '</div></div></div></div>';
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            var modalEl  = document.getElementById(modalId);
+            var bsModal  = new bootstrap.Modal(modalEl);
+            var resolved = false;
+
+            document.getElementById(modalId + 'Confirm').addEventListener('click', function () {
+                resolved = true;
+                bsModal.hide();
+                resolve(true);
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', function () {
+                if (!resolved) resolve(false);
+                modalEl.remove();
+            });
+
+            bsModal.show();
+        });
+    }
+
     // ─── Coletar ações da página atual ───
     function coletarAcoesPagina() {
         const acoes = {};
@@ -27,13 +67,8 @@
         try {
             const resp = await fetch('/spreadsheets/preview/save-actions', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    importacao_id: IMPORTACAO_ID,
-                    acoes: acoes
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ importacao_id: IMPORTACAO_ID, acoes: acoes })
             });
             const data = await resp.json();
             return data.sucesso === true;
@@ -60,43 +95,45 @@
     }
 
     // ─── Salvar ações antes de navegar (paginação) ───
-    window.salvarAcoesAntes = async function(e, url) {
+    window.salvarAcoesAntes = async function (e, url) {
         e.preventDefault();
         await salvarAcoes();
         window.location.href = url;
     };
 
     // ─── Atualizar estilo da linha conforme ação selecionada ───
-    window.atualizarEstiloLinha = function(select) {
+    window.atualizarEstiloLinha = function (select) {
         const row = select.closest('tr');
         row.classList.remove('acao-pular', 'acao-excluir');
-
         if (select.value === 'pular')   row.classList.add('acao-pular');
         if (select.value === 'excluir') row.classList.add('acao-excluir');
     };
 
     // ─── Importar Tudo (ignora seleções, processa tudo) ───
     window.importarTudo = async function () {
-        if (!confirm('IMPORTAR TUDO: todos os registros serão processados ignorando qualquer seleção de igreja ou produto. Confirmar?')) return;
+        const confirmado = await confirmarBootstrap(
+            'IMPORTAR TUDO: todos os registros serão processados ignorando qualquer seleção de igreja ou produto. Confirmar?'
+        );
+        if (!confirmado) return;
         await salvarAcoes();
         document.getElementById('importar_tudo_flag').value = '1';
         document.getElementById('form-confirmar').submit();
     };
 
-    // contadores removidos — não utilizados nesta versão
-
-
     // ─── Confirmação antes de submeter ───
-    document.getElementById('form-confirmar').addEventListener('submit', function(e) {
+    document.getElementById('form-confirmar').addEventListener('submit', async function (e) {
         let excluir = 0;
         document.querySelectorAll('.select-acao').forEach(select => {
             if (select.value === 'excluir') excluir++;
         });
 
         if (excluir > 0) {
-            if (!confirm(`Atenção: ${excluir} produto(s) serão DESATIVADOS. Confirmar?`)) {
-                e.preventDefault();
-                return;
+            e.preventDefault();
+            const confirmado = await confirmarBootstrap(
+                `Atenção: ${excluir} produto(s) serão DESATIVADOS. Confirmar?`
+            );
+            if (confirmado) {
+                document.getElementById('form-confirmar').submit();
             }
         }
     });
@@ -112,6 +149,5 @@
             window.location.href = url.toString();
         });
     });
-
 
 })();

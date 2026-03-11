@@ -3,6 +3,17 @@
  * Detecção de edição, atualização em massa e validação de impressão.
  */
 (function () {
+    // Helper local para feedback visual Bootstrap
+    function showFlash(type, msg) {
+        var el = document.createElement('div');
+        el.className = 'alert alert-' + type + ' alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3 shadow';
+        el.style.zIndex = '1090';
+        el.setAttribute('role', 'alert');
+        el.innerHTML = msg + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+        document.body.appendChild(el);
+        setTimeout(function () { el.classList.remove('show'); setTimeout(function () { el.remove(); }, 300); }, 4000);
+    }
+
     // Armazenar valores iniciais dos campos
     var valoresOriginais = new Map();
 
@@ -89,7 +100,7 @@
             var marcados = Array.from(checks).filter(function (c) { return c.checked; }).length;
 
             if (marcados !== 1) {
-                alert('Selecione exatamente 1 opção na página ' + (i + 1) + ' antes de imprimir.');
+                showFlash('warning', 'Selecione exatamente 1 opção na página ' + (i + 1) + ' antes de imprimir.');
                 // Rolar até a página com erro
                 document.querySelectorAll('.pagina-card')[i].scrollIntoView({
                     behavior: 'smooth',

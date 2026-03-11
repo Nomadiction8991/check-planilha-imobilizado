@@ -1,12 +1,24 @@
 #!/bin/sh
 set -e
 
+# resolver problema de "dubious ownership" do git dentro do container
+# antes de rodar qualquer comando composer. Isso impede loops de restart
+# quando a aplicação monta o código do host como volume.
+if command -v git >/dev/null 2>&1; then
+    git config --global --add safe.directory /var/www/html || true
+fi
+
 cd /var/www/html || exit 0
+
+# Garantir que os diretórios de storage existam com permissão para www-data
+mkdir -p storage/tmp storage/importacao storage/importation storage/logs
+chown -R www-data:www-data storage
+chmod -R 775 storage
 
 if command -v composer >/dev/null 2>&1; then
     if [ ! -d vendor ] || [ ! -f vendor/composer/installed.json ] || [ composer.lock -nt vendor/composer/installed.json ]; then
         echo "Executando composer install..."
-        composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+        composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader --no-dev
     else
         echo "Dependências já instaladas, pulando composer install."
     fi

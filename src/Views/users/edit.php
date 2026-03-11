@@ -27,26 +27,21 @@ if (!empty($_GET['pagina'])) {
     $qsArr['pagina'] = $_GET['pagina'];
 }
 
-$backUrl = '/users' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
+$backUrl       = '/users' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
+$customCssPath = '/assets/css/usuarios/usuario_editar.css';
+$headScripts   = [
+    ['src' => 'https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js', 'integrity' => 'sha384-dfIriABtoG8NhQWdmr5AP3BeMlhjjQXtqMH5mUVINWvjSe9+9IXLSwUb89C86VOP', 'crossorigin' => 'anonymous'],
+];
 
 ob_start();
 ?>
 
-<link href="/assets/css/usuarios/usuario_editar.css" rel="stylesheet">
-
-
 <?php if (!empty($mensagem)): ?>
     <div class="alert alert-<?php echo $tipo_mensagem === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show">
-        <?php echo $mensagem; ?>
+        <?= \App\Helpers\ViewHelper::e($mensagem) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
-
-<!-- JQUERY E INPUTMASK -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>
-<!-- SIGNATUREPAD -->
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
 
 
@@ -69,6 +64,7 @@ ob_start();
                 <div class="mb-3">
                     <label for="nome" class="form-label">NOME COMPLETO <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="nome" name="nome"
+                        autocomplete="name"
                         value="<?php echo htmlspecialchars($usuario['nome']); ?>" required>
                 </div>
 
@@ -92,6 +88,7 @@ ob_start();
                     <div class="col-12">
                         <label for="telefone" class="form-label">TELEFONE <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="telefone" name="telefone"
+                            autocomplete="tel"
                             value="<?php echo htmlspecialchars($usuario['telefone'] ?? ''); ?>"
                             placeholder="(00) 00000-0000" required>
                     </div>
@@ -99,8 +96,9 @@ ob_start();
 
                 <div class="mb-3 mt-3">
                     <label for="email" class="form-label">EMAIL <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control text-uppercase" id="email" name="email"
-                        value="<?php echo htmlspecialchars(to_uppercase($usuario['email']), ENT_QUOTES, 'UTF-8'); ?>" required>
+                    <input type="email" class="form-control" id="email" name="email"
+                        autocomplete="email"
+                        value="<?php echo htmlspecialchars($usuario['email'], ENT_QUOTES, 'UTF-8'); ?>" required>
                 </div>
 
                 <!-- Nota fixa sobre senha: não utilizar a classe 'alert' para evitar auto-dismiss do layout JS -->
@@ -112,13 +110,13 @@ ob_start();
                 <div class="row g-3">
                     <div class="col-12">
                         <label for="senha" class="form-label">NOVA SENHA</label>
-                        <input type="password" class="form-control" id="senha" name="senha" minlength="6">
+                        <input type="password" class="form-control" id="senha" name="senha" minlength="6" autocomplete="new-password">
                         <small class="text-muted">MÍNIMO DE 6 CARACTERES</small>
                     </div>
 
                     <div class="col-12">
                         <label for="confirmar_senha" class="form-label">CONFIRMAR NOVA SENHA</label>
-                        <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" minlength="6">
+                        <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" minlength="6" autocomplete="new-password">
                     </div>
                 </div>
 
@@ -183,6 +181,7 @@ ob_start();
                     <div class="col-12">
                         <label for="cep" class="form-label">CEP</label>
                         <input type="text" class="form-control" id="cep" name="endereco_cep"
+                            autocomplete="postal-code"
                             value="<?php echo htmlspecialchars($usuario['endereco_cep'] ?? ''); ?>"
                             placeholder="00000-000">
                         <small class="text-muted">PREENCHA PARA BUSCAR AUTOMATICAMENTE</small>
@@ -224,7 +223,7 @@ ob_start();
                         <select class="form-select" id="estado" name="endereco_estado">
                             <option value="">Selecione</option>
                             <?php
-                            $estados = ['AC' => 'Acre', 'AL' => 'Alagoas', 'AP' => 'Amapá', 'AM' => 'Amazonas', 'BA' => 'Bahia', 'CE' => 'Ceará', 'DF' => 'Distrito Federal', 'ES' => 'Espírito Santo', 'GO' => 'Goiás', 'MA' => 'Maranhão', 'MT' => 'Mato Grosso', 'MS' => 'Mato Grosso do Sul', 'MG' => 'Minas Gerais', 'PA' => 'Pará', 'PB' => 'Paraíba', 'PR' => 'Paraná', 'PE' => 'Pernambuco', 'PI' => 'Piauí', 'RJ' => 'Rio de Janeiro', 'RN' => 'Rio Grande do Norte', 'RS' => 'Rio Grande do Sul', 'RO' => 'RondÁ´nia', 'RR' => 'Roraima', 'SC' => 'Santa Catarina', 'SP' => 'São Paulo', 'SE' => 'Sergipe', 'TO' => 'Tocantins'];
+                            $estados = ['AC' => 'Acre', 'AL' => 'Alagoas', 'AP' => 'Amapá', 'AM' => 'Amazonas', 'BA' => 'Bahia', 'CE' => 'Ceará', 'DF' => 'Distrito Federal', 'ES' => 'Espírito Santo', 'GO' => 'Goiás', 'MA' => 'Maranhão', 'MT' => 'Mato Grosso', 'MS' => 'Mato Grosso do Sul', 'MG' => 'Minas Gerais', 'PA' => 'Pará', 'PB' => 'Paraíba', 'PR' => 'Paraná', 'PE' => 'Pernambuco', 'PI' => 'Piauí', 'RJ' => 'Rio de Janeiro', 'RN' => 'Rio Grande do Norte', 'RS' => 'Rio Grande do Sul', 'RO' => 'Rondônia', 'RR' => 'Roraima', 'SC' => 'Santa Catarina', 'SP' => 'São Paulo', 'SE' => 'Sergipe', 'TO' => 'Tocantins'];
                             foreach ($estados as $sigla => $nome):
                                 $selected = ($usuario['endereco_estado'] ?? '') === $sigla ? 'selected' : '';
                             ?>
@@ -248,8 +247,10 @@ ob_start();
 
     <!-- Variáveis PHP necessárias para o JS externo -->
     <script>
-        window._editUserRgDigits = '<?php echo preg_replace('/\D/', '', $usuario['rg'] ?? ''); ?>';
-        window._editUserRgConjugeDigits = '<?php echo preg_replace('/\D/', '', $usuario['rg_conjuge'] ?? ''); ?>';
+        window._appConfig = {
+            editUserRgDigits: '<?php echo preg_replace('/\D/', '', $usuario['rg'] ?? ''); ?>',
+            editUserRgConjugeDigits: '<?php echo preg_replace('/\D/', '', $usuario['rg_conjuge'] ?? ''); ?>'
+        };
     </script>
     <script src="/assets/js/users/edit.js"></script>
 <?php endif; ?>

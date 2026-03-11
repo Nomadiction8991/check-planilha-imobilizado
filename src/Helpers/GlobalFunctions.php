@@ -30,6 +30,7 @@ if (!function_exists('loadEnv')) {
      * Carrega variáveis de um .env para $_ENV, $_SERVER e putenv().
      *
      * @deprecated Use \App\Core\LerEnv::obter($chave) para acessar variáveis.
+     * TODO: migrar para \App\Core\LerEnv — ainda chamada em config/bootstrap.php
      */
     function loadEnv(string $path): void
     {
@@ -87,6 +88,7 @@ if (!function_exists('isLoggedIn')) {
 if (!function_exists('isAdmin')) {
     /**
      * @deprecated Use SessionManager::get('is_admin')
+     * TODO: migrar para SessionManager — ainda chamada em ComumController e views
      */
     function isAdmin(): bool
     {
@@ -121,6 +123,7 @@ if (!function_exists('getLoginUrl')) {
 if (!function_exists('to_uppercase')) {
     /**
      * @deprecated Use StringHelper::toUppercase()
+     * TODO: migrar para StringHelper — ainda chamada em múltiplas views
      */
     function to_uppercase(mixed $value): mixed
     {
@@ -253,6 +256,7 @@ if (!function_exists('contar_PRODUTOS_por_comum')) {
     /**
      * Conta produtos associados a um comum.
      * @deprecated Migrar para ProdutoRepository
+     * TODO: migrar para ProdutoRepository::contarPorComum — verificar chamadores
      */
     function contar_PRODUTOS_por_comum(PDO $conexao, int $comum_id): int
     {
@@ -284,6 +288,7 @@ if (!function_exists('gerarParametrosFiltro')) {
      * Gera query string de filtros a partir de $_GET.
      * @param bool $includeComumId Se true, inclui comum_id nos parâmetros
      * @deprecated Migrar lógica de filtro para Controllers
+     * TODO: migrar para ProdutoController::extrairFiltros — ainda chamada em múltiplas views
      */
     function gerarParametrosFiltro(bool $includeComumId = false): string
     {
@@ -318,6 +323,7 @@ if (!function_exists('getReturnUrl')) {
     /**
      * Gera URL de retorno para listagem de produtos com filtros preservados.
      * @deprecated Migrar para ProdutoController
+     * TODO: migrar para ProdutoController::urlRetorno — ainda chamada em products/edit.php
      */
     function getReturnUrl(
         $comum_id = null,
@@ -343,30 +349,13 @@ if (!function_exists('getReturnUrl')) {
 
 if (!function_exists('detectar_tabela_comuns')) {
     /**
-     * Detecta o nome da tabela de comuns no banco de dados.
-     * Verifica se existe 'comums' ou 'comuns'.
-     * @deprecated Padronizar nome da tabela na migração
+     * @deprecated Removida — a tabela foi renomeada definitivamente para `comuns`
+     *   pela migration 20260309000000_rename_comums_to_comuns.
+     *   Use o nome literal 'comuns' no SQL ou ComumRepository diretamente.
+     * TODO: remover esta função após confirmar que nenhum chamador externo a usa.
      */
     function detectar_tabela_comuns(PDO $conexao): string
     {
-        try {
-            $stmt = $conexao->query("SHOW TABLES LIKE 'comums'");
-            if ($stmt->rowCount() > 0) {
-                return 'comums';
-            }
-        } catch (\Exception $e) {
-            // ignora
-        }
-
-        try {
-            $stmt = $conexao->query("SHOW TABLES LIKE 'comuns'");
-            if ($stmt->rowCount() > 0) {
-                return 'comuns';
-            }
-        } catch (\Exception $e) {
-            // ignora
-        }
-
-        return 'comums'; // fallback padrão
+        return 'comuns';
     }
 }

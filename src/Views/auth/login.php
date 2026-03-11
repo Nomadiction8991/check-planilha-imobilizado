@@ -23,7 +23,9 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
     <meta name="apple-mobile-web-app-title" content="<?= htmlspecialchars($siteTitle, ENT_QUOTES, 'UTF-8') ?>">
     <link rel="apple-touch-icon" href="/assets/images/logo.png">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+        crossorigin="anonymous">
     <link href="/assets/css/auth/login.css" rel="stylesheet">
 </head>
 
@@ -50,14 +52,16 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
                         <?php endif; ?>
 
                         <form method="POST" action="/login">
+                            <input type="hidden" name="_csrf_token" value="<?= \App\Core\CsrfService::getToken() ?>">
                             <div class="mb-3">
                                 <label for="email" class="form-label">E-mail</label>
                                 <input type="email" class="form-control" id="email" name="email" required
+                                    autocomplete="email"
                                     value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
                             </div>
                             <div class="mb-3">
                                 <label for="senha" class="form-label">Senha</label>
-                                <input type="password" class="form-control" id="senha" name="senha" required>
+                                <input type="password" class="form-control" id="senha" name="senha" required autocomplete="current-password">
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-login">Entrar</button>
@@ -69,7 +73,9 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
 
     <!-- PWA Install Manager -->
     <script src="/assets/js/pwa-install.js"></script>

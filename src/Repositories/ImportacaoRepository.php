@@ -103,6 +103,21 @@ class ImportacaoRepository extends BaseRepository
         return $result ?: null;
     }
 
+    /**
+     * Conta erros de importação não resolvidos para uma determinada comum.
+     */
+    public function contarErrosPendentesPorComum(int $comumId): int
+    {
+        $sql = 'SELECT COUNT(*) FROM import_erros ie
+                 JOIN importacoes imp ON ie.importacao_id = imp.id
+                WHERE imp.comum_id = :comum_id AND ie.resolvido = 0';
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute([':comum_id' => $comumId]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
     public function buscarEmAndamento(): array
     {
         $sql = "SELECT * FROM {$this->tabela} 

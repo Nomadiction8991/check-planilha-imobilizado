@@ -3,6 +3,8 @@
 /**
  * View: Cadastrar Tipo de Bem
  */
+
+$customCssPath = '/assets/css/asset-types/create.css';
 ?>
 
 <div class="container-fluid page-editar-asset-type">
@@ -12,14 +14,6 @@
             NOVO TIPO DE BEM
         </div>
         <div class="card-body">
-
-            <?php if (!empty($_SESSION['mensagem'])): ?>
-                <div class="alert alert-<?= htmlspecialchars($_SESSION['tipo_mensagem'] ?? 'info') ?> alert-dismissible fade show" role="alert">
-                    <?= htmlspecialchars($_SESSION['mensagem']) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']); ?>
-            <?php endif; ?>
 
             <?php if (isset($_GET['erro'])): ?>
                 <div class="alert alert-danger alert-dismissible fade show">
@@ -62,37 +56,4 @@
     </div>
 </div>
 
-<style>
-    .page-editar-asset-type {
-        padding: 12px;
-    }
-
-    .page-editar-asset-type>.card {
-        width: 95%;
-        margin: 0 auto;
-    }
-
-    .page-editar-asset-type .form-label {
-        font-weight: 600;
-        font-size: .9rem;
-        color: #444;
-        display: block;
-        margin-bottom: 4px;
-    }
-
-    .page-editar-asset-type .form-label i {
-        color: #6c757d;
-        font-size: .85rem;
-    }
-
-    .page-editar-asset-type .form-actions {
-        margin-top: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .page-editar-asset-type .form-actions .btn {
-        width: 100%;
-    }
-</style>
+<script src="/assets/js/asset-types/create.js"></script>

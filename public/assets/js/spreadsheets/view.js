@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             wrapper.addEventListener('transitionend', () => wrapper.remove(), {
                 once: true
             });
-        }, 3000);
+        }, 500);
     };
 
     const linhaClasses = ['linha-dr', 'linha-imprimir', 'linha-checado', 'linha-observacao', 'linha-editado', 'linha-pendente'];
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         micBtn.addEventListener('click', () => {
-            alert('Reconhecimento de voz não suportado neste navegador. Use o botão de câmera ou digite o código.');
+            showAlert('warning', 'Reconhecimento de voz não suportado neste navegador. Use o botão de câmera ou digite o código.');
         });
         return;
     }
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function preencherEEnviar(codigo) {
         const input = encontraInputCodigo();
         if (!input) {
-            alert('Campo de código não encontrado.');
+            showAlert('danger', 'Campo de código não encontrado.');
             return;
         }
         input.focus();
@@ -507,16 +507,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isListening) return;
         
         try {
-            console.log('Iniciando reconhecimento de voz...');
             rec.start();
             isListening = true;
             micBtn.classList.add('listening');
             micBtn.setAttribute('aria-pressed', 'true');
             setMicIcon(true);
-            console.log('Reconhecimento de voz iniciado. Fale o código...');
         } catch (e) {
             console.error('Erro ao iniciar reconhecimento:', e);
-            alert('Erro ao iniciar o microfone: ' + e.message);
+            showAlert('danger', 'Erro ao iniciar o microfone: ' + e.message);
         }
     }
 
@@ -524,7 +522,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isListening) return;
         
         try {
-            console.log('Parando reconhecimento de voz...');
             rec.stop();
         } catch (e) {
             console.error('Erro ao parar reconhecimento:', e);
@@ -537,31 +534,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     rec.onstart = () => {
-        console.log('✓ Microfone ativo - pode falar agora!');
     };
 
     rec.onresult = (e) => {
-        console.log('Resultado recebido:', e);
         
         // Procurar primeiro resultado final
         for (let i = e.resultIndex; i < e.results.length; i++) {
             if (e.results[i].isFinal) {
                 const transcript = e.results[i][0].transcript || '';
-                console.log('Transcrição final:', transcript);
                 
                 const codigo = extraiCodigoFalado(transcript);
                 
                 if (codigo) {
-                    console.log('Código extraído:', codigo);
                     stopListening();
                     preencherEEnviar(codigo);
                 } else {
-                    console.log('Nenhum código numérico encontrado na fala');
                 }
             } else {
                 // Resultado intermediário - apenas log
                 const transcript = e.results[i][0].transcript || '';
-                console.log('Intermediário:', transcript);
             }
         }
     };
@@ -571,20 +562,17 @@ document.addEventListener('DOMContentLoaded', () => {
         stopListening();
         
         if (e.error === 'not-allowed') {
-            alert('❌ Permita o acesso ao microfone para usar a busca por voz.\n\nVerifique as permissões do navegador.');
+            showAlert('danger', 'Permita o acesso ao microfone para usar a busca por voz. Verifique as permissões do navegador.');
         } else if (e.error === 'no-speech') {
-            console.log('Nenhuma fala detectada. Tente novamente.');
         } else if (e.error === 'aborted') {
-            console.log('Reconhecimento abortado pelo usuário.');
         } else if (e.error === 'network') {
-            alert('❌ Erro de rede. Verifique sua conexão com a internet.');
+            showAlert('danger', 'Erro de rede. Verifique sua conexão com a internet.');
         } else {
-            alert('❌ Erro no reconhecimento de voz: ' + e.error);
+            showAlert('danger', 'Erro no reconhecimento de voz: ' + e.error);
         }
     };
 
     rec.onend = () => {
-        console.log('Reconhecimento finalizado');
         isListening = false;
         micBtn.classList.remove('listening');
         micBtn.setAttribute('aria-pressed', 'false');
@@ -592,7 +580,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     micBtn.addEventListener('click', () => {
-        console.log('Botão de microfone clicado. isListening:', isListening);
         if (isListening) {
             stopListening();
         } else {
@@ -620,7 +607,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== INICIALIZAÇÃO DOS BOTÕES FLUTUANTES =====
 function initFloatingButtons() {
-    console.log('===== INICIALIZANDO BOTÕES FLUTUANTES =====');
 
     const btnFloatingMic = document.getElementById('btnFloatingMic');
     const btnFloatingCam = document.getElementById('btnFloatingCam');
@@ -633,20 +619,17 @@ function initFloatingButtons() {
     }
 
     // Botão flutuante de microfone já está conectado pela função de reconhecimento de voz
-    console.log('✓ Botão flutuante de microfone configurado');
 
     // Conectar botão flutuante de câmera para abrir modal fullscreen
     if (btnFloatingCam && cameraFullscreenModal) {
         btnFloatingCam.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Clicado botão flutuante de câmera');
             cameraFullscreenModal.classList.add('show');
 
             // Aguardar ser visível antes de iniciar câmera
             setTimeout(initFullscreenCamera, 300);
         });
-        console.log('✓ Botão flutuante de câmera conectado');
     }
 
     // Botão de fechar da modal fullscreen
@@ -654,7 +637,6 @@ function initFloatingButtons() {
         cameraCloseBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Clicado botão de fechar câmera');
             stopFullscreenCamera();
             cameraFullscreenModal.classList.remove('show');
         });
@@ -676,7 +658,6 @@ function initFloatingButtons() {
         }
     });
 
-    console.log('✓ Botões flutuantes inicializados com sucesso!');
 }
 
 // ===== VARIÁVEIS GLOBAIS DA CÂMERA FULLSCREEN =====
@@ -688,7 +669,6 @@ let fullscreenAvailableCameras = [];
 let fullscreenLastCode = '';
 
 async function initFullscreenCamera() {
-    console.log('Inicializando câmera fullscreen...');
 
     await enumerateFullscreenCameras();
     startFullscreenScanner();
@@ -702,7 +682,6 @@ async function enumerateFullscreenCameras() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         fullscreenAvailableCameras = devices.filter(device => device.kind === 'videoinput');
 
-        console.log(`√ ${fullscreenAvailableCameras.length} câmera(s) encontrada(s)`);
 
         cameraSelectFloating.innerHTML = '<option value="">Câmera padrão</option>';
         fullscreenAvailableCameras.forEach((camera, index) => {
@@ -761,12 +740,11 @@ function startFullscreenScanner() {
     }, function(err) {
         if (err) {
             console.error('Erro ao iniciar câmera:', err);
-            alert('Não foi possível acessar a câmera:\n\n' + err.message);
+            showAlert('danger', 'Não foi possível acessar a câmera: ' + err.message);
             fullscreenScanning = false;
             return;
         }
 
-        console.log('√ Câmera fullscreen iniciada!');
         Quagga.start();
 
         // Forçar viewport wrapper do Quagga a preencher 100% do container
@@ -820,7 +798,6 @@ function startFullscreenScanner() {
         fullscreenLastCode = rawCode;
         const code = normalizeBarcodeFullscreen(rawCode);
 
-        console.log('√ Código detectado:', code);
 
         // Feedback visual
         const frame = document.getElementById('scannerFrameFullscreen');
@@ -853,7 +830,6 @@ function startFullscreenScanner() {
 }
 
 function stopFullscreenScanner() {
-    console.log('Parando câmera fullscreen...');
     try {
         Quagga.stop();
         if (fullscreenCurrentStream) {
@@ -905,7 +881,6 @@ function stopFullscreenCamera() {
 
 // ===== FUNÇÃO DUMMY PARA COMPATIBILIDADE =====
 function initBarcodeScanner() {
-    console.log('initBarcodeScanner() chamada - usando câmera fullscreen');
     // Compatibilidade com código antigo - não fazer nada
     // Os botões flutuantes já controlam tudo
 }

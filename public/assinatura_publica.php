@@ -17,8 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
 
-        $table = detectar_tabela_comuns($conexao);
-        $stmt = $conexao->prepare("SELECT id, descricao as comum FROM `{$table}` WHERE id = :id");
+        $stmt = $conexao->prepare("SELECT id, descricao as comum FROM `comuns` WHERE id = :id");
         $stmt->bindValue(':id', $comum_id, PDO::PARAM_INT);
         $stmt->execute();
         $planilha = $stmt->fetch();
@@ -43,8 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 try {
-    $table = detectar_tabela_comuns($conexao);
-    $stmt = $conexao->query("SELECT id, descricao as comum FROM `{$table}` WHERE 1 ORDER BY descricao ASC");
+    $stmt = $conexao->query("SELECT id, descricao as comum FROM `comuns` WHERE 1 ORDER BY descricao ASC");
     $comuns = $stmt->fetchAll();
 } catch (PDOException $e) {
     $erro = "Erro ao carregar lista de comuns: " . $e->getMessage();

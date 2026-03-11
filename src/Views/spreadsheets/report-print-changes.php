@@ -15,7 +15,7 @@ if (!$id_planilha) {
 
 
 try {
-  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comums WHERE id = :id";
+  $sql_planilha = "SELECT id, descricao as comum, cnpj, administracao, cidade FROM comuns WHERE id = :id";
   $stmt_planilha = $conexao->prepare($sql_planilha);
   $stmt_planilha->bindValue(':id', $id_planilha);
   $stmt_planilha->execute();
@@ -27,7 +27,7 @@ try {
 
   if ($e->getCode() === '42S02' || stripos($e->getMessage(), '1146') !== false || stripos($e->getMessage(), "doesn't exist") !== false) {
     try {
-      $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comums WHERE id = :id');
+      $stmt = $conexao->prepare('SELECT id, descricao as comum FROM comuns WHERE id = :id');
       $stmt->bindValue(':id', $id_planilha, PDO::PARAM_INT);
       $stmt->execute();
       $comum = $stmt->fetch(PDO::FETCH_ASSOC);

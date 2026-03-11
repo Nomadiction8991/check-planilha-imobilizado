@@ -29,7 +29,7 @@ class RelatorioController extends BaseController
 
         // Dados da comum (cnpj, descrição, cidade, administração)
         $stmtComum = $conexao->prepare(
-            'SELECT cnpj, descricao, administracao, cidade FROM comums WHERE id = :id'
+            'SELECT cnpj, descricao, administracao, cidade FROM comuns WHERE id = :id'
         );
         $stmtComum->bindValue(':id', (int)$comumId, PDO::PARAM_INT);
         $stmtComum->execute();

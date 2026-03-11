@@ -73,7 +73,7 @@ class ProdutoController extends BaseController
             'filtro_nome'        => trim($this->query('nome', '')),
             'filtro_dependencia' => trim($this->query('dependencia', '')),
             'filtro_codigo'      => trim($this->query('filtro_codigo', '')),
-            'filtro_STATUS'      => trim($this->query('status', $this->query('filtro_STATUS', ''))),
+            'filtro_status'      => trim($this->query('status', $this->query('filtro_status', ''))),
         ];
     }
 
@@ -91,7 +91,7 @@ class ProdutoController extends BaseController
         if ($filtros['filtro_nome'] !== '')      $params['nome']             = $filtros['filtro_nome'];
         if ($filtros['filtro_dependencia'] !== '') $params['dependencia']    = $filtros['filtro_dependencia'];
         if ($filtros['filtro_codigo'] !== '')    $params['filtro_codigo']    = $filtros['filtro_codigo'];
-        if ($filtros['filtro_STATUS'] !== '')    $params['status']           = $filtros['filtro_STATUS'];
+        if ($filtros['filtro_status'] !== '')    $params['status']           = $filtros['filtro_status'];
 
         $qs = http_build_query($params);
         return '/products/view' . ($qs ? '?' . $qs : '');
@@ -228,7 +228,7 @@ class ProdutoController extends BaseController
             'filtro_nome'        => $filtros['filtro_nome'],
             'filtro_dependencia' => $filtros['filtro_dependencia'],
             'filtro_codigo'      => $filtros['filtro_codigo'],
-            'filtro_STATUS'      => $filtros['filtro_STATUS'],
+            'filtro_status'      => $filtros['filtro_status'],
             // Valores editados (já salvos) para pré-preencher o form
             'novo_tipo_bem_id'   => $produto['editado_tipo_bem_id'] ?: null,
             'novo_bem'           => !empty($produto['editado_bem']) ? $produto['editado_bem'] : $produto['bem'],
@@ -332,7 +332,7 @@ class ProdutoController extends BaseController
             $nome       = $this->post('nome', '');
             $dep        = $this->post('dependencia', '');
             $codigo     = $this->post('filtro_codigo', '');
-            $status     = $this->post('STATUS', '');
+            $status     = $this->post('status', '');
 
             $params = ['comum_id' => $comumId, 'sucesso' => 'Produto atualizado com sucesso'];
             if ($pagina > 1)    $params['pagina']       = $pagina;
@@ -355,7 +355,7 @@ class ProdutoController extends BaseController
                 'filtro_nome'        => $filtros['filtro_nome'],
                 'filtro_dependencia' => $filtros['filtro_dependencia'],
                 'filtro_codigo'      => $filtros['filtro_codigo'],
-                'filtro_STATUS'      => $filtros['filtro_STATUS'],
+                'filtro_status'      => $filtros['filtro_status'],
                 'novo_tipo_bem_id'   => $novoTipoBemId,
                 'novo_bem'           => $novoBem,
                 'novo_complemento'   => $novoComplemento,
@@ -424,7 +424,7 @@ class ProdutoController extends BaseController
             'filtro_nome'        => $filtros['filtro_nome'],
             'filtro_dependencia' => $filtros['filtro_dependencia'],
             'filtro_codigo'      => $filtros['filtro_codigo'],
-            'filtro_STATUS'      => $filtros['filtro_STATUS'],
+            'filtro_status'      => $filtros['filtro_status'],
             'check'              => ['observacoes' => $produto['observacao'] ?? ''],
             'mensagem'           => '',
             'tipo_mensagem'      => '',
@@ -560,6 +560,51 @@ class ProdutoController extends BaseController
         }
     }
 
+    /**
+     * GET /products/sign — renderiza a tela de assinatura de produtos.
+     * Busca os produtos da comum e passa para a view, eliminando SQL direto na view.
+     */
+    public function signView(): void
+    {
+        $comumId = $this->obterComumIdOuRedirecionar();
+        if ($comumId === null) return;
+
+        $idPlanilha = (int) $this->query('id', $comumId);
+        $usuarioId  = (int) SessionManager::getUserId();
+
+        try {
+            $sql = "SELECT
+                        p.id_produto,
+                        p.codigo,
+                        CONCAT_WS(' ', p.bem, p.complemento) AS descricao_completa,
+                        p.complemento,
+                        p.imprimir_14_1,
+                        p.administrador_acessor_id AS minha_assinatura,
+                        tb.descricao AS tipo_descricao,
+                        d.descricao AS dependencia_descricao
+                    FROM produtos p
+                    LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
+                    LEFT JOIN dependencias d ON p.dependencia_id = d.id
+                    WHERE p.comum_id = :id_comum AND p.ativo = 1
+                    ORDER BY p.id_produto ASC";
+
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':id_comum', $idPlanilha, PDO::PARAM_INT);
+            $stmt->execute();
+            $produtos = $stmt->fetchAll();
+        } catch (\Throwable $e) {
+            error_log('Erro ao buscar produtos para assinatura: ' . $e->getMessage());
+            $produtos = [];
+        }
+
+        $this->renderizar('products/sign', [
+            'id_planilha' => $idPlanilha,
+            'comum_id'    => $comumId,
+            'usuario_id'  => $usuarioId,
+            'PRODUTOS'    => $produtos,
+        ]);
+    }
+
     public function assinar(): void
     {
         if (!$this->isPost()) {
@@ -568,6 +613,59 @@ class ProdutoController extends BaseController
         }
 
         $this->jsonErro('Funcionalidade em implementação.', 501);
+    }
+
+    /**
+     * POST /products/bulk-delete — exclusão em massa de produtos.
+     */
+    public function bulkDelete(): void
+    {
+        if (!$this->isPost()) {
+            $this->jsonErro('Método não permitido', 405);
+            return;
+        }
+
+        $comumId = $this->obterComumIdOuRedirecionar();
+        if ($comumId === null) return;
+
+        $rawComumId   = $this->post('comum_id', $this->post('id_planilha', ''));
+        $idsProdutos  = $this->post('ids_produtos', $this->post('ids_PRODUTOS', []));
+
+        if (!$rawComumId || empty($idsProdutos)) {
+            if ($this->isAjax()) {
+                $this->jsonErro('Parâmetros inválidos', 400);
+            } else {
+                $this->redirecionar('/products/view?comum_id=' . $comumId . '&erro=' . urlencode('Parâmetros inválidos'));
+            }
+            return;
+        }
+
+        try {
+            $idsProdutos = array_map('intval', (array) $idsProdutos);
+            $placeholders = implode(',', array_fill(0, count($idsProdutos), '?'));
+
+            // Hard delete mantido para compatibilidade com comportamento original do bulk-delete.php
+            $sql  = "DELETE FROM produtos WHERE comum_id = ? AND id_produto IN ($placeholders)";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(1, (int) $rawComumId, PDO::PARAM_INT);
+            foreach ($idsProdutos as $index => $id) {
+                $stmt->bindValue($index + 2, $id, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+
+            if ($this->isAjax()) {
+                $this->json(['success' => true, 'message' => 'Produtos excluídos com sucesso']);
+            } else {
+                $this->redirecionar('/products/view?comum_id=' . urlencode((string) $rawComumId) . '&sucesso=' . urlencode('Produtos excluídos com sucesso'));
+            }
+        } catch (\Exception $e) {
+            error_log('Erro bulkDelete: ' . $e->getMessage());
+            if ($this->isAjax()) {
+                $this->jsonErro('Erro ao excluir produtos: ' . $e->getMessage(), 500);
+            } else {
+                $this->redirecionar('/products/view?comum_id=' . $comumId . '&erro=' . urlencode('Erro ao excluir produtos'));
+            }
+        }
     }
 
     /**
@@ -583,9 +681,9 @@ class ProdutoController extends BaseController
         $nome = $this->query('nome', '');
         $dependencia = $this->query('dependencia', '');
         $filtro_codigo = $this->query('filtro_codigo', '');
-        $status = $this->query('STATUS', $this->query('status', ''));
+        $status = $this->query('status', $this->query('filtro_status', ''));
 
-        $params = ['id' => $comumId, 'comum_id' => $comumId, 'pagina' => $pagina, 'nome' => $nome, 'dependencia' => $dependencia, 'filtro_codigo' => $filtro_codigo, 'status' => $status, 'STATUS' => $status];
+        $params = ['id' => $comumId, 'comum_id' => $comumId, 'pagina' => $pagina, 'nome' => $nome, 'dependencia' => $dependencia, 'filtro_codigo' => $filtro_codigo, 'status' => $status];
 
         if ($idProduto <= 0 || $comumId <= 0) {
             $params['erro'] = 'Parâmetros inválidos';
@@ -594,28 +692,7 @@ class ProdutoController extends BaseController
         }
 
         try {
-            $sql = "UPDATE produtos 
-                                     SET editado_tipo_bem_id = 0,
-                                             editado_bem = '',
-                                             editado_complemento = '',
-                                             editado_dependencia_id = 0,
-
-                                             imprimir_etiqueta = 0,
-                                             checado = 0,
-                                             imprimir_14_1 = 0,
-                                             condicao_14_1 = '',
-                                             nota_numero = NULL,
-                                             nota_data = NULL,
-                                             nota_valor = NULL,
-                                             nota_fornecedor = '',
-                                             editado = 0
-                                     WHERE id_produto = :id_produto 
-                                         AND comum_id = :comum_id";
-
-            $stmt = $this->conexao->prepare($sql);
-            $stmt->bindValue(':id_produto', $idProduto, \PDO::PARAM_INT);
-            $stmt->bindValue(':comum_id', $comumId, \PDO::PARAM_INT);
-            $stmt->execute();
+            $this->produtoRepository->limparEdicoes($idProduto, $comumId);
 
             $params['sucesso'] = 'Edições limpas com sucesso!';
             $this->redirecionar('/products/view?' . http_build_query($params));

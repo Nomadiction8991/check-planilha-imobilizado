@@ -325,7 +325,7 @@ class ComumController extends BaseController
         }
 
         try {
-            // Apenas campos presentes na tabela `comums` e no formulário
+            // Apenas campos presentes na tabela `comuns` e no formulário
             $dados = [
                 'codigo' => trim($_POST['codigo'] ?? ''),
                 'descricao' => trim($_POST['descricao'] ?? ''),

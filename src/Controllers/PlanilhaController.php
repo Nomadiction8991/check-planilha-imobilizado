@@ -8,28 +8,35 @@ use App\Core\ConnectionManager;
 use App\Core\SessionManager;
 use App\Repositories\ComumRepository;
 use App\Repositories\DependenciaRepository;
+use App\Repositories\ImportacaoRepository;
 use App\Repositories\ProdutoRepository;
 use App\Services\ImportacaoService;
+use App\Services\LegacyImportacaoService;
 use App\Services\CsvParserService;
 use PDO;
 
 class PlanilhaController extends BaseController
 {
+    private const ITENS_POR_PAGINA = 20;
     private ImportacaoService $importacaoService;
+    private LegacyImportacaoService $legacyImportacaoService;
     private CsvParserService $csvParserService;
     private ComumRepository $comumRepository;
     private ProdutoRepository $produtoRepository;
     private DependenciaRepository $dependenciaRepository;
+    private ImportacaoRepository $importacaoRepository;
 
     public function __construct(?PDO $conexao = null)
     {
         $conexao = $conexao ?? ConnectionManager::getConnection();
 
-        $this->importacaoService = new ImportacaoService($conexao);
-        $this->csvParserService = new CsvParserService($conexao);
+        $this->importacaoService        = new ImportacaoService($conexao);
+        $this->legacyImportacaoService  = new LegacyImportacaoService($conexao);
+        $this->csvParserService         = new CsvParserService($conexao);
         $this->comumRepository = new ComumRepository($conexao);
         $this->produtoRepository = new ProdutoRepository($conexao);
         $this->dependenciaRepository = new DependenciaRepository($conexao);
+        $this->importacaoRepository = new ImportacaoRepository($conexao);
     }
 
     public function importar(): void
@@ -89,7 +96,7 @@ class PlanilhaController extends BaseController
             // Move arquivo para storage/importacao
             $dirImportacao = __DIR__ . '/../../storage/importacao';
             if (!is_dir($dirImportacao)) {
-                mkdir($dirImportacao, 0777, true);
+                mkdir($dirImportacao, 0755, true);
             }
 
             $nomeArquivo = 'importacao_' . ($comumId ?: 'multi') . '_' . time() . '.' . $extensao;
@@ -176,7 +183,7 @@ class PlanilhaController extends BaseController
             'pagina'           => 1,
             'total_paginas'    => 1,
             'total_registros'  => 0,
-            'itens_por_pagina' => 20,
+            'itens_por_pagina' => self::ITENS_POR_PAGINA,
             'acoes_salvas'     => $acoesSalvas,
             'comuns_detectadas' => $analise['comuns_detectadas'] ?? [],
             'igrejas_salvas'   => $igrejasSalvas,
@@ -362,7 +369,7 @@ class PlanilhaController extends BaseController
             if ($analise) {
                 $resultado = $this->importacaoService->processarComAcoes($importacaoId, $acoes, $analise);
             } else {
-                $resultado = $this->importacaoService->processar($importacaoId);
+                $resultado = $this->legacyImportacaoService->processar($importacaoId);
             }
 
             // Limpa dados temporários
@@ -434,7 +441,7 @@ class PlanilhaController extends BaseController
 
         // Filtros
         $paginaAtual = max(1, (int) ($this->query('pagina', 1)));
-        $itensPorPagina = 20; // limitar listagem de produtos a 20 por página (requisito do usuário)
+        $itensPorPagina = self::ITENS_POR_PAGINA;
 
         $filtros = [
             'nome'        => $this->query('nome', ''),
@@ -450,14 +457,7 @@ class PlanilhaController extends BaseController
         $dependencias = $this->dependenciaRepository->buscarTodos();
 
         // Contar erros de importação pendentes (não resolvidos) para esta comum
-        $conexao = \App\Core\ConnectionManager::getConnection();
-        $stmtErros = $conexao->prepare(
-            'SELECT COUNT(*) FROM import_erros ie
-              JOIN importacoes imp ON ie.importacao_id = imp.id
-             WHERE imp.comum_id = :comum_id AND ie.resolvido = 0'
-        );
-        $stmtErros->execute([':comum_id' => $comumId]);
-        $errosPendentes = (int) $stmtErros->fetchColumn();
+        $errosPendentes = $this->importacaoRepository->contarErrosPendentesPorComum($comumId);
 
         $this->renderizar('spreadsheets/view', [
             'comum_id'                    => $comumId,

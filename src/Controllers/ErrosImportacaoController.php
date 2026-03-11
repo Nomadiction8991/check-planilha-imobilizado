@@ -105,7 +105,7 @@ class ErrosImportacaoController extends BaseController
         $comum = [];
         if ($comumId > 0) {
             $stmtComum = $this->conexao->prepare(
-                "SELECT id, descricao FROM comums WHERE id = :id"
+                "SELECT id, descricao FROM comuns WHERE id = :id"
             );
             $stmtComum->execute([':id' => $comumId]);
             $comum = $stmtComum->fetch(PDO::FETCH_ASSOC) ?: [];

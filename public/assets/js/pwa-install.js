@@ -14,23 +14,19 @@
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
-                    console.log('✓ Service Worker registrado:', registration.scope);
-                    
                     // Verificar atualizações a cada 60 segundos
                     setInterval(() => {
                         registration.update();
                     }, 60000);
                 })
-                .catch(error => {
-                    console.error('✗ Erro ao registrar Service Worker:', error);
+                .catch(() => {
+                    // Falha silenciosa: registro do SW não é crítico para o funcionamento
                 });
         });
     }
 
     // Detectar evento beforeinstallprompt (PWA pode ser instalado)
     window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('✓ PWA pode ser instalado');
-        
         // Prevenir comportamento padrão (Chrome mostra mini-infobar)
         e.preventDefault();
         
@@ -43,7 +39,6 @@
 
     // Detectar quando o app foi instalado
     window.addEventListener('appinstalled', () => {
-        console.log('✓ PWA instalado com sucesso!');
         deferredPrompt = null;
         // Remover opção do menu
         const menuItem = document.getElementById('menu-install-pwa');
@@ -64,8 +59,6 @@
 
         // Aguardar escolha do usuário
         const { outcome } = await deferredPrompt.userChoice;
-        
-        console.log(`Usuário ${outcome === 'accepted' ? 'aceitou' : 'recusou'} a instalação`);
 
         // Limpar prompt (só pode ser usado uma vez)
         deferredPrompt = null;
@@ -137,7 +130,6 @@
 
     // Verificar se está rodando como PWA instalado
     if (isInstalled()) {
-        console.log('✓ Rodando como PWA instalado');
         document.documentElement.classList.add('pwa-installed');
     }
 
@@ -148,5 +140,4 @@
         canInstall: () => deferredPrompt !== null
     };
 
-    console.log('✓ PWA Install Manager carregado (modo menu apenas)');
 })();

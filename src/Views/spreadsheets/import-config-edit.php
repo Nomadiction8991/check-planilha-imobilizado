@@ -22,7 +22,7 @@ function carregar_planilha($conexao, $id_planilha)
                    c.descricao AS comum_descricao,
                    c.administracao, c.cidade, c.setor
             FROM planilhas p
-            LEFT JOIN comums c ON c.id = p.comum_id
+            LEFT JOIN comuns c ON c.id = p.comum_id
             WHERE p.id = :id";
     $st = $conexao->prepare($sql);
     $st->bindValue(':id', $id_planilha, PDO::PARAM_INT);
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $up1->execute();
 
 
-        $up2 = $conexao->prepare('UPDATE comums SET administracao = :adm, cidade = :cid, setor = :setor WHERE id = :cid_comum');
+        $up2 = $conexao->prepare('UPDATE comuns SET administracao = :adm, cidade = :cid, setor = :setor WHERE id = :cid_comum');
         $up2->bindValue(':adm', $administracao);
         $up2->bindValue(':cid', $cidade);
         if ($setor === null) {
@@ -94,7 +94,7 @@ ob_start();
 
 <?php if (!empty($mensagem)): ?>
     <div class="alert alert-<?php echo $tipo_mensagem === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show">
-        <?php echo $mensagem; ?>
+        <?= \App\Helpers\ViewHelper::e($mensagem) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>

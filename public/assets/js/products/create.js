@@ -20,8 +20,10 @@ function atualizarOpcoesBem() {
             const option = document.createElement('option');
             option.value = opcao;
             option.textContent = opcao;
-            if (window._postTipoBen !== null && window._postIdTipoBen !== null) {
-                if (opcao === window._postTipoBen && selectTipoBen.value === String(window._postIdTipoBen)) {
+            const _postTipoBen = window._appConfig ? window._appConfig.postTipoBen : null;
+            const _postIdTipoBen = window._appConfig ? window._appConfig.postIdTipoBen : null;
+            if (_postTipoBen !== null && _postIdTipoBen !== null) {
+                if (opcao === _postTipoBen && selectTipoBen.value === String(_postIdTipoBen)) {
                     option.selected = true;
                 }
             }
@@ -54,3 +56,28 @@ document.addEventListener('DOMContentLoaded', atualizarOpcoesBem);
         }, false);
     });
 })();
+
+// Controle dos radios de condição 14.1
+(function () {
+    var imprimir = document.getElementById('imprimir_14_1');
+    var radios = Array.from(document.querySelectorAll('input[name="condicao_14_1"]'));
+
+    function ensureDefault() {
+        if (!radios.some(function (r) { return r.checked; })) {
+            var def = document.getElementById('condicao_141_2');
+            if (def) def.checked = true;
+        }
+    }
+
+    function updateRequirement() {
+        var required = imprimir && imprimir.checked;
+        radios.forEach(function (r) {
+            if (required) r.setAttribute('required', 'required');
+            else r.removeAttribute('required');
+        });
+        ensureDefault();
+    }
+
+    ensureDefault();
+    if (imprimir) imprimir.addEventListener('change', updateRequirement);
+}());

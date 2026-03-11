@@ -46,6 +46,15 @@ class AuthController extends BaseController
 
     public function authenticate(): void
     {
+        $csrfToken = $this->post('_csrf_token', '');
+        if (!\App\Core\CsrfService::validate($csrfToken)) {
+            $this->renderizar('auth/login', [
+                'erro' => 'Requisição inválida. Por favor, tente novamente.',
+                'sucesso' => '',
+            ]);
+            return;
+        }
+
         $email = mb_strtoupper(trim($this->post('email', '')), 'UTF-8');
         $senha = trim($this->post('senha', ''));
 

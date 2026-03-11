@@ -20,7 +20,20 @@ use App\Services\CsvParserService;
 
 $dryRun = in_array('--dry-run', $argv ?? []);
 $pdo = ConnectionManager::getConnection();
-$parser = new CsvParserService($pdo);
+
+/**
+ * Subclasse local que expõe parsearNome publicamente para uso neste script.
+ * Necessário porque parsearNome é protected em CsvParserService.
+ */
+class CsvParserServiceScript extends CsvParserService
+{
+    public function parsearNomePublico(string $nome): array
+    {
+        return $this->parsearNome($nome);
+    }
+}
+
+$parser = new CsvParserServiceScript($pdo);
 
 echo "=== Correção BEM/COMPLEMENTO ===\n";
 echo $dryRun ? "[DRY-RUN] Nenhuma alteração será gravada.\n" : "[EXECUÇÃO REAL] Alterações serão gravadas no banco.\n";
@@ -44,9 +57,7 @@ if ($total === 0) {
     exit(0);
 }
 
-// Usar reflection para acessar o método privado parsearNome
-$refMethod = new ReflectionMethod(CsvParserService::class, 'parsearNome');
-$refMethod->setAccessible(true);
+// parsearNome é protected em CsvParserService; CsvParserServiceScript expõe via parsearNomePublico()
 
 $updateStmt = $pdo->prepare('
     UPDATE produtos 
@@ -68,7 +79,7 @@ foreach ($produtos as $i => $prod) {
 
     try {
         // Re-parsear o nome original usando a lógica corrigida
-        $parsed = $refMethod->invoke($parser, $nomeOriginal);
+        $parsed = $parser->parsearNomePublico($nomeOriginal);
 
         $novoBem = $parsed['bem'] ?? $prod['bem'];
         $novoComplemento = $parsed['complemento'] ?? '';

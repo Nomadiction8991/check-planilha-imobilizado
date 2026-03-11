@@ -17,12 +17,14 @@ $userName = $userName ?? '';
 $comuns = $comuns ?? [];
 $comumAtualId = $comumAtualId ?? null;
 
-function _fmtCodigoComum($codigo)
-{
-    // formata número como "BR 00-000". Se não for numérico, retorna original.
-    if (!is_numeric($codigo)) return $codigo;
-    $s = str_pad((string)$codigo, 5, '0', STR_PAD_LEFT);
-    return 'BR ' . substr($s, 0, 2) . '-' . substr($s, 2);
+if (!function_exists('_fmtCodigoComum')) {
+    function _fmtCodigoComum($codigo)
+    {
+        // formata número como "BR 00-000". Se não for numérico, retorna original.
+        if (!is_numeric($codigo)) return $codigo;
+        $s = str_pad((string)$codigo, 5, '0', STR_PAD_LEFT);
+        return 'BR ' . substr($s, 0, 2) . '-' . substr($s, 2);
+    }
 }
 ?>
 
@@ -57,4 +59,4 @@ function _fmtCodigoComum($codigo)
     </div>
 </div>
 
-<script src="/assets/js/layouts/header-mobile.js"></script>
+<script src="/assets/js/layouts/header-mobile.js" defer></script>

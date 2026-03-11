@@ -13,7 +13,7 @@ ob_start();
 
 <?= \App\Helpers\AlertHelper::fromQuery() ?>
 
-<form action="/spreadsheets/import" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+<form action="/spreadsheets/import" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate data-submit-lock>
     <!-- Arquivo CSV -->
     <div class="card mb-3">
         <div class="card-header">

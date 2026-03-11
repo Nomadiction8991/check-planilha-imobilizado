@@ -20,11 +20,13 @@ class FormHelper
         $maxlength = $options['maxlength'] ?? '';
         $readonly = $options['readonly'] ?? false;
         $helpText = $options['help'] ?? '';
+        $autocomplete = $options['autocomplete'] ?? '';
 
         $requiredAttr = $required ? 'required' : '';
         $readonlyAttr = $readonly ? 'readonly' : '';
         $maxlengthAttr = $maxlength ? 'maxlength="' . self::esc((string) $maxlength) . '"' : '';
         $placeholderAttr = $placeholder ? 'placeholder="' . self::esc($placeholder) . '"' : '';
+        $autocompleteAttr = $autocomplete ? 'autocomplete="' . self::esc($autocomplete) . '"' : '';
 
         $requiredLabel = $required ? '<span class="text-danger">*</span>' : '';
         $escapedValue = self::esc($value);
@@ -33,7 +35,7 @@ class FormHelper
 
         $html = '<div class="mb-3">';
         $html .= "<label for=\"{$escapedId}\" class=\"form-label\">{$escapedLabel} {$requiredLabel}</label>";
-        $html .= "<input type=\"text\" class=\"form-control\" id=\"{$escapedId}\" name=\"" . self::esc($name) . "\" value=\"{$escapedValue}\" {$requiredAttr} {$readonlyAttr} {$maxlengthAttr} {$placeholderAttr}>";
+        $html .= "<input type=\"text\" class=\"form-control\" id=\"{$escapedId}\" name=\"" . self::esc($name) . "\" value=\"{$escapedValue}\" {$requiredAttr} {$readonlyAttr} {$maxlengthAttr} {$placeholderAttr} {$autocompleteAttr}>";
 
         if ($helpText) {
             $html .= '<div class="form-text">' . self::esc($helpText) . '</div>';
@@ -81,6 +83,7 @@ class FormHelper
         $placeholder = $options['placeholder'] ?? '';
         $readonly = $options['readonly'] ?? false;
         $helpText = $options['help'] ?? '';
+        $autocomplete = $options['autocomplete'] ?? 'email';
 
         $requiredAttr = $required ? 'required' : '';
         $readonlyAttr = $readonly ? 'readonly' : '';
@@ -93,7 +96,7 @@ class FormHelper
 
         $html = '<div class="mb-3">';
         $html .= "<label for=\"{$escapedId}\" class=\"form-label\">{$escapedLabel} {$requiredLabel}</label>";
-        $html .= "<input type=\"email\" class=\"form-control\" id=\"{$escapedId}\" name=\"" . self::esc($name) . "\" value=\"{$escapedValue}\" {$requiredAttr} {$readonlyAttr} {$placeholderAttr}>";
+        $html .= "<input type=\"email\" class=\"form-control\" id=\"{$escapedId}\" name=\"" . self::esc($name) . "\" value=\"{$escapedValue}\" {$requiredAttr} {$readonlyAttr} {$placeholderAttr} autocomplete=\"" . self::esc($autocomplete) . "\">";
 
         if ($helpText) {
             $html .= '<div class="form-text">' . self::esc($helpText) . '</div>';

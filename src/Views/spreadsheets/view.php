@@ -570,7 +570,7 @@ if (false && !empty($acesso_bloqueado)) {
             border-left: 4px solid #fdd835 !important;
         }
 
-        /* Aes: usar padrão Bootstrap para botões e manter largura proporcional */
+        /* Ações: usar padrão Bootstrap para botões e manter largura proporcional */
         .acao-container .btn {
             aspect-ratio: 1 / 1;
             width: 48px;
@@ -726,7 +726,7 @@ if (false && !empty($acesso_bloqueado)) {
                 border-left: 4px solid #fdd835 !important;
             }
 
-            /* Aes: usar padrão Bootstrap para botões e manter largura proporcional */
+            /* Ações: usar padrão Bootstrap para botões e manter largura proporcional */
             .acao-container .btn {
                 aspect-ratio: 1 / 1;
                 width: 48px;
