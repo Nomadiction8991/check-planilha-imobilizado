@@ -20,16 +20,11 @@ $pageTitle = htmlspecialchars($planilha['comum_descricao'] ?? 'VISUALIZAR Planil
 $backUrl = base_url('/churches');
 
 
-if (false && !empty($acesso_bloqueado)) {
-    // Bloco legado mantido desativado intencionalmente.
-}
-
-
 ob_start();
 ?>
 
 <style>
-    .card {
+    .spreadsheets-view .card {
         background: #fff;
         border: 1px solid #e5e5e5;
         border-radius: 2px;
@@ -37,13 +32,13 @@ ob_start();
         overflow: hidden;
     }
 
-    .card-header,
-    .card-footer {
+    .spreadsheets-view .card-header,
+    .spreadsheets-view .card-footer {
         background: #fafafa;
         border-color: #e5e5e5;
     }
 
-    .card-header {
+    .spreadsheets-view .card-header {
         padding: 14px 18px;
         display: flex;
         align-items: center;
@@ -56,17 +51,17 @@ ob_start();
         text-transform: uppercase;
     }
 
-    .card-body {
+    .spreadsheets-view .card-body {
         padding: 18px;
     }
 
-    .card-footer {
+    .spreadsheets-view .card-footer {
         padding: 12px 18px;
         font-size: 12px;
         color: #525252;
     }
 
-    .form-label {
+    .spreadsheets-view .form-label {
         display: block;
         font-size: 12px;
         font-weight: 600;
@@ -74,8 +69,8 @@ ob_start();
         margin-bottom: 6px;
     }
 
-    .form-control,
-    .form-select {
+    .spreadsheets-view .form-control,
+    .spreadsheets-view .form-select {
         width: 100%;
         min-height: 42px;
         padding: 10px 12px;
@@ -86,14 +81,14 @@ ob_start();
         font-size: 14px;
     }
 
-    .form-control:focus,
-    .form-select:focus {
+    .spreadsheets-view .form-control:focus,
+    .spreadsheets-view .form-select:focus {
         outline: none;
         border-color: #000;
         box-shadow: none;
     }
 
-    .btn {
+    .spreadsheets-view .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -110,25 +105,25 @@ ob_start();
         transition: background .12s ease, color .12s ease, border-color .12s ease;
     }
 
-    .btn:hover {
+    .spreadsheets-view .btn:hover {
         background: #f5f5f5;
         color: #171717;
     }
 
-    .btn.btn-primary,
-    .btn-primary {
+    .spreadsheets-view .btn.btn-primary,
+    .spreadsheets-view .btn-primary {
         background: #000;
         border-color: #000;
         color: #fff;
     }
 
-    .btn.btn-primary:hover,
-    .btn-primary:hover {
+    .spreadsheets-view .btn.btn-primary:hover,
+    .spreadsheets-view .btn-primary:hover {
         background: #171717;
         color: #fff;
     }
 
-    .accordion-button {
+    .spreadsheets-view .accordion-button {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -143,29 +138,29 @@ ob_start();
         box-shadow: none;
     }
 
-    .accordion-body {
+    .spreadsheets-view .accordion-body {
         padding: 16px 0 0;
         border-top: 1px solid #e5e5e5;
     }
 
-    .filters-grid {
+    .spreadsheets-view .filters-grid {
         display: grid;
         gap: 14px;
     }
 
-    .filters-grid-advanced {
+    .spreadsheets-view .filters-grid-advanced {
         display: grid;
         gap: 14px;
     }
 
-    .toolbar-inline {
+    .spreadsheets-view .toolbar-inline {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         margin: 0 0 18px;
     }
 
-    .toolbar-inline .floating-btn {
+    .spreadsheets-view .toolbar-inline .floating-btn {
         min-width: 170px !important;
         height: 40px !important;
         border-radius: 2px !important;
@@ -179,19 +174,19 @@ ob_start();
         justify-content: center !important;
     }
 
-    .toolbar-inline .floating-btn:hover {
+    .spreadsheets-view .toolbar-inline .floating-btn:hover {
         transform: none !important;
         background: #f5f5f5 !important;
         box-shadow: none !important;
     }
 
-    .toolbar-inline .floating-btn.listening {
+    .spreadsheets-view .toolbar-inline .floating-btn.listening {
         background: #000 !important;
         color: #fff !important;
         animation: none !important;
     }
 
-    .floating-buttons-container {
+    .spreadsheets-view .floating-buttons-container {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
@@ -200,7 +195,7 @@ ob_start();
         align-items: center !important;
     }
 
-    .floating-btn {
+    .spreadsheets-view .floating-btn {
         cursor: pointer !important;
         display: inline-flex !important;
         align-items: center !important;
@@ -208,21 +203,21 @@ ob_start();
         line-height: 1 !important;
     }
 
-    .list-group {
+    .spreadsheets-view .list-group {
         display: block;
     }
 
-    .list-group-item {
+    .spreadsheets-view .list-group-item {
         display: grid;
         grid-template-columns: 112px minmax(0, 1fr) 176px;
         gap: 16px;
         align-items: start;
-        padding: 18px;
+        padding: 14px 18px;
         border-top: 1px solid #e5e5e5;
         background: #fff;
     }
 
-    .list-group-item:first-child {
+    .spreadsheets-view .list-group-item:first-child {
         border-top: none;
     }
 
@@ -260,40 +255,188 @@ ob_start();
         color: #171717;
     }
 
+    .produto-main {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .produto-titulo {
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.35;
+        color: #171717;
+        word-break: break-word;
+    }
+
+    .produto-meta-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
     .edicao-pendente,
     .observacao-PRODUTO {
-        margin-top: 12px;
-        padding: 10px 12px;
-        border: 1px solid #e5e5e5;
+        display: inline-flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 10px;
+        border: 1px solid #e7e2d8;
         border-radius: 2px;
-        background: #fafafa;
-        font-size: 12px;
-        color: #404040;
-        line-height: 1.5;
+        background: #fbfaf7;
+        font-size: 11px;
+        color: #4b4338;
+        line-height: 1.35;
+        min-width: 0;
+        max-width: 100%;
+        flex: 0 1 auto;
+    }
+
+    .edicao-pendente strong,
+    .observacao-PRODUTO strong {
+        display: inline-block;
+        margin-bottom: 0;
+        color: #2f2a24;
+        letter-spacing: .05em;
+        font-size: 10px;
+        text-transform: uppercase;
     }
 
     .acao-container {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
+        align-content: start;
     }
 
-    .acao-container .btn,
-    .acao-container button {
+    .acao-container form {
+        margin: 0;
+    }
+
+    .PRODUTO-action-form,
+    .action-observacao,
+    .action-editar {
+        display: block;
         width: 100%;
-        min-height: 42px;
     }
 
-    .acao-container .btn span,
-    .acao-container button span {
-        white-space: nowrap;
+    .action-check .btn,
+    .action-imprimir .btn,
+    .action-observacao,
+    .action-editar {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 40px;
+        border-width: 1px;
+        border-style: solid;
+        border-radius: 2px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 12px;
+        font-weight: 700;
+        letter-spacing: .01em;
+        line-height: 1;
+        text-align: center;
+        transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
     }
 
-    .acao-container .btn.active,
-    .acao-container button.active {
-        background: #000;
-        border-color: #000;
+    .action-check .btn:hover,
+    .action-imprimir .btn:hover,
+    .action-observacao:hover,
+    .action-editar:hover {
+        box-shadow: 0 6px 14px rgba(62, 48, 22, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .action-check .btn {
+        background: linear-gradient(180deg, #f7fcf8 0%, #eaf7ee 100%);
+        color: #1f6a3b;
+        border-color: #9dd8af;
+        box-shadow: inset 0 0 0 1px rgba(34, 112, 63, 0.06);
+    }
+
+    .action-check .btn:hover,
+    .action-check .btn.active {
+        background: linear-gradient(180deg, #249553 0%, #1f6a3b 100%);
         color: #fff;
+        border-color: #249553;
+        box-shadow: none;
+    }
+
+    .action-imprimir .btn {
+        background: linear-gradient(180deg, #fffaf2 0%, #fdf0d9 100%);
+        color: #b56e13;
+        border-color: #f5be59;
+        box-shadow: inset 0 0 0 1px rgba(181, 111, 20, 0.06);
+    }
+
+    .action-imprimir .btn:hover,
+    .action-imprimir .btn.active {
+        background: linear-gradient(180deg, #dc8b19 0%, #b56e13 100%);
+        color: #fff;
+        border-color: #dc8b19;
+        box-shadow: none;
+    }
+
+    .action-observacao {
+        background: linear-gradient(180deg, #fff8ef 0%, #ffedd4 100%);
+        color: #bc5c11;
+        border-color: #f2b363;
+        box-shadow: inset 0 0 0 1px rgba(188, 92, 17, 0.05);
+    }
+
+    .action-observacao:hover,
+    .action-observacao.active {
+        background: linear-gradient(180deg, #d97418 0%, #bc5c11 100%);
+        color: #fff;
+        border-color: #d97418;
+        box-shadow: none;
+    }
+
+    .action-editar {
+        background: linear-gradient(180deg, #fffceb 0%, #fef4c7 100%);
+        color: #9a6700;
+        border-color: #f2cd46;
+        box-shadow: inset 0 0 0 1px rgba(154, 103, 0, 0.05);
+    }
+
+    .action-editar:hover,
+    .action-editar.active {
+        background: linear-gradient(180deg, #d4a115 0%, #b38500 100%);
+        color: #fff;
+        border-color: #d4a115;
+        box-shadow: none;
+    }
+
+    .action-check .btn:disabled,
+    .action-imprimir .btn:disabled,
+    .action-observacao.disabled,
+    .action-editar.disabled {
+        opacity: .45;
+        filter: grayscale(.15);
+    }
+
+    .action-check .btn i,
+    .action-imprimir .btn i,
+    .action-observacao i,
+    .action-editar i {
+        flex: 0 0 auto;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .action-check .btn span,
+    .action-imprimir .btn span,
+    .action-observacao span,
+    .action-editar span {
+        white-space: nowrap;
+        flex: 0 1 auto;
+        line-height: 1;
     }
 
     .linha-dr {
@@ -402,6 +545,11 @@ ob_start();
     }
 
     @media (min-width: 1024px) {
+        .list-group-item {
+            grid-template-columns: 104px minmax(0, 1fr) 196px;
+            gap: 14px 16px;
+        }
+
         .filters-grid {
             grid-template-columns: minmax(0, 2fr) 220px;
             align-items: end;
@@ -409,6 +557,55 @@ ob_start();
 
         .filters-grid-advanced {
             grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .produto-header {
+            padding-top: 2px;
+        }
+
+        .produto-main {
+            padding-right: 0;
+        }
+
+        .produto-meta-grid {
+            max-width: 100%;
+        }
+
+        .acao-container {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-self: start;
+            position: sticky;
+            top: 92px;
+            gap: 6px;
+        }
+
+        .acao-container .btn,
+        .acao-container button {
+            padding: 0;
+            min-height: 36px;
+        }
+
+        .acao-container .btn span,
+        .acao-container button span {
+            display: none;
+        }
+
+        .acao-container .btn i,
+        .acao-container button i {
+            font-size: 15px;
+        }
+
+        .edicao-pendente,
+        .observacao-PRODUTO {
+            max-width: min(100%, 360px);
+        }
+
+        .edicao-pendente {
+            flex-basis: min(100%, 430px);
+        }
+
+        .observacao-PRODUTO {
+            flex-basis: min(100%, 220px);
         }
     }
 
@@ -441,6 +638,15 @@ ob_start();
             grid-template-columns: 1fr;
         }
 
+        .produto-main {
+            gap: 10px;
+        }
+
+        .produto-meta-grid {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
         .acao-container {
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
@@ -450,6 +656,11 @@ ob_start();
             min-height: 44px;
             padding: 0;
             gap: 0;
+            justify-content: center;
+            border-radius: 2px;
+            text-align: center;
+            box-shadow: none;
+            transform: none;
         }
 
         .acao-container .btn span,
@@ -461,6 +672,8 @@ ob_start();
 
 <!-- Link para Material Icons -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+<div class="spreadsheets-view">
 
 <?php if (!empty($_GET['sucesso'])): ?>
     <div class="px-4 py-3 mb-3 d-flex align-items-start gap-3" style="background:#fafafa;border:1px solid #d4d4d4;border-radius:2px;color:#171717">
@@ -697,91 +910,9 @@ ob_start();
                         <?php endif; ?>
                     </div>
 
-                    <!-- Edição Pendente / Impressão 14.1 -->
-                    <?php if ($tem_edicao || ($p['imprimir_14_1'] ?? 0) == 1): ?>
-                        <div class="edicao-pendente">
-                            <strong><?php echo mb_convert_case('Edição', MB_CASE_TITLE, 'UTF-8') . ':'; ?></strong>
-
-                            <?php if ($tem_edicao): ?>
-                                <br>
-                                <?php
-
-                                $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
-
-                                // Sempre montar a descrição editada a partir das partes
-                                $tipo_codigo_final = $p['editado_tipo_codigo'] ?: $p['tipo_codigo'];
-                                $tipo_desc_final = $p['editado_tipo_desc'] ?: $p['tipo_desc'];
-                                $ben_final = !empty($p['editado_bem']) ? $p['editado_bem'] : ($p['bem'] ?? '');
-                                $comp_final = !empty($p['editado_complemento']) ? $p['editado_complemento'] : ($p['complemento'] ?? '');
-
-                                $partes = [];
-                                if ($tipo_codigo_final || $tipo_desc_final) {
-                                    $partes[] = mb_strtoupper(trim(($tipo_codigo_final ? $tipo_codigo_final . ' - ' : '') . $tipo_desc_final), 'UTF-8');
-                                }
-                                if ($ben_final !== '') {
-                                    $partes[] = mb_strtoupper($ben_final, 'UTF-8');
-                                }
-                                if ($comp_final !== '') {
-                                    $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
-                                    if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
-                                        $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
-                                        $comp_tmp = preg_replace('/^[\s\-\/]+/', '', $comp_tmp);
-                                    }
-                                    if ($comp_tmp !== '') $partes[] = $comp_tmp;
-                                }
-
-                                $desc_editada_visivel = implode(' ', $partes);
-
-                                if ($desc_editada_visivel === '') {
-                                    $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
-                                }
-
-                                // Anexar dependência editada/original entre chaves no fim
-                                if (!empty($dep_final)) {
-                                    $desc_editada_visivel .= ' {' . mb_strtoupper($dep_final, 'UTF-8') . '}';
-                                }
-
-                                echo htmlspecialchars($desc_editada_visivel);
-                                ?><br>
-                            <?php endif; ?>
-
-                            <?php if (($p['imprimir_14_1'] ?? 0) == 1): ?>
-                                <div class="relatorios-lista">
-                                    <strong class="relatorios-subtitulo">Relatórios</strong>
-                                    <ul>
-                                        <li>14.1</li>
-                                    </ul>
-                                </div>
-                            <?php endif; ?>
-
-                            <?php
-                            // Exibir dados da Nota Fiscal se existirem
-                            $nota_numero = trim((string)($p['nota_numero'] ?? ''));
-                            $nota_data = trim((string)($p['nota_data'] ?? ''));
-                            $nota_valor = trim((string)($p['nota_valor'] ?? ''));
-                            $nota_fornecedor = trim((string)($p['nota_fornecedor'] ?? ''));
-                            if ($nota_numero !== '' || $nota_data !== '' || $nota_valor !== '' || $nota_fornecedor !== ''): ?>
-                                <div class="nota-fiscal-lista mt-2">
-                                    <strong>Nota Fiscal:</strong><br>
-                                    <?php if ($nota_numero !== ''): ?>Número: <?php echo htmlspecialchars($nota_numero, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
-                                <?php if ($nota_data !== ''): ?>Data: <?php echo htmlspecialchars($nota_data, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
-                            <?php if ($nota_valor !== ''): ?>Valor: <?php echo htmlspecialchars($nota_valor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
-                        <?php if ($nota_fornecedor !== ''): ?>Fornecedor: <?php echo htmlspecialchars($nota_fornecedor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Observacao -->
-                    <?php if (!empty($p['observacao'])): ?>
-                        <div class="observacao-PRODUTO">
-                            <strong><?php echo htmlspecialchars(to_uppercase('observação'), ENT_QUOTES, 'UTF-8'); ?>:</strong><br>
-                            <?php echo htmlspecialchars(to_uppercase($p['observacao']), ENT_QUOTES, 'UTF-8'); ?><br>
-                        </div>
-                    <?php endif; ?>
-
                     <!-- Informações -->
-                    <div class="info-PRODUTO">
+                    <div class="produto-main">
+                        <div class="info-PRODUTO">
                         <?php
                         // Montar título padrão: {TIPO_BEM} BEM COMPLEMENTO {DEPENDÊNCIA}
                         $tipoCodigo = trim((string)($p['tipo_codigo'] ?? ''));
@@ -803,7 +934,94 @@ ob_start();
 
                         $titulo = trim(($tipoPart ? $tipoPart . ' ' : '') . $descricao . ($depPart ? ' ' . $depPart : ''));
                         ?>
-                        <strong><?php echo htmlspecialchars($titulo); ?></strong>
+                            <div class="produto-titulo"><?php echo htmlspecialchars($titulo); ?></div>
+                        </div>
+
+                        <?php if ($tem_edicao || ($p['imprimir_14_1'] ?? 0) == 1 || !empty($p['observacao'])): ?>
+                            <div class="produto-meta-grid">
+                                <?php if ($tem_edicao || ($p['imprimir_14_1'] ?? 0) == 1): ?>
+                                    <div class="edicao-pendente">
+                                        <strong><?php echo mb_convert_case('Edição', MB_CASE_TITLE, 'UTF-8') . ':'; ?></strong>
+
+                                        <?php if ($tem_edicao): ?>
+                                            <?php
+
+                                            $dep_final = ($p['editado_dependencia_desc'] ?: $p['dependencia_desc']);
+
+                                            // Sempre montar a descrição editada a partir das partes
+                                            $tipo_codigo_final = $p['editado_tipo_codigo'] ?: $p['tipo_codigo'];
+                                            $tipo_desc_final = $p['editado_tipo_desc'] ?: $p['tipo_desc'];
+                                            $ben_final = !empty($p['editado_bem']) ? $p['editado_bem'] : ($p['bem'] ?? '');
+                                            $comp_final = !empty($p['editado_complemento']) ? $p['editado_complemento'] : ($p['complemento'] ?? '');
+
+                                            $partes = [];
+                                            if ($tipo_codigo_final || $tipo_desc_final) {
+                                                $partes[] = mb_strtoupper(trim(($tipo_codigo_final ? $tipo_codigo_final . ' - ' : '') . $tipo_desc_final), 'UTF-8');
+                                            }
+                                            if ($ben_final !== '') {
+                                                $partes[] = mb_strtoupper($ben_final, 'UTF-8');
+                                            }
+                                            if ($comp_final !== '') {
+                                                $comp_tmp = mb_strtoupper($comp_final, 'UTF-8');
+                                                if ($ben_final !== '' && strpos($comp_tmp, strtoupper($ben_final)) === 0) {
+                                                    $comp_tmp = trim(substr($comp_tmp, strlen($ben_final)));
+                                                    $comp_tmp = preg_replace('/^[\s\-\/]+/', '', $comp_tmp);
+                                                }
+                                                if ($comp_tmp !== '') {
+                                                    $partes[] = $comp_tmp;
+                                                }
+                                            }
+
+                                            $desc_editada_visivel = implode(' ', $partes);
+
+                                            if ($desc_editada_visivel === '') {
+                                                $desc_editada_visivel = 'EDICAO SEM DESCRICAO';
+                                            }
+
+                                            // Anexar dependência editada/original entre chaves no fim
+                                            if (!empty($dep_final)) {
+                                                $desc_editada_visivel .= ' {' . mb_strtoupper($dep_final, 'UTF-8') . '}';
+                                            }
+
+                                            echo htmlspecialchars($desc_editada_visivel);
+                                            ?><br>
+                                        <?php endif; ?>
+
+                                        <?php if (($p['imprimir_14_1'] ?? 0) == 1): ?>
+                                            <div class="relatorios-lista">
+                                                <strong class="relatorios-subtitulo">Relatórios</strong>
+                                                <ul>
+                                                    <li>14.1</li>
+                                                </ul>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <?php
+                                        // Exibir dados da Nota Fiscal se existirem
+                                        $nota_numero = trim((string)($p['nota_numero'] ?? ''));
+                                        $nota_data = trim((string)($p['nota_data'] ?? ''));
+                                        $nota_valor = trim((string)($p['nota_valor'] ?? ''));
+                                        $nota_fornecedor = trim((string)($p['nota_fornecedor'] ?? ''));
+                                        if ($nota_numero !== '' || $nota_data !== '' || $nota_valor !== '' || $nota_fornecedor !== ''): ?>
+                                            <div class="nota-fiscal-lista mt-2">
+                                                <strong>Nota Fiscal:</strong><br>
+                                                <?php if ($nota_numero !== ''): ?>Número: <?php echo htmlspecialchars($nota_numero, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                                <?php if ($nota_data !== ''): ?>Data: <?php echo htmlspecialchars($nota_data, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                                <?php if ($nota_valor !== ''): ?>Valor: <?php echo htmlspecialchars($nota_valor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                                <?php if ($nota_fornecedor !== ''): ?>Fornecedor: <?php echo htmlspecialchars($nota_fornecedor, ENT_QUOTES, 'UTF-8'); ?><br><?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($p['observacao'])): ?>
+                                    <div class="observacao-PRODUTO">
+                                        <strong><?php echo htmlspecialchars(to_uppercase('observação'), ENT_QUOTES, 'UTF-8'); ?>:</strong><br>
+                                        <?php echo htmlspecialchars(to_uppercase($p['observacao']), ENT_QUOTES, 'UTF-8'); ?><br>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Ações -->
@@ -885,6 +1103,8 @@ echo \App\Helpers\PaginationHelper::render(
 );
 ?>
 
+</div>
+
 <!-- Variáveis PHP necessárias para o JS externo -->
 <script>
     window._comumId = <?php echo json_encode($comum_id ?? ''); ?>;
@@ -952,7 +1172,7 @@ echo \App\Helpers\PaginationHelper::render(
 <!-- Quagga2 para leitura de códigos de barras -->
 <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
 <!-- JS extraído: AJAX, voz, câmera/barcode -->
-<script src="/assets/js/spreadsheets/view.js"></script>
+<script src="/assets/js/spreadsheets/view.js?v=<?= filemtime($projectRoot . '/public/assets/js/spreadsheets/view.js') ?>"></script>
 
 <?php
 

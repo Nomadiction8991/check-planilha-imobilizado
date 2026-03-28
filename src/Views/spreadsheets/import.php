@@ -31,7 +31,7 @@ ob_start();
         </div>
     </div>
 
-    <button type="submit" class="w-full px-4 py-2 bg-black text-white font-medium hover:bg-neutral-900 transition" style="border-radius:2px" id="btn-enviar">
+    <button type="submit" class="btn btn-action-confirm w-full px-4 py-2 font-medium transition" style="border-radius:2px" id="btn-enviar">
         <i class="bi bi-upload me-2"></i>
         <?php echo htmlspecialchars(\App\Helpers\StringHelper::toUppercase('Enviar e Analisar'), ENT_QUOTES, 'UTF-8'); ?>
     </button>

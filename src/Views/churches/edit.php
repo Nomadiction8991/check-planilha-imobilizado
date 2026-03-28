@@ -15,9 +15,10 @@
         </div>
         <div class="p-6">
             <?php if (!empty($_SESSION['mensagem'])): ?>
-                <div class="border p-4 mb-4 flex justify-between items-center" style="border-radius:2px;background:#fafafa;border-color:#d4d4d4">
-                    <span style="color:#171717"><?= htmlspecialchars($_SESSION['mensagem']) ?></span>
-                    <button type="button" style="color:#171717" onclick="this.parentElement.style.display='none';"><i class="bi bi-x"></i></button>
+                <?php $alertClass = (($_SESSION['tipo_mensagem'] ?? '') === 'success') ? 'alert-success' : 'alert-warning'; ?>
+                <div class="alert <?= $alertClass ?> mb-4" style="align-items:center">
+                    <span style="flex:1"><?= htmlspecialchars($_SESSION['mensagem']) ?></span>
+                    <button type="button" style="background:none;border:none;cursor:pointer;color:inherit;padding:0" onclick="this.parentElement.style.display='none';"><i class="bi bi-x"></i></button>
                 </div>
                 <?php
                 unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
@@ -110,7 +111,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-2 pt-4 border-t border-neutral-200">
-                    <button type="submit" class="px-4 py-2 bg-black hover:bg-neutral-900 text-white font-semibold transition flex items-center justify-center gap-2" style="border-radius:2px">
+                    <button type="submit" class="btn btn-action-edit px-4 py-2 font-semibold transition flex items-center justify-center gap-2" style="border-radius:2px">
                         <i class="bi bi-check-lg"></i>Salvar Alterações
                     </button>
                     <a href="<?= $backUrl ?? '/churches' ?>" class="px-4 py-2 bg-neutral-500 hover:bg-neutral-600 text-white font-semibold transition flex items-center justify-center gap-2" style="border-radius:2px">

@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['public_comum_id'] = $planilha['id'];
         $_SESSION['public_comum'] = $planilha['comum'];
 
-        header('Location: /comuns?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
+        header('Location: /churches?contexto=planilha&id=' . urlencode($planilha['id']) . '&comum_id=' . urlencode($planilha['id']) . '&publico=1');
         exit;
     } catch (Exception $e) {
         $erro = $e->getMessage();
@@ -64,13 +64,13 @@ try {
 </head>
 
 <body>
-    <div class="box">
-        <div class="box-header">
+    <div class="public-sign-box">
+        <div class="public-sign-box-header">
             <i class="bi bi-pen fs-1 d-block mb-2"></i>
             <h4 class="mb-0">Assinar Documentos</h4>
             <small>Acesso público</small>
         </div>
-        <div class="box-body">
+        <div class="public-sign-box-body">
             <?php if (!empty($erro)): ?>
                 <div class="alert alert-danger alert-dismissible fade show">
                     <i class="bi bi-exclamation-triangle me-2"></i>

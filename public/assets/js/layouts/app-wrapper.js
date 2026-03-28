@@ -85,8 +85,8 @@ document.addEventListener('show.bs.modal', function (event) {
 
 // Auto-dismiss alerts
 (function () {
-    var AUTO_MS = 3000;
-    var FADE_MS = 1000;
+    var AUTO_MS = 700;
+    var FADE_MS = 300;
 
     function processAlert(el) {
         if (!el || el.dataset._autoDismissProcessed) return;

@@ -35,9 +35,6 @@ function format_usuario_valor($valor)
 ob_start();
 ?>
 
-<link href="/assets/css/usuarios/usuario_ver.css" rel="stylesheet">
-
-
 <!-- JQUERY e INPUTMASK -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/inputmask@5.0.8/dist/inputmask.min.js"></script>

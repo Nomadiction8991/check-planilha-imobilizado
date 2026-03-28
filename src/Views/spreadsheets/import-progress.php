@@ -96,8 +96,6 @@ ob_start();
 </script>
 <script src="/assets/js/spreadsheets/import-progress.js"></script>
 
-<link href="/assets/css/planilhas/importacao_progresso.css" rel="stylesheet">
-
 <?php
 $contentHtml = ob_get_clean();
 include $projectRoot . '/src/Views/layouts/app.php';

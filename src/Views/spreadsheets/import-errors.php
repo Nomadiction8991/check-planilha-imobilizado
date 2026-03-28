@@ -123,31 +123,31 @@ ob_start();
 
 <!-- ── Alerta: ainda há pendentes ────────────────────────────────────────── -->
 <?php if ($resumo['pendentes'] > 0): ?>
-    <div class="bg-neutral-50 border border-black rounded flex items-start gap-2 p-4 mb-4">
-        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 text-black mt-1"></i>
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
         <div>
-            <strong class="text-black"><?= $resumo['pendentes'] ?> item<?= $resumo['pendentes'] !== 1 ? 'ns' : '' ?>
+            <strong><?= $resumo['pendentes'] ?> item<?= $resumo['pendentes'] !== 1 ? 'ns' : '' ?>
                 ainda com erro.</strong>
-            <div class="text-black text-sm mt-1">
+            <div class="text-sm mt-1">
                 Corrija o CSV, baixe-o com o botão acima e reimporte pela tela de
-                <a href="/spreadsheets/import" class="underline font-semibold text-black">Importar Planilha</a>.
+                <a href="/spreadsheets/import" class="underline font-semibold" style="color:inherit">Importar Planilha</a>.
                 Esta mensagem desaparecerá automaticamente quando todos forem marcados como resolvidos.
             </div>
         </div>
     </div>
 <?php else: ?>
-    <div class="bg-neutral-50 border border-neutral-300 rounded flex items-start gap-2 p-4 mb-4">
-        <i class="bi bi-check-circle-fill flex-shrink-0 text-black mt-1"></i>
-        <div class="text-black">
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle-fill flex-shrink-0 mt-1"></i>
+        <div>
             <strong>Tudo certo!</strong>&nbsp;Todos os erros desta importação foram resolvidos.
         </div>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($_GET['aviso'])): ?>
-    <div class="bg-neutral-50 border border-neutral-300 rounded flex items-start gap-2 p-4 mb-4">
-        <i class="bi bi-info-circle-fill flex-shrink-0 text-black mt-1"></i>
-        <div class="text-black text-sm">
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+        <div class="text-sm">
             <?= htmlspecialchars((string) $_GET['aviso'], ENT_QUOTES, 'UTF-8') ?>
         </div>
     </div>

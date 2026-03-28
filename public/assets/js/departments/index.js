@@ -20,16 +20,13 @@ function deletarDependencia(id) {
         return;
     }
     const confirmBtn = modal.querySelector('.confirm-delete');
-    modal.querySelector('.modal-body span').textContent = 'Deseja realmente excluir esta dependência?';
-    confirmBtn.setAttribute('data-delete-id', id);
-    // show modal using Bootstrap API if available
-    if (typeof bootstrap !== 'undefined') {
-        const bs = new bootstrap.Modal(modal);
-        bs.show();
-    } else {
-        modal.style.display = 'block';
-        modal.classList.add('show');
+    const messageTarget = modal.querySelector('div span');
+    if (messageTarget) {
+        messageTarget.textContent = 'Deseja realmente excluir esta dependência?';
     }
+    confirmBtn.setAttribute('data-delete-id', id);
+    modal.style.display = 'flex';
+    modal.classList.add('show');
 }
 
 function performDelete(id) {
@@ -71,13 +68,8 @@ function performDelete(id) {
         if (!modal) return;
         modal.querySelector('.confirm-delete').addEventListener('click', function(e) {
             const id = this.getAttribute('data-delete-id');
-            // hide modal
-            if (typeof bootstrap !== 'undefined') {
-                bootstrap.Modal.getInstance(modal)?.hide();
-            } else {
-                modal.classList.remove('show');
-                modal.style.display = 'none';
-            }
+            modal.classList.remove('show');
+            modal.style.display = 'none';
             if (id) performDelete(id);
         });
     });
