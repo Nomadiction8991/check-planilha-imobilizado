@@ -78,30 +78,30 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
         }
         
         .btn-primary {
-            background-color: #000000;
-            border: 1px solid #000000;
+            background-color: #15803d;
+            border: 1px solid #15803d;
             transition: all 150ms ease-out;
         }
         
         .btn-primary:hover:not(:disabled) {
-            background-color: #171717;
-            border-color: #171717;
+            background-color: #166534;
+            border-color: #166534;
         }
         
         .btn-primary:active:not(:disabled) {
-            background-color: #000000;
+            background-color: #14532d;
         }
         
         .alert-error {
-            background-color: #fafafa;
-            border: 1px solid #000000;
-            color: #171717;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
         }
         
         .alert-success {
-            background-color: #fafafa;
-            border: 1px solid #d4d4d4;
-            color: #171717;
+            background-color: #f0fdf4;
+            border: 1px solid #86efac;
+            color: #166534;
         }
     </style>
 </head>
@@ -173,7 +173,7 @@ $siteTitle = $appConfig['titulo_site'] ?? 'Check Planilha';
                     <!-- Submit Button -->
                     <button
                         type="submit"
-                        class="btn-primary w-full px-4 py-2.5 bg-black text-white text-sm font-medium rounded-sm flex items-center justify-center gap-2 mt-6"
+                        class="btn-primary w-full px-4 py-2.5 text-white text-sm font-medium rounded-sm flex items-center justify-center gap-2 mt-6"
                     >
                         <i class="bi bi-box-arrow-in-right"></i>
                         Entrar

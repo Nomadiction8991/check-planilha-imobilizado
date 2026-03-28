@@ -24,8 +24,6 @@ $responsavelEmail = trim((string) ($importacao['usuario_responsavel_email'] ?? '
 ob_start();
 ?>
 
-<link href="/assets/css/planilhas/importacao_preview.css" rel="stylesheet">
-
 <form id="form-confirmar" action="/spreadsheets/confirm" method="POST">
     <input type="hidden" name="importacao_id" value="<?= $importacaoId ?>">
     <input type="hidden" name="importar_tudo" id="importar_tudo_flag" value="0">
@@ -137,13 +135,13 @@ ob_start();
     <div class="border border-neutral-200 mt-4" style="border-radius:2px">
         <div class="p-3">
             <div class="flex flex-col gap-2">
-                <a href="/spreadsheets/import" class="w-full px-4 py-2 border border-neutral-300 text-neutral-700 font-semibold transition text-center" style="border-radius:2px;text-decoration:none" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''">
+                <a href="/spreadsheets/import" class="btn btn-outline-secondary w-full px-4 py-2 font-semibold transition text-center" style="border-radius:2px;text-decoration:none">
                     <i class="bi bi-x-lg me-1"></i>Cancelar
                 </a>
-                <button type="submit" class="w-full px-4 py-2 bg-black text-white font-semibold transition" style="border-radius:2px" id="btn-confirmar">
+                <button type="submit" class="btn btn-action-confirm w-full px-4 py-2 font-semibold transition" style="border-radius:2px" id="btn-confirmar">
                     <i class="bi bi-check-lg me-1"></i>Importar
                 </button>
-                <button type="button" class="w-full px-4 py-2 border border-black text-black font-semibold transition" style="border-radius:2px;background:#fff" id="btn-importar-tudo"
+                <button type="button" class="btn btn-action-create w-full px-4 py-2 font-semibold transition" style="border-radius:2px" id="btn-importar-tudo"
                     onclick="importarTudo()">
                     <i class="bi bi-check-all me-1"></i>Importar Tudo
                 </button>

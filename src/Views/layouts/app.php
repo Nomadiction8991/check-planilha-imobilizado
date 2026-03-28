@@ -115,11 +115,6 @@ function _navActive(string $prefix, string $current): string
     <!-- Global theme -->
     <link rel="stylesheet" href="/assets/css/minimalist-theme.css">
 
-    <!-- Component styles -->
-    <link rel="stylesheet" href="/assets/css/seal-card.css">
-    <link rel="stylesheet" href="/assets/css/metrics-custodian.css">
-    <link rel="stylesheet" href="/assets/css/asset-tree.css">
-
     <style>
         /* ── LAYOUT SHELL ─────────────────────────────── */
         html,
@@ -576,8 +571,14 @@ function _navActive(string $prefix, string $current): string
             padding: 12px 16px;
             border-radius: 2px;
             border: 1px solid;
-            margin-bottom: 16px;
             font-size: 14px;
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(720px, calc(100vw - 24px));
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+            z-index: 2500;
         }
 
         /* ── PAGINAÇÃO GLOBAL ─────────────────────────── */
@@ -658,7 +659,7 @@ function _navActive(string $prefix, string $current): string
     ?>
     <?php if ($linkHref): ?>
         <link rel="stylesheet" href="<?= $linkHref ?>">
-    <?php elseif ($customCss): ?>
+    <?php elseif (!empty($customCss)): ?>
         <style>
             <?= $customCss ?>
         </style>
@@ -669,7 +670,7 @@ function _navActive(string $prefix, string $current): string
     <?php
     $pageTitle  = $pageTitle ?? ($tituloPagina ?? null);
     $userName   = \App\Core\SessionManager::getUserName() ?? '';
-    $homePath   = $homePath ?? '/products/view';
+    $homePath   = $homePath ?? null;
     $logoutPath = $logoutPath ?? '/logout';
 
     $comuns = [];
@@ -700,6 +701,12 @@ function _navActive(string $prefix, string $current): string
         } catch (\Exception $e) {
             error_log('Erro ao carregar comuns: ' . $e->getMessage());
         }
+    }
+
+    if ($homePath === null) {
+        $homePath = $comumAtualId
+            ? '/products/view?comum_id=' . urlencode((string) $comumAtualId)
+            : '/products/view';
     }
 
     function _fmtCodigoComumLayout($codigo): string
@@ -771,21 +778,24 @@ function _navActive(string $prefix, string $current): string
     if (!empty($_SESSION['mensagem'])) {
         $tipoAlerta = $_SESSION['tipo_mensagem'] ?? 'info';
         $msgHtml = htmlspecialchars($_SESSION['mensagem'], ENT_QUOTES, 'UTF-8');
-        $styleMap = [
-            'success' => 'background:#f0fdf4;border-color:#86efac;color:#166534',
-            'danger'  => 'background:#fef2f2;border-color:#fecaca;color:#991b1b',
-            'warning' => 'background:#fefce8;border-color:#fde047;color:#b45309',
-            'info'    => 'background:#f0f9ff;border-color:#06b6d4;color:#0369a1',
-        ];
         $iconMap = [
             'success' => 'bi-check-circle',
             'danger'  => 'bi-exclamation-triangle',
             'warning' => 'bi-exclamation-diamond',
             'info'    => 'bi-info-circle',
+            'note'    => 'bi-journal-text',
+            'observation' => 'bi-chat-square-text',
         ];
-        $style = $styleMap[$tipoAlerta] ?? $styleMap['info'];
         $icon  = $iconMap[$tipoAlerta]  ?? $iconMap['info'];
-        $flashHtml = '<div class="flash-msg" style="' . $style . '" role="alert">'
+        $flashTypeClass = match ($tipoAlerta) {
+            'success' => 'flash-success',
+            'danger', 'error' => 'flash-danger',
+            'warning' => 'flash-warning',
+            'note' => 'flash-note',
+            'observation' => 'flash-observation',
+            default => 'flash-info',
+        };
+        $flashHtml = '<div class="flash-msg ' . $flashTypeClass . '" role="alert">'
             . '<i class="bi ' . $icon . ' flex-shrink-0" style="margin-top:2px"></i>'
             . '<div style="flex:1">' . $msgHtml . '</div>'
             . '<button type="button" style="background:none;border:none;font-size:18px;cursor:pointer;color:inherit;padding:0;line-height:1" onclick="this.parentElement.remove()" aria-label="Fechar">&times;</button>'
@@ -793,6 +803,8 @@ function _navActive(string $prefix, string $current): string
         unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
     }
     ?>
+
+    <?= $flashHtml ?>
 
     <!-- ═══════════ DESKTOP LAYOUT ═══════════ -->
     <div class="app-shell">
@@ -853,7 +865,6 @@ function _navActive(string $prefix, string $current): string
                 </div>
             </header>
             <main class="app-content-area">
-                <?= $flashHtml ?>
                 <?= $content ?? '' ?>
             </main>
         </div>
@@ -915,13 +926,12 @@ function _navActive(string $prefix, string $current): string
 
         <!-- Mobile Content -->
         <main class="mobile-content">
-            <?= $flashHtml ?>
             <?= $content ?? '' ?>
         </main>
 
         <!-- Mobile Footer -->
         <footer class="mobile-footer" style="background:#000;color:#fff;border-top:1px solid #1a1a1a;padding:0 8px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-            <button onclick="history.back()" style="flex:1;background:none;border:none;color:#a3a3a3;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:10px;letter-spacing:0.04em;transition:color 120ms" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a3a3a3'">
+            <button onclick="goBack()" style="flex:1;background:none;border:none;color:#a3a3a3;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:10px;letter-spacing:0.04em;transition:color 120ms" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a3a3a3'">
                 <i class="bi bi-arrow-left" style="font-size:16px"></i>Voltar
             </button>
             <a href="<?= htmlspecialchars($homePath) ?>" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;font-size:10px;letter-spacing:0.04em;color:#a3a3a3;text-decoration:none;transition:color 120ms" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a3a3a3'">
@@ -940,6 +950,10 @@ function _navActive(string $prefix, string $current): string
     <script src="/assets/js/csrf-global.js"></script>
     <script src="/assets/js/ui-components.js"></script>
     <script src="/assets/js/pwa-install.js"></script>
+    <script>
+        window._appHomePath = <?= json_encode($homePath, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        window._appCurrentComumId = <?= json_encode($comumAtualId, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    </script>
     <script src="/assets/js/layouts/app.js"></script>
 
     <script>

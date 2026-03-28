@@ -55,7 +55,6 @@ $headerActions = '
 ';
 
 
-$customCssPath = '/assets/css/reports/report-141.css';
 $tailwindReportsCss = '/assets/css/reports/tailwind-reports.css';
 
 

@@ -26,10 +26,10 @@ ob_start();
 <?php if (!empty($mensagem)): ?>
     <?php
     $isSuccess = ($tipo_mensagem ?? '') === 'success';
-    $msgStyle  = $isSuccess ? 'background:#f0fdf4;border:1px solid #86efac;color:#166534' : 'background:#fef2f2;border:1px solid #fecaca;color:#991b1b';
     $msgIcon   = $isSuccess ? 'bi-check-circle' : 'bi-exclamation-triangle';
+    $msgClass  = $isSuccess ? 'alert-success' : 'alert-danger';
     ?>
-    <div style="<?= $msgStyle ?>;border-radius:2px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;font-size:13px" role="alert">
+    <div class="alert <?= $msgClass ?>" style="font-size:13px" role="alert">
         <i class="bi <?= $msgIcon ?>" style="margin-top:2px;flex-shrink:0"></i>
         <span style="flex:1"><?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?></span>
         <button type="button" style="background:none;border:none;cursor:pointer;font-size:16px;line-height:1;color:inherit;padding:0" onclick="this.parentElement.remove()">&times;</button>
@@ -69,7 +69,7 @@ ob_start();
     </div>
 
     <button type="submit"
-        class="w-full px-4 py-2 bg-black text-white text-sm font-medium hover:bg-neutral-900 transition flex items-center justify-center gap-2"
+        class="btn btn-action-observation w-full px-4 py-2 text-sm font-medium transition flex items-center justify-center gap-2"
         style="border-radius:2px">
         <i class="bi bi-save"></i>
         SALVAR OBSERVAÇÕES

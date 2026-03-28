@@ -24,38 +24,58 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.remove();
     });
 
-    const alertHost = document.createElement('div');
-    alertHost.id = 'ajaxAlerts';
-    alertHost.className = 'position-fixed top-0 start-50 translate-middle-x p-3';
-    alertHost.style.zIndex = '1100';
-    document.body.appendChild(alertHost);
+    let alertHost = document.getElementById('ajaxAlerts');
+    if (!alertHost) {
+        alertHost = document.createElement('div');
+        alertHost.id = 'ajaxAlerts';
+        alertHost.style.cssText = [
+            'position:fixed',
+            'top:16px',
+            'left:50%',
+            'transform:translateX(-50%)',
+            'width:min(720px, calc(100vw - 24px))',
+            'display:flex',
+            'flex-direction:column',
+            'gap:10px',
+            'z-index:3200',
+            'pointer-events:none'
+        ].join(';');
+        document.body.appendChild(alertHost);
+    }
 
     const showAlert = (type, message) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'fade show';
-        wrapper.role = 'alert';
+        wrapper.setAttribute('role', 'status');
+        wrapper.setAttribute('aria-live', 'polite');
+        wrapper.dataset.alertSource = 'spreadsheets-view';
+        wrapper.dataset.autoDismissProcessed = '1';
         wrapper.style.cssText = [
             'background:#fafafa',
             `border:1px solid ${type === 'success' ? '#d4d4d4' : '#000'}`,
             'color:#171717',
             'padding:10px 14px',
             'border-radius:2px',
-            'min-width:280px'
+            'min-width:280px',
+            'box-shadow:0 10px 30px rgba(15, 23, 42, 0.12)',
+            'pointer-events:auto',
+            'opacity:1',
+            'transition:opacity 300ms ease'
         ].join(';');
         wrapper.innerHTML = `
             <div class="d-flex align-items-center gap-2">
                 <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-info-circle-fill'}"></i>
                 <span>${message}</span>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="FECHAR"></button>
         `;
         alertHost.appendChild(wrapper);
         setTimeout(() => {
             wrapper.classList.remove('show');
-            wrapper.addEventListener('transitionend', () => wrapper.remove(), {
-                once: true
-            });
-        }, 3000);
+            wrapper.style.opacity = '0';
+            setTimeout(() => {
+                wrapper.remove();
+            }, 320);
+        }, 700);
     };
 
     const linhaClasses = ['linha-dr', 'linha-imprimir', 'linha-checado', 'linha-observacao', 'linha-editado', 'linha-pendente'];
