@@ -54,7 +54,7 @@ if (!defined('APP_BOOTSTRAPPED')) {
     ];
 
     foreach ($storageDirs as $dir) {
-        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
             error_log('Não foi possível criar diretório de runtime: ' . $dir);
         }
     }

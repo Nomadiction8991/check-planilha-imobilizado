@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use PDO;
+use PDOException;
 
 class ConnectionManager
 {
@@ -61,15 +62,44 @@ class ConnectionManager
     private static function buildConnection(): PDO
     {
         $config = self::resolveConfig();
+        $hosts = self::resolveHostCandidates((string) $config['host']);
+        $lastException = null;
 
-        $dsn = sprintf(
-            'mysql:host=%s;port=%s;dbname=%s;charset=%s',
-            $config['host'],
-            $config['port'],
-            $config['database'],
-            $config['charset']
-        );
+        foreach ($hosts as $host) {
+            $dsn = sprintf(
+                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+                $host,
+                $config['port'],
+                $config['database'],
+                $config['charset']
+            );
 
-        return new PDO($dsn, $config['username'], $config['password'], self::$defaultOptions);
+            try {
+                return new PDO($dsn, $config['username'], $config['password'], self::$defaultOptions);
+            } catch (PDOException $exception) {
+                $lastException = $exception;
+            }
+        }
+
+        throw $lastException ?? new PDOException('Não foi possível conectar ao banco de dados.');
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function resolveHostCandidates(string $host): array
+    {
+        $host = trim($host);
+        if ($host === '') {
+            return ['127.0.0.1'];
+        }
+
+        $candidates = [$host];
+        if ($host === 'db') {
+            $candidates[] = '127.0.0.1';
+            $candidates[] = 'localhost';
+        }
+
+        return array_values(array_unique($candidates));
     }
 }
