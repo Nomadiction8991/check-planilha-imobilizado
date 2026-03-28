@@ -1,0 +1,727 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+use App\Core\ConnectionManager;
+use App\Core\SessionManager;
+use App\Repositories\ComumRepository;
+use App\Repositories\DependenciaRepository;
+use App\Repositories\ProdutoRepository;
+use App\Services\ImportacaoService;
+use App\Services\CsvParserService;
+use PDO;
+
+class PlanilhaController extends BaseController
+{
+    private ImportacaoService $importacaoService;
+    private CsvParserService $csvParserService;
+    private ComumRepository $comumRepository;
+    private ProdutoRepository $produtoRepository;
+    private DependenciaRepository $dependenciaRepository;
+
+    /**
+     * Resolve diretório de importação com fallback para área temporária.
+     */
+    private function resolverDiretorioImportacao(): string
+    {
+        $candidatos = [
+            __DIR__ . '/../../storage/importacao',
+            rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . '/check-planilha-imobilizado/importacao',
+        ];
+
+        foreach ($candidatos as $dir) {
+            if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+                continue;
+            }
+
+            if (is_writable($dir)) {
+                return $dir;
+            }
+        }
+
+        throw new \Exception('Não foi possível preparar um diretório de importação gravável. Verifique permissões da pasta storage ou /tmp.');
+    }
+
+    /**
+     * Traduz exceções técnicas para mensagem amigável ao usuário.
+     */
+    private function mensagemAmigavelErroImportacao(string $mensagemTecnica): string
+    {
+        $msg = mb_strtolower($mensagemTecnica, 'UTF-8');
+
+        if (str_contains($msg, 'diretório') || str_contains($msg, 'permiss') || str_contains($msg, 'writable')) {
+            return 'Não foi possível gravar o arquivo de importação. Verifique permissões de pasta e tente novamente.';
+        }
+
+        if (str_contains($msg, 'upload') || str_contains($msg, 'temporário')) {
+            return 'Falha no upload do arquivo. Reenvie a planilha e tente novamente.';
+        }
+
+        if (str_contains($msg, 'arquivo não encontrado') || str_contains($msg, 'não legível')) {
+            return 'Arquivo de importação inválido ou indisponível. Envie novamente a planilha.';
+        }
+
+        return 'Erro ao processar planilha. Verifique o arquivo e tente novamente.';
+    }
+
+    private function importacaoPertenceAoUsuario(array $importacao): bool
+    {
+        $usuarioIdAtual = SessionManager::getUserId();
+        $usuarioIdImportacao = (int) ($importacao['usuario_id'] ?? 0);
+
+        return $usuarioIdAtual !== null && $usuarioIdAtual === $usuarioIdImportacao;
+    }
+
+    private function getNomeResponsavelImportacao(array $importacao): string
+    {
+        return trim((string) ($importacao['usuario_responsavel_nome'] ?? 'outro usuário'));
+    }
+
+    public function __construct(?PDO $conexao = null)
+    {
+        $conexao = $conexao ?? ConnectionManager::getConnection();
+
+        $this->importacaoService = new ImportacaoService($conexao);
+        $this->csvParserService = new CsvParserService($conexao);
+        $this->comumRepository = new ComumRepository($conexao);
+        $this->produtoRepository = new ProdutoRepository($conexao);
+        $this->dependenciaRepository = new DependenciaRepository($conexao);
+    }
+
+    public function importar(): void
+    {
+        if (!SessionManager::isAuthenticated()) {
+            $this->redirecionar('/login');
+            return;
+        }
+        $this->renderizar('spreadsheets/import');
+    }
+
+    /**
+     * PASSO 1: Upload do CSV → salva arquivo → analisa → redireciona para preview.
+     */
+    public function processarImportacao(): void
+    {
+        if (!$this->isPost()) {
+            $this->redirecionar('/spreadsheets/import');
+            return;
+        }
+
+        try {
+            // Garante limites adequados para processar CSV grande
+            set_time_limit(120);
+            ini_set('memory_limit', '128M');
+
+            SessionManager::start();
+            $comumId = SessionManager::getComumId() ?? 0;
+            $usuarioId = SessionManager::getUserId();
+
+            if (!$usuarioId) {
+                $this->redirecionar('/login');
+                return;
+            }
+
+            // comumId é opcional — o CSV pode conter múltiplas igrejas (localidades)
+            // que serão detectadas automaticamente durante a análise
+
+            // Valida upload — aceita 'arquivo_csv' e 'arquivo' (compatibilidade)
+            $arquivo = null;
+            if (isset($_FILES['arquivo_csv']) && $_FILES['arquivo_csv']['error'] === UPLOAD_ERR_OK) {
+                $arquivo = $_FILES['arquivo_csv'];
+            } elseif (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK) {
+                $arquivo = $_FILES['arquivo'];
+            }
+
+            if (!$arquivo) {
+                throw new \Exception('Erro ao fazer upload do arquivo');
+            }
+
+            // Valida tamanho (máximo 50MB)
+            $maxSize = 50 * 1024 * 1024;
+            if ($arquivo['size'] > $maxSize) {
+                throw new \Exception('Arquivo muito grande. Máximo 50MB permitido.');
+            }
+
+            // Valida tipo
+            $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
+            if (!in_array($extensao, ['csv', 'txt'])) {
+                throw new \Exception('Apenas arquivos CSV são permitidos');
+            }
+
+            // Move arquivo para diretório de importação (com fallback para /tmp)
+            $dirImportacao = $this->resolverDiretorioImportacao();
+
+            $nomeArquivo = 'importacao_' . ($comumId ?: 'multi') . '_' . time() . '.' . $extensao;
+            $caminhoDestino = $dirImportacao . '/' . $nomeArquivo;
+
+            if (empty($arquivo['tmp_name']) || !is_uploaded_file($arquivo['tmp_name'])) {
+                throw new \Exception('Arquivo temporário de upload inválido.');
+            }
+
+            if (!@move_uploaded_file($arquivo['tmp_name'], $caminhoDestino)) {
+                throw new \Exception('Erro ao salvar arquivo');
+            }
+
+            // Registra importação no banco (comum_id pode ser NULL para multi-igreja)
+            $importacaoId = $this->importacaoService->iniciarImportacao(
+                $usuarioId,
+                $comumId ?: null,
+                $arquivo['name'],
+                $caminhoDestino
+            );
+
+            // Analisa CSV vs banco de dados (detecta igrejas automaticamente)
+            $analise = $this->csvParserService->analisar($caminhoDestino, $comumId);
+
+            // Salva análise em JSON para a tela de preview
+            $this->csvParserService->salvarAnalise($importacaoId, $analise);
+
+            // Redireciona para tela de preview (conferência)
+            $this->redirecionar('/spreadsheets/preview?id=' . $importacaoId);
+        } catch (\Exception $e) {
+            error_log('Erro ao processar importação: ' . $e->getMessage());
+            $this->setMensagem($this->mensagemAmigavelErroImportacao($e->getMessage()), 'danger');
+            $this->redirecionar('/spreadsheets/import');
+        }
+    }
+
+    public function processarArquivo(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (!$this->isPost()) {
+            $this->json(['success' => false, 'message' => 'Método não permitido'], 405);
+        }
+
+        if (!$this->validateCsrfToken()) {
+            $this->json(['success' => false, 'message' => 'Token de segurança inválido'], 403);
+        }
+
+        $importacaoId = (int) $this->post('id', 0);
+        if ($importacaoId <= 0) {
+            $this->json(['success' => false, 'message' => 'Importação inválida'], 400);
+        }
+
+        $importacao = $this->importacaoService->buscarProgresso($importacaoId);
+        if (!$importacao) {
+            $this->json(['success' => false, 'message' => 'Importação não encontrada'], 404);
+        }
+
+        if (!$this->importacaoPertenceAoUsuario($importacao)) {
+            $this->json([
+                'success' => false,
+                'message' => 'Somente o responsável pela importação pode processá-la.',
+                'responsavel' => $this->getNomeResponsavelImportacao($importacao),
+            ], 403);
+        }
+
+        $statusAtual = (string) ($importacao['status'] ?? '');
+        if (in_array($statusAtual, ['processando', 'concluida'], true)) {
+            $this->json([
+                'success' => true,
+                'message' => 'Importação já iniciada.',
+                'status' => $statusAtual,
+            ]);
+        }
+
+        try {
+            $resultado = $this->importacaoService->processar($importacaoId);
+
+            $this->json([
+                'success' => true,
+                'message' => 'Importação processada com sucesso.',
+                'status' => 'concluida',
+                'resultado' => $resultado,
+            ]);
+        } catch (\Throwable $e) {
+            error_log('Erro PlanilhaController::processarArquivo: ' . $e->getMessage());
+            $this->json([
+                'success' => false,
+                'message' => 'Erro ao processar importação.',
+            ], 500);
+        }
+    }
+
+    public function progressoImportacao(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $importacaoId = (int) $this->query('id', 0);
+        if ($importacaoId <= 0) {
+            $this->json(['success' => false, 'message' => 'Importação inválida'], 400);
+        }
+
+        $importacao = $this->importacaoService->buscarProgresso($importacaoId);
+        if (!$importacao) {
+            $this->json(['success' => false, 'message' => 'Importação não encontrada'], 404);
+        }
+
+        if (!$this->importacaoPertenceAoUsuario($importacao)) {
+            $this->json([
+                'success' => false,
+                'message' => 'Acesso negado à importação.',
+                'responsavel' => $this->getNomeResponsavelImportacao($importacao),
+            ], 403);
+        }
+
+        $this->json([
+            'success' => true,
+            'id' => (int) ($importacao['id'] ?? 0),
+            'status' => (string) ($importacao['status'] ?? 'aguardando'),
+            'total_linhas' => (int) ($importacao['total_linhas'] ?? 0),
+            'linhas_processadas' => (int) ($importacao['linhas_processadas'] ?? 0),
+            'linhas_sucesso' => (int) ($importacao['linhas_sucesso'] ?? 0),
+            'linhas_erro' => (int) ($importacao['linhas_erro'] ?? 0),
+            'porcentagem' => (float) ($importacao['porcentagem'] ?? 0),
+            'arquivo_nome' => (string) ($importacao['arquivo_nome'] ?? ''),
+            'mensagem_erro' => (string) ($importacao['mensagem_erro'] ?? ''),
+        ]);
+    }
+
+    /**
+     * PASSO 2: Tela de preview — mostra análise com diff e ações por registro.
+     */
+    public function preview(): void
+    {
+        $importacaoId = $this->getIntParam('id');
+
+        if ($importacaoId <= 0) {
+            $this->redirecionar('/spreadsheets/import?erro=ID inválido');
+            return;
+        }
+
+        // Carrega dados da importação
+        $importacao = $this->importacaoService->buscarProgresso($importacaoId);
+        if (!$importacao) {
+            $this->redirecionar('/spreadsheets/import?erro=Importação não encontrada');
+            return;
+        }
+
+        // Carrega análise salva
+        $analise = $this->csvParserService->carregarAnalise($importacaoId);
+        if (!$analise) {
+            $this->redirecionar('/spreadsheets/import?erro=Análise não encontrada');
+            return;
+        }
+
+        $acoesSalvas   = $_SESSION['preview_acoes_' . $importacaoId]   ?? [];
+        $igrejasSalvas = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
+
+        // Status por comune para a tabela de igrejas (novo > atualizar > iguais)
+        $statusPorComum = [];
+        foreach ($analise['registros'] as $reg) {
+            $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';
+            $status      = $reg['status'] ?? '';
+            if ($codigoComum === '') continue;
+            if (!isset($statusPorComum[$codigoComum])) {
+                $statusPorComum[$codigoComum] = 'iguais';
+            }
+            if ($status === 'novo') {
+                $statusPorComum[$codigoComum] = 'novo';
+            } elseif ($status === 'atualizar' && $statusPorComum[$codigoComum] !== 'novo') {
+                $statusPorComum[$codigoComum] = 'atualizar';
+            }
+        }
+
+        $this->renderizar('spreadsheets/import-preview', [
+            'importacao_id'    => $importacaoId,
+            'importacao'       => $importacao,
+            'resumo'           => $analise['resumo'],
+            'registros'        => [],
+            'pagina'           => 1,
+            'total_paginas'    => 1,
+            'total_registros'  => 0,
+            'itens_por_pagina' => 20,
+            'acoes_salvas'     => $acoesSalvas,
+            'comuns_detectadas' => $analise['comuns_detectadas'] ?? [],
+            'igrejas_salvas'   => $igrejasSalvas,
+            'status_por_comum' => $statusPorComum,
+        ]);
+    }
+
+    /**
+     * AJAX: Salva ações selecionadas da página atual na sessão.
+     * SEGURANÇA: Valida se importação pertence ao usuário autenticado
+     */
+    public function salvarAcoesPreview(): void
+    {
+        header('Content-Type: application/json');
+
+        if (!$this->isPost()) {
+            http_response_code(405);
+            echo json_encode(['erro' => 'Método não permitido']);
+            exit;
+        }
+
+        // Valida token CSRF
+        if (!$this->validateCsrfToken()) {
+            http_response_code(403);
+            echo json_encode(['erro' => 'Token de segurança inválido']);
+            exit;
+        }
+
+        // Valida tamanho da requisição (max 1MB para evitar DoS via JSON)
+        $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        if ($contentLength > 1048576) { // 1MB
+            http_response_code(413);
+            echo json_encode(['erro' => 'Requisição muito grande']);
+            exit;
+        }
+
+        $dados = json_decode(file_get_contents('php://input'), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'JSON inválido']);
+            exit;
+        }
+
+        $importacaoId = (int) ($dados['importacao_id'] ?? 0);
+        $acoes = $dados['acoes'] ?? [];
+        $igrejas = $dados['igrejas'] ?? [];
+
+        if ($importacaoId <= 0) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'ID inválido']);
+            exit;
+        }
+
+        $importacao = $this->importacaoService->buscarProgresso($importacaoId);
+        if (!$importacao || !$this->importacaoPertenceAoUsuario($importacao)) {
+            http_response_code(403);
+            echo json_encode([
+                'erro' => 'Somente o responsável pela importação pode alterar as ações salvas.',
+                'responsavel' => $this->getNomeResponsavelImportacao($importacao ?? []),
+            ]);
+            exit;
+        }
+
+        // Mescla com ações já salvas na sessão (linhas)
+        if (!isset($_SESSION['preview_acoes_' . $importacaoId])) {
+            $_SESSION['preview_acoes_' . $importacaoId] = [];
+        }
+
+        foreach ($acoes as $linhaCsv => $acao) {
+            $_SESSION['preview_acoes_' . $importacaoId][$linhaCsv] = $acao;
+        }
+
+        // Salva escolhas por igreja (se houver)
+        if (!isset($_SESSION['preview_igrejas_' . $importacaoId])) {
+            $_SESSION['preview_igrejas_' . $importacaoId] = [];
+        }
+        foreach ($igrejas as $codigo => $acaoIgreja) {
+            // aceitar apenas valores permitidos
+            if (in_array($acaoIgreja, ['', 'importar', 'pular', 'personalizado'], true)) {
+                $_SESSION['preview_igrejas_' . $importacaoId][(string)$codigo] = $acaoIgreja;
+            }
+        }
+
+        // Guarda contadores antes de fechar a sessão
+        $totalAcoes   = count($_SESSION['preview_acoes_' . $importacaoId]);
+        $totalIgrejas = count($_SESSION['preview_igrejas_' . $importacaoId]);
+
+        // Garante que a sessão é escrita antes da resposta (crucial para reload AJAX)
+        session_write_close();
+
+        echo json_encode([
+            'sucesso' => true,
+            'total_salvas' => $totalAcoes,
+            'igrejas_salvas' => $totalIgrejas
+        ]);
+        exit;
+    }
+
+    /**
+     * AJAX: Aplica ação em massa a TODOS os registros (todas as páginas).
+     * SEGURANÇA: Valida se importação pertence ao usuário autenticado
+     */
+    public function acaoMassaPreview(): void
+    {
+        header('Content-Type: application/json');
+
+        if (!$this->isPost()) {
+            http_response_code(405);
+            echo json_encode(['erro' => 'Método não permitido']);
+            exit;
+        }
+
+        if (!$this->validateCsrfToken()) {
+            http_response_code(403);
+            echo json_encode(['erro' => 'Token de segurança inválido']);
+            exit;
+        }
+
+        // Valida tamanho da requisição (max 256KB para ação em massa)
+        $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        if ($contentLength > 262144) { // 256KB
+            http_response_code(413);
+            echo json_encode(['erro' => 'Requisição muito grande']);
+            exit;
+        }
+
+        $dados = json_decode(file_get_contents('php://input'), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'JSON inválido']);
+            exit;
+        }
+
+        $importacaoId = (int) ($dados['importacao_id'] ?? 0);
+        $acao = $dados['acao'] ?? '';
+
+        if ($importacaoId <= 0 || !in_array($acao, ['importar', 'pular'])) {
+            http_response_code(400);
+            echo json_encode(['erro' => 'Parâmetros inválidos']);
+            exit;
+        }
+
+        $importacao = $this->importacaoService->buscarProgresso($importacaoId);
+        if (!$importacao || !$this->importacaoPertenceAoUsuario($importacao)) {
+            http_response_code(403);
+            echo json_encode([
+                'erro' => 'Somente o responsável pela importação pode aplicar ação em massa.',
+                'responsavel' => $this->getNomeResponsavelImportacao($importacao ?? []),
+            ]);
+            exit;
+        }
+
+        // Carrega análise para obter todas as linhas
+        $analise = $this->csvParserService->carregarAnalise($importacaoId);
+        if (!$analise) {
+            http_response_code(404);
+            echo json_encode(['erro' => 'Análise não encontrada']);
+            exit;
+        }
+
+        // Aplica a ação a todos os registros (exceto erros)
+        $acoes = [];
+        foreach ($analise['registros'] as $reg) {
+            $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+            $status = $reg['status'] ?? 'erro';
+            if ($linhaCsv !== '' && $status !== 'erro') {
+                $acoes[$linhaCsv] = $acao;
+            }
+        }
+
+        $_SESSION['preview_acoes_' . $importacaoId] = $acoes;
+
+        echo json_encode([
+            'sucesso' => true,
+            'acao' => $acao,
+            'total_aplicadas' => count($acoes)
+        ]);
+        exit;
+    }
+
+    /**
+     * PASSO 3: Confirma importação — recebe ações do usuário e processa diretamente.
+     */
+    public function confirmarImportacao(): void
+    {
+        if (!$this->isPost()) {
+            $this->redirecionar('/spreadsheets/import');
+            return;
+        }
+
+        if (!$this->validateCsrfToken()) {
+            $this->setMensagem('Token de segurança inválido.', 'danger');
+            $this->redirecionar('/spreadsheets/import');
+            return;
+        }
+
+        $importacaoId = (int) $this->post('importacao_id', 0);
+
+        if ($importacaoId <= 0) {
+            $this->redirecionar('/spreadsheets/import?erro=ID inválido');
+            return;
+        }
+
+        try {
+            set_time_limit(120);
+            ini_set('memory_limit', '128M');
+
+            $importacao = $this->importacaoService->buscarProgresso($importacaoId);
+            if (!$importacao) {
+                $this->redirecionar('/spreadsheets/import?erro=Importação não encontrada');
+                return;
+            }
+
+            if (!$this->importacaoPertenceAoUsuario($importacao)) {
+                $responsavel = urlencode($this->getNomeResponsavelImportacao($importacao));
+                $this->redirecionar('/spreadsheets/preview?id=' . $importacaoId . '&erro=Somente+o+respons%C3%A1vel+pode+confirmar+esta+importa%C3%A7%C3%A3o&responsavel=' . $responsavel);
+                return;
+            }
+
+            // Mescla ações salvas via AJAX (páginas anteriores) com ações do formulário (página atual)
+            $acoesSalvas = $_SESSION['preview_acoes_' . $importacaoId] ?? [];
+            $acoesFormulario = $this->post('acao', []);
+            if (!is_array($acoesFormulario)) {
+                $acoesFormulario = [];
+            }
+            $acoes = array_merge($acoesSalvas, $acoesFormulario);
+
+            // Flag de importação total (ignora seleções manuais)
+            $importarTudo = (bool) $this->post('importar_tudo', false);
+
+            // Para registros sem ação definida, carrega a ação sugerida da análise
+            $analise = $this->csvParserService->carregarAnalise($importacaoId);
+            if ($analise) {
+                if ($importarTudo) {
+                    // Sobrescreve TUDO: importar exceto status=excluir → excluir
+                    $acoes = [];
+                    foreach ($analise['registros'] as $reg) {
+                        $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                        if ($linhaCsv === '') continue;
+                        $status = $reg['status'] ?? '';
+                        $acoes[$linhaCsv] = ($status === CsvParserService::STATUS_EXCLUIR) ? 'excluir' : 'importar';
+                    }
+                } else {
+                    foreach ($analise['registros'] as $reg) {
+                        $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                        if ($linhaCsv !== '' && !isset($acoes[$linhaCsv])) {
+                            $acoes[$linhaCsv] = $reg['acao_sugerida'] ?? 'pular';
+                        }
+                    }
+                }
+            }
+
+            // Aplicar escolhas por igreja (POST tem precedência sobre sessão)
+            $igrejasFormulario = $this->post('igrejas', []);
+            if (!is_array($igrejasFormulario)) {
+                $igrejasFormulario = [];
+            }
+            $igrejasSessao = $_SESSION['preview_igrejas_' . $importacaoId] ?? [];
+            $igrejasEscolhas = array_merge($igrejasSessao, $igrejasFormulario);
+
+            if ($analise && !empty($igrejasEscolhas) && !$importarTudo) {
+                foreach ($analise['registros'] as $reg) {
+                    $linhaCsv = (string) ($reg['linha_csv'] ?? '');
+                    $codigoComum = $reg['dados_csv']['codigo_comum'] ?? '';
+                    if ($codigoComum !== '' && isset($igrejasEscolhas[$codigoComum])) {
+                        $acaoIgreja = $igrejasEscolhas[$codigoComum];
+                        if (in_array($acaoIgreja, ['importar', 'pular'], true) && $linhaCsv !== '') {
+                            $acoes[$linhaCsv] = $acaoIgreja;
+                        }
+                    }
+                }
+            }
+
+            // Processar importação diretamente
+            if ($analise) {
+                $resultado = $this->importacaoService->processarComAcoes($importacaoId, $acoes, $analise);
+            } else {
+                $resultado = $this->importacaoService->processar($importacaoId);
+            }
+
+            // Limpa dados temporários
+            unset(
+                $_SESSION['preview_acoes_' . $importacaoId],
+                $_SESSION['importacao_acoes_' . $importacaoId],
+                $_SESSION['preview_igrejas_' . $importacaoId]
+            );
+            $this->csvParserService->limparAnalise($importacaoId);
+
+            $sucesso = $resultado['sucesso'] ?? 0;
+            $erros = $resultado['erro'] ?? 0;
+            $msg = "{$sucesso} linha(s) importada(s) com sucesso.";
+            if ($erros > 0) {
+                $msg .= " {$erros} linha(s) com erro.";
+            }
+
+            $this->setMensagem($msg, $erros > 0 ? 'warning' : 'success');
+            $this->redirecionar('/products/view');
+        } catch (\Exception $e) {
+            error_log('Erro ao confirmar importação: ' . $e->getMessage());
+            $this->setMensagem('Erro ao importar: ' . $e->getMessage(), 'danger');
+            $this->redirecionar('/spreadsheets/import');
+        }
+    }
+
+    public function visualizar(): void
+    {
+        // Se veio ?comum_id= pela URL (ex: clique na listagem de igrejas), atualiza a sessão.
+        // O header utiliza outro mecanismo (POST /users/select-church) que já atualiza a sessão;
+        // o JS de troca garante recarregar com o ?comum_id= correto para manter consistência.
+        $comumIdUrl = (int) ($this->query('comum_id', 0));
+        if ($comumIdUrl > 0) {
+            SessionManager::setComumId($comumIdUrl);
+        }
+
+        $comumId = SessionManager::getComumId();
+
+        // Auto-recuperação: se comum_id não estiver na sessão (ex: container reiniciado),
+        // busca a primeira comum disponível no banco para não redirecionar para /churches.
+        if (!$comumId || $comumId <= 0) {
+            $comuns = $this->comumRepository->buscarTodos();
+            if (!empty($comuns)) {
+                $comumId = (int) $comuns[0]['id'];
+                SessionManager::setComumId($comumId);
+            } else {
+                $this->redirecionar('/churches?sucesso=Cadastre uma comum para começar a usar o sistema');
+                return;
+            }
+        }
+
+        // Buscar dados da comum
+        $planilha = $this->comumRepository->buscarPorId($comumId);
+
+        // Se a comum_id da sessão for inválida, tenta a primeira disponível
+        if (!$planilha) {
+            $comuns = $this->comumRepository->buscarTodos();
+            if (!empty($comuns)) {
+                $comumId = (int) $comuns[0]['id'];
+                SessionManager::setComumId($comumId);
+                $planilha = $this->comumRepository->buscarPorId($comumId);
+            }
+            if (!$planilha) {
+                $this->redirecionar('/churches?erro=Comum não encontrada');
+                return;
+            }
+        }
+
+        $planilha['comum_descricao'] = $planilha['descricao'] ?? 'Comum';
+
+        // Filtros
+        $paginaAtual = max(1, (int) ($this->query('pagina', 1)));
+        $itensPorPagina = 20; // limitar listagem de produtos a 20 por página (requisito do usuário)
+
+        $filtros = [
+            'nome'        => $this->query('nome', ''),
+            'dependencia' => $this->query('dependencia', ''),
+            'status'      => $this->query('status', ''),
+            'codigo'      => $this->query('filtro_codigo', ''),
+        ];
+
+        // Buscar produtos via repository
+        $resultado = $this->produtoRepository->buscarParaPlanilha($comumId, $paginaAtual, $itensPorPagina, $filtros);
+
+        // Buscar dependências para o filtro
+        $dependencias = $this->dependenciaRepository->buscarPaginadoPorComum($comumId, '', 1000, 0);
+
+        // Contar erros de importação pendentes (não resolvidos) para esta comum
+        $conexao = \App\Core\ConnectionManager::getConnection();
+        $stmtErros = $conexao->prepare(
+            'SELECT COUNT(*) FROM import_erros ie
+              JOIN importacoes imp ON ie.importacao_id = imp.id
+             WHERE imp.comum_id = :comum_id AND ie.resolvido = 0'
+        );
+        $stmtErros->execute([':comum_id' => $comumId]);
+        $errosPendentes = (int) $stmtErros->fetchColumn();
+
+        $this->renderizar('spreadsheets/view', [
+            'comum_id'                    => $comumId,
+            'planilha'                    => $planilha,
+            'produtos'                    => $resultado['dados'],
+            'total_registros'             => $resultado['total'],
+            'pagina'                      => $paginaAtual,
+            'total_paginas'               => $resultado['totalPaginas'],
+            'dependencia_options'         => $dependencias,
+            'filtro_nome'                 => $filtros['nome'],
+            'filtro_dependencia'          => $filtros['dependencia'],
+            'filtro_status'               => $filtros['status'],
+            'filtro_codigo'               => $filtros['codigo'],
+            'erros_importacao_pendentes'  => $errosPendentes,
+        ]);
+    }
+}
