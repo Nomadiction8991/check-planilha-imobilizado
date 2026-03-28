@@ -1,226 +1,103 @@
-/* tailwind-reports.css — Estilos consolidados para relatórios com Tailwind */
+/* tailwind-reports.css — Base enxuta para preview e impressão de relatórios */
 
-/* ========================================
-   COMPONENTES DE RELATÓRIO
-   ======================================== */
-
-/* Configuração de página A4 */
 .a4,
 .a4-content {
-    background: white;
+    background: #fff;
     max-width: 210mm;
     min-height: 297mm;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
-.a4-viewport {
-    max-height: 90vh;
-    overflow: auto;
-    background: #f0f0f0;
-}
-
-.a4-scaled {
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
-}
-
-/* Containers de página */
-.paginas-container {
-    display: space;
-    gap: 1rem;
-    padding: 1rem;
-}
-
-.pagina-card {
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    overflow: hidden;
-}
-
-.pagina-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f3f4f6;
-}
-
-.pagina-numero {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.pagina-numero i {
-    color: #2563eb;
-}
-
-.pagina-info {
-    font-size: 0.75rem;
-    color: #6b7280;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* Carrossel de páginas */
-.carousel-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem;
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.carousel-nav button {
-    padding: 0.5rem 1rem;
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.carousel-nav button:hover {
-    background: #1d4ed8;
-}
-
-.carousel-info {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #4b5563;
-}
-
-.carousel-info #paginaAtual {
-    color: #2563eb;
-    font-weight: bold;
-}
-
-.carousel-track {
-    display: flex;
-    transition: transform 0.3s;
-}
-
-.carousel-page {
-    width: 100%;
-    flex-shrink: 0;
-    padding: 1rem;
-}
-
-.a4-wrapper {
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-/* Valores Comuns */
-.valores-comuns {
-    padding: 1rem;
-    background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.valores-comuns h6 {
-    font-size: 0.875rem;
-    font-weight: bold;
-    color: #374151;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.valores-comuns h6 i {
-    color: #2563eb;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-}
-
-.form-grid > div {
+.report-a4-screen {
     display: flex;
     flex-direction: column;
-}
-
-.form-grid label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #4b5563;
-    margin-bottom: 0.5rem;
-}
-
-.form-grid input {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    transition: box-shadow 0.2s, border-color 0.2s;
-}
-
-.form-grid input:focus {
-    outline: none;
-    border-color: transparent;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), inset 0 0 0 1px #2563eb;
-}
-
-/* Alertas */
-.alert {
+    gap: 1.5rem;
     padding: 1rem;
-    border-radius: 0.375rem;
+}
+
+.report-a4-card {
+    background: linear-gradient(180deg, #fcfaf6 0%, #f3efe6 100%);
+    border: 1px solid rgba(105, 85, 52, 0.16);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(58, 44, 18, 0.08);
+}
+
+.report-a4-card-header {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid rgba(105, 85, 52, 0.12);
+    background: rgba(255, 252, 245, 0.92);
+}
+
+.report-a4-card-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #493923;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-transform: uppercase;
+}
+
+.report-a4-card-title i {
+    color: #8a6a2f;
+}
+
+.report-a4-card-note {
+    font-size: 0.75rem;
+    color: #756247;
+}
+
+.report-a4-preview {
+    display: flex;
+    justify-content: center;
     align-items: flex-start;
-    gap: 0.75rem;
+    padding: 1.5rem;
+    background:
+        radial-gradient(circle at top, rgba(196, 166, 109, 0.12), transparent 38%),
+        linear-gradient(180deg, #f6f2e8 0%, #ebe4d4 100%);
+    overflow: auto;
 }
 
-.alert-warning {
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
-    color: #92400e;
+.report-a4-stage {
+    width: min(100%, calc((100vh - 16rem) * 210 / 297));
+    min-width: 18rem;
 }
 
-.alert-warning i {
-    font-size: 1.125rem;
-    margin-top: 0.125rem;
+.report-a4-sheet {
+    aspect-ratio: 210 / 297;
+    width: 100%;
+    padding: 2.2%;
+    background: #ffffff;
+    border: 1px solid rgba(69, 53, 27, 0.12);
+    box-shadow:
+        0 24px 48px rgba(62, 48, 22, 0.14),
+        0 6px 18px rgba(62, 48, 22, 0.08);
+    overflow: auto;
 }
 
-.alert-danger {
-    background: #fee2e2;
-    border: 1px solid #fca5a5;
-    color: #7f1d1d;
+.report-a4-sheet .a4,
+.report-a4-sheet .a4-content,
+.report-a4-sheet .r141-root {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
 }
 
-/* ========================================
-   ESTILOS PARA IMPRESSÃO (@media print)
-   ======================================== */
+.report-a4-sheet .a4 {
+    min-height: 100% !important;
+}
 
 @media print {
     /* Remover elementos que não devem aparecer na impressão */
-    .carousel-nav,
-    .valores-comuns,
-    .pagina-header,
     .btn,
     button,
     .dropdown,
@@ -238,10 +115,11 @@
     }
 
     .a4,
-    .a4-viewport,
-    .a4-scaled,
     .a4-content,
-    .pagina-card {
+    .report-a4-card,
+    .report-a4-preview,
+    .report-a4-stage,
+    .report-a4-sheet {
         background: white !important;
         box-shadow: none !important;
         border: none !important;
@@ -258,7 +136,6 @@
         page-break-after: always;
     }
 
-    /* Preservar cor de texto e fundo no PDF */
     * {
         color: #000 !important;
         background: transparent !important;
@@ -266,7 +143,6 @@
         text-shadow: none !important;
     }
 
-    /* Exceção: fundo branco para seções */
     .cabecalho,
     .conteudo,
     .rodape,
@@ -298,29 +174,28 @@
         user-select: none;
     }
 
-    /* Canvas para assinatura */
     canvas {
         max-width: 100%;
         height: auto;
     }
 
-    /* Remover zoom/scroll */
-    .carousel-track,
-    .a4-viewport {
-        overflow: visible !important;
-        max-height: 100% !important;
-    }
-
-    /* Links não devem mostrar URL */
     a::after {
         content: "" !important;
     }
 
-    /* Evitar quebra de conteúdo importante */
     .cabecalho,
     .rodape,
     table tr {
         page-break-inside: avoid;
+    }
+
+    .report-a4-screen {
+        padding: 0 !important;
+        gap: 0 !important;
+    }
+
+    .report-a4-card-header {
+        display: none !important;
     }
 
     /* Margin/Padding de página */
@@ -330,54 +205,30 @@
     }
 }
 
-/* ========================================
-   RESPONSIVE TAILWIND INTEGRADO
-   ======================================== */
-
-/* Mobile-first */
 @media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
+    .report-a4-screen {
+        padding: 0.75rem;
+        gap: 1rem;
     }
 
-    .carousel-nav {
-        flex-direction: column;
-        gap: 0.75rem;
+    .report-a4-preview {
+        padding: 0.75rem;
     }
 
-    .carousel-nav button {
+    .report-a4-stage {
         width: 100%;
-        justify-content: center;
     }
 
-    .pagina-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
+    .report-a4-sheet {
+        padding: 3%;
     }
 }
 
-/* Tablet e acima */
-@media (min-width: 769px) {
-    .form-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Desktop */
 @media (min-width: 1024px) {
-    .form-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
-    .a4-viewport {
-        max-height: calc(100vh - 200px);
+    .report-a4-preview {
+        min-height: calc(100vh - 13rem);
     }
 }
-
-/* ========================================
-   UTILITÁRIOS
-   ======================================== */
 
 .line-clamp-1 {
     display: -webkit-box;
@@ -391,11 +242,6 @@
     page-break-after: always;
 }
 
-.no-print {
-    display: none !important;
-}
-
-/* Garantir visibilidade de form fields em PDF */
 .r141-root input,
 .r141-root textarea {
     pointer-events: none;

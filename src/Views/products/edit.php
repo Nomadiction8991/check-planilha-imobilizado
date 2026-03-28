@@ -51,10 +51,15 @@ ob_start();
 
 <?php if (!empty($mensagem)): ?>
     <?php
-    $msgStyle = 'background:#fafafa;border:1px solid #d4d4d4;color:#171717';
-    $msgIcon = $tipo_mensagem === 'success' ? 'bi-check-circle' : 'bi-info-circle';
+    $msgType = $tipo_mensagem === 'success' ? 'success' : ($tipo_mensagem === 'warning' ? 'warning' : 'info');
+    $msgClass = 'alert alert-' . $msgType;
+    $msgIcon = match ($msgType) {
+        'success' => 'bi-check-circle',
+        'warning' => 'bi-exclamation-diamond',
+        default => 'bi-info-circle',
+    };
     ?>
-    <div style="<?= $msgStyle ?>;border-radius:2px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;font-size:13px" role="alert">
+    <div class="<?= $msgClass ?>" style="font-size:13px" role="alert">
         <i class="bi <?= $msgIcon ?>" style="margin-top:2px;flex-shrink:0"></i>
         <span style="flex:1"><?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?></span>
         <button type="button" style="background:none;border:none;cursor:pointer;font-size:16px;line-height:1;color:inherit;padding:0" onclick="this.parentElement.remove()">&times;</button>

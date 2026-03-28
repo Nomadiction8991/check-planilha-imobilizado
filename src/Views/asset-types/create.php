@@ -2,64 +2,66 @@
 /**
  * View: Cadastrar Tipo de Bem
  */
+
+use App\Helpers\AlertHelper;
+
+$appConfig = require dirname(__DIR__, 3) . '/config/app.php';
+$projectRoot = $appConfig['project_root'];
+require_once $projectRoot . '/src/Helpers/BootstrapLoader.php';
+
+$pageTitle = 'Novo Tipo de Bem';
+$backUrl = '/asset-types';
+
+ob_start();
 ?>
 
-<div class="bg-white border border-neutral-200 mb-4" style="border-radius:2px">
-    <div class="px-5 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center gap-2">
-        <i class="bi bi-plus-circle text-neutral-500" style="font-size:13px"></i>
-        <span style="font-size:12px;font-weight:600;letter-spacing:0.06em;color:#525252">NOVO TIPO DE BEM</span>
-    </div>
-    <div class="p-5">
+<?= AlertHelper::fromQuery() ?>
 
-        <?php if (!empty($_SESSION['mensagem'])): ?>
-            <?php
-            $style = 'background:#fafafa;border:1px solid #d4d4d4;color:#171717';
-            $icon = 'bi-info-circle';
-            ?>
-            <div style="<?= $style ?>;border-radius:2px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;font-size:13px" role="alert">
-                <i class="bi <?= $icon ?>" style="margin-top:2px;flex-shrink:0"></i>
-                <span style="flex:1"><?= htmlspecialchars($_SESSION['mensagem'], ENT_QUOTES, 'UTF-8') ?></span>
-                <button type="button" style="background:none;border:none;cursor:pointer;font-size:16px;line-height:1;color:inherit;padding:0" onclick="this.parentElement.remove()">&times;</button>
-            </div>
-            <?php unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']); ?>
-        <?php endif; ?>
+<?php
+// Alertas de sessão (se houver)
+$alertas = [];
+if (!empty($_SESSION['mensagem'])) {
+    $alertas[] = [
+        'tipo' => $_SESSION['tipo_mensagem'] ?? 'info',
+        'mensagem' => $_SESSION['mensagem'],
+        'fechar' => true,
+    ];
+    unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
+}
 
-        <?php if (isset($_GET['erro'])): ?>
-            <div style="background:#fafafa;border:1px solid #000;color:#000;border-radius:2px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;font-size:13px" role="alert">
-                <i class="bi bi-exclamation-circle" style="margin-top:2px;flex-shrink:0"></i>
-                <span style="flex:1"><?= htmlspecialchars($_GET['erro'], ENT_QUOTES, 'UTF-8') ?></span>
-                <button type="button" style="background:none;border:none;cursor:pointer;font-size:16px;line-height:1;color:inherit;padding:0" onclick="this.parentElement.remove()">&times;</button>
-            </div>
-        <?php endif; ?>
+// Mostrar alertas customizados
+if (!empty($alertas)):
+    $alertasOptions = ['alertas' => $alertas];
+    include $projectRoot . '/src/Views/layouts/partials/alerts.php';
+endif;
+?>
 
-        <form method="POST" action="/asset-types/create" class="space-y-4">
-            <div>
-                <label for="descricao" style="display:block;font-size:12px;font-weight:500;color:#262626;margin-bottom:4px">
-                    Descrição <span style="color:#991b1b">*</span>
-                </label>
-                <input
-                    type="text"
-                    class="w-full px-3 py-2 border border-neutral-300 text-sm focus:outline-none focus:border-black"
-                    style="border-radius:2px"
-                    id="descricao"
-                    name="descricao"
-                    required
-                    maxlength="255"
-                    placeholder="EX: IMÓVEIS">
-            </div>
+<?php
+$formCardOptions = [
+    'titulo'        => 'NOVO TIPO DE BEM',
+    'icone'         => 'bi-plus-circle',
+    'action'        => '/asset-types/create',
+    'method'        => 'POST',
+    'back_url'      => $backUrl,
+    'back_label'    => 'Cancelar',
+    'submit_label'  => 'Salvar',
+    'csrf'          => true,
+    'campos'        => [
+        [
+            'tipo'        => 'text',
+            'name'        => 'descricao',
+            'label'       => 'Descrição',
+            'value'       => $_POST['descricao'] ?? '',
+            'placeholder' => 'EX: IMÓVEIS',
+            'required'    => true,
+            'maxlength'   => 255,
+        ],
+    ],
+];
+include $projectRoot . '/src/Views/layouts/partials/form-card.php';
+?>
 
-            <div style="display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:1px solid #e5e5e5">
-                <button type="submit"
-                    class="w-full px-4 py-2 bg-black text-white text-sm font-medium hover:bg-neutral-900 transition flex items-center justify-center gap-2"
-                    style="border-radius:2px">
-                    <i class="bi bi-check-lg"></i>Salvar
-                </button>
-                <a href="<?= htmlspecialchars($backUrl ?? '/asset-types', ENT_QUOTES, 'UTF-8') ?>"
-                    style="display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border:1px solid #d4d4d4;color:#525252;font-size:13px;text-decoration:none;border-radius:2px;transition:background 120ms"
-                    onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''">
-                    <i class="bi bi-x-lg"></i>Cancelar
-                </a>
-            </div>
-        </form>
-    </div>
-</div>
+<?php
+$contentHtml = ob_get_clean();
+include $projectRoot . '/src/Views/layouts/app.php';
+?>

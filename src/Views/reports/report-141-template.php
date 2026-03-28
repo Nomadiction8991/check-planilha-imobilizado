@@ -28,7 +28,6 @@ foreach ($PRODUTOS as $PRODUTO):
     $pagina_atual++;
 ?>
 
-    <link href="/assets/css/planilhas/relatorio141_template.css" rel="stylesheet">
     <link href="<?php echo $tailwindReportsCss; ?>" rel="stylesheet">
 
     <div class="max-w-4xl mx-auto bg-white p-0 page-break" style="border-radius:2px">

@@ -24,9 +24,6 @@ $backUrl = '/users' . ($qsArr ? ('?' . http_build_query($qsArr)) : '');
 ob_start();
 ?>
 
-<link href="/assets/css/usuarios/usuario_editar.css" rel="stylesheet">
-
-
 <?php if (!empty($mensagem)): ?>
     <div class="p-4 mb-4 flex justify-between items-center" style="background:#fafafa;border:1px solid #d4d4d4;border-radius:2px;color:#171717">
         <span><?php echo $mensagem; ?></span>

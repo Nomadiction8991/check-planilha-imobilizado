@@ -167,7 +167,7 @@ ob_start();
 ?>
 
 <?php if (!empty($mensagem)): ?>
-    <div class="px-4 py-3 mb-4" style="background:#fafafa;border:1px solid #000;color:#171717;border-radius:2px"><?php echo htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8'); ?></div>
+    <div class="alert alert-danger"><?php echo htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php endif; ?>
 
 <div class="border border-gray-200 mb-4" style="border-radius:2px">

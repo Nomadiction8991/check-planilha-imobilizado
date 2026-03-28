@@ -182,19 +182,21 @@ ob_start();
     </style>
 <?php endif; ?>
 
-<div class="space-y-4 p-4 md:p-6">
+<div class="report-a4-screen">
     <?php if (count($produtos) > 0): ?>
         <?php foreach ($produtos as $index => $produto): ?>
-            <div class="bg-white border border-gray-200 overflow-hidden" style="border-radius:2px">
-                <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                    <span class="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <div class="report-a4-card">
+                <div class="report-a4-card-header">
+                    <span class="report-a4-card-title">
                         <i class="bi bi-file-earmark-text text-black"></i>
                         Página <?php echo $index + 1; ?> de <?php echo count($produtos); ?>
                     </span>
+                    <span class="report-a4-card-note">Pré-visualização em proporção A4</span>
                 </div>
 
-                <div class="overflow-auto bg-gray-50 p-4 md:p-6" style="max-height: 90vh;">
-                    <div class="flex justify-center">
+                <div class="report-a4-preview">
+                    <div class="report-a4-stage">
+                        <div class="report-a4-sheet">
                         <?php
                         $htmlPreenchido = $a4Block;
 
@@ -205,6 +207,7 @@ ob_start();
 
                         echo $htmlPreenchido;
                         ?>
+                        </div>
                     </div>
                 </div>
             </div>

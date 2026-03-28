@@ -91,8 +91,8 @@
 
     // 4. Auto-dismiss alerts
     function initAlertDismiss() {
-        var AUTO_MS = 3000;
-        var FADE_MS = 500;
+        var AUTO_MS = 700;
+        var FADE_MS = 300;
 
         function processAlert(el) {
             if (!el || el.dataset._autoDismissProcessed) return;
@@ -153,7 +153,7 @@
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                window.location.href = '/products/view';
+                window.location.href = window._appHomePath || '/products/view';
             }
         };
     }

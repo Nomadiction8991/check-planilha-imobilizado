@@ -9,115 +9,97 @@ $pagina ??= 1;
 $totalPaginas ??= 1;
 $busca ??= '';
 $limite ??= 10;
+$projectRoot ??= (require dirname(__DIR__, 3) . '/config/app.php')['project_root'];
 ?>
 
 <?= AlertHelper::fromQuery() ?>
 
-<div class="bg-white border border-neutral-200 mb-4" style="border-radius:2px">
-    <div class="px-5 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center gap-2">
-        <i class="bi bi-search text-neutral-500" style="font-size:13px"></i>
-        <span style="font-size:12px;font-weight:600;letter-spacing:0.06em;color:#525252">PESQUISAR COMUM</span>
-    </div>
-    <div class="p-5">
-        <form method="GET" class="flex gap-2">
-            <input
-                type="text"
-                name="busca"
-                id="busca"
-                class="flex-1 px-3 py-2 border border-neutral-300 text-sm focus:outline-none focus:border-black"
-                style="border-radius:2px"
-                value="<?= ViewHelper::e($busca) ?>"
-                placeholder="Código ou descrição">
-            <?php if ($busca): ?>
-                <a href="?"
-                    style="display:inline-flex;align-items:center;padding:8px 12px;border:1px solid #d4d4d4;color:#525252;font-size:13px;text-decoration:none;border-radius:2px"
-                    title="Limpar">
-                    <i class="bi bi-x-lg"></i>
-                </a>
-            <?php endif; ?>
-            <button type="submit"
-                class="px-4 py-2 bg-black text-white text-sm font-medium hover:bg-neutral-900 transition flex items-center gap-2"
-                style="border-radius:2px">
-                <i class="bi bi-search"></i>Buscar
-            </button>
-        </form>
-    </div>
-</div>
+<?php
+$filterCardOptions = [
+    'titulo'       => 'PESQUISAR COMUM',
+    'icone'        => 'bi-search',
+    'campos'       => [
+        [
+            'tipo'        => 'text',
+            'name'        => 'busca',
+            'label'       => 'Código ou descrição',
+            'value'       => $busca,
+            'placeholder' => 'Código ou descrição',
+        ],
+    ],
+];
+include $projectRoot . '/src/Views/layouts/partials/filter-card.php';
+?>
 
 <?= PaginationHelper::info($total, $pagina, $limite) ?>
 
-<div class="bg-white border border-neutral-200 overflow-x-auto" style="border-radius:2px">
-    <table class="w-full border-collapse" style="font-size:13px">
-        <thead>
-            <tr style="background:#fafafa;border-bottom:2px solid #000">
-                <th class="px-5 py-3 text-left" style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#000;width:140px">CÓDIGO</th>
-                <th class="px-5 py-3 text-left" style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#000">DESCRIÇÃO</th>
-                <th class="px-5 py-3 text-center" style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#000;width:100px">AÇÕES</th>
-            </tr>
-        </thead>
-        <tbody id="tabela-comuns">
-            <?php if (empty($comuns)): ?>
-                <tr>
-                    <td colspan="3" class="text-center py-10" style="color:#a3a3a3;font-size:13px">
-                        <i class="bi bi-inbox block mb-2" style="font-size:24px"></i>
-                        Nenhuma comum encontrada
-                    </td>
-                </tr>
-            <?php else: ?>
-                <?php foreach ($comuns as $comum): ?>
-                    <?php
-                    $codigo = preg_replace("/\D/", '', (string)($comum['codigo'] ?? ''));
-                    if ($codigo === '') {
-                        $codigoFormatado = 'BR --';
-                    } else {
-                        $codigo = str_pad($codigo, 6, '0', STR_PAD_LEFT);
-                        $codigoFormatado = 'BR ' . substr($codigo, 0, 2) . '-' . substr($codigo, 2);
-                    }
-                    $editUrl = ViewHelper::urlComQuery('/churches/edit', ['id' => $comum['id']]);
-                    ?>
-                    <tr style="border-bottom:1px solid #e5e5e5" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
-                        <td class="px-5 py-3" style="font-weight:600;color:#000;font-family:Monaco,'Courier New',monospace;letter-spacing:0.04em">
-                            <?= ViewHelper::e($codigoFormatado) ?>
-                        </td>
-                        <td class="px-5 py-3" style="color:#000;text-transform:uppercase">
-                            <?= ViewHelper::e($comum['descricao'] ?? '') ?>
-                        </td>
-                        <td class="px-5 py-3">
-                            <div style="display:flex;justify-content:center;gap:6px">
-                                <a href="<?= ViewHelper::e($editUrl) ?>"
-                                    style="display:inline-flex;align-items:center;padding:5px 10px;border:1px solid #000;color:#000;font-size:12px;text-decoration:none;border-radius:2px;transition:background 120ms"
-                                    onmouseover="this.style.background='#000';this.style.color='#fff'"
-                                    onmouseout="this.style.background='';this.style.color='#000'"
-                                    title="Editar">
-                                    <i class="bi bi-pencil" style="font-size:11px"></i>
-                                </a>
-                                <button
-                                    type="button"
-                                    style="display:inline-flex;align-items:center;padding:5px 10px;border:1px solid #991b1b;color:#991b1b;font-size:12px;background:#fff;cursor:pointer;border-radius:2px;transition:background 120ms"
-                                    onmouseover="this.style.background='#991b1b';this.style.color='#fff'"
-                                    onmouseout="this.style.background='#fff';this.style.color='#991b1b'"
-                                    class="btn-delete-products"
-                                    data-comum-id="<?= (int)$comum['id'] ?>"
-                                    data-comum-nome="<?= ViewHelper::e($comum['descricao'] ?? '') ?>"
-                                    title="Excluir todos os produtos">
-                                    <i class="bi bi-trash3" style="font-size:11px"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
-</div>
+<?php
+// Gerar linhas da tabela
+ob_start();
+if (!empty($comuns)):
+    foreach ($comuns as $comum):
+        $codigo = preg_replace("/\D/", '', (string)($comum['codigo'] ?? ''));
+        if ($codigo === '') {
+            $codigoFormatado = 'BR --';
+        } else {
+            $codigo = str_pad($codigo, 6, '0', STR_PAD_LEFT);
+            $codigoFormatado = 'BR ' . substr($codigo, 0, 2) . '-' . substr($codigo, 2);
+        }
+        $editUrl = ViewHelper::urlComQuery('/churches/edit', ['id' => $comum['id']]);
+        ?>
+        <tr style="border-bottom:1px solid #e5e5e5" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+            <td class="px-5 py-3" style="font-weight:600;color:#000;font-family:Monaco,'Courier New',monospace;letter-spacing:0.04em">
+                <?= ViewHelper::e($codigoFormatado) ?>
+            </td>
+            <td class="px-5 py-3" style="color:#000;text-transform:uppercase">
+                <?= ViewHelper::e($comum['descricao'] ?? '') ?>
+            </td>
+            <td class="px-5 py-3">
+                <div style="display:flex;justify-content:center;gap:6px">
+                    <a href="<?= ViewHelper::e($editUrl) ?>"
+                        class="btn btn-action-edit"
+                        style="padding:5px 10px;font-size:12px;text-decoration:none"
+                        title="Editar">
+                        <i class="bi bi-pencil" style="font-size:11px"></i>
+                    </a>
+                    <button
+                        type="button"
+                        class="btn btn-action-delete btn-delete-products"
+                        style="padding:5px 10px;font-size:12px"
+                        data-comum-id="<?= (int)$comum['id'] ?>"
+                        data-comum-nome="<?= ViewHelper::e($comum['descricao'] ?? '') ?>"
+                        title="Excluir todos os produtos">
+                        <i class="bi bi-trash3" style="font-size:11px"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        <?php
+    endforeach;
+endif;
+$linhasHtml = ob_get_clean();
+?>
 
-<?= PaginationHelper::render($pagina, $totalPaginas, '/churches', ['busca' => $busca]) ?>
+<?php
+$tableOptions = [
+    'icone'          => 'bi-church',
+    'titulo'         => 'IGREJAS',
+    'total'          => count($comuns),
+    'pagina'         => $pagina,
+    'total_paginas'  => $totalPaginas,
+    'colunas'        => ['CÓDIGO', 'DESCRIÇÃO', 'AÇÕES'],
+    'empty_msg'      => 'Nenhuma comum encontrada',
+    'linhas_html'    => $linhasHtml,
+    'paginacao_html' => PaginationHelper::render($pagina, $totalPaginas, '/churches', ['busca' => $busca]),
+];
+include $projectRoot . '/src/Views/layouts/partials/table-wrapper.php';
+?>
 
 <!-- Modal: Confirmar exclusão de produtos -->
-<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50" id="modalDeleteProdutos">
+<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:center;justify-content:center" id="modalDeleteProdutos">
     <div style="background:#fff;border:1px solid #e5e5e5;max-width:480px;width:90%;border-radius:2px">
-        <div style="padding:16px 20px;border-bottom:2px solid #991b1b;display:flex;align-items:center;gap-8px">
-            <i class="bi bi-exclamation-triangle-fill" style="color:#991b1b;margin-right:8px"></i>
+        <div style="padding:16px 20px;border-bottom:2px solid #991b1b;display:flex;align-items:center;gap:8px">
+            <i class="bi bi-exclamation-triangle-fill" style="color:#991b1b;font-size:18px;flex-shrink:0"></i>
             <strong style="font-size:14px;letter-spacing:0.04em">EXCLUIR PRODUTOS</strong>
         </div>
         <div style="padding:20px;font-size:14px;color:#262626;line-height:1.6">
@@ -128,7 +110,7 @@ $limite ??= 10;
                 <i class="bi bi-exclamation-circle"></i>Esta ação <strong>não pode ser desfeita</strong>.
             </p>
         </div>
-        <div style="padding:12px 20px;border-top:1px solid #e5e5e5;display:flex;justify-content:flex-end;gap:8px">
+        <div style="padding:12px 20px;border-top:1px solid #e5e5e5;background:#fafafa;display:flex;gap:8px;justify-content:flex-end">
             <button type="button"
                 style="padding:8px 16px;border:1px solid #d4d4d4;background:#fff;font-size:13px;cursor:pointer;border-radius:2px"
                 onclick="document.getElementById('modalDeleteProdutos').style.display='none'">

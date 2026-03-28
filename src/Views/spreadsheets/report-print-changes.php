@@ -289,10 +289,6 @@ $headerActions = '
 ';
 
 
-$customCssPath = '/assets/css/spreadsheets/report-print-changes.css';
-
-
-
 ob_start();
 ?>
 
