@@ -1,0 +1,423 @@
+/**
+ * METRICS - CUSTODIAN STYLE
+ * Amétricas que comunicam custódia e responsabilidade
+ *
+ * Ao invés de mostrar apenas "427 bens", mostra:
+ * "427 bens em custódia"
+ * "Última auditoria: João Silva, 15 mar"
+ *
+ * Comunica permanência, custódia, responsabilidade
+ */
+
+/* ==================== CUSTODY METRIC CARD ==================== */
+
+.custody-metric {
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-standard);
+  border-radius: var(--radius-card);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.custody-metric:hover {
+  border-color: var(--border-emphasis);
+  background-color: #faf8f4;
+}
+
+/* Main Metric Display */
+
+.custody-metric__primary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-md);
+}
+
+.custody-metric__value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.custody-metric__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  flex: 1;
+}
+
+/* Audit Trail */
+
+.custody-metric__audit {
+  border-top: 1px solid var(--border-soft);
+  padding-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.custody-metric__audit-label {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.custody-metric__auditor {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.custody-metric__auditor-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.custody-metric__auditor-date {
+  font-size: 12px;
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+}
+
+/* Breakdown */
+
+.custody-metric__breakdown {
+  border-top: 1px solid var(--border-soft);
+  padding-top: var(--spacing-md);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.custody-metric__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.custody-metric__stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  font-family: var(--font-mono);
+}
+
+.custody-metric__stat-label {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Badge */
+
+.custody-metric__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: fit-content;
+}
+
+.custody-metric__badge.active {
+  background-color: var(--status-success);
+  color: white;
+}
+
+.custody-metric__badge.inactive {
+  background-color: var(--status-muted);
+  color: white;
+}
+
+.custody-metric__badge.pending {
+  background-color: var(--status-warning);
+  color: white;
+}
+
+/* ==================== STATUS INDICATOR ==================== */
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 0;
+}
+
+.status-indicator.active {
+  color: var(--status-success);
+  background-color: rgba(107, 142, 111, 0.08);
+}
+
+.status-indicator.inactive {
+  color: var(--status-muted);
+  background-color: rgba(154, 152, 148, 0.08);
+}
+
+.status-indicator.warning {
+  color: var(--status-warning);
+  background-color: rgba(200, 90, 84, 0.08);
+}
+
+.status-indicator__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-indicator.active .status-indicator__dot {
+  background-color: var(--status-success);
+}
+
+.status-indicator.inactive .status-indicator__dot {
+  background-color: var(--status-muted);
+}
+
+.status-indicator.warning .status-indicator__dot {
+  background-color: var(--status-warning);
+}
+
+/* ==================== DASHBOARD METRIC ROW ==================== */
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-base);
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (max-width: 1024px) {
+  .metrics-row {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .metrics-row {
+    grid-template-columns: 1fr;
+  }
+
+  .custody-metric {
+    padding: var(--spacing-base);
+  }
+
+  .custody-metric__primary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .custody-metric__value {
+    font-size: 28px;
+  }
+
+  .custody-metric__breakdown {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ==================== CUSTODY SUMMARY ==================== */
+
+.custody-summary {
+  background: linear-gradient(135deg, var(--surface-elevated), #faf8f4);
+  border: 1px solid var(--border-standard);
+  border-radius: var(--radius-card);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.custody-summary__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: var(--spacing-base);
+  border-bottom: 2px solid var(--brand-gold);
+  padding-bottom: var(--spacing-md);
+}
+
+.custody-summary__content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.custody-summary__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.custody-summary__item-title {
+  font-size: 12px;
+  color: var(--ink-tertiary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.custody-summary__item-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.custody-summary__item-meta {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  font-weight: 400;
+}
+
+/* ==================== IMPACT METRIC ==================== */
+
+.impact-metric {
+  background-color: var(--surface-elevated);
+  border-left: 4px solid var(--brand-gold);
+  padding: var(--spacing-base);
+  border-radius: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-base);
+  align-items: center;
+}
+
+.impact-metric.warning {
+  border-left-color: var(--status-warning);
+  background-color: rgba(200, 90, 84, 0.05);
+}
+
+.impact-metric.success {
+  border-left-color: var(--status-success);
+  background-color: rgba(107, 142, 111, 0.05);
+}
+
+.impact-metric__icon {
+  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.impact-metric__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.impact-metric__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.impact-metric__description {
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+/* ==================== ACTIVITY TIMELINE ==================== */
+
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.activity-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--surface-base);
+  border-left: 3px solid var(--border-soft);
+}
+
+.activity-item.important {
+  border-left-color: var(--brand-gold);
+  background-color: var(--surface-elevated);
+}
+
+.activity-item__timestamp {
+  font-size: 12px;
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.activity-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.activity-item__action {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.activity-item__person {
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.activity-item__details {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  margin-top: 4px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .custody-summary__content {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-metric {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-metric__icon {
+    order: -1;
+  }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+
+.custody-metric:focus-within {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
+}
+
+.activity-timeline a {
+  color: var(--brand-gold);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.activity-timeline a:hover {
+  text-decoration: underline;
+  color: #b89856;
+}
