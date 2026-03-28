@@ -24,6 +24,24 @@ class PlanilhaController extends BaseController
     /**
      * Resolve diretório de importação com fallback para área temporária.
      */
+    private function garantirDiretorioDisponivel(string $dir): bool
+    {
+        if (is_dir($dir)) {
+            return is_writable($dir);
+        }
+
+        $parent = dirname($dir);
+        if (!is_dir($parent) || !is_writable($parent)) {
+            return false;
+        }
+
+        if (!mkdir($dir, 0775, true) && !is_dir($dir)) {
+            return false;
+        }
+
+        return is_writable($dir);
+    }
+
     private function resolverDiretorioImportacao(): string
     {
         $candidatos = [
@@ -32,11 +50,7 @@ class PlanilhaController extends BaseController
         ];
 
         foreach ($candidatos as $dir) {
-            if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
-                continue;
-            }
-
-            if (is_writable($dir)) {
+            if ($this->garantirDiretorioDisponivel($dir)) {
                 return $dir;
             }
         }
@@ -160,7 +174,7 @@ class PlanilhaController extends BaseController
                 throw new \Exception('Arquivo temporário de upload inválido.');
             }
 
-            if (!@move_uploaded_file($arquivo['tmp_name'], $caminhoDestino)) {
+            if (!move_uploaded_file($arquivo['tmp_name'], $caminhoDestino)) {
                 throw new \Exception('Erro ao salvar arquivo');
             }
 

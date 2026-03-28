@@ -31,6 +31,11 @@ class AlertHelper
         return self::render('info', $message, $dismissible);
     }
 
+    public static function note(string $message, bool $dismissible = true): string
+    {
+        return self::render('note', $message, $dismissible);
+    }
+
     
     private static function render(string $type, string $message, bool $dismissible): string
     {
@@ -91,7 +96,7 @@ class AlertHelper
 
         if (isset($_GET['aviso'])) {
             $message = mb_strtoupper($_GET['aviso'], 'UTF-8');
-            $html .= self::info($message);
+            $html .= self::warning($message);
         }
 
         return $html;

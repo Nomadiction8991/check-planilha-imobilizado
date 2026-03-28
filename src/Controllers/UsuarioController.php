@@ -378,29 +378,6 @@ class UsuarioController extends BaseController
         $this->redirecionar($url);
     }
 
-    private function renderizarListagemLegada(array $dados): void
-    {
-        // Extrair variáveis de forma explícita (sem extract())
-        $usuarios = $dados['usuarios'];
-        $total_registros = $dados['total'];
-        $total_registros_all = $dados['totalGeral'];
-        $total_paginas = $dados['totalPaginas'];
-        $pagina = $dados['pagina'];
-        $filtroNome = $dados['filtros']['busca'];
-        $filtroStatus = $dados['filtros']['status'];
-        $erro = $dados['erro'];
-
-        require __DIR__ . '/../Views/users/list.php';
-    }
-
-    private function renderizarFormularioLegado(array $dados): void
-    {
-        $mensagem = $dados['erro'] ?? '';
-        $tipo_mensagem = $mensagem ? 'error' : '';
-
-        require __DIR__ . '/../Views/users/create-legacy.php';
-    }
-
     private function renderizarFormularioEdicao(array $usuario, string $erro = ''): void
     {
         ViewRenderer::render('users/edit', [

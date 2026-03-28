@@ -34,7 +34,7 @@ class AnalysisPersistenceService
             throw new Exception('Erro ao serializar análise: ' . json_last_error_msg());
         }
 
-        if (@file_put_contents($caminho, $json) === false) {
+        if (file_put_contents($caminho, $json) === false) {
             throw new Exception('Falha ao escrever arquivo de análise: ' . $caminho);
         }
 
@@ -48,11 +48,11 @@ class AnalysisPersistenceService
     {
         $caminho = $this->getAnalisePath($importacaoId);
 
-        if (!file_exists($caminho)) {
+        if (!is_file($caminho) || !is_readable($caminho)) {
             return null;
         }
 
-        $json = @file_get_contents($caminho);
+        $json = file_get_contents($caminho);
         if ($json === false) {
             return null;
         }
@@ -72,7 +72,7 @@ class AnalysisPersistenceService
             return true;
         }
 
-        return @unlink($caminho);
+        return unlink($caminho);
     }
 
     /**
@@ -96,10 +96,24 @@ class AnalysisPersistenceService
      */
     private function ensureStorageDir(): void
     {
-        if (!is_dir($this->storageDir)) {
-            if (@mkdir($this->storageDir, 0777, true) === false) {
-                throw new Exception('Falha ao criar diretório de storage: ' . $this->storageDir);
+        if (is_dir($this->storageDir)) {
+            if (!is_writable($this->storageDir)) {
+                throw new Exception('Diretório de storage sem permissão de escrita: ' . $this->storageDir);
             }
+            return;
+        }
+
+        $parentDir = dirname($this->storageDir);
+        if (!is_dir($parentDir) || !is_writable($parentDir)) {
+            throw new Exception('Diretório pai do storage indisponível: ' . $parentDir);
+        }
+
+        if (!mkdir($this->storageDir, 0777, true) && !is_dir($this->storageDir)) {
+            throw new Exception('Falha ao criar diretório de storage: ' . $this->storageDir);
+        }
+
+        if (!is_writable($this->storageDir)) {
+            throw new Exception('Diretório de storage sem permissão de escrita: ' . $this->storageDir);
         }
     }
 }

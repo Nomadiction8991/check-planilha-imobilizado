@@ -62,40 +62,6 @@ class QueryCache
     }
 
     /**
-     * Obtém valor diretamente do cache sem executar callable.
-     *
-     * @param string $key Chave única
-     * @param mixed $default Valor padrão se não existir
-     * @return mixed
-     */
-    public function peek(string $key, mixed $default = null): mixed
-    {
-        return $this->store[$key] ?? $default;
-    }
-
-    /**
-     * Verifica se chave existe no cache.
-     *
-     * @param string $key Chave a verificar
-     * @return bool
-     */
-    public function has(string $key): bool
-    {
-        return isset($this->store[$key]);
-    }
-
-    /**
-     * Remove entrada específica do cache.
-     *
-     * @param string $key Chave a remover
-     * @return void
-     */
-    public function forget(string $key): void
-    {
-        unset($this->store[$key]);
-    }
-
-    /**
      * Remove todas as entradas do cache.
      *
      * @return void
@@ -103,25 +69,5 @@ class QueryCache
     public function clear(): void
     {
         $this->store = [];
-    }
-
-    /**
-     * Obtém número de entradas em cache.
-     *
-     * @return int
-     */
-    public function count(): int
-    {
-        return count($this->store);
-    }
-
-    /**
-     * Obtém uso de memória estimado do cache.
-     *
-     * @return int Bytes estimados
-     */
-    public function getMemoryUsage(): int
-    {
-        return memory_get_usage(true);
     }
 }

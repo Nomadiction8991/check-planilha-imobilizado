@@ -191,17 +191,20 @@ class ComumController extends BaseController
 
     private function tratarErro(\Throwable $e, string $busca, int $pagina): void
     {
-        @is_dir(__DIR__ . '/../../storage/logs') || @mkdir(__DIR__ . '/../../storage/logs', 0755, true);
-        @file_put_contents(
-            __DIR__ . '/../../storage/logs/comuns_controller.log',
-            date('c') . " ERROR " . json_encode([
-                'busca' => $busca,
-                'pagina' => $pagina,
-                'message' => $e->getMessage(),
-                'trace' => substr($e->getTraceAsString(), 0, 1200)
-            ]) . PHP_EOL,
-            FILE_APPEND
-        );
+        $logDir = __DIR__ . '/../../storage/logs';
+        $payload = date('c') . " ERROR " . json_encode([
+            'busca' => $busca,
+            'pagina' => $pagina,
+            'message' => $e->getMessage(),
+            'trace' => substr($e->getTraceAsString(), 0, 1200)
+        ]) . PHP_EOL;
+
+        if ((is_dir($logDir) || mkdir($logDir, 0755, true) || is_dir($logDir))
+            && is_writable($logDir)) {
+            file_put_contents($logDir . '/comuns_controller.log', $payload, FILE_APPEND);
+        } else {
+            error_log($payload);
+        }
 
         if ($this->query('ajax') === '1') {
             $this->json([

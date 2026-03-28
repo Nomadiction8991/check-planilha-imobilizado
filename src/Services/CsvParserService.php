@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\ConnectionManager;
-use App\Core\Logger;
 use App\Core\QueryCache;
 use League\Csv\Reader;
 use League\Csv\CharsetConverter;
