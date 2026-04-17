@@ -1,38 +1,42 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+declare(strict_types=1);
 
-class CreateImportErrosTable extends AbstractMigration
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        $this->execute(
-            <<<SQL
-CREATE TABLE IF NOT EXISTS `import_erros` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `importacao_id` int NOT NULL,
-  `linha_csv` varchar(50) DEFAULT NULL,
-  `codigo` varchar(50) DEFAULT NULL,
-  `localidade` varchar(255) DEFAULT NULL,
-  `codigo_comum` varchar(50) DEFAULT NULL,
-  `descricao_csv` text DEFAULT NULL,
-  `bem` varchar(255) DEFAULT NULL,
-  `complemento` varchar(255) DEFAULT NULL,
-  `dependencia` varchar(255) DEFAULT NULL,
-  `mensagem_erro` text NOT NULL,
-  `resolvido` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_import_erros_importacao` (`importacao_id`),
-  KEY `idx_import_erros_resolvido` (`resolvido`),
-  CONSTRAINT `fk_import_erros_importacao` FOREIGN KEY (`importacao_id`) REFERENCES `importacoes` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-        );
+        if (Schema::hasTable('import_erros')) {
+            return;
+        }
+
+        Schema::create('import_erros', function (Blueprint $table): void {
+            $table->increments('id');
+            $table->unsignedInteger('importacao_id')->index('idx_import_erros_importacao');
+            $table->string('linha_csv', 50)->nullable();
+            $table->string('codigo', 50)->nullable();
+            $table->string('localidade')->nullable();
+            $table->string('codigo_comum', 50)->nullable();
+            $table->text('descricao_csv')->nullable();
+            $table->string('bem')->nullable();
+            $table->string('complemento')->nullable();
+            $table->string('dependencia')->nullable();
+            $table->text('mensagem_erro');
+            $table->boolean('resolvido')->default(false)->index('idx_import_erros_resolvido');
+            $table->timestamp('created_at')->useCurrent();
+            $table->foreign('importacao_id', 'fk_import_erros_importacao')
+                ->references('id')
+                ->on('importacoes')
+                ->cascadeOnDelete();
+        });
     }
 
-    public function down()
+    public function down(): void
     {
-        $this->execute("DROP TABLE IF EXISTS `import_erros`");
+        Schema::dropIfExists('import_erros');
     }
-}
+};

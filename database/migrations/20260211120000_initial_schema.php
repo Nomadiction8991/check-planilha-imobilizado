@@ -1,13 +1,15 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+declare(strict_types=1);
 
-class InitialSchema extends AbstractMigration
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
 {
-  public function up()
-  {
-    $this->execute(
-      <<<SQL
+    public function up(): void
+    {
+        DB::statement(<<<'SQL'
 CREATE TABLE `comums` (
   `id` int NOT NULL AUTO_INCREMENT,
   `codigo` varchar(50) NOT NULL,
@@ -15,27 +17,23 @@ CREATE TABLE `comums` (
   `descricao` varchar(255) DEFAULT NULL,
   `administracao` varchar(255) DEFAULT NULL,
   `cidade` varchar(255) DEFAULT NULL,
-  `setor` int DEFAULT NULL,
+  `setor` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `codigo` (`codigo`),
   UNIQUE KEY `cnpj` (`cnpj`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `configuracoes` (
   `posicao_data` varchar(255) NOT NULL DEFAULT 'D13',
   `pulo_linhas` varchar(255) NOT NULL DEFAULT '25',
   `mapeamento_colunas` varchar(255) NOT NULL DEFAULT 'codigo=A;complemento=D;dependencia=P;localidade=K',
   `data_importacao` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `dependencias` (
   `id` int NOT NULL AUTO_INCREMENT,
   `comum_id` int DEFAULT NULL,
@@ -45,22 +43,18 @@ CREATE TABLE `dependencias` (
   UNIQUE KEY `uk_comum_descricao` (`comum_id`, `descricao`),
   CONSTRAINT `fk_dependencias_comum` FOREIGN KEY (`comum_id`) REFERENCES `comums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `tipos_bens` (
   `id` int NOT NULL AUTO_INCREMENT,
   `codigo` int NOT NULL,
   `descricao` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `usuarios` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nome` varchar(255) NOT NULL,
@@ -97,11 +91,9 @@ CREATE TABLE `usuarios` (
   KEY `idx_usuario_comum` (`comum_id`),
   CONSTRAINT `fk_usuarios_comum` FOREIGN KEY (`comum_id`) REFERENCES `comums` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `produtos` (
   `comum_id` int NOT NULL,
   `id_produto` int NOT NULL AUTO_INCREMENT,
@@ -134,12 +126,9 @@ CREATE TABLE `produtos` (
   KEY `idx_produtos_tipo_bem_id` (`tipo_bem_id`),
   KEY `idx_produtos_dependencia_id` (`dependencia_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-    );
+SQL);
 
-
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `importacoes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `usuario_id` int NOT NULL,
@@ -165,11 +154,9 @@ CREATE TABLE `importacoes` (
   CONSTRAINT `fk_importacoes_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_importacoes_comum` FOREIGN KEY (`comum_id`) REFERENCES `comums` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `import_job_processed` (
   `job_id` varchar(128) NOT NULL,
   `id_produto` int NOT NULL,
@@ -177,11 +164,9 @@ CREATE TABLE `import_job_processed` (
   PRIMARY KEY (`job_id`,`id_produto`),
   KEY `idx_comum` (`comum_id`,`id_produto`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 CREATE TABLE `import_erros` (
   `id` int NOT NULL AUTO_INCREMENT,
   `importacao_id` int NOT NULL,
@@ -201,11 +186,9 @@ CREATE TABLE `import_erros` (
   KEY `idx_import_erros_resolvido` (`resolvido`),
   CONSTRAINT `fk_import_erros_importacao` FOREIGN KEY (`importacao_id`) REFERENCES `importacoes` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-SQL
-    );
+SQL);
 
-    $this->execute(
-      <<<SQL
+        DB::statement(<<<'SQL'
 INSERT INTO tipos_bens (codigo, descricao) VALUES
 (1, 'BANCO DE MADEIRA/GENUFLEXORIO'),
 (2, 'TRIBUNA/CRIADO MUDO'),
@@ -256,22 +239,19 @@ INSERT INTO tipos_bens (codigo, descricao) VALUES
 (70, 'REFORMA'),
 (80, 'INSTALACOES'),
 (99, 'DIVERSOS');
-SQL
-    );
+SQL);
+    }
 
-    $this->execute("INSERT INTO usuarios (nome, email, senha, ativo) VALUES ('Administrador', 'admin@checkplanilha.com', '\$2y\$10\$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);");
-  }
-
-  public function down()
-  {
-    $this->execute("DROP TABLE IF EXISTS import_erros");
-    $this->execute("DROP TABLE IF EXISTS importacoes");
-    $this->execute("DROP TABLE IF EXISTS import_job_processed");
-    $this->execute("DROP TABLE IF EXISTS produtos");
-    $this->execute("DROP TABLE IF EXISTS usuarios");
-    $this->execute("DROP TABLE IF EXISTS tipos_bens");
-    $this->execute("DROP TABLE IF EXISTS dependencias");
-    $this->execute("DROP TABLE IF EXISTS configuracoes");
-    $this->execute("DROP TABLE IF EXISTS comums");
-  }
-}
+    public function down(): void
+    {
+        DB::statement('DROP TABLE IF EXISTS import_erros');
+        DB::statement('DROP TABLE IF EXISTS importacoes');
+        DB::statement('DROP TABLE IF EXISTS import_job_processed');
+        DB::statement('DROP TABLE IF EXISTS produtos');
+        DB::statement('DROP TABLE IF EXISTS usuarios');
+        DB::statement('DROP TABLE IF EXISTS tipos_bens');
+        DB::statement('DROP TABLE IF EXISTS dependencias');
+        DB::statement('DROP TABLE IF EXISTS configuracoes');
+        DB::statement('DROP TABLE IF EXISTS comums');
+    }
+};

@@ -1,4 +1,0 @@
-# Ignorar certificados SSL (são gerados localmente)
-*.crt
-*.key
-*.pem
