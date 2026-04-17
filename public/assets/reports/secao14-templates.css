@@ -1,0 +1,31 @@
+.r141-root .field,
+.r142-root .field,
+.r143-root .field,
+.r144-root .field,
+.r145-root .field,
+.r146-root .field,
+.r147-root .field,
+.r148-root .field {
+    position: absolute;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background: transparent;
+    color: #000;
+    resize: none;
+    overflow: hidden;
+    padding: 1px 4px;
+    font-size: 32px;
+    line-height: 1;
+    text-align: center;
+}
+
+.r141-root .field::placeholder,
+.r142-root .field::placeholder,
+.r143-root .field::placeholder,
+.r144-root .field::placeholder,
+.r145-root .field::placeholder,
+.r146-root .field::placeholder,
+.r147-root .field::placeholder,
+.r148-root .field::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+    opacity: 1;
+}
