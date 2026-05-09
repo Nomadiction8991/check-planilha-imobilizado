@@ -91,6 +91,23 @@
 
                 <div class="field-grid">
                     <label>
+                        Altura (m)
+                        <input type="number" name="altura_m" value="{{ old('altura_m') }}" min="0" step="0.001" placeholder="Ex.: 1.200">
+                    </label>
+
+                    <label>
+                        Largura (m)
+                        <input type="number" name="largura_m" value="{{ old('largura_m') }}" min="0" step="0.001" placeholder="Ex.: 0.800">
+                    </label>
+
+                    <label>
+                        Comprimento (m)
+                        <input type="number" name="comprimento_m" value="{{ old('comprimento_m') }}" min="0" step="0.001" placeholder="Ex.: 2.500">
+                    </label>
+                </div>
+
+                <div class="field-grid">
+                    <label>
                         <span>Imprimir 14.1</span>
                         <select name="imprimir_14_1">
                             <option value="0" @selected(!old('imprimir_14_1'))>Não</option>

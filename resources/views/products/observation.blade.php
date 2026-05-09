@@ -4,10 +4,7 @@
 
 @section('content')
     @php
-        $description = trim(implode(' ', array_filter([
-            $product->editado_bem ?: $product->bem,
-            $product->editado_complemento ?: $product->complemento,
-        ])));
+        $description = \App\Support\LegacyProductNameSupport::formatCurrentName($product);
         $search = trim((string) ($filters['busca'] ?? $filters['nome'] ?? $filters['codigo'] ?? ''));
         $returnQuery = array_filter([
             'comum_id' => $churchId,

@@ -218,6 +218,13 @@
                         : ($currentTypeDescription !== '' ? $currentTypeDescription : 'Nenhum');
                     $currentDependency = trim((string) data_get($product, 'dependencia.descricao', ''));
                     $currentDependency = $currentDependency !== '' ? $currentDependency : 'Nenhuma';
+                    $currentDimensions = \App\Support\LegacyProductNameSupport::formatName(
+                        '',
+                        '',
+                        data_get($product, 'editado_altura_m', data_get($product, 'altura_m')),
+                        data_get($product, 'editado_largura_m', data_get($product, 'largura_m')),
+                        data_get($product, 'editado_comprimento_m', data_get($product, 'comprimento_m'))
+                    );
                     $selectedType = old('novo_tipo_bem_id', $product->editado_tipo_bem_id ?: $product->tipo_bem_id);
                     $selectedDependency = old('nova_dependencia_id', $product->editado_dependencia_id ?: $product->dependencia_id);
                     $selectedCondition = old('condicao_14_1', $product->condicao_14_1 ?: '2');
@@ -252,6 +259,11 @@
                             <label>
                                 Dependência atual
                                 <input type="text" value="{{ $currentDependency }}" disabled>
+                            </label>
+
+                            <label>
+                                Medidas atuais
+                                <input type="text" value="{{ $currentDimensions !== '' ? $currentDimensions : 'Sem medidas' }}" disabled>
                             </label>
                         </div>
                     </fieldset>
@@ -306,6 +318,23 @@
                                 Novo complemento
                                 <textarea name="novo_complemento" rows="3" required>{{ old('novo_complemento', $product->editado_complemento ?: $product->complemento) }}</textarea>
                             </label>
+
+                            <div class="field-grid">
+                                <label>
+                                    Altura (m)
+                                    <input type="number" name="altura_m" value="{{ old('altura_m', data_get($product, 'editado_altura_m', data_get($product, 'altura_m'))) }}" min="0" step="0.001" placeholder="Ex.: 1.200">
+                                </label>
+
+                                <label>
+                                    Largura (m)
+                                    <input type="number" name="largura_m" value="{{ old('largura_m', data_get($product, 'editado_largura_m', data_get($product, 'largura_m'))) }}" min="0" step="0.001" placeholder="Ex.: 0.800">
+                                </label>
+
+                                <label>
+                                    Comprimento (m)
+                                    <input type="number" name="comprimento_m" value="{{ old('comprimento_m', data_get($product, 'editado_comprimento_m', data_get($product, 'comprimento_m'))) }}" min="0" step="0.001" placeholder="Ex.: 2.500">
+                                </label>
+                            </div>
                         </div>
 
                         <div class="product-edit-group">

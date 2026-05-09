@@ -393,10 +393,9 @@
                                     $codeParts = $code !== '' ? explode('/', $code) : [];
                                     $displayCode = $codeParts !== [] ? trim((string) $codeParts[array_key_last($codeParts)]) : '';
                                     $typeDescription = trim((string) data_get($product, 'tipoBem.descricao', ''));
-                                    $productDescription = trim((string) data_get($product, 'bem', ''));
-                                    $productComplement = trim((string) data_get($product, 'complemento', ''));
+                                    $productDescription = \App\Support\LegacyProductNameSupport::formatCurrentName($product);
                                     $dependencyDescription = trim((string) data_get($product, 'dependencia.descricao', ''));
-                                    $mainDescription = $productComplement !== '' ? $productComplement : ($productDescription !== '' ? $productDescription : 'Sem descrição');
+                                    $mainDescription = $productDescription !== '' ? $productDescription : 'Sem descrição';
                                     $currentObservation = trim((string) data_get($product, 'observacao', ''));
                                     $observation = old("itens.$index.observacao", $currentObservation);
                                     $printLabel = old("itens.$index.imprimir_etiqueta", (int) data_get($product, 'imprimir_etiqueta', 0) === 1);
