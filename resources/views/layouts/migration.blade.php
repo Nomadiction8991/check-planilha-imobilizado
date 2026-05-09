@@ -71,38 +71,6 @@
             gap: 12px;
         }
 
-        .filters-pin-toggle {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 38px;
-            height: 38px;
-            padding: 0;
-            border: 1px solid transparent;
-            border-radius: 999px;
-            background: transparent;
-            color: var(--muted);
-            cursor: pointer;
-            transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
-        }
-
-        .filters-pin-toggle:hover {
-            transform: translateY(-1px);
-            border-color: rgba(24, 21, 17, 0.10);
-            background: rgba(255, 255, 255, 0.48);
-        }
-
-        .filters-pin-toggle.is-active {
-            color: var(--accent);
-            background: var(--accent-soft);
-            border-color: rgba(31, 111, 95, 0.22);
-        }
-
-        .filters-pin-toggle .material-symbols-outlined {
-            font-size: 18px;
-            line-height: 1;
-        }
-
         .topbar,
         .panel,
         .table-shell,
@@ -314,6 +282,16 @@
             color: #f9f7f2;
             background: linear-gradient(180deg, var(--ink), #1f1a14);
             border-color: rgba(24, 21, 17, 0.18);
+        }
+
+        .page-quick-actions-item.is-active {
+            color: var(--accent);
+            background: var(--accent-soft);
+            border-color: rgba(31, 111, 95, 0.22);
+        }
+
+        .page-quick-actions-item.is-active .material-symbols-outlined {
+            color: var(--accent);
         }
 
         @media (min-width: 861px) {
@@ -1586,6 +1564,18 @@
             </button>
             <button
                 type="button"
+                class="page-quick-actions-item"
+                data-page-quick-actions-pin
+                hidden
+                aria-pressed="false"
+                aria-label="Fixar filtros"
+                title="Fixar filtros"
+            >
+                <span class="material-symbols-outlined" aria-hidden="true">push_pin</span>
+                <span class="page-quick-actions-label" data-page-quick-actions-pin-label>Fixar filtros</span>
+            </button>
+            <button
+                type="button"
                 class="page-quick-actions-item page-quick-actions-item--voice"
                 data-page-quick-actions-voice
                 hidden
@@ -1734,6 +1724,8 @@
             const stickyStack = document.querySelector('[data-sticky-stack]');
             const stickySlot = document.querySelector('[data-sticky-stack-slot]');
             const stickyFilters = Array.from(document.querySelectorAll('[data-sticky-filters]'));
+            const pinButton = document.querySelector('[data-page-quick-actions-pin]');
+            const pinButtonLabel = document.querySelector('[data-page-quick-actions-pin-label]');
             const pinSyncUrl = stickyStack?.dataset.filtersPinSyncUrl || '';
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
@@ -1741,31 +1733,6 @@
                 return;
             }
             const currentPath = window.location.pathname;
-
-            const renderPinControl = (filterCard, index) => {
-                if (filterCard.querySelector('[data-filters-pin-toggle]')) {
-                    return filterCard.querySelector('[data-filters-pin-toggle]');
-                }
-
-                const principal = filterCard.querySelector('.filters-principal__controls')
-                    || filterCard.querySelector('.filters-principal')
-                    || filterCard;
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'filters-pin-toggle';
-                button.dataset.filtersPinToggle = '1';
-                button.setAttribute('aria-pressed', 'false');
-                button.setAttribute('aria-label', 'Fixar card de filtros');
-                button.title = 'Fixar card de filtros';
-                button.innerHTML = `
-                    <span class="material-symbols-outlined" data-filters-pin-icon aria-hidden="true">push_pin</span>
-                `;
-
-                principal.appendChild(button);
-                filterCard.dataset.filtersPinIndex = String(index);
-
-                return button;
-            };
 
             const readPinState = (index) => {
                 return Boolean(legacyFilterPinStates?.[currentPath]?.[String(index)]);
@@ -1796,30 +1763,29 @@
             };
 
             const syncFilterCard = (filterCard, pinned, index) => {
-                const button = filterCard.querySelector('[data-filters-pin-toggle]');
-                const icon = filterCard.querySelector('[data-filters-pin-icon]');
-
                 filterCard.classList.toggle('is-pinned', pinned);
                 filterCard.dataset.filtersPinned = pinned ? 'true' : 'false';
+                filterCard.dataset.filtersPinIndex = String(index);
+            };
 
-                if (button) {
-                    button.classList.toggle('is-active', pinned);
-                    button.setAttribute('aria-pressed', pinned ? 'true' : 'false');
-                    button.setAttribute(
-                        'aria-label',
-                        pinned ? 'Desafixar card de filtros' : 'Fixar card de filtros'
-                    );
-                    button.title = pinned ? 'Desafixar card de filtros' : 'Fixar card de filtros';
+            const syncPinButton = (pinned) => {
+                if (!pinButton) {
+                    return;
                 }
 
-                if (icon instanceof HTMLElement) {
-                    icon.textContent = 'push_pin';
+                pinButton.hidden = false;
+                pinButton.classList.toggle('is-active', pinned);
+                pinButton.setAttribute('aria-pressed', pinned ? 'true' : 'false');
+                pinButton.setAttribute('aria-label', pinned ? 'Desafixar filtros' : 'Fixar filtros');
+                pinButton.title = pinned ? 'Desafixar filtros' : 'Fixar filtros';
+
+                if (pinButtonLabel instanceof HTMLElement) {
+                    pinButtonLabel.textContent = pinned ? 'Desafixar filtros' : 'Fixar filtros';
                 }
             };
 
             stickyFilters.forEach((filterCard, index) => {
                 const filterSection = filterCard.closest('.section');
-                const pinToggle = renderPinControl(filterCard, index);
                 stickySlot.appendChild(filterCard);
 
                 if (filterSection && filterSection.children.length === 0) {
@@ -1827,13 +1793,6 @@
                 }
 
                 syncFilterCard(filterCard, readPinState(index), index);
-
-                pinToggle?.addEventListener('click', () => {
-                    const nextPinned = filterCard.dataset.filtersPinned !== 'true';
-                    syncFilterCard(filterCard, nextPinned, index);
-                    void persistPinState(index, nextPinned);
-                    updateStickyState();
-                });
             });
 
             stickyStack.classList.add('has-slot');
@@ -1842,6 +1801,20 @@
                 const hasPinnedFilters = stickyFilters.some((filterCard) => filterCard.dataset.filtersPinned === 'true');
                 stickyStack.classList.toggle('is-pinned', hasPinnedFilters);
                 stickyStack.classList.toggle('is-stuck', hasPinnedFilters);
+                syncPinButton(hasPinnedFilters);
+            };
+
+            if (pinButton) {
+                pinButton.addEventListener('click', () => {
+                    const nextPinned = !stickyFilters.some((filterCard) => filterCard.dataset.filtersPinned === 'true');
+
+                    stickyFilters.forEach((filterCard, index) => {
+                        syncFilterCard(filterCard, nextPinned, index);
+                        void persistPinState(index, nextPinned);
+                    });
+
+                    updateStickyState();
+                });
             };
 
             updateStickyState();
