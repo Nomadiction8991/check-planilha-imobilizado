@@ -15,6 +15,7 @@ final class LegacyNavigationService implements LegacyNavigationServiceInterface
     private const DEFAULT_ORDER = [
         'products',
         'verification',
+        'labels',
         'churches',
         'departments',
         'asset-types',
@@ -50,6 +51,13 @@ final class LegacyNavigationService implements LegacyNavigationServiceInterface
                 'route' => 'migration.products.verification',
                 'active_patterns' => ['migration.products.verification'],
                 'permission' => 'products.edit',
+                'admin_only' => false,
+            ],
+            'labels' => [
+                'label' => 'Etiquetas',
+                'route' => 'migration.compat.products.copy-labels',
+                'active_patterns' => ['migration.compat.products.copy-labels'],
+                'permission' => 'products.view',
                 'admin_only' => false,
             ],
             'churches' => [
