@@ -14,6 +14,12 @@ use RuntimeException;
 
 class LegacyRouteCompatibilityController extends Controller
 {
+    public function __construct(
+        private readonly LegacyAuthSessionServiceInterface $auth,
+        private readonly LegacyProductUtilityServiceInterface $products,
+    ) {
+    }
+
     public function menu(): RedirectResponse
     {
         return redirect()->route('migration.dashboard');
@@ -75,19 +81,31 @@ class LegacyRouteCompatibilityController extends Controller
 
     public function productsCopyLabels(
         Request $request,
-        LegacyProductUtilityServiceInterface $products,
     ): View|RedirectResponse {
-        $churchId = $this->resolveChurchId($request);
+        $churchId = $this->firstPositiveInt(
+            $request->input('comum_id'),
+            $request->query('comum_id'),
+        );
+        $churches = $this->auth->availableChurches();
 
         if ($churchId === null) {
-            return redirect()
-                ->route('migration.products.index')
-                ->with('status', 'Selecione uma igreja para copiar etiquetas.')
-                ->with('status_type', 'error');
+            return view('products.copy-labels', [
+                'churchId' => null,
+                'churches' => $churches,
+                'data' => [
+                    'church' => null,
+                    'dependencies' => [],
+                    'products' => [],
+                    'selected_dependency_id' => $this->firstPositiveInt($request->query('dependencia')),
+                    'total_products' => 0,
+                    'unique_codes' => 0,
+                    'codes' => '',
+                ],
+            ]);
         }
 
         try {
-            $data = $products->labelCopyData(
+            $data = $this->products->labelCopyData(
                 $churchId,
                 $this->firstPositiveInt($request->query('dependencia')),
             );
@@ -100,6 +118,7 @@ class LegacyRouteCompatibilityController extends Controller
 
         return view('products.copy-labels', [
             'churchId' => $churchId,
+            'churches' => $churches,
             'data' => $data,
         ]);
     }
