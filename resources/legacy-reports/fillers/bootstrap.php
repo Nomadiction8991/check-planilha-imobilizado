@@ -59,6 +59,10 @@ if (!function_exists('appReportAplicarPreenchimentoRelatorio')) {
             return $html;
         }
 
-        return (string)$preencher($html, $produto, $planilha);
+        $html = (string) $preencher($html, $produto, $planilha);
+
+        $sanitizedHtml = preg_replace('/\s+placeholder=(["\']).*?\1/i', '', $html);
+
+        return $sanitizedHtml === null ? $html : $sanitizedHtml;
     }
 }

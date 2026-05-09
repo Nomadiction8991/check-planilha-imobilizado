@@ -195,10 +195,14 @@ class LegacyProductController extends Controller
 
         $this->productUtility->saveVerificationChecklist($request->churchId(), [$request->toItem()]);
 
+        $updatedProduct = $this->productUtility->findForChurch($request->productId(), $request->churchId());
+
         return response()->json([
             'success' => true,
             'message' => 'Produto atualizado automaticamente.',
             'product_id' => $request->productId(),
+            'checked' => (int) data_get($updatedProduct, 'checado', 0) === 1,
+            'print_label' => (int) data_get($updatedProduct, 'imprimir_etiqueta', 0) === 1,
         ]);
     }
 }

@@ -55,6 +55,9 @@ final class LegacyChurchManagementTest extends TestCase
         $response->assertSee('Salvar alterações');
         $response->assertSee('12-3456');
         $response->assertSee('/api/cnpj-lookup');
+        $response->assertSee('assets/forms/input-mask.js', false);
+        $response->assertSee('data-mask="cnpj"', false);
+        $response->assertSee(route('migration.api.localidades.cities', ['state' => '__STATE__']), false);
     }
 
     public function testUpdateChangesChurchData(): void

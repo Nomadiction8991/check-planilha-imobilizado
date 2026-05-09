@@ -14,29 +14,32 @@
     <style>
         .identification-block {
             display: grid;
-            gap: 6px;
+            gap: 3px;
         }
 
         .identification-primary {
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0.01em;
+            font-size: 16px;
+            font-weight: 400;
+            font-family: inherit;
+            letter-spacing: 0;
             color: var(--ink);
-            line-height: 1.2;
+            line-height: 1.22;
         }
 
         .identification-secondary {
-            font-size: 13px;
-            font-weight: 600;
-            color: color-mix(in srgb, var(--ink) 88%, var(--surface));
-            line-height: 1.25;
+            font-size: 16px;
+            font-weight: 400;
+            font-family: inherit;
+            color: var(--ink);
+            line-height: 1.22;
         }
 
         .identification-tertiary {
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 400;
+            font-family: inherit;
             color: var(--muted);
-            line-height: 1.25;
+            line-height: 1.22;
         }
 
         .verification-hero {
@@ -64,6 +67,29 @@
 
         .verification-hero .hero-copy {
             max-width: 64ch;
+        }
+
+        .verification-edit-btn {
+            min-width: 46px;
+            padding-inline: 0;
+            justify-content: center;
+        }
+
+        .verification-edit-btn .material-symbols-outlined {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .verification-mobile-icon {
+            display: none;
+            font-size: 18px;
+            line-height: 1;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .verification-mobile-icon--verified {
+            color: var(--accent);
         }
 
         @media (max-width: 860px) {
@@ -151,9 +177,35 @@
                 background: rgba(255, 255, 255, 0.58);
             }
 
+            html[data-theme='dark'] .verification-cell--verified .check-inline,
+            html[data-theme='dark'] .verification-cell--label .check-inline {
+                background: linear-gradient(180deg, rgba(47, 43, 38, 0.98), rgba(33, 31, 27, 0.96));
+                border-color: rgba(255, 255, 255, 0.14);
+            }
+
+            html[data-theme='dark'] .verification-cell--verified .check-inline {
+                border-color: rgba(145, 221, 209, 0.22);
+                color: #d7fff7;
+            }
+
+            html[data-theme='dark'] .verification-cell--label .check-inline {
+                border-color: rgba(239, 190, 130, 0.22);
+                color: #ffe4bf;
+            }
+
+            .verification-mobile-icon {
+                display: inline-flex;
+                align-items: center;
+            }
+
             .verification-cell--actions .btn {
                 min-height: 44px;
                 padding-inline: 14px;
+            }
+
+            .verification-cell--actions .verification-edit-btn {
+                min-width: 46px;
+                padding-inline: 0;
             }
 
             .verification-cell--observation input[type='text'] {
@@ -161,19 +213,13 @@
             }
 
             .identification-block {
-                gap: 4px;
+                gap: 2px;
             }
 
-            .identification-primary {
-                font-size: 14px;
-            }
-
-            .identification-secondary {
-                font-size: 12px;
-            }
-
+            .identification-primary,
+            .identification-secondary,
             .identification-tertiary {
-                font-size: 11px;
+                font-size: 15px;
             }
         }
 
@@ -227,7 +273,7 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.products.verification') }}">
                 <div class="filters-primary">
                     <label class="filters-principal">
@@ -353,6 +399,7 @@
                                     $observation = old("itens.$index.observacao", $currentObservation);
                                     $printLabel = old("itens.$index.imprimir_etiqueta", (int) data_get($product, 'imprimir_etiqueta', 0) === 1);
                                     $verified = old("itens.$index.verificado", (int) data_get($product, 'checado', 0) === 1);
+                                    $verified = (bool) $verified || (bool) $printLabel || trim((string) $observation) !== '';
                                 @endphp
                                 <tr data-product-id="{{ data_get($product, 'id_produto') }}" data-church-id="{{ data_get($product, 'comum_id') }}">
                                     <td class="verification-cell--verified" data-label="Verificado">
@@ -364,6 +411,9 @@
                                                 @checked((bool) $verified)
                                                 aria-label="Marcar {{ $code !== '' ? $code : 'produto' }} como verificado"
                                             >
+                                            <span class="verification-mobile-icon verification-mobile-icon--verified material-symbols-outlined" aria-hidden="true">
+                                                check_circle
+                                            </span>
                                         </label>
                                     </td>
                                     <td class="verification-cell--label" data-label="Etiqueta">
@@ -375,6 +425,9 @@
                                                 @checked((bool) $printLabel)
                                                 aria-label="Marcar {{ $code !== '' ? $code : 'produto' }} para impressão"
                                             >
+                                            <span class="verification-mobile-icon material-symbols-outlined" aria-hidden="true">
+                                                sell
+                                            </span>
                                         </label>
                                     </td>
                                     <td class="verification-cell--identification" data-label="Identificação">
@@ -385,8 +438,8 @@
                                             <div class="identification-secondary">
                                                 {{ $mainDescription }}
                                             </div>
-                                            <div class="identification-tertiary">
-                                                {{ $typeDescription !== '' ? $typeDescription : 'n/a' }} >> {{ $dependencyDescription !== '' ? $dependencyDescription : 'n/a' }}
+                                            <div class="identification-tertiary table-note">
+                                                {{ $typeDescription !== '' ? $typeDescription : 'Nenhum' }} >> {{ $dependencyDescription !== '' ? $dependencyDescription : 'Nenhuma' }}
                                             </div>
                                         </div>
                                     </td>
@@ -401,11 +454,14 @@
                                         >
                                     </td>
                                     <td class="verification-cell--actions" data-label="Ações">
-                                        @if (!empty($legacyPermissions['products.edit'] ?? null))
-                                            <a class="btn" href="{{ route('migration.products.edit', ['product' => data_get($product, 'id_produto')]) }}">
-                                                Editar
-                                            </a>
-                                        @endif
+                                        <a
+                                            class="btn verification-edit-btn"
+                                            href="{{ route('migration.products.edit', ['product' => data_get($product, 'id_produto')]) }}"
+                                            aria-label="Editar cadastro do produto {{ $code !== '' ? $code : 'selecionado' }}"
+                                            title="Editar cadastro"
+                                        >
+                                            <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -413,16 +469,10 @@
                     </table>
 
                     @include('partials.pagination', ['paginator' => $products])
-
-                    <div class="form-shell">
-                        <p class="field-note">
-                            As alterações são salvas automaticamente ao marcar ou desmarcar um item.
-                        </p>
-                        <div class="inline-actions">
-                            @if ($selectedChurchId)
-                                <a class="btn" href="{{ route('migration.compat.products.copy-labels', $copyLabelsQuery) }}">Ir para etiquetas</a>
-                            @endif
-                        </div>
+                    <div class="inline-actions">
+                        @if ($selectedChurchId)
+                            <a class="btn" href="{{ route('migration.compat.products.copy-labels', $copyLabelsQuery) }}">Ir para etiquetas</a>
+                        @endif
                     </div>
             </div>
         @endif
@@ -459,6 +509,37 @@
                     return payload;
                 };
 
+                const applyServerState = (row, state) => {
+                    const verifiedInput = row.querySelector('input[name="verificado"]');
+                    const labelInput = row.querySelector('input[name="imprimir_etiqueta"]');
+
+                    if (verifiedInput instanceof HTMLInputElement && Object.prototype.hasOwnProperty.call(state, 'checked')) {
+                        verifiedInput.checked = Boolean(state.checked);
+                    }
+
+                    if (labelInput instanceof HTMLInputElement && Object.prototype.hasOwnProperty.call(state, 'print_label')) {
+                        labelInput.checked = Boolean(state.print_label);
+                    }
+                };
+
+                const syncDerivedState = (row) => {
+                    const verifiedInput = row.querySelector('input[name="verificado"]');
+                    const labelInput = row.querySelector('input[name="imprimir_etiqueta"]');
+                    const observationInput = row.querySelector('input[name="observacao"]');
+
+                    if (
+                        !(verifiedInput instanceof HTMLInputElement)
+                        || !(labelInput instanceof HTMLInputElement)
+                        || !(observationInput instanceof HTMLInputElement)
+                    ) {
+                        return;
+                    }
+
+                    if ((labelInput.checked || observationInput.value.trim() !== '') && !verifiedInput.checked) {
+                        verifiedInput.checked = true;
+                    }
+                };
+
                 const saveRow = async (row) => {
                     if (autosaveUrl === '' || csrfToken === '' || row.dataset.productId === '' || row.dataset.churchId === '') {
                         return;
@@ -488,6 +569,13 @@
                         if (!response.ok) {
                             console.error('Falha ao salvar o checklist automaticamente.');
                             return;
+                        }
+
+                        try {
+                            const data = await response.json();
+                            applyServerState(row, data);
+                        } catch (parseError) {
+                            console.error(parseError);
                         }
 
                         row.dataset.syncState = 'saved';
@@ -533,22 +621,28 @@
                     const observationInput = row.querySelector('input[name="observacao"]');
                     const checkboxes = row.querySelectorAll('input[type="checkbox"]');
 
+                    syncDerivedState(row);
+
                     checkboxes.forEach((checkbox) => {
                         checkbox.addEventListener('change', () => {
+                            syncDerivedState(row);
                             scheduleSave(row);
                         });
                     });
 
                     if (observationInput instanceof HTMLInputElement) {
                         observationInput.addEventListener('input', () => {
+                            syncDerivedState(row);
                             scheduleSave(row, 500);
                         });
 
                         observationInput.addEventListener('change', () => {
+                            syncDerivedState(row);
                             scheduleSave(row);
                         });
 
                         observationInput.addEventListener('blur', () => {
+                            syncDerivedState(row);
                             scheduleSave(row);
                         });
                     }

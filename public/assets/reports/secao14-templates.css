@@ -7,7 +7,11 @@
 .r147-root .field,
 .r148-root .field {
     position: absolute;
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+    margin: 0;
+    min-height: 0;
+    border: 1px solid transparent;
+    border-radius: 0;
     background: transparent;
     color: #000;
     resize: none;
@@ -16,6 +20,10 @@
     font-size: 32px;
     line-height: 1;
     text-align: center;
+    outline: none;
+    box-shadow: none;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 .r141-root .field::placeholder,

@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LegacyReportController extends Controller
 {
@@ -65,23 +66,12 @@ class LegacyReportController extends Controller
         if ($churchId <= 0) {
             return redirect()
                 ->route('migration.reports.index')
-                ->with('status', 'Selecione uma igreja para abrir o histórico de alterações.')
+                ->with('status', 'Selecione uma igreja para abrir a posição de estoque.')
                 ->with('status_type', 'error');
         }
 
-        $filters = [
-            'mostrar_pendentes' => $request->boolean('mostrar_pendentes'),
-            'mostrar_checados' => $request->boolean('mostrar_checados'),
-            'mostrar_observacao' => $request->boolean('mostrar_observacao'),
-            'mostrar_checados_observacao' => $request->boolean('mostrar_checados_observacao'),
-            'mostrar_etiqueta' => $request->boolean('mostrar_etiqueta'),
-            'mostrar_alteracoes' => $request->boolean('mostrar_alteracoes'),
-            'mostrar_novos' => $request->boolean('mostrar_novos'),
-            'dependencia' => $request->filled('dependencia') ? $request->integer('dependencia') : null,
-        ];
-
         try {
-            $history = $this->reports->buildChangeHistory($churchId, $filters);
+            $report = $this->reports->buildVerificationPositionReport($churchId);
         } catch (RuntimeException $exception) {
             return redirect()
                 ->route('migration.reports.index', ['comum_id' => $churchId])
@@ -89,11 +79,43 @@ class LegacyReportController extends Controller
                 ->with('status_type', 'error');
         }
 
-        return view('reports.changes', [
+        return view('reports.position', [
             'churches' => $this->reports->churchOptions(),
             'selectedChurchId' => $churchId,
-            'history' => $history,
+            'report' => $report,
         ]);
+    }
+
+    public function changesExport(Request $request): StreamedResponse|RedirectResponse
+    {
+        $churchId = $request->integer('comum_id', (int) Session::get('comum_id', 0));
+
+        if ($churchId <= 0) {
+            return redirect()
+                ->route('migration.reports.index')
+                ->with('status', 'Selecione uma igreja para exportar o backup da posição.')
+                ->with('status_type', 'error');
+        }
+
+        try {
+            $file = $this->reports->downloadVerificationPositionCsv($churchId);
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('migration.reports.index', ['comum_id' => $churchId])
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
+
+        return response()->streamDownload(
+            static function () use ($file): void {
+                echo $file['content'];
+            },
+            $file['filename'],
+            [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            ],
+        );
     }
 
     public function editor(Request $request): View|RedirectResponse

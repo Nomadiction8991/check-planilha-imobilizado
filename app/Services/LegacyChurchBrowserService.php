@@ -14,6 +14,7 @@ class LegacyChurchBrowserService implements LegacyChurchBrowserServiceInterface
     public function paginate(ChurchFilters $filters): LengthAwarePaginator
     {
         return Comum::query()
+            ->with(['administracao:id,descricao'])
             ->withCount('activeProducts')
             ->when(
                 $filters->search !== '',

@@ -5,18 +5,11 @@ declare(strict_types=1);
 return static function (string $html, array $produto, array $planilha): string {
     $dataHoje = date('d/m/Y');
     $descricaoIgreja = trim((string)($planilha['descricao'] ?? $planilha['comum'] ?? ''));
-    $administracao = trim((string)($planilha['cidade_administracao'] ?? $planilha['administracao'] ?? ''));
-    $estadoAdministracao = trim((string)($planilha['estado_administracao'] ?? ''));
+    $administracao = trim((string)($planilha['administracao_descricao'] ?? $planilha['administracao'] ?? ''));
+    $administracaoCnpj = trim((string)($planilha['administracao_cnpj'] ?? ''));
+    $usuarioNome = trim((string)($planilha['usuario_nome_relatorio'] ?? $planilha['usuario_nome'] ?? ''));
     $cidade = trim((string)($planilha['cidade'] ?? ''));
     $estado = trim((string)($planilha['estado'] ?? ''));
-
-    if ($administracao !== '' && $estadoAdministracao !== '') {
-        $administracao .= ' - ' . $estadoAdministracao;
-    }
-
-    if ($cidade !== '' && $estado !== '') {
-        $cidade .= ' - ' . $estado;
-    }
 
     $itens = $produto['itens'] ?? [];
     if (!is_array($itens)) {
@@ -24,7 +17,9 @@ return static function (string $html, array $produto, array $planilha): string {
     }
 
     $responsavel = '';
-    if ($itens !== []) {
+    if ($usuarioNome !== '') {
+        $responsavel = $usuarioNome;
+    } elseif ($itens !== []) {
         $responsavel = trim((string)($itens[0]['administrador_nome'] ?? ''));
     }
 
@@ -32,7 +27,7 @@ return static function (string $html, array $produto, array $planilha): string {
     $html = appReportPreencherCampoPorName($html, 'administracao', $administracao);
     $html = appReportPreencherCampoPorName($html, 'cidade', $cidade);
     $html = appReportPreencherCampoPorName($html, 'setor', $planilha['setor'] ?? '');
-    $html = appReportPreencherCampoPorName($html, 'cnpj_da-administracao', $planilha['cnpj'] ?? '');
+    $html = appReportPreencherCampoPorName($html, 'cnpj_da-administracao', $administracaoCnpj);
     $html = appReportPreencherCampoPorName($html, 'casa_de_oracao', $descricaoIgreja);
     $html = appReportPreencherCampoPorName($html, 'nome_do-responsavel', $responsavel);
 

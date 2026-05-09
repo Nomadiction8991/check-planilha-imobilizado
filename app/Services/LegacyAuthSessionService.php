@@ -133,6 +133,16 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
             throw new RuntimeException('Igreja não encontrada.');
         }
 
+        /** @var Usuario|null $user */
+        $user = Usuario::query()->find((int) Session::get('usuario_id', 0));
+        if ($user === null) {
+            throw new RuntimeException('Sessão inválida.');
+        }
+
+        if (!$user->isAdministrator() && (int) $user->comum_id !== $churchId) {
+            throw new RuntimeException('Igreja fora do escopo permitido.');
+        }
+
         Session::put('comum_id', $churchId);
     }
 

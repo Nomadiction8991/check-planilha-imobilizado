@@ -231,6 +231,65 @@ final class LegacyAuthFlowTest extends TestCase
         $response->assertSessionHas('status', 'Igreja ativa atualizada.');
     }
 
+    public function testSwitchChurchRejectsChurchOutsideUserScope(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('switchChurch')
+                ->once()
+                ->with(11)
+                ->andThrow(new \RuntimeException('Igreja fora do escopo permitido.'));
+            $mock->shouldReceive('currentUser')->andReturn([
+                'id' => 9,
+                'nome' => 'Maria Silva',
+                'email' => 'MARIA@EXEMPLO.COM',
+                'comum_id' => 7,
+                'is_admin' => false,
+            ]);
+            $mock->shouldReceive('currentChurch')->andReturn([
+                'id' => 7,
+                'codigo' => '12-3456',
+                'descricao' => 'Central Cuiabá',
+            ]);
+            $mock->shouldReceive('availableChurches')->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+                (object) ['id' => 11, 'codigo' => '12-7890', 'descricao' => 'Várzea Grande'],
+            ]));
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'administracao_id' => 4,
+        ])->post(route('migration.session.church'), [
+            'comum_id' => 11,
+            'redirect_to' => '/products',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('status', 'Igreja fora do escopo permitido.');
+        $response->assertSessionHas('status_type', 'error');
+        $response->assertSessionHas('comum_id', 7);
+    }
+
+    public function testPublicLogoutUsesPostAndClearsPublicSession(): void
+    {
+        $response = $this->withSession([
+            'public_acesso' => true,
+            'public_planilha_id' => 15,
+            'public_comum_id' => 15,
+            'public_comum' => 'Central Cuiabá',
+        ])->post(route('public.access.logout'));
+
+        $response->assertRedirect(route('migration.login'));
+        $response->assertSessionMissing('public_acesso');
+        $response->assertSessionMissing('public_planilha_id');
+        $response->assertSessionMissing('public_comum_id');
+        $response->assertSessionMissing('public_comum');
+    }
+
     public function testAdminRouteRedirectsNonAdminUser(): void
     {
         $response = $this->withSession([

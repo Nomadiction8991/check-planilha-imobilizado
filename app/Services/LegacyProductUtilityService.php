@@ -135,8 +135,12 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
                     continue;
                 }
 
+                $shouldCheck = $item->verified
+                    || $item->printLabel
+                    || trim($item->observation) !== '';
+
                 $this->updateLabel($item->productId, $churchId, $item->printLabel);
-                $this->updateCheck($item->productId, $churchId, $item->verified);
+                $this->updateCheck($item->productId, $churchId, $shouldCheck);
                 $this->updateObservation($item->productId, $churchId, $item->observation);
                 $processed++;
             }

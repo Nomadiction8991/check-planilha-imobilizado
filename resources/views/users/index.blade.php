@@ -27,7 +27,7 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.users.index') }}">
                 <div class="filters-primary">
                     <label class="filters-principal">
@@ -109,7 +109,7 @@
                                     <div class="table-note">{{ $user->email ?: 'Sem email' }}</div>
                                 </td>
                                 <td data-label="Administração">
-                                    {{ data_get($user, 'administracao.id') ? '#' . data_get($user, 'administracao.id') : 'n/a' }}
+                                    {{ data_get($user, 'administracao.id') ? '#' . data_get($user, 'administracao.id') : 'Nenhum' }}
                                     @if (data_get($user, 'administracao.descricao'))
                                         <div class="table-note">{{ data_get($user, 'administracao.descricao') }}</div>
                                     @endif

@@ -8,7 +8,7 @@
         <h1>Editar igreja.</h1>
         <p class="hero-copy">
             Atualize o cadastro principal da igreja. O código permanece imutável, o CNPJ continua validado antes de
-            gravar e os campos de localização e administração seguem obrigatórios.
+            gravar e a igreja precisa ficar vinculada a uma administração para funcionar na importação.
         </p>
     </section>
 
@@ -41,6 +41,18 @@
 
                 <div class="field-grid">
                     <label>
+                        Administração vinculada
+                        <select name="administracao_id" required>
+                            <option value="">Selecione</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected((int) old('administracao_id', $church->administracao_id ?? 0) === (int) $administration->id)>
+                                    #{{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label>
                         Código
                         <input type="text" value="{{ $church->codigo }}" readonly>
                     </label>
@@ -52,7 +64,9 @@
                             type="text"
                             name="cnpj"
                             value="{{ old('cnpj', $church->cnpj) }}"
-                            maxlength="30"
+                            maxlength="18"
+                            data-mask="cnpj"
+                            inputmode="numeric"
                             placeholder="00.000.000/0000-00"
                             required
                         >
@@ -85,42 +99,15 @@
 
                     <label>
                         Cidade da Igreja
-                        <input
+                        <select
                             id="church-cidade"
-                            type="text"
                             name="cidade"
-                            value="{{ old('cidade', $church->cidade) }}"
-                            maxlength="255"
-                            placeholder="Cidade da igreja"
                             required
+                            disabled
+                            data-selected-city="{{ old('cidade', $church->cidade) }}"
                         >
-                    </label>
-
-                    <label>
-                        Estado da Administração
-                        <select name="estado_administracao" required>
-                            <option value="">Selecione</option>
-                            @foreach ($states as $stateCode => $stateLabel)
-                                <option
-                                    value="{{ $stateCode }}"
-                                    @selected(old('estado_administracao', $church->estado_administracao) === $stateCode)
-                                >
-                                    {{ $stateLabel }} ({{ $stateCode }})
-                                </option>
-                            @endforeach
+                            <option value="">Selecione um estado primeiro</option>
                         </select>
-                    </label>
-
-                    <label>
-                        Cidade da Administração
-                        <input
-                            type="text"
-                            name="cidade_administracao"
-                            value="{{ old('cidade_administracao', $church->cidade_administracao) }}"
-                            maxlength="255"
-                            placeholder="Cidade da administração"
-                            required
-                        >
                     </label>
 
                     <label>
@@ -135,7 +122,9 @@
                     </label>
                 </div>
 
-                <p class="field-note">O código não pode ser alterado nesta etapa. Caso o CNPJ já exista em outro cadastro, a mesma regra de normalização será aplicada.</p>
+                <div class="field-note">
+                    O código não pode ser alterado nesta etapa. A administração vinculada é obrigatória para a importação.
+                </div>
 
                 <div class="inline-actions">
                     <button class="btn primary" type="submit">Salvar alterações</button>
@@ -150,7 +139,10 @@
             const form = document.getElementById('church-edit-form');
             const cnpjInput = document.getElementById('church-cnpj');
             const descricaoInput = document.getElementById('church-descricao');
+            const stateInput = document.querySelector('select[name="estado"]');
             const cidadeInput = document.getElementById('church-cidade');
+            const cidadeSelecionada = cidadeInput?.dataset.selectedCity || '';
+            const citiesEndpointTemplate = "{{ route('migration.api.localidades.cities', ['state' => '__STATE__']) }}";
 
             if (!form || !cnpjInput) {
                 return;
@@ -160,6 +152,53 @@
 
             if (!csrfInput) {
                 return;
+            }
+
+            async function loadCities(state, selectedCity = '') {
+                cidadeInput.disabled = true;
+                cidadeInput.innerHTML = '<option value="">Carregando cidades...</option>';
+
+                try {
+                    const response = await fetch(citiesEndpointTemplate.replace('__STATE__', encodeURIComponent(state)), {
+                        headers: { Accept: 'application/json' },
+                    });
+                    const payload = await response.json();
+
+                    if (!response.ok || payload.success !== true || !Array.isArray(payload.data)) {
+                        throw new Error(payload.message || 'Não foi possível carregar as cidades.');
+                    }
+
+                    const cities = payload.data;
+
+                    cidadeInput.innerHTML = '<option value="">Selecione</option>';
+                    cities.forEach((city) => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        if (selectedCity && selectedCity === city) {
+                            option.selected = true;
+                        }
+                        cidadeInput.appendChild(option);
+                    });
+                    cidadeInput.disabled = false;
+                } catch (error) {
+                    cidadeInput.innerHTML = '<option value="">Não foi possível carregar as cidades</option>';
+                }
+            }
+
+            stateInput?.addEventListener('change', () => {
+                const state = stateInput.value;
+                if (!state) {
+                    cidadeInput.innerHTML = '<option value="">Selecione um estado primeiro</option>';
+                    cidadeInput.disabled = true;
+                    return;
+                }
+
+                loadCities(state);
+            });
+
+            if (stateInput?.value) {
+                loadCities(stateInput.value, cidadeSelecionada);
             }
 
             cnpjInput.addEventListener('blur', async function () {

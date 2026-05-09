@@ -11,7 +11,8 @@
         <span class="eyebrow">Cadastro administrativo</span>
         <h1>Administrações do sistema.</h1>
         <p class="hero-copy">
-            Use este cadastro para selecionar a administração de cada importação. Aqui ficam apenas identificação e descrição.
+            Use este cadastro para selecionar a administração de cada importação e para vincular igrejas.
+            Aqui ficam a identificação, o CNPJ, a descrição e a localização base.
         </p>
     </section>
 
@@ -40,16 +41,18 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.administrations.index') }}">
-                <label>
-                    Buscar por ID ou descrição
-                    <input type="text" name="busca" value="{{ $filters->search }}" placeholder="1 ou Administração Central">
-                </label>
+                <div class="filters-primary">
+                    <label class="filters-query">
+                        Buscar por ID, descrição ou CNPJ
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="1, Administração Central ou 12345678000190">
+                    </label>
 
-                <div class="actions">
-                    <button class="btn primary" type="submit">Filtrar</button>
-                    <a class="btn" href="{{ route('migration.administrations.index') }}">Limpar</a>
+                    <div class="actions filters-actions">
+                        <button class="btn primary" type="submit">Filtrar</button>
+                        <a class="btn" href="{{ route('migration.administrations.index') }}">Limpar</a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -77,6 +80,8 @@
                         <tr>
                             <th>ID</th>
                             <th>Descrição</th>
+                            <th>CNPJ</th>
+                            <th>Localização</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -84,7 +89,11 @@
                         @foreach ($administrations as $administration)
                             <tr>
                                 <td data-label="ID" class="mono">{{ $administration->id }}</td>
-                                <td data-label="Descrição">{{ $administration->descricao ?: 'Sem descrição' }}</td>
+                                <td data-label="Descrição">{{ $administration->descricao ?? 'Sem descrição' }}</td>
+                                <td data-label="CNPJ" class="mono">{{ $administration->cnpj ?? 'Sem CNPJ' }}</td>
+                                <td data-label="Localização">
+                                    {{ trim(implode(' - ', array_filter([$administration->cidade ?? '', $administration->estado ?? '']))) ?: 'Sem localização' }}
+                                </td>
                                 <td data-label="Ações">
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['administrations.edit'] ?? null))

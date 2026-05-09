@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyReportServiceInterface;
 use App\Models\Legacy\Comum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use RuntimeException;
 
 class LegacyReportService implements LegacyReportServiceInterface
@@ -49,6 +51,7 @@ class LegacyReportService implements LegacyReportServiceInterface
 
     public function __construct(
         private readonly LegacyReportTemplateService $templates,
+        private readonly LegacyAuthSessionServiceInterface $auth,
     ) {
     }
 
@@ -62,6 +65,7 @@ class LegacyReportService implements LegacyReportServiceInterface
     public function listAvailableReports(int $churchId): array
     {
         $reports = [];
+        $permissions = (array) Session::get('legacy_permissions', []);
 
         foreach (self::REPORTS as $codigo => $definition) {
             if (!in_array($codigo, ['14.1', '14.6'], true)) {
@@ -91,6 +95,18 @@ class LegacyReportService implements LegacyReportServiceInterface
                 'descricao' => $definition['descricao'],
                 'rota' => route('migration.reports.show', ['formulario' => $codigo, 'comum_id' => $churchId]),
                 'quantidade' => $quantity,
+            ];
+        }
+
+        if (!empty($permissions['reports.changes.view'] ?? false)) {
+            $positionRows = $this->loadVerificationPositionProducts($churchId);
+
+            $reports[] = [
+                'codigo' => 'POS',
+                'titulo' => 'Posição de estoque',
+                'descricao' => 'Backup da posição de verificação e dos itens conferidos',
+                'rota' => route('migration.reports.changes', ['comum_id' => $churchId]),
+                'quantidade' => count($positionRows),
             ];
         }
 
@@ -140,12 +156,327 @@ class LegacyReportService implements LegacyReportServiceInterface
         ];
     }
 
+    /**
+     * @return array{
+     *   planilha: array<string, mixed>,
+     *   itens: array<int, array<string, mixed>>,
+     *   resumo: array{
+     *     total_geral: int,
+     *     total_pendentes: int,
+     *     total_checados: int,
+     *     total_observacao: int,
+     *     total_etiqueta: int,
+     *     total_alteracoes: int,
+     *     total_novos: int,
+     *     total_checados_observacao: int,
+     *     total_checados_etiqueta: int,
+     *     total_observacao_etiqueta: int,
+     *     total_checados_observacao_etiqueta: int,
+     *     total_editados_checados: int,
+     *     total_editados_observacao: int,
+     *     total_editados_checados_observacao: int,
+     *     total_backup: int
+     *   },
+     *   backup: array{filename: string, content: string}
+     * }
+     */
+    public function buildVerificationPositionReport(int $churchId): array
+    {
+        $churchData = $this->loadChurchData($churchId);
+
+        if ($churchData === []) {
+            throw new RuntimeException('Igreja não encontrada para abrir a posição de estoque.');
+        }
+
+        $rawProducts = $this->loadVerificationPositionProducts($churchId);
+        $items = [];
+
+        $summary = [
+            'total_geral' => 0,
+            'total_pendentes' => 0,
+            'total_checados' => 0,
+            'total_observacao' => 0,
+            'total_etiqueta' => 0,
+            'total_alteracoes' => 0,
+            'total_novos' => 0,
+            'total_checados_observacao' => 0,
+            'total_checados_etiqueta' => 0,
+            'total_observacao_etiqueta' => 0,
+            'total_checados_observacao_etiqueta' => 0,
+            'total_editados_checados' => 0,
+            'total_editados_observacao' => 0,
+            'total_editados_etiqueta' => 0,
+            'total_editados_checados_etiqueta' => 0,
+            'total_editados_observacao_etiqueta' => 0,
+            'total_editados_checados_observacao' => 0,
+            'total_editados_checados_observacao_etiqueta' => 0,
+            'total_backup' => 0,
+        ];
+
+        foreach ($rawProducts as $rawProduct) {
+            $item = $this->hydrateVerificationPositionItem($rawProduct);
+            $items[] = $item;
+
+            $summary['total_geral']++;
+
+            if ($item['pendente'] === true) {
+                $summary['total_pendentes']++;
+            }
+
+            if ($item['checado'] === true) {
+                $summary['total_checados']++;
+            }
+
+            if ($item['observacoes'] !== '') {
+                $summary['total_observacao']++;
+            }
+
+            if ($item['imprimir_etiqueta'] === true) {
+                $summary['total_etiqueta']++;
+            }
+
+            if ($item['editado'] === true) {
+                $summary['total_alteracoes']++;
+            }
+
+            if ($item['novo'] === true) {
+                $summary['total_novos']++;
+            }
+
+            if ($item['checado'] === true && $item['observacoes'] !== '') {
+                $summary['total_checados_observacao']++;
+            }
+
+            if ($item['checado'] === true && $item['imprimir_etiqueta'] === true) {
+                $summary['total_checados_etiqueta']++;
+            }
+
+            if ($item['observacoes'] !== '' && $item['imprimir_etiqueta'] === true) {
+                $summary['total_observacao_etiqueta']++;
+            }
+
+            if ($item['checado'] === true && $item['observacoes'] !== '' && $item['imprimir_etiqueta'] === true) {
+                $summary['total_checados_observacao_etiqueta']++;
+            }
+
+            if ($item['editado'] === true && $item['checado'] === true) {
+                $summary['total_editados_checados']++;
+            }
+
+            if ($item['editado'] === true && $item['observacoes'] !== '') {
+                $summary['total_editados_observacao']++;
+            }
+
+            if ($item['editado'] === true && $item['imprimir_etiqueta'] === true) {
+                $summary['total_editados_etiqueta']++;
+            }
+
+            if ($item['editado'] === true && $item['checado'] === true && $item['imprimir_etiqueta'] === true) {
+                $summary['total_editados_checados_etiqueta']++;
+            }
+
+            if ($item['editado'] === true && $item['observacoes'] !== '' && $item['imprimir_etiqueta'] === true) {
+                $summary['total_editados_observacao_etiqueta']++;
+            }
+
+            if ($item['editado'] === true && $item['checado'] === true && $item['observacoes'] !== '') {
+                $summary['total_editados_checados_observacao']++;
+            }
+
+            if ($item['editado'] === true && $item['checado'] === true && $item['observacoes'] !== '' && $item['imprimir_etiqueta'] === true) {
+                $summary['total_editados_checados_observacao_etiqueta']++;
+            }
+        }
+
+        $summary['total_backup'] = count($items);
+
+        return [
+            'planilha' => $churchData,
+            'itens' => $items,
+            'resumo' => $summary,
+            'backup' => $this->buildVerificationPositionCsv($churchData, $items),
+        ];
+    }
+
+    /**
+     * @return array{filename: string, content: string}
+     */
+    public function downloadVerificationPositionCsv(int $churchId): array
+    {
+        $report = $this->buildVerificationPositionReport($churchId);
+
+        return $report['backup'];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function loadVerificationPositionProducts(int $churchId): array
+    {
+        return DB::table('produtos as p')
+            ->leftJoin('tipos_bens as tb', 'p.tipo_bem_id', '=', 'tb.id')
+            ->leftJoin('tipos_bens as etb', 'p.editado_tipo_bem_id', '=', 'etb.id')
+            ->leftJoin('dependencias as d_orig', 'p.dependencia_id', '=', 'd_orig.id')
+            ->leftJoin('dependencias as d_edit', 'p.editado_dependencia_id', '=', 'd_edit.id')
+            ->where('p.comum_id', $churchId)
+            ->where('p.ativo', 1)
+            ->orderBy('p.codigo')
+            ->get([
+                'p.id_produto as id',
+                'p.codigo',
+                DB::raw('CAST(p.checado AS SIGNED) as checado'),
+                DB::raw('CAST(p.imprimir_etiqueta AS SIGNED) as imprimir'),
+                DB::raw('CAST(p.editado AS SIGNED) as editado'),
+                DB::raw('CAST(p.novo AS SIGNED) as novo'),
+                'p.observacao as observacoes',
+                'p.bem',
+                'p.complemento',
+                'p.editado_bem',
+                'p.editado_complemento',
+                DB::raw("NULLIF(CONCAT_WS(' ', p.editado_bem, p.editado_complemento), '') as nome_editado"),
+                'tb.codigo as tipo_codigo',
+                'tb.descricao as tipo_desc',
+                'etb.codigo as editado_tipo_codigo',
+                'etb.descricao as editado_tipo_desc',
+                'd_orig.descricao as dependencia_desc',
+                'd_edit.descricao as editado_dependencia_desc',
+            ])
+            ->map(function ($item): array {
+                $product = (array) $item;
+                $product['nome_original'] = $this->buildChangeHistoryTitle($product, false);
+                $product['nome_atual'] = ((int) ($product['editado'] ?? 0) === 1 || trim((string) ($product['nome_editado'] ?? '')) !== '')
+                    ? $this->buildChangeHistoryTitle($product, true)
+                    : $product['nome_original'];
+
+                return $product;
+            })
+            ->all();
+    }
+
+    /**
+     * @param array<string, mixed> $product
+     * @return array<string, mixed>
+     */
+    private function hydrateVerificationPositionItem(array $product): array
+    {
+        $observacoes = trim((string) ($product['observacoes'] ?? ''));
+        $checado = (int) ($product['checado'] ?? 0) === 1;
+        $imprimirEtiqueta = (int) ($product['imprimir'] ?? 0) === 1;
+        $editado = (int) ($product['editado'] ?? 0) === 1;
+        $novo = (int) ($product['novo'] ?? 0) === 1;
+        [$statusKey, $statusLabel] = $this->resolveVerificationPositionStatus($checado, $observacoes !== '', $imprimirEtiqueta, $editado, $novo);
+
+        return [
+            'id' => (int) ($product['id'] ?? 0),
+            'codigo' => (string) ($product['codigo'] ?? ''),
+            'nome_original' => (string) ($product['nome_original'] ?? ''),
+            'nome_atual' => (string) ($product['nome_atual'] ?? ''),
+            'dependencia' => trim((string) ($product['dependencia_desc'] ?? $product['editado_dependencia_desc'] ?? '')),
+            'observacoes' => $observacoes,
+            'checado' => $checado,
+            'imprimir_etiqueta' => $imprimirEtiqueta,
+            'editado' => $editado,
+            'novo' => $novo,
+            'pendente' => !$checado && !$imprimirEtiqueta && $observacoes === '' && !$editado && !$novo,
+            'status_key' => $statusKey,
+            'status_label' => $statusLabel,
+        ];
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function resolveVerificationPositionStatus(
+        bool $checado,
+        bool $temObservacao,
+        bool $imprimirEtiqueta,
+        bool $editado,
+        bool $novo,
+    ): array {
+        return match (true) {
+            $editado && $checado && $temObservacao && $imprimirEtiqueta => ['editado_checado_observacao_etiqueta', 'Editado, checado, observação e etiqueta'],
+            $editado && $checado && $temObservacao => ['editado_checado_observacao', 'Editado, checado e observação'],
+            $editado && $checado && $imprimirEtiqueta => ['editado_checado_etiqueta', 'Editado e checado para etiqueta'],
+            $editado && $temObservacao && $imprimirEtiqueta => ['editado_observacao_etiqueta', 'Editado com observação para etiqueta'],
+            $editado && $checado => ['editado_checado', 'Editado e checado'],
+            $editado && $temObservacao => ['editado_observacao', 'Editado com observação'],
+            $editado && $imprimirEtiqueta => ['editado_etiqueta', 'Editado para etiqueta'],
+            $editado => ['editado', 'Editado'],
+            $checado && $temObservacao && $imprimirEtiqueta => ['checado_observacao_etiqueta', 'Checado com observação para etiqueta'],
+            $checado && $temObservacao => ['checado_observacao', 'Checado com observação'],
+            $checado && $imprimirEtiqueta => ['checado_etiqueta', 'Checado para etiqueta'],
+            $temObservacao && $imprimirEtiqueta => ['observacao_etiqueta', 'Com observação para etiqueta'],
+            $checado => ['checado', 'Checado'],
+            $temObservacao => ['observacao', 'Com observação'],
+            $imprimirEtiqueta => ['etiqueta', 'Para etiquetas'],
+            $novo => ['novo', 'Novo'],
+            default => ['pendente', 'Pendente'],
+        };
+    }
+
+    /**
+     * @param array<string, mixed> $churchData
+     * @param array<int, array<string, mixed>> $items
+     * @return array{filename: string, content: string}
+     */
+    private function buildVerificationPositionCsv(array $churchData, array $items): array
+    {
+        $stream = fopen('php://temp', 'r+');
+
+        if ($stream === false) {
+            throw new RuntimeException('Não foi possível preparar o backup da posição.');
+        }
+
+        fwrite($stream, "\xEF\xBB\xBF");
+
+        fputcsv($stream, [
+            'Código',
+            'Situação',
+            'Descrição original',
+            'Descrição atual',
+            'Dependência',
+            'Checado',
+            'Etiqueta',
+            'Observação',
+            'Editado',
+            'Novo',
+        ], ';');
+
+        foreach ($items as $item) {
+            fputcsv($stream, [
+                (string) ($item['codigo'] ?? ''),
+                (string) ($item['status_label'] ?? ''),
+                (string) ($item['nome_original'] ?? ''),
+                (string) ($item['nome_atual'] ?? ''),
+                (string) ($item['dependencia'] ?? ''),
+                ($item['checado'] ?? false) === true ? '1' : '0',
+                ($item['imprimir_etiqueta'] ?? false) === true ? '1' : '0',
+                (string) ($item['observacoes'] ?? ''),
+                ($item['editado'] ?? false) === true ? '1' : '0',
+                ($item['novo'] ?? false) === true ? '1' : '0',
+            ], ';');
+        }
+
+        rewind($stream);
+        $content = stream_get_contents($stream);
+        fclose($stream);
+
+        $churchCode = $this->formatShortCode((string) ($churchData['codigo'] ?? ''));
+
+        return [
+            'filename' => 'posicao_verificacao'
+                . ($churchCode !== '' ? '_' . $churchCode : '')
+                . '_' . date('Ymd_His') . '.csv',
+            'content' => $content !== false ? $content : '',
+        ];
+    }
+
     public function buildChangeHistory(int $churchId, array $filters): array
     {
         $churchData = $this->loadChurchData($churchId);
 
         if ($churchData === []) {
-            throw new RuntimeException('Igreja não encontrada para abrir o histórico de alterações.');
+            throw new RuntimeException('Igreja não encontrada para abrir a posição de estoque.');
         }
 
         $normalizedFilters = [
@@ -154,6 +485,9 @@ class LegacyReportService implements LegacyReportServiceInterface
             'mostrar_observacao' => (bool) ($filters['mostrar_observacao'] ?? false),
             'mostrar_checados_observacao' => (bool) ($filters['mostrar_checados_observacao'] ?? false),
             'mostrar_etiqueta' => (bool) ($filters['mostrar_etiqueta'] ?? false),
+            'mostrar_checados_etiqueta' => (bool) ($filters['mostrar_checados_etiqueta'] ?? false),
+            'mostrar_observacao_etiqueta' => (bool) ($filters['mostrar_observacao_etiqueta'] ?? false),
+            'mostrar_checados_observacao_etiqueta' => (bool) ($filters['mostrar_checados_observacao_etiqueta'] ?? false),
             'mostrar_alteracoes' => (bool) ($filters['mostrar_alteracoes'] ?? false),
             'mostrar_novos' => (bool) ($filters['mostrar_novos'] ?? false),
             'dependencia' => isset($filters['dependencia']) && (int) $filters['dependencia'] > 0
@@ -170,24 +504,43 @@ class LegacyReportService implements LegacyReportServiceInterface
             'total_observacao' => count($sections['observacao']['itens']),
             'total_checados_observacao' => count($sections['checados_observacao']['itens']),
             'total_etiqueta' => count($sections['etiqueta']['itens']),
+            'total_checados_etiqueta' => count($sections['checados_etiqueta']['itens']),
+            'total_observacao_etiqueta' => count($sections['observacao_etiqueta']['itens']),
+            'total_checados_observacao_etiqueta' => count($sections['checados_observacao_etiqueta']['itens']),
             'total_alteracoes' => count($sections['alteracoes']['itens']),
             'total_novos' => count($sections['novos']['itens']),
             'total_mostrar' => 0,
         ];
 
-        foreach ([
-            'mostrar_pendentes' => 'total_pendentes',
-            'mostrar_checados' => 'total_checados',
-            'mostrar_observacao' => 'total_observacao',
-            'mostrar_checados_observacao' => 'total_checados_observacao',
-            'mostrar_etiqueta' => 'total_etiqueta',
-            'mostrar_alteracoes' => 'total_alteracoes',
-            'mostrar_novos' => 'total_novos',
-        ] as $flag => $totalKey) {
-            if ($normalizedFilters[$flag] === true) {
-                $totals['total_mostrar'] += $totals[$totalKey];
+        $selectedSections = [
+            'mostrar_pendentes' => 'pendentes',
+            'mostrar_checados' => 'checados',
+            'mostrar_observacao' => 'observacao',
+            'mostrar_checados_observacao' => 'checados_observacao',
+            'mostrar_etiqueta' => 'etiqueta',
+            'mostrar_checados_etiqueta' => 'checados_etiqueta',
+            'mostrar_observacao_etiqueta' => 'observacao_etiqueta',
+            'mostrar_checados_observacao_etiqueta' => 'checados_observacao_etiqueta',
+            'mostrar_alteracoes' => 'alteracoes',
+            'mostrar_novos' => 'novos',
+        ];
+
+        $selectedItemIds = [];
+        foreach ($selectedSections as $flag => $sectionKey) {
+            if ($normalizedFilters[$flag] !== true) {
+                continue;
+            }
+
+            foreach ($sections[$sectionKey]['itens'] as $item) {
+                $itemId = (int) ($item['id'] ?? 0);
+
+                if ($itemId > 0) {
+                    $selectedItemIds[$itemId] = true;
+                }
             }
         }
+
+        $totals['total_mostrar'] = count($selectedItemIds);
 
         return [
             'planilha' => $churchData,
@@ -203,21 +556,46 @@ class LegacyReportService implements LegacyReportServiceInterface
      */
     private function loadChurchData(int $churchId): array
     {
-        $result = DB::table('comums')
+        $result = DB::table('comums as c')
+            ->leftJoin('administracoes as a', 'c.administracao_id', '=', 'a.id')
             ->select([
-                'cnpj',
-                'descricao',
-                DB::raw('cidade_administracao AS administracao'),
-                'cidade',
-                'setor',
-                'estado',
-                'estado_administracao',
-                'cidade_administracao',
-            ])
-            ->where('id', $churchId)
+                'c.codigo',
+                'c.cnpj',
+            'c.descricao',
+            DB::raw('COALESCE(TRIM(a.descricao), "") AS administracao'),
+            DB::raw('COALESCE(TRIM(a.descricao), "") AS administracao_descricao'),
+            DB::raw('COALESCE(TRIM(a.cnpj), "") AS administracao_cnpj'),
+            'c.cidade',
+            'c.setor',
+            'c.estado',
+            'c.estado_administracao',
+            'c.cidade_administracao',
+        ])
+            ->where('c.id', $churchId)
             ->first();
 
-        return $result !== null ? (array) $result : [];
+        if ($result === null) {
+            return [];
+        }
+
+        return array_merge((array) $result, [
+            'usuario_nome_relatorio' => $this->resolveCurrentUserName(),
+        ]);
+    }
+
+    private function resolveCurrentUserName(): string
+    {
+        $currentUser = $this->auth->currentUser();
+
+        if ($currentUser !== null) {
+            $name = trim((string) ($currentUser['nome'] ?? ''));
+
+            if ($name !== '') {
+                return $name;
+            }
+        }
+
+        return trim((string) Session::get('usuario_nome', ''));
     }
 
     /**
@@ -307,6 +685,10 @@ class LegacyReportService implements LegacyReportServiceInterface
             ->get([
                 'p.id_produto as id',
                 'p.codigo',
+                'p.tipo_bem_id',
+                'p.dependencia_id',
+                'p.editado_tipo_bem_id',
+                'p.editado_dependencia_id',
                 'p.editado',
                 'p.imprimir_etiqueta',
                 'p.bem',
@@ -324,10 +706,67 @@ class LegacyReportService implements LegacyReportServiceInterface
             ->map(static fn ($item): array => (array) $item)
             ->all();
 
+        $products = array_values(array_filter(
+            $products,
+            fn (array $product): bool => $this->hasRelevantEditForReport146($product)
+        ));
+
         return array_map(
             static fn (array $chunk): array => ['itens' => $chunk],
             array_chunk($products, 13)
         );
+    }
+
+    /**
+     * Retorna true apenas quando a edição altera descrição, localidade ou tipo de bem.
+     *
+     * @param array<string, mixed> $product
+     */
+    protected function hasRelevantEditForReport146(array $product): bool
+    {
+        $originalDescription = $this->normalizeReport146Text(
+            (string) ($product['bem'] ?? ''),
+            (string) ($product['complemento'] ?? '')
+        );
+        $editedDescription = $this->normalizeReport146Text(
+            (string) ($product['editado_bem'] ?? ''),
+            (string) ($product['editado_complemento'] ?? '')
+        );
+
+        if ($originalDescription !== $editedDescription) {
+            return true;
+        }
+
+        $originalTypeId = (int) ($product['tipo_bem_id'] ?? 0);
+        $editedTypeId = (int) ($product['editado_tipo_bem_id'] ?? 0);
+
+        if ($originalTypeId !== $editedTypeId) {
+            return true;
+        }
+
+        $originalDependencyId = (int) ($product['dependencia_id'] ?? 0);
+        $editedDependencyId = (int) ($product['editado_dependencia_id'] ?? 0);
+
+        return $originalDependencyId !== $editedDependencyId;
+    }
+
+    private function normalizeReport146Text(string $asset, string $complement): string
+    {
+        $value = trim($asset);
+        $normalizedComplement = trim($complement);
+
+        if ($normalizedComplement !== '') {
+            if ($value !== '' && mb_strtoupper(mb_substr($normalizedComplement, 0, mb_strlen($value), 'UTF-8'), 'UTF-8') === mb_strtoupper($value, 'UTF-8')) {
+                $normalizedComplement = trim(mb_substr($normalizedComplement, mb_strlen($value), null, 'UTF-8'));
+                $normalizedComplement = preg_replace('/^[\s\-\/]+/u', '', $normalizedComplement) ?? $normalizedComplement;
+            }
+
+            if ($normalizedComplement !== '') {
+                $value .= ($value !== '' ? ' ' : '') . $normalizedComplement;
+            }
+        }
+
+        return trim(mb_strtoupper($value, 'UTF-8'));
     }
 
     /**
@@ -448,6 +887,9 @@ class LegacyReportService implements LegacyReportServiceInterface
             'observacao' => ['titulo' => 'Com observação', 'itens' => []],
             'checados_observacao' => ['titulo' => 'Checados com observação', 'itens' => []],
             'etiqueta' => ['titulo' => 'Para impressão de etiquetas', 'itens' => []],
+            'checados_etiqueta' => ['titulo' => 'Checados para etiquetas', 'itens' => []],
+            'observacao_etiqueta' => ['titulo' => 'Com observação para etiquetas', 'itens' => []],
+            'checados_observacao_etiqueta' => ['titulo' => 'Checados com observação para etiquetas', 'itens' => []],
             'alteracoes' => ['titulo' => 'Editados', 'itens' => []],
             'novos' => ['titulo' => 'Novos', 'itens' => []],
         ];
@@ -478,7 +920,13 @@ class LegacyReportService implements LegacyReportServiceInterface
                 $sections['etiqueta']['itens'][] = $product;
             }
 
-            if ($printLabel) {
+            if ($printLabel && $hasObservation && $isChecked) {
+                $sections['checados_observacao_etiqueta']['itens'][] = $product;
+            } elseif ($printLabel && $isChecked) {
+                $sections['checados_etiqueta']['itens'][] = $product;
+            } elseif ($printLabel && $hasObservation) {
+                $sections['observacao_etiqueta']['itens'][] = $product;
+            } elseif ($printLabel) {
                 $sections['etiqueta']['itens'][] = $product;
             } elseif ($hasObservation && $isChecked) {
                 $sections['checados_observacao']['itens'][] = $product;

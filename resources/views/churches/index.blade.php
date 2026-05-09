@@ -27,15 +27,18 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.churches.index') }}">
-                <label>
-                    Buscar por código ou descrição
-                    <input type="text" name="busca" value="{{ $filters->search }}" placeholder="BR 12-3456 ou descrição">
-                </label>
-                <div class="actions">
-                    <button class="btn primary" type="submit">Filtrar</button>
-                    <a class="btn" href="{{ route('migration.churches.index') }}">Limpar</a>
+                <div class="filters-primary">
+                    <label class="filters-query">
+                        Buscar por código ou descrição
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="BR 12-3456 ou descrição">
+                    </label>
+
+                    <div class="actions filters-actions">
+                        <button class="btn primary" type="submit">Filtrar</button>
+                        <a class="btn" href="{{ route('migration.churches.index') }}">Limpar</a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -58,6 +61,7 @@
                         <tr>
                             <th>Código</th>
                             <th>Descrição</th>
+                            <th>Administração</th>
                             <th>Cidade</th>
                             <th>Setor</th>
                             <th>Produtos ativos</th>
@@ -69,13 +73,20 @@
                     <tbody>
                         @foreach ($churches as $church)
                             <tr>
-                                <td data-label="Código" class="mono">{{ $church->codigo ?: 'n/a' }}</td>
+                                <td data-label="Código" class="mono">{{ $church->codigo ?: 'Nenhum' }}</td>
                                 <td data-label="Descrição">{{ $church->descricao ?: 'Sem descrição' }}</td>
-                                <td data-label="Cidade">
-                                    {{ trim(implode(' - ', array_filter([$church->cidade, $church->estado]))) ?: 'n/a' }}
+                                <td data-label="Administração">
+                                    @php
+                                        $administracao = $church->administracao ?? null;
+                                    @endphp
+
+                                    {{ $administracao?->descricao ? '#' . $administracao->id . ' - ' . $administracao->descricao : 'Não vinculada' }}
                                 </td>
-                                <td data-label="Setor">{{ $church->setor ?: 'n/a' }}</td>
-                                <td data-label="Produtos ativos">{{ $church->active_products_count }}</td>
+                                <td data-label="Cidade">
+                                    {{ trim(implode(' - ', array_filter([$church->cidade, $church->estado]))) ?: 'Nenhuma' }}
+                                </td>
+                                <td data-label="Setor">{{ $church->setor ?: 'Nenhum' }}</td>
+                                <td data-label="Produtos ativos">{{ $church->active_products_count ?? 0 }}</td>
                                 @unless (session('public_acesso'))
                                     <td data-label="Ações">
                                         <div class="inline-actions">

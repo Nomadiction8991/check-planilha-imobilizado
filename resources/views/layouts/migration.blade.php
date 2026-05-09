@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', config('app.name'))</title>
     @include('partials.theme-init')
+    @include('partials.pwa')
     <style>
         :root {
             --bg: #f5f0e8;
@@ -24,6 +25,7 @@
             --shadow-soft: 0 10px 24px rgba(38, 28, 12, 0.08);
             --shadow: 0 16px 38px rgba(38, 28, 12, 0.08);
             --shadow-strong: 0 24px 60px rgba(38, 28, 12, 0.12);
+            --topbar-sticky-gap: 12px;
         }
 
         * {
@@ -51,6 +53,35 @@
             padding: 28px 0 56px;
         }
 
+        .sticky-stack {
+            position: sticky;
+            top: var(--topbar-sticky-gap);
+            z-index: 70;
+            display: grid;
+            gap: 12px;
+        }
+
+        .sticky-stack-slot {
+            display: none;
+        }
+
+        .sticky-stack.has-slot .sticky-stack-slot {
+            display: grid;
+            gap: 12px;
+        }
+
+        .sticky-stack.is-stuck .filters {
+            padding-block: 16px;
+        }
+
+        .sticky-stack.is-stuck .filters .filters-advanced {
+            display: none;
+        }
+
+        .sticky-stack.is-stuck .filters .filters-actions .btn:not(.primary) {
+            display: none;
+        }
+
         .topbar,
         .panel,
         .table-shell,
@@ -71,9 +102,6 @@
             display: grid;
             gap: 14px;
             padding: 18px 20px;
-            position: sticky;
-            top: 12px;
-            z-index: 60;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             box-shadow: var(--shadow-soft);
@@ -135,11 +163,14 @@
         }
 
         .nav a {
+            display: inline-flex;
             padding: 9px 14px;
             text-decoration: none;
             border: 1px solid var(--line);
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.58);
+            min-height: 42px;
+            align-items: center;
             transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
         }
 
@@ -172,6 +203,133 @@
             flex: 0 0 auto;
             white-space: nowrap;
             order: 2;
+        }
+
+        .page-quick-actions {
+            position: fixed;
+            right: calc(16px + env(safe-area-inset-right, 0px));
+            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            z-index: 74;
+            display: grid;
+            justify-items: end;
+            gap: 8px;
+        }
+
+        .page-quick-actions[hidden] {
+            display: none !important;
+        }
+
+        .page-quick-actions-panel {
+            display: grid;
+            gap: 8px;
+            justify-items: end;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: linear-gradient(180deg, var(--surface), var(--surface-soft));
+            box-shadow: var(--shadow-strong);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px) scale(0.98);
+            transform-origin: bottom right;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .page-quick-actions.is-open .page-quick-actions-panel {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .page-quick-actions-toggle,
+        .page-quick-actions-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: linear-gradient(180deg, var(--surface-strong), var(--surface));
+            color: var(--ink);
+            box-shadow: 0 1px 0 rgba(24, 21, 17, 0.04);
+            cursor: pointer;
+            transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .page-quick-actions-toggle:hover,
+        .page-quick-actions-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(24, 21, 17, 0.18);
+            box-shadow: 0 8px 20px rgba(38, 28, 12, 0.08);
+        }
+
+        .page-quick-actions-toggle {
+            min-width: 132px;
+        }
+
+        .page-quick-actions-toggle .material-symbols-outlined,
+        .page-quick-actions-item .material-symbols-outlined {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .page-quick-actions-toggle-label,
+        .page-quick-actions-label {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .page-quick-actions-item {
+            min-width: 132px;
+            justify-content: flex-start;
+        }
+
+        .page-quick-actions-item.is-primary {
+            color: #f9f7f2;
+            background: linear-gradient(180deg, var(--ink), #1f1a14);
+            border-color: rgba(24, 21, 17, 0.18);
+        }
+
+        @media (min-width: 861px) {
+            .page-quick-actions-item--voice {
+                display: none !important;
+            }
+        }
+
+        .page-quick-actions-item--voice.is-listening {
+            border-color: rgba(31, 111, 95, 0.28);
+            background: linear-gradient(180deg, rgba(31, 111, 95, 0.18), rgba(255, 255, 255, 0.92));
+            color: var(--accent);
+            animation: page-quick-actions-pulse 1.2s ease-in-out infinite;
+        }
+
+        .page-quick-actions-item--voice.is-listening .material-symbols-outlined {
+            color: var(--accent);
+        }
+
+        @keyframes page-quick-actions-pulse {
+            0%,
+            100% {
+                box-shadow:
+                    0 1px 0 rgba(24, 21, 17, 0.04),
+                    0 10px 22px rgba(31, 111, 95, 0.08);
+            }
+            50% {
+                box-shadow:
+                    0 0 0 3px rgba(31, 111, 95, 0.12),
+                    0 12px 26px rgba(31, 111, 95, 0.14);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .page-quick-actions-item--voice.is-listening {
+                animation: none;
+            }
         }
 
         .session-tools form {
@@ -252,6 +410,12 @@
             text-transform: none;
         }
 
+        .check-inline--block {
+            grid-column: 1 / -1;
+            margin-top: -2px;
+            padding-top: 2px;
+        }
+
         .hero {
             display: grid;
             gap: 12px;
@@ -310,8 +474,8 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            min-height: 42px;
-            padding: 10px 15px;
+            min-height: 44px;
+            padding: 12px 16px;
             border: 1px solid var(--line);
             border-radius: 12px;
             text-decoration: none;
@@ -523,26 +687,23 @@
 
         .filters {
             padding: 20px;
-            position: sticky;
-            top: 156px;
             z-index: 55;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             box-shadow: var(--shadow-soft);
-        }
-
-        .filters-sticky-sentinel {
-            display: block;
-            height: 1px;
-            margin-top: -1px;
-            pointer-events: none;
-            visibility: hidden;
+            transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
         }
 
         .filters form {
             display: grid;
             gap: 14px;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        .filters.is-stuck {
+            box-shadow: 0 14px 30px rgba(24, 21, 17, 0.14);
+            border-color: rgba(31, 111, 95, 0.16);
         }
 
         .filters-primary,
@@ -555,6 +716,39 @@
 
         .filters-primary {
             align-items: end;
+            width: 100%;
+        }
+
+        .filters-primary:has(.filters-query):has(.filters-principal) {
+            grid-template-columns: minmax(220px, 320px) minmax(260px, 420px) auto;
+        }
+
+        .filters-primary:has(.filters-query):not(:has(.filters-principal)) {
+            grid-template-columns: minmax(260px, 420px) auto;
+        }
+
+        .filters-primary:has(.filters-query) .filters-principal {
+            min-width: 0;
+        }
+
+        .filters-primary:has(.filters-query) .filters-query {
+            min-width: 0;
+            width: min(100%, 420px);
+            justify-self: start;
+        }
+
+        .filters-primary:has(.filters-query) .filters-query input {
+            width: 100%;
+        }
+
+        .filters-primary:has(.filters-query) .filters-actions {
+            justify-self: end;
+        }
+
+        .sticky-stack-slot .filters {
+            position: static;
+            z-index: auto;
+            margin: 0;
         }
 
         label {
@@ -676,6 +870,12 @@
             box-shadow: var(--shadow-soft);
         }
 
+        .pagination-summary {
+            font-size: 0.96rem;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
         .pagination-links {
             display: flex;
             gap: 8px;
@@ -744,10 +944,32 @@
             padding: 22px;
         }
 
+        .form-section {
+            display: grid;
+            gap: 16px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: calc(var(--radius) - 2px);
+            background: var(--surface-strong);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .form-section__copy {
+            max-width: 64ch;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
         .field-grid {
             display: grid;
             gap: 12px 14px;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .field-stack {
+            display: grid;
+            gap: 10px;
+            align-content: start;
         }
 
         .field-note {
@@ -877,6 +1099,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            width: 100%;
             min-height: 52px;
             padding: 14px 16px;
             text-decoration: none;
@@ -923,12 +1146,12 @@
         }
 
         .mobile-menu-logout {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            min-height: 48px;
-            padding: 12px 16px;
+            min-height: 52px;
+            padding: 14px 16px;
             border: 1px solid rgba(139, 61, 25, 0.22);
             border-radius: 16px;
             background: var(--warn-soft);
@@ -949,13 +1172,22 @@
         }
 
         @media (max-width: 860px) {
+            :root {
+                --topbar-sticky-gap: 8px;
+            }
+
+            .sticky-stack {
+                display: contents;
+                position: static;
+            }
+
             .shell {
                 width: min(100% - 18px, 1240px);
             }
 
             .topbar {
-                top: 8px;
                 padding: 16px;
+                margin-bottom: 12px;
             }
 
             .section-head,
@@ -964,12 +1196,24 @@
             }
 
             .topbar-main {
-                align-items: center;
-                justify-content: space-between;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-wrap: wrap;
                 gap: 12px;
             }
 
+            .brand {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+
+            .topbar-tools {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
             .session-tools {
+                width: 100%;
                 align-items: center;
                 justify-content: flex-end;
                 gap: 8px;
@@ -985,12 +1229,24 @@
                 white-space: nowrap;
             }
 
+            body.has-page-quick-actions .shell {
+                padding-bottom: 112px;
+            }
+
             .session-logout {
                 display: none;
             }
 
+            .sticky-stack-slot {
+                position: sticky;
+                top: var(--topbar-sticky-gap);
+                z-index: 58;
+            }
+
             button.menu-toggle.theme-toggle {
                 display: inline-grid;
+                min-width: 44px;
+                min-height: 44px;
             }
 
             .topbar-nav {
@@ -1016,34 +1272,105 @@
                 padding: 18px;
             }
 
-            .filters {
-                top: 96px;
+            .form-section {
+                padding: 16px;
             }
 
-            .filters.is-stuck .filters-advanced {
-                display: none;
+            .filters-primary,
+            .filters-advanced {
+                gap: 12px;
+                grid-template-columns: minmax(0, 1fr);
             }
 
-            .filters.is-stuck .filters-primary {
-                grid-template-columns: minmax(0, 1fr) minmax(0, 150px);
+            .filters-primary:has(.filters-query):has(.filters-principal),
+            .filters-primary:has(.filters-query):not(:has(.filters-principal)) {
+                grid-template-columns: minmax(0, 1fr) auto;
                 align-items: end;
             }
 
-            .filters.is-stuck .filters-principal {
+            .filters-primary:has(.filters-query) .filters-principal {
                 grid-column: 1 / -1;
             }
 
-            .filters.is-stuck .filters-query {
-                grid-column: 1 / 2;
+            .filters-primary:has(.filters-query) .filters-query {
+                grid-column: 1;
+                min-width: 0;
             }
 
-            .filters.is-stuck .filters-actions {
-                grid-column: 2 / 3;
+            .filters-primary:has(.filters-query) .filters-query input {
+                min-width: 0;
+            }
+
+            .filters-primary:has(.filters-query) .filters-actions {
+                grid-column: 2;
+                align-self: end;
                 justify-self: end;
+                justify-content: flex-end;
+                flex-wrap: nowrap;
+                gap: 8px;
             }
 
-            .filters.is-stuck .filters-actions .btn:not(.primary) {
+            .filters-primary:has(.filters-query) .filters-actions .btn {
+                min-height: 40px;
+                padding: 10px 12px;
+                white-space: nowrap;
+            }
+
+            .filters-primary:has(.filters-query) .filters-actions .btn.primary {
+                min-width: 44px;
+                padding-inline: 12px;
+                gap: 0;
+                font-size: 0;
+                line-height: 0;
+                color: transparent;
+                justify-content: center;
+            }
+
+            .filters-primary:has(.filters-query) .filters-actions .btn.primary::before {
+                content: 'filter_alt';
+                font-family: 'Material Symbols Outlined';
+                font-size: 20px;
+                line-height: 1;
+                color: var(--ink);
+            }
+
+            .sticky-stack-slot .filters {
+                position: static;
+                z-index: auto;
+                margin: 0;
+            }
+
+            .page-quick-actions {
+                right: calc(12px + env(safe-area-inset-right, 0px));
+                bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .page-quick-actions-toggle {
+                min-width: 48px;
+                width: 48px;
+                height: 48px;
+                padding: 0;
+                border-radius: 999px;
+            }
+
+            .page-quick-actions-toggle-label,
+            .page-quick-actions-label {
                 display: none;
+            }
+
+            .page-quick-actions-item {
+                min-width: 48px;
+                width: 48px;
+                height: 48px;
+                padding: 0;
+                border-radius: 999px;
+                justify-content: center;
+            }
+
+            .page-quick-actions-item--voice.is-listening {
+                box-shadow:
+                    0 0 0 3px rgba(31, 111, 95, 0.12),
+                    0 12px 24px rgba(31, 111, 95, 0.14);
             }
 
             .session-tools,
@@ -1072,10 +1399,24 @@
                 display: none;
             }
 
+            tbody {
+                display: grid;
+                gap: 14px;
+                padding: 14px;
+            }
+
+            tbody tr {
+                padding: 14px;
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                background: var(--surface);
+                box-shadow: var(--shadow-soft);
+            }
+
             td {
-                border-top: none;
-                border-bottom: 1px solid var(--line);
-                padding-top: 8px;
+                min-width: 0;
+                padding: 0;
+                border: 0;
             }
 
             td::before {
@@ -1111,11 +1452,6 @@
 <body class="@yield('bodyClass') {{ $hideHeroOnOperationalRoutes ? 'page-operational' : '' }}">
     @php
         $legacyNavigation = [
-            [
-                'label' => 'Painel',
-                'route' => route('migration.dashboard'),
-                'active' => request()->routeIs('migration.dashboard'),
-            ],
         ];
 
         if (!empty($legacyPermissions['products.view'])) {
@@ -1131,30 +1467,6 @@
                 'label' => 'Verificação',
                 'route' => route('migration.products.verification'),
                 'active' => request()->routeIs('migration.products.verification'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['reports.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Relatórios',
-                'route' => route('migration.reports.index'),
-                'active' => request()->routeIs('migration.reports.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['audits.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Auditoria',
-                'route' => route('migration.audits.index'),
-                'active' => request()->routeIs('migration.audits.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['spreadsheets.import'])) {
-            $legacyNavigation[] = [
-                'label' => 'Importação',
-                'route' => route('migration.spreadsheets.create'),
-                'active' => request()->routeIs('migration.spreadsheets.*'),
             ];
         }
 
@@ -1197,9 +1509,34 @@
                 'active' => request()->routeIs('migration.users.*'),
             ];
         }
+
+        if (!empty($legacyPermissions['reports.view'])) {
+            $legacyNavigation[] = [
+                'label' => 'Relatórios',
+                'route' => route('migration.reports.index'),
+                'active' => request()->routeIs('migration.reports.*'),
+            ];
+        }
+
+        if (!empty($legacyPermissions['spreadsheets.import'])) {
+            $legacyNavigation[] = [
+                'label' => 'Importação',
+                'route' => route('migration.spreadsheets.create'),
+                'active' => request()->routeIs('migration.spreadsheets.*'),
+            ];
+        }
+
+        if (!empty($legacyPermissions['audits.view'])) {
+            $legacyNavigation[] = [
+                'label' => 'Auditoria',
+                'route' => route('migration.audits.index'),
+                'active' => request()->routeIs('migration.audits.*'),
+            ];
+        }
     @endphp
     <main class="shell">
-        <header class="topbar">
+        <div class="sticky-stack" data-sticky-stack>
+        <header class="topbar" data-sticky-stack-topbar>
             <div class="topbar-main">
                 <div class="brand">
                     <small>Área restrita</small>
@@ -1246,9 +1583,59 @@
             </div>
             @endunless
         </header>
+        <div class="sticky-stack-slot" data-sticky-stack-slot></div>
+        </div>
 
         @yield('content')
     </main>
+    <div class="page-quick-actions" data-page-quick-actions hidden>
+        <div class="page-quick-actions-panel" data-page-quick-actions-panel id="page-quick-actions-panel" hidden>
+            <button
+                type="button"
+                class="page-quick-actions-item is-primary"
+                data-page-quick-actions-top
+                aria-label="Voltar ao topo"
+                title="Voltar ao topo"
+            >
+                <span class="material-symbols-outlined" aria-hidden="true">vertical_align_top</span>
+                <span class="page-quick-actions-label">Topo</span>
+            </button>
+            <button
+                type="button"
+                class="page-quick-actions-item"
+                data-page-quick-actions-filters
+                aria-label="Ir para os filtros"
+                title="Ir para os filtros"
+            >
+                <span class="material-symbols-outlined" aria-hidden="true">filter_alt</span>
+                <span class="page-quick-actions-label">Filtros</span>
+            </button>
+            <button
+                type="button"
+                class="page-quick-actions-item page-quick-actions-item--voice"
+                data-page-quick-actions-voice
+                hidden
+                aria-pressed="false"
+                aria-label="Abrir microfone para buscar por números"
+                title="Microfone"
+            >
+                <span class="material-symbols-outlined" data-page-quick-actions-voice-icon aria-hidden="true">mic</span>
+                <span class="page-quick-actions-label" data-page-quick-actions-voice-label>Microfone</span>
+            </button>
+        </div>
+        <button
+            type="button"
+            class="page-quick-actions-toggle"
+            data-page-quick-actions-toggle
+            aria-controls="page-quick-actions-panel"
+            aria-expanded="false"
+            aria-label="Abrir ações rápidas"
+            title="Ações rápidas"
+        >
+            <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+            <span class="page-quick-actions-toggle-label">Ações</span>
+        </button>
+    </div>
     @unless (session('public_acesso'))
         <div class="mobile-menu" id="mobile-menu" data-mobile-menu aria-hidden="true">
             <div class="mobile-menu-backdrop" data-mobile-menu-backdrop></div>
@@ -1362,62 +1749,372 @@
         })();
 
         (() => {
-            const filterCards = Array.from(document.querySelectorAll('.filters'));
+            const stickyStack = document.querySelector('[data-sticky-stack]');
+            const stickySlot = document.querySelector('[data-sticky-stack-slot]');
+            const stickyTopbar = document.querySelector('[data-sticky-stack-topbar]');
+            const stickyFilters = Array.from(document.querySelectorAll('[data-sticky-filters]'));
+            const mobileStickyQuery = window.matchMedia('(max-width: 860px)');
 
-            if (!filterCards.length || !('IntersectionObserver' in window) || !window.matchMedia) {
+            if (!stickyStack || !stickySlot || !stickyFilters.length) {
                 return;
             }
 
-            const mobileQuery = window.matchMedia('(max-width: 860px)');
-            const observers = [];
+            stickyFilters.forEach((filterCard) => {
+                const filterSection = filterCard.closest('.section');
+                stickySlot.appendChild(filterCard);
 
-            const clearStickyState = () => {
-                observers.splice(0).forEach((observer) => observer.disconnect());
-                document.querySelectorAll('[data-filters-sticky-sentinel]').forEach((sentinel) => sentinel.remove());
-                filterCards.forEach((card) => card.classList.remove('is-stuck'));
+                if (filterSection && filterSection.children.length === 0) {
+                    filterSection.remove();
+                }
+            });
+
+            stickyStack.classList.add('has-slot');
+
+            let frameId = null;
+
+            const updateStickyState = () => {
+                const stickyGap = Number.parseFloat(
+                    getComputedStyle(document.documentElement).getPropertyValue('--topbar-sticky-gap')
+                ) || 12;
+                const stickyAnchor = mobileStickyQuery.matches && stickyTopbar
+                    ? stickyTopbar.getBoundingClientRect().bottom
+                    : stickyStack.getBoundingClientRect().top;
+
+                stickyStack.classList.toggle('is-stuck', stickyAnchor <= stickyGap + 1);
             };
 
-            const setupStickyState = () => {
-                clearStickyState();
-
-                if (!mobileQuery.matches) {
+            const scheduleUpdate = () => {
+                if (frameId !== null) {
                     return;
                 }
 
-                filterCards.forEach((card) => {
-                    const sentinel = document.createElement('span');
-                    sentinel.className = 'filters-sticky-sentinel';
-                    sentinel.dataset.filtersStickySentinel = 'true';
-                    sentinel.setAttribute('aria-hidden', 'true');
-                    card.parentNode?.insertBefore(sentinel, card);
-
-                    const observer = new IntersectionObserver((entries) => {
-                        const [entry] = entries;
-
-                        if (!entry) {
-                            return;
-                        }
-
-                        card.classList.toggle('is-stuck', !entry.isIntersecting);
-                    }, {
-                        threshold: 0,
-                        rootMargin: '-96px 0px 0px 0px',
-                    });
-
-                    observer.observe(sentinel);
-                    observers.push(observer);
+                frameId = window.requestAnimationFrame(() => {
+                    frameId = null;
+                    updateStickyState();
                 });
             };
 
-            setupStickyState();
+            updateStickyState();
+            window.addEventListener('scroll', scheduleUpdate, { passive: true });
+            window.addEventListener('resize', scheduleUpdate);
+            window.addEventListener('load', scheduleUpdate);
+        })();
 
-            if (typeof mobileQuery.addEventListener === 'function') {
-                mobileQuery.addEventListener('change', setupStickyState);
-            } else if (typeof mobileQuery.addListener === 'function') {
-                mobileQuery.addListener(setupStickyState);
+        (() => {
+            const quickActions = document.querySelector('[data-page-quick-actions]');
+            const toggle = document.querySelector('[data-page-quick-actions-toggle]');
+            const panel = document.querySelector('[data-page-quick-actions-panel]');
+            const topButton = document.querySelector('[data-page-quick-actions-top]');
+            const filtersButton = document.querySelector('[data-page-quick-actions-filters]');
+            const voiceButton = document.querySelector('[data-page-quick-actions-voice]');
+            const voiceIcon = document.querySelector('[data-page-quick-actions-voice-icon]');
+            const voiceLabel = document.querySelector('[data-page-quick-actions-voice-label]');
+            const filtersAnchor = document.querySelector('[data-sticky-filters]');
+            const listingSurface = document.querySelector('.table-shell, .verification-table-shell');
+            const verificationRoot = document.querySelector('[data-verification-autosave]');
+
+            if (!quickActions || !toggle || !panel || !topButton || !listingSurface) {
+                return;
             }
+
+            quickActions.hidden = false;
+            document.body.classList.add('has-page-quick-actions');
+
+            const setOpenState = (open) => {
+                quickActions.classList.toggle('is-open', open);
+                panel.hidden = !open;
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                toggle.setAttribute('aria-label', open ? 'Fechar ações rápidas' : 'Abrir ações rápidas');
+                toggle.title = open ? 'Fechar ações rápidas' : 'Ações rápidas';
+            };
+
+            const closeQuickActions = () => setOpenState(false);
+
+            const searchInput = verificationRoot?.querySelector('input[name="busca"]');
+            const searchForm = searchInput?.closest('form');
+            const searchSubmit = searchForm?.querySelector('.filters-actions .btn.primary[type="submit"]');
+            const speechRecognitionFactory = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const mobileVoiceQuery = window.matchMedia('(max-width: 860px)');
+
+            const normalizeVoiceDigits = (transcript) => {
+                const normalized = transcript
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '');
+                const tokens = normalized.match(/\d+|[a-z]+/g) || [];
+                const digitMap = {
+                    zero: '0',
+                    um: '1',
+                    uma: '1',
+                    dois: '2',
+                    duas: '2',
+                    tres: '3',
+                    quatro: '4',
+                    cinco: '5',
+                    seis: '6',
+                    sete: '7',
+                    oito: '8',
+                    nove: '9',
+                };
+
+                return tokens.reduce((accumulator, token) => {
+                    if (/^\d+$/.test(token)) {
+                        return `${accumulator}${token}`;
+                    }
+
+                    if (Object.prototype.hasOwnProperty.call(digitMap, token)) {
+                        return `${accumulator}${digitMap[token]}`;
+                    }
+
+                    return accumulator;
+                }, '');
+            };
+
+            let recognition = null;
+            let isListening = false;
+            let cancelRequested = false;
+            let pendingDigits = '';
+
+            const updateVoiceButton = (listening) => {
+                if (!voiceButton) {
+                    return;
+                }
+
+                voiceButton.classList.toggle('is-listening', listening);
+                voiceButton.setAttribute('aria-pressed', listening ? 'true' : 'false');
+                voiceButton.setAttribute(
+                    'aria-label',
+                    listening
+                        ? 'Cancelar reconhecimento de voz'
+                        : 'Abrir microfone para buscar por números'
+                );
+                voiceButton.title = listening ? 'Cancelar' : 'Microfone';
+
+                if (voiceIcon instanceof HTMLElement) {
+                    voiceIcon.textContent = listening ? 'close' : 'mic';
+                }
+
+                if (voiceLabel instanceof HTMLElement) {
+                    voiceLabel.textContent = listening ? 'Cancelar' : 'Microfone';
+                }
+            };
+
+            const submitVoiceSearch = (digits) => {
+                if (!searchInput || !searchForm || digits === '') {
+                    return;
+                }
+
+                searchInput.value = digits;
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                searchInput.focus({ preventScroll: true });
+
+                window.requestAnimationFrame(() => {
+                    if (searchSubmit instanceof HTMLButtonElement || searchSubmit instanceof HTMLInputElement) {
+                        searchSubmit.click();
+                        return;
+                    }
+
+                    if (typeof searchForm.requestSubmit === 'function') {
+                        searchForm.requestSubmit();
+                        return;
+                    }
+
+                    searchForm.submit();
+                });
+            };
+
+            const syncVoiceAvailability = () => {
+                if (!voiceButton) {
+                    return;
+                }
+
+                const shouldShow = Boolean(
+                    verificationRoot
+                    && searchInput
+                    && searchForm
+                    && speechRecognitionFactory
+                    && mobileVoiceQuery.matches
+                );
+
+                voiceButton.hidden = !shouldShow;
+
+                if (!shouldShow && isListening && recognition) {
+                    cancelRequested = true;
+                    pendingDigits = '';
+                    try {
+                        recognition.abort();
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+            };
+
+            const finishListening = () => {
+                if (!isListening) {
+                    return;
+                }
+
+                isListening = false;
+                updateVoiceButton(false);
+            };
+
+            const stopListening = (cancel = false) => {
+                cancelRequested = cancel;
+
+                if (!recognition) {
+                    pendingDigits = '';
+                    finishListening();
+                    return;
+                }
+
+                try {
+                    cancel ? recognition.abort() : recognition.stop();
+                } catch (error) {
+                    console.error(error);
+                    finishListening();
+                }
+            };
+
+            const attachRecognition = () => {
+                if (!speechRecognitionFactory) {
+                    return false;
+                }
+
+                recognition = new speechRecognitionFactory();
+                recognition.lang = 'pt-BR';
+                recognition.interimResults = false;
+                recognition.continuous = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onresult = (event) => {
+                    let transcript = '';
+
+                    Array.from(event.results).forEach((result) => {
+                        if (result.isFinal && result[0]?.transcript) {
+                            transcript += `${result[0].transcript} `;
+                        }
+                    });
+
+                    const digits = normalizeVoiceDigits(transcript);
+                    if (digits !== '') {
+                        pendingDigits = digits;
+                        cancelRequested = false;
+
+                        try {
+                            recognition.stop();
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    if (event.error !== 'aborted') {
+                        console.error(event);
+                    }
+
+                    cancelRequested = true;
+                    pendingDigits = '';
+                    finishListening();
+                };
+
+                recognition.onend = () => {
+                    const shouldSubmit = !cancelRequested && pendingDigits !== '';
+                    const digits = pendingDigits;
+
+                    pendingDigits = '';
+                    finishListening();
+
+                    if (shouldSubmit) {
+                        submitVoiceSearch(digits);
+                    }
+
+                    cancelRequested = false;
+                };
+
+                return true;
+            };
+
+            const startListening = () => {
+                if (!mobileVoiceQuery.matches || !speechRecognitionFactory || !voiceButton || !searchInput || !searchForm) {
+                    return;
+                }
+
+                if (!recognition && !attachRecognition()) {
+                    return;
+                }
+
+                pendingDigits = '';
+                cancelRequested = false;
+
+                try {
+                    recognition.start();
+                    isListening = true;
+                    updateVoiceButton(true);
+                } catch (error) {
+                    console.error(error);
+                    finishListening();
+                }
+            };
+
+            syncVoiceAvailability();
+            if (typeof mobileVoiceQuery.addEventListener === 'function') {
+                mobileVoiceQuery.addEventListener('change', syncVoiceAvailability);
+            } else if (typeof mobileVoiceQuery.addListener === 'function') {
+                mobileVoiceQuery.addListener(syncVoiceAvailability);
+            }
+
+            if (!filtersAnchor || !filtersButton) {
+                filtersButton?.setAttribute('hidden', '');
+            } else {
+                filtersButton.addEventListener('click', () => {
+                    filtersAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    closeQuickActions();
+                });
+            }
+
+            if (voiceButton) {
+                voiceButton.addEventListener('click', () => {
+                    if (isListening) {
+                        stopListening(true);
+                        return;
+                    }
+
+                    startListening();
+                });
+            }
+
+            toggle.addEventListener('click', () => {
+                setOpenState(!quickActions.classList.contains('is-open'));
+            });
+
+            topButton.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                closeQuickActions();
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!quickActions.classList.contains('is-open')) {
+                    return;
+                }
+
+                if (quickActions.contains(event.target)) {
+                    return;
+                }
+
+                closeQuickActions();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeQuickActions();
+                }
+            });
+
+            updateVoiceButton(false);
         })();
     </script>
+    <script src="{{ asset('assets/forms/input-mask.js') }}?v={{ filemtime(public_path('assets/forms/input-mask.js')) }}"></script>
     @include('partials.request-loading')
 </body>
 </html>

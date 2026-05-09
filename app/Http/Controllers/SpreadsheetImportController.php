@@ -26,7 +26,6 @@ class SpreadsheetImportController extends Controller
         $selectedAdministrationId = (int) Session::get('administracao_id', 0) ?: null;
 
         return view('spreadsheets.import', [
-            'users' => $this->imports->responsibleUserOptions(),
             'administrations' => $this->imports->administrationOptions(),
             'selectedAdministrationId' => $selectedAdministrationId,
             'recentImports' => $this->imports->recentImports(null, 5),

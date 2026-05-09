@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Entrar | {{ config('app.name') }}</title>
     @include('partials.theme-init')
+    @include('partials.pwa')
     <style>
         :root {
             --bg: #f5f0e8;

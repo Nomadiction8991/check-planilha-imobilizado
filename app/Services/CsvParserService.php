@@ -647,7 +647,9 @@ class CsvParserService
         if (preg_match('/^\s*(\d{1,3})(?:[\.,]\d+)?\s*[\-–—]\s*(.+)$/u', $nome, $m)) {
             $resultado['tipo_bem_codigo'] = $m[1];
             $textoAposCodigo = trim($m[2]);
+            $textoAposCodigoUpper = mb_strtoupper($textoAposCodigo, 'UTF-8');
             $resultado['descricao_apos_tipo'] = $textoAposCodigo;
+            $resultado['complemento'] = $textoAposCodigoUpper;
 
             // Buscar as opções de bens do tipo_bem no banco
             $bensDoTipo = $this->obterBensDoTipo($m[1]);
@@ -670,9 +672,10 @@ class CsvParserService
                 $textoNorm = $this->removerAcentos($textoUpper);
                 $bemEncontrado = false;
 
-                // ── PASSO 1: Remover eco da descrição do tipo ──
-                // O CSV ecoa todas as opções do tipo separadas por " / "
-                // Remover cada opção que aparece na ordem do início do texto
+                // ── PASSO 1: Remover eco da descrição do tipo apenas para localizar o bem ──
+                // O CSV ecoa todas as opções do tipo separadas por " / ".
+                // A remoção é usada só para identificar o bem correto; o complemento
+                // preserva o texto original.
                 $textoRestante = $textoUpper;
                 $textoRestanteNorm = $textoNorm;
 
@@ -700,9 +703,6 @@ class CsvParserService
 
                         if (strpos($textoRestanteNorm, $bemOpcaoNorm) === 0) {
                             $resultado['bem'] = $bemOpcaoUpper;
-                            $complemento = trim(mb_substr($textoRestante, mb_strlen($bemOpcaoUpper)));
-                            $complemento = preg_replace('/^[\s\-\/]+/', '', $complemento);
-                            $resultado['complemento'] = mb_strtoupper($complemento, 'UTF-8');
                             $bemEncontrado = true;
                             break;
                         }
@@ -710,9 +710,8 @@ class CsvParserService
 
                     if (!$bemEncontrado) {
                         // BEM não correspondeu exatamente → usar primeira opção do tipo
-                        // e todo o texto restante como complemento
+                        // e manter o complemento original informado no CSV
                         $resultado['bem'] = mb_strtoupper(trim($bensDoTipo[0]), 'UTF-8');
-                        $resultado['complemento'] = mb_strtoupper($textoRestante, 'UTF-8');
                         $bemEncontrado = true;
                     }
                 }
@@ -723,9 +722,6 @@ class CsvParserService
                         $bemOpcaoNorm = $this->removerAcentos(mb_strtoupper(trim($bemOpcao), 'UTF-8'));
                         if (strpos($textoNorm, $bemOpcaoNorm) === 0) {
                             $resultado['bem'] = mb_strtoupper(trim($bemOpcao), 'UTF-8');
-                            $resto = trim(mb_substr($textoUpper, mb_strlen(trim($bemOpcao))));
-                            $resto = preg_replace('/^[\s\-\/]+/', '', $resto);
-                            $resultado['complemento'] = $resto;
                             $bemEncontrado = true;
                             break;
                         }
@@ -734,7 +730,6 @@ class CsvParserService
 
                 if (!$bemEncontrado) {
                     $resultado['bem'] = $textoUpper;
-                    $resultado['complemento'] = '';
                 }
             } else {
                 // Sem dados do tipo_bem → fallback: tenta separar por " - "

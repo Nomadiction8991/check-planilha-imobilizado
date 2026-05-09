@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\LegacyAdministrationManagementServiceInterface;
 use App\DTO\AdministrationMutationData;
 use App\Models\Legacy\Administracao;
+use App\Support\LegacyCnpjValidator;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -14,15 +15,33 @@ class LegacyAdministrationManagementService implements LegacyAdministrationManag
 {
     public function create(AdministrationMutationData $data): Administracao
     {
+        try {
+            $cnpj = LegacyCnpjValidator::validate($data->cnpj);
+        } catch (\InvalidArgumentException $exception) {
+            throw new RuntimeException('CNPJ inválido: ' . $exception->getMessage());
+        }
+
         return Administracao::query()->create([
             'descricao' => $this->normalizeDescription($data->description),
+            'cnpj' => $cnpj,
+            'estado' => strtoupper(trim($data->state)),
+            'cidade' => mb_strtoupper(trim($data->city), 'UTF-8'),
         ]);
     }
 
     public function update(Administracao $administration, AdministrationMutationData $data): Administracao
     {
+        try {
+            $cnpj = LegacyCnpjValidator::validate($data->cnpj);
+        } catch (\InvalidArgumentException $exception) {
+            throw new RuntimeException('CNPJ inválido: ' . $exception->getMessage());
+        }
+
         $administration->fill([
             'descricao' => $this->normalizeDescription($data->description),
+            'cnpj' => $cnpj,
+            'estado' => strtoupper(trim($data->state)),
+            'cidade' => mb_strtoupper(trim($data->city), 'UTF-8'),
         ]);
         $administration->save();
 

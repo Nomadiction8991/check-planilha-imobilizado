@@ -23,6 +23,8 @@ final class LegacyAuditController extends Controller
         $filters = [
             'search' => trim((string) $request->query('busca', '')),
             'module' => trim((string) $request->query('modulo', '')),
+            'date_from' => trim((string) $request->query('data_inicio', '')),
+            'date_to' => trim((string) $request->query('data_fim', '')),
         ];
 
         $audits = $this->audits->paginate(

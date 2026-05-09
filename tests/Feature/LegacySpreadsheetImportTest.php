@@ -351,11 +351,14 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertSee('Relatório de Bens Imobilizado.csv');
         $response->assertSee('Administração');
         $response->assertSee('Administração Central');
+        $response->assertDontSee('name="usuario_id"');
         $response->assertDontSee('Arquivo Antigo 4.csv');
     }
 
     public function testStoreRedirectsToPreview(): void
     {
+        Session::put('usuario_id', 9);
+
         $this->mock(
             LegacySpreadsheetImportServiceInterface::class,
             function (MockInterface $mock): void {
@@ -369,14 +372,12 @@ final class LegacySpreadsheetImportTest extends TestCase
                     )
                     ->andReturn(15);
 
-                $mock->shouldReceive('responsibleUserOptions')->andReturn(collect());
                 $mock->shouldReceive('churchOptions')->andReturn(collect());
                 $mock->shouldReceive('administrationOptions')->andReturn(collect());
             }
         );
 
         $response = $this->post(route('migration.spreadsheets.store'), [
-                'usuario_id' => 9,
                 'administracao_id' => 3,
                 'arquivo_csv' => UploadedFile::fake()->create('bens.csv', 12, 'text/csv'),
             ]);
@@ -466,6 +467,8 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertSee('Importação em processamento.');
         $response->assertSee('bens.csv');
         $response->assertSee('Administração Central');
+        $response->assertSee('id="arquivo-nome"', false);
+        $response->assertSee('id="linhas-sucesso"', false);
     }
 
     public function testErrorsPageRendersAdministrationScope(): void
@@ -632,6 +635,6 @@ final class LegacySpreadsheetImportTest extends TestCase
             ->post(route('migration.spreadsheets.store'), []);
 
         $response->assertRedirect(route('migration.spreadsheets.create'));
-        $response->assertSessionHasErrors(['usuario_id', 'administracao_id', 'arquivo_csv']);
+        $response->assertSessionHasErrors(['administracao_id', 'arquivo_csv']);
     }
 }

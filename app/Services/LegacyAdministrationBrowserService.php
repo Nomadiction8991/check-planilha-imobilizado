@@ -13,16 +13,21 @@ class LegacyAdministrationBrowserService implements LegacyAdministrationBrowserS
 {
     public function paginate(AdministrationFilters $filters): LengthAwarePaginator
     {
+        $cnpjSearch = preg_replace('/\D+/', '', $filters->search) ?? '';
+
         return Administracao::query()
             ->when(
                 $filters->search !== '',
-                static function ($query) use ($filters): void {
-                    $query->where(function ($nested) use ($filters): void {
+                static function ($query) use ($filters, $cnpjSearch): void {
+                    $query->where(function ($nested) use ($filters, $cnpjSearch): void {
                         if (ctype_digit($filters->search)) {
                             $nested->whereKey((int) $filters->search);
                         }
 
                         $nested->orWhere('descricao', 'like', '%' . $filters->search . '%');
+                        if ($cnpjSearch !== '') {
+                            $nested->orWhere('cnpj', 'like', '%' . $cnpjSearch . '%');
+                        }
                     });
                 }
             )
