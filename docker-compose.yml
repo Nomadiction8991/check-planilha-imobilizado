@@ -15,8 +15,8 @@ services:
     ports:
       - "${HOST_PORT}:80"
     volumes:
-      - ./:/var/www/html
-      - ./Dockerfiles/php.ini:/usr/local/etc/php/conf.d/dev.ini:ro
+      - ./:/var/www/html:z
+      - ./Dockerfiles/php.ini:/usr/local/etc/php/conf.d/dev.ini:ro,z
     depends_on:
       - db
     networks:

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\LegacyAssetTypeController;
 use App\Http\Controllers\LegacyAuditController;
+use App\Http\Controllers\LegacyConfigurationController;
 use App\Http\Controllers\LegacyAdministrationController;
 use App\Http\Controllers\LegacyAuthController;
 use App\Http\Controllers\LegacyChurchController;
@@ -26,18 +27,22 @@ Route::post('/logout-publico', [PublicAccessController::class, 'logout'])->name(
 Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::get('/login', [LegacyAuthController::class, 'showLogin'])->name('migration.login');
     Route::post('/login', [LegacyAuthController::class, 'login'])->name('migration.login.store');
+    Route::get('/esqueci-minha-senha', [LegacyAuthController::class, 'showForgotPassword'])
+        ->name('migration.password.request');
+    Route::post('/esqueci-minha-senha', [LegacyAuthController::class, 'sendForgotPassword'])
+        ->name('migration.password.store');
 
     Route::middleware('legacy.auth')->group(function (): void {
-    Route::post('/logout', [LegacyAuthController::class, 'logout'])->name('migration.logout');
-    Route::post('/session/church', [LegacyAuthController::class, 'switchChurch'])->name('migration.session.church');
-    Route::post('/users/select-church', [LegacyRouteCompatibilityController::class, 'usersSelectChurch'])
-        ->name('migration.compat.users.select-church');
-    Route::get('/menu', [LegacyRouteCompatibilityController::class, 'menu'])->name('migration.compat.menu');
-    Route::get('/churches', [LegacyChurchController::class, 'index'])
-        ->middleware('legacy.permission:churches.view')
-        ->name('migration.churches.index');
-    Route::get('/churches/public', [LegacyChurchController::class, 'index'])
-        ->name('migration.churches.public');
+        Route::post('/logout', [LegacyAuthController::class, 'logout'])->name('migration.logout');
+        Route::post('/session/church', [LegacyAuthController::class, 'switchChurch'])->name('migration.session.church');
+        Route::post('/users/select-church', [LegacyRouteCompatibilityController::class, 'usersSelectChurch'])
+            ->name('migration.compat.users.select-church');
+        Route::get('/menu', [LegacyRouteCompatibilityController::class, 'menu'])->name('migration.compat.menu');
+        Route::get('/churches', [LegacyChurchController::class, 'index'])
+            ->middleware('legacy.permission:churches.view')
+            ->name('migration.churches.index');
+        Route::get('/churches/public', [LegacyChurchController::class, 'index'])
+            ->name('migration.churches.public');
 
     Route::get('/', LegacyMigrationDashboardController::class)->name('migration.dashboard');
     Route::get('/products/novo', [LegacyRouteCompatibilityController::class, 'productsNew'])
@@ -195,6 +200,10 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
         ->name('migration.spreadsheets.progress');
 
     Route::middleware('legacy.admin')->group(function (): void {
+        Route::get('/configuracoes', [LegacyConfigurationController::class, 'index'])
+            ->name('migration.configuracoes.index');
+        Route::post('/configuracoes', [LegacyConfigurationController::class, 'update'])
+            ->name('migration.configuracoes.update');
         Route::get('/churches/products-count', [LegacyChurchController::class, 'productsCount'])
             ->middleware('legacy.permission:churches.delete')
             ->name('migration.churches.products-count');
@@ -360,6 +369,14 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
             ->middleware('legacy.permission:users.edit')
             ->whereNumber('user')
             ->name('migration.users.update');
+        Route::get('/users/{user}/permissions', [LegacyUserController::class, 'permissions'])
+            ->middleware('legacy.permission:users.permissions.manage')
+            ->whereNumber('user')
+            ->name('migration.users.permissions');
+        Route::put('/users/{user}/permissions', [LegacyUserController::class, 'updatePermissions'])
+            ->middleware('legacy.permission:users.permissions.manage')
+            ->whereNumber('user')
+            ->name('migration.users.permissions.update');
         Route::post('/users/delete', [LegacyRouteCompatibilityController::class, 'usersDelete'])
             ->middleware('legacy.permission:users.delete')
             ->name('migration.compat.users.delete');

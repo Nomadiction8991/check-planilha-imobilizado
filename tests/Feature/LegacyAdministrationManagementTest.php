@@ -97,6 +97,7 @@ final class LegacyAdministrationManagementTest extends TestCase
         $response->assertSee('Administração Central');
         $response->assertSee('12345678000190');
         $response->assertSee('Nova administração');
+        $response->assertSee('Configurações');
     }
 
     public function testCreatePageRendersForm(): void

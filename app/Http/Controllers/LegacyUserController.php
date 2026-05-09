@@ -116,6 +116,54 @@ class LegacyUserController extends Controller
             ->with('status_type', 'success');
     }
 
+    public function permissions(Usuario $user): View|RedirectResponse
+    {
+        if ($user->isProtectedAdministratorAccount()) {
+            return redirect()
+                ->route('migration.users.index')
+                ->with('status', 'O usuário administrador já possui todas as permissões.')
+                ->with('status_type', 'error');
+        }
+
+        if ($response = $this->ensureUserWithinScope($user)) {
+            return $response;
+        }
+
+        return view('users.permissions', [
+            'user' => $user,
+            'groups' => (array) config('legacy.permissions.groups', []),
+            'currentPermissions' => (array) ($user->permissions ?? []),
+        ]);
+    }
+
+    public function updatePermissions(Request $request, Usuario $user): RedirectResponse
+    {
+        if ($user->isProtectedAdministratorAccount()) {
+            return redirect()
+                ->route('migration.users.index')
+                ->with('status', 'O usuário administrador já possui todas as permissões.')
+                ->with('status_type', 'error');
+        }
+
+        if ($response = $this->ensureUserWithinScope($user)) {
+            return $response;
+        }
+
+        try {
+            $this->userManager->updatePermissions($user, (array) $request->input('abilities', []));
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('migration.users.permissions', ['user' => $user->id])
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
+
+        return redirect()
+            ->route('migration.users.index')
+            ->with('status', 'Permissões do usuário atualizadas com sucesso.')
+            ->with('status_type', 'success');
+    }
+
     public function destroy(Usuario $user): RedirectResponse
     {
         if ($user->isProtectedAdministratorAccount()) {

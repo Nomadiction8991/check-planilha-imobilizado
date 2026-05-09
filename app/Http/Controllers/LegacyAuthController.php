@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\LegacyAuthSessionServiceInterface;
+use App\Contracts\LegacyPasswordRecoveryServiceInterface;
+use App\Http\Requests\LegacyPasswordResetRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +26,15 @@ class LegacyAuthController extends Controller
         }
 
         return view('auth.login');
+    }
+
+    public function showForgotPassword(): View|RedirectResponse
+    {
+        if ($this->auth->isAuthenticated()) {
+            return redirect()->route('migration.dashboard');
+        }
+
+        return view('auth.forgot-password');
     }
 
     public function login(Request $request): RedirectResponse
@@ -62,6 +73,31 @@ class LegacyAuthController extends Controller
         return redirect()
             ->route('migration.dashboard')
             ->with('status', 'Login realizado com sucesso.')
+            ->with('status_type', 'success');
+    }
+
+    public function sendForgotPassword(
+        LegacyPasswordResetRequest $request,
+        LegacyPasswordRecoveryServiceInterface $passwordRecovery
+    ): RedirectResponse {
+        $validated = $request->validated();
+
+        try {
+            $passwordRecovery->recover(
+                (string) $validated['cpf'],
+                (string) $validated['telefone'],
+                (string) $validated['email'],
+            );
+        } catch (RuntimeException $exception) {
+            return back()
+                ->withInput($request->only('cpf', 'telefone', 'email'))
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
+
+        return redirect()
+            ->route('migration.login')
+            ->with('status', 'Nova senha enviada para o e-mail cadastrado.')
             ->with('status_type', 'success');
     }
 
