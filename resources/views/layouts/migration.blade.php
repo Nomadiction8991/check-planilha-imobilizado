@@ -1450,90 +1450,6 @@
     @endphp
 </head>
 <body class="@yield('bodyClass') {{ $hideHeroOnOperationalRoutes ? 'page-operational' : '' }}">
-    @php
-        $legacyNavigation = [
-        ];
-
-        if (!empty($legacyPermissions['products.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Produtos',
-                'route' => route('migration.products.index'),
-                'active' => request()->routeIs('migration.products.index', 'migration.products.create', 'migration.products.edit', 'migration.compat.products.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['products.edit'])) {
-            $legacyNavigation[] = [
-                'label' => 'Verificação',
-                'route' => route('migration.products.verification'),
-                'active' => request()->routeIs('migration.products.verification'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['churches.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Igrejas',
-                'route' => route('migration.churches.index'),
-                'active' => request()->routeIs('migration.churches.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['departments.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Dependências',
-                'route' => route('migration.departments.index'),
-                'active' => request()->routeIs('migration.departments.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['asset-types.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Tipos de bem',
-                'route' => route('migration.asset-types.index'),
-                'active' => request()->routeIs('migration.asset-types.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['administrations.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Administrações',
-                'route' => route('migration.administrations.index'),
-                'active' => request()->routeIs('migration.administrations.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['users.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Usuários',
-                'route' => route('migration.users.index'),
-                'active' => request()->routeIs('migration.users.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['reports.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Relatórios',
-                'route' => route('migration.reports.index'),
-                'active' => request()->routeIs('migration.reports.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['spreadsheets.import'])) {
-            $legacyNavigation[] = [
-                'label' => 'Importação',
-                'route' => route('migration.spreadsheets.create'),
-                'active' => request()->routeIs('migration.spreadsheets.*'),
-            ];
-        }
-
-        if (!empty($legacyPermissions['audits.view'])) {
-            $legacyNavigation[] = [
-                'label' => 'Auditoria',
-                'route' => route('migration.audits.index'),
-                'active' => request()->routeIs('migration.audits.*'),
-            ];
-        }
-    @endphp
     <main class="shell">
         <div class="sticky-stack" data-sticky-stack>
         <header class="topbar" data-sticky-stack-topbar>
@@ -1574,13 +1490,20 @@
                 </div>
             </div>
             @unless (session('public_acesso'))
-            <div class="topbar-nav">
-                <nav class="nav" aria-label="Navegação principal">
-                    @foreach ($legacyNavigation as $item)
-                        <a href="{{ $item['route'] }}" class="{{ $item['active'] ? 'active' : '' }}">{{ $item['label'] }}</a>
-                    @endforeach
-                </nav>
-            </div>
+            @if (!empty($legacyNavigation))
+                <div class="topbar-nav">
+                    <nav class="nav" aria-label="Navegação principal">
+                        @foreach ($legacyNavigation as $item)
+                            <a
+                                href="{{ $item['route'] }}"
+                                class="{{ request()->routeIs(...$item['active_patterns']) ? 'active' : '' }}"
+                            >
+                                {{ $item['label'] }}
+                            </a>
+                        @endforeach
+                    </nav>
+                </div>
+            @endif
             @endunless
         </header>
         <div class="sticky-stack-slot" data-sticky-stack-slot></div>
@@ -1663,14 +1586,20 @@
                         <span>{{ $legacySessionUser['email'] }}</span>
                     </div>
                 @endif
-                <nav class="mobile-menu-nav" aria-label="Navegação principal">
-                    @foreach ($legacyNavigation as $item)
-                        <a href="{{ $item['route'] }}" class="mobile-menu-link {{ $item['active'] ? 'active' : '' }}" data-mobile-menu-link>
-                            <span class="mobile-menu-link-label">{{ $item['label'] }}</span>
-                            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-                        </a>
-                    @endforeach
-                </nav>
+                @if (!empty($legacyNavigation))
+                    <nav class="mobile-menu-nav" aria-label="Navegação principal">
+                        @foreach ($legacyNavigation as $item)
+                            <a
+                                href="{{ $item['route'] }}"
+                                class="mobile-menu-link {{ request()->routeIs(...$item['active_patterns']) ? 'active' : '' }}"
+                                data-mobile-menu-link
+                            >
+                                <span class="mobile-menu-link-label">{{ $item['label'] }}</span>
+                                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                            </a>
+                        @endforeach
+                    </nav>
+                @endif
                 @if (!empty($legacySessionUser))
                     <div class="mobile-menu-footer">
                         <form method="POST" action="{{ route('migration.logout') }}">

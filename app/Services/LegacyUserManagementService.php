@@ -48,6 +48,20 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
         return $user->refresh();
     }
 
+    public function updatePermissions(Usuario $user, array $permissions): Usuario
+    {
+        $this->assertUserCanBeManaged($user);
+
+        if (!$this->permissionsCanBeEdited()) {
+            throw new RuntimeException('Você não tem permissão para gerenciar permissões de usuários.');
+        }
+
+        $user->permissions = $this->normalizePermissionSelection(array_keys(array_filter($permissions)));
+        $user->save();
+
+        return $user->refresh();
+    }
+
     public function delete(Usuario $user): void
     {
         $this->assertUserCanBeManaged($user);

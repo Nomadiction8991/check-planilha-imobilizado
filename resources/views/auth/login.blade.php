@@ -81,6 +81,25 @@
             margin-top: 6px;
         }
 
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .forgot-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
         label {
             display: grid;
             gap: 6px;
@@ -191,7 +210,10 @@
                 <input type="password" name="senha" required autocomplete="current-password">
             </label>
 
-            <button type="submit">Entrar</button>
+            <div class="form-footer">
+                <button type="submit">Entrar</button>
+                <a class="forgot-link" href="{{ route('migration.password.request') }}">Esqueci minha senha</a>
+            </div>
         </form>
     </main>
     @include('partials.request-loading')
