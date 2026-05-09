@@ -22,6 +22,7 @@ class Produto extends Model
         'tipo_bem_id',
         'bem',
         'complemento',
+        'editado_marca',
         'altura_m',
         'largura_m',
         'comprimento_m',
