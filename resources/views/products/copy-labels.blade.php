@@ -49,6 +49,27 @@
     </section>
 
     <section class="section">
+        <div class="filters">
+            <label style="grid-column: 1 / -1;">
+                Etiquetas manuais
+                <textarea
+                    id="manualLabelsField"
+                    rows="6"
+                    placeholder="Uma etiqueta por linha"
+                ></textarea>
+            </label>
+
+            <p class="product-edit-note" style="grid-column: 1 / -1; margin: 0;">
+                Use uma linha por etiqueta para acrescentar textos manuais e copiar tudo junto com os códigos gerados.
+            </p>
+
+            <div class="actions">
+                <button class="btn" id="copyManualLabelsButton" type="button">Copiar etiquetas manuais</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
         @if ($data['products'] !== [])
             <div class="filters">
                 <label style="grid-column: 1 / -1;">
@@ -57,7 +78,8 @@
                 </label>
 
                 <div class="actions">
-                    <button class="btn primary" id="copyCodesButton" type="button">Copiar códigos</button>
+                    <button class="btn primary" id="copyCodesButton" type="button">Copiar códigos gerados</button>
+                    <button class="btn" id="copyAllLabelsButton" type="button">Copiar tudo</button>
                 </div>
             </div>
         @else
@@ -76,29 +98,84 @@
 
     <script>
         (() => {
-            const button = document.getElementById('copyCodesButton');
-            const field = document.getElementById('codigosField');
+            const codesButton = document.getElementById('copyCodesButton');
+            const allButton = document.getElementById('copyAllLabelsButton');
+            const manualButton = document.getElementById('copyManualLabelsButton');
+            const codesField = document.getElementById('codigosField');
+            const manualField = document.getElementById('manualLabelsField');
 
-            if (!button || !field) {
-                return;
-            }
+            const normalizeLines = (value) => value
+                .split(/\r?\n/)
+                .map((line) => line.trim())
+                .filter((line) => line !== '');
 
-            button.addEventListener('click', async () => {
-                field.select();
-
+            const copyText = async (text, button, successText) => {
                 try {
-                    await navigator.clipboard.writeText(field.value);
-                    button.textContent = 'Códigos copiados';
-                    window.setTimeout(() => {
-                        button.textContent = 'Copiar códigos';
-                    }, 1600);
+                    await navigator.clipboard.writeText(text);
+                    button.textContent = successText;
                 } catch (error) {
                     button.textContent = 'Falha ao copiar';
-                    window.setTimeout(() => {
-                        button.textContent = 'Copiar códigos';
-                    }, 1600);
                 }
-            });
+
+                window.setTimeout(() => {
+                    if (button === manualButton) {
+                        button.textContent = 'Copiar etiquetas manuais';
+                        return;
+                    }
+
+                    if (button === allButton) {
+                        button.textContent = 'Copiar tudo';
+                        return;
+                    }
+
+                    button.textContent = 'Copiar códigos gerados';
+                }, 1600);
+            };
+
+            if (manualButton && manualField) {
+                manualButton.addEventListener('click', async () => {
+                    const manualLabels = normalizeLines(manualField.value).join('\n');
+
+                    if (manualLabels === '') {
+                        manualField.focus();
+                        return;
+                    }
+
+                    await copyText(manualLabels, manualButton, 'Etiquetas manuais copiadas');
+                });
+            }
+
+            if (codesButton && codesField) {
+                codesButton.addEventListener('click', async () => {
+                    codesField.select();
+
+                    await copyText(codesField.value, codesButton, 'Códigos copiados');
+                });
+            }
+
+            if (allButton && codesField && manualField) {
+                allButton.addEventListener('click', async () => {
+                    const codes = codesField.value.trim();
+                    const manualLabels = normalizeLines(manualField.value).join('\n');
+
+                    const parts = [];
+
+                    if (codes !== '') {
+                        parts.push(codes);
+                    }
+
+                    if (manualLabels !== '') {
+                        parts.push(manualLabels);
+                    }
+
+                    if (parts.length === 0) {
+                        manualField.focus();
+                        return;
+                    }
+
+                    await copyText(parts.join('\n\n'), allButton, 'Tudo copiado');
+                });
+            }
         })();
     </script>
 @endsection
