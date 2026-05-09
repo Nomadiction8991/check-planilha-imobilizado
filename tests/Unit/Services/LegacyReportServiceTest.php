@@ -61,6 +61,15 @@ final class LegacyReportServiceTest extends TestCase
             public function storeFilterPinState(string $scope, int $index, bool $pinned): void
             {
             }
+
+            public function labelManualCodes(?int $churchId, ?int $dependencyId): array
+            {
+                return [];
+            }
+
+            public function saveLabelManualCodes(?int $churchId, ?int $dependencyId, array $codes): void
+            {
+            }
         };
 
         $service = new class(new LegacyReportTemplateService(), $auth) extends LegacyReportService {

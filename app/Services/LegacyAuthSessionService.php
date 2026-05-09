@@ -255,6 +255,80 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
         ])->save();
     }
 
+    public function labelManualCodes(?int $churchId, ?int $dependencyId): array
+    {
+        $user = $this->currentUsuario();
+
+        if ($user === null) {
+            return [];
+        }
+
+        $preferences = $this->normalizePreferences($user->ui_preferences);
+        $storedCodes = $preferences['label_manual_codes'] ?? [];
+
+        if (!is_array($storedCodes)) {
+            return [];
+        }
+
+        $churchKey = $this->normalizeLabelManualScopeKey($churchId);
+        $dependencyKey = $this->normalizeLabelManualScopeKey($dependencyId);
+        $codes = $storedCodes[$churchKey][$dependencyKey] ?? [];
+
+        if (!is_array($codes)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(
+            static fn (mixed $value): string => trim((string) $value),
+            $codes,
+        ), static fn (string $value): bool => $value !== ''));
+    }
+
+    public function saveLabelManualCodes(?int $churchId, ?int $dependencyId, array $codes): void
+    {
+        $user = $this->currentUsuario();
+
+        if ($user === null) {
+            throw new RuntimeException('Sessão inválida.');
+        }
+
+        $churchKey = $this->normalizeLabelManualScopeKey($churchId);
+        $dependencyKey = $this->normalizeLabelManualScopeKey($dependencyId);
+        $normalizedCodes = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $value): string => trim((string) $value),
+            $codes,
+        ), static fn (string $value): bool => $value !== '')));
+
+        $preferences = $this->normalizePreferences($user->ui_preferences);
+        $storedCodes = $preferences['label_manual_codes'] ?? [];
+
+        if (!is_array($storedCodes)) {
+            $storedCodes = [];
+        }
+
+        if ($normalizedCodes === []) {
+            if (isset($storedCodes[$churchKey]) && is_array($storedCodes[$churchKey])) {
+                unset($storedCodes[$churchKey][$dependencyKey]);
+
+                if ($storedCodes[$churchKey] === []) {
+                    unset($storedCodes[$churchKey]);
+                }
+            }
+        } else {
+            if (!isset($storedCodes[$churchKey]) || !is_array($storedCodes[$churchKey])) {
+                $storedCodes[$churchKey] = [];
+            }
+
+            $storedCodes[$churchKey][$dependencyKey] = $normalizedCodes;
+        }
+
+        $preferences['label_manual_codes'] = $storedCodes;
+
+        $user->forceFill([
+            'ui_preferences' => $preferences,
+        ])->save();
+    }
+
     private function resolveInitialChurchId(Usuario $user): ?int
     {
         if ($this->inferIsAdmin($user) || (int) ($user->administracao_id ?? 0) > 0) {
@@ -320,6 +394,13 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
         }
 
         return str_starts_with($scope, '/') ? $scope : '/' . ltrim($scope, '/');
+    }
+
+    private function normalizeLabelManualScopeKey(?int $value): string
+    {
+        $normalized = (int) ($value ?? 0);
+
+        return (string) max(0, $normalized);
     }
 
     /**

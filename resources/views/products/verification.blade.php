@@ -247,7 +247,7 @@
         </p>
         @if ($selectedChurchId && !empty($legacyPermissions['products.view'] ?? null))
             <div class="hero-actions">
-                <a class="btn" href="{{ route('migration.compat.products.copy-labels', $copyLabelsQuery) }}">Abrir etiquetas</a>
+                <a class="btn" href="{{ route('migration.labels.index', $copyLabelsQuery) }}">Abrir etiquetas</a>
             </div>
         @endif
     </section>
@@ -358,7 +358,7 @@
             <div class="inline-actions">
                 <a class="btn" href="{{ route('migration.products.index', array_filter(array_merge(['comum_id' => $selectedChurchId], $filters->toQuery()))) }}">Voltar aos produtos</a>
                 @if ($selectedChurchId)
-                    <a class="btn primary" href="{{ route('migration.compat.products.copy-labels', $copyLabelsQuery) }}">Ver etiquetas</a>
+                    <a class="btn primary" href="{{ route('migration.labels.index', $copyLabelsQuery) }}">Ver etiquetas</a>
                 @endif
             </div>
         </div>
@@ -475,7 +475,7 @@
                     @include('partials.pagination', ['paginator' => $products])
                     <div class="inline-actions">
                         @if ($selectedChurchId)
-                            <a class="btn" href="{{ route('migration.compat.products.copy-labels', $copyLabelsQuery) }}">Ir para etiquetas</a>
+                            <a class="btn" href="{{ route('migration.labels.index', $copyLabelsQuery) }}">Ir para etiquetas</a>
                         @endif
                     </div>
             </div>
