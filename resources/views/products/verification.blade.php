@@ -278,14 +278,16 @@
                 <div class="filters-primary">
                     <label class="filters-principal">
                         Igreja
-                        <select name="comum_id">
-                            <option value="">Todas</option>
-                            @foreach ($churches as $church)
-                                <option value="{{ $church->id }}" @selected($filters->comumId === $church->id)>
-                                    {{ $church->codigo }} - {{ $church->descricao }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="filters-principal__controls">
+                            <select name="comum_id">
+                                <option value="">Todas</option>
+                                @foreach ($churches as $church)
+                                    <option value="{{ $church->id }}" @selected($filters->comumId === $church->id)>
+                                        {{ $church->codigo }} - {{ $church->descricao }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </label>
 
                     <label class="filters-query">
@@ -456,7 +458,10 @@
                                     <td class="verification-cell--actions" data-label="Ações">
                                         <a
                                             class="btn verification-edit-btn"
-                                            href="{{ route('migration.products.edit', ['product' => data_get($product, 'id_produto')]) }}"
+                                            href="{{ route('migration.products.edit', [
+                                                'product' => data_get($product, 'id_produto'),
+                                                'return_url' => url()->full(),
+                                            ]) }}"
                                             aria-label="Editar cadastro do produto {{ $code !== '' ? $code : 'selecionado' }}"
                                             title="Editar cadastro"
                                         >

@@ -35,4 +35,11 @@ interface LegacyAuthSessionServiceInterface
      * @return Collection<int, object{id:int,codigo:string,descricao:string}>
      */
     public function availableChurches(): Collection;
+
+    /**
+     * @return array<string, array<string, bool>>
+     */
+    public function filterPinStates(): array;
+
+    public function storeFilterPinState(string $scope, int $index, bool $pinned): void;
 }
