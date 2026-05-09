@@ -16,6 +16,9 @@ final class BrazilLocalityControllerTest extends TestCase
                 ['nome' => 'Cuiabá'],
                 ['nome' => 'Várzea Grande'],
             ]),
+            'https://brasilapi.com.br/api/ibge/municipios/v1/MT' => Http::response([
+                ['nome' => 'CUIABÁ'],
+            ]),
         ]);
 
         $response = $this->get(route('migration.api.localidades.cities', ['state' => 'MT']));
@@ -25,6 +28,26 @@ final class BrazilLocalityControllerTest extends TestCase
             'success' => true,
             'data' => ['Cuiabá', 'Várzea Grande'],
             'source' => 'IBGE',
+        ]);
+    }
+
+    public function testCitiesFallsBackToBrasilApiWhenIbgeFails(): void
+    {
+        Http::fake([
+            'https://servicodados.ibge.gov.br/api/v1/localidades/estados/MT/municipios' => Http::response([], 503),
+            'https://brasilapi.com.br/api/ibge/municipios/v1/MT' => Http::response([
+                ['nome' => 'CUIABÁ'],
+                ['nome' => 'VÁRZEA GRANDE'],
+            ]),
+        ]);
+
+        $response = $this->get(route('migration.api.localidades.cities', ['state' => 'MT']));
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'data' => ['Cuiabá', 'Várzea Grande'],
+            'source' => 'BrasilAPI',
         ]);
     }
 
