@@ -10,6 +10,7 @@ final readonly class UpdateLegacyProductData
         public int $editedAssetTypeId,
         public string $editedItemName,
         public string $editedComplement,
+        public ?string $editedBrand,
         public ?string $editedHeightMeters,
         public ?string $editedWidthMeters,
         public ?string $editedLengthMeters,

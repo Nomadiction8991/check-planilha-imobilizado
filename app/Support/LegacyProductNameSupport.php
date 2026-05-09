@@ -13,6 +13,7 @@ final class LegacyProductNameSupport
         return self::formatName(
             self::firstNonEmpty($product, ['editado_bem', 'bem']),
             self::firstNonEmpty($product, ['editado_complemento', 'complemento']),
+            self::firstNonEmpty($product, ['editado_marca', 'marca']),
             self::firstNonEmpty($product, ['editado_altura_m', 'altura_m']),
             self::firstNonEmpty($product, ['editado_largura_m', 'largura_m']),
             self::firstNonEmpty($product, ['editado_comprimento_m', 'comprimento_m']),
@@ -26,6 +27,7 @@ final class LegacyProductNameSupport
         return self::formatName(
             self::stringValue($product, $prefix . 'bem'),
             self::stringValue($product, $prefix . 'complemento'),
+            self::stringValue($product, $prefix . 'marca'),
             self::stringValue($product, $prefix . 'altura_m'),
             self::stringValue($product, $prefix . 'largura_m'),
             self::stringValue($product, $prefix . 'comprimento_m'),
@@ -35,6 +37,7 @@ final class LegacyProductNameSupport
     public static function formatName(
         string $asset,
         string $complement = '',
+        string $brand = '',
         mixed $height = null,
         mixed $width = null,
         mixed $length = null,
@@ -49,6 +52,11 @@ final class LegacyProductNameSupport
         $complement = trim($complement);
         if ($complement !== '') {
             $parts[] = $complement;
+        }
+
+        $brand = trim($brand);
+        if ($brand !== '') {
+            $parts[] = $brand;
         }
 
         $dimensions = array_filter([

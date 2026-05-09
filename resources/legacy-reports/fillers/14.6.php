@@ -40,15 +40,22 @@ return static function (string $html, array $produto, array $planilha): string {
         $linhaDe = ($indice * 2) + 1;
         $linhaPara = $linhaDe + 1;
 
-        $descricaoOriginal = trim(implode(' ', array_filter([
-            trim((string)($item['bem'] ?? '')),
-            trim((string)($item['complemento'] ?? '')),
-        ], static fn ($valor): bool => $valor !== '')));
+        $descricaoOriginal = trim((string)($item['nome_original'] ?? ''));
+        $descricaoEditada = trim((string)($item['nome_atual'] ?? ''));
 
-        $descricaoEditada = trim(implode(' ', array_filter([
-            trim((string)($item['editado_bem'] ?? '')),
-            trim((string)($item['editado_complemento'] ?? '')),
-        ], static fn ($valor): bool => $valor !== '')));
+        if ($descricaoOriginal === '') {
+            $descricaoOriginal = trim(implode(' ', array_filter([
+                trim((string)($item['bem'] ?? '')),
+                trim((string)($item['complemento'] ?? '')),
+            ], static fn ($valor): bool => $valor !== '')));
+        }
+
+        if ($descricaoEditada === '') {
+            $descricaoEditada = trim(implode(' ', array_filter([
+                trim((string)($item['editado_bem'] ?? '')),
+                trim((string)($item['editado_complemento'] ?? '')),
+            ], static fn ($valor): bool => $valor !== '')));
+        }
 
         if ($descricaoEditada === '') {
             $descricaoEditada = $descricaoOriginal;

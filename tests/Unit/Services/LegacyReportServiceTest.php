@@ -81,6 +81,20 @@ final class LegacyReportServiceTest extends TestCase
         self::assertTrue($service->includes([
             'bem' => 'CADEIRA',
             'complemento' => 'METALICA',
+            'editado_marca' => 'TRAMONTINA',
+            'editado_bem' => 'CADEIRA',
+            'editado_complemento' => 'METALICA',
+            'tipo_bem_id' => 4,
+            'editado_tipo_bem_id' => 4,
+            'dependencia_id' => 2,
+            'editado_dependencia_id' => 2,
+            'editado' => 1,
+        ]));
+
+        self::assertTrue($service->includes([
+            'bem' => 'CADEIRA',
+            'complemento' => 'METALICA',
+            'editado_marca' => 'TRAMONTINA',
             'editado_bem' => 'CADEIRA',
             'editado_complemento' => 'METALICA GRANDE',
             'tipo_bem_id' => 4,
@@ -109,11 +123,13 @@ final class LegacyReportServiceTest extends TestCase
         self::assertTrue($service->includes([
             'bem' => 'CADEIRA',
             'complemento' => 'METALICA',
+            'editado_marca' => 'TRAMONTINA',
             'altura_m' => '1.200',
             'largura_m' => '0.800',
             'comprimento_m' => '2.000',
             'editado_bem' => 'CADEIRA',
             'editado_complemento' => 'METALICA',
+            'editado_marca' => 'TRAMONTINA',
             'editado_altura_m' => '1.300',
             'editado_largura_m' => '0.800',
             'editado_comprimento_m' => '2.000',

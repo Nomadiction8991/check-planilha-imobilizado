@@ -56,9 +56,16 @@ HTML;
 <textarea name="cnpj_da-administracao"></textarea>
 <textarea name="casa_de_oracao"></textarea>
 <textarea name="nome_do-responsavel"></textarea>
+<textarea name="descricao_de_1"></textarea>
+<textarea name="descricao_para_2"></textarea>
 HTML;
 
-        $filled = $filler($html, ['itens' => []], [
+        $filled = $filler($html, [
+            'itens' => [[
+                'nome_original' => 'CADEIRA METALICA A(1.2m) L(0.8m) C(2m)',
+                'nome_atual' => 'CADEIRA METALICA TRAMONTINA A(1.3m) L(0.8m) C(2m)',
+            ]],
+        ], [
             'descricao' => 'Igreja Central',
             'cidade' => 'Cuiabá',
             'estado' => 'MT',
@@ -73,6 +80,8 @@ HTML;
         self::assertSame('Cuiabá', $this->extractTextareaValue($filled, 'cidade'));
         self::assertSame('12345678000190', $this->extractTextareaValue($filled, 'cnpj_da-administracao'));
         self::assertSame('Maria Silva', $this->extractTextareaValue($filled, 'nome_do-responsavel'));
+        self::assertSame('CADEIRA METALICA A(1.2m) L(0.8m) C(2m)', $this->extractTextareaValue($filled, 'descricao_de_1'));
+        self::assertSame('CADEIRA METALICA TRAMONTINA A(1.3m) L(0.8m) C(2m)', $this->extractTextareaValue($filled, 'descricao_para_2'));
         self::assertStringNotContainsString('cidade_administracao', $filled);
     }
 

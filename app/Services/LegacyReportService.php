@@ -332,6 +332,7 @@ class LegacyReportService implements LegacyReportServiceInterface
                 'p.observacao as observacoes',
                 'p.bem',
                 'p.complemento',
+                'p.editado_marca',
                 'p.altura_m',
                 'p.largura_m',
                 'p.comprimento_m',
@@ -340,7 +341,7 @@ class LegacyReportService implements LegacyReportServiceInterface
                 'p.editado_altura_m',
                 'p.editado_largura_m',
                 'p.editado_comprimento_m',
-                DB::raw("NULLIF(CONCAT_WS(' ', p.editado_bem, p.editado_complemento), '') as nome_editado"),
+                DB::raw("NULLIF(CONCAT_WS(' ', p.editado_bem, p.editado_complemento, p.editado_marca), '') as nome_editado"),
                 'tb.codigo as tipo_codigo',
                 'tb.descricao as tipo_desc',
                 'etb.codigo as editado_tipo_codigo',
@@ -669,7 +670,13 @@ class LegacyReportService implements LegacyReportServiceInterface
                 DB::raw('NULL as doador_endereco_estado'),
                 DB::raw('NULL as doador_endereco_cep'),
             ])
-            ->map(static fn ($item): array => (array) $item)
+            ->map(static function ($item): array {
+                $product = (array) $item;
+                $product['nome_original'] = LegacyProductNameSupport::formatHistoricalName($product, false);
+                $product['nome_atual'] = LegacyProductNameSupport::formatHistoricalName($product, true);
+
+                return $product;
+            })
             ->all();
     }
 
@@ -700,6 +707,7 @@ class LegacyReportService implements LegacyReportServiceInterface
                 'p.imprimir_etiqueta',
                 'p.bem',
                 'p.complemento',
+                'p.editado_marca',
                 'p.altura_m',
                 'p.largura_m',
                 'p.comprimento_m',
@@ -716,7 +724,13 @@ class LegacyReportService implements LegacyReportServiceInterface
                 'ed.descricao as editado_dependencia_descricao',
                 'u.nome as administrador_nome',
             ])
-            ->map(static fn ($item): array => (array) $item)
+            ->map(static function ($item): array {
+                $product = (array) $item;
+                $product['nome_original'] = LegacyProductNameSupport::formatHistoricalName($product, false);
+                $product['nome_atual'] = LegacyProductNameSupport::formatHistoricalName($product, true);
+
+                return $product;
+            })
             ->all();
 
         $products = array_values(array_filter(
@@ -837,6 +851,7 @@ class LegacyReportService implements LegacyReportServiceInterface
                 DB::raw('CAST(p.editado AS SIGNED) as editado'),
                 'p.bem',
                 'p.complemento',
+                'p.editado_marca',
                 'p.altura_m',
                 'p.largura_m',
                 'p.comprimento_m',
