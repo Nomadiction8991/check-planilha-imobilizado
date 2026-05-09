@@ -26,11 +26,21 @@
     <section class="section">
         <div class="filters">
             <form method="GET" action="{{ route('migration.compat.products.copy-labels') }}">
-                <input type="hidden" name="comum_id" value="{{ $churchId }}">
+                <label>
+                    Igreja
+                    <select name="comum_id" onchange="this.form.submit()">
+                        <option value="">Selecione uma igreja</option>
+                        @foreach ($churches as $church)
+                            <option value="{{ $church->id }}" @selected((int) $churchId === (int) $church->id)>
+                                {{ $church->codigo }} - {{ $church->descricao }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
 
                 <label>
                     Dependência
-                    <select name="dependencia">
+                    <select name="dependencia" @disabled($churchId === null)>
                         <option value="">Todas as dependências</option>
                         @foreach ($data['dependencies'] as $dependency)
                             <option value="{{ $dependency['id'] }}" @selected((string) $selectedDependencyId === (string) $dependency['id'])>
@@ -86,7 +96,9 @@
             <div class="empty-state">
                 <strong>Nenhum produto disponível para etiquetas.</strong>
                 <p>
-                    @if ($selectedDependencyId)
+                    @if ($churchId === null)
+                        Selecione uma igreja acima para carregar as etiquetas.
+                    @elseif ($selectedDependencyId)
                         Não há produtos marcados para etiqueta na dependência selecionada.
                     @else
                         Marque produtos com o ícone de etiqueta para gerar a lista de códigos.
