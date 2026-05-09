@@ -6,6 +6,11 @@
     @php
         $selectedDependencyId = $data['selected_dependency_id'];
         $manualCodes = collect($manualCodes ?? [])->values()->all();
+        $verifiedCodes = trim((string) ($data['codes'] ?? ''));
+        $verifiedCodesList = $verifiedCodes !== ''
+            ? array_values(array_filter(array_map('trim', preg_split('/[,\n\r]+/', $verifiedCodes) ?: [])))
+            : [];
+        $allCodesList = array_values(array_unique(array_merge($verifiedCodesList, $manualCodes)));
         $churchCode = trim((string) data_get($data, 'church.codigo', ''));
     @endphp
 
@@ -16,10 +21,10 @@
             gap: 10px;
             align-items: center;
             padding: 14px 16px;
-            border: 1px solid rgba(15, 23, 42, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.28);
             border-radius: 18px;
-            background: rgba(255, 255, 255, 0.86);
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
         }
 
         .manual-tag-input__prefix {
@@ -29,8 +34,8 @@
             min-width: 102px;
             padding: 10px 12px;
             border-radius: 999px;
-            background: rgba(59, 130, 246, 0.12);
-            color: #1d4ed8;
+            background: rgba(96, 165, 250, 0.18);
+            color: #dbeafe;
             font-weight: 700;
             letter-spacing: 0.02em;
             white-space: nowrap;
@@ -38,10 +43,21 @@
 
         .manual-tag-input input {
             min-width: 0;
+            background: rgba(15, 23, 42, 0.88);
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #f8fafc;
         }
 
         .manual-tag-input__add {
             white-space: nowrap;
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: rgba(248, 250, 252, 0.8);
+        }
+
+        .manual-tag-input__add:hover {
+            background: #e2e8f0;
+            color: #0f172a;
         }
 
         .manual-tag-list {
@@ -57,7 +73,9 @@
             gap: 10px;
             padding: 10px 12px;
             border-radius: 999px;
-            background: rgba(15, 23, 42, 0.08);
+            background: rgba(15, 23, 42, 0.88);
+            color: #f8fafc;
+            border: 1px solid rgba(148, 163, 184, 0.24);
             font-weight: 600;
         }
 
@@ -66,21 +84,59 @@
             height: 26px;
             border: 0;
             border-radius: 999px;
-            background: rgba(15, 23, 42, 0.12);
-            color: #111827;
+            background: rgba(148, 163, 184, 0.2);
+            color: #f8fafc;
             cursor: pointer;
             line-height: 1;
         }
 
         .manual-tag-chip button:hover {
-            background: rgba(239, 68, 68, 0.18);
-            color: #991b1b;
+            background: rgba(239, 68, 68, 0.34);
+            color: #fff;
+        }
+
+        .manual-tag-input input::placeholder {
+            color: #94a3b8;
         }
 
         .manual-tag-empty {
-            color: #6b7280;
+            color: #cbd5e1;
             font-size: 14px;
             margin-top: 10px;
+        }
+
+        .label-output-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .label-output-card {
+            display: grid;
+            gap: 10px;
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+        }
+
+        .label-output-card h3 {
+            margin: 0;
+            color: #f8fafc;
+            font-size: 16px;
+        }
+
+        .label-output-card p {
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        .label-output-card textarea {
+            min-height: 108px;
+            background: rgba(15, 23, 42, 0.88);
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #f8fafc;
+            resize: vertical;
         }
     </style>
 
@@ -180,21 +236,37 @@
     </section>
 
     <section class="section">
-        @if ($data['products'] !== [])
-            <div class="filters">
-                <label style="grid-column: 1 / -1;">
-                    Códigos
-                    <textarea id="codigosField" rows="8" readonly onclick="this.select()">{{ $data['codes'] }}</textarea>
-                </label>
-
+        <div class="label-output-grid">
+            <div class="label-output-card">
+                <h3>Manuais</h3>
+                <p>Etiquetas adicionadas pelo usuário e salvas automaticamente.</p>
+                <textarea id="manualCodesField" rows="5" readonly onclick="this.select()">{{ implode(', ', $manualCodes) }}</textarea>
                 <div class="actions">
-                    <button class="btn primary" id="copyCodesButton" type="button">Copiar códigos gerados</button>
-                    <button class="btn" id="copyAllLabelsButton" type="button">Copiar tudo</button>
                     <button class="btn" id="copyManualLabelsButton" type="button" @disabled($manualCodes === [])>Copiar manuais</button>
                 </div>
             </div>
-        @else
-            <div class="empty-state">
+
+            <div class="label-output-card">
+                <h3>Verificados</h3>
+                <p>Códigos gerados pelos produtos marcados para etiqueta.</p>
+                <textarea id="verifiedCodesField" rows="6" readonly onclick="this.select()">{{ $verifiedCodes }}</textarea>
+                <div class="actions">
+                    <button class="btn primary" id="copyCodesButton" type="button">Copiar verificados</button>
+                </div>
+            </div>
+
+            <div class="label-output-card">
+                <h3>Todos</h3>
+                <p>União dos códigos verificados com os manuais, sem duplicar.</p>
+                <textarea id="allCodesField" rows="7" readonly onclick="this.select()">{{ implode(', ', $allCodesList) }}</textarea>
+                <div class="actions">
+                    <button class="btn" id="copyAllLabelsButton" type="button">Copiar todos</button>
+                </div>
+            </div>
+        </div>
+
+        @if ($data['products'] === [])
+            <div class="empty-state" style="margin-top: 16px;">
                 <strong>Nenhum produto disponível para etiquetas.</strong>
                 <p>
                     @if ($churchId === null)
@@ -218,7 +290,9 @@
             const codesButton = document.getElementById('copyCodesButton');
             const allButton = document.getElementById('copyAllLabelsButton');
             const manualButton = document.getElementById('copyManualLabelsButton');
-            const codesField = document.getElementById('codigosField');
+            const verifiedField = document.getElementById('verifiedCodesField');
+            const manualField = document.getElementById('manualCodesField');
+            const allField = document.getElementById('allCodesField');
 
             const config = root ? {
                 churchId: Number(root.dataset.churchId || 0),
@@ -229,6 +303,7 @@
             } : null;
 
             let manualCodes = @json(array_values($manualCodes));
+            let verifiedCodes = @json(array_values($verifiedCodesList));
 
             const renderChips = () => {
                 if (!chipList) {
@@ -263,6 +338,21 @@
                     chip.appendChild(remove);
                     chipList.appendChild(chip);
                 });
+            };
+
+            const syncOutputs = () => {
+                if (manualField) {
+                    manualField.value = manualCodes.join(', ');
+                }
+
+                if (verifiedField) {
+                    verifiedField.value = verifiedCodes.join(', ');
+                }
+
+                if (allField) {
+                    const merged = [...verifiedCodes, ...manualCodes];
+                    allField.value = Array.from(new Set(merged)).join(', ');
+                }
             };
 
             const normalizeNumber = (value) => value.replace(/\D+/g, '').slice(0, 6);
@@ -338,6 +428,7 @@
 
                 manualCodes = Array.isArray(data.codes) ? data.codes : manualCodes;
                 renderChips();
+                syncOutputs();
                 if (input) {
                     input.value = '';
                     input.focus();
@@ -391,36 +482,30 @@
                 });
             }
 
-            if (codesButton && codesField) {
+            if (codesButton && verifiedField) {
                 codesButton.addEventListener('click', async () => {
-                    codesField.select();
-                    await copyText(codesField.value, codesButton, 'Códigos copiados');
+                    verifiedField.select();
+                    await copyText(verifiedField.value, codesButton, 'Verificados copiados');
                 });
             }
 
-            if (allButton && codesField) {
+            if (allButton && allField) {
                 allButton.addEventListener('click', async () => {
-                    const parts = [];
-                    const codes = codesField.value.trim();
-                    if (codes !== '') {
-                        parts.push(codes);
-                    }
-                    if (manualCodes.length) {
-                        parts.push(manualCodes.join(', '));
-                    }
+                    const text = allField.value.trim();
 
-                    if (!parts.length) {
+                    if (text === '') {
                         if (input) {
                             input.focus();
                         }
                         return;
                     }
 
-                    await copyText(parts.join('\n\n'), allButton, 'Tudo copiado');
+                    await copyText(text, allButton, 'Todos copiados');
                 });
             }
 
             renderChips();
+            syncOutputs();
         })();
     </script>
 @endsection

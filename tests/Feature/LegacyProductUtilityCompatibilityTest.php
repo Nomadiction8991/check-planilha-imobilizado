@@ -79,7 +79,8 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('Selecione uma igreja');
         $response->assertSee('Etiquetas manuais');
         $response->assertSee('Copiar manuais');
-        $response->assertSee('Copiar tudo');
+        $response->assertSee('Verificados');
+        $response->assertSee('Todos');
     }
 
     public function testCopyLabelsPageOpensWithoutChurchSelected(): void
