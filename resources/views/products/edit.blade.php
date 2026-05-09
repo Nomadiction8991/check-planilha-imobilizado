@@ -223,6 +223,7 @@
                     $currentDimensions = \App\Support\LegacyProductNameSupport::formatName(
                         '',
                         '',
+                        '',
                         data_get($product, 'editado_altura_m', data_get($product, 'altura_m')),
                         data_get($product, 'editado_largura_m', data_get($product, 'largura_m')),
                         data_get($product, 'editado_comprimento_m', data_get($product, 'comprimento_m'))
