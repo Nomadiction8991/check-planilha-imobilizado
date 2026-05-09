@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Contracts\LegacyAuthSessionServiceInterface;
+use App\Contracts\LegacyNavigationServiceInterface;
 use App\Contracts\LegacyProductUtilityServiceInterface;
 use App\Models\Legacy\Produto;
 use Mockery\MockInterface;
@@ -31,6 +32,11 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
             $mock->shouldReceive('availableChurches')->andReturn(collect([
                 (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
             ]));
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('navigation')->andReturn([]);
         });
 
         $this->mock(LegacyProductUtilityServiceInterface::class, function (MockInterface $mock): void {
@@ -66,6 +72,9 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertOk();
         $response->assertSee('Copiar códigos para etiquetas.');
         $response->assertSee('A-101,A-102');
+        $response->assertSee('Etiquetas manuais');
+        $response->assertSee('Copiar etiquetas manuais');
+        $response->assertSee('Copiar tudo');
     }
 
     public function testObservationPageRendersCompatibilityForm(): void
