@@ -79,24 +79,27 @@ class LegacyRouteCompatibilityController extends Controller
         return redirect()->route('migration.products.update.post', ['product' => $productId], 307);
     }
 
-    public function productsCopyLabels(
+    public function labels(
         Request $request,
     ): View|RedirectResponse {
         $churchId = $this->firstPositiveInt(
             $request->input('comum_id'),
             $request->query('comum_id'),
         );
+        $dependencyId = $this->firstPositiveInt($request->query('dependencia'));
         $churches = $this->auth->availableChurches();
 
         if ($churchId === null) {
-            return view('products.copy-labels', [
+            return view('labels.index', [
                 'churchId' => null,
+                'dependencyId' => $dependencyId,
                 'churches' => $churches,
+                'manualCodes' => [],
                 'data' => [
                     'church' => null,
                     'dependencies' => [],
                     'products' => [],
-                    'selected_dependency_id' => $this->firstPositiveInt($request->query('dependencia')),
+                    'selected_dependency_id' => $dependencyId,
                     'total_products' => 0,
                     'unique_codes' => 0,
                     'codes' => '',
@@ -107,7 +110,7 @@ class LegacyRouteCompatibilityController extends Controller
         try {
             $data = $this->products->labelCopyData(
                 $churchId,
-                $this->firstPositiveInt($request->query('dependencia')),
+                $dependencyId,
             );
         } catch (RuntimeException $exception) {
             return redirect()
@@ -116,11 +119,70 @@ class LegacyRouteCompatibilityController extends Controller
                 ->with('status_type', 'error');
         }
 
-        return view('products.copy-labels', [
+        return view('labels.index', [
             'churchId' => $churchId,
+            'dependencyId' => $dependencyId,
             'churches' => $churches,
+            'manualCodes' => $this->auth->labelManualCodes($churchId, $dependencyId),
             'data' => $data,
         ]);
+    }
+
+    public function labelsManualStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'comum_id' => ['required', 'integer', 'min:1'],
+            'dependencia_id' => ['nullable', 'integer', 'min:1'],
+            'numero' => ['required', 'string', 'regex:/^\d{1,6}$/'],
+            'action' => ['required', 'in:add,remove'],
+        ]);
+
+        $churchId = (int) $validated['comum_id'];
+        $dependencyId = isset($validated['dependencia_id']) ? (int) $validated['dependencia_id'] : null;
+        $churchCode = $this->resolveChurchCode($churchId);
+
+        if ($churchCode === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Igreja não encontrada.',
+            ], 422);
+        }
+
+        $currentCodes = $this->auth->labelManualCodes($churchId, $dependencyId);
+        $formattedCode = $this->formatManualLabelCode($churchCode, (string) $validated['numero']);
+
+        if ($validated['action'] === 'add' && !in_array($formattedCode, $currentCodes, true)) {
+            $currentCodes[] = $formattedCode;
+        }
+
+        if ($validated['action'] === 'remove') {
+            $currentCodes = array_values(array_filter(
+                $currentCodes,
+                static fn (string $code): bool => $code !== $formattedCode,
+            ));
+        }
+
+        try {
+            $this->auth->saveLabelManualCodes($churchId, $dependencyId, $currentCodes);
+        } catch (RuntimeException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'codes' => $currentCodes,
+            'manual_labels' => implode(', ', $currentCodes),
+            'code' => $formattedCode,
+        ]);
+    }
+
+    public function productsCopyLabels(
+        Request $request,
+    ): RedirectResponse {
+        return redirect()->route('migration.labels.index', $request->query());
     }
 
     public function productsObservation(
@@ -565,6 +627,30 @@ class LegacyRouteCompatibilityController extends Controller
         }
 
         return trim((string) $request->input('codigo', $request->query('codigo', $request->query('filtro_codigo', ''))));
+    }
+
+    private function resolveChurchCode(int $churchId): ?string
+    {
+        if ($churchId <= 0) {
+            return null;
+        }
+
+        $church = $this->auth->availableChurches()->firstWhere('id', $churchId);
+
+        if ($church === null) {
+            return null;
+        }
+
+        $code = trim((string) ($church->codigo ?? ''));
+
+        return $code !== '' ? $code : null;
+    }
+
+    private function formatManualLabelCode(string $churchCode, string $number): string
+    {
+        $normalizedNumber = str_pad(trim($number), 6, '0', STR_PAD_LEFT);
+
+        return strtoupper(trim($churchCode)) . '/' . $normalizedNumber;
     }
 
     private function productJsonOrRedirectError(Request $request, string $message, int $statusCode): JsonResponse|RedirectResponse

@@ -92,7 +92,7 @@ final class LegacyConfigurationManagementTest extends TestCase
                         'key' => 'labels',
                         'label' => 'Etiquetas',
                         'route' => '/produtos/etiquetas',
-                        'active_patterns' => ['migration.compat.products.copy-labels'],
+                        'active_patterns' => ['migration.labels.*', 'migration.compat.products.copy-labels'],
                     ],
                     [
                         'key' => 'configuracoes',
