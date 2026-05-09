@@ -11,6 +11,41 @@ use Illuminate\Support\Facades\Http;
 
 final class BrazilLocalityController extends Controller
 {
+    public function states(Request $request): JsonResponse
+    {
+        foreach ($this->stateProviders() as $source => $url) {
+            try {
+                $response = Http::timeout(8)
+                    ->acceptJson()
+                    ->get($url);
+
+                if (! $response->ok()) {
+                    continue;
+                }
+
+                $states = $this->extractStates((array) $response->json());
+
+                if ($states === []) {
+                    continue;
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $states,
+                    'source' => $source,
+                ]);
+            } catch (Throwable) {
+                continue;
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Não foi possível consultar os estados.',
+            'data' => [],
+        ], 502);
+    }
+
     public function cities(Request $request, string $state): JsonResponse
     {
         $state = strtoupper(trim($state));
@@ -59,6 +94,41 @@ final class BrazilLocalityController extends Controller
     /**
      * @return array<string, string>
      */
+    private function stateProviders(): array
+    {
+        return [
+            'IBGE' => 'https://servicodados.ibge.gov.br/api/v1/localidades/estados',
+            'BrasilAPI' => 'https://brasilapi.com.br/api/ibge/uf/v1',
+        ];
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $payload
+     * @return array<int, array{sigla: string, nome: string}>
+     */
+    private function extractStates(array $payload): array
+    {
+        $states = [];
+
+        foreach ($payload as $item) {
+            $sigla = strtoupper(trim((string) ($item['sigla'] ?? '')));
+            $nome = $this->normalizeCityName((string) ($item['nome'] ?? ''));
+
+            if ($sigla === '' || $nome === '') {
+                continue;
+            }
+
+            $states[] = [
+                'sigla' => $sigla,
+                'nome' => $nome,
+            ];
+        }
+
+        usort($states, static fn (array $left, array $right): int => $left['sigla'] <=> $right['sigla']);
+
+        return $states;
+    }
+
     private function cityProviders(string $state): array
     {
         return [

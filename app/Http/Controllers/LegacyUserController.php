@@ -80,8 +80,6 @@ class LegacyUserController extends Controller
             return $response;
         }
 
-        $user->loadMissing('administracao:id,descricao');
-
         return view('users.edit', [
             'user' => $user,
             'administrations' => $this->users->administrationOptions(),

@@ -17,7 +17,7 @@ use Tests\TestCase;
 final class LegacyAdministrationManagementTest extends TestCase
 {
     private Administracao $boundAdministration;
-    private string $citiesEndpointTemplate;
+    private string $localidadesAsset;
 
     protected function setUp(): void
     {
@@ -45,7 +45,7 @@ final class LegacyAdministrationManagementTest extends TestCase
             description: 'Administração Central',
             cnpj: '12345678000190',
         );
-        $this->citiesEndpointTemplate = route('migration.api.localidades.cities', ['state' => '__STATE__']);
+        $this->localidadesAsset = 'assets/forms/localidades.js';
 
         $this->app['router']->bind('administration', fn (): Administracao => $this->boundAdministration);
         $this->app->instance(
@@ -107,8 +107,8 @@ final class LegacyAdministrationManagementTest extends TestCase
         $response->assertSee('Nova administração.');
         $response->assertSee('Salvar administração');
         $response->assertSee('assets/forms/input-mask.js', false);
+        $response->assertSee($this->localidadesAsset, false);
         $response->assertSee('data-mask="cnpj"', false);
-        $response->assertSee($this->citiesEndpointTemplate, false);
     }
 
     public function testStoreCreatesAdministration(): void
@@ -182,7 +182,7 @@ final class LegacyAdministrationManagementTest extends TestCase
         $response->assertSee('Editar administração.');
         $response->assertSee('Salvar alterações');
         $response->assertSee('data-mask="cnpj"', false);
-        $response->assertSee($this->citiesEndpointTemplate, false);
+        $response->assertSee($this->localidadesAsset, false);
     }
 
     public function testDestroyDeletesUnusedAdministration(): void

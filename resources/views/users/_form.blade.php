@@ -265,7 +265,7 @@
                 <div class="section-head">
                     <div>
                         <h2>Endereço</h2>
-                        <p class="form-section__copy">CEP, rua e localização para contato e referência administrativa. O CEP pode completar parte dos campos automaticamente.</p>
+                        <p class="form-section__copy">CEP, rua e localização para contato e referência administrativa. O CEP preenche os campos de endereço e o estado/cidade seguem o fluxo de localidades.</p>
                     </div>
                 </div>
 
@@ -333,66 +333,9 @@
         const spouseRgInput = document.getElementById('rg_conjuge');
         const spouseRgEqualsCpfCheckbox = document.getElementById('rg_conjuge_igual_cpf');
         const zipInput = document.getElementById('endereco_cep');
-        const citySelect = document.getElementById('endereco_cidade');
-        const stateSelect = document.getElementById('endereco_estado');
-        const selectedCity = citySelect?.dataset.selectedCity || '';
-        const citiesEndpointTemplate = "{{ route('migration.api.localidades.cities', ['state' => '__STATE__']) }}";
 
         function digitsOnly(value) {
             return value.replace(/\D/g, '');
-        }
-
-        function clearCityOptions(message) {
-            if (!citySelect) {
-                return;
-            }
-
-            citySelect.innerHTML = '';
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = message;
-            citySelect.appendChild(option);
-            citySelect.disabled = true;
-        }
-
-        async function loadCities(state, cityToSelect = '') {
-            if (!citySelect || !state) {
-                clearCityOptions('Selecione um estado primeiro');
-                return;
-            }
-
-            citySelect.disabled = true;
-            citySelect.innerHTML = '<option value="">Carregando cidades...</option>';
-
-            try {
-                const response = await fetch(citiesEndpointTemplate.replace('__STATE__', encodeURIComponent(state)), {
-                    headers: {
-                        'Accept': 'application/json',
-                    },
-                });
-
-                const payload = await response.json();
-
-                if (!response.ok || !payload.success) {
-                    throw new Error(payload.message || 'Não foi possível carregar as cidades.');
-                }
-
-                citySelect.innerHTML = '<option value="">Selecione</option>';
-                payload.data.forEach((city) => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    if (cityToSelect && cityToSelect === city) {
-                        option.selected = true;
-                    }
-                    citySelect.appendChild(option);
-                });
-
-                citySelect.disabled = false;
-            } catch (error) {
-                console.error('Erro ao carregar cidades:', error);
-                clearCityOptions('Não foi possível carregar as cidades');
-            }
         }
 
         function toggleSpouseFields() {
@@ -430,14 +373,6 @@
 
                 document.getElementById('endereco_logradouro').value = data.logradouro || '';
                 document.getElementById('endereco_bairro').value = data.bairro || '';
-                const state = (data.uf || '').toUpperCase();
-                if (stateSelect) {
-                    stateSelect.value = state;
-                }
-
-                if (state) {
-                    await loadCities(state, data.localidade || '');
-                }
             } catch (error) {
                 console.error('Erro ao buscar CEP:', error);
             }
@@ -449,13 +384,9 @@
         spouseRgEqualsCpfCheckbox?.addEventListener('change', () => syncRgWithCpf(spouseRgEqualsCpfCheckbox, spouseCpfInput, spouseRgInput));
         spouseCpfInput?.addEventListener('input', () => syncRgWithCpf(spouseRgEqualsCpfCheckbox, spouseCpfInput, spouseRgInput));
         zipInput?.addEventListener('blur', lookupZip);
-        stateSelect?.addEventListener('change', () => loadCities(stateSelect.value));
 
         toggleSpouseFields();
         syncRgWithCpf(rgEqualsCpfCheckbox, cpfInput, rgInput);
         syncRgWithCpf(spouseRgEqualsCpfCheckbox, spouseCpfInput, spouseRgInput);
-        if (stateSelect?.value) {
-            loadCities(stateSelect.value, selectedCity);
-        }
     })();
 </script>

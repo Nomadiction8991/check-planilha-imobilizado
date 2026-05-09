@@ -18,14 +18,14 @@ use Tests\TestCase;
 final class LegacyUserManagementTest extends TestCase
 {
     private Usuario $boundUser;
-    private string $citiesEndpointTemplate;
+    private string $localidadesAsset;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->boundUser = $this->makeUser();
-        $this->citiesEndpointTemplate = route('migration.api.localidades.cities', ['state' => '__STATE__']);
+        $this->localidadesAsset = 'assets/forms/localidades.js';
         $this->app['router']->bind('user', fn (): Usuario => $this->boundUser);
         $this->app->instance(
             LegacyUserBrowserServiceInterface::class,
@@ -73,7 +73,7 @@ final class LegacyUserManagementTest extends TestCase
         $response->assertSee('Salvar usuário');
         $response->assertSee('data-mask="cpf"', false);
         $response->assertSee('data-mask="cep"', false);
-        $response->assertSee($this->citiesEndpointTemplate, false);
+        $response->assertSee($this->localidadesAsset, false);
     }
 
     public function testStoreCreatesUser(): void
@@ -156,7 +156,7 @@ final class LegacyUserManagementTest extends TestCase
         $response->assertSee('Salvar alterações');
         $response->assertSee('data-mask="cpf"', false);
         $response->assertSee('data-mask="cep"', false);
-        $response->assertSee($this->citiesEndpointTemplate, false);
+        $response->assertSee($this->localidadesAsset, false);
     }
 
     public function testUpdateChangesUser(): void

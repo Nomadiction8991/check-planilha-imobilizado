@@ -9,6 +9,54 @@ use Tests\TestCase;
 
 final class BrazilLocalityControllerTest extends TestCase
 {
+    public function testStatesReturnsNormalizedPayload(): void
+    {
+        Http::fake([
+            'https://servicodados.ibge.gov.br/api/v1/localidades/estados' => Http::response([
+                ['sigla' => 'MT', 'nome' => 'Mato Grosso'],
+                ['sigla' => 'SP', 'nome' => 'São Paulo'],
+            ]),
+            'https://brasilapi.com.br/api/ibge/uf/v1' => Http::response([
+                ['sigla' => 'RJ', 'nome' => 'Rio de Janeiro'],
+            ]),
+        ]);
+
+        $response = $this->get(route('migration.api.localidades.states'));
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'data' => [
+                ['sigla' => 'MT', 'nome' => 'Mato Grosso'],
+                ['sigla' => 'SP', 'nome' => 'São Paulo'],
+            ],
+            'source' => 'IBGE',
+        ]);
+    }
+
+    public function testStatesFallsBackToBrasilApiWhenIbgeFails(): void
+    {
+        Http::fake([
+            'https://servicodados.ibge.gov.br/api/v1/localidades/estados' => Http::response([], 503),
+            'https://brasilapi.com.br/api/ibge/uf/v1' => Http::response([
+                ['sigla' => 'MT', 'nome' => 'Mato Grosso'],
+                ['sigla' => 'SP', 'nome' => 'São Paulo'],
+            ]),
+        ]);
+
+        $response = $this->get(route('migration.api.localidades.states'));
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'data' => [
+                ['sigla' => 'MT', 'nome' => 'Mato Grosso'],
+                ['sigla' => 'SP', 'nome' => 'São Paulo'],
+            ],
+            'source' => 'BrasilAPI',
+        ]);
+    }
+
     public function testCitiesReturnsNormalizedPayload(): void
     {
         Http::fake([
