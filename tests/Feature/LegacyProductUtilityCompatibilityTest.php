@@ -72,9 +72,51 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertOk();
         $response->assertSee('Copiar códigos para etiquetas.');
         $response->assertSee('A-101,A-102');
+        $response->assertSee('Igreja');
+        $response->assertSee('Selecione uma igreja');
         $response->assertSee('Etiquetas manuais');
         $response->assertSee('Copiar etiquetas manuais');
         $response->assertSee('Copiar tudo');
+    }
+
+    public function testCopyLabelsPageOpensWithoutChurchSelected(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('currentUser')->andReturn([
+                'id' => 9,
+                'nome' => 'Maria Silva',
+                'email' => 'MARIA@EXEMPLO.COM',
+                'comum_id' => 7,
+                'administracao_id' => 4,
+                'is_admin' => false,
+            ]);
+            $mock->shouldReceive('currentChurch')->andReturn([
+                'id' => 7,
+                'codigo' => '12-3456',
+                'descricao' => 'Central Cuiabá',
+            ]);
+            $mock->shouldReceive('availableChurches')->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+            ]));
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('navigation')->andReturn([]);
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->get('/products/label');
+
+        $response->assertOk();
+        $response->assertSee('Selecione uma igreja acima para carregar as etiquetas.');
+        $response->assertSee('Selecione uma igreja');
     }
 
     public function testObservationPageRendersCompatibilityForm(): void
@@ -106,6 +148,11 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
             $mock->shouldReceive('availableChurches')->andReturn(collect([
                 (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
             ]));
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('navigation')->andReturn([]);
         });
 
         $this->mock(LegacyProductUtilityServiceInterface::class, function (MockInterface $mock) use ($product): void {
