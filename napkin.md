@@ -45,6 +45,8 @@
    Faça isto em vez disso: injete o toggle de fixar no layout base e persista o estado por página sem quebrar o modo automático.
 7. **[2026-05-09] Tela de etiquetas deve filtrar dentro da própria view**
    Faça isto em vez disso: abrir `/products/label` sem igreja e só aplicar `comum_id` escolhido no formulário da página.
+8. **[2026-05-09] Importação de planilha precisa avisar por igreja**
+   Faça isto em vez disso: destacar em vermelho na tela inicial e na prévia que o fluxo importa a igreja inteira, não dependência.
 
 ## Diretrizes do Usuário
 1. **[2026-03-28] Responder em PT-BR com foco em ação**

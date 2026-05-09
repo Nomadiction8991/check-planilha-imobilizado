@@ -343,6 +343,7 @@ final class LegacySpreadsheetImportTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Importe uma planilha para análise.');
+        $response->assertSee('Atenção: esta importação é por igreja, não por dependência.');
         $response->assertSee('Enviar e analisar');
         $response->assertDontSee('Igreja base');
         $response->assertSee('detecta as igrejas diretamente do CSV');
@@ -391,6 +392,7 @@ final class LegacySpreadsheetImportTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Escolha as igrejas que devem entrar na importação.');
+        $response->assertSee('Atenção: importação por dependência não é suportada.');
         $response->assertSee('Central Cuiabá');
         $response->assertSee('Administração: Administração Central');
         $response->assertSee('Confirmar igrejas selecionadas');
