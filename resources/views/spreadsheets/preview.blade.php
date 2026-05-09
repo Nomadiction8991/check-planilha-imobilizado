@@ -9,6 +9,67 @@
         $savedChurches = $igrejasSalvas ?? [];
     @endphp
 
+    <style>
+        .spreadsheet-warning-banner {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            gap: 10px;
+            padding: 20px 22px 20px 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 206, 79, 0.38);
+            border-left: 8px solid #ffb703;
+            border-radius: 24px;
+            background:
+                linear-gradient(135deg, rgba(146, 32, 32, 0.98), rgba(77, 17, 17, 0.98)),
+                radial-gradient(circle at top right, rgba(255, 183, 3, 0.28), transparent 34%);
+            color: #fff9f0;
+            box-shadow: 0 20px 48px rgba(62, 15, 15, 0.38);
+        }
+
+        .spreadsheet-warning-banner::after {
+            content: '';
+            position: absolute;
+            inset: auto -18px -18px auto;
+            width: 128px;
+            height: 128px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(255, 183, 3, 0.18), transparent 70%);
+            pointer-events: none;
+        }
+
+        .spreadsheet-warning-banner__eyebrow {
+            display: inline-flex;
+            align-self: start;
+            width: fit-content;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: rgba(255, 244, 214, 0.16);
+            color: #ffe28a;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .spreadsheet-warning-banner strong {
+            display: block;
+            font-size: 18px;
+            line-height: 1.35;
+            letter-spacing: -0.01em;
+        }
+
+        .spreadsheet-warning-banner p {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            max-width: 90ch;
+            font-size: 15px;
+            line-height: 1.65;
+            color: rgba(255, 249, 240, 0.95);
+        }
+    </style>
+
     <section class="hero">
         <span class="eyebrow">Análise pronta</span>
         <h1>Escolha as igrejas que devem entrar na importação.</h1>
@@ -21,9 +82,10 @@
         </p>
     </section>
 
-    <div class="flash error" style="margin-bottom: 24px;">
-        <strong>Atenção: importação por dependência não é suportada.</strong>
-        <p style="margin: 8px 0 0;">
+    <div class="spreadsheet-warning-banner" role="alert" aria-live="polite">
+        <span class="spreadsheet-warning-banner__eyebrow">Atenção máxima</span>
+        <strong>Importação por dependência não é suportada.</strong>
+        <p>
             Confirme sempre a igreja inteira ou todas as igrejas do arquivo. Separar por dependência pode omitir
             itens do relatório e causar divergências futuras.
         </p>
