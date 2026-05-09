@@ -2115,6 +2115,7 @@
         })();
     </script>
     <script src="{{ asset('assets/forms/input-mask.js') }}?v={{ filemtime(public_path('assets/forms/input-mask.js')) }}"></script>
+    <script src="{{ asset('assets/forms/localidades.js') }}?v={{ filemtime(public_path('assets/forms/localidades.js')) }}"></script>
     @include('partials.request-loading')
 </body>
 </html>

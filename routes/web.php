@@ -121,6 +121,9 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::post('/api/cnpj-lookup', [CnpjLookupController::class, 'lookup'])
         ->middleware('legacy.admin')
         ->name('migration.api.cnpj.lookup');
+    Route::get('/api/localidades/estados', [BrazilLocalityController::class, 'states'])
+        ->middleware('legacy.auth')
+        ->name('migration.api.localidades.states');
     Route::get('/api/localidades/estados/{state}/municipios', [BrazilLocalityController::class, 'cities'])
         ->middleware('legacy.auth')
         ->name('migration.api.localidades.cities');

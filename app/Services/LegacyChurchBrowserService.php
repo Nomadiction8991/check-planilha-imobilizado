@@ -6,8 +6,10 @@ namespace App\Services;
 
 use App\Contracts\LegacyChurchBrowserServiceInterface;
 use App\DTO\ChurchFilters;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class LegacyChurchBrowserService implements LegacyChurchBrowserServiceInterface
 {
@@ -37,5 +39,12 @@ class LegacyChurchBrowserService implements LegacyChurchBrowserServiceInterface
     public function countAll(): int
     {
         return Comum::query()->count();
+    }
+
+    public function administrationOptions(): Collection
+    {
+        return Administracao::query()
+            ->orderBy('descricao')
+            ->get(['id', 'descricao']);
     }
 }

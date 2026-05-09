@@ -9,6 +9,7 @@ use App\Contracts\LegacyChurchManagementServiceInterface;
 use App\DTO\ChurchFilters;
 use App\Models\Legacy\Comum;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Mockery\MockInterface;
 use RuntimeException;
 use Tests\TestCase;
@@ -42,6 +43,13 @@ final class LegacyChurchManagementTest extends TestCase
                 {
                     return 1;
                 }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect([
+                        (object) ['id' => 4, 'descricao' => 'Administração Central'],
+                    ]);
+                }
             }
         );
     }
@@ -56,8 +64,8 @@ final class LegacyChurchManagementTest extends TestCase
         $response->assertSee('12-3456');
         $response->assertSee('/api/cnpj-lookup');
         $response->assertSee('assets/forms/input-mask.js', false);
+        $response->assertSee('assets/forms/localidades.js', false);
         $response->assertSee('data-mask="cnpj"', false);
-        $response->assertSee(route('migration.api.localidades.cities', ['state' => '__STATE__']), false);
     }
 
     public function testUpdateChangesChurchData(): void
@@ -73,8 +81,6 @@ final class LegacyChurchManagementTest extends TestCase
                         && $dto->cnpj === '12.345.678/0001-90'
                         && $dto->state === 'MT'
                         && $dto->city === 'Cuiaba'
-                        && $dto->administrationState === 'SP'
-                        && $dto->administrationCity === 'Campinas'
                         && $dto->sector === 'Norte'
                     )
                     ->andReturn($this->makeChurch(description: 'CENTRAL ATUALIZADA'));
@@ -82,12 +88,11 @@ final class LegacyChurchManagementTest extends TestCase
         );
 
         $response = $this->put(route('migration.churches.update', ['church' => 7]), [
+            'administracao_id' => 4,
             'descricao' => 'Central Atualizada',
             'cnpj' => '12.345.678/0001-90',
             'estado' => 'MT',
             'cidade' => 'Cuiaba',
-            'estado_administracao' => 'SP',
-            'cidade_administracao' => 'Campinas',
             'setor' => 'Norte',
         ]);
 
@@ -108,12 +113,11 @@ final class LegacyChurchManagementTest extends TestCase
 
         $response = $this->from(route('migration.churches.edit', ['church' => 7]))
             ->put(route('migration.churches.update', ['church' => 7]), [
+                'administracao_id' => 4,
                 'descricao' => 'Central Atualizada',
                 'cnpj' => '123',
                 'estado' => 'MT',
                 'cidade' => 'Cuiaba',
-                'estado_administracao' => 'SP',
-                'cidade_administracao' => 'Campinas',
                 'setor' => 'Norte',
             ]);
 
@@ -126,23 +130,21 @@ final class LegacyChurchManagementTest extends TestCase
     {
         $response = $this->from(route('migration.churches.edit', ['church' => 7]))
             ->put(route('migration.churches.update', ['church' => 7]), [
+                'administracao_id' => '',
                 'descricao' => '   ',
                 'cnpj' => '',
                 'estado' => '',
                 'cidade' => '',
-                'estado_administracao' => '',
-                'cidade_administracao' => '',
                 'setor' => '',
             ]);
 
         $response->assertRedirect(route('migration.churches.edit', ['church' => 7]));
         $response->assertSessionHasErrors([
+            'administracao_id',
             'descricao',
             'cnpj',
             'estado',
             'cidade',
-            'estado_administracao',
-            'cidade_administracao',
         ]);
     }
 
