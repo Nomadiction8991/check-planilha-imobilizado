@@ -42,4 +42,14 @@ interface LegacyAuthSessionServiceInterface
     public function filterPinStates(): array;
 
     public function storeFilterPinState(string $scope, int $index, bool $pinned): void;
+
+    /**
+     * @return array<int, string>
+     */
+    public function labelManualCodes(?int $churchId, ?int $dependencyId): array;
+
+    /**
+     * @param array<int, string> $codes
+     */
+    public function saveLabelManualCodes(?int $churchId, ?int $dependencyId, array $codes): void;
 }

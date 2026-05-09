@@ -56,6 +56,12 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::get('/products/edit', [LegacyRouteCompatibilityController::class, 'productsEdit'])
         ->middleware('legacy.permission:products.edit')
         ->name('migration.compat.products.edit');
+    Route::get('/labels', [LegacyRouteCompatibilityController::class, 'labels'])
+        ->middleware('legacy.permission:products.view')
+        ->name('migration.labels.index');
+    Route::post('/labels/manual', [LegacyRouteCompatibilityController::class, 'labelsManualStore'])
+        ->middleware('legacy.permission:products.view')
+        ->name('migration.labels.manual.store');
     Route::get('/products/label', [LegacyRouteCompatibilityController::class, 'productsCopyLabels'])
         ->middleware('legacy.permission:products.view')
         ->name('migration.compat.products.copy-labels');

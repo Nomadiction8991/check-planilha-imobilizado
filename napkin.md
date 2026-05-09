@@ -47,6 +47,8 @@
    Faça isto em vez disso: abrir `/products/label` sem igreja e só aplicar `comum_id` escolhido no formulário da página.
 8. **[2026-05-09] Importação de planilha precisa avisar por igreja**
    Faça isto em vez disso: destacar em vermelho na tela inicial e na prévia que o fluxo importa a igreja inteira, não dependência.
+9. **[2026-05-09] Etiquetas manuais precisam persistir por usuário**
+   Faça isto em vez disso: salvar chips de etiqueta em `ui_preferences` e renderizar remoção/adição no próprio fluxo da tela.
 
 ## Diretrizes do Usuário
 1. **[2026-03-28] Responder em PT-BR com foco em ação**

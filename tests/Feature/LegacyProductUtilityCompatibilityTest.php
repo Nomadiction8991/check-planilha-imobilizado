@@ -33,6 +33,7 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
                 (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
             ]));
             $mock->shouldReceive('filterPinStates')->andReturn([]);
+            $mock->shouldReceive('labelManualCodes')->once()->with(7, 3)->andReturn(['12-3456/000233']);
         });
 
         $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
@@ -44,6 +45,7 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
                 'church' => [
                     'id' => 7,
                     'descricao' => 'Central Cuiabá',
+                    'codigo' => '12-3456',
                 ],
                 'dependencies' => [
                     ['id' => 3, 'descricao' => 'SECRETARIA'],
@@ -67,15 +69,16 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
             'usuario_email' => 'MARIA@EXEMPLO.COM',
             'comum_id' => 7,
             'is_admin' => false,
-        ])->get('/products/label?comum_id=7&dependencia=3');
+        ])->get(route('migration.labels.index', ['comum_id' => 7, 'dependencia' => 3]));
 
         $response->assertOk();
         $response->assertSee('Copiar códigos para etiquetas.');
         $response->assertSee('A-101,A-102');
+        $response->assertSee('12-3456/000233');
         $response->assertSee('Igreja');
         $response->assertSee('Selecione uma igreja');
         $response->assertSee('Etiquetas manuais');
-        $response->assertSee('Copiar etiquetas manuais');
+        $response->assertSee('Copiar manuais');
         $response->assertSee('Copiar tudo');
     }
 
@@ -112,11 +115,66 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
             'usuario_email' => 'MARIA@EXEMPLO.COM',
             'comum_id' => 7,
             'is_admin' => false,
-        ])->get('/products/label');
+        ])->get(route('migration.labels.index'));
 
         $response->assertOk();
         $response->assertSee('Selecione uma igreja acima para carregar as etiquetas.');
         $response->assertSee('Selecione uma igreja');
+    }
+
+    public function testManualLabelsEndpointPersistsCodes(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('currentUser')->andReturn([
+                'id' => 9,
+                'nome' => 'Maria Silva',
+                'email' => 'MARIA@EXEMPLO.COM',
+                'comum_id' => 7,
+                'administracao_id' => 4,
+                'is_admin' => false,
+            ]);
+            $mock->shouldReceive('availableChurches')->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+            ]));
+            $mock->shouldReceive('labelManualCodes')->once()->with(7, 3)->andReturn([]);
+            $mock->shouldReceive('saveLabelManualCodes')->once()->with(7, 3, ['12-3456/000233']);
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->postJson(route('migration.labels.manual.store'), [
+            'comum_id' => 7,
+            'dependencia_id' => 3,
+            'numero' => '233',
+            'action' => 'add',
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'codes' => ['12-3456/000233'],
+            'manual_labels' => '12-3456/000233',
+            'code' => '12-3456/000233',
+        ]);
+    }
+
+    public function testLegacyCopyLabelsRouteRedirectsToLabelsPage(): void
+    {
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->get('/products/label?comum_id=7&dependencia=3');
+
+        $response->assertRedirect(route('migration.labels.index', ['comum_id' => 7, 'dependencia' => 3]));
     }
 
     public function testObservationPageRendersCompatibilityForm(): void

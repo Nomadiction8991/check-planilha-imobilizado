@@ -55,8 +55,8 @@ final class LegacyNavigationService implements LegacyNavigationServiceInterface
             ],
             'labels' => [
                 'label' => 'Etiquetas',
-                'route' => 'migration.compat.products.copy-labels',
-                'active_patterns' => ['migration.compat.products.copy-labels'],
+                'route' => 'migration.labels.index',
+                'active_patterns' => ['migration.labels.*', 'migration.compat.products.copy-labels'],
                 'permission' => 'products.view',
                 'admin_only' => false,
             ],
