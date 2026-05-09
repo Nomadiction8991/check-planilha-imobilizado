@@ -17,6 +17,14 @@
         </p>
     </section>
 
+    <div class="flash error" style="margin-bottom: 24px;">
+        <strong>Atenção: esta importação é por igreja, não por dependência.</strong>
+        <p style="margin: 8px 0 0;">
+            Sempre importe a igreja inteira ou todas as igrejas detectadas no arquivo. Não tente separar por dependência,
+            porque isso pode deixar o relatório incompleto e gerar inconsistências depois.
+        </p>
+    </div>
+
     @if (session('status') || $errors->any())
         <div class="flash-stack">
             @if (session('status'))
