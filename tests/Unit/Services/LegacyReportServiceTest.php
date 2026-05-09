@@ -52,6 +52,15 @@ final class LegacyReportServiceTest extends TestCase
             {
                 return collect();
             }
+
+            public function filterPinStates(): array
+            {
+                return [];
+            }
+
+            public function storeFilterPinState(string $scope, int $index, bool $pinned): void
+            {
+            }
         };
 
         $service = new class(new LegacyReportTemplateService(), $auth) extends LegacyReportService {
@@ -95,6 +104,24 @@ final class LegacyReportServiceTest extends TestCase
             'checado' => 1,
             'imprimir_etiqueta' => 1,
             'observacao' => 'AJUSTE',
+        ]));
+
+        self::assertTrue($service->includes([
+            'bem' => 'CADEIRA',
+            'complemento' => 'METALICA',
+            'altura_m' => '1.200',
+            'largura_m' => '0.800',
+            'comprimento_m' => '2.000',
+            'editado_bem' => 'CADEIRA',
+            'editado_complemento' => 'METALICA',
+            'editado_altura_m' => '1.300',
+            'editado_largura_m' => '0.800',
+            'editado_comprimento_m' => '2.000',
+            'tipo_bem_id' => 4,
+            'editado_tipo_bem_id' => 4,
+            'dependencia_id' => 2,
+            'editado_dependencia_id' => 2,
+            'editado' => 1,
         ]));
     }
 }

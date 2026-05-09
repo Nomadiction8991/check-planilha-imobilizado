@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyReportServiceInterface;
 use App\Models\Legacy\Comum;
+use App\Support\LegacyProductNameSupport;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -331,8 +332,14 @@ class LegacyReportService implements LegacyReportServiceInterface
                 'p.observacao as observacoes',
                 'p.bem',
                 'p.complemento',
+                'p.altura_m',
+                'p.largura_m',
+                'p.comprimento_m',
                 'p.editado_bem',
                 'p.editado_complemento',
+                'p.editado_altura_m',
+                'p.editado_largura_m',
+                'p.editado_comprimento_m',
                 DB::raw("NULLIF(CONCAT_WS(' ', p.editado_bem, p.editado_complemento), '') as nome_editado"),
                 'tb.codigo as tipo_codigo',
                 'tb.descricao as tipo_desc',
@@ -693,8 +700,14 @@ class LegacyReportService implements LegacyReportServiceInterface
                 'p.imprimir_etiqueta',
                 'p.bem',
                 'p.complemento',
+                'p.altura_m',
+                'p.largura_m',
+                'p.comprimento_m',
                 'p.editado_bem',
                 'p.editado_complemento',
+                'p.editado_altura_m',
+                'p.editado_largura_m',
+                'p.editado_comprimento_m',
                 'tb.codigo as tipo_codigo',
                 'tb.descricao as tipo_descricao',
                 'etb.codigo as editado_tipo_codigo',
@@ -724,14 +737,8 @@ class LegacyReportService implements LegacyReportServiceInterface
      */
     protected function hasRelevantEditForReport146(array $product): bool
     {
-        $originalDescription = $this->normalizeReport146Text(
-            (string) ($product['bem'] ?? ''),
-            (string) ($product['complemento'] ?? '')
-        );
-        $editedDescription = $this->normalizeReport146Text(
-            (string) ($product['editado_bem'] ?? ''),
-            (string) ($product['editado_complemento'] ?? '')
-        );
+        $originalDescription = LegacyProductNameSupport::formatHistoricalName($product, false);
+        $editedDescription = LegacyProductNameSupport::formatHistoricalName($product, true);
 
         if ($originalDescription !== $editedDescription) {
             return true;
@@ -748,25 +755,6 @@ class LegacyReportService implements LegacyReportServiceInterface
         $editedDependencyId = (int) ($product['editado_dependencia_id'] ?? 0);
 
         return $originalDependencyId !== $editedDependencyId;
-    }
-
-    private function normalizeReport146Text(string $asset, string $complement): string
-    {
-        $value = trim($asset);
-        $normalizedComplement = trim($complement);
-
-        if ($normalizedComplement !== '') {
-            if ($value !== '' && mb_strtoupper(mb_substr($normalizedComplement, 0, mb_strlen($value), 'UTF-8'), 'UTF-8') === mb_strtoupper($value, 'UTF-8')) {
-                $normalizedComplement = trim(mb_substr($normalizedComplement, mb_strlen($value), null, 'UTF-8'));
-                $normalizedComplement = preg_replace('/^[\s\-\/]+/u', '', $normalizedComplement) ?? $normalizedComplement;
-            }
-
-            if ($normalizedComplement !== '') {
-                $value .= ($value !== '' ? ' ' : '') . $normalizedComplement;
-            }
-        }
-
-        return trim(mb_strtoupper($value, 'UTF-8'));
     }
 
     /**
@@ -849,8 +837,14 @@ class LegacyReportService implements LegacyReportServiceInterface
                 DB::raw('CAST(p.editado AS SIGNED) as editado'),
                 'p.bem',
                 'p.complemento',
+                'p.altura_m',
+                'p.largura_m',
+                'p.comprimento_m',
                 'p.editado_bem',
                 'p.editado_complemento',
+                'p.editado_altura_m',
+                'p.editado_largura_m',
+                'p.editado_comprimento_m',
                 'tb.codigo as tipo_codigo',
                 'tb.descricao as tipo_desc',
                 'etb.codigo as editado_tipo_codigo',
@@ -961,22 +955,7 @@ class LegacyReportService implements LegacyReportServiceInterface
             $typePart = '{' . mb_strtoupper(trim(($typeCode !== '' ? $typeCode . ' - ' : '') . $typeDescription), 'UTF-8') . '}';
         }
 
-        $asset = trim((string) ($useEdited ? ($product['editado_bem'] ?? '') : ($product['bem'] ?? '')));
-        $complement = trim((string) ($useEdited ? ($product['editado_complemento'] ?? '') : ($product['complemento'] ?? '')));
-        $description = $asset;
-
-        if ($complement !== '') {
-            $trimmedComplement = $complement;
-
-            if ($asset !== '' && mb_strtoupper(mb_substr($trimmedComplement, 0, mb_strlen($asset), 'UTF-8'), 'UTF-8') === mb_strtoupper($asset, 'UTF-8')) {
-                $trimmedComplement = trim(mb_substr($trimmedComplement, mb_strlen($asset), null, 'UTF-8'));
-                $trimmedComplement = preg_replace('/^[\s\-\/]+/u', '', $trimmedComplement) ?? $trimmedComplement;
-            }
-
-            if ($trimmedComplement !== '') {
-                $description .= ($description !== '' ? ' ' : '') . $trimmedComplement;
-            }
-        }
+        $description = LegacyProductNameSupport::formatHistoricalName($product, $useEdited);
 
         $dependencyDescription = trim((string) ($useEdited
             ? ($product['editado_dependencia_desc'] ?? $product['dependencia_desc'] ?? '')
