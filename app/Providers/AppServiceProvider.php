@@ -169,6 +169,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('legacySessionUser', $currentUser);
             $view->with('legacySessionChurch', $currentUser !== null ? $auth->currentChurch() : null);
             $view->with('legacySessionChurches', $currentUser !== null ? $auth->availableChurches() : collect());
+            $view->with('legacyFilterPinStates', $currentUser !== null ? $auth->filterPinStates() : []);
             $view->with('legacyPermissions', $legacyPermissions);
             $view->with(
                 'legacyNavigation',

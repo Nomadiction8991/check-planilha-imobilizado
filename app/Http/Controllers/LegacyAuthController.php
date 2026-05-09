@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyPasswordRecoveryServiceInterface;
 use App\Http\Requests\LegacyPasswordResetRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -150,5 +151,31 @@ class LegacyAuthController extends Controller
             ->back()
             ->with('status', 'Igreja ativa atualizada.')
             ->with('status_type', 'success');
+    }
+
+    public function storeFilterPin(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'scope' => ['required', 'string', 'max:255'],
+            'index' => ['required', 'integer', 'min:0'],
+            'pinned' => ['required', 'boolean'],
+        ]);
+
+        try {
+            $this->auth->storeFilterPinState(
+                (string) $validated['scope'],
+                (int) $validated['index'],
+                (bool) $validated['pinned'],
+            );
+        } catch (RuntimeException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }

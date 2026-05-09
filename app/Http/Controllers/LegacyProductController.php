@@ -159,6 +159,14 @@ class LegacyProductController extends Controller
                 ->with('status_type', 'error');
         }
 
+        $returnUrl = $this->resolveInternalReturnUrl($request->input('return_url'));
+
+        if ($returnUrl !== null) {
+            return redirect($returnUrl)
+                ->with('status', 'Produto atualizado com sucesso.')
+                ->with('status_type', 'success');
+        }
+
         return redirect()
             ->route('migration.products.index', ['comum_id' => $product->comum_id])
             ->with('status', 'Produto atualizado com sucesso.')
@@ -204,5 +212,41 @@ class LegacyProductController extends Controller
             'checked' => (int) data_get($updatedProduct, 'checado', 0) === 1,
             'print_label' => (int) data_get($updatedProduct, 'imprimir_etiqueta', 0) === 1,
         ]);
+    }
+
+    private function resolveInternalReturnUrl(mixed $returnUrl): ?string
+    {
+        $candidate = trim((string) $returnUrl);
+        if ($candidate === '') {
+            return null;
+        }
+
+        $appUrl = rtrim((string) config('app.url'), '/');
+        $candidateParts = parse_url($candidate);
+
+        if ($candidateParts === false || !isset($candidateParts['path'])) {
+            return null;
+        }
+
+        if (str_starts_with($candidate, '/')) {
+            return $candidate;
+        }
+
+        $candidateHost = $candidateParts['host'] ?? null;
+        if ($candidateHost === null || $appUrl === '') {
+            return null;
+        }
+
+        $appHost = parse_url($appUrl, PHP_URL_HOST);
+        if (!is_string($appHost) || $appHost === '' || !hash_equals($appHost, $candidateHost)) {
+            return null;
+        }
+
+        $path = (string) $candidateParts['path'];
+        $query = isset($candidateParts['query']) && $candidateParts['query'] !== ''
+            ? '?' . $candidateParts['query']
+            : '';
+
+        return $path . $query;
     }
 }

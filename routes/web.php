@@ -35,6 +35,8 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::middleware('legacy.auth')->group(function (): void {
         Route::post('/logout', [LegacyAuthController::class, 'logout'])->name('migration.logout');
         Route::post('/session/church', [LegacyAuthController::class, 'switchChurch'])->name('migration.session.church');
+        Route::post('/session/filters-pin', [LegacyAuthController::class, 'storeFilterPin'])
+            ->name('migration.session.filters-pin');
         Route::post('/users/select-church', [LegacyRouteCompatibilityController::class, 'usersSelectChurch'])
             ->name('migration.compat.users.select-church');
         Route::get('/menu', [LegacyRouteCompatibilityController::class, 'menu'])->name('migration.compat.menu');

@@ -202,6 +202,7 @@
             <form method="POST" action="{{ route('migration.products.update', ['product' => $product->id_produto]) }}" class="form-shell product-edit-layout">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="return_url" value="{{ request()->query('return_url', url()->previous()) }}">
 
                 @php
                     $currentChurchCode = trim((string) data_get($product, 'comum.codigo', ''));
