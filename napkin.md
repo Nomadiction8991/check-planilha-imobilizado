@@ -49,6 +49,8 @@
    Faça isto em vez disso: destacar em vermelho na tela inicial e na prévia que o fluxo importa a igreja inteira, não dependência.
 9. **[2026-05-09] Etiquetas manuais precisam persistir por usuário**
    Faça isto em vez disso: salvar chips de etiqueta em `ui_preferences` e renderizar remoção/adição no próprio fluxo da tela.
+10. **[2026-05-09] Tela de etiquetas funciona melhor com saídas separadas**
+   Faça isto em vez disso: mostrar blocos distintos para manuais, verificados e todos, em vez de misturar tudo em um único textarea.
 
 ## Diretrizes do Usuário
 1. **[2026-03-28] Responder em PT-BR com foco em ação**
