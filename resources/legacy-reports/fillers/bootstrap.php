@@ -60,6 +60,7 @@ if (!function_exists('appReportAplicarPreenchimentoRelatorio')) {
         }
 
         $html = (string) $preencher($html, $produto, $planilha);
+        $html = appReportPreencherCampoPorName($html, 'n_relatorio', $planilha['codigo'] ?? '');
 
         $sanitizedHtml = preg_replace('/\s+placeholder=(["\']).*?\1/i', '', $html);
 

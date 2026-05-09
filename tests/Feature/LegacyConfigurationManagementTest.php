@@ -30,6 +30,7 @@ final class LegacyConfigurationManagementTest extends TestCase
             ]);
             $mock->shouldReceive('currentChurch')->andReturn(null);
             $mock->shouldReceive('availableChurches')->andReturn(collect());
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
         });
     }
 
@@ -64,7 +65,7 @@ final class LegacyConfigurationManagementTest extends TestCase
             public function currentOrder(): LegacyNavigationOrderData
             {
                 return LegacyNavigationOrderData::fromArray([
-                    'items' => ['verification', 'products', 'configuracoes'],
+                    'items' => ['verification', 'products', 'labels', 'configuracoes'],
                 ]);
             }
 
@@ -86,6 +87,12 @@ final class LegacyConfigurationManagementTest extends TestCase
                         'label' => 'Produtos',
                         'route' => '/produtos',
                         'active_patterns' => ['migration.products.index'],
+                    ],
+                    [
+                        'key' => 'labels',
+                        'label' => 'Etiquetas',
+                        'route' => '/produtos/etiquetas',
+                        'active_patterns' => ['migration.compat.products.copy-labels'],
                     ],
                     [
                         'key' => 'configuracoes',
@@ -112,6 +119,12 @@ final class LegacyConfigurationManagementTest extends TestCase
                         'admin_only' => false,
                     ],
                     [
+                        'key' => 'labels',
+                        'label' => 'Etiquetas',
+                        'subtitle' => 'Permissão: products.view',
+                        'admin_only' => false,
+                    ],
+                    [
                         'key' => 'configuracoes',
                         'label' => 'Configurações',
                         'subtitle' => 'Apenas administradores',
@@ -122,7 +135,7 @@ final class LegacyConfigurationManagementTest extends TestCase
 
             public function availableKeys(): array
             {
-                return ['verification', 'products', 'configuracoes'];
+                return ['verification', 'products', 'labels', 'configuracoes'];
             }
         });
 
@@ -140,7 +153,7 @@ final class LegacyConfigurationManagementTest extends TestCase
         $response->assertSee('smtp.gmail.com');
         $response->assertSee('Salvar configurações');
         $response->assertSee('Ordem dos menus');
-        $response->assertSeeInOrder(['Verificação', 'Produtos', 'Configurações']);
+        $response->assertSeeInOrder(['Verificação', 'Produtos', 'Etiquetas', 'Configurações']);
     }
 
     public function testUpdateConfigurationPersistsValues(): void
@@ -160,11 +173,11 @@ final class LegacyConfigurationManagementTest extends TestCase
         });
 
         $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
-            $mock->shouldReceive('availableKeys')->andReturn(['verification', 'products', 'configuracoes']);
+            $mock->shouldReceive('availableKeys')->andReturn(['verification', 'products', 'labels', 'configuracoes']);
             $mock->shouldReceive('saveOrder')
                 ->once()
                 ->withArgs(static function (LegacyNavigationOrderData $data): bool {
-                    return $data->items === ['products', 'verification', 'configuracoes'];
+                    return $data->items === ['products', 'verification', 'labels', 'configuracoes'];
                 });
         });
 
@@ -182,7 +195,7 @@ final class LegacyConfigurationManagementTest extends TestCase
             'mail_password' => 'senha-do-app',
             'mail_from_address' => 'contato@gmail.com',
             'mail_from_name' => 'Check Planilha',
-            'menu_order' => ['products', 'verification', 'configuracoes'],
+            'menu_order' => ['products', 'verification', 'labels', 'configuracoes'],
         ]);
 
         $response->assertRedirect(route('migration.configuracoes.index'));
