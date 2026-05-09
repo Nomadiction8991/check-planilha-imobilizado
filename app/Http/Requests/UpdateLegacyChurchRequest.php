@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Contracts\LegacyChurchBrowserServiceInterface;
 use App\DTO\ChurchMutationData;
-use App\Models\Legacy\Administracao;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,8 +21,14 @@ class UpdateLegacyChurchRequest extends FormRequest
      */
     public function rules(): array
     {
+        $administrationIds = app(LegacyChurchBrowserServiceInterface::class)
+            ->administrationOptions()
+            ->pluck('id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->all();
+
         return [
-            'administracao_id' => ['required', 'integer', Rule::exists((new Administracao())->getTable(), 'id')],
+            'administracao_id' => ['required', 'integer', Rule::in($administrationIds)],
             'descricao' => ['required', 'string', 'max:255', 'regex:/\S/'],
             'cnpj' => ['required', 'string', 'max:30', 'regex:/\S/'],
             'estado' => ['required', 'string', Rule::in(array_keys((array) config('brazil.states', [])))],

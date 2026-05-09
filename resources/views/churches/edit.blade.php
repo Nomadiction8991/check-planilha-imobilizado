@@ -139,10 +139,7 @@
             const form = document.getElementById('church-edit-form');
             const cnpjInput = document.getElementById('church-cnpj');
             const descricaoInput = document.getElementById('church-descricao');
-            const stateInput = document.querySelector('select[name="estado"]');
             const cidadeInput = document.getElementById('church-cidade');
-            const cidadeSelecionada = cidadeInput?.dataset.selectedCity || '';
-            const citiesEndpointTemplate = "{{ route('migration.api.localidades.cities', ['state' => '__STATE__']) }}";
 
             if (!form || !cnpjInput) {
                 return;
@@ -152,53 +149,6 @@
 
             if (!csrfInput) {
                 return;
-            }
-
-            async function loadCities(state, selectedCity = '') {
-                cidadeInput.disabled = true;
-                cidadeInput.innerHTML = '<option value="">Carregando cidades...</option>';
-
-                try {
-                    const response = await fetch(citiesEndpointTemplate.replace('__STATE__', encodeURIComponent(state)), {
-                        headers: { Accept: 'application/json' },
-                    });
-                    const payload = await response.json();
-
-                    if (!response.ok || payload.success !== true || !Array.isArray(payload.data)) {
-                        throw new Error(payload.message || 'Não foi possível carregar as cidades.');
-                    }
-
-                    const cities = payload.data;
-
-                    cidadeInput.innerHTML = '<option value="">Selecione</option>';
-                    cities.forEach((city) => {
-                        const option = document.createElement('option');
-                        option.value = city;
-                        option.textContent = city;
-                        if (selectedCity && selectedCity === city) {
-                            option.selected = true;
-                        }
-                        cidadeInput.appendChild(option);
-                    });
-                    cidadeInput.disabled = false;
-                } catch (error) {
-                    cidadeInput.innerHTML = '<option value="">Não foi possível carregar as cidades</option>';
-                }
-            }
-
-            stateInput?.addEventListener('change', () => {
-                const state = stateInput.value;
-                if (!state) {
-                    cidadeInput.innerHTML = '<option value="">Selecione um estado primeiro</option>';
-                    cidadeInput.disabled = true;
-                    return;
-                }
-
-                loadCities(state);
-            });
-
-            if (stateInput?.value) {
-                loadCities(stateInput.value, cidadeSelecionada);
             }
 
             cnpjInput.addEventListener('blur', async function () {

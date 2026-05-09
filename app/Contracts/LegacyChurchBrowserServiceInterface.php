@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Contracts;
 
 use App\DTO\ChurchFilters;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface LegacyChurchBrowserServiceInterface
@@ -12,4 +13,6 @@ interface LegacyChurchBrowserServiceInterface
     public function paginate(ChurchFilters $filters): LengthAwarePaginator;
 
     public function countAll(): int;
+
+    public function administrationOptions(): Collection;
 }
