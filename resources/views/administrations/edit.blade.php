@@ -7,7 +7,7 @@
         <span class="eyebrow">Cadastro administrativo</span>
         <h1>Editar administração.</h1>
         <p class="hero-copy">
-            Atualize a descrição usada no vínculo com as importações já cadastradas.
+            Atualize a descrição, o CNPJ, o estado e a cidade usados no vínculo com as importações e igrejas já cadastradas.
         </p>
     </section>
 
@@ -50,9 +50,42 @@
                             required
                         >
                     </label>
+
+                    <label>
+                        CNPJ
+                        <input
+                            type="text"
+                            name="cnpj"
+                            value="{{ old('cnpj', $administration->cnpj) }}"
+                            maxlength="18"
+                            data-mask="cnpj"
+                            inputmode="numeric"
+                            placeholder="00.000.000/0000-00"
+                            required
+                        >
+                    </label>
+
+                    <label>
+                        Estado
+                        <select name="estado" id="administration-estado" required>
+                            <option value="">Selecione</option>
+                            @foreach ((array) config('brazil.states', []) as $stateCode => $stateLabel)
+                                <option value="{{ $stateCode }}" @selected(old('estado', $administration->estado) === $stateCode)>
+                                    {{ $stateLabel }} ({{ $stateCode }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label>
+                        Cidade
+                        <select name="cidade" id="administration-cidade" required disabled>
+                            <option value="">Selecione um estado primeiro</option>
+                        </select>
+                    </label>
                 </div>
 
-                <p class="field-note">A alteração reflete nos envios novos e no histórico já vinculado.</p>
+                <p class="field-note">A alteração reflete nos envios novos, no vínculo das igrejas e no histórico já cadastrado.</p>
 
                 <div class="inline-actions">
                     <button class="btn primary" type="submit">Salvar alterações</button>
@@ -61,4 +94,62 @@
             </form>
         </div>
     </section>
+
+    <script>
+        (() => {
+            const stateSelect = document.getElementById('administration-estado');
+            const citySelect = document.getElementById('administration-cidade');
+            const selectedCity = @json(old('cidade', $administration->cidade));
+            const citiesEndpointTemplate = "{{ route('migration.api.localidades.cities', ['state' => '__STATE__']) }}";
+
+            async function loadCities(state, cityValue = '') {
+                citySelect.disabled = true;
+                citySelect.innerHTML = '<option value="">Carregando cidades...</option>';
+
+                try {
+                    const response = await fetch(citiesEndpointTemplate.replace('__STATE__', encodeURIComponent(state)), {
+                        headers: { Accept: 'application/json' },
+                    });
+                    const payload = await response.json();
+
+                    if (!response.ok || payload.success !== true || !Array.isArray(payload.data)) {
+                        throw new Error(payload.message || 'Não foi possível carregar as cidades.');
+                    }
+
+                    const cities = payload.data;
+
+                    citySelect.innerHTML = '<option value="">Selecione</option>';
+
+                    cities.forEach((city) => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        if (cityValue && cityValue === city) {
+                            option.selected = true;
+                        }
+                        citySelect.appendChild(option);
+                    });
+
+                    citySelect.disabled = false;
+                } catch (error) {
+                    citySelect.innerHTML = '<option value="">Não foi possível carregar as cidades</option>';
+                }
+            }
+
+            stateSelect?.addEventListener('change', () => {
+                const state = stateSelect.value;
+                if (!state) {
+                    citySelect.innerHTML = '<option value="">Selecione um estado primeiro</option>';
+                    citySelect.disabled = true;
+                    return;
+                }
+
+                loadCities(state);
+            });
+
+            if (stateSelect?.value) {
+                loadCities(stateSelect.value, selectedCity);
+            }
+        })();
+    </script>
 @endsection

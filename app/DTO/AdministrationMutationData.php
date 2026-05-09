@@ -8,6 +8,9 @@ final readonly class AdministrationMutationData
 {
     public function __construct(
         public string $description,
+        public string $cnpj,
+        public string $state,
+        public string $city,
     ) {
     }
 }

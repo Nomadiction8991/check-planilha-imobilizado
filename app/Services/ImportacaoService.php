@@ -234,6 +234,8 @@ class ImportacaoService
     private function processarLoteComAcoes(array $lote, int $comumIdFallback, int $importacaoId = 0): ProcessingResult
     {
         $resultado = ProcessingResult::criar();
+        $importacao = $importacaoId > 0 ? $this->importacaoRepo->buscarPorId($importacaoId) : null;
+        $administracaoId = (int) ($importacao['administracao_id'] ?? 0);
 
         $this->conexao->beginTransaction();
 
@@ -250,7 +252,7 @@ class ImportacaoService
                         }
                         $resultado->adicionarSucesso();
                     } elseif ($acao === CsvParserService::ACAO_IMPORTAR) {
-                        $this->processarRegistro($registro, $comumIdFallback);
+                        $this->processarRegistro($registro, $comumIdFallback, $administracaoId > 0 ? $administracaoId : null);
                         $resultado->adicionarSucesso();
                     }
                 } catch (Exception $e) {
@@ -309,7 +311,7 @@ class ImportacaoService
      * Resolve a comum automaticamente pela localidade do CSV.
      * Se a comum não existir, cria automaticamente.
      */
-    private function processarRegistro(array $registro, int $comumIdFallback): void
+    private function processarRegistro(array $registro, int $comumIdFallback, ?int $administracaoId = null): void
     {
         $dadosCsv = $registro['dados_csv'];
 
@@ -322,7 +324,7 @@ class ImportacaoService
         // ── Resolver comumId pela localidade do CSV ──
         $codigoComum = $dadosCsv['codigo_comum'] ?? '';
         if (!empty($codigoComum)) {
-            $comumId = $this->buscarOuCriarComum($codigoComum);
+            $comumId = $this->buscarOuCriarComum($codigoComum, $administracaoId);
         } else {
             $comumId = $comumIdFallback;
         }
@@ -333,7 +335,7 @@ class ImportacaoService
         if ($comumId <= 0 && !empty($codigo)) {
             $codigoComumDoCodigo = $this->extrairCodigoComumDoCodigo($codigo);
             if (!empty($codigoComumDoCodigo)) {
-                $comumId = $this->buscarOuCriarComum($codigoComumDoCodigo);
+                $comumId = $this->buscarOuCriarComum($codigoComumDoCodigo, $administracaoId);
             }
         }
 
@@ -447,28 +449,41 @@ class ImportacaoService
      * Busca ou cria uma comum pelo código extraído da localidade.
      * Código extraído: "BR 09-0038" → "09-0038"
      */
-    private function buscarOuCriarComum(string $codigoComum): int
+    private function buscarOuCriarComum(string $codigoComum, ?int $administracaoId = null): int
     {
         if (empty($codigoComum)) {
             throw new Exception('Código da comum vazio — não é possível identificar a comum');
         }
 
         // Buscar comum pelo código
-        $stmt = $this->conexao->prepare("SELECT id FROM comums WHERE codigo = :codigo LIMIT 1");
+        $stmt = $this->conexao->prepare("SELECT id, administracao_id FROM comums WHERE codigo = :codigo LIMIT 1");
         $stmt->execute([':codigo' => $codigoComum]);
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($resultado) {
+            if ($administracaoId !== null && (int) ($resultado['administracao_id'] ?? 0) !== $administracaoId) {
+                $stmtUpdate = $this->conexao->prepare(
+                    "UPDATE comums SET administracao_id = :administracao_id WHERE id = :id"
+                );
+                $stmtUpdate->execute([
+                    ':administracao_id' => $administracaoId,
+                    ':id' => (int) $resultado['id'],
+                ]);
+            }
+
             return (int) $resultado['id'];
         }
 
         // Comum não encontrada → criar automaticamente
         $descricaoComum = 'Comum ' . $codigoComum;
 
-        $stmt = $this->conexao->prepare("INSERT INTO comums (codigo, descricao) VALUES (:codigo, :descricao)");
+        $stmt = $this->conexao->prepare(
+            "INSERT INTO comums (codigo, descricao, administracao_id) VALUES (:codigo, :descricao, :administracao_id)"
+        );
         $stmt->execute([
             ':codigo' => $codigoComum,
-            ':descricao' => $descricaoComum
+            ':descricao' => $descricaoComum,
+            ':administracao_id' => $administracaoId,
         ]);
 
         return (int) $this->conexao->lastInsertId();

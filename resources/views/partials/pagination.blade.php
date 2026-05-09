@@ -1,9 +1,10 @@
 @if ($paginator->hasPages())
     <div class="pagination">
-        <div class="table-note">
+        <div class="pagination-summary">
             Página {{ $paginator->currentPage() }} de {{ $paginator->lastPage() }}.
             {{ $paginator->total() }} registro(s).
         </div>
+
         <div class="pagination-links">
             @if ($paginator->onFirstPage())
                 <span class="disabled">Anterior</span>

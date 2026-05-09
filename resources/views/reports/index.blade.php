@@ -5,9 +5,9 @@
 @section('content')
     <section class="hero">
         <span class="eyebrow">Relatórios</span>
-        <h1>Relatórios 14.x já navegam no novo app.</h1>
+        <h1>Relatórios 14.x e posição de estoque já navegam no novo app.</h1>
         <p class="hero-copy">
-            Selecione uma igreja para listar os formulários e abrir a prévia.
+            Selecione uma igreja para listar os formulários, a posição de verificação e os backups disponíveis.
         </p>
     </section>
 
@@ -20,23 +20,25 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.reports.index') }}">
-                <label>
-                    Igreja
-                    <select name="comum_id">
-                        <option value="">Selecione</option>
-                        @foreach ($churches as $church)
-                            <option value="{{ $church->id }}" @selected((int) $selectedChurchId === (int) $church->id)>
-                                {{ $church->codigo }} - {{ $church->descricao }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+                <div class="filters-primary">
+                    <label class="filters-principal">
+                        Igreja
+                        <select name="comum_id">
+                            <option value="">Selecione</option>
+                            @foreach ($churches as $church)
+                                <option value="{{ $church->id }}" @selected((int) $selectedChurchId === (int) $church->id)>
+                                    {{ $church->codigo }} - {{ $church->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
 
-                <div class="actions">
-                    <button class="btn primary" type="submit">Carregar relatórios</button>
-                    <a class="btn" href="{{ route('migration.reports.index') }}">Limpar</a>
+                    <div class="actions filters-actions">
+                        <button class="btn primary" type="submit">Carregar relatórios</button>
+                        <a class="btn" href="{{ route('migration.reports.index') }}">Limpar</a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -52,7 +54,7 @@
 
         <div class="table-shell">
             @if (!$selectedChurchId)
-                <div class="empty-state">Escolha uma igreja para liberar a lista de relatórios 14.x disponíveis.</div>
+                <div class="empty-state">Escolha uma igreja para liberar a lista de relatórios disponíveis.</div>
             @elseif ($reports === [])
                 <div class="empty-state">Não há relatórios disponíveis para a igreja selecionada no momento.</div>
             @else
@@ -74,7 +76,9 @@
                                 <td data-label="Título">{{ $report['titulo'] }}</td>
                                 <td data-label="Itens">{{ $report['quantidade'] }} item(ns)</td>
                                 <td data-label="Ação">
-                                    <a class="btn primary" href="{{ $report['rota'] }}">Abrir prévia</a>
+                                    <a class="btn primary" href="{{ $report['rota'] }}">
+                                        {{ $report['codigo'] === 'POS' ? 'Abrir posição' : 'Abrir prévia' }}
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach
@@ -83,10 +87,5 @@
             @endif
         </div>
 
-        @if ($selectedChurchId && !empty($legacyPermissions['reports.changes.view']))
-            <div class="inline-actions" style="margin-top: 14px;">
-                <a class="btn" href="{{ route('migration.reports.changes', ['comum_id' => $selectedChurchId]) }}">Abrir histórico</a>
-            </div>
-        @endif
     </section>
 @endsection

@@ -14,7 +14,7 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters filters--audit" data-sticky-filters>
             <form method="GET" action="{{ route('migration.audits.index') }}">
                 <div class="filters-primary">
                     <label class="filters-query">
@@ -42,6 +42,16 @@
                                 <option value="{{ $module }}" @selected($filters['module'] === $module)>{{ $module }}</option>
                             @endforeach
                         </select>
+                    </label>
+
+                    <label>
+                        Data inicial
+                        <input type="date" name="data_inicio" value="{{ $filters['date_from'] }}">
+                    </label>
+
+                    <label>
+                        Data final
+                        <input type="date" name="data_fim" value="{{ $filters['date_to'] }}">
                     </label>
                 </div>
             </form>

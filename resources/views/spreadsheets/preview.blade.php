@@ -65,7 +65,7 @@
                                 $churchAction = $savedChurches[$churchKey] ?? 'pular';
                             @endphp
                             <tr>
-                                <td>{{ $churchCode !== '' ? $churchCode : 'n/a' }}</td>
+                                <td>{{ $churchCode !== '' ? $churchCode : 'Nenhum' }}</td>
                                 <td>
                                     <strong>{{ $churchDescription !== '' ? $churchDescription : 'Sem descrição' }}</strong>
                                 </td>

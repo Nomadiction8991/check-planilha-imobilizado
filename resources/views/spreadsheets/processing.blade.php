@@ -120,6 +120,13 @@
                 </div>
                 <p><strong>Progresso:</strong> <span id="progress-text">0%</span></p>
             </div>
+            <div hidden aria-hidden="true">
+                <span id="arquivo-nome">{{ $importacao['arquivo_nome'] ?? '' }}</span>
+                <span id="total-linhas">{{ (int) ($importacao['total_linhas'] ?? 0) }}</span>
+                <span id="linhas-processadas">{{ (int) ($importacao['linhas_processadas'] ?? 0) }}</span>
+                <span id="linhas-sucesso">{{ (int) ($importacao['linhas_sucesso'] ?? 0) }}</span>
+                <span id="linhas-erro">{{ (int) ($importacao['linhas_erro'] ?? 0) }}</span>
+            </div>
         </div>
     </section>
 
@@ -156,5 +163,5 @@
             csrfToken: {{ \Illuminate\Support\Js::from(csrf_token()) }},
         };
     </script>
-    <script src="{{ asset('assets/reports/spreadsheet-import-progress.js') }}"></script>
+    <script src="{{ asset('assets/reports/spreadsheet-import-progress.js') }}?v={{ filemtime(public_path('assets/reports/spreadsheet-import-progress.js')) }}"></script>
 @endsection

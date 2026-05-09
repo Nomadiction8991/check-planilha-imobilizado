@@ -13,6 +13,7 @@ use App\Http\Controllers\LegacyProductController;
 use App\Http\Controllers\LegacyReportController;
 use App\Http\Controllers\LegacyRouteCompatibilityController;
 use App\Http\Controllers\LegacyUserController;
+use App\Http\Controllers\BrazilLocalityController;
 use App\Http\Controllers\CnpjLookupController;
 use App\Http\Controllers\PublicAccessController;
 use App\Http\Controllers\SpreadsheetImportController;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/assinatura-publica', [PublicAccessController::class, 'create'])->name('public.access.create');
 Route::post('/assinatura-publica', [PublicAccessController::class, 'store'])->name('public.access.store');
-Route::get('/logout-publico', [PublicAccessController::class, 'logout'])->name('public.access.logout');
+Route::post('/logout-publico', [PublicAccessController::class, 'logout'])->name('public.access.logout');
 
 Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::get('/login', [LegacyAuthController::class, 'showLogin'])->name('migration.login');
@@ -108,6 +109,9 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::get('/reports', [LegacyReportController::class, 'index'])
         ->middleware('legacy.permission:reports.view')
         ->name('migration.reports.index');
+    Route::get('/reports/changes/export', [LegacyReportController::class, 'changesExport'])
+        ->middleware('legacy.permission:reports.changes.view')
+        ->name('migration.reports.changes.export');
     Route::get('/reports/view', [LegacyRouteCompatibilityController::class, 'reportsView'])
         ->middleware('legacy.permission:reports.view')
         ->name('migration.compat.reports.view');
@@ -117,6 +121,9 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::post('/api/cnpj-lookup', [CnpjLookupController::class, 'lookup'])
         ->middleware('legacy.admin')
         ->name('migration.api.cnpj.lookup');
+    Route::get('/api/localidades/estados/{state}/municipios', [BrazilLocalityController::class, 'cities'])
+        ->middleware('legacy.auth')
+        ->name('migration.api.localidades.cities');
     Route::get('/spreadsheets/import', [SpreadsheetImportController::class, 'create'])
         ->middleware('legacy.permission:spreadsheets.import')
         ->name('migration.spreadsheets.create');

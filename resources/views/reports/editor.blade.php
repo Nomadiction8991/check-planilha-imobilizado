@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Editor de Células — {{ $formulario }}</title>
+    @include('partials.pwa')
     <link rel="stylesheet" href="{{ asset('assets/reports/secao14-templates.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/reports/report-cell-editor.css') }}">
 </head>

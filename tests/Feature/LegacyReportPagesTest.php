@@ -36,6 +36,13 @@ final class LegacyReportPagesTest extends TestCase
                             'rota' => '/reports/14.1?comum_id=7',
                             'quantidade' => 3,
                         ],
+                        [
+                            'codigo' => 'POS',
+                            'titulo' => 'Posição de estoque',
+                            'descricao' => 'Backup da posição de verificação e dos itens conferidos',
+                            'rota' => '/reports/changes?comum_id=7',
+                            'quantidade' => 2,
+                        ],
                     ];
                 }
 
@@ -61,59 +68,83 @@ final class LegacyReportPagesTest extends TestCase
                     ];
                 }
 
-                public function buildChangeHistory(int $churchId, array $filters): array
+                public function buildVerificationPositionReport(int $churchId): array
                 {
                     if ($churchId !== 7) {
-                        throw new RuntimeException('Igreja não encontrada para abrir o histórico de alterações.');
+                        throw new RuntimeException('Igreja não encontrada para abrir a posição de estoque.');
                     }
 
                     return [
-                        'planilha' => ['descricao' => 'Central Cuiabá', 'cidade' => 'Cuiabá'],
-                        'filtros' => [
-                            'mostrar_pendentes' => true,
-                            'mostrar_checados' => false,
-                            'mostrar_observacao' => false,
-                            'mostrar_checados_observacao' => false,
-                            'mostrar_etiqueta' => false,
-                            'mostrar_alteracoes' => true,
-                            'mostrar_novos' => false,
-                            'dependencia' => null,
+                        'planilha' => [
+                            'codigo' => '12-3456',
+                            'descricao' => 'Central Cuiabá',
+                            'cidade' => 'Cuiabá',
+                            'estado' => 'MT',
+                            'administracao' => 'Cuiabá',
                         ],
-                        'dependencias' => [
-                            ['id' => 3, 'descricao' => 'SALA'],
-                        ],
-                        'secoes' => [
-                            'pendentes' => [
-                                'titulo' => 'Pendentes',
-                                'itens' => [
-                                    ['codigo' => '12-3456 / 0001', 'nome_atual' => 'CADEIRA {SALA}', 'dependencia' => 'SALA'],
-                                ],
-                                'total' => 1,
+                        'itens' => [
+                            [
+                                'codigo' => '12-3456 / 0001',
+                                'nome_original' => 'CADEIRA {SALA}',
+                                'nome_atual' => 'CADEIRA {SALA}',
+                                'dependencia' => 'SALA',
+                                'observacoes' => '',
+                                'checado' => true,
+                                'imprimir_etiqueta' => false,
+                                'editado' => false,
+                                'novo' => false,
+                                'pendente' => false,
+                                'status_key' => 'checado',
+                                'status_label' => 'Checado',
                             ],
-                            'checados' => ['titulo' => 'Checados', 'itens' => [], 'total' => 0],
-                            'observacao' => ['titulo' => 'Com observação', 'itens' => [], 'total' => 0],
-                            'checados_observacao' => ['titulo' => 'Checados com observação', 'itens' => [], 'total' => 0],
-                            'etiqueta' => ['titulo' => 'Para impressão de etiquetas', 'itens' => [], 'total' => 0],
-                            'alteracoes' => [
-                                'titulo' => 'Editados',
-                                'itens' => [
-                                    ['codigo' => '12-3456 / 0002', 'nome_original' => 'MESA {SALA}', 'nome_atual' => 'MESA GRANDE {SALA}'],
-                                ],
-                                'total' => 1,
+                            [
+                                'codigo' => '12-3456 / 0002',
+                                'nome_original' => 'MESA {SALA}',
+                                'nome_atual' => 'MESA GRANDE {SALA}',
+                                'dependencia' => 'SALA',
+                                'observacoes' => 'AJUSTE',
+                                'checado' => true,
+                                'imprimir_etiqueta' => true,
+                                'editado' => true,
+                                'novo' => false,
+                                'pendente' => false,
+                                'status_key' => 'editado_checado_observacao_etiqueta',
+                                'status_label' => 'Editado, checado, observação e etiqueta',
                             ],
-                            'novos' => ['titulo' => 'Novos', 'itens' => [], 'total' => 0],
                         ],
                         'resumo' => [
                             'total_geral' => 2,
-                            'total_pendentes' => 1,
-                            'total_checados' => 0,
-                            'total_observacao' => 0,
-                            'total_checados_observacao' => 0,
-                            'total_etiqueta' => 0,
+                            'total_pendentes' => 0,
+                            'total_checados' => 2,
+                            'total_observacao' => 1,
+                            'total_etiqueta' => 1,
                             'total_alteracoes' => 1,
                             'total_novos' => 0,
-                            'total_mostrar' => 2,
+                            'total_checados_observacao' => 1,
+                            'total_checados_etiqueta' => 1,
+                            'total_observacao_etiqueta' => 1,
+                            'total_checados_observacao_etiqueta' => 1,
+                            'total_editados_checados' => 1,
+                            'total_editados_observacao' => 1,
+                            'total_editados_etiqueta' => 1,
+                            'total_editados_checados_etiqueta' => 1,
+                            'total_editados_observacao_etiqueta' => 1,
+                            'total_editados_checados_observacao' => 1,
+                            'total_editados_checados_observacao_etiqueta' => 1,
+                            'total_backup' => 2,
                         ],
+                        'backup' => [
+                            'filename' => 'posicao_verificacao_12-3456_20260421_120000.csv',
+                            'content' => "Código;Situação;Descrição original;Descrição atual;Dependência;Checado;Etiqueta;Observação;Editado;Novo\n12-3456 / 0001;Checado;CADEIRA {SALA};CADEIRA {SALA};SALA;1;0;;0;0\n12-3456 / 0002;Editado, checado, observação e etiqueta;MESA {SALA};MESA GRANDE {SALA};SALA;1;1;AJUSTE;1;0\n",
+                        ],
+                    ];
+                }
+
+                public function downloadVerificationPositionCsv(int $churchId): array
+                {
+                    return [
+                        'filename' => 'posicao_verificacao_12-3456_20260421_120000.csv',
+                        'content' => "Código;Situação;Descrição original;Descrição atual;Dependência;Checado;Etiqueta;Observação;Editado;Novo\n12-3456 / 0001;Checado;CADEIRA {SALA};CADEIRA {SALA};SALA;1;0;;0;0\n12-3456 / 0002;Editado, checado, observação e etiqueta;MESA {SALA};MESA GRANDE {SALA};SALA;1;1;AJUSTE;1;0\n",
                     ];
                 }
             }
@@ -125,9 +156,11 @@ final class LegacyReportPagesTest extends TestCase
         $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
 
         $response->assertOk();
-        $response->assertSee('Relatórios 14.x já navegam no novo app.');
+        $response->assertSee('Relatórios 14.x e posição de estoque já navegam no novo app.');
         $response->assertSee('Relatório 14.1');
         $response->assertSee('3 item(ns)');
+        $response->assertSee('Posição de estoque');
+        $response->assertSee('2 item(ns)');
     }
 
     public function testReportsShowRendersPreview(): void
@@ -151,15 +184,25 @@ final class LegacyReportPagesTest extends TestCase
     {
         $response = $this->get(route('migration.reports.changes', [
             'comum_id' => 7,
-            'mostrar_pendentes' => 1,
-            'mostrar_alteracoes' => 1,
         ]));
 
         $response->assertOk();
-        $response->assertSee('Histórico de alterações no Laravel.');
+        $response->assertSee('Posição de verificação do estoque.');
         $response->assertSee('Central Cuiabá');
-        $response->assertSee('Pendentes (1)');
-        $response->assertSee('MESA GRANDE {SALA}');
+        $response->assertSee('Baixar backup CSV');
+        $response->assertSee('Editado, checado, observação e etiqueta');
+        $response->assertSee('Total de produtos');
+    }
+
+    public function testReportsChangesCsvExportDownloadsBackup(): void
+    {
+        $response = $this->get(route('migration.reports.changes.export', [
+            'comum_id' => 7,
+        ]));
+
+        $response->assertOk();
+        $response->assertDownload('posicao_verificacao_12-3456_20260421_120000.csv');
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
     }
 
     public function testReportsCellEditorRendersLocalEditorAssets(): void

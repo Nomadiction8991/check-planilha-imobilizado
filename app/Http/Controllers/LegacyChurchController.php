@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\LegacyChurchBrowserServiceInterface;
 use App\Contracts\LegacyChurchManagementServiceInterface;
 use App\DTO\ChurchFilters;
+use App\Models\Legacy\Administracao;
 use App\Http\Requests\UpdateLegacyChurchRequest;
 use App\Models\Legacy\Comum;
 use Illuminate\Contracts\View\View;
@@ -39,6 +40,7 @@ class LegacyChurchController extends Controller
     {
         return view('churches.edit', [
             'church' => $church,
+            'administrations' => Administracao::query()->orderBy('descricao')->get(['id', 'descricao']),
             'states' => (array) config('brazil.states', []),
         ]);
     }

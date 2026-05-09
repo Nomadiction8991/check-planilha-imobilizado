@@ -16,10 +16,12 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
 
     public function __construct(?string $storageFile = null)
     {
-        $this->storageFile = $storageFile ?? (string) config(
+        $configuredFile = $storageFile ?? (string) config(
             'legacy.audit.storage_file',
             storage_path('app/private/audits/audit-log.jsonl')
         );
+
+        $this->storageFile = $this->resolveWritableStorageFile($configuredFile);
     }
 
     public function record(LegacyAuditEntryData $entry): void
@@ -59,6 +61,8 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
     ): LengthAwarePaginator {
         $module = mb_strtolower(trim((string) ($filters['module'] ?? '')), 'UTF-8');
         $search = mb_strtolower(trim((string) ($filters['search'] ?? '')), 'UTF-8');
+        $dateFrom = $this->parseDateBoundary((string) ($filters['date_from'] ?? ''), false);
+        $dateTo = $this->parseDateBoundary((string) ($filters['date_to'] ?? ''), true);
 
         $entries = collect($this->readEntries())
             ->filter(static function (LegacyAuditEntryData $entry) use ($userId, $administrationId, $churchId, $isAdmin): bool {
@@ -107,6 +111,19 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
                 );
 
                 return str_contains($haystack, $search);
+            })
+            ->filter(function (LegacyAuditEntryData $entry) use ($dateFrom, $dateTo): bool {
+                $entryDate = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $entry->occurredAt);
+
+                if ($dateFrom !== null && $entryDate->lt($dateFrom)) {
+                    return false;
+                }
+
+                if ($dateTo !== null && $entryDate->gt($dateTo)) {
+                    return false;
+                }
+
+                return true;
             })
             ->sortByDesc(static fn (LegacyAuditEntryData $entry): string => $entry->occurredAt)
             ->values();
@@ -168,5 +185,62 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
         }
 
         return $entries;
+    }
+
+    private function parseDateBoundary(string $value, bool $endOfDay): ?\Carbon\Carbon
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        try {
+            $date = \Carbon\Carbon::createFromFormat('Y-m-d', $value);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return $endOfDay ? $date->endOfDay() : $date->startOfDay();
+    }
+
+    private function resolveWritableStorageFile(string $storageFile): string
+    {
+        $storageFile = trim($storageFile);
+
+        if ($storageFile !== '' && $this->isWritableFilePath($storageFile)) {
+            return $storageFile;
+        }
+
+        $fallbackFile = sys_get_temp_dir()
+            . DIRECTORY_SEPARATOR
+            . 'check-planilha-imobilizado'
+            . DIRECTORY_SEPARATOR
+            . 'audits'
+            . DIRECTORY_SEPARATOR
+            . 'audit-log.jsonl';
+
+        if ($this->isWritableFilePath($fallbackFile)) {
+            return $fallbackFile;
+        }
+
+        return $storageFile !== '' ? $storageFile : $fallbackFile;
+    }
+
+    private function isWritableFilePath(string $file): bool
+    {
+        $directory = dirname($file);
+
+        if (is_file($file)) {
+            return is_writable($file);
+        }
+
+        if (is_dir($directory)) {
+            return is_writable($directory);
+        }
+
+        $parent = dirname($directory);
+
+        return is_dir($parent) && is_writable($parent);
     }
 }

@@ -7,6 +7,7 @@ namespace App\DTO;
 final readonly class ChurchMutationData
 {
     public function __construct(
+        public int $administrationId,
         public string $description,
         public string $cnpj,
         public string $state,

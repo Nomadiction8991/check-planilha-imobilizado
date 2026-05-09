@@ -92,7 +92,7 @@
                             @endphp
                             <tr id="erro-row-{{ $erro->id }}">
                                 <td data-label="Código">
-                                    <strong class="mono">{{ $erro->codigo ?: 'n/a' }}</strong>
+                                    <strong class="mono">{{ $erro->codigo ?: 'Nenhum' }}</strong>
                                     @if (!empty($erro->linha_csv))
                                         <div class="table-note">Linha {{ $erro->linha_csv }}</div>
                                     @endif

@@ -16,5 +16,8 @@ class Administracao extends Model
 
     protected $fillable = [
         'descricao',
+        'cnpj',
+        'estado',
+        'cidade',
     ];
 }

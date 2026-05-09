@@ -28,34 +28,37 @@ interface LegacyReportServiceInterface
     public function buildReportPreview(int $churchId, string $formulario): array;
 
     /**
-     * @param array{
-     *   mostrar_pendentes?: bool,
-     *   mostrar_checados?: bool,
-     *   mostrar_observacao?: bool,
-     *   mostrar_checados_observacao?: bool,
-     *   mostrar_etiqueta?: bool,
-     *   mostrar_alteracoes?: bool,
-     *   mostrar_novos?: bool,
-     *   dependencia?: int|null
-     * } $filters
-     *
      * @return array{
      *   planilha: array<string, mixed>,
-     *   filtros: array<string, bool|int|null>,
-     *   dependencias: array<int, array{id: int, descricao: string}>,
-     *   secoes: array<string, array{titulo: string, itens: array<int, array<string, mixed>>, total: int}>,
+     *   itens: array<int, array<string, mixed>>,
      *   resumo: array{
      *     total_geral: int,
      *     total_pendentes: int,
      *     total_checados: int,
      *     total_observacao: int,
-     *     total_checados_observacao: int,
      *     total_etiqueta: int,
      *     total_alteracoes: int,
      *     total_novos: int,
-     *     total_mostrar: int
-     *   }
+     *     total_checados_observacao: int,
+     *     total_checados_etiqueta: int,
+     *     total_observacao_etiqueta: int,
+     *     total_checados_observacao_etiqueta: int,
+     *     total_editados_checados: int,
+     *     total_editados_observacao: int,
+     *     total_editados_etiqueta: int,
+     *     total_editados_checados_etiqueta: int,
+     *     total_editados_observacao_etiqueta: int,
+     *     total_editados_checados_observacao: int,
+     *     total_editados_checados_observacao_etiqueta: int,
+     *     total_backup: int
+     *   },
+     *   backup: array{filename: string, content: string}
      * }
      */
-    public function buildChangeHistory(int $churchId, array $filters): array;
+    public function buildVerificationPositionReport(int $churchId): array;
+
+    /**
+     * @return array{filename: string, content: string}
+     */
+    public function downloadVerificationPositionCsv(int $churchId): array;
 }

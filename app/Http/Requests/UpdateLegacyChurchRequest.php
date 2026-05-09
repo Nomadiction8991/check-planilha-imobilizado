@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\DTO\ChurchMutationData;
+use App\Models\Legacy\Administracao;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,12 +22,11 @@ class UpdateLegacyChurchRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'administracao_id' => ['required', 'integer', Rule::exists((new Administracao())->getTable(), 'id')],
             'descricao' => ['required', 'string', 'max:255', 'regex:/\S/'],
             'cnpj' => ['required', 'string', 'max:30', 'regex:/\S/'],
             'estado' => ['required', 'string', Rule::in(array_keys((array) config('brazil.states', [])))],
             'cidade' => ['required', 'string', 'max:255', 'regex:/\S/'],
-            'estado_administracao' => ['required', 'string', Rule::in(array_keys((array) config('brazil.states', [])))],
-            'cidade_administracao' => ['required', 'string', 'max:255', 'regex:/\S/'],
             'setor' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -37,6 +37,9 @@ class UpdateLegacyChurchRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'administracao_id.required' => 'Selecione a administração vinculada à igreja.',
+            'administracao_id.integer' => 'Selecione uma administração válida.',
+            'administracao_id.exists' => 'A administração selecionada não existe.',
             'descricao.required' => 'A descrição / nome fantasia é obrigatória.',
             'descricao.regex' => 'A descrição / nome fantasia não pode conter apenas espaços.',
             'cnpj.required' => 'O CNPJ é obrigatório.',
@@ -45,10 +48,6 @@ class UpdateLegacyChurchRequest extends FormRequest
             'estado.in' => 'Selecione um estado válido para a igreja.',
             'cidade.required' => 'A cidade da igreja é obrigatória.',
             'cidade.regex' => 'A cidade da igreja não pode conter apenas espaços.',
-            'estado_administracao.required' => 'O estado da administração é obrigatório.',
-            'estado_administracao.in' => 'Selecione um estado válido para a administração.',
-            'cidade_administracao.required' => 'A cidade da administração é obrigatória.',
-            'cidade_administracao.regex' => 'A cidade da administração não pode conter apenas espaços.',
         ];
     }
 
@@ -57,12 +56,13 @@ class UpdateLegacyChurchRequest extends FormRequest
         $sector = trim((string) ($this->validated('setor') ?? ''));
 
         return new ChurchMutationData(
+            administrationId: (int) $this->validated('administracao_id'),
             description: trim((string) $this->validated('descricao')),
             cnpj: trim((string) $this->validated('cnpj')),
             state: trim((string) $this->validated('estado')),
             city: trim((string) $this->validated('cidade')),
-            administrationState: trim((string) $this->validated('estado_administracao')),
-            administrationCity: trim((string) $this->validated('cidade_administracao')),
+            administrationState: '',
+            administrationCity: '',
             sector: $sector !== '' ? $sector : null,
         );
     }
