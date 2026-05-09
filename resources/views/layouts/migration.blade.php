@@ -82,6 +82,43 @@
             display: none;
         }
 
+        .filters-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 14px;
+        }
+
+        .filters-pin-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--surface-strong);
+            color: var(--muted);
+            cursor: pointer;
+            transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .filters-pin-toggle:hover {
+            transform: translateY(-1px);
+            border-color: rgba(24, 21, 17, 0.18);
+            box-shadow: 0 8px 20px rgba(38, 28, 12, 0.08);
+        }
+
+        .filters-pin-toggle.is-active {
+            color: var(--accent);
+            background: var(--accent-soft);
+            border-color: rgba(31, 111, 95, 0.22);
+        }
+
+        .filters-pin-toggle .material-symbols-outlined {
+            font-size: 18px;
+            line-height: 1;
+        }
+
         .topbar,
         .panel,
         .table-shell,
@@ -701,9 +738,15 @@
             width: 100%;
         }
 
-        .filters.is-stuck {
+        .filters.is-stuck,
+        .filters.is-pinned {
             box-shadow: 0 14px 30px rgba(24, 21, 17, 0.14);
             border-color: rgba(31, 111, 95, 0.16);
+            padding-block: 16px;
+        }
+
+        .filters.is-pinned {
+            background: linear-gradient(180deg, var(--surface-strong), var(--surface));
         }
 
         .filters-primary,
@@ -749,6 +792,23 @@
             position: static;
             z-index: auto;
             margin: 0;
+        }
+
+        .sticky-stack.is-stuck .filters .filters-advanced,
+        .filters.is-pinned .filters-advanced {
+            display: none;
+        }
+
+        .sticky-stack.is-stuck .filters .filters-actions .btn:not(.primary),
+        .filters.is-pinned .filters-actions .btn:not(.primary) {
+            display: none;
+        }
+
+        .sticky-stack.is-stuck .filters .filters-pin-toggle,
+        .filters.is-pinned .filters-pin-toggle {
+            color: var(--accent);
+            background: var(--accent-soft);
+            border-color: rgba(31, 111, 95, 0.22);
         }
 
         label {
@@ -1688,13 +1748,96 @@
                 return;
             }
 
-            stickyFilters.forEach((filterCard) => {
+            const storagePrefix = `check-planilha:filters-pin:${window.location.pathname}`;
+
+            const renderPinControl = (filterCard, index) => {
+                if (filterCard.querySelector('[data-filters-pin-toggle]')) {
+                    return filterCard.querySelector('[data-filters-pin-toggle]');
+                }
+
+                const toolbar = document.createElement('div');
+                toolbar.className = 'filters-toolbar';
+                toolbar.innerHTML = `
+                    <button
+                        type="button"
+                        class="filters-pin-toggle"
+                        data-filters-pin-toggle
+                        aria-pressed="false"
+                        aria-label="Fixar card de filtros"
+                        title="Fixar card de filtros"
+                    >
+                        <span class="material-symbols-outlined" data-filters-pin-icon aria-hidden="true">push_pin</span>
+                        <span data-filters-pin-label>Fixar</span>
+                    </button>
+                `;
+
+                filterCard.prepend(toolbar);
+                filterCard.dataset.filtersPinIndex = String(index);
+
+                return toolbar.querySelector('[data-filters-pin-toggle]');
+            };
+
+            const readPinState = (index) => {
+                try {
+                    return window.localStorage.getItem(`${storagePrefix}:${index}`) === '1';
+                } catch (error) {
+                    return false;
+                }
+            };
+
+            const writePinState = (index, pinned) => {
+                try {
+                    window.localStorage.setItem(`${storagePrefix}:${index}`, pinned ? '1' : '0');
+                } catch (error) {
+                    // Keep the preference in-memory when storage is unavailable.
+                }
+            };
+
+            const syncFilterCard = (filterCard, pinned, index) => {
+                const button = filterCard.querySelector('[data-filters-pin-toggle]');
+                const icon = filterCard.querySelector('[data-filters-pin-icon]');
+                const label = filterCard.querySelector('[data-filters-pin-label]');
+
+                filterCard.classList.toggle('is-pinned', pinned);
+                filterCard.dataset.filtersPinned = pinned ? 'true' : 'false';
+
+                if (button) {
+                    button.classList.toggle('is-active', pinned);
+                    button.setAttribute('aria-pressed', pinned ? 'true' : 'false');
+                    button.setAttribute(
+                        'aria-label',
+                        pinned ? 'Desafixar card de filtros' : 'Fixar card de filtros'
+                    );
+                    button.title = pinned ? 'Desafixar card de filtros' : 'Fixar card de filtros';
+                }
+
+                if (icon instanceof HTMLElement) {
+                    icon.textContent = 'push_pin';
+                }
+
+                if (label instanceof HTMLElement) {
+                    label.textContent = pinned ? 'Fixado' : 'Fixar';
+                }
+
+                writePinState(index, pinned);
+            };
+
+            stickyFilters.forEach((filterCard, index) => {
                 const filterSection = filterCard.closest('.section');
+                const pinToggle = renderPinControl(filterCard, index);
                 stickySlot.appendChild(filterCard);
 
                 if (filterSection && filterSection.children.length === 0) {
                     filterSection.remove();
                 }
+
+                syncFilterCard(filterCard, readPinState(index), index);
+
+                pinToggle?.addEventListener('click', () => {
+                    const nextPinned = filterCard.dataset.filtersPinned !== 'true';
+                    syncFilterCard(filterCard, nextPinned, index);
+                    updateStickyState();
+                });
             });
 
             stickyStack.classList.add('has-slot');
@@ -1709,7 +1852,9 @@
                     ? stickyTopbar.getBoundingClientRect().bottom
                     : stickyStack.getBoundingClientRect().top;
 
-                stickyStack.classList.toggle('is-stuck', stickyAnchor <= stickyGap + 1);
+                const hasPinnedFilters = stickyFilters.some((filterCard) => filterCard.dataset.filtersPinned === 'true');
+                stickyStack.classList.toggle('is-pinned', hasPinnedFilters);
+                stickyStack.classList.toggle('is-stuck', hasPinnedFilters || stickyAnchor <= stickyGap + 1);
             };
 
             const scheduleUpdate = () => {
