@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Entrar | {{ config('app.name') }}</title>
+    <title>Recuperar senha | {{ config('app.name') }}</title>
     @include('partials.theme-init')
     @include('partials.pwa')
     <style>
@@ -38,7 +38,7 @@
         }
 
         .card {
-            width: min(480px, 100%);
+            width: min(560px, 100%);
             border: 1px solid var(--line);
             background: var(--surface);
             box-shadow: var(--shadow-strong);
@@ -81,23 +81,9 @@
             margin-top: 6px;
         }
 
-        .form-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .field-grid {
+            display: grid;
             gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .forgot-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .forgot-link:hover {
-            text-decoration: underline;
         }
 
         label {
@@ -137,10 +123,30 @@
             transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
         }
 
-        button:not(.theme-toggle):hover {
+        button:hover {
             transform: translateY(-1px);
             background: #1f1a14;
             box-shadow: 0 8px 20px rgba(38, 28, 12, 0.12);
+        }
+
+        .inline-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .link {
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
         }
 
         .flash {
@@ -175,11 +181,11 @@
 <body>
     <main class="card">
         <div class="card-head">
-            <span class="eyebrow">Acesso restrito</span>
+            <span class="eyebrow">Recuperação de acesso</span>
             @include('partials.theme-toggle')
         </div>
-        <h1>Entrar</h1>
-        <p class="copy">Use suas credenciais para acessar o sistema.</p>
+        <h1>Esqueci minha senha</h1>
+        <p class="copy">Informe CPF, telefone e e-mail exatamente como estão no cadastro. Se os dados baterem, o sistema gera uma senha nova e envia para o e-mail informado.</p>
 
         @if (session('status'))
             <div class="flash {{ session('status_type', 'success') === 'error' ? '' : 'success' }}">
@@ -198,21 +204,29 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('migration.login.store') }}">
+        <form method="POST" action="{{ route('migration.password.store') }}">
             @csrf
-            <label>
-                E-mail
-                <input type="email" name="email" value="{{ old('email') }}" required autocomplete="email">
-            </label>
 
-            <label>
-                Senha
-                <input type="password" name="senha" required autocomplete="current-password">
-            </label>
+            <div class="field-grid">
+                <label>
+                    CPF
+                    <input type="text" name="cpf" value="{{ old('cpf') }}" required maxlength="14" data-mask="cpf" inputmode="numeric" autocomplete="off">
+                </label>
 
-            <div class="form-footer">
-                <button type="submit">Entrar</button>
-                <a class="forgot-link" href="{{ route('migration.password.request') }}">Esqueci minha senha</a>
+                <label>
+                    Telefone
+                    <input type="text" name="telefone" value="{{ old('telefone') }}" required maxlength="15" data-mask="phone" inputmode="numeric" autocomplete="off">
+                </label>
+
+                <label>
+                    E-mail cadastrado
+                    <input type="email" name="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email">
+                </label>
+            </div>
+
+            <div class="inline-actions">
+                <button type="submit">Gerar nova senha</button>
+                <a class="link" href="{{ route('migration.login') }}">Voltar ao login</a>
             </div>
         </form>
     </main>

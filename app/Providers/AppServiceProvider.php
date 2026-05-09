@@ -9,6 +9,7 @@ use App\Contracts\LegacyAdministrationBrowserServiceInterface;
 use App\Contracts\LegacyAdministrationManagementServiceInterface;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyAssetTypeManagementServiceInterface;
+use App\Contracts\LegacyMailConfigurationServiceInterface;
 use App\Contracts\LegacyChurchBrowserServiceInterface;
 use App\Contracts\LegacyChurchManagementServiceInterface;
 use App\Contracts\LegacyAuditTrailServiceInterface;
@@ -20,6 +21,8 @@ use App\Contracts\LegacyProductManagementServiceInterface;
 use App\Contracts\LegacyProductUtilityServiceInterface;
 use App\Contracts\LegacyProductBrowserServiceInterface;
 use App\Contracts\LegacyReportServiceInterface;
+use App\Contracts\LegacyPasswordRecoveryServiceInterface;
+use App\Contracts\LegacyNavigationServiceInterface;
 use App\Contracts\LegacySpreadsheetImportServiceInterface;
 use App\Contracts\LegacyUserBrowserServiceInterface;
 use App\Contracts\LegacyUserManagementServiceInterface;
@@ -28,6 +31,7 @@ use App\Services\LegacyAdministrationBrowserService;
 use App\Services\LegacyAdministrationManagementService;
 use App\Services\LegacyAuthSessionService;
 use App\Services\LegacyAssetTypeManagementService;
+use App\Services\LegacyMailConfigurationService;
 use App\Services\LegacyChurchBrowserService;
 use App\Services\LegacyChurchManagementService;
 use App\Services\LegacyAuditTrailService;
@@ -38,6 +42,8 @@ use App\Services\LegacyPermissionService;
 use App\Services\LegacyProductManagementService;
 use App\Services\LegacyProductUtilityService;
 use App\Services\LegacyProductBrowserService;
+use App\Services\LegacyPasswordRecoveryService;
+use App\Services\LegacyNavigationService;
 use App\Services\LegacyReportService;
 use App\Services\LegacySpreadsheetImportService;
 use App\Services\LegacyUserBrowserService;
@@ -60,6 +66,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(
             LegacyAuthSessionServiceInterface::class,
             LegacyAuthSessionService::class
+        );
+        $this->app->singleton(
+            LegacyMailConfigurationServiceInterface::class,
+            LegacyMailConfigurationService::class
+        );
+        $this->app->singleton(
+            LegacyPasswordRecoveryServiceInterface::class,
+            LegacyPasswordRecoveryService::class
+        );
+        $this->app->singleton(
+            LegacyNavigationServiceInterface::class,
+            LegacyNavigationService::class
         );
         $this->app->singleton(
             LegacyAuditTrailServiceInterface::class,
@@ -141,6 +159,8 @@ class AppServiceProvider extends ServiceProvider
             $auth = $this->app->make(LegacyAuthSessionServiceInterface::class);
             /** @var LegacyPermissionServiceInterface $permissions */
             $permissions = $this->app->make(LegacyPermissionServiceInterface::class);
+            /** @var LegacyNavigationServiceInterface $navigation */
+            $navigation = $this->app->make(LegacyNavigationServiceInterface::class);
             $currentUser = $auth->currentUser();
             $legacyPermissions = $currentUser !== null
                 ? $permissions->currentPermissions()
@@ -150,6 +170,12 @@ class AppServiceProvider extends ServiceProvider
             $view->with('legacySessionChurch', $currentUser !== null ? $auth->currentChurch() : null);
             $view->with('legacySessionChurches', $currentUser !== null ? $auth->availableChurches() : collect());
             $view->with('legacyPermissions', $legacyPermissions);
+            $view->with(
+                'legacyNavigation',
+                $currentUser !== null
+                    ? $navigation->navigation($legacyPermissions, (bool) ($currentUser['is_admin'] ?? false))
+                    : []
+            );
         });
     }
 }

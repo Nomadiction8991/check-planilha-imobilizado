@@ -126,6 +126,9 @@
                                         <span class="capsule dark">Protegido</span>
                                     @else
                                         <div class="inline-actions">
+                                            @if ($isLegacyAdmin || !empty($legacyPermissions['users.permissions.manage'] ?? null))
+                                                <a class="btn" href="{{ route('migration.users.permissions', ['user' => $user->id]) }}">Permissões</a>
+                                            @endif
                                             @if ($isLegacyAdmin || !empty($legacyPermissions['users.edit'] ?? null))
                                                 <a class="btn" href="{{ route('migration.users.edit', ['user' => $user->id]) }}">Editar</a>
                                             @endif

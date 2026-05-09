@@ -32,12 +32,6 @@ if [ ! -d storage ]; then
     mkdir -p storage
 fi
 
-if [ ! -w storage ]; then
-    echo "storage não está gravável para o usuário atual ($(id -u):$(id -g))."
-    echo "O host precisa ajustar ownership/permissão do volume antes de subir o container."
-    exit 1
-fi
-
 mkdir -p \
     storage/framework/cache/data \
     storage/framework/sessions \
@@ -55,6 +49,12 @@ fi
 
 chmod -R ug+rwX,o+rX storage 2>/dev/null || true
 chmod -R 777 storage/framework storage/logs storage/importacao storage/tmp 2>/dev/null || true
+
+if [ ! -w storage ]; then
+    echo "storage não está gravável para o usuário atual ($(id -u):$(id -g))."
+    echo "O volume precisa permitir escrita no host ou via SELinux para subir o container."
+    exit 1
+fi
 
 if command -v composer >/dev/null 2>&1; then
     if [ ! -d vendor ] || [ ! -f vendor/composer/installed.json ] || [ composer.lock -nt vendor/composer/installed.json ]; then

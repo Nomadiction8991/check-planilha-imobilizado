@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Contracts\LegacyAuthSessionServiceInterface;
-use App\Contracts\LegacyInventoryServiceInterface;
-use App\DTO\LegacyInventorySnapshot;
+use App\Contracts\LegacyPasswordRecoveryServiceInterface;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
@@ -29,6 +28,20 @@ final class LegacyAuthFlowTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Acesso restrito');
+        $response->assertSee('Esqueci minha senha');
+    }
+
+    public function testForgotPasswordPageRenders(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('isAuthenticated')->andReturn(false);
+        });
+
+        $response = $this->get(route('migration.password.request'));
+
+        $response->assertOk();
+        $response->assertSee('Esqueci minha senha');
+        $response->assertSee('Gerar nova senha');
     }
 
     public function testProtectedRouteRedirectsToLoginWhenAuthenticationIsEnforced(): void
@@ -77,6 +90,24 @@ final class LegacyAuthFlowTest extends TestCase
         ]);
     }
 
+    public function testForgotPasswordFlowQueuesNewPasswordDelivery(): void
+    {
+        $this->mock(LegacyPasswordRecoveryServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('recover')
+                ->once()
+                ->with('123.456.789-09', '(65) 99999-0000', 'maria@example.com');
+        });
+
+        $response = $this->post(route('migration.password.store'), [
+            'cpf' => '123.456.789-09',
+            'telefone' => '(65) 99999-0000',
+            'email' => 'maria@example.com',
+        ]);
+
+        $response->assertRedirect(route('migration.login'));
+        $response->assertSessionHas('status', 'Nova senha enviada para o e-mail cadastrado.');
+    }
+
     public function testLegacyNativeSessionAuthenticatesLaravelRouteInHybridMode(): void
     {
         $sessionId = 'legacy-bridge-auth';
@@ -89,27 +120,11 @@ final class LegacyAuthFlowTest extends TestCase
             'administracao_id' => 4,
             'administracoes_permitidas' => [4, 8],
             'is_admin' => false,
+            'legacy_permissions' => [
+                'products.view' => true,
+            ],
         ]);
 
-        $this->mock(LegacyInventoryServiceInterface::class, function (MockInterface $mock): void {
-            $mock->shouldReceive('buildSnapshot')->once()->andReturn(
-                new LegacyInventorySnapshot(
-                    legacyRootPath: base_path(),
-                    legacyPublicUrl: url('/'),
-                    databaseReachable: true,
-                    databaseDriver: 'mysql',
-                    databaseName: 'check-planilha',
-                    databaseError: null,
-                    architectureCounts: [
-                        'controllers' => 0,
-                        'services' => 0,
-                        'repositories' => 0,
-                        'views' => 0,
-                    ],
-                    modules: [],
-                )
-            );
-        });
         $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
             $mock->shouldReceive('currentUser')->andReturn([
                 'id' => 9,
@@ -133,7 +148,7 @@ final class LegacyAuthFlowTest extends TestCase
         $response = $this->withCookie(session_name(), $sessionId)
             ->get(route('migration.dashboard'));
 
-        $response->assertOk();
+        $response->assertRedirect(route('migration.products.index'));
         $response->assertSessionHas('usuario_id', 9);
         $response->assertSessionHas('administracoes_permitidas', [4, 8]);
     }
