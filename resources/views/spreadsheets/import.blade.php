@@ -84,7 +84,7 @@
                                 $dateRef = $import['data_referencia'] ?? null;
                                 $dateLabel = $dateRef !== null && $dateRef !== ''
                                     ? \Illuminate\Support\Carbon::parse($dateRef)->format('d/m/Y H:i')
-                                    : 'n/a';
+                                    : 'Nenhuma';
                                 $progress = number_format((float) ($import['porcentagem'] ?? 0), 0, ',', '.');
                                 $completed = (int) ($import['linhas_processadas'] ?? 0);
                                 $total = (int) ($import['total_linhas'] ?? 0);
@@ -97,7 +97,7 @@
                                 <td data-label="Igreja">{{ $churchLabel }}</td>
                                 <td data-label="Administração">{{ $administrationLabel }}</td>
                                 <td data-label="Arquivo">
-                                    <strong>{{ $import['arquivo_nome'] ?? 'n/a' }}</strong>
+                                    <strong>{{ $import['arquivo_nome'] ?? 'Nenhum' }}</strong>
                                 </td>
                                 <td data-label="Status">
                                     @if ($status === 'concluida')
@@ -117,7 +117,7 @@
                                     {{ $completed }}/{{ $total }}
                                 </td>
                                 <td data-label="Responsável">
-                                    <strong>{{ $responsible !== '' ? $responsible : 'n/a' }}</strong>
+                                    <strong>{{ $responsible !== '' ? $responsible : 'Nenhum' }}</strong>
                                     @if ($responsibleEmail !== '')
                                         <div class="table-note">{{ $responsibleEmail }}</div>
                                     @endif
@@ -142,17 +142,7 @@
                 @csrf
 
                 <div class="field-grid">
-                    <label>
-                        Responsável
-                        <select name="usuario_id" required>
-                            <option value="">Selecione</option>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}" @selected((int) old('usuario_id') === (int) $user->id)>
-                                    {{ $user->nome }}{{ $user->email ? ' - ' . $user->email : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </label>
+                    <input type="hidden" name="usuario_id" value="{{ (int) session('usuario_id', 0) }}">
 
                     <label>
                         Administração
@@ -177,7 +167,7 @@
                 @endif
 
                 <p class="field-note">
-                    A importação detecta as igrejas diretamente do CSV e cadastra os produtos a partir dessas linhas. O arquivo é analisado antes da importação definitiva. Tamanho máximo: 50MB.
+                    A importação detecta as igrejas diretamente do CSV e cadastra os produtos a partir dessas linhas. O arquivo é analisado antes da importação definitiva. O responsável será sempre o usuário logado. Tamanho máximo: 50MB.
                 </p>
 
                 <div class="inline-actions">

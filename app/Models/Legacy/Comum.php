@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Legacy;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,6 +20,7 @@ class Comum extends Model
         'codigo',
         'cnpj',
         'descricao',
+        'administracao_id',
         'estado',
         'cidade',
         'estado_administracao',
@@ -29,6 +31,11 @@ class Comum extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Produto::class, 'comum_id', 'id');
+    }
+
+    public function administracao(): BelongsTo
+    {
+        return $this->belongsTo(Administracao::class, 'administracao_id', 'id');
     }
 
     public function activeProducts(): HasMany

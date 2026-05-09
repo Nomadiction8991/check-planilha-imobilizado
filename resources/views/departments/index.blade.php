@@ -41,28 +41,30 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.departments.index') }}">
-                <label>
-                    Igreja
-                    <select name="comum_id">
-                        <option value="">Todas</option>
-                        @foreach ($churches as $church)
-                            <option value="{{ $church->id }}" @selected($filters->comumId === $church->id)>
-                                {{ $church->codigo }} - {{ $church->descricao }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+                <div class="filters-primary">
+                    <label class="filters-principal">
+                        Igreja
+                        <select name="comum_id">
+                            <option value="">Todas</option>
+                            @foreach ($churches as $church)
+                                <option value="{{ $church->id }}" @selected($filters->comumId === $church->id)>
+                                    {{ $church->codigo }} - {{ $church->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
 
-                <label>
-                    Descrição
-                    <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome da dependência">
-                </label>
+                    <label class="filters-query">
+                        Descrição
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome da dependência">
+                    </label>
 
-                <div class="actions">
-                    <button class="btn primary" type="submit">Filtrar</button>
-                    <a class="btn" href="{{ route('migration.departments.index') }}">Limpar</a>
+                    <div class="actions filters-actions">
+                        <button class="btn primary" type="submit">Filtrar</button>
+                        <a class="btn" href="{{ route('migration.departments.index') }}">Limpar</a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -99,7 +101,7 @@
                             <tr>
                                 <td data-label="Dependência">{{ $department->descricao ?: 'Sem descrição' }}</td>
                                 <td data-label="Igreja">
-                                    {{ data_get($department, 'comum.codigo') ?: 'n/a' }}
+                                    {{ data_get($department, 'comum.codigo') ?: 'Nenhum' }}
                                     @if (data_get($department, 'comum.descricao'))
                                         <div class="table-note">{{ data_get($department, 'comum.descricao') }}</div>
                                     @endif

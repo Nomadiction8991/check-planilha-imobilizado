@@ -6,8 +6,9 @@ return static function (string $html, array $produto, array $planilha): string {
     $dataHoje = date('d/m/Y');
     $descricaoIgreja = $planilha['descricao'] ?? $planilha['comum'] ?? '';
     $condicao = (int)($produto['condicao_14_1'] ?? 0);
-    $administracao = trim((string)($planilha['cidade_administracao'] ?? $planilha['administracao'] ?? ''));
-    $estadoAdministracao = trim((string)($planilha['estado_administracao'] ?? ''));
+    $administracao = trim((string)($planilha['administracao_descricao'] ?? $planilha['administracao'] ?? ''));
+    $administracaoCnpj = trim((string)($planilha['administracao_cnpj'] ?? ''));
+    $usuarioNome = trim((string)($planilha['usuario_nome_relatorio'] ?? $planilha['usuario_nome'] ?? $produto['administrador_nome'] ?? ''));
     $cidade = trim((string)($planilha['cidade'] ?? ''));
     $estado = trim((string)($planilha['estado'] ?? ''));
     $localDataPartes = array_filter([
@@ -18,14 +19,6 @@ return static function (string $html, array $produto, array $planilha): string {
     $localData = trim(implode(' - ', $localDataPartes));
     if ($localData !== '') {
         $localData .= ' - ___/___/_____';
-    }
-
-    if ($administracao !== '' && $estadoAdministracao !== '') {
-        $administracao .= ' - ' . $estadoAdministracao;
-    }
-
-    if ($cidade !== '' && $estado !== '') {
-        $cidade .= ' - ' . $estado;
     }
 
     $descricaoProduto = trim((string)($produto['descricao_completa'] ?? ''));
@@ -40,7 +33,7 @@ return static function (string $html, array $produto, array $planilha): string {
     $html = appReportPreencherCampoPorName($html, 'administracao', $administracao);
     $html = appReportPreencherCampoPorName($html, 'cidade', $cidade);
     $html = appReportPreencherCampoPorName($html, 'setor', $planilha['setor'] ?? '');
-    $html = appReportPreencherCampoPorName($html, 'cnpj-da-administracao', $planilha['cnpj'] ?? '');
+    $html = appReportPreencherCampoPorName($html, 'cnpj-da-administracao', $administracaoCnpj);
     $html = appReportPreencherCampoPorName($html, 'casa_de_oracao', $descricaoIgreja);
     $html = appReportPreencherCampoPorName($html, 'descricao_bem', $descricaoProduto);
     $html = appReportPreencherCampoPorName($html, 'local_e_data', $localData);
@@ -55,7 +48,7 @@ return static function (string $html, array $produto, array $planilha): string {
     $html = appReportPreencherCampoPorName($html, 'c1', $condicao === 1 ? 'X' : '');
     $html = appReportPreencherCampoPorName($html, 'c2', $condicao === 2 ? 'X' : '');
     $html = appReportPreencherCampoPorName($html, 'c3', $condicao === 3 ? 'X' : '');
-    $html = appReportPreencherCampoPorName($html, 'nome_administrador&acessor_1', $produto['administrador_nome'] ?? '');
+    $html = appReportPreencherCampoPorName($html, 'nome_administrador&amp;acessor_1', $usuarioNome);
 
     return $html;
 };

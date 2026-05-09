@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\DTO\SpreadsheetImportUploadData;
 use Illuminate\Foundation\Http\FormRequest;
+use RuntimeException;
 
 class StoreSpreadsheetImportRequest extends FormRequest
 {
@@ -20,7 +21,6 @@ class StoreSpreadsheetImportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'usuario_id' => ['required', 'integer', 'min:1'],
             'administracao_id' => ['required', 'integer', 'min:1'],
             'arquivo_csv' => ['required', 'file', 'mimes:csv,txt', 'max:51200'],
         ];
@@ -32,8 +32,6 @@ class StoreSpreadsheetImportRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'usuario_id.required' => 'Selecione o responsável pela importação.',
-            'usuario_id.min' => 'Selecione um responsável válido.',
             'administracao_id.required' => 'Selecione a administração da importação.',
             'administracao_id.min' => 'Selecione uma administração válida.',
             'arquivo_csv.required' => 'Selecione um arquivo CSV.',
@@ -44,8 +42,14 @@ class StoreSpreadsheetImportRequest extends FormRequest
 
     public function toDto(): SpreadsheetImportUploadData
     {
+        $responsibleUserId = (int) $this->session()->get('usuario_id', 0);
+
+        if ($responsibleUserId <= 0) {
+            throw new RuntimeException('Sessão inválida para identificar o responsável.');
+        }
+
         return new SpreadsheetImportUploadData(
-            responsibleUserId: (int) $this->validated('usuario_id'),
+            responsibleUserId: $responsibleUserId,
             churchId: null,
             administrationId: (int) $this->validated('administracao_id'),
         );

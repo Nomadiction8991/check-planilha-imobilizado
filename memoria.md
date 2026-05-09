@@ -1,8 +1,8 @@
 # Memória de Análises - Check Planilha Imobilizado
 
 ## Resumo Acumulativo
-- Total de análises: 2
-- Problemas catalogados: 2
+- Total de análises: 4
+- Problemas catalogados: 4
 - Padrões recorrentes identificados: 1
 
 ## Análise 2026-04-17 - Permissões, autenticação e importação
@@ -74,3 +74,23 @@
 
 **Próximos passos**:
 - Manter o contrato da importação alinhado ao schema `importacoes.comum_id`.
+
+## Análise 2026-04-17 - Troca de igreja e logout público
+
+**Arquivos analisados**:
+- `app/Services/LegacyAuthSessionService.php`
+- `app/Http/Controllers/LegacyRouteCompatibilityController.php`
+- `app/Http/Controllers/PublicAccessController.php`
+- `routes/web.php`
+
+**Escopo**: Segurança, Lógica
+**Problemas encontrados**: 2
+**Críticos**: 0 | Altos: 1 | Médios: 1 | Baixos: 0
+
+**Padrões identificados**:
+- `comum_id` continua sendo um ponto central de escopo e autorização.
+- Ações com efeito colateral ainda aparecem expostas por rotas `GET`.
+
+**Próximos passos**:
+- Validar o escopo permitido antes de trocar a igreja ativa.
+- Converter logout público para `POST` com proteção CSRF.

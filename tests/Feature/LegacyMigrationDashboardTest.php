@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Contracts\LegacyInventoryServiceInterface;
+use App\Contracts\LegacyAuthSessionServiceInterface;
+use App\Contracts\LegacyPermissionServiceInterface;
 use App\DTO\LegacyInventorySnapshot;
 use App\DTO\LegacyModuleSummary;
 use Tests\TestCase;
@@ -13,6 +15,38 @@ final class LegacyMigrationDashboardTest extends TestCase
 {
     public function testDashboardRendersMigrationInventory(): void
     {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function ($mock): void {
+            $mock->shouldReceive('currentUser')->andReturn([
+                'id' => 9,
+                'nome' => 'Maria Silva',
+                'email' => 'MARIA@EXEMPLO.COM',
+                'comum_id' => 7,
+                'is_admin' => false,
+            ]);
+            $mock->shouldReceive('currentChurch')->andReturn([
+                'id' => 7,
+                'codigo' => '12-3456',
+                'descricao' => 'Central Cuiabá',
+            ]);
+            $mock->shouldReceive('availableChurches')->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+                (object) ['id' => 8, 'codigo' => '98-7654', 'descricao' => 'Filial Várzea'],
+            ]));
+        });
+        $this->mock(LegacyPermissionServiceInterface::class, function ($mock): void {
+            $mock->shouldReceive('currentPermissions')->andReturn([
+                'products.view' => true,
+                'products.edit' => true,
+                'reports.view' => true,
+                'spreadsheets.import' => true,
+                'churches.view' => true,
+                'departments.view' => true,
+                'asset-types.view' => true,
+                'administrations.view' => true,
+                'users.view' => true,
+                'audits.view' => true,
+            ]);
+        });
         $this->app->instance(
             LegacyInventoryServiceInterface::class,
             new class implements LegacyInventoryServiceInterface
@@ -72,15 +106,17 @@ final class LegacyMigrationDashboardTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk();
-        $response->assertSee('Resumo do sistema.');
+        $response->assertSee('Dashboard do sistema.');
         $response->assertSee('Indicadores rápidos');
-        $response->assertSee('Registros contabilizados');
-        $response->assertSee('Módulos principais');
+        $response->assertSee('Total de registros');
         $response->assertSee('Igrejas');
-        $response->assertSee('Estrutura');
         $response->assertSee('Produtos');
-        $response->assertSee('Inventário');
-        $response->assertSee('Relatórios');
-        $response->assertSee('Fluxo');
+        $response->assertSee('Dependências');
+        $response->assertSee('Tipos de bem');
+        $response->assertSee('Usuários');
+        $response->assertSee('Auditoria');
+        $response->assertSee('Indicadores por igreja');
+        $response->assertSee('Central Cuiabá');
+        $response->assertSee('Filial Várzea');
     }
 }

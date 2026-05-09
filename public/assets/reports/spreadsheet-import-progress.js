@@ -127,17 +127,32 @@
             throw new Error(data.message || 'Erro ao consultar progresso.');
         }
 
-        document.getElementById('arquivo-nome').textContent = data.arquivo_nome;
-        document.getElementById('total-linhas').textContent = String(data.total_linhas);
-        document.getElementById('linhas-processadas').textContent = String(data.linhas_processadas);
-        document.getElementById('linhas-sucesso').textContent = String(data.linhas_sucesso);
-        document.getElementById('linhas-erro').textContent = String(data.linhas_erro);
-
         const percentage = Math.round(data.porcentagem);
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
         const statusText = document.getElementById('status-text');
         const progressShell = document.getElementById('processing-shell');
+        const arquivoNome = document.getElementById('arquivo-nome');
+        const totalLinhas = document.getElementById('total-linhas');
+        const linhasProcessadas = document.getElementById('linhas-processadas');
+        const linhasSucesso = document.getElementById('linhas-sucesso');
+        const linhasErro = document.getElementById('linhas-erro');
+
+        if (arquivoNome) {
+            arquivoNome.textContent = data.arquivo_nome || '';
+        }
+        if (totalLinhas) {
+            totalLinhas.textContent = String(data.total_linhas ?? 0);
+        }
+        if (linhasProcessadas) {
+            linhasProcessadas.textContent = String(data.linhas_processadas ?? 0);
+        }
+        if (linhasSucesso) {
+            linhasSucesso.textContent = String(data.linhas_sucesso ?? 0);
+        }
+        if (linhasErro) {
+            linhasErro.textContent = String(data.linhas_erro ?? 0);
+        }
 
         if (progressBar) {
             progressBar.style.width = `${percentage}%`;

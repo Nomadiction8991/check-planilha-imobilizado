@@ -29,6 +29,7 @@ class LegacyChurchManagementService implements LegacyChurchManagementServiceInte
         $church->fill([
             'descricao' => mb_strtoupper($data->description, 'UTF-8'),
             'cnpj' => $this->generateUniqueCnpj($validatedCnpj, $normalizedCode, (int) $church->id),
+            'administracao_id' => $data->administrationId,
             'estado' => $data->state,
             'cidade' => mb_strtoupper($data->city, 'UTF-8'),
             'estado_administracao' => $data->administrationState,

@@ -14,6 +14,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use RuntimeException;
 use Throwable;
@@ -35,11 +36,16 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
     public function responsibleUserOptions(): Collection
     {
         $scopeAdministrationIds = $this->currentAdministrationScopeIds();
+        $columns = ['id', 'nome', 'email', 'administracao_id', 'tipo'];
+
+        if (Schema::hasColumn('usuarios', 'administracoes_permitidas')) {
+            $columns[] = 'administracoes_permitidas';
+        }
 
         $users = Usuario::query()
             ->where('ativo', 1)
             ->orderBy('nome')
-            ->get(['id', 'nome', 'email', 'administracao_id', 'administracoes_permitidas', 'tipo']);
+            ->get($columns);
 
         if ($scopeAdministrationIds === null) {
             return $users;

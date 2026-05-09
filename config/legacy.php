@@ -85,7 +85,7 @@ return [
             'title' => 'Relatórios',
             'category' => 'Fluxo',
             'tone' => 'flow',
-            'description' => 'Geração, impressão e consulta dos formulários 14.x.',
+            'description' => 'Geração, impressão e posição de estoque da igreja.',
             'legacy_path' => '/reports',
             'target' => 'app/Http/Controllers/LegacyReportController.php',
         ],
@@ -109,7 +109,10 @@ return [
         ],
     ],
     'audit' => [
-        'storage_file' => env('LEGACY_AUDIT_LOG_PATH', storage_path('app/private/audits/audit-log.jsonl')),
+        'storage_file' => env(
+            'LEGACY_AUDIT_LOG_PATH',
+            sys_get_temp_dir() . '/check-planilha-imobilizado/audits/audit-log.jsonl'
+        ),
         'modules' => [
             'Sistema',
             'Sessão',
@@ -398,8 +401,8 @@ return [
                     ],
                     [
                         'key' => 'reports.changes.view',
-                        'label' => 'Ver histórico de alterações',
-                        'description' => 'Libera a tela de alterações por produto.',
+                        'label' => 'Ver posição de estoque',
+                        'description' => 'Libera a tela de posição de estoque e backup da verificação.',
                     ],
                     [
                         'key' => 'reports.editor',

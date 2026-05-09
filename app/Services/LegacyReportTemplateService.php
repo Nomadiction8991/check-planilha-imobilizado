@@ -49,6 +49,14 @@ final class LegacyReportTemplateService
             $backgroundImageUrl = $this->normalizeAssetUrl($matches[1]);
         }
 
+        $sharedStylesPath = public_path('assets/reports/secao14-templates.css');
+        if (is_file($sharedStylesPath)) {
+            $sharedStyles = file_get_contents($sharedStylesPath);
+            if ($sharedStyles !== false) {
+                $styleContent .= "\n\n" . trim($sharedStyles);
+            }
+        }
+
         return [$a4Block, $styleContent, $backgroundImageUrl];
     }
 

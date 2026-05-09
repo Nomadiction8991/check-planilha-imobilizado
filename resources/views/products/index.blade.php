@@ -12,7 +12,6 @@
         <h1>{{ $filters->onlyNew ? 'Produtos novos filtrados.' : 'Produtos ativos com filtro e manutenção.' }}</h1>
         <p class="hero-copy">
             Esta tela consulta o inventário com busca geral por código, descrição, dependência, tipo e status.
-            O filtro de igreja continua separado para manter o recorte da sessão.
         </p>
     </section>
 
@@ -27,7 +26,7 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.products.index') }}">
                 <div class="filters-primary">
                     <label class="filters-principal">
@@ -127,7 +126,6 @@
                     <thead>
                         <tr>
                             <th>Produto</th>
-                            <th>Igreja</th>
                             <th>Dependência</th>
                             <th>Status</th>
                             <th>Ações</th>
@@ -153,13 +151,7 @@
                                         <div class="table-note">{{ $type }}</div>
                                     @endif
                                 </td>
-                                <td data-label="Igreja">
-                                    {{ data_get($product, 'comum.codigo') ?: 'n/a' }}
-                                    @if (data_get($product, 'comum.descricao'))
-                                        <div class="table-note">{{ data_get($product, 'comum.descricao') }}</div>
-                                    @endif
-                                </td>
-                                <td data-label="Dependência">{{ data_get($product, 'dependencia.descricao', 'n/a') }}</td>
+                                <td data-label="Dependência">{{ data_get($product, 'dependencia.descricao', 'Nenhuma') }}</td>
                                 <td data-label="Status">
                                     @if ((int) $product->imprimir_14_1 === 1)
                                         <span class="capsule dark">14.1</span>
@@ -175,13 +167,11 @@
                                     @endif
                                 </td>
                                 <td data-label="Ações">
-                                    @if ($isLegacyAdmin || !empty($legacyPermissions['products.edit'] ?? null))
-                                        <div class="inline-actions">
-                                            <a class="btn" href="{{ route('migration.products.edit', ['product' => $product->id_produto]) }}">
-                                                Editar
-                                            </a>
-                                        </div>
-                                    @endif
+                                    <div class="inline-actions">
+                                        <a class="btn" href="{{ route('migration.products.edit', ['product' => $product->id_produto]) }}">
+                                            Editar
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

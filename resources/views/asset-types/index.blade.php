@@ -41,16 +41,18 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.asset-types.index') }}">
-                <label>
-                    Buscar por código ou descrição
-                    <input type="text" name="busca" value="{{ $filters->search }}" placeholder="4 ou CADEIRA">
-                </label>
+                <div class="filters-primary">
+                    <label class="filters-query">
+                        Buscar por código ou descrição
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="4 ou CADEIRA">
+                    </label>
 
-                <div class="actions">
-                    <button class="btn primary" type="submit">Filtrar</button>
-                    <a class="btn" href="{{ route('migration.asset-types.index') }}">Limpar</a>
+                    <div class="actions filters-actions">
+                        <button class="btn primary" type="submit">Filtrar</button>
+                        <a class="btn" href="{{ route('migration.asset-types.index') }}">Limpar</a>
+                    </div>
                 </div>
             </form>
         </div>
