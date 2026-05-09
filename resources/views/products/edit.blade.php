@@ -218,6 +218,8 @@
                         : ($currentTypeDescription !== '' ? $currentTypeDescription : 'Nenhum');
                     $currentDependency = trim((string) data_get($product, 'dependencia.descricao', ''));
                     $currentDependency = $currentDependency !== '' ? $currentDependency : 'Nenhuma';
+                    $currentBrand = trim((string) data_get($product, 'editado_marca', ''));
+                    $currentBrand = $currentBrand !== '' ? $currentBrand : 'Sem marca';
                     $currentDimensions = \App\Support\LegacyProductNameSupport::formatName(
                         '',
                         '',
@@ -259,6 +261,11 @@
                             <label>
                                 Dependência atual
                                 <input type="text" value="{{ $currentDependency }}" disabled>
+                            </label>
+
+                            <label>
+                                Marca atual
+                                <input type="text" value="{{ $currentBrand }}" disabled>
                             </label>
 
                             <label>
@@ -317,6 +324,11 @@
                             <label>
                                 Novo complemento
                                 <textarea name="novo_complemento" rows="3" required>{{ old('novo_complemento', $product->editado_complemento ?: $product->complemento) }}</textarea>
+                            </label>
+
+                            <label>
+                                Nova marca
+                                <input type="text" name="novo_marca" value="{{ old('novo_marca', $product->editado_marca) }}" maxlength="255" placeholder="Ex.: TRAMONTINA">
                             </label>
 
                             <div class="field-grid">

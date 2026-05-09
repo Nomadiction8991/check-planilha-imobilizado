@@ -12,8 +12,8 @@ final class LegacyProductNameSupportTest extends TestCase
     public function testFormatsDimensionsAtTheEndOfTheName(): void
     {
         self::assertSame(
-            'CADEIRA METALICA A(1.2m) L(0.8m) C(2.5m)',
-            LegacyProductNameSupport::formatName('CADEIRA', 'METALICA', '1.200', '0.800', '2.500')
+            'CADEIRA METALICA TRAMONTINA A(1.2m) L(0.8m) C(2.5m)',
+            LegacyProductNameSupport::formatName('CADEIRA', 'METALICA', 'TRAMONTINA', '1.200', '0.800', '2.500')
         );
     }
 
@@ -28,13 +28,14 @@ final class LegacyProductNameSupportTest extends TestCase
             'editado' => 1,
             'editado_bem' => 'MESA',
             'editado_complemento' => 'MADEIRA',
+            'editado_marca' => 'TRAMONTINA',
             'editado_altura_m' => '1.300',
             'editado_largura_m' => null,
             'editado_comprimento_m' => '2.400',
         ];
 
         self::assertSame(
-            'MESA MADEIRA A(1.3m) L(0.9m) C(2.4m)',
+            'MESA MADEIRA TRAMONTINA A(1.3m) L(0.9m) C(2.4m)',
             LegacyProductNameSupport::formatCurrentName($product)
         );
     }

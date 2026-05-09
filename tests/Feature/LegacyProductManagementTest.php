@@ -584,6 +584,8 @@ final class LegacyProductManagementTest extends TestCase
         $response->assertSee('Editar produto.');
         $response->assertSee('Valores atuais');
         $response->assertSee('Novos valores');
+        $response->assertSee('Marca atual');
+        $response->assertSee('Nova marca');
         $response->assertSee('Salvar alterações');
     }
 
@@ -599,6 +601,7 @@ final class LegacyProductManagementTest extends TestCase
                         && $dto->editedAssetTypeId === 7
                         && $dto->editedItemName === 'MESA'
                         && $dto->editedDependencyId === 3
+                        && $dto->editedBrand === 'Marca X'
                         && $dto->printReport141 === true
                     )
                     ->andReturn($this->makeProduct());
@@ -609,6 +612,7 @@ final class LegacyProductManagementTest extends TestCase
             'novo_tipo_bem_id' => 7,
             'novo_bem' => 'MESA',
             'novo_complemento' => 'Madeira',
+            'novo_marca' => 'Marca X',
             'nova_dependencia_id' => 3,
             'imprimir_14_1' => 1,
             'condicao_14_1' => '2',
@@ -633,6 +637,7 @@ final class LegacyProductManagementTest extends TestCase
             'novo_tipo_bem_id' => 7,
             'novo_bem' => 'MESA',
             'novo_complemento' => 'Madeira',
+            'novo_marca' => 'Marca X',
             'nova_dependencia_id' => 3,
             'imprimir_14_1' => 1,
             'condicao_14_1' => '2',
@@ -767,6 +772,7 @@ final class LegacyProductManagementTest extends TestCase
             'novo_tipo_bem_id' => 7,
             'novo_bem' => 'MESA',
             'novo_complemento' => 'Madeira',
+            'novo_marca' => 'Marca X',
             'nova_dependencia_id' => 3,
             'observacao' => 'ajuste de cadastro',
             'verificado' => 0,

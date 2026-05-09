@@ -73,6 +73,9 @@ class LegacyProductManagementService implements LegacyProductManagementServiceIn
             'editado_tipo_bem_id' => (int) $assetType->id,
             'editado_bem' => $itemName,
             'editado_complemento' => mb_strtoupper(trim($data->editedComplement), 'UTF-8'),
+            'editado_marca' => $data->editedBrand !== null
+                ? mb_strtoupper(trim($data->editedBrand), 'UTF-8')
+                : null,
             'editado_altura_m' => $data->editedHeightMeters,
             'editado_largura_m' => $data->editedWidthMeters,
             'editado_comprimento_m' => $data->editedLengthMeters,
