@@ -173,6 +173,88 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
             ->get(['id', 'codigo', 'descricao']);
     }
 
+    public function filterPinStates(): array
+    {
+        $user = $this->currentUsuario();
+
+        if ($user === null) {
+            return [];
+        }
+
+        $preferences = $this->normalizePreferences($user->ui_preferences);
+        $states = $preferences['filters_pin'] ?? [];
+
+        if (!is_array($states)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($states as $scope => $scopeStates) {
+            if (!is_array($scopeStates)) {
+                continue;
+            }
+
+            $normalizedScope = [];
+            foreach ($scopeStates as $index => $pinned) {
+                if ((bool) $pinned) {
+                    $normalizedScope[(string) $index] = true;
+                }
+            }
+
+            if ($normalizedScope !== []) {
+                $normalized[(string) $scope] = $normalizedScope;
+            }
+        }
+
+        return $normalized;
+    }
+
+    public function storeFilterPinState(string $scope, int $index, bool $pinned): void
+    {
+        $scope = $this->normalizeFilterPinScope($scope);
+
+        if ($scope === '' || $index < 0) {
+            throw new RuntimeException('Preferência de filtros inválida.');
+        }
+
+        $user = $this->currentUsuario();
+
+        if ($user === null) {
+            throw new RuntimeException('Sessão inválida.');
+        }
+
+        $preferences = $this->normalizePreferences($user->ui_preferences);
+        $filterPinStates = $preferences['filters_pin'] ?? [];
+
+        if (!is_array($filterPinStates)) {
+            $filterPinStates = [];
+        }
+
+        $scopeStates = $filterPinStates[$scope] ?? [];
+        if (!is_array($scopeStates)) {
+            $scopeStates = [];
+        }
+
+        if ($pinned) {
+            $scopeStates[(string) $index] = true;
+        } else {
+            unset($scopeStates[(string) $index]);
+        }
+
+        if ($scopeStates === []) {
+            unset($filterPinStates[$scope]);
+        } else {
+            $filterPinStates[$scope] = $scopeStates;
+        }
+
+        $preferences['filters_pin'] = $filterPinStates;
+
+        $user->forceFill([
+            'ui_preferences' => $preferences,
+        ])->save();
+    }
+
     private function resolveInitialChurchId(Usuario $user): ?int
     {
         if ($this->inferIsAdmin($user) || (int) ($user->administracao_id ?? 0) > 0) {
@@ -200,6 +282,44 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
         $administrationId = (int) ($user->administracao_id ?? 0);
 
         return $administrationId > 0 ? $administrationId : null;
+    }
+
+    private function currentUsuario(): ?Usuario
+    {
+        $userId = (int) Session::get('usuario_id', 0);
+
+        if ($userId <= 0) {
+            return null;
+        }
+
+        /** @var Usuario|null $user */
+        $user = Usuario::query()->find($userId);
+
+        return $user;
+    }
+
+    /**
+     * @param mixed $preferences
+     * @return array<string, mixed>
+     */
+    private function normalizePreferences(mixed $preferences): array
+    {
+        if (!is_array($preferences)) {
+            return [];
+        }
+
+        return $preferences;
+    }
+
+    private function normalizeFilterPinScope(string $scope): string
+    {
+        $scope = trim($scope);
+
+        if ($scope === '') {
+            return '';
+        }
+
+        return str_starts_with($scope, '/') ? $scope : '/' . ltrim($scope, '/');
     }
 
     /**

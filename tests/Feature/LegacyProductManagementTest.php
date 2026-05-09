@@ -9,6 +9,7 @@ use App\Contracts\LegacyProductBrowserServiceInterface;
 use App\Contracts\LegacyProductManagementServiceInterface;
 use App\Contracts\LegacyProductUtilityServiceInterface;
 use App\Contracts\LegacyPermissionServiceInterface;
+use App\Contracts\LegacyNavigationServiceInterface;
 use App\DTO\ProductFilters;
 use App\DTO\ProductVerificationItemData;
 use App\Models\Legacy\Comum;
@@ -45,6 +46,11 @@ final class LegacyProductManagementTest extends TestCase
             $mock->shouldReceive('availableChurches')->andReturn(collect([
                 (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
             ]));
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('navigation')->andReturn([]);
         });
 
         $this->boundProduct = $this->makeProduct();
@@ -612,6 +618,55 @@ final class LegacyProductManagementTest extends TestCase
         $response->assertSessionHas('status', 'Produto atualizado com sucesso.');
     }
 
+    public function testUpdateReturnsToVerificationWhenRequested(): void
+    {
+        $this->mock(
+            LegacyProductManagementServiceInterface::class,
+            function (MockInterface $mock): void {
+                $mock->shouldReceive('update')
+                    ->once()
+                    ->andReturn($this->makeProduct());
+            }
+        );
+
+        $response = $this->put(route('migration.products.update', ['product' => 19]), [
+            'novo_tipo_bem_id' => 7,
+            'novo_bem' => 'MESA',
+            'novo_complemento' => 'Madeira',
+            'nova_dependencia_id' => 3,
+            'imprimir_14_1' => 1,
+            'condicao_14_1' => '2',
+            'return_url' => route('migration.products.verification', [
+                'comum_id' => 7,
+                'busca' => 'cadeira',
+            ]),
+        ]);
+
+        $response->assertRedirect(route('migration.products.verification', [
+            'comum_id' => 7,
+            'busca' => 'cadeira',
+        ]));
+        $response->assertSessionHas('status', 'Produto atualizado com sucesso.');
+    }
+
+    public function testFilterPinPreferenceIsSavedPerUser(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('storeFilterPinState')
+                ->once()
+                ->with('/products/verificacao', 0, true);
+        });
+
+        $response = $this->postJson(route('migration.session.filters-pin'), [
+            'scope' => '/products/verificacao',
+            'index' => 0,
+            'pinned' => true,
+        ]);
+
+        $response->assertOk();
+        $response->assertJson(['success' => true]);
+    }
+
     public function testIndexAndVerificationShowEditButtonWithoutEditPermission(): void
     {
         $this->mock(LegacyPermissionServiceInterface::class, function (MockInterface $mock): void {
@@ -768,7 +823,12 @@ final class LegacyProductManagementTest extends TestCase
      */
     private function makeProduct(array $overrides = []): Produto
     {
-        $product = new Produto();
+        $product = new class extends Produto {
+            public function loadMissing($relations = null): static
+            {
+                return $this;
+            }
+        };
         $product->forceFill(array_merge([
             'id_produto' => 19,
             'comum_id' => 7,

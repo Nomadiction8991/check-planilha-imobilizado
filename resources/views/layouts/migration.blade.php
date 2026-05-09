@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
     @include('partials.theme-init')
     @include('partials.pwa')
@@ -70,33 +71,16 @@
             gap: 12px;
         }
 
-        .sticky-stack.is-stuck .filters {
-            padding-block: 16px;
-        }
-
-        .sticky-stack.is-stuck .filters .filters-advanced {
-            display: none;
-        }
-
-        .sticky-stack.is-stuck .filters .filters-actions .btn:not(.primary) {
-            display: none;
-        }
-
-        .filters-toolbar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 14px;
-        }
-
         .filters-pin-toggle {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            min-height: 40px;
-            padding: 10px 12px;
-            border: 1px solid var(--line);
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border: 1px solid transparent;
             border-radius: 999px;
-            background: var(--surface-strong);
+            background: transparent;
             color: var(--muted);
             cursor: pointer;
             transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
@@ -104,8 +88,8 @@
 
         .filters-pin-toggle:hover {
             transform: translateY(-1px);
-            border-color: rgba(24, 21, 17, 0.18);
-            box-shadow: 0 8px 20px rgba(38, 28, 12, 0.08);
+            border-color: rgba(24, 21, 17, 0.10);
+            background: rgba(255, 255, 255, 0.48);
         }
 
         .filters-pin-toggle.is-active {
@@ -762,6 +746,22 @@
             width: 100%;
         }
 
+        .filters-principal {
+            display: grid;
+            gap: 6px;
+        }
+
+        .filters-principal__controls {
+            display: flex;
+            align-items: end;
+            gap: 8px;
+        }
+
+        .filters-principal__controls select {
+            min-width: 220px;
+            flex: 1 1 auto;
+        }
+
         .filters-primary:has(.filters-query):has(.filters-principal) {
             grid-template-columns: minmax(220px, 320px) minmax(260px, 420px) auto;
         }
@@ -794,21 +794,12 @@
             margin: 0;
         }
 
-        .sticky-stack.is-stuck .filters .filters-advanced,
         .filters.is-pinned .filters-advanced {
             display: none;
         }
 
-        .sticky-stack.is-stuck .filters .filters-actions .btn:not(.primary),
         .filters.is-pinned .filters-actions .btn:not(.primary) {
             display: none;
-        }
-
-        .sticky-stack.is-stuck .filters .filters-pin-toggle,
-        .filters.is-pinned .filters-pin-toggle {
-            color: var(--accent);
-            background: var(--accent-soft);
-            border-color: rgba(31, 111, 95, 0.22);
         }
 
         label {
@@ -1511,7 +1502,7 @@
 </head>
 <body class="@yield('bodyClass') {{ $hideHeroOnOperationalRoutes ? 'page-operational' : '' }}">
     <main class="shell">
-        <div class="sticky-stack" data-sticky-stack>
+        <div class="sticky-stack" data-sticky-stack data-filters-pin-sync-url="{{ route('migration.session.filters-pin') }}">
         <header class="topbar" data-sticky-stack-topbar>
             <div class="topbar-main">
                 <div class="brand">
@@ -1672,6 +1663,8 @@
         </div>
     @endunless
     <script>
+        const legacyFilterPinStates = @json($legacyFilterPinStates ?? []);
+
         (() => {
             const menu = document.querySelector('[data-mobile-menu]');
             const toggle = document.querySelector('[data-mobile-menu-toggle]');
@@ -1740,63 +1733,71 @@
         (() => {
             const stickyStack = document.querySelector('[data-sticky-stack]');
             const stickySlot = document.querySelector('[data-sticky-stack-slot]');
-            const stickyTopbar = document.querySelector('[data-sticky-stack-topbar]');
             const stickyFilters = Array.from(document.querySelectorAll('[data-sticky-filters]'));
-            const mobileStickyQuery = window.matchMedia('(max-width: 860px)');
+            const pinSyncUrl = stickyStack?.dataset.filtersPinSyncUrl || '';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
             if (!stickyStack || !stickySlot || !stickyFilters.length) {
                 return;
             }
-
-            const storagePrefix = `check-planilha:filters-pin:${window.location.pathname}`;
+            const currentPath = window.location.pathname;
 
             const renderPinControl = (filterCard, index) => {
                 if (filterCard.querySelector('[data-filters-pin-toggle]')) {
                     return filterCard.querySelector('[data-filters-pin-toggle]');
                 }
 
-                const toolbar = document.createElement('div');
-                toolbar.className = 'filters-toolbar';
-                toolbar.innerHTML = `
-                    <button
-                        type="button"
-                        class="filters-pin-toggle"
-                        data-filters-pin-toggle
-                        aria-pressed="false"
-                        aria-label="Fixar card de filtros"
-                        title="Fixar card de filtros"
-                    >
-                        <span class="material-symbols-outlined" data-filters-pin-icon aria-hidden="true">push_pin</span>
-                        <span data-filters-pin-label>Fixar</span>
-                    </button>
+                const principal = filterCard.querySelector('.filters-principal__controls')
+                    || filterCard.querySelector('.filters-principal')
+                    || filterCard;
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'filters-pin-toggle';
+                button.dataset.filtersPinToggle = '1';
+                button.setAttribute('aria-pressed', 'false');
+                button.setAttribute('aria-label', 'Fixar card de filtros');
+                button.title = 'Fixar card de filtros';
+                button.innerHTML = `
+                    <span class="material-symbols-outlined" data-filters-pin-icon aria-hidden="true">push_pin</span>
                 `;
 
-                filterCard.prepend(toolbar);
+                principal.appendChild(button);
                 filterCard.dataset.filtersPinIndex = String(index);
 
-                return toolbar.querySelector('[data-filters-pin-toggle]');
+                return button;
             };
 
             const readPinState = (index) => {
-                try {
-                    return window.localStorage.getItem(`${storagePrefix}:${index}`) === '1';
-                } catch (error) {
-                    return false;
-                }
+                return Boolean(legacyFilterPinStates?.[currentPath]?.[String(index)]);
             };
 
-            const writePinState = (index, pinned) => {
+            const persistPinState = async (index, pinned) => {
+                if (!pinSyncUrl || csrfToken === '') {
+                    return;
+                }
+
                 try {
-                    window.localStorage.setItem(`${storagePrefix}:${index}`, pinned ? '1' : '0');
+                    await fetch(pinSyncUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            scope: currentPath,
+                            index,
+                            pinned,
+                        }),
+                    });
                 } catch (error) {
-                    // Keep the preference in-memory when storage is unavailable.
+                    console.warn('Não foi possível salvar o pin dos filtros.', error);
                 }
             };
 
             const syncFilterCard = (filterCard, pinned, index) => {
                 const button = filterCard.querySelector('[data-filters-pin-toggle]');
                 const icon = filterCard.querySelector('[data-filters-pin-icon]');
-                const label = filterCard.querySelector('[data-filters-pin-label]');
 
                 filterCard.classList.toggle('is-pinned', pinned);
                 filterCard.dataset.filtersPinned = pinned ? 'true' : 'false';
@@ -1814,12 +1815,6 @@
                 if (icon instanceof HTMLElement) {
                     icon.textContent = 'push_pin';
                 }
-
-                if (label instanceof HTMLElement) {
-                    label.textContent = pinned ? 'Fixado' : 'Fixar';
-                }
-
-                writePinState(index, pinned);
             };
 
             stickyFilters.forEach((filterCard, index) => {
@@ -1836,42 +1831,20 @@
                 pinToggle?.addEventListener('click', () => {
                     const nextPinned = filterCard.dataset.filtersPinned !== 'true';
                     syncFilterCard(filterCard, nextPinned, index);
+                    void persistPinState(index, nextPinned);
                     updateStickyState();
                 });
             });
 
             stickyStack.classList.add('has-slot');
 
-            let frameId = null;
-
             const updateStickyState = () => {
-                const stickyGap = Number.parseFloat(
-                    getComputedStyle(document.documentElement).getPropertyValue('--topbar-sticky-gap')
-                ) || 12;
-                const stickyAnchor = mobileStickyQuery.matches && stickyTopbar
-                    ? stickyTopbar.getBoundingClientRect().bottom
-                    : stickyStack.getBoundingClientRect().top;
-
                 const hasPinnedFilters = stickyFilters.some((filterCard) => filterCard.dataset.filtersPinned === 'true');
                 stickyStack.classList.toggle('is-pinned', hasPinnedFilters);
-                stickyStack.classList.toggle('is-stuck', hasPinnedFilters || stickyAnchor <= stickyGap + 1);
-            };
-
-            const scheduleUpdate = () => {
-                if (frameId !== null) {
-                    return;
-                }
-
-                frameId = window.requestAnimationFrame(() => {
-                    frameId = null;
-                    updateStickyState();
-                });
+                stickyStack.classList.toggle('is-stuck', hasPinnedFilters);
             };
 
             updateStickyState();
-            window.addEventListener('scroll', scheduleUpdate, { passive: true });
-            window.addEventListener('resize', scheduleUpdate);
-            window.addEventListener('load', scheduleUpdate);
         })();
 
         (() => {

@@ -43,6 +43,7 @@ class Usuario extends Model
         'endereco_estado',
         'tipo',
         'permissions',
+        'ui_preferences',
     ];
 
     protected $casts = [
@@ -54,6 +55,7 @@ class Usuario extends Model
         'casado' => 'integer',
         'rg_conjuge_igual_cpf' => 'integer',
         'permissions' => 'array',
+        'ui_preferences' => 'array',
     ];
 
     public function scopeActive(Builder $query): Builder
