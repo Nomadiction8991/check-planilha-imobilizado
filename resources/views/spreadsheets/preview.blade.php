@@ -21,6 +21,14 @@
         </p>
     </section>
 
+    <div class="flash error" style="margin-bottom: 24px;">
+        <strong>Atenção: importação por dependência não é suportada.</strong>
+        <p style="margin: 8px 0 0;">
+            Confirme sempre a igreja inteira ou todas as igrejas do arquivo. Separar por dependência pode omitir
+            itens do relatório e causar divergências futuras.
+        </p>
+    </div>
+
     @if (session('status'))
         <div class="flash-stack">
             <div class="flash {{ session('status_type', 'success') === 'error' ? 'error' : 'success' }}">
