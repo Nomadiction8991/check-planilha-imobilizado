@@ -138,10 +138,7 @@
                                     data_get($product, 'tipoBem.codigo'),
                                     data_get($product, 'tipoBem.descricao'),
                                 ])));
-                                $description = trim(implode(' ', array_filter([
-                                    $product->bem,
-                                    $product->complemento,
-                                ])));
+                                $description = \App\Support\LegacyProductNameSupport::formatCurrentName($product);
                             @endphp
                             <tr>
                                 <td data-label="Produto">
