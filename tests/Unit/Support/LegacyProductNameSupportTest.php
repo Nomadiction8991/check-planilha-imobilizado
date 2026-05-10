@@ -39,4 +39,27 @@ final class LegacyProductNameSupportTest extends TestCase
             LegacyProductNameSupport::formatCurrentName($product)
         );
     }
+
+    public function testFormatsCurrentNameKeepingBlankEditedComplement(): void
+    {
+        $product = (object) [
+            'bem' => 'CADEIRA',
+            'complemento' => 'METALICA',
+            'altura_m' => '1.100',
+            'largura_m' => '0.900',
+            'comprimento_m' => '2.000',
+            'editado' => 1,
+            'editado_bem' => 'MESA',
+            'editado_complemento' => '',
+            'editado_marca' => 'TRAMONTINA',
+            'editado_altura_m' => '1.300',
+            'editado_largura_m' => null,
+            'editado_comprimento_m' => '2.400',
+        ];
+
+        self::assertSame(
+            'MESA TRAMONTINA A(1.3m) L(0.9m) C(2.4m)',
+            LegacyProductNameSupport::formatCurrentName($product)
+        );
+    }
 }
