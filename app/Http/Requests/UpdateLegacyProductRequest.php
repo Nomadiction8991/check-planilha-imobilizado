@@ -25,7 +25,7 @@ class UpdateLegacyProductRequest extends FormRequest
         return [
             'novo_tipo_bem_id' => ['required', 'integer', 'min:1'],
             'novo_bem' => ['required', 'string', 'max:255', 'regex:/\S/'],
-            'novo_complemento' => ['required', 'string', 'regex:/\S/'],
+            'novo_complemento' => ['nullable', 'string', 'max:255'],
             'novo_marca' => ['nullable', 'string', 'max:255'],
             'altura_m' => ['nullable', 'numeric', 'min:0'],
             'largura_m' => ['nullable', 'numeric', 'min:0'],
@@ -51,8 +51,7 @@ class UpdateLegacyProductRequest extends FormRequest
             'novo_tipo_bem_id.required' => 'Selecione um tipo de bem.',
             'novo_bem.required' => 'Selecione um bem.',
             'novo_bem.regex' => 'Selecione um bem válido.',
-            'novo_complemento.required' => 'Informe o complemento.',
-            'novo_complemento.regex' => 'Informe o complemento.',
+            'novo_complemento.max' => 'O complemento deve ter no máximo 255 caracteres.',
             'novo_marca.max' => 'A marca deve ter no máximo 255 caracteres.',
             'nova_dependencia_id.required' => 'Selecione uma dependência.',
             'verificado.boolean' => 'A seleção de verificação é inválida.',
