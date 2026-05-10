@@ -324,7 +324,7 @@
 
                             <label>
                                 Novo complemento
-                                <textarea name="novo_complemento" rows="3">{{ old('novo_complemento', $product->editado_complemento ?: $product->complemento) }}</textarea>
+                                <textarea name="novo_complemento" rows="3">{{ old('novo_complemento', (int) $product->editado === 1 ? data_get($product, 'editado_complemento', '') : data_get($product, 'complemento', '')) }}</textarea>
                             </label>
 
                             <label>
