@@ -165,7 +165,10 @@
                                 </td>
                                 <td data-label="Ações">
                                     <div class="inline-actions">
-                                        <a class="btn" href="{{ route('migration.products.edit', ['product' => $product->id_produto]) }}">
+                                        <a class="btn" href="{{ route('migration.products.edit', [
+                                            'product' => $product->id_produto,
+                                            'return_url' => url()->full(),
+                                        ]) }}">
                                             Editar
                                         </a>
                                     </div>
