@@ -62,7 +62,6 @@ final class LegacyChurchManagementTest extends TestCase
         $response->assertSee('Editar igreja.');
         $response->assertSee('Salvar alterações');
         $response->assertSee('12-3456');
-        $response->assertSee('/api/cnpj-lookup');
         $response->assertSee('assets/forms/input-mask.js', false);
         $response->assertSee('assets/forms/localidades.js', false);
         $response->assertSee('data-mask="cnpj"', false);

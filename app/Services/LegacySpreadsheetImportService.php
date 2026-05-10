@@ -42,20 +42,22 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             $columns[] = 'administracoes_permitidas';
         }
 
-        $users = Usuario::query()
+        return Usuario::query()
             ->where('ativo', 1)
+            ->when($scopeAdministrationIds !== null, function ($query) use ($scopeAdministrationIds) {
+                // Filtra usuários que pertencem à administração ou que têm permissão explícita
+                $query->where(function ($q) use ($scopeAdministrationIds) {
+                    $q->whereIn('administracao_id', $scopeAdministrationIds);
+                    
+                    if (Schema::hasColumn('usuarios', 'administracoes_permitidas')) {
+                        foreach ($scopeAdministrationIds as $id) {
+                            $q->orWhereJsonContains('administracoes_permitidas', (int) $id);
+                        }
+                    }
+                });
+            })
             ->orderBy('nome')
             ->get($columns);
-
-        if ($scopeAdministrationIds === null) {
-            return $users;
-        }
-
-        return $users
-            ->filter(
-                fn (Usuario $user): bool => $this->isUserWithinAdministrationScope($user, $scopeAdministrationIds)
-            )
-            ->values();
     }
 
     public function churchOptions(): Collection
@@ -109,7 +111,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             }
 
             $importacaoService = new ImportacaoService();
-            $csvParserService = new CsvParserService();
+            $csvParserService = new CsvParserService(null, (int) $data->administrationId);
             $destinationPath = $this->moveUploadedFile($file, $fallbackChurchId);
 
             $importacaoId = $importacaoService->iniciarImportacao(
@@ -255,6 +257,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                 'analise' => $analise,
                 'acoes_salvas' => Session::get($this->previewActionsKey($importacaoId), []),
                 'igrejas_salvas' => Session::get($this->previewChurchesKey($importacaoId), []),
+                'dependencias_salvas' => Session::get($this->previewDependenciesKey($importacaoId), []),
                 'status_por_comum' => $statusByChurch,
                 'igrejas_detectadas' => $igrejasDetectadas,
             ];
@@ -263,7 +266,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
         }
     }
 
-    public function savePreviewActions(int $importacaoId, array $acoes, array $igrejas): array
+    public function savePreviewActions(int $importacaoId, array $acoes, array $igrejas, array $dependencias = []): array
     {
         $this->ensureImportExists($importacaoId);
 
@@ -285,12 +288,22 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             }
         }
 
+        $savedDependencies = Session::get($this->previewDependenciesKey($importacaoId), []);
+        foreach ($dependencias as $churchDepKey => $action) {
+            // chave formatada como "CHURCH_CODE:DEPENDENCY_NAME"
+            if (in_array($action, ['', 'importar', 'pular'], true)) {
+                $savedDependencies[(string) $churchDepKey] = $action;
+            }
+        }
+
         Session::put($this->previewActionsKey($importacaoId), $savedActions);
         Session::put($this->previewChurchesKey($importacaoId), $savedChurches);
+        Session::put($this->previewDependenciesKey($importacaoId), $savedDependencies);
 
         return [
-            'total_salvas' => count($savedActions) + count($savedChurches),
+            'total_salvas' => count($savedActions) + count($savedChurches) + count($savedDependencies),
             'igrejas_salvas' => count($savedChurches),
+            'dependencias_salvas' => count($savedDependencies),
         ];
     }
 
@@ -330,7 +343,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
         ];
     }
 
-    public function confirmImport(int $importacaoId, bool $importAll = true, array $acoes = [], array $igrejas = []): array
+    public function confirmImport(int $importacaoId, bool $importAll = true, array $acoes = [], array $igrejas = [], array $dependencias = []): array
     {
         $importacaoService = new ImportacaoService();
         $csvParserService = new CsvParserService();
@@ -357,13 +370,18 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             }
 
             $savedChurches = Session::get($this->previewChurchesKey($importacaoId), []);
+            $savedDependencies = Session::get($this->previewDependenciesKey($importacaoId), []);
+            
             $churchActions = array_merge($savedChurches, $igrejas);
+            $dependencyActions = array_merge($savedDependencies, $dependencias);
+            
             $fallbackChurchId = (int) ($importacao['comum_id'] ?? 0);
             $actions = [];
 
             if ($importAll) {
                 $actions = $this->buildConfirmActionsByChurch(
                     (array) ($analise['registros'] ?? []),
+                    [],
                     [],
                     $fallbackChurchId,
                     true,
@@ -372,6 +390,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                 $actions = $this->buildConfirmActionsByChurch(
                     (array) ($analise['registros'] ?? []),
                     $churchActions,
+                    $dependencyActions,
                     $fallbackChurchId,
                     false,
                 );
@@ -380,6 +399,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             $resultado = $importacaoService->processarComAcoes($importacaoId, $actions, $analise);
             Session::forget($this->previewActionsKey($importacaoId));
             Session::forget($this->previewChurchesKey($importacaoId));
+            Session::forget($this->previewDependenciesKey($importacaoId));
 
             try {
                 $csvParserService->limparAnalise($importacaoId);
@@ -396,6 +416,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                     if ($importacao !== null && (string) ($importacao['status'] ?? '') === 'concluida') {
                         Session::forget($this->previewActionsKey($importacaoId));
                         Session::forget($this->previewChurchesKey($importacaoId));
+                        Session::forget($this->previewDependenciesKey($importacaoId));
                         Session::forget($this->confirmOptionsKey($importacaoId));
 
                         return [
@@ -501,6 +522,11 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
         foreach ($registros as $registro) {
             $churchCode = $this->resolveChurchCodeForRecord($registro, $fallbackChurchCode);
+            $dependencyName = strtoupper(trim((string) ($registro['dados_csv']['dependencia_descricao'] ?? $registro['dependencia'] ?? 'SEM DEPENDÊNCIA')));
+            if ($dependencyName === '') {
+                $dependencyName = 'SEM DEPENDÊNCIA';
+            }
+
             $status = (string) ($registro['status'] ?? '');
 
             if (!isset($groups[$churchCode])) {
@@ -519,26 +545,45 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                     'exclusoes' => 0,
                     'erros' => 0,
                     'status' => 'sem_alteracao',
+                    'dependencias' => [],
+                ];
+            }
+
+            if (!isset($groups[$churchCode]['dependencias'][$dependencyName])) {
+                $groups[$churchCode]['dependencias'][$dependencyName] = [
+                    'nome' => $dependencyName,
+                    'total' => 0,
+                    'novos' => 0,
+                    'atualizar' => 0,
+                    'sem_alteracao' => 0,
+                    'exclusoes' => 0,
+                    'erros' => 0,
                 ];
             }
 
             $groups[$churchCode]['total']++;
+            $groups[$churchCode]['dependencias'][$dependencyName]['total']++;
 
             switch ($status) {
                 case CsvParserService::STATUS_NOVO:
                     $groups[$churchCode]['novos']++;
+                    $groups[$churchCode]['dependencias'][$dependencyName]['novos']++;
                     break;
                 case CsvParserService::STATUS_ATUALIZAR:
                     $groups[$churchCode]['atualizar']++;
+                    $groups[$churchCode]['dependencias'][$dependencyName]['atualizar']++;
                     break;
                 case CsvParserService::STATUS_SEM_ALTERACAO:
                     $groups[$churchCode]['sem_alteracao']++;
+                    $groups[$churchCode]['dependencias'][$dependencyName]['sem_alteracao']++;
                     break;
                 case CsvParserService::STATUS_EXCLUIR:
                     $groups[$churchCode]['exclusoes']++;
+                    $groups[$churchCode]['dependencias'][$dependencyName]['exclusoes']++;
                     break;
                 default:
                     $groups[$churchCode]['erros']++;
+                    $groups[$churchCode]['dependencias'][$dependencyName]['erros']++;
                     break;
             }
         }
@@ -571,6 +616,9 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                     $group['descricao'] = $code;
                 }
             }
+
+            // Ordenar dependências por nome
+            ksort($group['dependencias']);
 
             $group['status'] = $group['erros'] > 0
                 ? 'com_erro'
@@ -616,9 +664,10 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
     /**
      * @param array<int, array<string, mixed>> $registros
      * @param array<string, string> $churchActions
+     * @param array<string, string> $dependencyActions
      * @return array<string, string>
      */
-    private function buildConfirmActionsByChurch(array $registros, array $churchActions, int $fallbackChurchId, bool $importAll): array
+    private function buildConfirmActionsByChurch(array $registros, array $churchActions, array $dependencyActions, int $fallbackChurchId, bool $importAll): array
     {
         $actions = [];
         $fallbackChurchCode = $this->resolveFallbackChurchCode($fallbackChurchId);
@@ -632,6 +681,11 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
             $status = (string) ($registro['status'] ?? '');
             $churchCode = $this->resolveChurchCodeForRecord($registro, $fallbackChurchCode);
+            $dependencyName = strtoupper(trim((string) ($registro['dados_csv']['dependencia_descricao'] ?? $registro['dependencia'] ?? 'SEM DEPENDÊNCIA')));
+            if ($dependencyName === '') {
+                $dependencyName = 'SEM DEPENDÊNCIA';
+            }
+            $depKey = $churchCode . ':' . $dependencyName;
 
             if ($importAll) {
                 if ($status === 'erro') {
@@ -645,9 +699,18 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                 continue;
             }
 
-            $churchAction = $churchActions[$churchCode] ?? CsvParserService::ACAO_PULAR;
+            $churchAction = $churchActions[$churchCode] ?? 'personalizado';
+            
+            // Se a igreja estiver marcada para pular, pula tudo dela
+            if ($churchAction === CsvParserService::ACAO_PULAR) {
+                $actions[$line] = CsvParserService::ACAO_PULAR;
+                continue;
+            }
 
-            if ($churchAction !== CsvParserService::ACAO_IMPORTAR || $status === 'erro') {
+            // Se estiver em modo personalizado ou importar, checa a dependência
+            $depAction = $dependencyActions[$depKey] ?? ($churchAction === 'importar' ? 'importar' : 'pular');
+
+            if ($depAction !== CsvParserService::ACAO_IMPORTAR || $status === 'erro') {
                 $actions[$line] = CsvParserService::ACAO_PULAR;
                 continue;
             }
@@ -756,6 +819,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
         $church = null;
         $administration = null;
+        $import = null;
 
         if (($importacaoId ?? 0) > 0) {
             $import = $connection->table('importacoes as i')
@@ -858,53 +922,36 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                 'ie.complemento',
             ])
             ->orderBy('ie.id')
-            ->get();
+            ->cursor();
 
-        if ($errors->isEmpty()) {
-            throw new RuntimeException('Nenhum erro pendente para baixar.');
-        }
+        $rows = (function () use ($errors) {
+            $header = array_fill(0, 16, '');
+            $header[0] = 'Codigo';
+            $header[3] = 'Nome';
+            $header[10] = 'Localidade';
+            $header[15] = 'Dependencia';
+            yield $header;
 
-        $stream = fopen('php://temp', 'r+');
-        if ($stream === false) {
-            throw new RuntimeException('Não foi possível preparar o arquivo de correção.');
-        }
+            foreach ($errors as $error) {
+                $row = array_fill(0, 16, '');
+                $row[0] = (string) ($error->codigo ?? '');
 
-        fwrite($stream, chr(0xEF) . chr(0xBB) . chr(0xBF));
+                $originalName = trim((string) ($error->descricao_csv ?? ''));
+                if ($originalName === '') {
+                    $originalName = trim((string) (($error->bem ?? '') . ' ' . ($error->complemento ?? '')));
+                }
 
-        $header = array_fill(0, 16, '');
-        $header[0] = 'Codigo';
-        $header[3] = 'Nome';
-        $header[10] = 'Localidade';
-        $header[15] = 'Dependencia';
-        fputcsv($stream, $header, ';');
+                $row[3] = $originalName;
+                $row[10] = (string) ($error->localidade ?? '');
+                $row[15] = (string) ($error->dependencia ?? '');
 
-        foreach ($errors as $error) {
-            $row = array_fill(0, 16, '');
-            $row[0] = (string) ($error->codigo ?? '');
-
-            $originalName = trim((string) ($error->descricao_csv ?? ''));
-            if ($originalName === '') {
-                $originalName = trim((string) (($error->bem ?? '') . ' ' . ($error->complemento ?? '')));
+                yield $row;
             }
-
-            $row[3] = $originalName;
-            $row[10] = (string) ($error->localidade ?? '');
-            $row[15] = (string) ($error->dependencia ?? '');
-
-            fputcsv($stream, $row, ';');
-        }
-
-        rewind($stream);
-        $content = stream_get_contents($stream);
-        fclose($stream);
-
-        if ($content === false) {
-            throw new RuntimeException('Não foi possível gerar o arquivo de correção.');
-        }
+        })();
 
         return [
             'filename' => 'correcao_erros_' . $suffix . '_' . date('Ymd_His') . '.csv',
-            'content' => $content,
+            'rows' => $rows,
         ];
     }
 
@@ -953,14 +1000,19 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
         }
     }
 
-    private function previewActionsKey(int $importacaoId): string
+    public function previewActionsKey(int $importacaoId): string
     {
-        return 'preview_acoes_' . $importacaoId;
+        return 'spreadsheet_preview_actions_' . $importacaoId;
     }
 
-    private function previewChurchesKey(int $importacaoId): string
+    public function previewChurchesKey(int $importacaoId): string
     {
-        return 'preview_igrejas_' . $importacaoId;
+        return 'spreadsheet_preview_churches_' . $importacaoId;
+    }
+
+    public function previewDependenciesKey(int $importacaoId): string
+    {
+        return 'spreadsheet_preview_dependencies_' . $importacaoId;
     }
 
     private function moveUploadedFile(UploadedFile $file, int $churchId): string
@@ -1194,5 +1246,9 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
         ), static fn (int $value): bool => $value > 0));
 
         return array_intersect($permittedIds, $administrationIds) !== [];
+    }
+    private function confirmOptionsKey(int $importacao): string
+    {
+        return 'importacao_confirm_options_' . $importacao;
     }
 }

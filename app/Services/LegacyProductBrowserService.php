@@ -11,6 +11,8 @@ use App\Models\Legacy\Dependencia;
 use App\Models\Legacy\Produto;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Session;
 use App\Models\Legacy\TipoBem;
 
 class LegacyProductBrowserService implements LegacyProductBrowserServiceInterface
@@ -109,10 +111,33 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
 
     public function assetTypeOptions(): Collection
     {
-        return TipoBem::query()
+        $supportsAdministrationScope = Schema::hasColumn('tipos_bens', 'administracao_id');
+        $query = TipoBem::query();
+
+        if ($supportsAdministrationScope && !((bool) Session::get('is_admin', false))) {
+            $administrationId = (int) Session::get('administracao_id', 0);
+
+            if ($administrationId > 0) {
+                $query->where(function ($nested) use ($administrationId): void {
+                    $nested
+                        ->where('administracao_id', $administrationId)
+                        ->orWhereNull('administracao_id');
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        $select = ['id', 'codigo', 'descricao'];
+        if ($supportsAdministrationScope) {
+            $select[] = 'administracao_id';
+            $query->with(['administracao:id,descricao']);
+        }
+
+        return $query
             ->orderBy('codigo')
             ->orderBy('descricao')
-            ->get(['id', 'codigo', 'descricao']);
+            ->get($select);
     }
 
     public function statusOptions(): array

@@ -78,6 +78,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>Administração</th>
                             <th>Código</th>
                             <th>Descrição</th>
                             <th>Produtos ativos</th>
@@ -87,6 +88,12 @@
                     <tbody>
                         @foreach ($assetTypes as $assetType)
                             <tr>
+                                <td data-label="Administração">
+                                    {{ data_get($assetType, 'administracao.id') ? '#' . data_get($assetType, 'administracao.id') : 'Global' }}
+                                    @if (data_get($assetType, 'administracao.descricao'))
+                                        <div class="table-note">{{ data_get($assetType, 'administracao.descricao') }}</div>
+                                    @endif
+                                </td>
                                 <td data-label="Código" class="mono">{{ $assetType->codigo }}</td>
                                 <td data-label="Descrição">{{ $assetType->descricao ?: 'Sem descrição' }}</td>
                                 <td data-label="Produtos ativos">{{ $assetType->active_products_count }}</td>

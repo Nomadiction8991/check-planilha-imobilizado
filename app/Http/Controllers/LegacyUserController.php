@@ -69,13 +69,6 @@ class LegacyUserController extends Controller
 
     public function edit(Usuario $user): View|RedirectResponse
     {
-        if ($user->isProtectedAdministratorAccount()) {
-            return redirect()
-                ->route('migration.users.index')
-                ->with('status', 'O usuário administrador não pode ser editado ou excluído.')
-                ->with('status_type', 'error');
-        }
-
         if ($response = $this->ensureUserWithinScope($user)) {
             return $response;
         }
@@ -89,13 +82,6 @@ class LegacyUserController extends Controller
 
     public function update(UpdateLegacyUserRequest $request, Usuario $user): RedirectResponse
     {
-        if ($user->isProtectedAdministratorAccount()) {
-            return redirect()
-                ->route('migration.users.index')
-                ->with('status', 'O usuário administrador não pode ser editado ou excluído.')
-                ->with('status_type', 'error');
-        }
-
         if ($response = $this->ensureUserWithinScope($user)) {
             return $response;
         }

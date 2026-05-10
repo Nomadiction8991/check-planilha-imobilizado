@@ -83,10 +83,12 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
             'email' => (string) ($user->email ?: Session::get('usuario_email', '')),
             'comum_id' => Session::has('comum_id') ? (int) Session::get('comum_id') : null,
             'administracao_id' => Session::has('administracao_id') ? (int) Session::get('administracao_id') : $this->resolveAdministrationId($user),
-            'administracoes_permitidas' => array_values(array_filter(array_map(
-                static fn (mixed $value): int => (int) $value,
-                (array) Session::get('administracoes_permitidas', []),
-            ), static fn (int $value): bool => $value > 0)),
+            'administracoes_permitidas' => $user->isAdministrator()
+                ? $this->allAdministrationIds()
+                : array_values(array_filter(array_map(
+                    static fn (mixed $value): int => (int) $value,
+                    (array) Session::get('administracoes_permitidas', []),
+                ), static fn (int $value): bool => $value > 0)),
             'is_admin' => $user->isAdministrator(),
         ];
     }

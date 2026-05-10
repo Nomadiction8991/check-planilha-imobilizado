@@ -140,14 +140,6 @@
         }
     </style>
 
-    <section class="hero">
-        <span class="eyebrow">Etiquetas de produto</span>
-        <h1>Copiar códigos para etiquetas.</h1>
-        <p class="hero-copy">
-            Use esta tela para gerar a lista de códigos sem alterar a marcação já feita na listagem de produtos.
-        </p>
-    </section>
-
     @if (session('status'))
         <div class="flash-stack">
             <div class="flash {{ session('status_type', 'success') === 'error' ? 'error' : 'success' }}">

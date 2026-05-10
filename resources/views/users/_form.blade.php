@@ -1,11 +1,11 @@
 @php
     $editing = isset($user);
-    $selectedAdministrationId = old('administracao_id', $user->administracao_id ?? '');
     $selectedAdministrationIds = old(
         'administracoes_permitidas',
         $editing ? ($user->administracoes_permitidas ?? [$user->administracao_id ?? null]) : []
     );
     $selectedAdministrationIds = array_values(array_filter(array_map('intval', (array) $selectedAdministrationIds)));
+    $primaryAdministrationId = old('administracao_id', $user->administracao_id ?? ($selectedAdministrationIds[0] ?? ''));
     $selectedState = old('endereco_estado', $user->endereco_estado ?? '');
     $selectedCity = old('endereco_cidade', $user->endereco_cidade ?? '');
     $isActive = (int) old('ativo', $editing ? $user->ativo : 1) === 1;
@@ -24,8 +24,19 @@
         $selectedPermissionKeys = array_keys(array_filter($currentPermissionMap));
     }
     $canManagePermissions = !empty($legacyPermissions['users.permissions.manage'] ?? false);
+    $isAdministrator = $editing && $user->isAdministrator();
     if ($selectedAdministrationIds === [] && $hasAdministrations && $administrations->count() === 1) {
         $selectedAdministrationIds = [(int) $administrations->first()->id];
+    }
+    if (($primaryAdministrationId === '' || $primaryAdministrationId === null) && $selectedAdministrationIds !== []) {
+        $primaryAdministrationId = $selectedAdministrationIds[0];
+    }
+    if ($isAdministrator && $hasAdministrations) {
+        $selectedAdministrationIds = $administrations->pluck('id')->map(static fn ($id) => (int) $id)->values()->all();
+        $primaryAdministrationId = $selectedAdministrationIds[0] ?? $primaryAdministrationId;
+    }
+    if ($isAdministrator) {
+        $selectedPermissionKeys = array_keys($defaultPermissions);
     }
 @endphp
 
@@ -62,25 +73,12 @@
                 <div class="section-head">
                     <div>
                         <h2>Dados principais</h2>
-                        <p class="form-section__copy">Defina a administração, o estado da conta e as credenciais básicas do usuário.</p>
+                        <p class="form-section__copy">Defina o estado da conta e as credenciais básicas do usuário. A administração principal vem do primeiro item marcado abaixo.</p>
                     </div>
                 </div>
 
                 <div class="field-grid">
-                    <label>
-                        Administração
-                        <select name="administracao_id" required @disabled(!$hasAdministrations)>
-                            <option value="">Selecione</option>
-                            @foreach ($administrations as $administration)
-                                <option value="{{ $administration->id }}" @selected((int) $selectedAdministrationId === (int) $administration->id)>
-                                    #{{ $administration->id }} - {{ $administration->descricao }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @unless ($hasAdministrations)
-                            <span class="field-note">Cadastre uma administração antes de salvar usuários.</span>
-                        @endunless
-                    </label>
+                    <input type="hidden" name="administracao_id" value="{{ $primaryAdministrationId }}">
 
                     <label>
                         Status
@@ -113,6 +111,10 @@
 
                 @if ($editing)
                     <p class="field-note">Deixe a senha em branco para manter a atual.</p>
+                @endif
+
+                @if ($isAdministrator)
+                    <p class="field-note">Administrador mantém acesso total. Permissões e administrações ficam travadas por regra.</p>
                 @endif
             </div>
 
@@ -148,15 +150,21 @@
             </div>
 
             @if ($canManagePermissions)
-                <div class="form-section">
-                    <div class="section-head">
-                        <div>
-                            <h2>Permissões do sistema</h2>
-                            <p class="form-section__copy">Marque apenas o que este usuário poderá acessar. As permissões podem ser ajustadas depois.</p>
-                        </div>
+            <div class="form-section">
+                <div class="section-head">
+                    <div>
+                        <h2>Permissões do sistema</h2>
+                        <p class="form-section__copy">
+                            @if ($isAdministrator)
+                                Administradores mantêm acesso total. Esta lista fica travada por regra.
+                            @else
+                                Marque apenas o que este usuário poderá acessar. As permissões podem ser ajustadas depois.
+                            @endif
+                        </p>
                     </div>
+                </div>
 
-                    <div class="permissions-panel">
+                <div class="permissions-panel">
                         <input type="hidden" name="permissions_present" value="1">
 
                         @foreach ($permissionGroups as $group)
@@ -174,6 +182,7 @@
                                                 name="permissions[]"
                                                 value="{{ $ability['key'] }}"
                                                 @checked(in_array($ability['key'], $selectedPermissionKeys, true))
+                                                @disabled($isAdministrator)
                                             >
                                             <span>
                                                 <strong>{{ $ability['label'] }}</strong>
@@ -192,7 +201,13 @@
                 <div class="section-head">
                     <div>
                         <h2>Administrações permitidas</h2>
-                        <p class="form-section__copy">Selecione as administrações adicionais que este usuário poderá usar na importação. A administração principal será incluída automaticamente.</p>
+                        <p class="form-section__copy">
+                            @if ($isAdministrator)
+                                Administradores têm acesso a todas as administrações. A seleção fica travada por regra.
+                            @else
+                                Selecione as administrações adicionais que este usuário poderá usar na importação. A administração principal será incluída automaticamente.
+                            @endif
+                        </p>
                     </div>
                 </div>
 
@@ -206,6 +221,7 @@
                                         name="administracoes_permitidas[]"
                                         value="{{ $administration->id }}"
                                         @checked(in_array((int) $administration->id, $selectedAdministrationIds, true))
+                                        @disabled($isAdministrator)
                                     >
                                     <span>
                                         <strong>#{{ $administration->id }} - {{ $administration->descricao }}</strong>

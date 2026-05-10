@@ -33,6 +33,18 @@
 
                 <div class="field-grid">
                     <label>
+                        Administração
+                        <select name="administracao_id" required>
+                            <option value="">Selecione</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected((int) old('administracao_id', $selectedAdministrationId ?? $assetType->administracao_id ?? '') === (int) $administration->id)>
+                                    #{{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label>
                         Código
                         <input type="text" value="{{ $assetType->codigo }}" readonly>
                     </label>
@@ -50,7 +62,7 @@
                     </label>
                 </div>
 
-                <p class="field-note">Exclusão fica disponível na listagem e é bloqueada quando já existem produtos vinculados.</p>
+                <p class="field-note">Exclusão fica disponível na listagem e é bloqueada quando já existem produtos vinculados. O tipo de bem sempre pertence a uma administração.</p>
 
                 <div class="inline-actions">
                     <button class="btn primary" type="submit">Salvar alterações</button>
