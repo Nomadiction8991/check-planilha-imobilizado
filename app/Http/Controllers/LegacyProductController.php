@@ -39,6 +39,7 @@ class LegacyProductController extends Controller
         $filters = ProductFilters::fromRequest($request);
         $paginator = $this->products->paginate($filters)->appends($filters->toQuery());
         $assetTypes = $this->products->assetTypeOptions();
+        Session::put('migration.products.last_list_url', $request->fullUrl());
 
         return view('products.index', [
             'filters' => $filters,
@@ -59,6 +60,7 @@ class LegacyProductController extends Controller
         $filters = ProductFilters::fromRequest($request);
         $paginator = $this->products->paginate($filters)->appends($filters->toQuery());
         $rows = $paginator->getCollection();
+        Session::put('migration.products.last_list_url', $request->fullUrl());
 
         $stats = [
             'total_products' => $paginator->total(),
@@ -159,7 +161,9 @@ class LegacyProductController extends Controller
                 ->with('status_type', 'error');
         }
 
-        $returnUrl = $this->resolveInternalReturnUrl($request->input('return_url'));
+        $returnUrl = $this->resolveInternalReturnUrl(
+            $request->input('return_url') ?: Session::get('migration.products.last_list_url')
+        );
 
         if ($returnUrl !== null) {
             return redirect($returnUrl)
