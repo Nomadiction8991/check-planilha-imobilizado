@@ -8,6 +8,7 @@ use App\Core\ConnectionManager;
 use App\Core\QueryCache;
 use League\Csv\Reader;
 use League\Csv\CharsetConverter;
+use Illuminate\Support\Facades\Schema;
 use PDO;
 use Exception;
 
@@ -29,6 +30,9 @@ class CsvParserService
 {
     /** @var PDO Conexão com banco de dados */
     private PDO $conexao;
+
+    /** Administração atual usada para resolver tipos de bens */
+    private ?int $administrationId;
 
     /** @var QueryCache Cache em memória para queries frequentes (Melhoria 11) */
     private QueryCache $cache;
@@ -55,9 +59,16 @@ class CsvParserService
     /** Linhas de metadados a pular por padrão */
     private const PULO_LINHAS_PADRAO = 25;
 
-    public function __construct(?PDO $conexao = null)
+    /** @var array Cache para tipos de bens já consultados */
+    private array $cacheBensDoTipo = [];
+
+    /** @var array Cache para comuns consultadas */
+    private array $cacheComuns = [];
+
+    public function __construct(?PDO $conexao = null, ?int $administrationId = null)
     {
         $this->conexao = $conexao ?? ConnectionManager::getConnection();
+        $this->administrationId = $administrationId !== null && $administrationId > 0 ? $administrationId : null;
         $this->cache = new QueryCache();
     }
 
@@ -123,6 +134,9 @@ class CsvParserService
      */
     public function analisar(string $caminhoArquivo, int $comumIdFallback = 0): array
     {
+        // Garantir tempo para processar arquivos grandes
+        @set_time_limit(0);
+
         if (!file_exists($caminhoArquivo)) {
             throw new Exception('Arquivo não encontrado: ' . $caminhoArquivo);
         }
@@ -152,7 +166,12 @@ class CsvParserService
         $resultado = $this->analisarTodasAsLinhas($linhas, $mapaCodigoParaComumId, $comumIdFallback, $produtosPorComum, $dependenciasPorComum, $tiposBens);
 
         // Detectar exclusões
-        $exclusoes = $this->detectarExclusoes($mapaCodigoParaComumId, $produtosPorComum, $resultado['codigosPorComum']);
+        $exclusoes = $this->detectarExclusoes(
+            $mapaCodigoParaComumId,
+            $produtosPorComum,
+            $resultado['codigosPorComum'],
+            $resultado['depsPorComum'] ?? []
+        );
         $resultado['registros'] = array_merge($resultado['registros'], $exclusoes['registros']);
         $resultado['resumo']['exclusoes'] = $exclusoes['total'];
 
@@ -176,9 +195,21 @@ class CsvParserService
             }
         }
 
-        $mapa = [];
-        foreach (array_keys($codigosComuns) as $codigoComum) {
-            $mapa[$codigoComum] = $this->buscarComumPorCodigo($codigoComum);
+        $codigos = array_keys($codigosComuns);
+        if (empty($codigos)) {
+            return [];
+        }
+
+        // Busca todas as comuns de uma vez usando Eloquent/Query Builder se disponível
+        // para aproveitar o ConnectionManager do Laravel
+        $placeholders = implode(',', array_fill(0, count($codigos), '?'));
+        $stmt = $this->conexao->prepare("SELECT id, codigo FROM comums WHERE codigo IN ($placeholders)");
+        $stmt->execute($codigos);
+        $comunsDb = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $mapa = array_fill_keys($codigos, 0);
+        foreach ($comunsDb as $comum) {
+            $mapa[(string) $comum['codigo']] = (int) $comum['id'];
         }
 
         return $mapa;
@@ -206,15 +237,33 @@ class CsvParserService
      */
     private function carregarTodosProdutos(array $mapaCodigoParaComumId, int $comumIdFallback): array
     {
-        $produtosPorComum = [];
-        foreach ($mapaCodigoParaComumId as $codigoComum => $comumId) {
-            if ($comumId > 0) {
-                $produtosPorComum[$comumId] = $this->carregarProdutosDoComum($comumId);
-            }
+        $comumIds = array_filter(array_values($mapaCodigoParaComumId), fn($id) => $id > 0);
+        if ($comumIdFallback > 0) {
+            $comumIds[] = $comumIdFallback;
+        }
+        $comumIds = array_unique($comumIds);
+
+        if (empty($comumIds)) {
+            return [];
         }
 
-        if ($comumIdFallback > 0 && !isset($produtosPorComum[$comumIdFallback])) {
-            $produtosPorComum[$comumIdFallback] = $this->carregarProdutosDoComum($comumIdFallback);
+        $placeholders = implode(',', array_fill(0, count($comumIds), '?'));
+        $sql = "SELECT p.id_produto, p.codigo, p.bem, p.complemento, p.dependencia_id, p.comum_id, p.tipo_bem_id, p.ativo,
+                       tb.codigo AS tipo_bem_codigo, tb.descricao AS tipo_bem_descricao,
+                       d.descricao AS dependencia_descricao
+                FROM produtos p
+                LEFT JOIN tipos_bens tb ON p.tipo_bem_id = tb.id
+                LEFT JOIN dependencias d ON p.dependencia_id = d.id
+                WHERE p.comum_id IN ($placeholders)";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute(array_values($comumIds));
+        $todosProdutos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $produtosPorComum = [];
+        foreach ($todosProdutos as $produto) {
+            $chave = strtoupper(trim((string) $produto['codigo']));
+            $produtosPorComum[$produto['comum_id']][$chave] = $produto;
         }
 
         return $produtosPorComum;
@@ -225,18 +274,28 @@ class CsvParserService
      */
     private function carregarTodasDependencias(array $mapaCodigoParaComumId, int $comumIdFallback): array
     {
-        $dependenciasPorComum = [];
-        foreach ($mapaCodigoParaComumId as $codigoComum => $comumId) {
-            if ($comumId > 0) {
-                $dependenciasPorComum[$comumId] = $this->carregarDependencias($comumId);
-            }
+        $comumIds = array_filter(array_values($mapaCodigoParaComumId), fn($id) => $id > 0);
+        if ($comumIdFallback > 0) {
+            $comumIds[] = $comumIdFallback;
+        }
+        $comumIds = array_unique($comumIds);
+
+        if (empty($comumIds)) {
+            return [];
         }
 
-        if ($comumIdFallback > 0 && !isset($dependenciasPorComum[$comumIdFallback])) {
-            $dependenciasPorComum[$comumIdFallback] = $this->carregarDependencias($comumIdFallback);
+        $placeholders = implode(',', array_fill(0, count($comumIds), '?'));
+        $stmt = $this->conexao->prepare("SELECT id, descricao, comum_id FROM dependencias WHERE comum_id IN ($placeholders)");
+        $stmt->execute(array_values($comumIds));
+        $todasDeps = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $depsPorComum = [];
+        foreach ($todasDeps as $dep) {
+            $chave = strtoupper(trim($dep['descricao']));
+            $depsPorComum[$dep['comum_id']][$chave] = (int) $dep['id'];
         }
 
-        return $dependenciasPorComum;
+        return $depsPorComum;
     }
 
     /**
@@ -252,6 +311,7 @@ class CsvParserService
     ): array {
         $registros = [];
         $codigosPorComum = [];
+        $depsPorComum = [];
         $resumo = [
             'total' => 0,
             'novos' => 0,
@@ -268,10 +328,17 @@ class CsvParserService
                 $codigoComum = $linha['codigo_comum'] ?? '';
                 $comumIdLinha = $mapaCodigoParaComumId[$codigoComum] ?? $comumIdFallback;
 
-                // Rastrear códigos por comum
+                // Rastrear códigos e dependências por comum
                 $codigoRastr = strtoupper(trim($linha['codigo'] ?? ''));
-                if ($comumIdLinha > 0 && $codigoRastr !== '') {
-                    $codigosPorComum[$comumIdLinha][$codigoRastr] = true;
+                $depRastr = strtoupper(trim((string) ($linha['dependencia_descricao'] ?? $linha['dependencia'] ?? '')));
+
+                if ($comumIdLinha > 0) {
+                    if ($codigoRastr !== '') {
+                        $codigosPorComum[$comumIdLinha][$codigoRastr] = true;
+                    }
+                    if ($depRastr !== '') {
+                        $depsPorComum[$comumIdLinha][$depRastr] = true;
+                    }
                 }
 
                 $produtosExistentes = $produtosPorComum[$comumIdLinha] ?? [];
@@ -292,6 +359,7 @@ class CsvParserService
             'registros' => $registros,
             'resumo' => $resumo,
             'codigosPorComum' => $codigosPorComum,
+            'depsPorComum' => $depsPorComum,
         ];
     }
 
@@ -335,7 +403,7 @@ class CsvParserService
     /**
      * Detecta produtos para exclusão.
      */
-    private function detectarExclusoes(array $mapaCodigoParaComumId, array $produtosPorComum, array $codigosPorComum): array
+    private function detectarExclusoes(array $mapaCodigoParaComumId, array $produtosPorComum, array $codigosPorComum, array $depsPorComum): array
     {
         $registros = [];
         $total = 0;
@@ -345,9 +413,19 @@ class CsvParserService
 
             $produtosDb = $produtosPorComum[$comumIdExcl] ?? [];
             $codigosNoCSV = $codigosPorComum[$comumIdExcl] ?? [];
+            $depsNoCSV = $depsPorComum[$comumIdExcl] ?? [];
 
             foreach ($produtosDb as $codigoUpper => $produto) {
                 if ($codigoUpper === '' || isset($codigosNoCSV[$codigoUpper]) || ($produto['ativo'] ?? 1) == 0) {
+                    continue;
+                }
+
+                // Se o CSV contém informações de dependência, só sugerimos exclusão
+                // se a dependência do produto no DB estiver presente no CSV.
+                // Se a dependência não estiver no CSV, assumimos que o arquivo é parcial para aquele setor.
+                $depProdutoDb = strtoupper(trim((string) ($produto['dependencia_descricao'] ?? '')));
+                
+                if (!empty($depsNoCSV) && $depProdutoDb !== '' && !isset($depsNoCSV[$depProdutoDb])) {
                     continue;
                 }
 
@@ -424,18 +502,28 @@ class CsvParserService
             CharsetConverter::addTo($csv, $encoding, 'UTF-8');
         }
 
-        // Ler todas as linhas como array
-        $todasLinhas = iterator_to_array($csv->getRecords(), false);
+        // Encontrar início dos dados sem carregar o arquivo todo
+        $headSample = [];
+        $records = $csv->getRecords();
+        foreach ($records as $index => $row) {
+            $headSample[] = $row;
+            if ($index >= $puloLinhas + 50) { // Amostra generosa para o cabeçalho
+                break;
+            }
+        }
 
-        // Pular linhas de metadados — procurar o cabeçalho real
-        $inicioLeitura = $this->encontrarInicioDados($todasLinhas, $puloLinhas, $mapeamento);
+        $inicioLeitura = $this->encontrarInicioDados($headSample, $puloLinhas, $mapeamento);
 
-        // Extrair dados
+        // Extrair dados iterando sobre o arquivo
         $linhas = [];
         $ultimaLocalidade  = '';  // carry-forward: localidade do último registro válido
         $ultimoCodigoComum = '';  // carry-forward: codigo_comum do último registro válido
-        for ($i = $inicioLeitura; $i < count($todasLinhas); $i++) {
-            $row = $todasLinhas[$i];
+        
+        $records = $csv->getRecords();
+        foreach ($records as $index => $row) {
+            if ($index < $inicioLeitura) {
+                continue;
+            }
 
             // Extrair código da coluna mapeada
             $colCodigo = $mapeamento['codigo'] ?? self::MAPEAMENTO_PADRAO['codigo'];
@@ -499,7 +587,7 @@ class CsvParserService
                 'codigo_comum'      => $codigoComum,
                 'nome_original'     => $nomeCompleto,
                 'quantidade'        => 1,
-                '_linha_original'   => $i + 1,
+                '_linha_original'   => $index + 1,
             ];
         }
 
@@ -760,16 +848,40 @@ class CsvParserService
             return [];
         }
 
+        if (isset($this->cacheBensDoTipo[$tipoBemCodigo])) {
+            return $this->cacheBensDoTipo[$tipoBemCodigo];
+        }
+
         try {
-            $stmt = $this->conexao->prepare("SELECT descricao FROM tipos_bens WHERE codigo = :codigo LIMIT 1");
-            $stmt->execute([':codigo' => $tipoBemCodigo]);
+            $supportsAdministrationScope = Schema::hasColumn('tipos_bens', 'administracao_id');
+
+            if ($supportsAdministrationScope && $this->administrationId !== null) {
+                $stmt = $this->conexao->prepare(
+                    "SELECT descricao
+                     FROM tipos_bens
+                     WHERE codigo = :codigo
+                       AND (administracao_id = :administracao_id OR administracao_id IS NULL)
+                     ORDER BY administracao_id IS NULL ASC
+                     LIMIT 1"
+                );
+                $stmt->execute([
+                    ':codigo' => $tipoBemCodigo,
+                    ':administracao_id' => $this->administrationId,
+                ]);
+            } else {
+                $stmt = $this->conexao->prepare("SELECT descricao FROM tipos_bens WHERE codigo = :codigo LIMIT 1");
+                $stmt->execute([':codigo' => $tipoBemCodigo]);
+            }
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$row || empty($row['descricao'])) {
+                $this->cacheBensDoTipo[$tipoBemCodigo] = [];
                 return [];
             }
 
-            return array_map('trim', explode('/', $row['descricao']));
+            $resultado = array_map('trim', explode('/', $row['descricao']));
+            $this->cacheBensDoTipo[$tipoBemCodigo] = $resultado;
+            return $resultado;
         } catch (Exception $e) {
             return [];
         }
@@ -1075,12 +1187,27 @@ class CsvParserService
      */
     private function carregarTiposBens(): array
     {
-        $stmt = $this->conexao->query("SELECT codigo, descricao FROM tipos_bens");
+        $supportsAdministrationScope = Schema::hasColumn('tipos_bens', 'administracao_id');
+
+        if ($supportsAdministrationScope && $this->administrationId !== null) {
+            $stmt = $this->conexao->prepare(
+                "SELECT codigo, descricao
+                 FROM tipos_bens
+                 WHERE administracao_id = :administracao_id OR administracao_id IS NULL
+                 ORDER BY administracao_id IS NULL ASC, id ASC"
+            );
+            $stmt->execute([':administracao_id' => $this->administrationId]);
+        } else {
+            $stmt = $this->conexao->query("SELECT codigo, descricao FROM tipos_bens ORDER BY id ASC");
+        }
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $mapa = [];
         foreach ($rows as $row) {
-            $mapa[(string) $row['codigo']] = $row['descricao'];
+            $codigo = (string) $row['codigo'];
+            if (!isset($mapa[$codigo])) {
+                $mapa[$codigo] = $row['descricao'];
+            }
         }
 
         return $mapa;

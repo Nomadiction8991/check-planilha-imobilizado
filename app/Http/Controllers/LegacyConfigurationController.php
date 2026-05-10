@@ -30,8 +30,11 @@ final class LegacyConfigurationController extends Controller
         LegacyNavigationServiceInterface $navigation
     ): RedirectResponse {
         try {
-            $mailConfiguration->save($request->toDto());
-            $navigation->saveOrder($request->toMenuOrderDto());
+            if ($request->section() === 'menu') {
+                $navigation->saveOrder($request->toMenuOrderDto());
+            } else {
+                $mailConfiguration->save($request->toDto());
+            }
         } catch (RuntimeException $exception) {
             return back()
                 ->withInput($request->except('mail_password'))

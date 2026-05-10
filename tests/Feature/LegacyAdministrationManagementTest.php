@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyAdministrationBrowserServiceInterface;
 use App\Contracts\LegacyAdministrationManagementServiceInterface;
+use App\Contracts\LegacyNavigationServiceInterface;
 use App\DTO\AdministrationFilters;
 use App\Models\Legacy\Administracao;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -37,6 +38,15 @@ final class LegacyAdministrationManagementTest extends TestCase
                 ]);
                 $mock->shouldReceive('currentChurch')->andReturn(null);
                 $mock->shouldReceive('availableChurches')->andReturn(collect());
+                $mock->shouldReceive('filterPinStates')->andReturn([]);
+            }
+        );
+
+        $this->mock(
+            LegacyNavigationServiceInterface::class,
+            function (MockInterface $mock): void {
+                $mock->shouldReceive('navigation')->andReturn([]);
+                $mock->shouldReceive('editorItems')->andReturn([]);
             }
         );
 
@@ -97,7 +107,6 @@ final class LegacyAdministrationManagementTest extends TestCase
         $response->assertSee('Administração Central');
         $response->assertSee('12345678000190');
         $response->assertSee('Nova administração');
-        $response->assertSee('Configurações');
     }
 
     public function testCreatePageRendersForm(): void

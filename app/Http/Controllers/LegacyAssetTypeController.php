@@ -9,10 +9,13 @@ use App\Contracts\LegacyAssetTypeManagementServiceInterface;
 use App\DTO\AssetTypeFilters;
 use App\Http\Requests\StoreLegacyAssetTypeRequest;
 use App\Http\Requests\UpdateLegacyAssetTypeRequest;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\TipoBem;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 use RuntimeException;
 
 class LegacyAssetTypeController extends Controller
@@ -37,7 +40,10 @@ class LegacyAssetTypeController extends Controller
 
     public function create(): View
     {
-        return view('asset-types.create');
+        return view('asset-types.create', [
+            'administrations' => $this->administrations(),
+            'selectedAdministrationId' => $this->currentAdministrationId(),
+        ]);
     }
 
     public function store(StoreLegacyAssetTypeRequest $request): RedirectResponse
@@ -55,6 +61,10 @@ class LegacyAssetTypeController extends Controller
     {
         return view('asset-types.edit', [
             'assetType' => $assetType,
+            'administrations' => $this->administrations(),
+            'selectedAdministrationId' => (int) ($assetType->administracao_id ?? 0) > 0
+                ? (int) $assetType->administracao_id
+                : $this->currentAdministrationId(),
         ]);
     }
 
@@ -83,5 +93,24 @@ class LegacyAssetTypeController extends Controller
             ->route('migration.asset-types.index')
             ->with('status', 'Tipo de bem excluído com sucesso.')
             ->with('status_type', 'success');
+    }
+
+    private function currentAdministrationId(): ?int
+    {
+        $administrationId = (int) session('administracao_id', 0);
+
+        return $administrationId > 0 ? $administrationId : null;
+    }
+
+    private function administrations(): Collection
+    {
+        $query = Administracao::query()->orderBy('descricao');
+        $administrationId = $this->currentAdministrationId();
+
+        if (!Session::get('is_admin', false) && $administrationId !== null) {
+            $query->whereKey($administrationId);
+        }
+
+        return $query->get(['id', 'descricao']);
     }
 }

@@ -88,16 +88,14 @@
     <section class="hero">
         <span class="eyebrow">Processamento em andamento</span>
         <h1>Importação em processamento.</h1>
-        <p class="hero-copy">
-            Esta etapa executa o processamento final com atualização de progresso.
-        </p>
+        <p class="hero-copy">Aguarde a conclusão do processamento.</p>
     </section>
 
     <section class="section">
         <div class="section-head">
             <div>
                 <h2>{{ $importacao['arquivo_nome'] ?? ('Importação #' . $importacaoId) }}</h2>
-                <p>O progresso abaixo acompanha a importação em tempo real, sem cartões extras.</p>
+                <p>O progresso abaixo é atualizado em tempo real.</p>
                 <p class="table-note">Administração: {{ $importacao['administracao_label'] ?? 'Sem administração' }}</p>
             </div>
         </div>

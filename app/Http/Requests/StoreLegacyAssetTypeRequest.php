@@ -20,6 +20,7 @@ class StoreLegacyAssetTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'administracao_id' => ['required', 'integer', 'min:1'],
             'descricao' => ['required', 'string', 'max:255', 'regex:/\S/'],
         ];
     }
@@ -30,6 +31,8 @@ class StoreLegacyAssetTypeRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'administracao_id.required' => 'Selecione a administração do tipo de bem.',
+            'administracao_id.min' => 'Selecione uma administração válida.',
             'descricao.required' => 'A descrição é obrigatória.',
             'descricao.max' => 'A descrição deve ter no máximo 255 caracteres.',
             'descricao.regex' => 'A descrição não pode conter apenas espaços.',
@@ -39,6 +42,7 @@ class StoreLegacyAssetTypeRequest extends FormRequest
     public function toDto(): AssetTypeMutationData
     {
         return new AssetTypeMutationData(
+            administrationId: (int) $this->validated('administracao_id'),
             description: trim((string) $this->validated('descricao')),
         );
     }

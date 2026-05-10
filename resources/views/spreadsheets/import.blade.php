@@ -16,27 +16,16 @@
             display: grid;
             gap: 10px;
             padding: 20px 22px 20px 24px;
+            margin-top: 40px;
             margin-bottom: 24px;
             border: 1px solid rgba(255, 206, 79, 0.38);
             border-left: 8px solid #ffb703;
             border-radius: 24px;
-            background:
-                linear-gradient(135deg, rgba(146, 32, 32, 0.98), rgba(77, 17, 17, 0.98)),
-                radial-gradient(circle at top right, rgba(255, 183, 3, 0.28), transparent 34%);
+            background: linear-gradient(135deg, rgba(146, 32, 32, 0.98), rgba(77, 17, 17, 0.98));
             color: #fff9f0;
             box-shadow: 0 20px 48px rgba(62, 15, 15, 0.38);
         }
 
-        .spreadsheet-warning-banner::after {
-            content: '';
-            position: absolute;
-            inset: auto -18px -18px auto;
-            width: 128px;
-            height: 128px;
-            border-radius: 999px;
-            background: radial-gradient(circle, rgba(255, 183, 3, 0.18), transparent 70%);
-            pointer-events: none;
-        }
 
         .spreadsheet-warning-banner__eyebrow {
             display: inline-flex;
@@ -79,11 +68,10 @@
     </section>
 
     <div class="spreadsheet-warning-banner" role="alert" aria-live="polite">
-        <span class="spreadsheet-warning-banner__eyebrow">Atenção máxima</span>
-        <strong>Esta importação é por igreja, não por dependência.</strong>
+        <span class="spreadsheet-warning-banner__eyebrow">Importação por igreja</span>
+        <strong>Prefira a planilha filtrada por igreja.</strong>
         <p>
-            Sempre importe a igreja inteira ou todas as igrejas detectadas no arquivo. Não tente separar por dependência,
-            porque isso pode deixar o relatório incompleto e gerar inconsistências depois.
+            Se não houver muitos dados, envie já filtrado por igreja para deixar a análise mais leve.
         </p>
     </div>
 
@@ -107,6 +95,51 @@
             @endif
         </div>
     @endif
+
+    <section class="section">
+        <div class="table-shell">
+            <form method="POST" action="{{ route('migration.spreadsheets.store') }}" class="form-shell" enctype="multipart/form-data">
+                @csrf
+
+                <div class="field-grid">
+                    <input type="hidden" name="usuario_id" value="{{ (int) session('usuario_id', 0) }}">
+
+                    <label>
+                        Administração
+                        <select name="administracao_id" required @disabled($administrations->isEmpty())>
+                            <option value="">Selecione</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected((int) old('administracao_id') === (int) $administration->id)>
+                                    {{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label>
+                        Arquivo CSV
+                        <input type="file" name="arquivo_csv" accept=".csv,.txt" required>
+                    </label>
+                </div>
+
+                @if ($administrations->isEmpty())
+                    <p class="field-note">Cadastre uma administração antes de enviar a planilha.</p>
+                @endif
+
+                <p class="field-note">
+                    A análise detecta as igrejas do CSV e prepara a prévia antes da confirmação. O responsável será sempre o usuário logado. Tamanho máximo: 50MB.
+                </p>
+
+                <div class="inline-actions">
+                    <button class="btn primary" type="submit" @disabled($administrations->isEmpty())>Enviar e analisar</button>
+                    <a class="btn" href="{{ route('migration.products.index') }}">Cancelar</a>
+                    @if (!empty($legacyPermissions['spreadsheets.errors.view']))
+                        <a class="btn" href="{{ route('migration.spreadsheets.errors') }}">Ver erros pendentes</a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </section>
 
     <section class="section">
         <div class="section-head">
@@ -204,50 +237,5 @@
                 </table>
             </div>
         @endif
-    </section>
-
-    <section class="section">
-        <div class="table-shell">
-            <form method="POST" action="{{ route('migration.spreadsheets.store') }}" class="form-shell" enctype="multipart/form-data">
-                @csrf
-
-                <div class="field-grid">
-                    <input type="hidden" name="usuario_id" value="{{ (int) session('usuario_id', 0) }}">
-
-                    <label>
-                        Administração
-                        <select name="administracao_id" required @disabled($administrations->isEmpty())>
-                            <option value="">Selecione</option>
-                            @foreach ($administrations as $administration)
-                                <option value="{{ $administration->id }}" @selected((int) old('administracao_id') === (int) $administration->id)>
-                                    {{ $administration->id }} - {{ $administration->descricao }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </label>
-
-                    <label>
-                        Arquivo CSV
-                        <input type="file" name="arquivo_csv" accept=".csv,.txt" required>
-                    </label>
-                </div>
-
-                @if ($administrations->isEmpty())
-                    <p class="field-note">Cadastre uma administração antes de enviar a planilha.</p>
-                @endif
-
-                <p class="field-note">
-                    A importação detecta as igrejas diretamente do CSV e cadastra os produtos a partir dessas linhas. O arquivo é analisado antes da importação definitiva. O responsável será sempre o usuário logado. Tamanho máximo: 50MB.
-                </p>
-
-                <div class="inline-actions">
-                    <button class="btn primary" type="submit" @disabled($administrations->isEmpty())>Enviar e analisar</button>
-                    <a class="btn" href="{{ route('migration.products.index') }}">Cancelar</a>
-                    @if (!empty($legacyPermissions['spreadsheets.errors.view']))
-                        <a class="btn" href="{{ route('migration.spreadsheets.errors') }}">Ver erros pendentes</a>
-                    @endif
-                </div>
-            </form>
-        </div>
     </section>
 @endsection

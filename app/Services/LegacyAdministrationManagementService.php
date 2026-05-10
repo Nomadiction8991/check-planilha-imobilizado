@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\LegacyAdministrationManagementServiceInterface;
 use App\DTO\AdministrationMutationData;
 use App\Models\Legacy\Administracao;
+use App\Models\Legacy\Usuario;
 use App\Support\LegacyCnpjValidator;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -21,12 +22,15 @@ class LegacyAdministrationManagementService implements LegacyAdministrationManag
             throw new RuntimeException('CNPJ inválido: ' . $exception->getMessage());
         }
 
-        return Administracao::query()->create([
+        $administration = Administracao::query()->create([
             'descricao' => $this->normalizeDescription($data->description),
             'cnpj' => $cnpj,
             'estado' => strtoupper(trim($data->state)),
             'cidade' => mb_strtoupper(trim($data->city), 'UTF-8'),
         ]);
+        $this->syncAdministratorAccess();
+
+        return $administration;
     }
 
     public function update(Administracao $administration, AdministrationMutationData $data): Administracao
@@ -44,6 +48,7 @@ class LegacyAdministrationManagementService implements LegacyAdministrationManag
             'cidade' => mb_strtoupper(trim($data->city), 'UTF-8'),
         ]);
         $administration->save();
+        $this->syncAdministratorAccess();
 
         return $administration->refresh();
     }
@@ -64,5 +69,34 @@ class LegacyAdministrationManagementService implements LegacyAdministrationManag
     private function normalizeDescription(string $description): string
     {
         return trim($description);
+    }
+
+    private function syncAdministratorAccess(): void
+    {
+        $administrationIds = Administracao::query()
+            ->orderBy('descricao')
+            ->pluck('id')
+            ->map(static fn (mixed $value): int => (int) $value)
+            ->filter(static fn (int $value): bool => $value > 0)
+            ->values()
+            ->all();
+
+        if ($administrationIds === []) {
+            return;
+        }
+
+        Usuario::query()
+            ->where(function ($query): void {
+                $query
+                    ->whereKey(1)
+                    ->orWhere('tipo', 'administrador')
+                    ->orWhereRaw('UPPER(email) = ?', ['ADMIN@LOCALHOST']);
+            })
+            ->get()
+            ->each(function (Usuario $user) use ($administrationIds): void {
+                $user->forceFill([
+                    'administracoes_permitidas' => $administrationIds,
+                ])->save();
+            });
     }
 }

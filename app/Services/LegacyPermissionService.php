@@ -29,10 +29,16 @@ class LegacyPermissionService implements LegacyPermissionServiceInterface
             return $this->cachedPermissions;
         }
 
-        $permissions = $this->resolvePermissions((int) Session::get('usuario_id', 0));
-        foreach ($this->permissionAliases() as $alias => $abilities) {
-            $permissions[$alias] = $this->anyGranted($permissions, $abilities);
-        }
+        $userId = (int) Session::get('usuario_id', 0);
+        $cacheKey = "user_permissions_{$userId}_" . md5($signature);
+
+        $permissions = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addMinutes(30), function () use ($userId) {
+            $perms = $this->resolvePermissions($userId);
+            foreach ($this->permissionAliases() as $alias => $abilities) {
+                $perms[$alias] = $this->anyGranted($perms, $abilities);
+            }
+            return $perms;
+        });
 
         $this->cachedSignature = $signature;
         $this->cachedPermissions = $permissions;

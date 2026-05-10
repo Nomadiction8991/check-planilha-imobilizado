@@ -122,27 +122,25 @@
                                     @endif
                                 </td>
                                 <td data-label="Ações">
-                                    @if ($isProtectedAdministrator)
-                                        <span class="capsule dark">Protegido</span>
-                                    @else
-                                        <div class="inline-actions">
-                                            @if ($isLegacyAdmin || !empty($legacyPermissions['users.permissions.manage'] ?? null))
+                                    <div class="inline-actions">
+                                        @if ($isLegacyAdmin || !empty($legacyPermissions['users.permissions.manage'] ?? null))
+                                            @unless ($isProtectedAdministrator)
                                                 <a class="btn" href="{{ route('migration.users.permissions', ['user' => $user->id]) }}">Permissões</a>
-                                            @endif
-                                            @if ($isLegacyAdmin || !empty($legacyPermissions['users.edit'] ?? null))
-                                                <a class="btn" href="{{ route('migration.users.edit', ['user' => $user->id]) }}">Editar</a>
-                                            @endif
-                                            @if ($isLegacyAdmin || !empty($legacyPermissions['users.delete'] ?? null))
-                                                <form method="POST" action="{{ route('migration.users.destroy', ['user' => $user->id]) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn" type="submit" onclick="return confirm('Excluir este usuário?');">
-                                                        Excluir
-                                                    </button>
-                                                </form>
-                                            @endif
-                                        </div>
-                                    @endif
+                                            @endunless
+                                        @endif
+                                        @if ($isLegacyAdmin || !empty($legacyPermissions['users.edit'] ?? null))
+                                            <a class="btn" href="{{ route('migration.users.edit', ['user' => $user->id]) }}">Editar</a>
+                                        @endif
+                                        @if (!$isProtectedAdministrator && ($isLegacyAdmin || !empty($legacyPermissions['users.delete'] ?? null)))
+                                            <form method="POST" action="{{ route('migration.users.destroy', ['user' => $user->id]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn" type="submit" onclick="return confirm('Excluir este usuário?');">
+                                                    Excluir
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

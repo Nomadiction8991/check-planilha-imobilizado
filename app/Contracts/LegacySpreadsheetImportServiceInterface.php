@@ -11,6 +11,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 interface LegacySpreadsheetImportServiceInterface
 {
+    public function previewActionsKey(int $importacaoId): string;
+
+    public function previewChurchesKey(int $importacaoId): string;
+
+    public function previewDependenciesKey(int $importacaoId): string;
+
     public function responsibleUserOptions(): Collection;
 
     public function churchOptions(): Collection;
@@ -39,9 +45,10 @@ interface LegacySpreadsheetImportServiceInterface
     /**
      * @param array<string, string> $acoes
      * @param array<string, string> $igrejas
-     * @return array{total_salvas: int, igrejas_salvas: int}
+     * @param array<string, string> $dependencias
+     * @return array{total_salvas: int, igrejas_salvas: int, dependencias_salvas: int}
      */
-    public function savePreviewActions(int $importacaoId, array $acoes, array $igrejas): array;
+    public function savePreviewActions(int $importacaoId, array $acoes, array $igrejas, array $dependencias = []): array;
 
     /**
      * @return array{acao: string, total_aplicadas: int}
@@ -51,7 +58,7 @@ interface LegacySpreadsheetImportServiceInterface
     /**
      * @return array<string, mixed>
      */
-    public function confirmImport(int $importacaoId, bool $importAll = true, array $acoes = [], array $igrejas = []): array;
+    public function confirmImport(int $importacaoId, bool $importAll = true, array $acoes = [], array $igrejas = [], array $dependencias = []): array;
 
     /**
      * @return array<string, mixed>|null

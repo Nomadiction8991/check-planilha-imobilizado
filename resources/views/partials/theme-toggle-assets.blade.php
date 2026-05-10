@@ -322,6 +322,10 @@
         background: var(--warn-soft);
     }
 
+    html[data-theme='light'] .pagination {
+        background: rgba(255, 255, 255, 0.34);
+    }
+
     html[data-theme='light'] .pagination a,
     html[data-theme='light'] .pagination span {
         background: rgba(255, 255, 255, 0.80);
@@ -583,6 +587,10 @@
     html[data-theme='dark'] .status.warn {
         color: var(--warn);
         background: rgba(239, 190, 130, 0.14);
+    }
+
+    html[data-theme='dark'] .pagination {
+        background: rgba(255, 255, 255, 0.02);
     }
 
     html[data-theme='dark'] .pagination a,

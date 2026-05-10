@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Contracts\LegacyAssetTypeManagementServiceInterface;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\TipoBem;
 use Mockery\MockInterface;
 use RuntimeException;
@@ -12,16 +13,22 @@ use Tests\TestCase;
 
 final class LegacyAssetTypeManagementTest extends TestCase
 {
+    private int $administrationId;
     private TipoBem $boundAssetType;
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->administrationId = (int) Administracao::query()->create([
+            'descricao' => 'Administração Central',
+        ])->id;
+
         $this->boundAssetType = $this->makeAssetType(
             id: 4,
             code: 4,
             description: 'CADEIRA ANTIGA',
+            administrationId: $this->administrationId,
         );
 
         $this->app['router']->bind('assetType', fn (): TipoBem => $this->boundAssetType);
@@ -33,6 +40,7 @@ final class LegacyAssetTypeManagementTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Novo tipo de bem.');
+        $response->assertSee('Administração');
         $response->assertSee('Salvar tipo de bem');
     }
 
@@ -43,12 +51,13 @@ final class LegacyAssetTypeManagementTest extends TestCase
             function (MockInterface $mock): void {
                 $mock->shouldReceive('create')
                     ->once()
-                    ->withArgs(fn ($dto): bool => $dto->description === 'IMOVEIS')
-                    ->andReturn($this->makeAssetType(id: 9, code: 41, description: 'IMOVEIS'));
+                    ->withArgs(fn ($dto): bool => $dto->description === 'IMOVEIS' && $dto->administrationId === $this->administrationId)
+                    ->andReturn($this->makeAssetType(id: 9, code: 41, description: 'IMOVEIS', administrationId: $this->administrationId));
             }
         );
 
         $response = $this->post(route('migration.asset-types.store'), [
+            'administracao_id' => $this->administrationId,
             'descricao' => 'IMOVEIS',
         ]);
 
@@ -64,12 +73,13 @@ final class LegacyAssetTypeManagementTest extends TestCase
             function (MockInterface $mock): void {
                 $mock->shouldReceive('create')
                     ->once()
-                    ->withArgs(fn ($dto): bool => $dto->description === 'MESA')
-                    ->andReturn($this->makeAssetType(id: 10, code: 42, description: 'MESA'));
+                    ->withArgs(fn ($dto): bool => $dto->description === 'MESA' && $dto->administrationId === $this->administrationId)
+                    ->andReturn($this->makeAssetType(id: 10, code: 42, description: 'MESA', administrationId: $this->administrationId));
             }
         );
 
         $response = $this->post('/asset-types/create', [
+            'administracao_id' => $this->administrationId,
             'descricao' => 'MESA',
         ]);
 
@@ -84,12 +94,17 @@ final class LegacyAssetTypeManagementTest extends TestCase
             function (MockInterface $mock): void {
                 $mock->shouldReceive('update')
                     ->once()
-                    ->withArgs(fn (TipoBem $assetType, $dto): bool => $assetType->id === 4 && $dto->description === 'CADEIRA ATUALIZADA')
-                    ->andReturn($this->makeAssetType(id: 4, code: 4, description: 'CADEIRA ATUALIZADA'));
+                    ->withArgs(fn (TipoBem $assetType, $dto): bool =>
+                        $assetType->id === 4
+                        && $dto->description === 'CADEIRA ATUALIZADA'
+                        && $dto->administrationId === $this->administrationId
+                    )
+                    ->andReturn($this->makeAssetType(id: 4, code: 4, description: 'CADEIRA ATUALIZADA', administrationId: $this->administrationId));
             }
         );
 
         $response = $this->put(route('migration.asset-types.update', ['assetType' => 4]), [
+            'administracao_id' => $this->administrationId,
             'descricao' => 'CADEIRA ATUALIZADA',
         ]);
 
@@ -139,6 +154,7 @@ final class LegacyAssetTypeManagementTest extends TestCase
     {
         $response = $this->from(route('migration.asset-types.create'))
             ->post(route('migration.asset-types.store'), [
+                'administracao_id' => $this->administrationId,
                 'descricao' => '   ',
             ]);
 
@@ -146,15 +162,20 @@ final class LegacyAssetTypeManagementTest extends TestCase
         $response->assertSessionHasErrors(['descricao']);
     }
 
-    private function makeAssetType(int $id, int $code, string $description): TipoBem
+    private function makeAssetType(int $id, int $code, string $description, int $administrationId): TipoBem
     {
         $assetType = new TipoBem();
         $assetType->forceFill([
             'id' => $id,
+            'administracao_id' => $administrationId,
             'codigo' => $code,
             'descricao' => $description,
         ]);
         $assetType->exists = true;
+        $assetType->setRelation('administracao', new Administracao([
+            'id' => $administrationId,
+            'descricao' => 'Administração Central',
+        ]));
 
         return $assetType;
     }

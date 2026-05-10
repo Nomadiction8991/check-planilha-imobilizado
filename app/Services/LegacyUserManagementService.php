@@ -35,7 +35,7 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
 
     public function update(Usuario $user, UserMutationData $data): Usuario
     {
-        $this->assertUserCanBeManaged($user);
+        $this->assertUserCanBeUpdated($user);
         $this->assertAdministrationExists($data->administrationId);
         $this->assertAdministrationAllowed($data->administrationId, $user);
         $normalized = $this->normalizePayload($data, $user);
@@ -50,13 +50,15 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
 
     public function updatePermissions(Usuario $user, array $permissions): Usuario
     {
-        $this->assertUserCanBeManaged($user);
+        $this->assertUserCanBeUpdated($user);
 
         if (!$this->permissionsCanBeEdited()) {
             throw new RuntimeException('Você não tem permissão para gerenciar permissões de usuários.');
         }
 
-        $user->permissions = $this->normalizePermissionSelection(array_keys(array_filter($permissions)));
+        $user->permissions = $user->isAdministrator()
+            ? $this->normalizePermissionSelection(array_keys($this->permissionDefaults()))
+            : $this->normalizePermissionSelection(array_keys(array_filter($permissions)));
         $user->save();
 
         return $user->refresh();
@@ -85,7 +87,6 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
 
         $payload = [
             'administracao_id' => $data->administrationId,
-            'administracoes_permitidas' => $this->normalizeAdministrationScopeIds($data->administrationIds, $data->administrationId),
             'comum_id' => null,
             'nome' => mb_strtoupper(trim($data->name), 'UTF-8'),
             'email' => mb_strtoupper(trim($data->email), 'UTF-8'),
@@ -109,6 +110,16 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
             'endereco_estado' => mb_strtoupper(trim($data->addressState), 'UTF-8'),
             'permissions' => $this->resolvePermissionsPayload($data, $existingUser),
         ];
+
+        $payload['administracoes_permitidas'] = $existingUser !== null && $existingUser->isAdministrator()
+            ? $this->allAdministrationIds()
+            : $this->normalizeAdministrationScopeIds($data->administrationIds, $data->administrationId);
+
+        if ($existingUser !== null && $existingUser->isAdministrator()) {
+            $payload['tipo'] = 'administrador';
+        } elseif ($existingUser !== null && trim((string) ($existingUser->tipo ?? '')) !== '') {
+            $payload['tipo'] = (string) $existingUser->tipo;
+        }
 
         if ($data->married) {
             $spouseCpf = $this->digitsOnly($data->spouseCpf);
@@ -174,6 +185,11 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
             throw new RuntimeException('O usuário administrador não pode ser editado ou excluído.');
         }
 
+        $this->assertAdministrationAllowed((int) ($user->administracao_id ?? 0) > 0 ? (int) $user->administracao_id : null, $user);
+    }
+
+    private function assertUserCanBeUpdated(Usuario $user): void
+    {
         $this->assertAdministrationAllowed((int) ($user->administracao_id ?? 0) > 0 ? (int) $user->administracao_id : null, $user);
     }
 
@@ -257,6 +273,10 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
     {
         $defaults = $this->permissionDefaults();
 
+        if ($existingUser !== null && $existingUser->isAdministrator()) {
+            return $this->normalizePermissionSelection(array_keys($defaults));
+        }
+
         if (!$this->permissionsCanBeEdited()) {
             return $existingUser !== null && is_array($existingUser->permissions)
                 ? $this->normalizePermissionSelection(array_keys(array_filter($existingUser->permissions)))
@@ -286,6 +306,20 @@ class LegacyUserManagementService implements LegacyUserManagementServiceInterfac
         }
 
         return $permissions;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    protected function allAdministrationIds(): array
+    {
+        return Administracao::query()
+            ->orderBy('descricao')
+            ->pluck('id')
+            ->map(static fn (mixed $value): int => (int) $value)
+            ->filter(static fn (int $value): bool => $value > 0)
+            ->values()
+            ->all();
     }
 
     /**
