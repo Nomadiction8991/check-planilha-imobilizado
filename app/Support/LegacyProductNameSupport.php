@@ -10,13 +10,15 @@ final class LegacyProductNameSupport
 {
     public static function formatCurrentName(mixed $product): string
     {
+        $useEditedValues = (int) data_get($product, 'editado', 0) === 1;
+
         return self::formatName(
-            self::firstNonEmpty($product, ['editado_bem', 'bem']),
-            self::firstNonEmpty($product, ['editado_complemento', 'complemento']),
-            self::firstNonEmpty($product, ['editado_marca', 'marca']),
-            self::firstNonEmpty($product, ['editado_altura_m', 'altura_m']),
-            self::firstNonEmpty($product, ['editado_largura_m', 'largura_m']),
-            self::firstNonEmpty($product, ['editado_comprimento_m', 'comprimento_m']),
+            self::currentValue($product, $useEditedValues, 'editado_bem', 'bem'),
+            self::currentValue($product, $useEditedValues, 'editado_complemento', 'complemento'),
+            self::currentValue($product, $useEditedValues, 'editado_marca', 'marca'),
+            self::currentValue($product, $useEditedValues, 'editado_altura_m', 'altura_m'),
+            self::currentValue($product, $useEditedValues, 'editado_largura_m', 'largura_m'),
+            self::currentValue($product, $useEditedValues, 'editado_comprimento_m', 'comprimento_m'),
         );
     }
 
@@ -118,6 +120,15 @@ final class LegacyProductNameSupport
         }
 
         return '';
+    }
+
+    private static function currentValue(mixed $record, bool $useEditedValues, string $editedKey, string $originalKey): string
+    {
+        if ($useEditedValues) {
+            return trim((string) data_get($record, $editedKey, ''));
+        }
+
+        return self::firstNonEmpty($record, [$editedKey, $originalKey]);
     }
 
     private static function stringValue(mixed $record, string $key): string
