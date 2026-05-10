@@ -148,15 +148,15 @@ final class LegacyConfigurationManagementTest extends TestCase
         ])->get(route('migration.configuracoes.index'));
 
         $response->assertOk();
-        $response->assertSee('Configurações.');
         $response->assertSee('Host SMTP');
         $response->assertSee('smtp.gmail.com');
-        $response->assertSee('Salvar configurações');
+        $response->assertSee('Salvar e-mail');
+        $response->assertSee('Salvar menu');
         $response->assertSee('Ordem dos menus');
         $response->assertSeeInOrder(['Verificação', 'Produtos', 'Etiquetas', 'Configurações']);
     }
 
-    public function testUpdateConfigurationPersistsValues(): void
+    public function testUpdateMailConfigurationPersistsValues(): void
     {
         $this->mock(LegacyMailConfigurationServiceInterface::class, function (MockInterface $mock): void {
             $mock->shouldReceive('save')
@@ -170,6 +170,38 @@ final class LegacyConfigurationManagementTest extends TestCase
                         && $data->fromAddress === 'contato@gmail.com'
                         && $data->fromName === 'Check Planilha';
                 });
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('availableKeys')->andReturn(['verification', 'products', 'labels', 'configuracoes']);
+            $mock->shouldReceive('saveOrder')->never();
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 1,
+            'usuario_nome' => 'Administrador',
+            'usuario_email' => 'ADMIN@LOCALHOST',
+            'is_admin' => true,
+        ])->post(route('migration.configuracoes.update'), [
+            'config_section' => 'mail',
+            'mail_host' => 'smtp.gmail.com',
+            'mail_port' => 587,
+            'mail_scheme' => 'tls',
+            'mail_username' => 'contato@gmail.com',
+            'mail_password' => 'senha-do-app',
+            'mail_from_address' => 'contato@gmail.com',
+            'mail_from_name' => 'Check Planilha',
+        ]);
+
+        $response->assertRedirect(route('migration.configuracoes.index'));
+        $response->assertSessionHas('status', 'Configurações salvas com sucesso.');
+    }
+
+    public function testUpdateMenuConfigurationPersistsValues(): void
+    {
+        $this->mock(LegacyMailConfigurationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('save')->never();
         });
 
         $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
@@ -188,13 +220,7 @@ final class LegacyConfigurationManagementTest extends TestCase
             'usuario_email' => 'ADMIN@LOCALHOST',
             'is_admin' => true,
         ])->post(route('migration.configuracoes.update'), [
-            'mail_host' => 'smtp.gmail.com',
-            'mail_port' => 587,
-            'mail_scheme' => 'tls',
-            'mail_username' => 'contato@gmail.com',
-            'mail_password' => 'senha-do-app',
-            'mail_from_address' => 'contato@gmail.com',
-            'mail_from_name' => 'Check Planilha',
+            'config_section' => 'menu',
             'menu_order' => ['products', 'verification', 'labels', 'configuracoes'],
         ]);
 

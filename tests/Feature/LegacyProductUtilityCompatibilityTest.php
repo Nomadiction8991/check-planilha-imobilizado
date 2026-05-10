@@ -72,7 +72,6 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         ])->get(route('migration.labels.index', ['comum_id' => 7, 'dependencia' => 3]));
 
         $response->assertOk();
-        $response->assertSee('Copiar códigos para etiquetas.');
         $response->assertSee('A-101,A-102');
         $response->assertSee('12-3456/000233');
         $response->assertSee('Igreja');

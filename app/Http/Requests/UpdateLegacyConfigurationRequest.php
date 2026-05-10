@@ -23,16 +23,20 @@ final class UpdateLegacyConfigurationRequest extends FormRequest
     public function rules(): array
     {
         $menuKeys = app(LegacyNavigationServiceInterface::class)->availableKeys();
+        $section = $this->section();
+        $mailSection = $section !== 'menu';
+        $menuSection = $section !== 'mail';
 
         return [
-            'mail_host' => ['required', 'string', 'max:255'],
-            'mail_port' => ['required', 'integer', 'between:1,65535'],
-            'mail_scheme' => ['required', 'string', Rule::in(['tls', 'ssl', 'null'])],
-            'mail_username' => ['required', 'email:rfc', 'max:255'],
+            'config_section' => ['required', Rule::in(['mail', 'menu'])],
+            'mail_host' => $mailSection ? ['required', 'string', 'max:255'] : ['nullable'],
+            'mail_port' => $mailSection ? ['required', 'integer', 'between:1,65535'] : ['nullable', 'integer', 'between:1,65535'],
+            'mail_scheme' => $mailSection ? ['required', 'string', Rule::in(['tls', 'ssl', 'null'])] : ['nullable', 'string', Rule::in(['tls', 'ssl', 'null'])],
+            'mail_username' => $mailSection ? ['required', 'email:rfc', 'max:255'] : ['nullable', 'email:rfc', 'max:255'],
             'mail_password' => ['nullable', 'string', 'min:6', 'max:255'],
-            'mail_from_address' => ['required', 'email:rfc', 'max:255'],
-            'mail_from_name' => ['required', 'string', 'max:255'],
-            'menu_order' => ['required', 'array', 'min:1'],
+            'mail_from_address' => $mailSection ? ['required', 'email:rfc', 'max:255'] : ['nullable', 'email:rfc', 'max:255'],
+            'mail_from_name' => $mailSection ? ['required', 'string', 'max:255'] : ['nullable', 'string', 'max:255'],
+            'menu_order' => $menuSection ? ['required', 'array', 'min:1'] : ['nullable', 'array'],
             'menu_order.*' => ['string', Rule::in($menuKeys)],
         ];
     }
@@ -59,14 +63,16 @@ final class UpdateLegacyConfigurationRequest extends FormRequest
 
     public function toDto(): LegacyMailConfigurationData
     {
+        $values = $this->mailValues();
+
         return LegacyMailConfigurationData::fromArray([
-            'host' => trim((string) $this->validated('mail_host')),
-            'port' => (int) $this->validated('mail_port'),
-            'scheme' => trim((string) $this->validated('mail_scheme')),
-            'username' => trim((string) $this->validated('mail_username')),
-            'password' => trim((string) ($this->validated('mail_password') ?? '')) ?: null,
-            'fromAddress' => trim((string) $this->validated('mail_from_address')),
-            'fromName' => trim((string) $this->validated('mail_from_name')),
+            'host' => trim((string) $values['mail_host']),
+            'port' => (int) $values['mail_port'],
+            'scheme' => trim((string) $values['mail_scheme']),
+            'username' => trim((string) $values['mail_username']),
+            'password' => trim((string) ($values['mail_password'] ?? '')) ?: null,
+            'fromAddress' => trim((string) $values['mail_from_address']),
+            'fromName' => trim((string) $values['mail_from_name']),
         ]);
     }
 
@@ -81,5 +87,28 @@ final class UpdateLegacyConfigurationRequest extends FormRequest
         return LegacyNavigationOrderData::fromArray([
             'items' => $menuOrder,
         ]);
+    }
+
+    public function section(): string
+    {
+        $section = trim((string) $this->input('config_section', ''));
+
+        return in_array($section, ['mail', 'menu'], true) ? $section : '';
+    }
+
+    /**
+     * @return array{mail_host: mixed, mail_port: mixed, mail_scheme: mixed, mail_username: mixed, mail_password: mixed, mail_from_address: mixed, mail_from_name: mixed}
+     */
+    private function mailValues(): array
+    {
+        return [
+            'mail_host' => $this->validated('mail_host'),
+            'mail_port' => $this->validated('mail_port'),
+            'mail_scheme' => $this->validated('mail_scheme'),
+            'mail_username' => $this->validated('mail_username'),
+            'mail_password' => $this->validated('mail_password'),
+            'mail_from_address' => $this->validated('mail_from_address'),
+            'mail_from_name' => $this->validated('mail_from_name'),
+        ];
     }
 }

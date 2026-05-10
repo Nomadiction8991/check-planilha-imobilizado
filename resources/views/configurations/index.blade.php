@@ -3,15 +3,6 @@
 @section('title', 'Configurações | ' . config('app.name'))
 
 @section('content')
-    <section class="hero">
-        <span class="eyebrow">Acesso administrativo</span>
-        <h1>Configurações.</h1>
-        <p class="hero-copy">
-            Use esta tela para configurar o e-mail de envio do sistema. No momento, só a conta do Google SMTP é
-            necessária para que a recuperação de senha funcione.
-        </p>
-    </section>
-
     @if (session('status') || $errors->any())
         <div class="flash-stack">
             @if (session('status'))
@@ -34,167 +25,274 @@
     @endif
 
     <section class="section">
-        <div class="table-shell">
-            <form method="POST" action="{{ route('migration.configuracoes.update') }}" class="form-shell">
-                @csrf
+        <div class="config-grid">
+            <div class="table-shell config-card config-card--mail">
+                <form method="POST" action="{{ route('migration.configuracoes.update') }}" class="form-shell">
+                    @csrf
+                    <input type="hidden" name="config_section" value="mail">
 
-                <div class="field-grid">
-                    <label>
-                        Host SMTP
-                        <input
-                            type="text"
-                            name="mail_host"
-                            value="{{ old('mail_host', $mailConfiguration->host) }}"
-                            maxlength="255"
-                            placeholder="smtp.gmail.com"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Porta SMTP
-                        <input
-                            type="number"
-                            name="mail_port"
-                            value="{{ old('mail_port', (string) $mailConfiguration->port) }}"
-                            min="1"
-                            max="65535"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Conexão
-                        <select name="mail_scheme" required>
-                            <option value="tls" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'tls')>TLS</option>
-                            <option value="ssl" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'ssl')>SSL</option>
-                            <option value="null" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'null')>Sem criptografia</option>
-                        </select>
-                    </label>
-
-                    <label>
-                        E-mail Google
-                        <input
-                            type="email"
-                            name="mail_username"
-                            value="{{ old('mail_username', $mailConfiguration->username) }}"
-                            maxlength="255"
-                            placeholder="seuemail@gmail.com"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Senha do aplicativo
-                        <input
-                            type="password"
-                            name="mail_password"
-                            value=""
-                            maxlength="255"
-                            placeholder="Digite a senha do aplicativo do Google"
-                        >
-                    </label>
-
-                    <label>
-                        E-mail do remetente
-                        <input
-                            type="email"
-                            name="mail_from_address"
-                            value="{{ old('mail_from_address', $mailConfiguration->fromAddress ?: $mailConfiguration->username) }}"
-                            maxlength="255"
-                            placeholder="seuemail@gmail.com"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Nome do remetente
-                        <input
-                            type="text"
-                            name="mail_from_name"
-                            value="{{ old('mail_from_name', $mailConfiguration->fromName) }}"
-                            maxlength="255"
-                            placeholder="Check Planilha"
-                            required
-                        >
-                    </label>
-                </div>
-
-                <p class="field-note">
-                    O sistema usa essas credenciais para enviar a senha nova no fluxo de "esqueci minha senha". Se você
-                    mudar a senha do Google, atualize este campo também.
-                </p>
-
-                @php
-                    $menuItemsByKey = [];
-
-                    foreach ($menuItems as $item) {
-                        $menuItemsByKey[$item['key']] = $item;
-                    }
-
-                    $orderedMenuKeys = old('menu_order', $menuOrder->items);
-                    $orderedMenuItems = [];
-
-                    foreach ($orderedMenuKeys as $key) {
-                        if (isset($menuItemsByKey[$key])) {
-                            $orderedMenuItems[] = $menuItemsByKey[$key];
-                        }
-                    }
-
-                    foreach ($menuItemsByKey as $key => $item) {
-                        if (!in_array($key, array_column($orderedMenuItems, 'key'), true)) {
-                            $orderedMenuItems[] = $item;
-                        }
-                    }
-                @endphp
-
-                <div class="menu-order-shell">
-                    <div class="menu-order-head">
+                    <div class="section-head section-head--stacked">
                         <div>
-                            <h2>Ordem dos menus</h2>
+                            <h2>E-mail do sistema</h2>
                             <p>
-                                Arraste e solte os itens para definir a ordem global do menu. Essa personalização vale
-                                para todos os usuários.
+                                Configure o SMTP usado para recuperar senha e enviar mensagens automáticas. Salve só
+                                este bloco quando alterar credenciais de e-mail.
                             </p>
                         </div>
-                        <span class="menu-order-badge">Global</span>
                     </div>
 
-                    <div class="menu-order-list" data-menu-order-list>
-                        @foreach ($orderedMenuItems as $item)
-                            <article
-                                class="menu-order-item"
-                                data-menu-order-item
-                                data-menu-key="{{ $item['key'] }}"
-                                draggable="true"
+                    <div class="field-grid">
+                        <label>
+                            Host SMTP
+                            <input
+                                type="text"
+                                name="mail_host"
+                                value="{{ old('mail_host', $mailConfiguration->host) }}"
+                                maxlength="255"
+                                placeholder="smtp.gmail.com"
+                                required
                             >
-                                <input type="hidden" name="menu_order[]" value="{{ $item['key'] }}">
-                                <span class="menu-order-handle" aria-hidden="true">drag_indicator</span>
-                                <div class="menu-order-copy">
-                                    <strong>{{ $item['label'] }}</strong>
-                                    <small>{{ $item['subtitle'] }}</small>
-                                </div>
-                            </article>
-                        @endforeach
-                    </div>
-                </div>
+                        </label>
 
-                <div class="inline-actions">
-                    <button class="btn primary" type="submit">Salvar configurações</button>
-                </div>
-            </form>
+                        <label>
+                            Porta SMTP
+                            <input
+                                type="number"
+                                name="mail_port"
+                                value="{{ old('mail_port', (string) $mailConfiguration->port) }}"
+                                min="1"
+                                max="65535"
+                                required
+                            >
+                        </label>
+
+                        <label>
+                            Conexão
+                            <select name="mail_scheme" required>
+                                <option value="tls" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'tls')>TLS</option>
+                                <option value="ssl" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'ssl')>SSL</option>
+                                <option value="null" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'null')>Sem criptografia</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            E-mail Google
+                            <input
+                                type="email"
+                                name="mail_username"
+                                value="{{ old('mail_username', $mailConfiguration->username) }}"
+                                maxlength="255"
+                                placeholder="seuemail@gmail.com"
+                                required
+                            >
+                        </label>
+
+                        <label>
+                            Senha do aplicativo
+                            <input
+                                type="password"
+                                name="mail_password"
+                                value=""
+                                maxlength="255"
+                                placeholder="Digite a senha do aplicativo do Google"
+                            >
+                        </label>
+
+                        <label>
+                            E-mail do remetente
+                            <input
+                                type="email"
+                                name="mail_from_address"
+                                value="{{ old('mail_from_address', $mailConfiguration->fromAddress ?: $mailConfiguration->username) }}"
+                                maxlength="255"
+                                placeholder="seuemail@gmail.com"
+                                required
+                            >
+                        </label>
+
+                        <label>
+                            Nome do remetente
+                            <input
+                                type="text"
+                                name="mail_from_name"
+                                value="{{ old('mail_from_name', $mailConfiguration->fromName) }}"
+                                maxlength="255"
+                                placeholder="Check Planilha"
+                                required
+                            >
+                        </label>
+                    </div>
+
+                    <p class="field-note">
+                        O sistema usa essas credenciais para enviar a senha nova no fluxo de "esqueci minha senha". Se
+                        você mudar a senha do Google, atualize este bloco também.
+                    </p>
+
+                    <div class="inline-actions inline-actions--end">
+                        <button class="btn primary" type="submit">Salvar e-mail</button>
+                    </div>
+                </form>
+            </div>
+
+            @php
+                $menuItemsByKey = [];
+
+                foreach ($menuItems as $item) {
+                    $menuItemsByKey[$item['key']] = $item;
+                }
+
+                $orderedMenuKeys = old('menu_order', $menuOrder->items);
+                $orderedMenuItems = [];
+
+                foreach ($orderedMenuKeys as $key) {
+                    if (isset($menuItemsByKey[$key])) {
+                        $orderedMenuItems[] = $menuItemsByKey[$key];
+                    }
+                }
+
+                foreach ($menuItemsByKey as $key => $item) {
+                    if (!in_array($key, array_column($orderedMenuItems, 'key'), true)) {
+                        $orderedMenuItems[] = $item;
+                    }
+                }
+            @endphp
+
+            <div class="table-shell config-card config-card--menu">
+                <form method="POST" action="{{ route('migration.configuracoes.update') }}" class="form-shell">
+                    @csrf
+                    <input type="hidden" name="config_section" value="menu">
+
+                    <div class="menu-order-shell">
+                        <div class="menu-order-head">
+                            <div>
+                                <h2>Ordem dos menus</h2>
+                                <p>
+                                    Arraste e solte os itens para definir a ordem global do menu. Salve só este bloco
+                                    quando reorganizar a navegação.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="menu-order-list" data-menu-order-list>
+                            @foreach ($orderedMenuItems as $item)
+                                <article
+                                    class="menu-order-item"
+                                    data-menu-order-item
+                                    data-menu-key="{{ $item['key'] }}"
+                                    draggable="true"
+                                >
+                                    <input type="hidden" name="menu_order[]" value="{{ $item['key'] }}">
+                                    <span class="menu-order-handle" aria-hidden="true">drag_indicator</span>
+                                    <div class="menu-order-copy">
+                                        <strong>{{ $item['label'] }}</strong>
+                                        <small>{{ $item['subtitle'] }}</small>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="inline-actions inline-actions--end">
+                        <button class="btn primary" type="submit">Salvar menu</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </section>
 
     <style>
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        .config-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .config-card::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.8), rgba(14, 165, 233, 0.2));
+        }
+
+        .config-card--menu::before {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.8), rgba(45, 212, 191, 0.2));
+        }
+
+        .section-head--stacked {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .section-head--stacked h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .section-head--stacked p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            max-width: 60ch;
+        }
+
+        .config-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .config-badge--mail {
+            background: rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.28);
+            color: var(--accent);
+        }
+
+        .inline-actions--end {
+            justify-content: flex-end;
+        }
+
+        html[data-theme='dark'] .config-card {
+            background: linear-gradient(180deg, rgba(22, 28, 39, 0.92), rgba(18, 23, 32, 0.98));
+        }
+
+        html[data-theme='dark'] .config-card::before {
+            opacity: 0.95;
+        }
+
+        html[data-theme='dark'] .config-badge--mail {
+            background: rgba(59, 130, 246, 0.18);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        html[data-theme='dark'] .config-card--menu::before {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.9), rgba(45, 212, 191, 0.22));
+        }
+
         .menu-order-shell {
             display: grid;
             gap: 16px;
-            margin-top: 8px;
-            padding: 18px;
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.92));
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
         }
 
         .menu-order-head {
@@ -206,7 +304,7 @@
 
         .menu-order-head h2 {
             margin: 0;
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .menu-order-head p {
@@ -284,6 +382,10 @@
         }
 
         @media (max-width: 720px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
             .menu-order-head {
                 flex-direction: column;
             }

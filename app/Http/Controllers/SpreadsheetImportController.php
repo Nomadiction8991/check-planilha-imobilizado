@@ -69,6 +69,7 @@ class SpreadsheetImportController extends Controller
             'importacao' => $preview['importacao'],
             'analise' => $preview['analise'],
             'igrejasSalvas' => $preview['igrejas_salvas'],
+            'dependenciasSalvas' => $preview['dependencias_salvas'] ?? [],
             'igrejasDetectadas' => $preview['igrejas_detectadas'] ?? [],
         ]);
     }
@@ -80,6 +81,7 @@ class SpreadsheetImportController extends Controller
                 $importacao,
                 (array) $request->input('acoes', []),
                 (array) $request->input('igrejas', []),
+                (array) $request->input('dependencias', []),
             );
         } catch (RuntimeException $exception) {
             return response()->json(['erro' => $exception->getMessage()], 422);
@@ -122,11 +124,14 @@ class SpreadsheetImportController extends Controller
 
     public function confirm(Request $request, int $importacao): RedirectResponse
     {
-        Session::put($this->confirmOptionsKey($importacao), [
+        $confirmData = [
             'importar_tudo' => $request->boolean('importar_tudo'),
-            'acoes' => (array) $request->input('acao', []),
-            'igrejas' => (array) $request->input('igrejas', []),
-        ]);
+            'acoes' => (array) $request->input('acao', Session::get($this->imports->previewActionsKey($importacao), [])),
+            'igrejas' => (array) $request->input('igrejas', Session::get($this->imports->previewChurchesKey($importacao), [])),
+            'dependencias' => (array) $request->input('dependencias', Session::get($this->imports->previewDependenciesKey($importacao), [])),
+        ];
+
+        Session::put($this->confirmOptionsKey($importacao), $confirmData);
 
         return redirect()
             ->route('migration.spreadsheets.processing', ['importacao' => $importacao])
@@ -175,6 +180,7 @@ class SpreadsheetImportController extends Controller
                 importAll: (bool) ($options['importar_tudo'] ?? false),
                 acoes: (array) ($options['acoes'] ?? []),
                 igrejas: (array) ($options['igrejas'] ?? []),
+                dependencias: (array) ($options['dependencias'] ?? []),
             );
         } catch (RuntimeException $exception) {
             return response()->json([
@@ -325,7 +331,19 @@ class SpreadsheetImportController extends Controller
 
         return response()->streamDownload(
             static function () use ($file): void {
-                echo $file['content'];
+                $output = fopen('php://output', 'w');
+                // Adiciona BOM para Excel abrir corretamente em UTF-8
+                fputs($output, "\xEF\xBB\xBF");
+                
+                if (isset($file['rows']) && is_iterable($file['rows'])) {
+                    foreach ($file['rows'] as $row) {
+                        fputcsv($output, $row);
+                    }
+                } else {
+                    echo $file['content'] ?? '';
+                }
+                
+                fclose($output);
             },
             $file['filename'],
             [

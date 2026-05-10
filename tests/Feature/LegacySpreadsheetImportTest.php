@@ -23,6 +23,21 @@ final class LegacySpreadsheetImportTest extends TestCase
             LegacySpreadsheetImportServiceInterface::class,
             new class implements LegacySpreadsheetImportServiceInterface
             {
+                public function previewActionsKey(int $importacaoId): string
+                {
+                    return 'preview-actions-' . $importacaoId;
+                }
+
+                public function previewChurchesKey(int $importacaoId): string
+                {
+                    return 'preview-churches-' . $importacaoId;
+                }
+
+                public function previewDependenciesKey(int $importacaoId): string
+                {
+                    return 'preview-dependencies-' . $importacaoId;
+                }
+
                 public function responsibleUserOptions(): Collection
                 {
                     return collect([
@@ -240,15 +255,17 @@ final class LegacySpreadsheetImportTest extends TestCase
                             ],
                         ],
                         'igrejas_salvas' => ['12-3456' => 'importar'],
+                        'dependencias_salvas' => ['12-3456:SEM DEPENDÊNCIA' => 'importar'],
                         'status_por_comum' => ['12-3456' => 'novo'],
                     ];
                 }
 
-                public function savePreviewActions(int $importacaoId, array $acoes, array $igrejas): array
+                public function savePreviewActions(int $importacaoId, array $acoes, array $igrejas, array $dependencias = []): array
                 {
                     return [
-                        'total_salvas' => count($acoes) + count($igrejas),
+                        'total_salvas' => count($acoes) + count($igrejas) + count($dependencias),
                         'igrejas_salvas' => count($igrejas),
+                        'dependencias_salvas' => count($dependencias),
                     ];
                 }
 
@@ -257,7 +274,7 @@ final class LegacySpreadsheetImportTest extends TestCase
                     return ['acao' => $acao, 'total_aplicadas' => 1];
                 }
 
-                public function confirmImport(int $importacaoId, bool $importAll = true, array $acoes = [], array $igrejas = []): array
+                public function confirmImport(int $importacaoId, bool $importAll = true, array $acoes = [], array $igrejas = [], array $dependencias = []): array
                 {
                     return ['sucesso' => 9, 'erro' => 1];
                 }
@@ -343,10 +360,10 @@ final class LegacySpreadsheetImportTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Importe uma planilha para análise.');
-        $response->assertSee('Esta importação é por igreja, não por dependência.');
+        $response->assertSee('Prefira a planilha filtrada por igreja.');
         $response->assertSee('Enviar e analisar');
         $response->assertDontSee('Igreja base');
-        $response->assertSee('detecta as igrejas diretamente do CSV');
+        $response->assertSee('A análise detecta as igrejas do CSV');
         $response->assertSee('Importações recentes');
         $response->assertSee('5 registro(s)');
         $response->assertSee('Relatório de Bens Imobilizado.csv');
@@ -392,14 +409,12 @@ final class LegacySpreadsheetImportTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Escolha as igrejas que devem entrar na importação.');
-        $response->assertSee('Importação por dependência não é suportada.');
         $response->assertSee('Central Cuiabá');
         $response->assertSee('Administração: Administração Central');
         $response->assertSee('Confirmar igrejas selecionadas');
         $response->assertDontSee('bens.csv');
         $response->assertDontSee('CADEIRA METALICA');
         $response->assertDontSee('Salvar ações');
-        $response->assertDontSee('Importar tudo');
     }
 
     public function testConfirmRedirectsToProductsWithResultMessage(): void

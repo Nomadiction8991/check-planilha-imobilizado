@@ -32,6 +32,18 @@
 
                 <div class="field-grid">
                     <label>
+                        Administração
+                        <select name="administracao_id" required>
+                            <option value="">Selecione</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected((int) old('administracao_id', $selectedAdministrationId ?? '') === (int) $administration->id)>
+                                    #{{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label>
                         Descrição
                         <input
                             type="text"
@@ -44,7 +56,7 @@
                     </label>
                 </div>
 
-                <p class="field-note">O código é sequencial e será gerado automaticamente ao salvar.</p>
+                <p class="field-note">O código é sequencial e será gerado automaticamente ao salvar. Cada tipo de bem fica ligado a uma administração.</p>
 
                 <div class="inline-actions">
                     <button class="btn primary" type="submit">Salvar tipo de bem</button>

@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Repositories\ImportacaoRepository;
 use App\ValueObjects\ProcessingResult;
 use App\Core\ConnectionManager;
+use Illuminate\Support\Facades\Schema;
 use PDO;
 use Exception;
 
@@ -31,6 +32,11 @@ class ImportacaoService
     private ImportacaoRepository $importacaoRepo;
     private PDO $conexao;
     private const LOTE_SIZE = 100;
+
+    // Caches em memória para evitar N+1 queries
+    private array $cacheTiposBens = [];
+    private array $cacheDependencias = []; // [comum_id => [descricao_upper => id]]
+    private array $cacheComuns = []; // [codigo => id]
 
     public function __construct(?PDO $conexao = null)
     {
@@ -129,6 +135,12 @@ class ImportacaoService
             throw new Exception('Importação não encontrada');
         }
 
+        // Garantir que o processo não seja interrompido por timeout
+        @set_time_limit(0);
+        @ignore_user_abort(true);
+
+        error_log("Iniciando processamento da importação #{$importacaoId} com " . count($acoes) . " ações.");
+
         // Limpar erros anterior desta importação para registrar apenas os novos
         $stmtDeleteErros = $this->conexao->prepare('DELETE FROM import_erros WHERE importacao_id = :id');
         $stmtDeleteErros->execute([':id' => $importacaoId]);
@@ -137,6 +149,12 @@ class ImportacaoService
             'status' => 'processando',
             'iniciada_em' => date('Y-m-d H:i:s')
         ]);
+
+        $administracaoId = (int) ($importacao['administracao_id'] ?? 0);
+
+        // Pre-load caches para evitar N+1
+        $this->preCarregarTiposBens($administracaoId > 0 ? $administracaoId : null);
+        $this->preCarregarComuns();
 
         $resultado = ProcessingResult::criar();
 
@@ -213,6 +231,7 @@ class ImportacaoService
                 'concluida_em' => date('Y-m-d H:i:s')
             ]);
         } catch (Exception $e) {
+            error_log("ERRO FATAL na importação #{$importacaoId}: " . $e->getMessage());
             $this->importacaoRepo->atualizar($importacaoId, [
                 'status' => 'erro',
                 'mensagem_erro' => $e->getMessage(),
@@ -220,6 +239,8 @@ class ImportacaoService
             ]);
             throw $e;
         }
+
+        error_log("Importação #{$importacaoId} concluída. Sucesso: " . $resultado->getSucesso() . ", Erros: " . $resultado->getErro());
 
         return $resultado->toArray();
     }
@@ -345,8 +366,10 @@ class ImportacaoService
 
         // Usa o código do tipo_bem extraído do prefixo numérico; se não houver,
         // usa 99 (DIVERSOS) para não quebrar a constraint NOT NULL de tipo_bem_id.
-        $tipoBemId    = $this->buscarOuCriarTipoBem(!empty($tipoBemCodigo) ? $tipoBemCodigo : '99');
-        $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);
+        $tipoBemCodigoFinal = !empty($tipoBemCodigo) ? $tipoBemCodigo : '99';
+        $tipoBemId = $this->cacheTiposBens[$tipoBemCodigoFinal] ?? $this->buscarOuCriarTipoBem($tipoBemCodigoFinal, $administracaoId);
+
+        $dependenciaId = $this->buscarOuCriarDependenciaCached($dependenciaDescricao, $comumId);
 
         if ($registro['status'] === CsvParserService::STATUS_ATUALIZAR && !empty($registro['id_produto'])) {
             // id_produto pode ser string vindo do CSV/DB; converter para int
@@ -397,6 +420,64 @@ class ImportacaoService
         }
     }
 
+    private function preCarregarTiposBens(?int $administracaoId = null): void
+    {
+        $supportsAdministrationScope = $this->supportsAdministrationScope();
+
+        if ($supportsAdministrationScope && $administracaoId !== null && $administracaoId > 0) {
+            $stmt = $this->conexao->prepare(
+                "SELECT id, codigo
+                 FROM tipos_bens
+                 WHERE administracao_id = :administracao_id OR administracao_id IS NULL
+                 ORDER BY administracao_id IS NULL ASC, id ASC"
+            );
+            $stmt->execute([':administracao_id' => $administracaoId]);
+        } else {
+            $stmt = $this->conexao->query("SELECT id, codigo FROM tipos_bens ORDER BY id ASC");
+        }
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $codigo = (string) $row['codigo'];
+            if (!isset($this->cacheTiposBens[$codigo])) {
+                $this->cacheTiposBens[$codigo] = (int) $row['id'];
+            }
+        }
+    }
+
+    private function preCarregarComuns(): void
+    {
+        $stmt = $this->conexao->query("SELECT id, codigo FROM comums");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $this->cacheComuns[strtoupper(trim((string) $row['codigo']))] = (int) $row['id'];
+        }
+    }
+
+    private function buscarOuCriarDependenciaCached(string $descricao, int $comumId): int
+    {
+        $descricao = trim(strtoupper($descricao));
+        if (empty($descricao)) {
+            $descricao = 'SEM DEPENDÊNCIA';
+        }
+
+        // Se cache da comum não existe, carrega
+        if (!isset($this->cacheDependencias[$comumId])) {
+            $this->cacheDependencias[$comumId] = [];
+            $stmt = $this->conexao->prepare("SELECT id, descricao FROM dependencias WHERE comum_id = :comum_id");
+            $stmt->execute([':comum_id' => $comumId]);
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $this->cacheDependencias[$comumId][strtoupper(trim((string) $row['descricao']))] = (int) $row['id'];
+            }
+        }
+
+        if (isset($this->cacheDependencias[$comumId][$descricao])) {
+            return $this->cacheDependencias[$comumId][$descricao];
+        }
+
+        $id = $this->buscarOuCriarDependencia($descricao, $comumId);
+        $this->cacheDependencias[$comumId][$descricao] = $id;
+
+        return $id;
+    }
+
     /**
      * Desativa um produto (soft delete — seta ativo = 0).
      */
@@ -408,21 +489,53 @@ class ImportacaoService
 
     // ─── Métodos auxiliares (preservados da lógica original) ───
 
-    private function buscarOuCriarTipoBem(string $codigo): int
+    private function buscarOuCriarTipoBem(string $codigo, ?int $administracaoId = null): int
     {
-        $stmt = $this->conexao->prepare("SELECT id FROM tipos_bens WHERE codigo = :codigo");
-        $stmt->execute([':codigo' => $codigo]);
+        $supportsAdministrationScope = $this->supportsAdministrationScope();
+
+        if ($supportsAdministrationScope && $administracaoId !== null && $administracaoId > 0) {
+            $stmt = $this->conexao->prepare(
+                "SELECT id
+                 FROM tipos_bens
+                 WHERE codigo = :codigo
+                   AND (administracao_id = :administracao_id OR administracao_id IS NULL)
+                 ORDER BY administracao_id IS NULL ASC
+                 LIMIT 1"
+            );
+            $stmt->execute([
+                ':codigo' => $codigo,
+                ':administracao_id' => $administracaoId,
+            ]);
+        } else {
+            $stmt = $this->conexao->prepare("SELECT id FROM tipos_bens WHERE codigo = :codigo LIMIT 1");
+            $stmt->execute([':codigo' => $codigo]);
+        }
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($resultado) {
             return (int) $resultado['id'];
         }
 
-        $stmt = $this->conexao->prepare("INSERT INTO tipos_bens (codigo, descricao) VALUES (:codigo, :descricao)");
-        $stmt->execute([
-            ':codigo' => $codigo,
-            ':descricao' => 'Tipo ' . $codigo
-        ]);
+        if ($supportsAdministrationScope) {
+            $stmt = $this->conexao->prepare(
+                "INSERT INTO tipos_bens (codigo, descricao, administracao_id)
+                 VALUES (:codigo, :descricao, :administracao_id)"
+            );
+            $stmt->execute([
+                ':codigo' => $codigo,
+                ':descricao' => 'Tipo ' . $codigo,
+                ':administracao_id' => $administracaoId,
+            ]);
+        } else {
+            $stmt = $this->conexao->prepare(
+                "INSERT INTO tipos_bens (codigo, descricao)
+                 VALUES (:codigo, :descricao)"
+            );
+            $stmt->execute([
+                ':codigo' => $codigo,
+                ':descricao' => 'Tipo ' . $codigo,
+            ]);
+        }
 
         return (int) $this->conexao->lastInsertId();
     }
@@ -455,7 +568,26 @@ class ImportacaoService
             throw new Exception('Código da comum vazio — não é possível identificar a comum');
         }
 
-        // Buscar comum pelo código
+        $codigoUpper = strtoupper(trim($codigoComum));
+
+        if (isset($this->cacheComuns[$codigoUpper])) {
+            $comumId = $this->cacheComuns[$codigoUpper];
+            
+            // Garantir administração (lógica original)
+            if ($administracaoId !== null) {
+                $stmt = $this->conexao->prepare("SELECT administracao_id FROM comums WHERE id = :id");
+                $stmt->execute([':id' => $comumId]);
+                $res = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($res && (int) ($res['administracao_id'] ?? 0) !== $administracaoId) {
+                    $stmtUpdate = $this->conexao->prepare("UPDATE comums SET administracao_id = :adm WHERE id = :id");
+                    $stmtUpdate->execute([':adm' => $administracaoId, ':id' => $comumId]);
+                }
+            }
+            
+            return $comumId;
+        }
+
+        // Buscar comum pelo código (fallback caso não esteja no cache inicial)
         $stmt = $this->conexao->prepare("SELECT id, administracao_id FROM comums WHERE codigo = :codigo LIMIT 1");
         $stmt->execute([':codigo' => $codigoComum]);
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -515,6 +647,11 @@ class ImportacaoService
         ]);
 
         return (int) $this->conexao->lastInsertId();
+    }
+
+    private function supportsAdministrationScope(): bool
+    {
+        return Schema::hasColumn('tipos_bens', 'administracao_id');
     }
 
     /**
@@ -752,7 +889,7 @@ class ImportacaoService
         $complemento = $dados[$mapa['complemento']] ?? '';
         $dependenciaDescricao = $dados[$mapa['dependencia']] ?? '';
 
-        $tipoBemId = $this->buscarOuCriarTipoBem($tipoBemCodigo);
+        $tipoBemId = $this->buscarOuCriarTipoBem($tipoBemCodigo, $administracaoId);
         $dependenciaId = $this->buscarOuCriarDependencia($dependenciaDescricao, $comumId);
 
         $stmt = $this->conexao->prepare("SELECT * FROM produtos WHERE codigo = :codigo AND comum_id = :comum_id");
