@@ -1,0 +1,17 @@
+# Índice Visual
+
+- [Tela de Login](login.md)
+- [Recuperar Senha](recuperar-senha.md)
+- [Dashboard](dashboard.md)
+- [Listagem de Produtos](produtos-lista.md)
+- [Cadastro de Produto](produtos-cadastro.md)
+- [Verificação (Checklist)](produtos-verificacao.md)
+- [Upload de Planilha](importacao-upload.md)
+- [Preview de Importação](importacao-preview.md)
+- [Progresso de Importação](importacao-progresso.md)
+- [Erros de Importação](importacao-erros.md)
+- [Central de Relatórios](relatorios-lista.md)
+- [Editor de Células](relatorios-editor.md)
+- [Gestão Administrativa](administracao.md)
+- [Gestão de Usuários](usuarios.md)
+- [Logs de Auditoria](auditoria.md)
