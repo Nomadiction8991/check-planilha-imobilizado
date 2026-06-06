@@ -81,7 +81,7 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
                     };
                 }
             )
-            ->orderByRaw('CASE WHEN codigo IS NULL OR codigo = "" THEN 1 ELSE 0 END')
+            ->orderByRaw("CASE WHEN codigo IS NULL OR codigo = '' THEN 1 ELSE 0 END")
             ->orderBy('codigo')
             ->orderBy('id_produto')
             ->paginate(

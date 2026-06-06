@@ -85,13 +85,13 @@ class ProdutoRepository extends BaseRepository
         if ($filtroStatus !== '') {
             switch ((string) $filtroStatus) {
                 case 'com_nota':
-                    $where[] = 'p.nota_numero IS NOT NULL AND p.nota_numero != ""';
+                    $where[] = "p.nota_numero IS NOT NULL AND p.nota_numero != ''";
                     break;
                 case 'com_14_1':
                     $where[] = 'p.imprimir_14_1 = 1';
                     break;
                 case 'sem_status':
-                    $where[] = '(p.nota_numero IS NULL OR p.nota_numero = "") AND COALESCE(p.imprimir_14_1, 0) = 0';
+                    $where[] = "(p.nota_numero IS NULL OR p.nota_numero = '') AND COALESCE(p.imprimir_14_1, 0) = 0";
                     break;
             }
         }
@@ -336,7 +336,7 @@ class ProdutoRepository extends BaseRepository
         if ($status === 'checado') {
             $where[] = 'p.checado = 1';
         } elseif ($status === 'observacao') {
-            $where[] = 'p.observacao != ""';
+            $where[] = "p.observacao != ''";
         } elseif ($status === 'etiqueta') {
             $where[] = 'p.imprimir_etiqueta = 1';
         } elseif ($status === 'pendente') {
