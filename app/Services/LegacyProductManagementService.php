@@ -24,11 +24,14 @@ class LegacyProductManagementService implements LegacyProductManagementServiceIn
         $dependency = $this->resolveDependency($data->dependencyId, $church->id);
         $itemName = $this->normalizeItemName($assetType, $data->itemName);
         $complement = mb_strtoupper(trim($data->complement), 'UTF-8');
+        $brand = $data->brand !== null
+            ? mb_strtoupper(trim($data->brand), 'UTF-8')
+            : null;
         $invoiceSupplier = $data->invoiceSupplier !== null
             ? mb_strtoupper(trim($data->invoiceSupplier), 'UTF-8')
             : null;
 
-        DB::transaction(function () use ($data, $church, $assetType, $dependency, $itemName, $complement, $invoiceSupplier): void {
+        DB::transaction(function () use ($data, $church, $assetType, $dependency, $itemName, $complement, $brand, $invoiceSupplier): void {
             for ($index = 0; $index < $data->multiplier; $index++) {
                 Produto::query()->create([
                     'comum_id' => (int) $church->id,
@@ -36,6 +39,7 @@ class LegacyProductManagementService implements LegacyProductManagementServiceIn
                     'tipo_bem_id' => (int) $assetType->id,
                     'bem' => $itemName,
                     'complemento' => $complement,
+                    'editado_marca' => $brand,
                     'altura_m' => $data->heightMeters,
                     'largura_m' => $data->widthMeters,
                     'comprimento_m' => $data->lengthMeters,

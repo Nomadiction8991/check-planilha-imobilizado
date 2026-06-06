@@ -109,6 +109,7 @@ final class LegacyProductManagementTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Novo produto.');
+        $response->assertSee('Marca');
         $response->assertSee('Salvar produto');
     }
 
@@ -556,6 +557,8 @@ final class LegacyProductManagementTest extends TestCase
                         $dto->churchId === 7
                         && $dto->assetTypeId === 4
                         && $dto->itemName === 'CADEIRA'
+                        && $dto->complement === ''
+                        && $dto->brand === 'Marca X'
                         && $dto->dependencyId === 2
                     )
                     ->andReturn(1);
@@ -566,7 +569,8 @@ final class LegacyProductManagementTest extends TestCase
             'comum_id' => 7,
             'id_tipo_ben' => 4,
             'tipo_ben' => 'CADEIRA',
-            'complemento' => 'Metalica',
+            'complemento' => '',
+            'marca' => 'Marca X',
             'id_dependencia' => 2,
             'multiplicador' => 1,
             'condicao_14_1' => '2',
@@ -800,6 +804,7 @@ final class LegacyProductManagementTest extends TestCase
                 'id_tipo_ben' => '',
                 'tipo_ben' => '',
                 'complemento' => '',
+                'marca' => '',
                 'id_dependencia' => '',
                 'multiplicador' => 0,
                 'condicao_14_1' => '3',
@@ -814,7 +819,6 @@ final class LegacyProductManagementTest extends TestCase
             'comum_id',
             'id_tipo_ben',
             'tipo_ben',
-            'complemento',
             'id_dependencia',
             'multiplicador',
             'nota_numero',
