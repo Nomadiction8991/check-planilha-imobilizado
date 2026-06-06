@@ -23,13 +23,17 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 {
     public function __construct()
     {
+        $connectionName = (string) config('database.default', 'mysql');
+        $connectionConfig = (array) config("database.connections.{$connectionName}", []);
+
         ConnectionManager::configure([
-            'host' => (string) config('database.connections.mysql.host', '127.0.0.1'),
-            'database' => (string) config('database.connections.mysql.database', ''),
-            'username' => (string) config('database.connections.mysql.username', ''),
-            'password' => (string) config('database.connections.mysql.password', ''),
-            'charset' => (string) config('database.connections.mysql.charset', 'utf8mb4'),
-            'port' => (string) config('database.connections.mysql.port', '3306'),
+            'driver' => $connectionName,
+            'host' => (string) ($connectionConfig['host'] ?? '127.0.0.1'),
+            'database' => (string) ($connectionConfig['database'] ?? ''),
+            'username' => (string) ($connectionConfig['username'] ?? ''),
+            'password' => (string) ($connectionConfig['password'] ?? ''),
+            'charset' => (string) ($connectionConfig['charset'] ?? 'utf8mb4'),
+            'port' => (string) ($connectionConfig['port'] ?? ($connectionName === 'pgsql' ? '5432' : '3306')),
         ]);
     }
 
@@ -133,7 +137,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
     public function recentImports(?int $churchId, int $limit = 5): array
     {
-        $connection = DB::connection('mysql');
+        $connection = DB::connection();
         $administrationIds = $this->currentAdministrationScopeIds();
         $query = $connection->table('importacoes as i')
             ->leftJoin('usuarios as u', 'u.id', '=', 'i.usuario_id')
@@ -467,7 +471,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
     {
         $keep = max(0, $keep);
 
-        $connection = DB::connection('mysql');
+        $connection = DB::connection();
         $importIds = $connection->table('importacoes')
             ->select(['id'])
             ->whereIn('status', ['concluida', 'erro'])
@@ -751,7 +755,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
     public function loadImportErrors(?int $churchId, ?int $importacaoId, int $page = 1, int $perPage = 30): array
     {
         $page = max(1, $page);
-        $connection = DB::connection('mysql');
+        $connection = DB::connection();
         $administrationIds = $this->currentAdministrationScopeIds();
         $effectiveChurchId = $churchId ?? $this->currentChurchId();
 
@@ -887,7 +891,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
     public function downloadImportErrorsCsv(?int $churchId, ?int $importacaoId): array
     {
-        $connection = DB::connection('mysql');
+        $connection = DB::connection();
         $query = $connection->table('import_erros as ie');
         $suffix = '';
         $administrationIds = $this->currentAdministrationScopeIds();
@@ -957,7 +961,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
     public function markImportErrorResolved(int $errorId, bool $resolved): array
     {
-        $connection = DB::connection('mysql');
+        $connection = DB::connection();
         $error = $connection->table('import_erros as ie')
             ->join('importacoes as imp', 'imp.id', '=', 'ie.importacao_id')
             ->select([
@@ -1098,7 +1102,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
      */
     private function loadImportErrorsSummary(?int $churchId, ?int $importacaoId): array
     {
-        $connection = DB::connection('mysql');
+        $connection = DB::connection();
         $query = $connection->table('import_erros as ie');
         $administrationIds = $this->currentAdministrationScopeIds();
         $effectiveChurchId = $churchId ?? $this->currentChurchId();
