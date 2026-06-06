@@ -29,6 +29,7 @@ cache/
 
 # Node (if ever used)
 /node_modules/
+/public/build/
 
 # Misc
 *.bak
