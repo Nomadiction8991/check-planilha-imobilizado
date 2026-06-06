@@ -325,10 +325,10 @@ class LegacyReportService implements LegacyReportServiceInterface
             ->get([
                 'p.id_produto as id',
                 'p.codigo',
-                DB::raw('CAST(p.checado AS SIGNED) as checado'),
-                DB::raw('CAST(p.imprimir_etiqueta AS SIGNED) as imprimir'),
-                DB::raw('CAST(p.editado AS SIGNED) as editado'),
-                DB::raw('CAST(p.novo AS SIGNED) as novo'),
+                DB::raw($this->integerCastExpression('p.checado', 'checado')),
+                DB::raw($this->integerCastExpression('p.imprimir_etiqueta', 'imprimir')),
+                DB::raw($this->integerCastExpression('p.editado', 'editado')),
+                DB::raw($this->integerCastExpression('p.novo', 'novo')),
                 'p.observacao as observacoes',
                 'p.bem',
                 'p.complemento',
@@ -844,11 +844,11 @@ class LegacyReportService implements LegacyReportServiceInterface
             ->get([
                 'p.id_produto as id',
                 'p.codigo',
-                DB::raw('CAST(p.checado AS SIGNED) as checado'),
-                DB::raw('CAST(p.ativo AS SIGNED) as ativo'),
-                DB::raw('CAST(p.imprimir_etiqueta AS SIGNED) as imprimir'),
+                DB::raw($this->integerCastExpression('p.checado', 'checado')),
+                DB::raw($this->integerCastExpression('p.ativo', 'ativo')),
+                DB::raw($this->integerCastExpression('p.imprimir_etiqueta', 'imprimir')),
                 'p.observacao as observacoes',
-                DB::raw('CAST(p.editado AS SIGNED) as editado'),
+                DB::raw($this->integerCastExpression('p.editado', 'editado')),
                 'p.bem',
                 'p.complemento',
                 'p.editado_marca',
@@ -992,5 +992,14 @@ class LegacyReportService implements LegacyReportServiceInterface
         $parts = explode('/', $normalizedCode);
 
         return trim((string) end($parts));
+    }
+
+    private function integerCastExpression(string $column, string $alias): string
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            return "CAST({$column} AS INTEGER) as {$alias}";
+        }
+
+        return "CAST({$column} AS SIGNED) as {$alias}";
     }
 }

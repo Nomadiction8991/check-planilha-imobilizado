@@ -16,7 +16,6 @@ class ConnectionManager
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
-        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
     ];
 
     public static function configure(array $config): void
@@ -56,6 +55,7 @@ class ConnectionManager
             'password' => LerEnv::obter('DB_PASS', LerEnv::obter('DB_PASSWORD', '')),
             'charset'  => LerEnv::obter('DB_CHARSET', 'utf8mb4'),
             'port'     => LerEnv::obter('DB_PORT', '3306'),
+            'driver'   => LerEnv::obter('DB_CONNECTION', 'mysql'),
         ];
     }
 
@@ -64,18 +64,18 @@ class ConnectionManager
         $config = self::resolveConfig();
         $hosts = self::resolveHostCandidates((string) $config['host']);
         $lastException = null;
+        $driver = (string) ($config['driver'] ?? 'mysql');
 
         foreach ($hosts as $host) {
-            $dsn = sprintf(
-                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
-                $host,
-                $config['port'],
-                $config['database'],
-                $config['charset']
-            );
+            $dsn = self::buildDsn($driver, $host, $config);
 
             try {
-                return new PDO($dsn, $config['username'], $config['password'], self::$defaultOptions);
+                $options = self::$defaultOptions;
+                if ($driver === 'mysql') {
+                    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci";
+                }
+
+                return new PDO($dsn, $config['username'], $config['password'], $options);
             } catch (PDOException $exception) {
                 $lastException = $exception;
             }
@@ -101,5 +101,25 @@ class ConnectionManager
         }
 
         return array_values(array_unique($candidates));
+    }
+
+    private static function buildDsn(string $driver, string $host, array $config): string
+    {
+        if ($driver === 'pgsql') {
+            return sprintf(
+                'pgsql:host=%s;port=%s;dbname=%s',
+                $host,
+                $config['port'],
+                $config['database'],
+            );
+        }
+
+        return sprintf(
+            'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+            $host,
+            $config['port'],
+            $config['database'],
+            $config['charset'],
+        );
     }
 }
