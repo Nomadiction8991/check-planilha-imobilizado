@@ -79,6 +79,7 @@
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                 },
+                credentials: 'include',
             });
             const progressData = await progressResponse.json();
 
@@ -104,9 +105,10 @@
         const response = await fetch(config.startUrl, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': config.csrfToken || '',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                 'X-Requested-With': 'XMLHttpRequest',
             },
+            credentials: 'include',
         });
         const data = await response.json();
 
@@ -120,6 +122,7 @@
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
             },
+            credentials: 'include',
         });
         const data = await response.json();
 
