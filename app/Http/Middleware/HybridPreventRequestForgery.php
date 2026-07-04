@@ -8,6 +8,18 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 
 class HybridPreventRequestForgery extends PreventRequestForgery
 {
+    /**
+     * Rotas AJAX POST que usam CSRF via header X-CSRF-TOKEN.
+     * Mantidas fora da verificação padrão por compatibilidade com sessão híbrida.
+     *
+     * @var array<int, string>
+     */
+    protected $except = [
+        '/spreadsheets/preview/*/actions',
+        '/spreadsheets/preview/*/bulk-action',
+        '/spreadsheets/process/*/start',
+    ];
+
     protected function tokensMatch($request)
     {
         if (parent::tokensMatch($request)) {
