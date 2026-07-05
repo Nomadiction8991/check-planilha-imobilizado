@@ -1,0 +1,22 @@
+#!/bin/bash
+# ====================================================================
+# bin/phpstan — PHPStan wrapper com guarda de ambiente
+# ====================================================================
+# Impede que o PHPStan seja executado acidentalmente em produção.
+# A CI (GitHub Actions) não define APP_ENV=production, então o
+# guarda permite execução normal em CI e ambientes dev/test.
+# ====================================================================
+
+set -euo pipefail
+
+if [ "${APP_ENV:-}" = "production" ]; then
+    echo "[ERROR] PHPStan nao pode ser executado no ambiente de producao (APP_ENV=production)." >&2
+    echo "        Se voce precisa analisar estaticamente o codigo, faca isso em ambiente" >&2
+    echo "        local ou em CI. Para deploy, use: composer install --no-dev" >&2
+    exit 1
+fi
+
+# Descobre o diretorio raiz do projeto (2 niveis acima de bin/)
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+exec "$DIR/vendor/bin/phpstan" --memory-limit=512M "$@"

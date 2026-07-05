@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Collection;
 use Mockery;
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Tests\TestCase;
 
 final class LegacyReportServiceTest extends TestCase
@@ -151,6 +152,7 @@ final class LegacyReportServiceTest extends TestCase
         $this->assertSame(0, $posReport[0]['quantidade']); // empty products table
     }
 
+    #[RunInSeparateProcess]
     public function testChurchOptionsReturnsCollection(): void
     {
         $builder = Mockery::mock('alias:' . Comum::class);
@@ -176,6 +178,7 @@ final class LegacyReportServiceTest extends TestCase
         $this->assertSame('001', $result->first()->codigo);
     }
 
+    #[RunInSeparateProcess]
     public function testChurchOptionsReturnsItemsWithExpectedKeys(): void
     {
         $builder = Mockery::mock('alias:' . Comum::class);
@@ -204,6 +207,7 @@ final class LegacyReportServiceTest extends TestCase
         $this->assertSame('Igreja Sul', $item->descricao);
     }
 
+    #[RunInSeparateProcess]
     public function testChurchOptionsReturnsEmptyCollectionWhenNoChurches(): void
     {
         $builder = Mockery::mock('alias:' . Comum::class);
@@ -226,6 +230,7 @@ final class LegacyReportServiceTest extends TestCase
         $this->assertCount(0, $result);
     }
 
+    #[RunInSeparateProcess]
     public function testChurchOptionsAppliesOrderByCodigo(): void
     {
         $builder = Mockery::mock('alias:' . Comum::class);
