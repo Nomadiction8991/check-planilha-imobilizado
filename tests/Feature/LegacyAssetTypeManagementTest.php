@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Contracts\LegacyAssetTypeManagementServiceInterface;
 use App\Models\Legacy\Administracao;
 use App\Models\Legacy\TipoBem;
+use Illuminate\Support\Facades\DB;
 use Mockery\MockInterface;
 use RuntimeException;
 use Tests\TestCase;
@@ -19,6 +20,8 @@ final class LegacyAssetTypeManagementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->createAdministracoesTable();
 
         $this->administrationId = (int) Administracao::query()->create([
             'descricao' => 'Administração Central',
@@ -160,6 +163,19 @@ final class LegacyAssetTypeManagementTest extends TestCase
 
         $response->assertRedirect(route('migration.asset-types.create'));
         $response->assertSessionHasErrors(['descricao']);
+    }
+
+    private function createAdministracoesTable(): void
+    {
+        DB::statement('
+            CREATE TABLE IF NOT EXISTS "administracoes" (
+                "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                "descricao" VARCHAR(255) NOT NULL,
+                "cnpj" VARCHAR(255) DEFAULT NULL,
+                "estado" VARCHAR(255) DEFAULT NULL,
+                "cidade" VARCHAR(255) DEFAULT NULL
+            )
+        ');
     }
 
     private function makeAssetType(int $id, int $code, string $description, int $administrationId): TipoBem
