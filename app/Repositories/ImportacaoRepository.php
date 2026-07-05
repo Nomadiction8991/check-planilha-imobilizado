@@ -12,6 +12,9 @@ class ImportacaoRepository extends BaseRepository
 
     public function criar(array $dados): int
     {
+        // ATENÇÃO: coluna é `comum_id` (singular), NÃO `comuns_id`.
+        // O nome plural `comuns_id` NÃO existe nesta tabela — qualquer
+        // referência a ele causará erro SQL. Sempre use `comum_id`.
         $sql = "INSERT INTO {$this->tabela}
                 (usuario_id, comum_id, administracao_id, arquivo_nome, arquivo_caminho, total_linhas, status, iniciada_em)
                 VALUES (:usuario_id, :comum_id, :administracao_id, :arquivo_nome, :arquivo_caminho, :total_linhas, :status, NOW())";
@@ -32,6 +35,17 @@ class ImportacaoRepository extends BaseRepository
 
     public function atualizar(int $id, array $dados): bool
     {
+        // Validate: setting status to 'erro' requires a non-empty error message.
+        // This prevents imports from being stuck in 'erro' state without diagnostic info.
+        if (isset($dados['status']) && $dados['status'] === 'erro') {
+            $erroMsg = $dados['mensagem_erro'] ?? '';
+            if (trim((string) $erroMsg) === '') {
+                throw new \InvalidArgumentException(
+                    'Cannot set status to "erro" without providing a non-empty mensagem_erro.'
+                );
+            }
+        }
+
         $sets = [];
         $params = [':id' => $id];
 
