@@ -35,4 +35,7 @@ cache/
 *.bak
 *.swp
 
+# Coverage reports
+/coverage/
+
 napkin.md
