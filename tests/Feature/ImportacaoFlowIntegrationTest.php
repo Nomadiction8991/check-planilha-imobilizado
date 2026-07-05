@@ -18,6 +18,13 @@ use Tests\TestCase;
 /**
  * Teste de integração do fluxo completo de importação de planilha.
  *
+ * @note Verificação de conflito de autoload (Jul/2026): o nome desta classe
+ *       é único em todo o código-fonte e vendor. Não há outra classe com o
+ *       nome 'ImportacaoFlowIntegrationTest' em nenhum pacote ou diretório, e
+ *       o classmap do Composer contém apenas uma entrada. Um eventual erro de
+ *       "constant visibility" NÃO é causado por conflito de autoload nesta
+ *       classe. (Investigação: task t_c531dad4)
+ *
  * Cenário:
  *  1. Upload de CSV com 2 produtos novos (linhas 30 e 31)
  *  2. Preview da análise
@@ -212,10 +219,24 @@ final class ImportacaoFlowIntegrationTest extends TestCase
 
     private function criarTestDouble(): LegacySpreadsheetImportServiceInterface
     {
-        return new class implements LegacySpreadsheetImportServiceInterface
+        $churchCode = self::CHURCH_CODE;
+        $churchId = self::CHURCH_ID;
+        $churchDesc = self::CHURCH_DESC;
+        $userId = self::USER_ID;
+        $adminId = self::ADMIN_ID;
+
+        return new class($churchCode, $churchId, $churchDesc, $userId, $adminId) implements LegacySpreadsheetImportServiceInterface
         {
             private AnalysisPersistenceService $analysisStorage;
             private int $nextImportacaoId = 1000;
+
+            public function __construct(
+                private readonly string $churchCode,
+                private readonly int $churchId,
+                private readonly string $churchDesc,
+                private readonly int $userId,
+                private readonly int $adminId,
+            ) {}
 
             public function previewActionsKey(int $importacaoId): string
             {
@@ -235,21 +256,21 @@ final class ImportacaoFlowIntegrationTest extends TestCase
             public function responsibleUserOptions(): Collection
             {
                 return collect([
-                    (object) ['id' => ImportacaoFlowIntegrationTest::USER_ID, 'nome' => 'Maria Silva', 'email' => 'maria@exemplo.com'],
+                    (object) ['id' => $this->userId, 'nome' => 'Maria Silva', 'email' => 'maria@exemplo.com'],
                 ]);
             }
 
             public function churchOptions(): Collection
             {
                 return collect([
-                    (object) ['id' => ImportacaoFlowIntegrationTest::CHURCH_ID, 'codigo' => ImportacaoFlowIntegrationTest::CHURCH_CODE, 'descricao' => ImportacaoFlowIntegrationTest::CHURCH_DESC],
+                    (object) ['id' => $this->churchId, 'codigo' => $this->churchCode, 'descricao' => $this->churchDesc],
                 ]);
             }
 
             public function administrationOptions(): Collection
             {
                 return collect([
-                    (object) ['id' => ImportacaoFlowIntegrationTest::ADMIN_ID, 'descricao' => 'Administração Central'],
+                    (object) ['id' => $this->adminId, 'descricao' => 'Administração Central'],
                 ]);
             }
 
@@ -282,13 +303,13 @@ final class ImportacaoFlowIntegrationTest extends TestCase
                             'status' => 'novo',
                             'acao_sugerida' => 'importar',
                             'dados_csv' => [
-                                'codigo_comum' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
+                                'codigo_comum' => $this->churchCode,
                                 'codigo' => '09-0565 / 0001',
                                 'tipo_bem_codigo' => '4',
                                 'bem' => 'CADEIRA',
                                 'complemento' => 'METALICA',
                                 'dependencia_descricao' => 'SALA 01',
-                                'localidade' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
+                                'localidade' => $this->churchCode,
                             ],
                         ],
                         [
@@ -296,21 +317,21 @@ final class ImportacaoFlowIntegrationTest extends TestCase
                             'status' => 'novo',
                             'acao_sugerida' => 'importar',
                             'dados_csv' => [
-                                'codigo_comum' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
+                                'codigo_comum' => $this->churchCode,
                                 'codigo' => '09-0565 / 0002',
                                 'tipo_bem_codigo' => '7',
                                 'bem' => 'MESA',
                                 'complemento' => 'ESCRITORIO',
                                 'dependencia_descricao' => 'SALA 01',
-                                'localidade' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
+                                'localidade' => $this->churchCode,
                             ],
                         ],
                     ],
                     'igrejas_detectadas' => [
                         [
-                            'chave' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
-                            'codigo' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
-                            'descricao' => ImportacaoFlowIntegrationTest::CHURCH_DESC,
+                            'chave' => $this->churchCode,
+                            'codigo' => $this->churchCode,
+                            'descricao' => $this->churchDesc,
                             'total' => 2,
                             'novos' => 2,
                             'atualizar' => 0,
@@ -348,13 +369,13 @@ final class ImportacaoFlowIntegrationTest extends TestCase
                 }
 
                 $churchDescription = DB::table('comums')
-                    ->where('codigo', ImportacaoFlowIntegrationTest::CHURCH_CODE)
+                    ->where('codigo', $this->churchCode)
                     ->value('descricao') ?? '';
 
                 $igrejasDetectadas = [
                     [
-                        'chave' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
-                        'codigo' => ImportacaoFlowIntegrationTest::CHURCH_CODE,
+                        'chave' => $this->churchCode,
+                        'codigo' => $this->churchCode,
                         'descricao' => $churchDescription,
                         'total' => 2,
                         'novos' => 2,
@@ -376,7 +397,7 @@ final class ImportacaoFlowIntegrationTest extends TestCase
                     'acoes_salvas' => Session::get($this->previewActionsKey($importacaoId), []),
                     'igrejas_salvas' => Session::get($this->previewChurchesKey($importacaoId), []),
                     'dependencias_salvas' => Session::get($this->previewDependenciesKey($importacaoId), []),
-                    'status_por_comum' => [ImportacaoFlowIntegrationTest::CHURCH_CODE => 'novo'],
+                    'status_por_comum' => [$this->churchCode => 'novo'],
                     'igrejas_detectadas' => $igrejasDetectadas,
                 ];
             }
@@ -454,13 +475,13 @@ final class ImportacaoFlowIntegrationTest extends TestCase
                         // Busca ou cria dependência
                         $depDescricao = trim(strtoupper($dados['dependencia_descricao'] ?? 'SEM DEPENDÊNCIA'));
                         $depId = DB::table('dependencias')
-                            ->where('comum_id', ImportacaoFlowIntegrationTest::CHURCH_ID)
+                            ->where('comum_id', $this->churchId)
                             ->where('descricao', $depDescricao)
                             ->value('id');
 
                         if ($depId === null) {
                             $depId = DB::table('dependencias')->insertGetId([
-                                'comum_id' => ImportacaoFlowIntegrationTest::CHURCH_ID,
+                                'comum_id' => $this->churchId,
                                 'descricao' => $depDescricao,
                             ]);
                         }
@@ -473,9 +494,9 @@ final class ImportacaoFlowIntegrationTest extends TestCase
 
                         // Church ID resolve pelo código
                         $churchRow = DB::table('comums')
-                            ->where('codigo', $dados['codigo_comum'] ?? ImportacaoFlowIntegrationTest::CHURCH_CODE)
+                            ->where('codigo', $dados['codigo_comum'] ?? $this->churchCode)
                             ->first();
-                        $comumId = $churchRow ? (int) $churchRow->id : ImportacaoFlowIntegrationTest::CHURCH_ID;
+                        $comumId = $churchRow ? (int) $churchRow->id : $this->churchId;
 
                         DB::table('produtos')->insert([
                             'comum_id' => $comumId,
@@ -571,8 +592,8 @@ final class ImportacaoFlowIntegrationTest extends TestCase
 
                 return [
                     'modo' => $mode,
-                    'comum' => $churchId !== null ? ['id' => $churchId, 'codigo' => ImportacaoFlowIntegrationTest::CHURCH_CODE, 'descricao' => ImportacaoFlowIntegrationTest::CHURCH_DESC] : null,
-                    'administracao' => ['id' => ImportacaoFlowIntegrationTest::ADMIN_ID, 'descricao' => 'Administração Central'],
+                    'comum' => $churchId !== null ? ['id' => $churchId, 'codigo' => $this->churchCode, 'descricao' => $this->churchDesc] : null,
+                    'administracao' => ['id' => $this->adminId, 'descricao' => 'Administração Central'],
                     'importacao' => $importacaoId !== null ? [
                         'id' => $importacaoId,
                         'arquivo_nome' => 'bens.csv',
