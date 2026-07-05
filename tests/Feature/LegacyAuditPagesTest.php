@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Contracts\LegacyAuditTrailServiceInterface;
 use App\Contracts\LegacyAuthSessionServiceInterface;
+use App\Contracts\LegacyNavigationServiceInterface;
 use App\Contracts\LegacyPermissionServiceInterface;
 use App\DTO\LegacyAuditEntryData;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -28,6 +29,7 @@ final class LegacyAuditPagesTest extends TestCase
             ]);
             $mock->shouldReceive('currentChurch')->andReturn(null);
             $mock->shouldReceive('availableChurches')->andReturn(collect());
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
         });
 
         $this->mock(LegacyPermissionServiceInterface::class, function (MockInterface $mock): void {
@@ -35,6 +37,10 @@ final class LegacyAuditPagesTest extends TestCase
                 'audits.view' => true,
             ]);
             $mock->shouldReceive('can')->andReturnTrue();
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('navigation')->andReturn([]);
         });
 
         $this->app->instance(
