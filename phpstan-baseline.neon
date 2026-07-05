@@ -1,0 +1,13 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined static method Faker\\Factory\:\:define\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Features/Factories/LegacyDepartmentFactory.php
+
+		-
+			message: '#^Undefined variable\: \$administracaoId$#'
+			identifier: variable.undefined
+			count: 1
+			path: app/Services/ImportacaoService.php
