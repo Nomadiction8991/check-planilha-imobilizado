@@ -4,18 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Contracts\LegacyInventoryServiceInterface;
-use App\Contracts\LegacyAuthSessionServiceInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
 
 class LegacyMigrationDashboardController extends Controller
 {
-    public function __construct(
-        private readonly LegacyAuthSessionServiceInterface $auth,
-    ) {
-    }
-
     public function __invoke(): RedirectResponse
     {
         $permissions = (array) Session::get('legacy_permissions', []);

@@ -11,6 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use Mockery\MockInterface;
+use RuntimeException;
 use Tests\TestCase;
 
 final class LegacySpreadsheetImportTest extends TestCase
@@ -513,6 +514,171 @@ final class LegacySpreadsheetImportTest extends TestCase
 
         $response->assertOk();
         $response->assertJson(['success' => true]);
+    }
+
+    public function testStartProcessingReturnsFullJsonStructure(): void
+    {
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->post(route('migration.spreadsheets.start', ['importacao' => 15]));
+
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'success',
+            'message',
+            'resultado' => ['sucesso', 'erro'],
+        ]);
+        $response->assertJson([
+            'success' => true,
+            'message' => 'Importação processada com sucesso.',
+            'resultado' => ['sucesso' => 9, 'erro' => 1],
+        ]);
+    }
+
+    public function testStartProcessingAccessDeniedForOtherUser(): void
+    {
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 5,
+            'usuario_nome' => 'Outro Usuário',
+            'is_admin' => false,
+        ])->post(route('migration.spreadsheets.start', ['importacao' => 15]));
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Acesso negado à importação.',
+        ]);
+    }
+
+    public function testStartProcessingAccessDeniedWithoutSession(): void
+    {
+        $response = $this->post(route('migration.spreadsheets.start', ['importacao' => 15]));
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Acesso negado à importação.',
+        ]);
+    }
+
+    public function testStartProcessingReturnsNotFoundWhenImportMissing(): void
+    {
+        $this->mock(LegacySpreadsheetImportServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('loadProgress')
+                ->once()
+                ->with(99)
+                ->andReturnNull();
+
+            $mock->shouldReceive('administrationOptions')
+                ->andReturn(collect());
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'is_admin' => false,
+        ])->post(route('migration.spreadsheets.start', ['importacao' => 99]));
+
+        $response->assertStatus(404);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Importação não encontrada.',
+        ]);
+    }
+
+    public function testStartProcessingReturnsErrorOnServiceException(): void
+    {
+        $this->mock(LegacySpreadsheetImportServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('loadProgress')
+                ->once()
+                ->with(15)
+                ->andReturn([
+                    'id' => 15,
+                    'usuario_id' => 9,
+                    'usuario_responsavel_nome' => 'Maria Silva',
+                    'status' => 'aguardando',
+                    'total_linhas' => 10,
+                    'linhas_processadas' => 0,
+                    'linhas_sucesso' => 0,
+                    'linhas_erro' => 0,
+                    'porcentagem' => 0,
+                    'arquivo_nome' => 'bens.csv',
+                    'administracao_label' => 'Administração Central',
+                    'mensagem_erro' => '',
+                ]);
+
+            $mock->shouldReceive('confirmImport')
+                ->once()
+                ->with(15, false, [], [], [])
+                ->andThrow(new RuntimeException('Erro simulado no processamento.'));
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'is_admin' => false,
+        ])->post(route('migration.spreadsheets.start', ['importacao' => 15]));
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Erro simulado no processamento.',
+        ]);
+    }
+
+    public function testStartProcessingAcceptsConfirmOptionsFromSession(): void
+    {
+        $this->mock(LegacySpreadsheetImportServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('loadProgress')
+                ->once()
+                ->with(15)
+                ->andReturn([
+                    'id' => 15,
+                    'usuario_id' => 9,
+                    'usuario_responsavel_nome' => 'Maria Silva',
+                    'status' => 'aguardando',
+                    'total_linhas' => 10,
+                    'linhas_processadas' => 0,
+                    'linhas_sucesso' => 0,
+                    'linhas_erro' => 0,
+                    'porcentagem' => 0,
+                    'arquivo_nome' => 'bens.csv',
+                    'administracao_label' => 'Administração Central',
+                    'mensagem_erro' => '',
+                ]);
+
+            $mock->shouldReceive('confirmImport')
+                ->once()
+                ->with(15, true, ['30' => 'importar'], ['12-3456' => 'importar'], ['12-3456:SEM DEPENDÊNCIA' => 'importar'])
+                ->andReturn(['sucesso' => 5, 'erro' => 0]);
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'is_admin' => false,
+            'importacao_confirm_options_15' => [
+                'importar_tudo' => true,
+                'acoes' => ['30' => 'importar'],
+                'igrejas' => ['12-3456' => 'importar'],
+                'dependencias' => ['12-3456:SEM DEPENDÊNCIA' => 'importar'],
+            ],
+        ])->post(route('migration.spreadsheets.start', ['importacao' => 15]));
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'resultado' => ['sucesso' => 5, 'erro' => 0],
+        ]);
     }
 
     public function testProgressEndpointReturnsJson(): void

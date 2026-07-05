@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Contracts\LegacyAuthSessionServiceInterface;
-use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 /**
@@ -19,10 +17,6 @@ final class LegacyMigrationDashboardControllerTest extends TestCase
 {
     public function test_unauthenticated_user_with_no_permissions_is_redirected_to_login(): void
     {
-        $this->mock(LegacyAuthSessionServiceInterface::class, function ($mock): void {
-            $mock->shouldReceive('isAuthenticated')->andReturn(false);
-        });
-
         $response = $this->get(route('migration.dashboard'));
 
         $response->assertRedirect(route('migration.login'));
