@@ -12,6 +12,7 @@ final readonly class CreateLegacyProductData
         public int $assetTypeId,
         public string $itemName,
         public string $complement,
+        public ?string $brand,
         public ?string $heightMeters,
         public ?string $widthMeters,
         public ?string $lengthMeters,

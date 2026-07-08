@@ -86,7 +86,12 @@
 
                 <label>
                     Complemento
-                    <textarea name="complemento" rows="3" required>{{ old('complemento') }}</textarea>
+                    <textarea name="complemento" rows="3" maxlength="255">{{ old('complemento') }}</textarea>
+                </label>
+
+                <label>
+                    Marca
+                    <input type="text" name="marca" value="{{ old('marca') }}" maxlength="255" placeholder="Ex.: TRAMONTINA">
                 </label>
 
                 <div class="field-grid">

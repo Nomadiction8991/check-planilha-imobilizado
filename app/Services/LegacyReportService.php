@@ -569,16 +569,16 @@ class LegacyReportService implements LegacyReportServiceInterface
             ->select([
                 'c.codigo',
                 'c.cnpj',
-            'c.descricao',
-            DB::raw('COALESCE(TRIM(a.descricao), "") AS administracao'),
-            DB::raw('COALESCE(TRIM(a.descricao), "") AS administracao_descricao'),
-            DB::raw('COALESCE(TRIM(a.cnpj), "") AS administracao_cnpj'),
-            'c.cidade',
-            'c.setor',
-            'c.estado',
-            'c.estado_administracao',
-            'c.cidade_administracao',
-        ])
+                'c.descricao',
+                DB::raw("COALESCE(TRIM(a.descricao), '') AS administracao"),
+                DB::raw("COALESCE(TRIM(a.descricao), '') AS administracao_descricao"),
+                DB::raw("COALESCE(TRIM(a.cnpj), '') AS administracao_cnpj"),
+                'c.cidade',
+                'c.setor',
+                'c.estado',
+                'c.estado_administracao',
+                'c.cidade_administracao',
+            ])
             ->where('c.id', $churchId)
             ->first();
 
@@ -627,7 +627,9 @@ class LegacyReportService implements LegacyReportServiceInterface
     {
         return DB::table('produtos as p')
             ->leftJoin('tipos_bens as tb', 'p.tipo_bem_id', '=', 'tb.id')
+            ->leftJoin('tipos_bens as etb', 'p.editado_tipo_bem_id', '=', 'etb.id')
             ->leftJoin('dependencias as d', 'p.dependencia_id', '=', 'd.id')
+            ->leftJoin('dependencias as ed', 'p.editado_dependencia_id', '=', 'ed.id')
             ->leftJoin('usuarios as u', 'p.administrador_acessor_id', '=', 'u.id')
             ->where('p.comum_id', $churchId)
             ->where('p.imprimir_14_1', 1)
@@ -636,19 +638,29 @@ class LegacyReportService implements LegacyReportServiceInterface
             ->get([
                 'p.id_produto as id',
                 'p.codigo',
-                DB::raw("TRIM(CONCAT_WS(' ',
-                    CASE WHEN (tb.codigo IS NOT NULL OR tb.descricao IS NOT NULL)
-                         THEN TRIM(CONCAT_WS(' - ', tb.codigo, tb.descricao))
-                         ELSE NULL END,
-                    NULLIF(TRIM(COALESCE(NULLIF(p.editado_bem,''), p.bem)), ''),
-                    NULLIF(TRIM(COALESCE(NULLIF(p.editado_complemento,''), p.complemento)), '')
-                )) AS descricao_completa"),
+                DB::raw($this->integerCastExpression('p.editado', 'editado')),
+                'p.bem',
+                'p.complemento',
+                'p.editado_marca',
+                'p.altura_m',
+                'p.largura_m',
+                'p.comprimento_m',
+                'p.editado_bem',
+                'p.editado_complemento',
+                'p.editado_altura_m',
+                'p.editado_largura_m',
+                'p.editado_comprimento_m',
+                'tb.codigo as tipo_codigo',
+                'tb.descricao as tipo_desc',
+                'etb.codigo as editado_tipo_codigo',
+                'etb.descricao as editado_tipo_desc',
                 'p.condicao_14_1',
                 'p.nota_numero',
                 'p.nota_data',
                 'p.nota_valor',
                 'p.nota_fornecedor',
                 'd.descricao as dependencia_descricao',
+                'ed.descricao as editado_dependencia_descricao',
                 'u.nome as administrador_nome',
                 DB::raw('NULL as administrador_assinatura'),
                 DB::raw('NULL as doador_nome'),
@@ -670,10 +682,11 @@ class LegacyReportService implements LegacyReportServiceInterface
                 DB::raw('NULL as doador_endereco_estado'),
                 DB::raw('NULL as doador_endereco_cep'),
             ])
-            ->map(static function ($item): array {
+            ->map(function ($item): array {
                 $product = (array) $item;
                 $product['nome_original'] = LegacyProductNameSupport::formatHistoricalName($product, false);
                 $product['nome_atual'] = LegacyProductNameSupport::formatHistoricalName($product, true);
+                $product['descricao_completa'] = $this->buildCurrentProductTitle($product);
 
                 return $product;
             })
@@ -975,6 +988,34 @@ class LegacyReportService implements LegacyReportServiceInterface
         $dependencyDescription = trim((string) ($useEdited
             ? ($product['editado_dependencia_desc'] ?? $product['dependencia_desc'] ?? '')
             : ($product['dependencia_desc'] ?? '')));
+        $dependencyPart = $dependencyDescription !== '' ? ' {' . mb_strtoupper($dependencyDescription, 'UTF-8') . '}' : '';
+        $title = trim(($typePart !== '' ? $typePart . ' ' : '') . $description . ($dependencyPart !== '' ? ' ' . $dependencyPart : ''));
+
+        return $title !== '' ? $title : 'Sem descrição';
+    }
+
+    /**
+     * @param array<string, mixed> $product
+     */
+    private function buildCurrentProductTitle(array $product): string
+    {
+        $useEdited = (int) ($product['editado'] ?? 0) === 1;
+        $typeCode = trim((string) ($useEdited
+            ? ($product['editado_tipo_codigo'] ?? $product['tipo_codigo'] ?? '')
+            : ($product['tipo_codigo'] ?? '')));
+        $typeDescription = trim((string) ($useEdited
+            ? ($product['editado_tipo_desc'] ?? $product['tipo_desc'] ?? '')
+            : ($product['tipo_desc'] ?? '')));
+        $typePart = '';
+
+        if ($typeCode !== '' || $typeDescription !== '') {
+            $typePart = '{' . mb_strtoupper(trim(($typeCode !== '' ? $typeCode . ' - ' : '') . $typeDescription), 'UTF-8') . '}';
+        }
+
+        $description = LegacyProductNameSupport::formatCurrentName($product);
+        $dependencyDescription = trim((string) ($useEdited
+            ? ($product['editado_dependencia_descricao'] ?? $product['dependencia_descricao'] ?? '')
+            : ($product['dependencia_descricao'] ?? '')));
         $dependencyPart = $dependencyDescription !== '' ? ' {' . mb_strtoupper($dependencyDescription, 'UTF-8') . '}' : '';
         $title = trim(($typePart !== '' ? $typePart . ' ' : '') . $description . ($dependencyPart !== '' ? ' ' . $dependencyPart : ''));
 

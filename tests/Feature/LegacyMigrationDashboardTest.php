@@ -32,6 +32,7 @@ final class LegacyMigrationDashboardTest extends TestCase
                 (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
                 (object) ['id' => 8, 'codigo' => '98-7654', 'descricao' => 'Filial Várzea'],
             ]));
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
         });
         $this->mock(LegacyPermissionServiceInterface::class, function ($mock): void {
             $mock->shouldReceive('currentPermissions')->andReturn([

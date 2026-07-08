@@ -8,15 +8,17 @@ use App\Contracts\LegacyInventoryServiceInterface;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
+use Illuminate\View\View;
 
 class LegacyMigrationDashboardController extends Controller
 {
     public function __construct(
         private readonly LegacyAuthSessionServiceInterface $auth,
+        private readonly LegacyInventoryServiceInterface $inventoryService,
     ) {
     }
 
-    public function __invoke(): RedirectResponse
+    public function __invoke(): View|RedirectResponse
     {
         $permissions = (array) Session::get('legacy_permissions', []);
 
@@ -44,6 +46,9 @@ class LegacyMigrationDashboardController extends Controller
             return redirect()->route('migration.reports.index');
         }
 
-        return redirect()->route('migration.login');
+        return view('migration-dashboard', [
+            'snapshot' => $this->inventoryService->buildSnapshot(),
+            'churches' => $this->auth->availableChurches(),
+        ]);
     }
 }
