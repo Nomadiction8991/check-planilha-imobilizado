@@ -7,12 +7,15 @@ namespace Tests\Feature;
 use App\Contracts\LegacyAssetTypeManagementServiceInterface;
 use App\Models\Legacy\Administracao;
 use App\Models\Legacy\TipoBem;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery\MockInterface;
 use RuntimeException;
 use Tests\TestCase;
 
 final class LegacyAssetTypeManagementTest extends TestCase
 {
+    use RefreshDatabase;
+
     private int $administrationId;
     private TipoBem $boundAssetType;
 
