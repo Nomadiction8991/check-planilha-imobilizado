@@ -62,9 +62,16 @@ class ConnectionManager
     private static function buildConnection(): PDO
     {
         $config = self::resolveConfig();
+        $driver = (string) ($config['driver'] ?? 'mysql');
+
+        if ($driver === 'sqlite') {
+            $dsn = self::buildDsn($driver, (string) ($config['database'] ?? ':memory:'), $config);
+
+            return new PDO($dsn, null, null, self::$defaultOptions);
+        }
+
         $hosts = self::resolveHostCandidates((string) $config['host']);
         $lastException = null;
-        $driver = (string) ($config['driver'] ?? 'mysql');
 
         foreach ($hosts as $host) {
             $dsn = self::buildDsn($driver, $host, $config);
@@ -105,6 +112,12 @@ class ConnectionManager
 
     private static function buildDsn(string $driver, string $host, array $config): string
     {
+        if ($driver === 'sqlite') {
+            return $host === ':memory:'
+                ? 'sqlite::memory:'
+                : 'sqlite:' . $host;
+        }
+
         if ($driver === 'pgsql') {
             return sprintf(
                 'pgsql:host=%s;port=%s;dbname=%s',
