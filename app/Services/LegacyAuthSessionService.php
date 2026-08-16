@@ -146,6 +146,7 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
         }
 
         Session::put('comum_id', $churchId);
+        Session::regenerate();
     }
 
     public function currentChurch(): ?array

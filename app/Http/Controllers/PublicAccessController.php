@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Models\Legacy\Comum;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +12,11 @@ use Illuminate\Http\Request;
 
 final class PublicAccessController extends Controller
 {
+    public function __construct(
+        private readonly LegacyAuthSessionServiceInterface $auth,
+    ) {
+    }
+
     public function create(Request $request): View
     {
         $request->session()->forget([
@@ -64,6 +70,8 @@ final class PublicAccessController extends Controller
             'public_comum_id',
             'public_comum',
         ]);
+
+        $this->auth->logout();
 
         return redirect()->route('migration.login');
     }

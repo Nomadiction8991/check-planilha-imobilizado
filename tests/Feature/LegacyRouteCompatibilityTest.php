@@ -150,7 +150,9 @@ final class LegacyRouteCompatibilityTest extends TestCase
     public function testLegacyUsersSelectChurchRouteReturnsLegacyJsonContract(): void
     {
         $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
-            $mock->shouldReceive('switchChurch')->once()->with(11);
+            $mock->shouldReceive('switchChurch')->once()->with(11)->andReturnUsing(function (): void {
+                session()->put('comum_id', 11);
+            });
         });
 
         $response = $this->withSession([

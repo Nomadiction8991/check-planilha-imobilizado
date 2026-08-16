@@ -509,8 +509,7 @@ class LegacyRouteCompatibilityController extends Controller
 
         try {
             $auth->switchChurch($churchId);
-            $request->session()->put('comum_id', $churchId);
-        } catch (\RuntimeException $exception) {
+        } catch (RuntimeException $exception) {
             return response()->json([
                 'success' => false,
                 'message' => $exception->getMessage(),
