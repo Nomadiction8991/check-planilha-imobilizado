@@ -90,6 +90,35 @@ final class LegacyAuthFlowTest extends TestCase
         ]);
     }
 
+    public function testLoginRejectsProtocolRelativeRedirectTargets(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('attempt')
+                ->once()
+                ->with('maria@exemplo.com', 'segredo')
+                ->andReturn([
+                    'id' => 9,
+                    'nome' => 'Maria Silva',
+                    'email' => 'MARIA@EXEMPLO.COM',
+                    'comum_id' => null,
+                    'administracao_id' => 4,
+                    'administracoes_permitidas' => [4, 8],
+                    'is_admin' => false,
+                ]);
+        });
+
+        $response = $this->withSession([
+            'redirect_after_login' => '//evil.com/phish',
+        ])->post(route('migration.login.store'), [
+            'email' => 'maria@exemplo.com',
+            'senha' => 'segredo',
+        ]);
+
+        $response->assertRedirect(route('migration.dashboard'));
+        $response->assertSessionHas('status', 'Login realizado com sucesso.');
+        $response->assertSessionMissing('redirect_after_login');
+    }
+
     public function testForgotPasswordFlowQueuesNewPasswordDelivery(): void
     {
         $this->mock(LegacyPasswordRecoveryServiceInterface::class, function (MockInterface $mock): void {
@@ -106,6 +135,32 @@ final class LegacyAuthFlowTest extends TestCase
 
         $response->assertRedirect(route('migration.login'));
         $response->assertSessionHas('status', 'Nova senha enviada para o e-mail cadastrado.');
+    }
+
+    public function testLogoutInvalidatesLegacySessionAndPreservesRedirectBehavior(): void
+    {
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'administracao_id' => 4,
+            'administracoes_permitidas' => [4, 8],
+            'is_admin' => false,
+            'legacy_permissions' => [
+                'products.view' => true,
+            ],
+        ])->post(route('migration.logout'));
+
+        $response->assertRedirect(route('migration.login'));
+        $response->assertSessionHas('status', 'Sessão encerrada.');
+        $response->assertSessionHas('status_type', 'success');
+        $response->assertSessionMissing('usuario_id');
+        $response->assertSessionMissing('legacy_permissions');
+
+        $this->get(route('migration.login'))
+            ->assertOk();
     }
 
     public function testLegacyNativeSessionAuthenticatesLaravelRouteInHybridMode(): void
@@ -211,7 +266,9 @@ final class LegacyAuthFlowTest extends TestCase
     public function testSwitchChurchUpdatesSession(): void
     {
         $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
-            $mock->shouldReceive('switchChurch')->once()->with(11);
+            $mock->shouldReceive('switchChurch')->once()->with(11)->andReturnUsing(function (): void {
+                session()->put('comum_id', 11);
+            });
             $mock->shouldReceive('currentUser')->andReturn([
                 'id' => 9,
                 'nome' => 'Maria Silva',
@@ -244,6 +301,47 @@ final class LegacyAuthFlowTest extends TestCase
 
         $response->assertRedirect('/products');
         $response->assertSessionHas('status', 'Igreja ativa atualizada.');
+    }
+
+    public function testSwitchChurchRejectsProtocolRelativeRedirectTargets(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('switchChurch')->once()->with(11)->andReturnUsing(function (): void {
+                session()->put('comum_id', 11);
+            });
+            $mock->shouldReceive('currentUser')->andReturn([
+                'id' => 9,
+                'nome' => 'Maria Silva',
+                'email' => 'MARIA@EXEMPLO.COM',
+                'comum_id' => 7,
+                'is_admin' => false,
+            ]);
+            $mock->shouldReceive('currentChurch')->andReturn([
+                'id' => 7,
+                'codigo' => '12-3456',
+                'descricao' => 'Central Cuiabá',
+            ]);
+            $mock->shouldReceive('availableChurches')->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+                (object) ['id' => 11, 'codigo' => '12-7890', 'descricao' => 'Várzea Grande'],
+            ]));
+        });
+
+        $response = $this->from('/igrejas')->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'administracao_id' => 4,
+        ])->post(route('migration.session.church'), [
+            'comum_id' => 11,
+            'redirect_to' => '//evil.com/phish',
+        ]);
+
+        $response->assertRedirect('/igrejas');
+        $response->assertSessionHas('status', 'Igreja ativa atualizada.');
+        $response->assertSessionHas('comum_id', 11);
     }
 
     public function testSwitchChurchRejectsChurchOutsideUserScope(): void
@@ -291,6 +389,10 @@ final class LegacyAuthFlowTest extends TestCase
 
     public function testPublicLogoutUsesPostAndClearsPublicSession(): void
     {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('logout')->once();
+        });
+
         $response = $this->withSession([
             'public_acesso' => true,
             'public_planilha_id' => 15,

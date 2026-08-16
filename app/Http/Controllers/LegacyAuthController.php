@@ -66,8 +66,8 @@ class LegacyAuthController extends Controller
             'legacy_permissions' => $authenticatedUser['legacy_permissions'] ?? $request->session()->get('legacy_permissions', []),
         ]);
 
-        $redirectTarget = (string) $request->session()->pull('redirect_after_login', '');
-        if ($redirectTarget !== '' && str_starts_with($redirectTarget, '/')) {
+        $redirectTarget = $this->resolveInternalRedirectTarget((string) $request->session()->pull('redirect_after_login', ''));
+        if ($redirectTarget !== null) {
             return redirect($redirectTarget);
         }
 
@@ -137,11 +137,9 @@ class LegacyAuthController extends Controller
                 ->with('status_type', 'error');
         }
 
-        $request->session()->put('comum_id', (int) $validated['comum_id']);
+        $redirectTo = $this->resolveInternalRedirectTarget((string) ($validated['redirect_to'] ?? ''));
 
-        $redirectTo = (string) ($validated['redirect_to'] ?? '');
-
-        if ($redirectTo !== '' && str_starts_with($redirectTo, '/')) {
+        if ($redirectTo !== null) {
             return redirect($redirectTo)
                 ->with('status', 'Igreja ativa atualizada.')
                 ->with('status_type', 'success');
@@ -151,6 +149,53 @@ class LegacyAuthController extends Controller
             ->back()
             ->with('status', 'Igreja ativa atualizada.')
             ->with('status_type', 'success');
+    }
+
+    private function resolveInternalRedirectTarget(string $redirectTarget): ?string
+    {
+        $candidate = trim($redirectTarget);
+        if ($candidate === '') {
+            return null;
+        }
+
+        if (str_starts_with($candidate, '/')) {
+            return str_starts_with($candidate, '//') ? null : $candidate;
+        }
+
+        $appUrl = rtrim((string) config('app.url'), '/');
+        if ($appUrl === '') {
+            return null;
+        }
+
+        $candidateParts = parse_url($candidate);
+        if ($candidateParts === false || !isset($candidateParts['path'])) {
+            return null;
+        }
+
+        $candidateHost = $candidateParts['host'] ?? null;
+        if (!is_string($candidateHost) || $candidateHost === '') {
+            return null;
+        }
+
+        $appHost = parse_url($appUrl, PHP_URL_HOST);
+        if (!is_string($appHost) || $appHost === '' || !hash_equals($appHost, $candidateHost)) {
+            return null;
+        }
+
+        $path = (string) $candidateParts['path'];
+        if ($path === '' || !str_starts_with($path, '/')) {
+            return null;
+        }
+
+        $query = isset($candidateParts['query']) && $candidateParts['query'] !== ''
+            ? '?' . $candidateParts['query']
+            : '';
+
+        $fragment = isset($candidateParts['fragment']) && $candidateParts['fragment'] !== ''
+            ? '#' . $candidateParts['fragment']
+            : '';
+
+        return $path . $query . $fragment;
     }
 
     public function storeFilterPin(Request $request): JsonResponse
