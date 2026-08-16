@@ -1,0 +1,1 @@
+O sistema utilizará uma abordagem de validação por linhas, onde cada linha é validada independentemente. Erros serão coletados em uma lista e exibidos após a tentativa de processamento. A arquitetura de importação será refatorada para isolar a responsabilidade de validação.
