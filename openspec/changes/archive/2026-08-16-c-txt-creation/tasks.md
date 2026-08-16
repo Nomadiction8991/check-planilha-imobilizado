@@ -1,0 +1,3 @@
+- [ ] Create /tmp/c.txt
+- [ ] Verify file content is 'b'
+- [ ] Remove /tmp/c.txt
