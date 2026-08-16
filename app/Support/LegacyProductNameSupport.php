@@ -125,13 +125,13 @@ final class LegacyProductNameSupport
     private static function currentValue(mixed $record, bool $useEditedValues, string $editedKey, string $originalKey): string
     {
         if ($useEditedValues) {
-            $editedValue = data_get($record, $editedKey);
+            $edited = data_get($record, $editedKey);
 
-            if ($editedValue !== null) {
-                return trim((string) $editedValue);
+            if ($edited !== null) {
+                return trim((string) $edited);
             }
 
-            return self::firstNonEmpty($record, [$originalKey]);
+            return trim((string) data_get($record, $originalKey, ''));
         }
 
         return self::firstNonEmpty($record, [$editedKey, $originalKey]);

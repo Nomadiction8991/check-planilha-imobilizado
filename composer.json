@@ -13,11 +13,13 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.10",
         "laravel/pail": "^1.2.5",
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^12.5.12"
+        "phpstan/phpstan": "*",
+        "phpunit/phpunit": "^13.2.2"
     },
     "autoload": {
         "psr-4": {
@@ -46,7 +48,13 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@php artisan test"
+            "@php vendor/bin/phpunit"
+        ],
+        "phpstan": [
+            "bin/phpstan analyse --memory-limit=512M"
+        ],
+        "phpstan:baseline": [
+            "bin/phpstan analyse --memory-limit=512M --generate-baseline"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

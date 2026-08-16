@@ -128,6 +128,11 @@ CREATE TABLE `produtos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 SQL);
 
+        // ATENÇÃO: a coluna é `comum_id` (singular), NÃO `comuns_id`. 
+        // O erro `column "comuns_id" does not exist` em logs de produção 
+        // foi causado por comando manual (`php artisan tinker` ou SQL direto) 
+        // que usou o nome no plural, que não existe na tabela. 
+        // SEMPRE use `comum_id` ao referenciar esta coluna.
         DB::statement(<<<'SQL'
 CREATE TABLE `importacoes` (
   `id` int NOT NULL AUTO_INCREMENT,

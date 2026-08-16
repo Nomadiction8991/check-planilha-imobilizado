@@ -683,6 +683,7 @@ final class LegacyProductManagementTest extends TestCase
                 'products.view' => true,
                 'products.edit' => false,
             ]);
+            $mock->shouldReceive('can')->andReturn(true);
         });
 
         $this->app->instance(

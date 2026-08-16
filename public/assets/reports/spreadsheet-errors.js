@@ -9,8 +9,9 @@
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': config.csrfToken || '',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
             },
+            credentials: 'include',
             body: JSON.stringify(payload),
         });
 
