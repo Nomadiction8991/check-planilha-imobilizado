@@ -1,0 +1,5 @@
+- [ ] Criar teste para validar importação com colunas ausentes
+- [ ] Implementar validação de colunas ausentes no service
+- [ ] Criar teste para validar importação com tipos de dados inválidos
+- [ ] Implementar tratamento de erros de tipos de dados no service
+- [ ] Atualizar UI de importação para exibir lista de erros
