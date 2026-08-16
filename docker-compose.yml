@@ -19,7 +19,6 @@ services:
       - ./Dockerfiles/php.ini:/usr/local/etc/php/conf.d/dev.ini:ro,z
     depends_on:
       - db
-    restart: unless-stopped
     networks:
       - app_network
     extra_hosts:
@@ -40,13 +39,12 @@ services:
       - "${DB_HOST_PORT:-3307}:3306"
     volumes:
       - db:/var/lib/mysql
-    restart: unless-stopped
     networks:
       - app_network
 
 volumes:
   db:
-    name: "${APP_NAME}-volumes-db-mysql"
+    name: "${APP_NAME}-volumes-db"
 
 networks:
   app_network:
