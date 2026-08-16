@@ -794,6 +794,10 @@ class ImportacaoService
             }
 
             $cabecalho = fgetcsv($arquivo, 0, ',');
+            // Pula linhas vazias ou metadados de congregação
+            while ($cabecalho !== false && (empty(array_filter($cabecalho)) || str_contains(implode(',', $cabecalho), 'CONGREGAÇÃO'))) {
+                $cabecalho = fgetcsv($arquivo, 0, ',');
+            }
 
             $linhaAtual = 0;
             $lote = [];
