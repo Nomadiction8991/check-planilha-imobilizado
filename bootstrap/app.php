@@ -12,7 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->replace(
+        $middleware->replaceInGroup(
+            'web',
             PreventRequestForgery::class,
             \App\Http\Middleware\HybridPreventRequestForgery::class,
         );
