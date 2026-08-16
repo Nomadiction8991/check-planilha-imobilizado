@@ -1,12 +1,13 @@
-name: Deploy no servidor
+name: Deploy
 
 on:
   push:
-    branches: ["main"]
+    tags:
+      - '[0-9][0-9].[0-9][0-9].[0-9][0-9].[0-9][0-9]'
   workflow_dispatch:
 
 concurrency:
-  group: checkplanilha-production
+  group: production-deploy
   cancel-in-progress: false
 
 jobs:
@@ -20,16 +21,12 @@ jobs:
           APP_DIR="/var/www/checkplanilha"
           cd "$APP_DIR"
 
-          git fetch --prune origin main
-          git reset --hard origin/main
+          git fetch origin --tags --force
+          git reset --hard "$GITHUB_SHA"
 
-          mkdir -p bootstrap/cache \
-            storage/app \
-            storage/framework/cache/data \
-            storage/framework/sessions \
-            storage/framework/views \
-            storage/logs
-
+          # Configurações de ambiente (mantém .env local)
+          mkdir -p bootstrap/cache storage/app storage/framework/{cache/data,sessions,views} storage/logs
+          
           composer install --no-dev --optimize-autoloader --no-interaction
           npm ci
           npm run build
