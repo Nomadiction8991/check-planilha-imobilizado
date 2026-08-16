@@ -21,7 +21,7 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
         $method->setAccessible(true);
 
         self::assertSame(
-            storage_path('importacao'),
+            storage_path('tmp'),
             $method->invoke($service),
         );
     }
@@ -111,7 +111,7 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
                     'dados_csv' => ['codigo_comum' => '12-3456'],
                 ],
             ],
-            ['12-3456' => CsvParserService::ACAO_IMPORTAR, '34-5678' => CsvParserService::ACAO_PULAR],
+            ['12-3456' => CsvParserService::ACAO_IMPORTAR, '34-5678' => CsvParserService::ACAO_PULAR], [],
             0,
             false,
         );
