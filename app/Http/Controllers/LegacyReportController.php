@@ -118,6 +118,38 @@ class LegacyReportController extends Controller
         );
     }
 
+    public function formularioExport(Request $request, string $formulario): StreamedResponse|RedirectResponse
+    {
+        $churchId = $request->integer('comum_id', (int) Session::get('comum_id', 0));
+
+        if ($churchId <= 0) {
+            return redirect()
+                ->route('migration.reports.index')
+                ->with('status', 'Selecione uma igreja para exportar o relatório.')
+                ->with('status_type', 'error');
+        }
+
+        try {
+            $file = $this->reports->downloadFormularioCsv($churchId, $formulario);
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('migration.reports.index', ['comum_id' => $churchId])
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
+
+        return response()->streamDownload(
+            static function () use ($file): void {
+                echo $file['content'];
+            },
+            $file['filename'],
+            [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            ],
+        );
+    }
+
     public function editor(Request $request): View|RedirectResponse
     {
         $formulario = str_replace('-', '.', trim((string) $request->query('formulario', '14.1')));

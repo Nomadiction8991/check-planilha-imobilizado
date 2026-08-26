@@ -61,4 +61,11 @@ interface LegacyReportServiceInterface
      * @return array{filename: string, content: string}
      */
     public function downloadVerificationPositionCsv(int $churchId): array;
+
+    /**
+     * Gera o CSV do formulário 14.1 ou 14.6 para a igreja informada.
+     *
+     * @return array{filename: string, content: string}
+     */
+    public function downloadFormularioCsv(int $churchId, string $formulario): array;
 }

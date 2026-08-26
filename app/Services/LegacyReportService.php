@@ -310,6 +310,174 @@ class LegacyReportService implements LegacyReportServiceInterface
     }
 
     /**
+     * @return array{filename: string, content: string}
+     */
+    public function downloadFormularioCsv(int $churchId, string $formulario): array
+    {
+        $normalizedForm = str_replace('-', '.', trim($formulario));
+
+        if (!array_key_exists($normalizedForm, self::REPORTS)) {
+            throw new RuntimeException('Formulário inválido.');
+        }
+
+        if (!in_array($normalizedForm, ['14.1', '14.6'], true)) {
+            throw new RuntimeException('Este formulário é uma folha em branco e não possui itens para exportar.');
+        }
+
+        $churchData = $this->loadChurchData($churchId);
+
+        if ($churchData === []) {
+            throw new RuntimeException('Igreja não encontrada para gerar o relatório.');
+        }
+
+        $items = match ($normalizedForm) {
+            '14.1' => $this->buildFormulario141CsvItems($churchId),
+            default => $this->buildFormulario146CsvItems($churchId),
+        };
+
+        return [
+            'filename' => 'relatorio_' . $normalizedForm . '_'
+                . $this->formatShortCode((string) ($churchData['codigo'] ?? ''))
+                . '_' . date('Ymd_His') . '.csv',
+            'content' => $this->renderCsv($this->csvHeadersFor($normalizedForm), $items),
+        ];
+    }
+
+    /**
+     * @return array<int, array<int, string>>
+     */
+    private function buildFormulario141CsvItems(int $churchId): array
+    {
+        $products = $this->loadProducts141($churchId);
+
+        if ($products === []) {
+            throw new RuntimeException('O formulário selecionado não está disponível para esta igreja.');
+        }
+
+        $conditionLabels = [
+            1 => 'Mais de cinco anos com documento',
+            2 => 'Mais de cinco anos sem documento',
+            3 => 'Até cinco anos com documento',
+        ];
+
+        $rows = [];
+
+        foreach ($products as $product) {
+            $condition = (int) ($product['condicao_14_1'] ?? 0);
+            $hasInvoice = in_array($condition, [1, 3], true);
+            $currentDescription = trim((string) ($product['descricao_completa'] ?? ''));
+
+            $rows[] = [
+                (string) ($product['codigo'] ?? ''),
+                $conditionLabels[$condition] ?? '',
+                (string) ($product['nome_original'] ?? ''),
+                $currentDescription !== '' ? $currentDescription : (string) ($product['nome_original'] ?? ''),
+                (string) ($product['dependencia_descricao'] ?? ''),
+                $hasInvoice ? (string) ($product['nota_numero'] ?? '') : '',
+                $hasInvoice ? $this->formatReportDate((string) ($product['nota_data'] ?? '')) : '',
+                $hasInvoice ? (string) ($product['nota_valor'] ?? '') : '',
+                $hasInvoice ? (string) ($product['nota_fornecedor'] ?? '') : '',
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return array<int, array<int, string>>
+     */
+    private function buildFormulario146CsvItems(int $churchId): array
+    {
+        $pages = $this->loadProducts146($churchId);
+        $items = [];
+
+        foreach ($pages as $page) {
+            foreach ($page['itens'] ?? [] as $item) {
+                $originalType = trim((string) ($item['tipo_codigo'] ?? ''));
+                $editedType = trim((string) ($item['editado_tipo_codigo'] ?? '')) ?: $originalType;
+
+                $items[] = [
+                    (string) ($item['codigo'] ?? ''),
+                    (string) ($item['nome_original'] ?? ''),
+                    (string) ($item['nome_atual'] ?? ''),
+                    $originalType,
+                    $editedType,
+                    (string) ($item['dependencia_descricao'] ?? ''),
+                    (string) ($item['editado_dependencia_descricao'] ?? '') ?: (string) ($item['dependencia_descricao'] ?? ''),
+                ];
+            }
+        }
+
+        if ($items === []) {
+            throw new RuntimeException('O formulário selecionado não está disponível para esta igreja.');
+        }
+
+        return $items;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function csvHeadersFor(string $formulario): array
+    {
+        return $formulario === '14.1'
+            ? ['Código', 'Condição', 'Descrição original', 'Descrição atual', 'Dependência', 'Número nota', 'Data nota', 'Valor nota', 'Fornecedor']
+            : ['Código', 'Descrição original', 'Descrição atual', 'Tipo de bem original', 'Tipo de bem editado', 'Dependência original', 'Dependência editada'];
+    }
+
+    /**
+     * Formata datas da nota fiscal para o padrão dd/mm/AAAA usado nos relatórios.
+     */
+    private function formatReportDate(string $value): string
+    {
+        $value = trim($value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1) {
+            $date = \DateTime::createFromFormat('Y-m-d', $value);
+
+            return $date ? $date->format('d/m/Y') : $value;
+        }
+
+        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $value) === 1) {
+            return $value;
+        }
+
+        $timestamp = strtotime($value);
+
+        return $timestamp ? date('d/m/Y', $timestamp) : $value;
+    }
+
+    /**
+     * @param array<int, string> $headers
+     * @param array<int, array<int, string>> $rows
+     */
+    private function renderCsv(array $headers, array $rows): string
+    {
+        $stream = fopen('php://temp', 'r+');
+
+        if ($stream === false) {
+            throw new RuntimeException('Não foi possível preparar a exportação do formulário.');
+        }
+
+        fwrite($stream, "\xEF\xBB\xBF");
+        fputcsv($stream, $headers, ';');
+
+        foreach ($rows as $row) {
+            fputcsv($stream, $row, ';');
+        }
+
+        rewind($stream);
+        $content = stream_get_contents($stream);
+        fclose($stream);
+
+        return $content !== false ? $content : '';
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     private function loadVerificationPositionProducts(int $churchId): array
@@ -989,7 +1157,7 @@ class LegacyReportService implements LegacyReportServiceInterface
             ? ($product['editado_dependencia_desc'] ?? $product['dependencia_desc'] ?? '')
             : ($product['dependencia_desc'] ?? '')));
         $dependencyPart = $dependencyDescription !== '' ? ' {' . mb_strtoupper($dependencyDescription, 'UTF-8') . '}' : '';
-        $title = trim(($typePart !== '' ? $typePart . ' ' : '') . $description . ($dependencyPart !== '' ? ' ' . $dependencyPart : ''));
+        $title = trim(($typePart !== '' ? $typePart . ' ' : '') . $description . $dependencyPart);
 
         return $title !== '' ? $title : 'Sem descrição';
     }
@@ -1012,12 +1180,12 @@ class LegacyReportService implements LegacyReportServiceInterface
             $typePart = '{' . mb_strtoupper(trim(($typeCode !== '' ? $typeCode . ' - ' : '') . $typeDescription), 'UTF-8') . '}';
         }
 
-        $description = LegacyProductNameSupport::formatCurrentName($product);
+        $description = trim(LegacyProductNameSupport::formatCurrentName($product));
         $dependencyDescription = trim((string) ($useEdited
             ? ($product['editado_dependencia_descricao'] ?? $product['dependencia_descricao'] ?? '')
             : ($product['dependencia_descricao'] ?? '')));
         $dependencyPart = $dependencyDescription !== '' ? ' {' . mb_strtoupper($dependencyDescription, 'UTF-8') . '}' : '';
-        $title = trim(($typePart !== '' ? $typePart . ' ' : '') . $description . ($dependencyPart !== '' ? ' ' . $dependencyPart : ''));
+        $title = trim(($typePart !== '' ? $typePart . ' ' : '') . $description . $dependencyPart);
 
         return $title !== '' ? $title : 'Sem descrição';
     }
