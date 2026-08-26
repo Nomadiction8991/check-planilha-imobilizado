@@ -1086,6 +1086,12 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             return 'A administração selecionada não está disponível para este usuário.';
         }
 
+        if (str_contains($message, 'colunas obrigatórias')) {
+            // Erro de validação de colunas do parser: já é amigável e
+            // específico (indica as colunas ausentes) — preservar intacto.
+            return $technicalMessage;
+        }
+
         if (str_contains($message, 'csv') || str_contains($message, 'arquivo')) {
             return 'Erro ao ler o arquivo enviado. Verifique se a planilha está em CSV válido.';
         }

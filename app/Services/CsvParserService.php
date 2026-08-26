@@ -514,6 +514,15 @@ class CsvParserService
 
         $inicioLeitura = $this->encontrarInicioDados($headSample, $puloLinhas, $mapeamento);
 
+        // Validação antecipada: as colunas essenciais do mapeamento existem
+        // e têm conteúdo nas linhas de dados da amostra? Sem isso, o parser
+        // descartaria todas as linhas silenciosamente e o usuário receberia
+        // apenas um "CSV vazio", sem saber que o problema é o mapeamento.
+        $erroColunas = $this->validarColunasMapeadas($headSample, $inicioLeitura, $mapeamento);
+        if ($erroColunas !== null) {
+            throw new Exception($erroColunas);
+        }
+
         // Extrair dados iterando sobre o arquivo
         $linhas = [];
         $ultimaLocalidade  = '';  // carry-forward: localidade do último registro válido
@@ -592,6 +601,78 @@ class CsvParserService
         }
 
         return $linhas;
+    }
+
+    /**
+     * Valida se as colunas essenciais do mapeamento (código e nome) existem
+     * e têm conteúdo nas linhas de dados da amostra lida do CSV.
+     *
+     * Retorna null quando a planilha parece compatível com o mapeamento, ou
+     * uma mensagem de erro amigável indicando quais colunas estão ausentes
+     * (com a letra da planilha correspondente) para o usuário corrigir o
+     * arquivo ou ajustar a configuração de mapeamento de colunas.
+     *
+     * @param array $linhasAmostra Linhas brutas do início do arquivo
+     * @param int  $inicioLeitura  Índice da primeira linha de dados
+     * @param array $mapeamento    Mapa campo → índice de coluna (0-based)
+     */
+    private function validarColunasMapeadas(array $linhasAmostra, int $inicioLeitura, array $mapeamento): ?string
+    {
+        $dadosAmostra = array_slice($linhasAmostra, $inicioLeitura);
+
+        if (empty($dadosAmostra)) {
+            return null;
+        }
+
+        // Só as colunas essenciais bloqueiam a importação; localidade e
+        // dependência têm fallback/carry-forward no fluxo normal.
+        $essenciais = [
+            'codigo' => 'Código',
+            'complemento' => 'Nome',
+        ];
+
+        $letrasAusentes = [];
+        foreach ($essenciais as $campo => $rotulo) {
+            $indice = $mapeamento[$campo] ?? self::MAPEAMENTO_PADRAO[$campo];
+            $preenchidos = 0;
+
+            foreach ($dadosAmostra as $linha) {
+                if (array_key_exists($indice, $linha) && trim((string) $linha[$indice]) !== '') {
+                    $preenchidos++;
+                }
+            }
+
+            if ($preenchidos === 0) {
+                $letrasAusentes[] = sprintf('%s (coluna %s)', $rotulo, $this->indiceParaLetra($indice));
+            }
+        }
+
+        if (empty($letrasAusentes)) {
+            return null;
+        }
+
+        return sprintf(
+            'A planilha não possui dados nas colunas obrigatórias: %s. Verifique se o arquivo segue o layout esperado ou ajuste o mapeamento de colunas na configuração.',
+            implode(', ', $letrasAusentes)
+        );
+    }
+
+    /**
+     * Converte índice numérico de coluna (0-based) em letra de planilha
+     * (0 → A, 3 → D, 10 → K) para mensagens de erro legíveis.
+     */
+    private function indiceParaLetra(int $indice): string
+    {
+        $letra = '';
+        $indice += 1;
+
+        while ($indice > 0) {
+            $resto = ($indice - 1) % 26;
+            $letra = chr(ord('A') + $resto) . $letra;
+            $indice = intdiv($indice - $resto - 1, 26);
+        }
+
+        return $letra !== '' ? $letra : '?';
     }
 
     /**
