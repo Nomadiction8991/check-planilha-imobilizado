@@ -244,4 +244,16 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
 
         self::assertSame($original, $method->invoke($service, $original));
     }
+
+    public function testFriendlyErrorMessagePreservaErroDeProdutoSemNome(): void
+    {
+        $service = new LegacySpreadsheetImportService();
+
+        $method = new ReflectionMethod($service, 'friendlyErrorMessage');
+
+        $original = 'Produto sem nome na planilha (código 09-0565 / 0002, linha 31). '
+            . 'Verifique se a coluna de nome está preenchida.';
+
+        self::assertSame($original, $method->invoke($service, $original));
+    }
 }

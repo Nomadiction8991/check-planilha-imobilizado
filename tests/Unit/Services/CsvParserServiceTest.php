@@ -83,6 +83,92 @@ final class CsvParserServiceTest extends TestCase
         self::assertNull($method->invoke($service, [$linhaCompleta], 0, []));
     }
 
+    public function testAnalisarTodasAsLinhasClassificaLinhaSemNomeComoErroIdentificavel(): void
+    {
+        $pdo = $this->createMock(PDO::class);
+        $service = new CsvParserService($pdo);
+
+        $linhas = [
+            [
+                'codigo' => '09-0565 / 0001',
+                'tipo_bem_codigo' => '4',
+                'bem' => 'CADEIRA',
+                'complemento' => 'METALICA',
+                'dependencia' => 'SALA 01',
+                'localidade' => 'BR 09-0565',
+                'codigo_comum' => '09-0565',
+                'nome_original' => '4 - CADEIRA METALICA',
+                '_linha_original' => 30,
+            ],
+            [
+                'codigo' => '09-0565 / 0002',
+                'tipo_bem_codigo' => '',
+                'bem' => '',
+                'complemento' => '',
+                'dependencia' => '',
+                'localidade' => '',
+                'codigo_comum' => '09-0565',
+                'nome_original' => '',
+                '_linha_original' => 31,
+            ],
+            [
+                'codigo' => '09-0565 / 0003',
+                'tipo_bem_codigo' => '7',
+                'bem' => 'MESA',
+                'complemento' => 'ESCRITORIO',
+                'dependencia' => 'SALA 01',
+                'localidade' => 'BR 09-0565',
+                'codigo_comum' => '09-0565',
+                'nome_original' => '7 - MESA ESCRITORIO',
+                '_linha_original' => 32,
+            ],
+        ];
+
+        $method = new ReflectionMethod($service, 'analisarTodasAsLinhas');
+
+        $resultado = $method->invoke($service, $linhas, ['09-0565' => 0], 0, [], [], []);
+
+        self::assertSame(1, $resultado['resumo']['erros'], 'Somente a linha sem nome deve virar erro');
+        self::assertSame(3, $resultado['resumo']['total']);
+
+        self::assertSame(CsvParserService::STATUS_NOVO, $resultado['registros'][0]['status']);
+
+        $registroErro = $resultado['registros'][1];
+        self::assertSame('erro', $registroErro['status']);
+        self::assertSame(31, $registroErro['linha_csv']);
+        self::assertStringContainsString('09-0565 / 0002', $registroErro['erro']);
+        self::assertStringContainsString('sem nome', mb_strtolower($registroErro['erro'], 'UTF-8'));
+
+        self::assertSame(CsvParserService::STATUS_NOVO, $resultado['registros'][2]['status']);
+    }
+
+    public function testAnalisarLinhaRejeitaProdutoComBemVazio(): void
+    {
+        $pdo = $this->createMock(PDO::class);
+        $service = new CsvParserService($pdo);
+
+        $method = new ReflectionMethod($service, 'analisarLinha');
+
+        try {
+            $method->invoke($service, [
+                'codigo' => '12-9999 / 0042',
+                'tipo_bem_codigo' => '',
+                'bem' => '   ',
+                'complemento' => '',
+                'dependencia' => '',
+                'codigo_comum' => '12-9999',
+                'localidade' => '',
+                'nome_original' => '',
+                '_linha_original' => 77,
+            ], [], [], [], 0);
+
+            self::fail('Era esperada uma exceção para produto sem nome.');
+        } catch (\Exception $e) {
+            self::assertStringContainsString('12-9999 / 0042', $e->getMessage());
+            self::assertStringContainsString('77', $e->getMessage());
+        }
+    }
+
     public function testAnalisarRejeitaCsvSemColunasObrigatoriasComMensagemClara(): void
     {
         $base = sys_get_temp_dir() . '/check-planilha-imobilizado/importacao';
