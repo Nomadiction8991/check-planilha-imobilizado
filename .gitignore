@@ -39,3 +39,6 @@ cache/
 /coverage/
 
 napkin.md
+
+# PHPUnit result cache
+.phpunit.result.cache

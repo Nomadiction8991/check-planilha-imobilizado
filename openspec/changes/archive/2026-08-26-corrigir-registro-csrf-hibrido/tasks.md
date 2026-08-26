@@ -1,4 +1,4 @@
-- [ ] Teste de regressão do registro do CSRF híbrido no grupo web (RED)
+- [x] Teste de regressão do registro do CSRF híbrido no grupo web (RED)
 - [x] Corrigir registro para substituição dentro do grupo web (GREEN)
 - [x] Validar suíte de testes e lint dos arquivos alterados
-- [ ] Validar rotas em produção após o deploy
+- [x] Validar rotas em produção após o deploy
