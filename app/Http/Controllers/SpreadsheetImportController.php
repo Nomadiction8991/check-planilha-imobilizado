@@ -71,6 +71,7 @@ class SpreadsheetImportController extends Controller
             'igrejasSalvas' => $preview['igrejas_salvas'],
             'dependenciasSalvas' => $preview['dependencias_salvas'] ?? [],
             'igrejasDetectadas' => $preview['igrejas_detectadas'] ?? [],
+            'errosPreview' => $preview['erros_preview'] ?? [],
         ]);
     }
 
