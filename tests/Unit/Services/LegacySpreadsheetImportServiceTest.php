@@ -232,4 +232,16 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
         Session::forget('administracoes_permitidas');
         Session::forget('is_admin');
     }
+
+    public function testFriendlyErrorMessagePreservaErroDeColunasObrigatorias(): void
+    {
+        $service = new LegacySpreadsheetImportService();
+
+        $method = new ReflectionMethod($service, 'friendlyErrorMessage');
+
+        $original = 'A planilha não possui dados nas colunas obrigatórias: Nome (coluna D). '
+            . 'Verifique se o arquivo segue o layout esperado ou ajuste o mapeamento de colunas na configuração.';
+
+        self::assertSame($original, $method->invoke($service, $original));
+    }
 }

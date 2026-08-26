@@ -7,7 +7,7 @@
 - [x] Testes de feature da rota (download OK, redirect sem igreja, redirect sem itens, botão na prévia) — RED
 - [x] Implementar rota + método do controller + botão na view — GREEN
 - [x] php -l nos arquivos alterados; suíte completa verde (538 testes)
-- [ ] Commit + push (deploy automático)
+- [x] Commit + push (deploy automático)
 
 ## Bônus descoberto pelo TDD
 - [x] Corrigido espaço duplo nos títulos com dependência em
