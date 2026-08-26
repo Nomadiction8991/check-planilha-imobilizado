@@ -258,6 +258,20 @@ final class LegacySpreadsheetImportTest extends TestCase
                         'igrejas_salvas' => ['12-3456' => 'importar'],
                         'dependencias_salvas' => ['12-3456:SEM DEPENDÊNCIA' => 'importar'],
                         'status_por_comum' => ['12-3456' => 'novo'],
+                        'erros_preview' => [
+                            [
+                                'linha' => 31,
+                                'codigo' => '09-0565 / 0002',
+                                'nome' => 'CADEIRA METALICA',
+                                'mensagem' => 'Produto sem nome na planilha (código 09-0565 / 0002, linha 31). Verifique se a coluna de nome está preenchida.',
+                            ],
+                            [
+                                'linha' => 32,
+                                'codigo' => '09-0565 / 0007',
+                                'nome' => '',
+                                'mensagem' => 'Dependência inválida.',
+                            ],
+                        ],
                     ];
                 }
 
@@ -414,8 +428,20 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertSee('Administração: Administração Central');
         $response->assertSee('Confirmar igrejas selecionadas');
         $response->assertDontSee('bens.csv');
-        $response->assertDontSee('CADEIRA METALICA');
         $response->assertDontSee('Salvar ações');
+    }
+
+    public function testPreviewPageRendersErrorListWhenAnalysisHasFailures(): void
+    {
+        $response = $this->get(route('migration.spreadsheets.preview', ['importacao' => 15]));
+
+        $response->assertOk();
+        $response->assertSee('Linhas com erro na análise');
+        $response->assertSee('2 linha(s) com falha. Corrija o CSV e reimporte, ou revise os itens abaixo.');
+        $response->assertSee('09-0565 / 0002');
+        $response->assertSee('CADEIRA METALICA');
+        $response->assertSee('Produto sem nome na planilha (código 09-0565 / 0002, linha 31). Verifique se a coluna de nome está preenchida.');
+        $response->assertSee('Dependência inválida.');
     }
 
     public function testConfirmRedirectsToProductsWithResultMessage(): void

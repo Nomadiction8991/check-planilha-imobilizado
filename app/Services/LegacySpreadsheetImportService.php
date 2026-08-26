@@ -264,6 +264,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                 'dependencias_salvas' => Session::get($this->previewDependenciesKey($importacaoId), []),
                 'status_por_comum' => $statusByChurch,
                 'igrejas_detectadas' => $igrejasDetectadas,
+                'erros_preview' => $this->extractPreviewErrors((array) ($analise['registros'] ?? [])),
             ];
         } catch (Throwable $throwable) {
             throw new RuntimeException('Não foi possível carregar a prévia da importação.', previous: $throwable);
@@ -750,6 +751,43 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
         } catch (Throwable $throwable) {
             throw new RuntimeException('Não foi possível consultar o progresso da importação.', previous: $throwable);
         }
+    }
+
+    /**
+     * Extrai a lista de linhas com falha da análise da importação para
+     * exibição na prévia, com limite máximo para não estourar a página.
+     *
+     * @param array $registros Registros da análise (analise['registros'])
+     * @param int   $limite    Quantidade máxima de erros retornados
+     */
+    private function extractPreviewErrors(array $registros, int $limite = 50): array
+    {
+        $erros = [];
+
+        foreach ($registros as $registro) {
+            if ((string) ($registro['status'] ?? '') !== 'erro') {
+                continue;
+            }
+
+            if (count($erros) >= max(0, $limite)) {
+                break;
+            }
+
+            $dadosCsv = is_array($registro['dados_csv'] ?? null) ? $registro['dados_csv'] : [];
+
+            $bem = strtoupper(trim((string) ($dadosCsv['bem'] ?? '')));
+            $complemento = trim((string) ($dadosCsv['complemento'] ?? ''));
+            $nome = trim(sprintf('%s %s', $bem, $complemento));
+
+            $erros[] = [
+                'linha' => (int) ($registro['linha_csv'] ?? 0),
+                'codigo' => trim((string) ($dadosCsv['codigo'] ?? '')),
+                'nome' => $nome,
+                'mensagem' => trim((string) ($registro['erro'] ?? '')) ?: 'Erro desconhecido',
+            ];
+        }
+
+        return $erros;
     }
 
     public function loadImportErrors(?int $churchId, ?int $importacaoId, int $page = 1, int $perPage = 30): array

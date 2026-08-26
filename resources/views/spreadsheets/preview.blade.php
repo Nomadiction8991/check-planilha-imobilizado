@@ -237,6 +237,61 @@
             background: rgba(139, 61, 25, 0.08);
             border-color: rgba(139, 61, 25, 0.12);
         }
+
+        /* Painel de linhas com erro na análise */
+        .import-errors-panel {
+            display: grid;
+            gap: 0;
+            border-left: 6px solid #ffb703;
+            border-radius: 16px;
+        }
+
+        .import-errors-panel__head {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .import-errors-panel__badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 183, 3, 0.14);
+            color: #b26a00;
+            font-size: 15px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .import-errors-panel__head strong {
+            display: block;
+            font-size: 16px;
+            line-height: 1.3;
+        }
+
+        .import-errors-panel__head p {
+            margin: 2px 0 0;
+            max-width: 80ch;
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--muted);
+        }
+
+        .import-errors-table th,
+        .import-errors-table td {
+            padding: 12px 22px;
+            font-size: 13px;
+        }
+
+        .import-errors-table td:first-child {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
     </style>
 
     <section class="hero">
@@ -258,6 +313,48 @@
             </div>
         </div>
     @endif
+
+    <section class="section">
+        @php
+            $errosPreview = collect($errosPreview ?? []);
+            $totalErrosAnalise = (int) ($analise['resumo']['erros'] ?? count($errosPreview));
+        @endphp
+
+        @if ($errosPreview->isNotEmpty())
+            <div class="table-shell import-errors-panel" role="region" aria-label="Linhas com erro na análise">
+                <div class="import-errors-panel__head">
+                    <span class="import-errors-panel__badge">{{ $errosPreview->count() }}</span>
+                    <div>
+                        <strong>Linhas com erro na análise</strong>
+                        <p>
+                            {{ $errosPreview->count() }} linha(s) com falha. Corrija o CSV e reimporte, ou revise os itens abaixo.
+                        </p>
+                    </div>
+                </div>
+
+                <table class="import-errors-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Linha</th>
+                            <th scope="col">Código</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($errosPreview as $erro)
+                            <tr>
+                                <td>{{ (int) ($erro['linha'] ?? 0) }}</td>
+                                <td>{{ trim((string) ($erro['codigo'] ?? '')) !== '' ? $erro['codigo'] : '—' }}</td>
+                                <td>{{ trim((string) ($erro['nome'] ?? '')) !== '' ? $erro['nome'] : '—' }}</td>
+                                <td>{{ $erro['mensagem'] ?? '' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </section>
 
     <section class="section">
         <div class="section-head">

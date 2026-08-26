@@ -256,4 +256,76 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
 
         self::assertSame($original, $method->invoke($service, $original));
     }
+
+    public function testExtractPreviewErrorsListaSomenteLinhasComFalha(): void
+    {
+        $service = new LegacySpreadsheetImportService();
+
+        $method = new ReflectionMethod($service, 'extractPreviewErrors');
+
+        $erros = $method->invoke($service, [
+            [
+                'linha_csv' => 10,
+                'status' => CsvParserService::STATUS_NOVO,
+                'dados_csv' => ['codigo' => '09-0565 / 0001'],
+            ],
+            [
+                'linha_csv' => 11,
+                'status' => 'erro',
+                'erro' => 'Dependência inválida.',
+                'dados_csv' => [
+                    'codigo' => '09-0565 / 0002',
+                    'bem' => 'CADEIRA',
+                    'complemento' => 'METALICA',
+                ],
+            ],
+            [
+                'linha_csv' => 12,
+                'status' => 'erro',
+                'dados_csv' => ['codigo' => ''],
+            ],
+            [
+                'status' => 'erro',
+                'erro' => 'Sem linha informada.',
+                'dados_csv' => [],
+            ],
+        ]);
+
+        self::assertCount(3, $erros);
+
+        self::assertSame(11, $erros[0]['linha']);
+        self::assertSame('09-0565 / 0002', $erros[0]['codigo']);
+        self::assertSame('CADEIRA METALICA', $erros[0]['nome']);
+        self::assertSame('Dependência inválida.', $erros[0]['mensagem']);
+
+        self::assertSame(12, $erros[1]['linha']);
+        self::assertSame('', $erros[1]['codigo']);
+        self::assertSame('Erro desconhecido', $erros[1]['mensagem']);
+
+        self::assertSame(0, $erros[2]['linha']);
+        self::assertSame('Sem linha informada.', $erros[2]['mensagem']);
+    }
+
+    public function testExtractPreviewErrorsRespeitaLimiteInformado(): void
+    {
+        $service = new LegacySpreadsheetImportService();
+
+        $method = new ReflectionMethod($service, 'extractPreviewErrors');
+
+        $registros = [];
+        for ($i = 1; $i <= 60; $i++) {
+            $registros[] = [
+                'linha_csv' => $i,
+                'status' => 'erro',
+                'erro' => sprintf('Falha na linha %d.', $i),
+                'dados_csv' => [],
+            ];
+        }
+
+        $erros = $method->invoke($service, $registros, 50);
+
+        self::assertCount(50, $erros);
+        self::assertSame(1, $erros[0]['linha']);
+        self::assertSame(50, $erros[49]['linha']);
+    }
 }

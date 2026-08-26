@@ -2,4 +2,7 @@
 - [x] Implementar validação de colunas ausentes no service
 - [x] Criar teste para validar importação com tipos de dados inválidos
 - [x] Implementar tratamento de erros de tipos de dados no service
-- [ ] Atualizar UI de importação para exibir lista de erros
+- [x] Criar teste do extrator de linhas com erro da análise (lista filtrada por status de falha)
+- [x] Implementar extração das linhas com erro na prévia (com limite de exibição)
+- [x] Criar teste de renderização do painel de erros na tela de prévia
+- [x] Implementar painel de erros na UI de importação (linha, código, nome e motivo)
