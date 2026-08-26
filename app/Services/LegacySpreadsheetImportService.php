@@ -1092,6 +1092,13 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             return $technicalMessage;
         }
 
+        if (str_contains($message, 'sem nome na planilha')) {
+            // Erro de linha sem descrição do bem: já identifica código e
+            // linha do CSV — preservar intacto em vez de mascarar como
+            // falha genérica de leitura de arquivo.
+            return $technicalMessage;
+        }
+
         if (str_contains($message, 'csv') || str_contains($message, 'arquivo')) {
             return 'Erro ao ler o arquivo enviado. Verifique se a planilha está em CSV válido.';
         }

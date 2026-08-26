@@ -1132,6 +1132,17 @@ class CsvParserService
             throw new Exception('Código vazio na linha');
         }
 
+        // Nome do bem é essencial: linha com código mas sem descrição
+        // produziria um produto "fantasma" sem nome no banco. Rejeita
+        // a linha como erro identificável, citando código e linha do CSV.
+        if (trim((string) $bem) === '') {
+            throw new Exception(sprintf(
+                'Produto sem nome na planilha (código %s, linha %s). Verifique se a coluna de nome está preenchida.',
+                $codigo,
+                (string) ($dadosCsv['_linha_original'] ?? '?')
+            ));
+        }
+
         // Resolve tipo_bem e dependência para exibição
         $tipoBemDesc = $tiposBens[$tipoBemCodigo] ?? ($tipoBemCodigo !== '' ? 'Tipo ' . $tipoBemCodigo : '');
         $depDescNorm = trim(strtoupper($dependenciaDescricao));
