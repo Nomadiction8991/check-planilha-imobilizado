@@ -21,6 +21,7 @@
                 <div class="hero-actions">
                     <a class="btn" href="{{ route('migration.reports.index', ['comum_id' => $selectedChurchId]) }}">Voltar para relatórios</a>
                     <a class="btn" href="{{ route('migration.reports.editor', ['formulario' => $preview['formulario'], 'comum_id' => $selectedChurchId]) }}">Editar células</a>
+                    <a class="btn" href="{{ route('migration.reports.export', ['formulario' => $preview['formulario'], 'comum_id' => $selectedChurchId]) }}">Baixar CSV</a>
                     <button class="btn primary js-report-print" type="button">Imprimir</button>
                 </div>
             </div>

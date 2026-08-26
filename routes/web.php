@@ -409,5 +409,9 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
         Route::get('/reports/{formulario}', [LegacyReportController::class, 'show'])
             ->middleware('legacy.permission:reports.view')
             ->name('migration.reports.show');
+
+        Route::get('/reports/{formulario}/export', [LegacyReportController::class, 'formularioExport'])
+            ->middleware('legacy.permission:reports.view')
+            ->name('migration.reports.export');
     });
 });

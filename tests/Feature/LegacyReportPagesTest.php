@@ -147,6 +147,22 @@ final class LegacyReportPagesTest extends TestCase
                         'content' => "Código;Situação;Descrição original;Descrição atual;Dependência;Checado;Etiqueta;Observação;Editado;Novo\n12-3456 / 0001;Checado;CADEIRA {SALA};CADEIRA {SALA};SALA;1;0;;0;0\n12-3456 / 0002;Editado, checado, observação e etiqueta;MESA {SALA};MESA GRANDE {SALA};SALA;1;1;AJUSTE;1;0\n",
                     ];
                 }
+
+                public function downloadFormularioCsv(int $churchId, string $formulario): array
+                {
+                    if ($churchId !== 7) {
+                        throw new RuntimeException('Igreja não encontrada para gerar o relatório.');
+                    }
+
+                    if (!in_array($formulario, ['14.1', '14.6'], true)) {
+                        throw new RuntimeException('Formulário inválido.');
+                    }
+
+                    return [
+                        'filename' => 'relatorio_' . $formulario . '_12-3456_20260826_120000.csv',
+                        'content' => "Código;Condição\n12-3456 / 0001;Mais de cinco anos com documento\n",
+                    ];
+                }
             }
         );
     }
@@ -203,6 +219,92 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertOk();
         $response->assertDownload('posicao_verificacao_12-3456_20260421_120000.csv');
         $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+    }
+
+    public function testReportsFormularioCsvExportDownloadsFile(): void
+    {
+        $response = $this->get(route('migration.reports.export', [
+            'formulario' => '14.1',
+            'comum_id' => 7,
+        ]));
+
+        $response->assertOk();
+        $response->assertDownload('relatorio_14.1_12-3456_20260826_120000.csv');
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+    }
+
+    public function testReportsFormularioCsvExportRedirectsWithoutChurch(): void
+    {
+        $response = $this->get(route('migration.reports.export', [
+            'formulario' => '14.1',
+        ]));
+
+        $response->assertRedirect(route('migration.reports.index'));
+        $response->assertSessionHas('status', 'Selecione uma igreja para exportar o relatório.');
+    }
+
+    public function testReportsFormularioCsvExportRedirectsWithoutItems(): void
+    {
+        $this->app->instance(
+            LegacyReportServiceInterface::class,
+            new class implements LegacyReportServiceInterface
+            {
+                public function churchOptions(): Collection
+                {
+                    return collect();
+                }
+
+                public function listAvailableReports(int $churchId): array
+                {
+                    return [];
+                }
+
+                public function buildReportPreview(int $churchId, string $formulario): array
+                {
+                    throw new RuntimeException('O formulário selecionado não está disponível para esta igreja.');
+                }
+
+                public function buildVerificationPositionReport(int $churchId): array
+                {
+                    return [];
+                }
+
+                public function downloadVerificationPositionCsv(int $churchId): array
+                {
+                    return ['filename' => 'x.csv', 'content' => ''];
+                }
+
+                public function downloadFormularioCsv(int $churchId, string $formulario): array
+                {
+                    throw new RuntimeException('O formulário selecionado não está disponível para esta igreja.');
+                }
+            },
+        );
+
+        $response = $this->get(route('migration.reports.export', [
+            'formulario' => '14.6',
+            'comum_id' => 7,
+        ]));
+
+        $response->assertRedirect(route('migration.reports.index', ['comum_id' => 7]));
+        $response->assertSessionHas('status', 'O formulário selecionado não está disponível para esta igreja.');
+    }
+
+    public function testReportsShowRendersCsvExportButton(): void
+    {
+        $response = $this->get(route('migration.reports.show', [
+            'formulario' => '14.1',
+            'comum_id' => 7,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Baixar CSV');
+
+        $expectedUrl = route('migration.reports.export', [
+            'formulario' => '14.1',
+            'comum_id' => 7,
+        ]);
+        $response->assertSee($expectedUrl, escape: false);
     }
 
     public function testReportsCellEditorRendersLocalEditorAssets(): void
