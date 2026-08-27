@@ -34,3 +34,20 @@ O sistema SHALL apresentar, na tela de prévia da importação, a lista das linh
 - WHEN the user opens the import preview
 - THEN the system SHOULD NOT render the error list panel
 
+### Requirement: Aviso de escopo de importação na tela inicial
+A tela de importação SHALL exibir um aviso proeminente em vermelho alertando que a importação processa a igreja inteira, incluindo todas as dependências, não apenas um setor ou dependência selecionada.
+
+#### Scenario: Usuário acessa a tela de importação
+- GIVEN a user with access to spreadsheet imports
+- WHEN the user opens the spreadsheet import page
+- THEN the system displays a red banner stating that the entire church and all dependencies will be processed
+- AND the performance note remains visible as secondary guidance
+
+### Requirement: Aviso de escopo de importação na prévia
+A prévia da importação SHALL exibir o mesmo aviso de escopo antes da seção de igrejas detectadas.
+
+#### Scenario: Usuário visualiza a prévia com igrejas detectadas
+- GIVEN an import preview with detected churches
+- WHEN the user opens the preview
+- THEN the system displays a red scope banner before church or dependency actions
+- AND the banner states that confirming imports all sectors of selected churches
