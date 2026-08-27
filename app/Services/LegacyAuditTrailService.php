@@ -159,6 +159,157 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
         return array_values(array_unique($modules));
     }
 
+    public function exportCsv(
+        array $filters,
+        ?int $userId,
+        ?int $administrationId,
+        ?int $churchId,
+        bool $isAdmin,
+    ): array {
+        $entries = collect($this->readEntries())->filter(
+            fn (LegacyAuditEntryData $entry): bool => $this->entryMatchesScopeAndFilters(
+                $entry,
+                $filters,
+                $userId,
+                $administrationId,
+                $churchId,
+                $isAdmin,
+            ),
+        )->sortByDesc(static fn (LegacyAuditEntryData $entry): string => $entry->occurredAt)->values();
+
+        if ($entries->isEmpty()) {
+            return ['filename' => '', 'content' => ''];
+        }
+
+        return [
+            'filename' => 'auditoria_' . date('Ymd_His') . '.csv',
+            'content' => $this->renderCsv($entries->all()),
+        ];
+    }
+
+    /**
+     * Reaproveita os mesmos critérios de escopo e filtro do paginate.
+     *
+     * @param array<string, string> $filters
+     */
+    private function entryMatchesScopeAndFilters(
+        LegacyAuditEntryData $entry,
+        array $filters,
+        ?int $userId,
+        ?int $administrationId,
+        ?int $churchId,
+        bool $isAdmin,
+    ): bool {
+        if (! $isAdmin) {
+            if ($administrationId !== null && $administrationId > 0) {
+                if ($entry->administrationId !== $administrationId) {
+                    return false;
+                }
+            } elseif ($churchId !== null && $churchId > 0) {
+                if ($entry->churchId !== $churchId) {
+                    return false;
+                }
+            } elseif ($userId !== null && $userId > 0 && $entry->userId !== $userId) {
+                return false;
+            }
+        }
+
+        $module = mb_strtolower(trim((string) ($filters['module'] ?? '')), 'UTF-8');
+        if ($module !== '' && mb_strtolower($entry->module, 'UTF-8') !== $module) {
+            return false;
+        }
+
+        $search = mb_strtolower(trim((string) ($filters['search'] ?? '')), 'UTF-8');
+        if ($search !== '') {
+            $haystack = mb_strtolower(
+                implode(' ', array_filter([
+                    $entry->module,
+                    $entry->action,
+                    $entry->description,
+                    $entry->routeName,
+                    $entry->path,
+                    $entry->method,
+                    $entry->userName,
+                    $entry->userEmail,
+                ], static fn (mixed $value): bool => is_scalar($value) && trim((string) $value) !== '')),
+                'UTF-8'
+            );
+
+            if (! str_contains($haystack, $search)) {
+                return false;
+            }
+        }
+
+        $dateFrom = $this->parseDateBoundary((string) ($filters['date_from'] ?? ''), false);
+        $dateTo = $this->parseDateBoundary((string) ($filters['date_to'] ?? ''), true);
+        $entryDate = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $entry->occurredAt);
+
+        if ($dateFrom !== null && $entryDate->lt($dateFrom)) {
+            return false;
+        }
+
+        if ($dateTo !== null && $entryDate->gt($dateTo)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array<int, LegacyAuditEntryData> $entries
+     */
+    private function renderCsv(array $entries): string
+    {
+        $headers = [
+            'Data/Hora',
+            'Usuário',
+            'E-mail',
+            'Administração',
+            'Igreja',
+            'Módulo',
+            'Ação',
+            'Descrição',
+            'Rota',
+            'Caminho',
+            'Método',
+            'HTTP',
+            'IP',
+        ];
+
+        $stream = fopen('php://temp', 'r+');
+
+        if ($stream === false) {
+            return '';
+        }
+
+        fwrite($stream, "\xEF\xBB\xBF");
+        fputcsv($stream, $headers, ';');
+
+        foreach ($entries as $entry) {
+            fputcsv($stream, [
+                $entry->occurredAt,
+                $entry->userName,
+                $entry->userEmail ?? '',
+                $entry->administrationId !== null ? (string) $entry->administrationId : '',
+                $entry->churchId !== null ? (string) $entry->churchId : '',
+                $entry->module,
+                $entry->action,
+                $entry->description,
+                $entry->routeName ?? '',
+                $entry->path,
+                $entry->method,
+                (string) $entry->statusCode,
+                $entry->ipAddress ?? '',
+            ], ';');
+        }
+
+        rewind($stream);
+        $content = stream_get_contents($stream);
+        fclose($stream);
+
+        return $content !== false ? $content : '';
+    }
+
     /**
      * @return array<int, LegacyAuditEntryData>
      */

@@ -10,13 +10,12 @@ use App\Contracts\LegacyNavigationServiceInterface;
 use App\Contracts\LegacyPermissionServiceInterface;
 use App\DTO\LegacyAuditEntryData;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
 final class LegacyAuditPagesTest extends TestCase
 {
-    public function testAuditPageRendersLoggedEvents(): void
+    private function mockAuditUser(): void
     {
         $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
             $mock->shouldReceive('currentUser')->andReturn([
@@ -42,11 +41,19 @@ final class LegacyAuditPagesTest extends TestCase
         $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
             $mock->shouldReceive('navigation')->andReturn([]);
         });
+    }
 
+    private function bindAuditServiceWithEntry(LegacyAuditEntryData $entry): void
+    {
         $this->app->instance(
             LegacyAuditTrailServiceInterface::class,
-            new class implements LegacyAuditTrailServiceInterface
+            new class($entry) implements LegacyAuditTrailServiceInterface
             {
+                public function __construct(
+                    private readonly LegacyAuditEntryData $storedEntry,
+                ) {
+                }
+
                 public function record(LegacyAuditEntryData $entry): void
                 {
                 }
@@ -61,28 +68,9 @@ final class LegacyAuditPagesTest extends TestCase
                     array $query = [],
                     int $page = 1,
                     int $perPage = 20,
-                ): \Illuminate\Contracts\Pagination\LengthAwarePaginator {
+                ): LengthAwarePaginator {
                     return new LengthAwarePaginator(
-                        items: collect([
-                            new LegacyAuditEntryData(
-                                occurredAt: '2026-04-17 10:30:15',
-                                userId: 7,
-                                userName: 'Maria Oliveira',
-                                userEmail: 'maria@example.com',
-                                administrationId: 2,
-                                churchId: null,
-                                isAdmin: false,
-                                module: 'Sessão',
-                                action: 'Login',
-                                description: 'Autenticação realizada com sucesso.',
-                                routeName: 'migration.login.store',
-                                path: 'login',
-                                method: 'POST',
-                                statusCode: 302,
-                                ipAddress: '127.0.0.1',
-                                userAgent: 'PHPUnit',
-                            ),
-                        ]),
+                        items: collect([$this->storedEntry]),
                         total: 1,
                         perPage: 20,
                         currentPage: 1,
@@ -100,8 +88,42 @@ final class LegacyAuditPagesTest extends TestCase
                         'Produtos',
                     ];
                 }
+
+                public function exportCsv(
+                    array $filters,
+                    ?int $userId,
+                    ?int $administrationId,
+                    ?int $churchId,
+                    bool $isAdmin,
+                ): array {
+                    return ['filename' => '', 'content' => ''];
+                }
             }
         );
+    }
+
+    public function testAuditPageRendersLoggedEvents(): void
+    {
+        $this->mockAuditUser();
+
+        $this->bindAuditServiceWithEntry(new LegacyAuditEntryData(
+            occurredAt: '2026-04-17 10:30:15',
+            userId: 7,
+            userName: 'Maria Oliveira',
+            userEmail: 'maria@example.com',
+            administrationId: 2,
+            churchId: null,
+            isAdmin: false,
+            module: 'Sessão',
+            action: 'Login',
+            description: 'Autenticação realizada com sucesso.',
+            routeName: 'migration.login.store',
+            path: 'login',
+            method: 'POST',
+            statusCode: 302,
+            ipAddress: '127.0.0.1',
+            userAgent: 'PHPUnit',
+        ));
 
         $response = $this->get('/audits?busca=Login');
 
@@ -112,5 +134,39 @@ final class LegacyAuditPagesTest extends TestCase
         $response->assertSee('Autenticação realizada com sucesso.');
         $response->assertSee('Sessão');
         $response->assertSee('Produtos');
+    }
+
+    public function testAuditPageShowsExportButtonPreservingCurrentFilters(): void
+    {
+        $this->mockAuditUser();
+
+        $this->bindAuditServiceWithEntry(new LegacyAuditEntryData(
+            occurredAt: '2026-04-17 10:30:15',
+            userId: 7,
+            userName: 'Maria Oliveira',
+            userEmail: 'maria@example.com',
+            administrationId: 2,
+            churchId: null,
+            isAdmin: false,
+            module: 'Sessão',
+            action: 'Login',
+            description: 'Autenticação realizada com sucesso.',
+            routeName: 'migration.login.store',
+            path: 'login',
+            method: 'POST',
+            statusCode: 302,
+            ipAddress: '127.0.0.1',
+            userAgent: 'PHPUnit',
+        ));
+
+        $response = $this->get('/audits?busca=Login&modulo=Sess%C3%A3o');
+
+        $response->assertOk();
+
+        // O botão de exportar preserva busca e módulo na URL do download
+        // (no HTML os separadores aparecem escapados como &amp;).
+        $exportPath = '/audits/export?busca=Login&amp;modulo=Sess%C3%A3o';
+        $response->assertSee($exportPath, false);
+        $response->assertSee('Exportar CSV', false);
     }
 }

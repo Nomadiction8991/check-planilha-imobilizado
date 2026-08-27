@@ -100,4 +100,137 @@ final class LegacyAuditTrailServiceTest extends TestCase
         self::assertContains('Sessão', $service->availableModules());
         self::assertContains('Importação', $service->availableModules());
     }
+
+    /**
+     * @param array<string, string> $extra
+     */
+    private function recordEntry(
+        LegacyAuditTrailService $service,
+        string $occurredAt,
+        string $userName,
+        ?int $administrationId,
+        string $module = 'Sessão',
+        array $extra = [],
+    ): void {
+        $service->record(new LegacyAuditEntryData(
+            occurredAt: $occurredAt,
+            userId: 1,
+            userName: $userName,
+            userEmail: $extra['userEmail'] ?? ($userName === 'Ana' ? 'ana@example.com' : null),
+            administrationId: $administrationId,
+            churchId: $extra['churchId'] ?? null,
+            isAdmin: false,
+            module: $module,
+            action: $extra['action'] ?? 'Login',
+            description: $extra['description'] ?? 'Evento auditado de teste.',
+            routeName: $extra['routeName'] ?? 'migration.login.store',
+            path: $extra['path'] ?? 'login',
+            method: 'POST',
+            statusCode: 302,
+            ipAddress: '127.0.0.1',
+            userAgent: 'PHPUnit',
+        ));
+    }
+
+    public function testExportCsvReturnsAllFilteredEntriesWithHeaders(): void
+    {
+        $service = new LegacyAuditTrailService($this->storageFile);
+
+        // 25 entradas que casam com o filtro — mais que uma página de 20.
+        for ($i = 1; $i <= 25; $i++) {
+            $this->recordEntry(
+                $service,
+                sprintf('2026-04-17 09:%02d:00', $i),
+                'Ana',
+                9,
+                'Sessão',
+                ['description' => 'Login número ' . $i],
+            );
+        }
+
+        // Entrada fora dos filtros (outro módulo) — não pode aparecer.
+        $this->recordEntry($service, '2026-04-17 10:00:00', 'Ana', 9, 'Produtos');
+
+        $file = $service->exportCsv(
+            ['search' => '', 'module' => 'Sessão'],
+            1,
+            9,
+            null,
+            false,
+        );
+
+        self::assertArrayHasKey('filename', $file);
+        self::assertArrayHasKey('content', $file);
+        self::assertNotSame('', $file['content']);
+        self::assertStringStartsWith('auditoria_', $file['filename']);
+        self::assertStringEndsWith('.csv', $file['filename']);
+
+        // BOM UTF-8 presente no início do conteúdo.
+        self::assertSame("\xEF\xBB\xBF", mb_substr($file['content'], 0, 3, '8bit'));
+
+        // Round-trip com separador ponto e vírgula (nunca comparação por string crua).
+        $lines = preg_split('/\r\n|\r|\n/', rtrim($file['content'], "\r\n")) ?: [];
+        self::assertCount(26, $lines); // cabeçalho + 25 eventos
+
+        // Ao ler, tirar o BOM do primeiro campo (lição do CSV no PHP 8.5).
+        $lines[0] = preg_replace('/^\xEF\xBB\xBF/', '', $lines[0]) ?? $lines[0];
+        $header = str_getcsv($lines[0], ';');
+        self::assertSame('Data/Hora', $header[0]);
+        self::assertSame('Usuário', $header[1]);
+        self::assertSame('Módulo', array_search('Módulo', $header, true) !== false ? 'Módulo' : '');
+
+        $rows = array_slice($lines, 1);
+        $descriptions = [];
+        foreach ($rows as $line) {
+            $row = str_getcsv($line, ';');
+            self::assertCount(13, $row);
+            self::assertSame('Sessão', $row[5]);
+            $descriptions[] = $row[7];
+        }
+
+        for ($i = 1; $i <= 25; $i++) {
+            self::assertContains('Login número ' . $i, $descriptions);
+        }
+        self::assertNotContains('Evento auditado de teste.', $descriptions);
+    }
+
+    public function testExportCsvRespectsUserScopeForNonAdmin(): void
+    {
+        $service = new LegacyAuditTrailService($this->storageFile);
+
+        // Mesma administração do usuário exportando.
+        $this->recordEntry($service, '2026-04-17 09:00:00', 'Ana', 9);
+        // Outra administração — deve ficar fora da exportação.
+        $this->recordEntry($service, '2026-04-17 09:05:00', 'Bruno', 8);
+
+        $file = $service->exportCsv(
+            ['search' => '', 'module' => ''],
+            1,
+            9,
+            null,
+            false,
+        );
+
+        $lines = preg_split('/\r\n|\r|\n/', trim($file['content'])) ?: [];
+        self::assertCount(2, $lines); // cabeçalho + 1 evento
+
+        $row = str_getcsv($lines[1], ';');
+        self::assertSame('Ana', $row[1]);
+        self::assertSame('9', $row[3]);
+    }
+
+    public function testExportCsvWithoutEntriesSignalsEmptyResult(): void
+    {
+        $service = new LegacyAuditTrailService($this->storageFile);
+
+        $file = $service->exportCsv(
+            ['search' => 'nada-encontrado', 'module' => ''],
+            1,
+            9,
+            null,
+            false,
+        );
+
+        self::assertSame('', $file['content']);
+    }
 }
