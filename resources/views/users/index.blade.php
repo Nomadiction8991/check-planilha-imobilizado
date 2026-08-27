@@ -132,10 +132,10 @@
                                             <a class="btn" href="{{ route('migration.users.edit', ['user' => $user->id]) }}">Editar</a>
                                         @endif
                                         @if (!$isProtectedAdministrator && ($isLegacyAdmin || !empty($legacyPermissions['users.delete'] ?? null)))
-                                            <form method="POST" action="{{ route('migration.users.destroy', ['user' => $user->id]) }}">
+                                            <form method="POST" action="{{ route('migration.users.destroy', ['user' => $user->id]) }}" data-confirm="Excluir este usuário?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn" type="submit" onclick="return confirm('Excluir este usuário?');">
+                                                <button class="btn" type="submit">
                                                     Excluir
                                                 </button>
                                             </form>
