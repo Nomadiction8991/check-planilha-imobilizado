@@ -110,9 +110,13 @@ final class LegacyAuditController extends Controller
         $errors = [];
 
         foreach (['data_inicio' => $dateFrom, 'data_fim' => $dateTo] as $field => $value) {
-            if ($value !== '' && (! preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $value) || ! \Carbon\Carbon::createFromFormat('!Y-m-d', $value))) {
+            $parsedDate = $value !== '' && preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $value) === 1
+                ? \Carbon\Carbon::createFromFormat('!Y-m-d', $value)
+                : false;
+
+            if ($value !== '' && ($parsedDate === false || $parsedDate->format('Y-m-d') !== $value)) {
                 $label = $field === 'data_inicio' ? 'inicial' : 'final';
-                $errors[$field] = "Data {$label} precisa usar o formato AAAA-MM-DD.";
+                $errors[$field] = "Data {$label} precisa usar o formato AAAA-MM-DD e ser uma data válida.";
             }
         }
 
