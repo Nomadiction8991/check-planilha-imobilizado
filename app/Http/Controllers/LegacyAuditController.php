@@ -68,8 +68,15 @@ final class LegacyAuditController extends Controller
         );
 
         if ($file['content'] === '') {
+            $query = array_filter([
+                'busca' => $filters['search'],
+                'modulo' => $filters['module'],
+                'data_inicio' => $filters['date_from'],
+                'data_fim' => $filters['date_to'],
+            ], static fn (string $value): bool => $value !== '');
+
             return redirect()
-                ->route('migration.audits.index', array_filter($filters))
+                ->route('migration.audits.index', $query)
                 ->with('status', 'Não há eventos auditados para os filtros atuais.')
                 ->with('status_type', 'error');
         }
