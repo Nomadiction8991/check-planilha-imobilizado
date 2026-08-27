@@ -1,7 +1,7 @@
 ## 1. Testes de regressão
 
 - [x] 1.1 Adicionar teste unitário cobrindo caracteres perigosos e texto legítimo na exportação.
-- [ ] 1.2 Adicionar teste de feature confirmando proteção no download CSV.
+- [x] 1.2 Adicionar teste de feature confirmando proteção no download CSV.
 
 ## 2. Implementação
 
