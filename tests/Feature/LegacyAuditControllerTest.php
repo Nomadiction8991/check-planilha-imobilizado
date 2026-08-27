@@ -286,6 +286,28 @@ final class LegacyAuditControllerTest extends TestCase
         );
     }
 
+    public function testExportStreamsSanitizedCsvContentWithoutChangingDownload(): void
+    {
+        $this->mockAuthenticatedUser();
+
+        /** @var MockInterface&LegacyAuditTrailServiceInterface $audits */
+        $audits = $this->mock(LegacyAuditTrailServiceInterface::class);
+        $audits->shouldReceive('exportCsv')
+            ->once()
+            ->andReturn([
+                'filename' => 'auditoria_20260417_103015.csv',
+                'content' => "\\xEF\\xBB\\xBFData/Hora;Usuário\\n2026-04-17 10:30:15;'=Nome\\n",
+            ]);
+
+        $response = $this->get(route('migration.audits.export'));
+
+        $response->assertOk();
+        self::assertSame(
+            "\\xEF\\xBB\\xBFData/Hora;Usuário\\n2026-04-17 10:30:15;'=Nome\\n",
+            $response->streamedContent(),
+        );
+    }
+
     public function testExportWithoutEntriesRedirectsWithFriendlyMessage(): void
     {
         $this->mockAuthenticatedUser();
