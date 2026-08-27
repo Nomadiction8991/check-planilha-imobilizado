@@ -361,6 +361,16 @@ final class LegacyAuditControllerTest extends TestCase
                         'Auditoria',
                     ];
                 }
+
+                public function exportCsv(
+                    array $filters,
+                    ?int $userId,
+                    ?int $administrationId,
+                    ?int $churchId,
+                    bool $isAdmin,
+                ): array {
+                    return ['filename' => '', 'content' => ''];
+                }
             },
         );
     }
