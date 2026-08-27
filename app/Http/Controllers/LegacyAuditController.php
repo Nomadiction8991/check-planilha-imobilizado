@@ -19,8 +19,13 @@ final class LegacyAuditController extends Controller
     ) {
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
+        $invalidPeriod = $this->validatePeriod($request);
+        if ($invalidPeriod !== null) {
+            return $invalidPeriod;
+        }
+
         $currentUser = $this->auth->currentUser();
         $filters = [
             'search' => trim((string) $request->query('busca', '')),
@@ -51,6 +56,11 @@ final class LegacyAuditController extends Controller
 
     public function export(Request $request): StreamedResponse|RedirectResponse
     {
+        $invalidPeriod = $this->validatePeriod($request);
+        if ($invalidPeriod !== null) {
+            return $invalidPeriod;
+        }
+
         $currentUser = $this->auth->currentUser();
         $filters = [
             'search' => trim((string) $request->query('busca', '')),
@@ -91,6 +101,33 @@ final class LegacyAuditController extends Controller
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
             ],
         );
+    }
+
+    private function validatePeriod(Request $request): ?RedirectResponse
+    {
+        $dateFrom = trim((string) $request->query('data_inicio', ''));
+        $dateTo = trim((string) $request->query('data_fim', ''));
+        $errors = [];
+
+        foreach (['data_inicio' => $dateFrom, 'data_fim' => $dateTo] as $field => $value) {
+            if ($value !== '' && (! preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $value) || ! \Carbon\Carbon::createFromFormat('!Y-m-d', $value))) {
+                $label = $field === 'data_inicio' ? 'inicial' : 'final';
+                $errors[$field] = "Data {$label} precisa usar o formato AAAA-MM-DD.";
+            }
+        }
+
+        if ($errors !== []) {
+            return redirect()
+                ->route('migration.audits.index', $request->query())
+                ->withErrors($errors);
+        }
+        if ($dateFrom !== '' && $dateTo !== '' && $dateTo < $dateFrom) {
+            return redirect()
+                ->route('migration.audits.index', $request->query())
+                ->withErrors(['data_fim' => 'Data final não pode ser anterior à data inicial.']);
+        }
+
+        return null;
     }
 
     /**

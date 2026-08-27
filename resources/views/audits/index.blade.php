@@ -10,6 +10,11 @@
                     <strong>{{ session('status') }}</strong>
                 </div>
             @endif
+            @if ($errors->any())
+                <div class="flash error" role="alert">
+                    <strong>{{ $errors->first() }}</strong>
+                </div>
+            @endif
         </div>
     @endif
 

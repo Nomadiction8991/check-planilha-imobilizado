@@ -312,6 +312,50 @@ final class LegacyAuditControllerTest extends TestCase
         $response->assertSessionHas('status', 'Não há eventos auditados para os filtros atuais.');
     }
 
+    public function testIndexRejectsInvalidDateAndPreservesFilters(): void
+    {
+        $this->mockAuthenticatedUser();
+
+        /** @var MockInterface&LegacyAuditTrailServiceInterface $audits */
+        $audits = $this->mock(LegacyAuditTrailServiceInterface::class);
+        $audits->shouldNotReceive('paginate');
+        $audits->shouldReceive('availableModules')->andReturn([]);
+
+        $response = $this->get(route('migration.audits.index', [
+            'busca' => 'Login',
+            'data_inicio' => '17/04/2026',
+        ]));
+
+        $response->assertRedirect(route('migration.audits.index', [
+            'busca' => 'Login',
+            'data_inicio' => '17/04/2026',
+        ]));
+        $response->assertSessionHasErrors('data_inicio');
+    }
+
+    public function testExportRejectsInvertedDateRangeAndPreservesFilters(): void
+    {
+        $this->mockAuthenticatedUser();
+
+        /** @var MockInterface&LegacyAuditTrailServiceInterface $audits */
+        $audits = $this->mock(LegacyAuditTrailServiceInterface::class);
+        $audits->shouldNotReceive('exportCsv');
+        $audits->shouldReceive('availableModules')->andReturn([]);
+
+        $response = $this->get(route('migration.audits.export', [
+            'modulo' => 'Sessão',
+            'data_inicio' => '2026-04-30',
+            'data_fim' => '2026-04-01',
+        ]));
+
+        $response->assertRedirect(route('migration.audits.index', [
+            'modulo' => 'Sessão',
+            'data_inicio' => '2026-04-30',
+            'data_fim' => '2026-04-01',
+        ]));
+        $response->assertSessionHasErrors('data_fim');
+    }
+
     private function generateEntries(int $count, string $occurredAt, string $description): Collection
     {
         return collect(array_fill(0, $count, new LegacyAuditEntryData(
