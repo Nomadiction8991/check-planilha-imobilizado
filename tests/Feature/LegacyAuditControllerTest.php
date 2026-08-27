@@ -296,9 +296,19 @@ final class LegacyAuditControllerTest extends TestCase
             ->once()
             ->andReturn(['filename' => '', 'content' => '']);
 
-        $response = $this->get(route('migration.audits.export', ['busca' => 'nada']));
+        $response = $this->get(route('migration.audits.export', [
+            'busca' => 'nada',
+            'modulo' => 'Sessão',
+            'data_inicio' => '2026-04-01',
+            'data_fim' => '2026-04-30',
+        ]));
 
-        $response->assertRedirect(route('migration.audits.index', ['search' => 'nada']));
+        $response->assertRedirect(route('migration.audits.index', [
+            'busca' => 'nada',
+            'modulo' => 'Sessão',
+            'data_inicio' => '2026-04-01',
+            'data_fim' => '2026-04-30',
+        ]));
         $response->assertSessionHas('status', 'Não há eventos auditados para os filtros atuais.');
     }
 
