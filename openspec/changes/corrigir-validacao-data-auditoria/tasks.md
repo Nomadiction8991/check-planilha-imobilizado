@@ -13,4 +13,4 @@
 
 - [x] 3.1 Validar mudança OpenSpec
 - [x] 3.2 Atualizar checklist e registrar alteração no Git
-- [ ] 3.3 Enviar alteração e confirmar deploy
+- [x] 3.3 Enviar alteração e confirmar deploy
