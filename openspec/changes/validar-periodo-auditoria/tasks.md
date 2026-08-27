@@ -12,4 +12,4 @@
 ## 3. Entrega
 
 - [x] 3.1 Confirmar saúde da aplicação
-- [ ] 3.2 Commitar e enviar alteração
+- [x] 3.2 Commitar e enviar alteração
