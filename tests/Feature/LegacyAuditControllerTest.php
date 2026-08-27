@@ -230,9 +230,78 @@ final class LegacyAuditControllerTest extends TestCase
         $response->assertRedirect(route('migration.login'));
     }
 
-    /**
-     * @return Collection<int, LegacyAuditEntryData>
-     */
+    public function testExportDownloadsCsvWithAppliedFilters(): void
+    {
+        $this->mockAuthenticatedUser();
+
+        $entry = new LegacyAuditEntryData(
+            occurredAt: '2026-04-17 10:30:15',
+            userId: 7,
+            userName: 'Maria Oliveira',
+            userEmail: 'maria@example.com',
+            administrationId: 2,
+            churchId: null,
+            isAdmin: false,
+            module: 'Sessão',
+            action: 'Login',
+            description: 'Autenticação realizada com sucesso.',
+            routeName: 'migration.login.store',
+            path: 'login',
+            method: 'POST',
+            statusCode: 302,
+            ipAddress: '127.0.0.1',
+            userAgent: 'PHPUnit',
+        );
+
+        /** @var MockInterface&LegacyAuditTrailServiceInterface $audits */
+        $audits = $this->mock(LegacyAuditTrailServiceInterface::class);
+        $audits->shouldReceive('paginate')->andReturn(new LengthAwarePaginator([], 0, 20));
+        $audits->shouldReceive('availableModules')->andReturn(['Sessão']);
+        $audits->shouldReceive('exportCsv')
+            ->once()
+            ->with(
+                ['search' => 'Login', 'module' => 'Sessão', 'date_from' => '2026-04-01', 'date_to' => '2026-04-30'],
+                7,
+                2,
+                null,
+                false,
+            )
+            ->andReturn([
+                'filename' => 'auditoria_20260417_103015.csv',
+                'content' => "\xEF\xBB\xBF" . "Data/Hora;Usuário\n2026-04-17 10:30:15;Maria Oliveira\n",
+            ]);
+
+        $response = $this->get(route('migration.audits.export', [
+            'busca' => 'Login',
+            'modulo' => 'Sessão',
+            'data_inicio' => '2026-04-01',
+            'data_fim' => '2026-04-30',
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader(
+            'Content-Disposition',
+            'attachment; filename=auditoria_20260417_103015.csv',
+        );
+    }
+
+    public function testExportWithoutEntriesRedirectsWithFriendlyMessage(): void
+    {
+        $this->mockAuthenticatedUser();
+
+        /** @var MockInterface&LegacyAuditTrailServiceInterface $audits */
+        $audits = $this->mock(LegacyAuditTrailServiceInterface::class);
+        $audits->shouldReceive('exportCsv')
+            ->once()
+            ->andReturn(['filename' => '', 'content' => '']);
+
+        $response = $this->get(route('migration.audits.export', ['busca' => 'nada']));
+
+        $response->assertRedirect(route('migration.audits.index', ['search' => 'nada']));
+        $response->assertSessionHas('status', 'Não há eventos auditados para os filtros atuais.');
+    }
+
     private function generateEntries(int $count, string $occurredAt, string $description): Collection
     {
         return collect(array_fill(0, $count, new LegacyAuditEntryData(

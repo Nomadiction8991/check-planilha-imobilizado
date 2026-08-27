@@ -7,7 +7,9 @@ namespace App\Http\Controllers;
 use App\Contracts\LegacyAuditTrailServiceInterface;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class LegacyAuditController extends Controller
 {
@@ -45,6 +47,43 @@ final class LegacyAuditController extends Controller
             'modules' => $this->audits->availableModules(),
             'scopeLabel' => $this->resolveScopeLabel($currentUser),
         ]);
+    }
+
+    public function export(Request $request): StreamedResponse|RedirectResponse
+    {
+        $currentUser = $this->auth->currentUser();
+        $filters = [
+            'search' => trim((string) $request->query('busca', '')),
+            'module' => trim((string) $request->query('modulo', '')),
+            'date_from' => trim((string) $request->query('data_inicio', '')),
+            'date_to' => trim((string) $request->query('data_fim', '')),
+        ];
+
+        $file = $this->audits->exportCsv(
+            $filters,
+            isset($currentUser['id']) ? (int) $currentUser['id'] : null,
+            isset($currentUser['administracao_id']) ? (int) $currentUser['administracao_id'] : null,
+            isset($currentUser['comum_id']) ? (int) $currentUser['comum_id'] : null,
+            (bool) ($currentUser['is_admin'] ?? false),
+        );
+
+        if ($file['content'] === '') {
+            return redirect()
+                ->route('migration.audits.index', array_filter($filters))
+                ->with('status', 'Não há eventos auditados para os filtros atuais.')
+                ->with('status_type', 'error');
+        }
+
+        return response()->streamDownload(
+            static function () use ($file): void {
+                echo $file['content'];
+            },
+            $file['filename'],
+            [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            ],
+        );
     }
 
     /**

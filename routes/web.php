@@ -131,6 +131,9 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::get('/audits', [LegacyAuditController::class, 'index'])
         ->middleware('legacy.permission:audits.view')
         ->name('migration.audits.index');
+    Route::get('/audits/export', [LegacyAuditController::class, 'export'])
+        ->middleware('legacy.permission:audits.view')
+        ->name('migration.audits.export');
     Route::post('/api/cnpj-lookup', [CnpjLookupController::class, 'lookup'])
         ->middleware('legacy.admin')
         ->name('migration.api.cnpj.lookup');

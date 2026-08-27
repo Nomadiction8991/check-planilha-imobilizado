@@ -30,6 +30,15 @@
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Filtrar</button>
                         <a class="btn" href="{{ route('migration.audits.index') }}">Limpar</a>
+                        <a
+                            class="btn"
+                            href="{{ route('migration.audits.export', array_filter([
+                                'busca' => $filters['search'],
+                                'modulo' => $filters['module'],
+                                'data_inicio' => $filters['date_from'],
+                                'data_fim' => $filters['date_to'],
+                            ], static fn (string $value): bool => $value !== '')) }}"
+                        >Exportar CSV</a>
                     </div>
                 </div>
 

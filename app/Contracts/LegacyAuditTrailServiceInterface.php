@@ -31,4 +31,19 @@ interface LegacyAuditTrailServiceInterface
      * @return array<int, string>
      */
     public function availableModules(): array;
+
+    /**
+     * Gera o conteúdo CSV de TODAS as entradas que casam com os filtros,
+     * respeitando o escopo do usuário — sem limite de paginação.
+     *
+     * @param array<string, string> $filters
+     * @return array{filename: string, content: string} content vazio sinaliza ausência de eventos
+     */
+    public function exportCsv(
+        array $filters,
+        ?int $userId,
+        ?int $administrationId,
+        ?int $churchId,
+        bool $isAdmin,
+    ): array;
 }
