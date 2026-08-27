@@ -2140,6 +2140,15 @@
             });
 
             updateVoiceButton(false);
+
+            document.addEventListener('submit', (event) => {
+                const form = event.target;
+                const message = form instanceof HTMLFormElement ? form.dataset.confirm : '';
+
+                if (message && !window.confirm(message)) {
+                    event.preventDefault();
+                }
+            });
         })();
     </script>
     <script src="{{ asset('assets/forms/input-mask.js') }}?v={{ filemtime(public_path('assets/forms/input-mask.js')) }}"></script>

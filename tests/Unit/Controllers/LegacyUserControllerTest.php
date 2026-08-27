@@ -87,6 +87,15 @@ final class LegacyUserControllerTest extends TestCase
 
     // ========== INDEX ==========
 
+    public function testUserDeletionUsesDeclarativeConfirmation(): void
+    {
+        $view = file_get_contents(resource_path('views/users/index.blade.php'));
+
+        self::assertIsString($view);
+        self::assertStringContainsString('data-confirm="Excluir este usuário?"', $view);
+        self::assertStringNotContainsString("onclick=\"return confirm('Excluir este usuário?');\"", $view);
+    }
+
     public function testIndexReturnsViewWithExpectedData(): void
     {
         $request = new Request(['busca' => 'maria', 'status' => '1']);
