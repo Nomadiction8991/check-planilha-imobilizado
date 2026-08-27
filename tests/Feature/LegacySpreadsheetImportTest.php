@@ -375,7 +375,10 @@ final class LegacySpreadsheetImportTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Importe uma planilha para análise.');
-        $response->assertSee('Prefira a planilha filtrada por igreja.');
+        $response->assertSee('A importação processa a');
+        $response->assertSee('igreja inteira');
+        $response->assertSee('todas as dependências');
+        $response->assertSee('não apenas um setor');
         $response->assertSee('Enviar e analisar');
         $response->assertDontSee('Igreja base');
         $response->assertSee('A análise detecta as igrejas do CSV');
@@ -386,6 +389,18 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertSee('Administração Central');
         $response->assertDontSee('name="usuario_id"');
         $response->assertDontSee('Arquivo Antigo 4.csv');
+    }
+
+    public function testPreviewPageShowsChurchScopeWarning(): void
+    {
+        $response = $this->get(route('migration.spreadsheets.preview', ['importacao' => 15]));
+
+        $response->assertOk();
+        $response->assertSee('A importação processa a');
+        $response->assertSee('igreja inteira');
+        $response->assertSee('todos os setores');
+        $response->assertSee('igreja(s) selecionada(s)');
+        $response->assertSee('Confirmar igrejas selecionadas');
     }
 
     public function testStoreRedirectsToPreview(): void
