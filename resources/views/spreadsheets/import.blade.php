@@ -18,12 +18,12 @@
             padding: 20px 22px 20px 24px;
             margin-top: 40px;
             margin-bottom: 24px;
-            border: 1px solid rgba(255, 206, 79, 0.38);
-            border-left: 8px solid #ffb703;
+            border: 1px solid rgba(239, 68, 68, 0.38);
+            border-left: 8px solid #ef4444;
             border-radius: 24px;
-            background: linear-gradient(135deg, rgba(146, 32, 32, 0.98), rgba(77, 17, 17, 0.98));
-            color: #fff9f0;
-            box-shadow: 0 20px 48px rgba(62, 15, 15, 0.38);
+            background: linear-gradient(135deg, #7f1d1d, #450a0a);
+            color: #fef2f2;
+            box-shadow: 0 20px 48px rgba(127, 29, 29, 0.38);
         }
 
 
@@ -33,8 +33,8 @@
             width: fit-content;
             padding: 5px 12px;
             border-radius: 999px;
-            background: rgba(255, 244, 214, 0.16);
-            color: #ffe28a;
+            background: rgba(254, 202, 202, 0.16);
+            color: #fca5a5;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.12em;
@@ -55,7 +55,7 @@
             max-width: 90ch;
             font-size: 15px;
             line-height: 1.65;
-            color: rgba(255, 249, 240, 0.95);
+            color: rgba(254, 242, 242, 0.95);
         }
     </style>
 
@@ -68,10 +68,10 @@
     </section>
 
     <div class="spreadsheet-warning-banner" role="alert" aria-live="polite">
-        <span class="spreadsheet-warning-banner__eyebrow">Importação por igreja</span>
-        <strong>Prefira a planilha filtrada por igreja.</strong>
+        <span class="spreadsheet-warning-banner__eyebrow">Escopo da importação</span>
+        <strong>A importação processa a <strong>igreja inteira</strong> (todas as dependências), não apenas um setor.</strong>
         <p>
-            Se não houver muitos dados, envie já filtrado por igreja para deixar a análise mais leve.
+            Para análise mais leve, prefira planilha filtrada por igreja.
         </p>
     </div>
 

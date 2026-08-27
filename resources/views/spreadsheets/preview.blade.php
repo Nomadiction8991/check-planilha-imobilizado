@@ -24,12 +24,12 @@
             gap: 12px;
             padding: 24px 28px;
             margin-bottom: 32px;
-            border: 1px solid rgba(46, 196, 182, 0.2);
-            border-left: 6px solid #2ec4b6;
+            border: 1px solid rgba(239, 68, 68, 0.38);
+            border-left: 8px solid #ef4444;
             border-radius: 24px;
-            background: linear-gradient(135deg, #0f2a28, #071514);
-            color: #f0fdfa;
-            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(135deg, #7f1d1d, #450a0a);
+            color: #fef2f2;
+            box-shadow: 0 20px 48px rgba(127, 29, 29, 0.38);
             transition: transform 0.3s ease;
         }
 
@@ -39,8 +39,8 @@
             width: fit-content;
             padding: 5px 12px;
             border-radius: 999px;
-            background: rgba(46, 196, 182, 0.15);
-            color: #2ec4b6;
+            background: rgba(254, 202, 202, 0.16);
+            color: #fca5a5;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.12em;
@@ -60,7 +60,7 @@
             max-width: 80ch;
             font-size: 15px;
             line-height: 1.6;
-            color: rgba(240, 253, 250, 0.85);
+            color: rgba(254, 242, 242, 0.85);
         }
 
         /* UX Polish: Tabelas e Interações */
@@ -355,6 +355,11 @@
             </div>
         @endif
     </section>
+
+    <div class="spreadsheet-warning-banner" role="alert" aria-live="polite">
+        <span class="spreadsheet-warning-banner__eyebrow">Escopo da importação</span>
+        <strong>A importação processa a <strong>igreja inteira</strong> — ao confirmar, todos os setores da(s) igreja(s) selecionada(s) serão importados.</strong>
+    </div>
 
     <section class="section">
         <div class="section-head">
