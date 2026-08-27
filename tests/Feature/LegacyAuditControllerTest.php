@@ -333,6 +333,27 @@ final class LegacyAuditControllerTest extends TestCase
         $response->assertSessionHasErrors('data_inicio');
     }
 
+    public function testIndexRejectsImpossibleCalendarDateAndPreservesFilters(): void
+    {
+        $this->mockAuthenticatedUser();
+
+        /** @var MockInterface&LegacyAuditTrailServiceInterface $audits */
+        $audits = $this->mock(LegacyAuditTrailServiceInterface::class);
+        $audits->shouldNotReceive('paginate');
+        $audits->shouldReceive('availableModules')->andReturn([]);
+
+        $response = $this->get(route('migration.audits.index', [
+            'busca' => 'Login',
+            'data_inicio' => '2026-02-31',
+        ]));
+
+        $response->assertRedirect(route('migration.audits.index', [
+            'busca' => 'Login',
+            'data_inicio' => '2026-02-31',
+        ]));
+        $response->assertSessionHasErrors('data_inicio');
+    }
+
     public function testExportRejectsInvertedDateRangeAndPreservesFilters(): void
     {
         $this->mockAuthenticatedUser();
