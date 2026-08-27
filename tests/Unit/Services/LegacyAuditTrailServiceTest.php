@@ -233,4 +233,25 @@ final class LegacyAuditTrailServiceTest extends TestCase
 
         self::assertSame('', $file['content']);
     }
+
+    public function testExportCsvNeutralizesFormulaLikeTextFields(): void
+    {
+        $service = new LegacyAuditTrailService($this->storageFile);
+        $this->recordEntry($service, '2026-04-17 09:00:00', '=Nome', 9, '+Módulo', [
+            'description' => '=1+1',
+            'routeName' => '@rota',
+            'path' => "\t/caminho",
+        ]);
+
+        $file = $service->exportCsv(['search' => '', 'module' => ''], 1, 9, null, false);
+        $lines = preg_split('/\r\n|\r|\n/', trim($file['content'])) ?: [];
+        $row = str_getcsv($lines[1], ';');
+
+        self::assertSame("'=Nome", $row[1]);
+        self::assertSame("'=1+1", $row[7]);
+        self::assertSame("'@rota", $row[8]);
+        self::assertSame("'\t/caminho", $row[9]);
+        self::assertSame('2026-04-17 09:00:00', $row[0]);
+        self::assertSame('9', $row[3]);
+    }
 }
