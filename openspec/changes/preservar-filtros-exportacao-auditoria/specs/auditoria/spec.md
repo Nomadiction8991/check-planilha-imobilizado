@@ -20,6 +20,14 @@ O sistema SHALL permitir exportar, em um único arquivo CSV, TODOS os eventos au
 - WHEN ele solicita a exportação
 - THEN apenas eventos dentro do escopo dele são incluídos no arquivo
 
+#### Scenario: Exportação filtrada protege conteúdo textual
+- **WHEN** usuário autorizado exporta auditoria com filtros aplicados e evento contendo texto iniciado por caractere de fórmula
+- **THEN** download contém somente eventos compatíveis e prefixa texto perigoso com apóstrofo
+
+#### Scenario: Exportação sem resultados mantém comportamento atual
+- **WHEN** filtros não encontram eventos no escopo do usuário
+- **THEN** sistema não gera arquivo vazio e informa que não há eventos para os filtros atuais
+
 ### Requirement: Acesso à exportação pela tela de auditoria
 A tela de auditoria SHALL oferecer um botão de exportação que dispara o download preservando os filtros atuais da consulta, e SHALL responder com mensagem clara quando não houver eventos para exportar.
 
