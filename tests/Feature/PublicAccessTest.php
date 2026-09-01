@@ -159,4 +159,16 @@ final class PublicAccessTest extends TestCase
         $response->assertRedirect(route('migration.login'));
         $response->assertSessionMissing('public_acesso');
     }
+
+    public function testCreateRendersSearchFieldForFiltering(): void
+    {
+        $response = $this->get(route('public.access.create'));
+
+        $response->assertOk();
+        $response->assertSee('Buscar igreja', false);
+        $response->assertSee('data-public-church-search', false);
+        $response->assertSee('data-public-church-select', false);
+        $response->assertSee('aria-controls="comum_id"', false);
+        $response->assertSee('role="status"', false);
+    }
 }
