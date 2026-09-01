@@ -37,6 +37,15 @@ final class LegacyAssetTypeManagementTest extends TestCase
         $this->app['router']->bind('assetType', fn (): TipoBem => $this->boundAssetType);
     }
 
+    public function testAssetTypeDeletionUsesDeclarativeConfirmation(): void
+    {
+        $view = file_get_contents(resource_path('views/asset-types/index.blade.php'));
+
+        self::assertIsString($view);
+        self::assertStringContainsString('data-confirm="Excluir este tipo de bem?"', $view);
+        self::assertStringNotContainsString("onclick=\"return confirm('Excluir este tipo de bem?');\"", $view);
+    }
+
     public function testCreatePageRendersForm(): void
     {
         $response = $this->get(route('migration.asset-types.create'));

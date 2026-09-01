@@ -106,10 +106,10 @@
                                             <a class="btn" href="{{ route('migration.asset-types.edit', ['assetType' => $assetType->id]) }}">Editar</a>
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['asset-types.delete'] ?? null))
-                                            <form method="POST" action="{{ route('migration.asset-types.destroy', ['assetType' => $assetType->id]) }}">
+                                            <form method="POST" action="{{ route('migration.asset-types.destroy', ['assetType' => $assetType->id]) }}" data-confirm="Excluir este tipo de bem?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn" type="submit" onclick="return confirm('Excluir este tipo de bem?');">
+                                                <button class="btn" type="submit">
                                                     Excluir
                                                 </button>
                                             </form>

@@ -100,10 +100,10 @@
                                             <a class="btn" href="{{ route('migration.administrations.edit', ['administration' => $administration->id]) }}">Editar</a>
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['administrations.delete'] ?? null))
-                                            <form method="POST" action="{{ route('migration.administrations.destroy', ['administration' => $administration->id]) }}">
+                                            <form method="POST" action="{{ route('migration.administrations.destroy', ['administration' => $administration->id]) }}" data-confirm="Excluir esta administração?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn" type="submit" onclick="return confirm('Excluir esta administração?');">
+                                                <button class="btn" type="submit">
                                                     Excluir
                                                 </button>
                                             </form>

@@ -87,6 +87,17 @@ final class LegacyAdministrationManagementTest extends TestCase
         );
     }
 
+    // ========== INDEX ==========
+
+    public function testAdministrationDeletionUsesDeclarativeConfirmation(): void
+    {
+        $view = file_get_contents(resource_path('views/administrations/index.blade.php'));
+
+        self::assertIsString($view);
+        self::assertStringContainsString('data-confirm="Excluir esta administração?"', $view);
+        self::assertStringNotContainsString("onclick=\"return confirm('Excluir esta administração?');\"", $view);
+    }
+
     public function testIndexPageRendersList(): void
     {
         $response = $this->withSession([

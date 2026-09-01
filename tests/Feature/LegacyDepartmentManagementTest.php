@@ -60,6 +60,15 @@ final class LegacyDepartmentManagementTest extends TestCase
         );
     }
 
+    public function testDepartmentDeletionUsesDeclarativeConfirmation(): void
+    {
+        $view = file_get_contents(resource_path('views/departments/index.blade.php'));
+
+        self::assertIsString($view);
+        self::assertStringContainsString('data-confirm="Excluir esta dependência?"', $view);
+        self::assertStringNotContainsString("onclick=\"return confirm('Excluir esta dependência?');\"", $view);
+    }
+
     public function testCreatePageRendersForm(): void
     {
         $response = $this->get(route('migration.departments.create'));
