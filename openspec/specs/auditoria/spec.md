@@ -32,16 +32,55 @@ O sistema SHALL permitir exportar, em um único arquivo CSV, TODOS os eventos au
 - **THEN** sistema não gera arquivo vazio e informa que não há eventos para os filtros atuais
 
 ### Requirement: Acesso à exportação pela tela de auditoria
-A tela de auditoria SHALL oferecer um botão de exportação que dispara o download preservando os filtros atuais da consulta, e SHALL responder com mensagem clara quando não houver eventos para exportar.
+A tela de auditoria SHALL oferecer um botão de exportação que dispara o download preservando os filtros atuais da consulta, SHALL responder com mensagem clara quando não houver eventos para exportar e SHALL rejeitar filtros de período inválidos antes de consultar eventos.
+
+#### Scenario: Período inválido na consulta
+- **GIVEN** um usuário com permissão de ver auditoria autenticado
+- **WHEN** ele informa data inicial ou final em formato inválido
+- **THEN** o sistema retorna à tela de auditoria sem consultar eventos
+- **AND** exibe mensagem indicando qual data precisa ser corrigida
+- **AND** preserva filtros informados na tela
+
+#### Scenario: Data final anterior à data inicial
+- **GIVEN** um usuário com permissão de ver auditoria autenticado
+- **WHEN** ele informa data final anterior à data inicial
+- **THEN** o sistema retorna à tela de auditoria sem consultar eventos
+- **AND** exibe mensagem informando que período está invertido
+- **AND** preserva filtros informados na tela
 
 #### Scenario: Botão preserva filtros
-- GIVEN um usuário na tela de auditoria com filtros preenchidos
-- WHEN ele aciona o botão de exportar
-- THEN a requisição leva consigo os mesmos parâmetros de filtro exibidos na tela
+- **GIVEN** um usuário na tela de auditoria com filtros preenchidos
+- **WHEN** ele aciona o botão de exportar
+- **THEN** a requisição leva consigo os mesmos parâmetros de filtro exibidos na tela
+
+#### Scenario: Exportação com período válido
+- **GIVEN** filtros de período válidos
+- **WHEN** o usuário aciona o botão de exportar
+- **THEN** a requisição leva consigo os mesmos parâmetros de filtro exibidos na tela
 
 #### Scenario: Sem eventos para exportar
-- GIVEN filtros que não casam com nenhum evento auditado
-- WHEN o usuário solicita a exportação
-- THEN o sistema redireciona de volta à tela de auditoria mantendo os parâmetros públicos de busca, módulo e período
-- AND exibe mensagem informando que não há eventos para os filtros atuais
+- **GIVEN** filtros que não casam com nenhum evento auditado
+- **WHEN** o usuário solicita a exportação
+- **THEN** o sistema redireciona de volta à tela de auditoria mantendo os filtros
+- **AND** exibe mensagem informando que não há eventos para os filtros atuais
+
+### Requirement: Filtros de período da auditoria
+O sistema SHALL aceitar filtros de período somente quando cada data estiver no formato AAAA-MM-DD e representar uma data válida do calendário. Quando ambas forem informadas, a data final SHALL ser igual ou posterior à data inicial. Ao rejeitar o filtro, o sistema SHALL retornar à tela de auditoria preservando os demais filtros informados e SHALL explicar o erro no campo correspondente.
+
+#### Scenario: Data de calendário inexistente
+- GIVEN que usuário informa `data_inicio=2026-02-31`
+- WHEN usuário consulta auditoria
+- THEN sistema rejeita filtro e informa que data inicial precisa usar uma data válida
+- AND sistema preserva filtros enviados no redirecionamento
+
+#### Scenario: Data final anterior à inicial
+- GIVEN que usuário informa data inicial posterior à data final
+- WHEN usuário consulta ou exporta auditoria
+- THEN sistema rejeita filtro e informa que data final não pode ser anterior à inicial
+- AND sistema preserva filtros enviados no redirecionamento
+
+#### Scenario: Período válido
+- GIVEN que usuário informa duas datas válidas em ordem cronológica
+- WHEN usuário consulta auditoria
+- THEN sistema aplica período informado sem erro
 
