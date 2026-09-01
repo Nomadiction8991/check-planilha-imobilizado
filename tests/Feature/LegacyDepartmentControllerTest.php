@@ -145,6 +145,21 @@ final class LegacyDepartmentControllerTest extends TestCase
         $response->assertRedirect(route('migration.login'));
     }
 
+    public function testIndexPageShowsChurchSearchField(): void
+    {
+        $this->mockBrowserService(paginatorItems: [], totalCount: 0);
+
+        $response = $this->withSession($this->authSession())
+            ->get(route('migration.departments.index'));
+
+        $response->assertOk();
+        $response->assertSee('Buscar igreja', false);
+        $response->assertSee('data-departments-church-search', false);
+        $response->assertSee('data-departments-church-select', false);
+        $response->assertSee('data-departments-church-status', false);
+        $response->assertSee('Digite para filtrar', false);
+    }
+
     // ─── Create ───────────────────────────────────────────────────────────────
 
     public function testCreatePageRendersForm(): void
