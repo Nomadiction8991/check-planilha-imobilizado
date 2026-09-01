@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyReportServiceInterface;
 use App\Models\Legacy\Comum;
+use App\Support\LegacyCsvSanitizer;
 use App\Support\LegacyProductNameSupport;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -370,13 +371,13 @@ class LegacyReportService implements LegacyReportServiceInterface
             $rows[] = [
                 (string) ($product['codigo'] ?? ''),
                 $conditionLabels[$condition] ?? '',
-                $this->sanitizeCsvText((string) ($product['nome_original'] ?? '')),
-                $this->sanitizeCsvText($currentDescription !== '' ? $currentDescription : (string) ($product['nome_original'] ?? '')),
-                $this->sanitizeCsvText((string) ($product['dependencia_descricao'] ?? '')),
+                LegacyCsvSanitizer::sanitizeText((string) ($product['nome_original'] ?? '')),
+                LegacyCsvSanitizer::sanitizeText($currentDescription !== '' ? $currentDescription : (string) ($product['nome_original'] ?? '')),
+                LegacyCsvSanitizer::sanitizeText((string) ($product['dependencia_descricao'] ?? '')),
                 $hasInvoice ? (string) ($product['nota_numero'] ?? '') : '',
                 $hasInvoice ? $this->formatReportDate((string) ($product['nota_data'] ?? '')) : '',
                 $hasInvoice ? (string) ($product['nota_valor'] ?? '') : '',
-                $hasInvoice ? $this->sanitizeCsvText((string) ($product['nota_fornecedor'] ?? '')) : '',
+                $hasInvoice ? LegacyCsvSanitizer::sanitizeText((string) ($product['nota_fornecedor'] ?? '')) : '',
             ];
         }
 
@@ -398,12 +399,12 @@ class LegacyReportService implements LegacyReportServiceInterface
 
                 $items[] = [
                     (string) ($item['codigo'] ?? ''),
-                    $this->sanitizeCsvText((string) ($item['nome_original'] ?? '')),
-                    $this->sanitizeCsvText((string) ($item['nome_atual'] ?? '')),
+                    LegacyCsvSanitizer::sanitizeText((string) ($item['nome_original'] ?? '')),
+                    LegacyCsvSanitizer::sanitizeText((string) ($item['nome_atual'] ?? '')),
                     $originalType,
                     $editedType,
-                    $this->sanitizeCsvText((string) ($item['dependencia_descricao'] ?? '')),
-                    $this->sanitizeCsvText((string) ($item['editado_dependencia_descricao'] ?? '') ?: (string) ($item['dependencia_descricao'] ?? '')),
+                    LegacyCsvSanitizer::sanitizeText((string) ($item['dependencia_descricao'] ?? '')),
+                    LegacyCsvSanitizer::sanitizeText((string) ($item['editado_dependencia_descricao'] ?? '') ?: (string) ($item['dependencia_descricao'] ?? '')),
                 ];
             }
         }
@@ -475,17 +476,6 @@ class LegacyReportService implements LegacyReportServiceInterface
         fclose($stream);
 
         return $content !== false ? $content : '';
-    }
-
-    private function sanitizeCsvText(?string $value): string
-    {
-        $value ??= '';
-
-        if ($value !== '' && str_contains("=+-@\t\r", $value[0])) {
-            return "'" . $value;
-        }
-
-        return $value;
     }
 
     /**
@@ -633,12 +623,12 @@ class LegacyReportService implements LegacyReportServiceInterface
             fputcsv($stream, [
                 (string) ($item['codigo'] ?? ''),
                 (string) ($item['status_label'] ?? ''),
-                $this->sanitizeCsvText((string) ($item['nome_original'] ?? '')),
-                $this->sanitizeCsvText((string) ($item['nome_atual'] ?? '')),
-                $this->sanitizeCsvText((string) ($item['dependencia'] ?? '')),
+                LegacyCsvSanitizer::sanitizeText((string) ($item['nome_original'] ?? '')),
+                LegacyCsvSanitizer::sanitizeText((string) ($item['nome_atual'] ?? '')),
+                LegacyCsvSanitizer::sanitizeText((string) ($item['dependencia'] ?? '')),
                 ($item['checado'] ?? false) === true ? '1' : '0',
                 ($item['imprimir_etiqueta'] ?? false) === true ? '1' : '0',
-                $this->sanitizeCsvText((string) ($item['observacoes'] ?? '')),
+                LegacyCsvSanitizer::sanitizeText((string) ($item['observacoes'] ?? '')),
                 ($item['editado'] ?? false) === true ? '1' : '0',
                 ($item['novo'] ?? false) === true ? '1' : '0',
             ], ';');

@@ -331,18 +331,13 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
 
     public function testDownloadImportErrorsCsvSanitizaCamposTextuaisContraFormulas(): void
     {
-        $service = new LegacySpreadsheetImportService();
-
-        $method = new ReflectionMethod($service, 'sanitizeCsvText');
-        $method->setAccessible(true);
-
-        self::assertSame("'=SOMA(1;2)", $method->invoke($service, '=SOMA(1;2)'));
-        self::assertSame("'+551199999", $method->invoke($service, '+551199999'));
-        self::assertSame("'-100", $method->invoke($service, '-100'));
-        self::assertSame("'@COMUM", $method->invoke($service, '@COMUM'));
-        self::assertSame("'\tTAB", $method->invoke($service, "\tTAB"));
-        self::assertSame("CADEIRA NORMAL", $method->invoke($service, 'CADEIRA NORMAL'));
-        self::assertSame('', $method->invoke($service, ''));
-        self::assertSame('', $method->invoke($service, null));
+        self::assertSame("'=SOMA(1;2)", \App\Support\LegacyCsvSanitizer::sanitizeText('=SOMA(1;2)'));
+        self::assertSame("'+551****9999", \App\Support\LegacyCsvSanitizer::sanitizeText('+551****9999'));
+        self::assertSame("'-100", \App\Support\LegacyCsvSanitizer::sanitizeText('-100'));
+        self::assertSame("'@COMUM", \App\Support\LegacyCsvSanitizer::sanitizeText('@COMUM'));
+        self::assertSame("'\tTAB", \App\Support\LegacyCsvSanitizer::sanitizeText("\tTAB"));
+        self::assertSame("CADEIRA NORMAL", \App\Support\LegacyCsvSanitizer::sanitizeText('CADEIRA NORMAL'));
+        self::assertSame('', \App\Support\LegacyCsvSanitizer::sanitizeText(''));
+        self::assertSame('', \App\Support\LegacyCsvSanitizer::sanitizeText(null));
     }
 }
