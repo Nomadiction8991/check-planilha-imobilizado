@@ -370,13 +370,13 @@ class LegacyReportService implements LegacyReportServiceInterface
             $rows[] = [
                 (string) ($product['codigo'] ?? ''),
                 $conditionLabels[$condition] ?? '',
-                (string) ($product['nome_original'] ?? ''),
-                $currentDescription !== '' ? $currentDescription : (string) ($product['nome_original'] ?? ''),
-                (string) ($product['dependencia_descricao'] ?? ''),
+                $this->sanitizeCsvText((string) ($product['nome_original'] ?? '')),
+                $this->sanitizeCsvText($currentDescription !== '' ? $currentDescription : (string) ($product['nome_original'] ?? '')),
+                $this->sanitizeCsvText((string) ($product['dependencia_descricao'] ?? '')),
                 $hasInvoice ? (string) ($product['nota_numero'] ?? '') : '',
                 $hasInvoice ? $this->formatReportDate((string) ($product['nota_data'] ?? '')) : '',
                 $hasInvoice ? (string) ($product['nota_valor'] ?? '') : '',
-                $hasInvoice ? (string) ($product['nota_fornecedor'] ?? '') : '',
+                $hasInvoice ? $this->sanitizeCsvText((string) ($product['nota_fornecedor'] ?? '')) : '',
             ];
         }
 
@@ -398,12 +398,12 @@ class LegacyReportService implements LegacyReportServiceInterface
 
                 $items[] = [
                     (string) ($item['codigo'] ?? ''),
-                    (string) ($item['nome_original'] ?? ''),
-                    (string) ($item['nome_atual'] ?? ''),
+                    $this->sanitizeCsvText((string) ($item['nome_original'] ?? '')),
+                    $this->sanitizeCsvText((string) ($item['nome_atual'] ?? '')),
                     $originalType,
                     $editedType,
-                    (string) ($item['dependencia_descricao'] ?? ''),
-                    (string) ($item['editado_dependencia_descricao'] ?? '') ?: (string) ($item['dependencia_descricao'] ?? ''),
+                    $this->sanitizeCsvText((string) ($item['dependencia_descricao'] ?? '')),
+                    $this->sanitizeCsvText((string) ($item['editado_dependencia_descricao'] ?? '') ?: (string) ($item['dependencia_descricao'] ?? '')),
                 ];
             }
         }
@@ -475,6 +475,17 @@ class LegacyReportService implements LegacyReportServiceInterface
         fclose($stream);
 
         return $content !== false ? $content : '';
+    }
+
+    private function sanitizeCsvText(?string $value): string
+    {
+        $value ??= '';
+
+        if ($value !== '' && str_contains("=+-@\t\r", $value[0])) {
+            return "'" . $value;
+        }
+
+        return $value;
     }
 
     /**
@@ -622,12 +633,12 @@ class LegacyReportService implements LegacyReportServiceInterface
             fputcsv($stream, [
                 (string) ($item['codigo'] ?? ''),
                 (string) ($item['status_label'] ?? ''),
-                (string) ($item['nome_original'] ?? ''),
-                (string) ($item['nome_atual'] ?? ''),
-                (string) ($item['dependencia'] ?? ''),
+                $this->sanitizeCsvText((string) ($item['nome_original'] ?? '')),
+                $this->sanitizeCsvText((string) ($item['nome_atual'] ?? '')),
+                $this->sanitizeCsvText((string) ($item['dependencia'] ?? '')),
                 ($item['checado'] ?? false) === true ? '1' : '0',
                 ($item['imprimir_etiqueta'] ?? false) === true ? '1' : '0',
-                (string) ($item['observacoes'] ?? ''),
+                $this->sanitizeCsvText((string) ($item['observacoes'] ?? '')),
                 ($item['editado'] ?? false) === true ? '1' : '0',
                 ($item['novo'] ?? false) === true ? '1' : '0',
             ], ';');
