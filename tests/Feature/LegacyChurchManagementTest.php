@@ -54,6 +54,15 @@ final class LegacyChurchManagementTest extends TestCase
         );
     }
 
+    public function testChurchProductsDeletionUsesDeclarativeConfirmation(): void
+    {
+        $view = file_get_contents(resource_path('views/churches/index.blade.php'));
+
+        self::assertIsString($view);
+        self::assertStringContainsString('data-confirm="Excluir todos os produtos desta igreja? Esta ação não pode ser desfeita."', $view);
+        self::assertStringNotContainsString('window.confirm', $view);
+    }
+
     public function testEditPageRendersForm(): void
     {
         $response = $this->get(route('migration.churches.edit', ['church' => 7]));
