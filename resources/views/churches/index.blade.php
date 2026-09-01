@@ -97,7 +97,7 @@
                                                 <a class="btn" href="{{ route('migration.churches.edit', ['church' => $church->id]) }}">Editar</a>
                                             @endif
                                             @if ($isLegacyAdmin || !empty($legacyPermissions['churches.delete'] ?? null))
-                                                <form method="POST" action="{{ route('migration.churches.delete-products') }}" class="delete-products-form" data-products-count-url="{{ route('migration.churches.products-count', ['comum_id' => $church->id]) }}" data-church-name="{{ $church->descricao ?: 'Sem descrição' }}">
+                                                <form method="POST" action="{{ route('migration.churches.delete-products') }}" data-confirm="Excluir todos os produtos desta igreja? Esta ação não pode ser desfeita.">
                                                     @csrf
                                                     <input type="hidden" name="comum_id" value="{{ $church->id }}">
                                                     <button class="btn danger" type="submit">Excluir produtos</button>
@@ -114,37 +114,4 @@
             @endif
         </div>
     </section>
-
-    <script>
-        (() => {
-            document.querySelectorAll('.delete-products-form').forEach((form) => {
-                form.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    const countUrl = form.dataset.productsCountUrl;
-                    const churchName = form.dataset.churchName || 'igreja selecionada';
-                    let message = `Excluir todos os produtos de ${churchName}?`;
-
-                    try {
-                        const response = await fetch(countUrl, {
-                            headers: { Accept: 'application/json' },
-                        });
-
-                        if (response.ok) {
-                            const payload = await response.json();
-                            const count = Number(payload.count || 0);
-                            message = count > 0
-                                ? `Excluir ${count} produto(s) de ${churchName}?`
-                                : `Nenhum produto cadastrado em ${churchName}. Confirmar mesmo assim?`;
-                        }
-                    } catch (error) {
-                    }
-
-                    if (window.confirm(message)) {
-                        form.submit();
-                    }
-                });
-            });
-        })();
-    </script>
 @endsection
