@@ -328,4 +328,21 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
         self::assertSame(1, $erros[0]['linha']);
         self::assertSame(50, $erros[49]['linha']);
     }
+
+    public function testDownloadImportErrorsCsvSanitizaCamposTextuaisContraFormulas(): void
+    {
+        $service = new LegacySpreadsheetImportService();
+
+        $method = new ReflectionMethod($service, 'sanitizeCsvText');
+        $method->setAccessible(true);
+
+        self::assertSame("'=SOMA(1;2)", $method->invoke($service, '=SOMA(1;2)'));
+        self::assertSame("'+551199999", $method->invoke($service, '+551199999'));
+        self::assertSame("'-100", $method->invoke($service, '-100'));
+        self::assertSame("'@COMUM", $method->invoke($service, '@COMUM'));
+        self::assertSame("'\tTAB", $method->invoke($service, "\tTAB"));
+        self::assertSame("CADEIRA NORMAL", $method->invoke($service, 'CADEIRA NORMAL'));
+        self::assertSame('', $method->invoke($service, ''));
+        self::assertSame('', $method->invoke($service, null));
+    }
 }

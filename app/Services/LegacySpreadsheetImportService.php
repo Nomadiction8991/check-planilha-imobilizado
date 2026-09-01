@@ -983,9 +983,9 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                     $originalName = trim((string) (($error->bem ?? '') . ' ' . ($error->complemento ?? '')));
                 }
 
-                $row[3] = $originalName;
-                $row[10] = (string) ($error->localidade ?? '');
-                $row[15] = (string) ($error->dependencia ?? '');
+                $row[3] = $this->sanitizeCsvText($originalName);
+                $row[10] = $this->sanitizeCsvText((string) ($error->localidade ?? ''));
+                $row[15] = $this->sanitizeCsvText((string) ($error->dependencia ?? ''));
 
                 yield $row;
             }
@@ -995,6 +995,17 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             'filename' => 'correcao_erros_' . $suffix . '_' . date('Ymd_His') . '.csv',
             'rows' => $rows,
         ];
+    }
+
+    private function sanitizeCsvText(?string $value): string
+    {
+        $value ??= '';
+
+        if ($value !== '' && str_contains("=+-@\t\r", $value[0])) {
+            return "'" . $value;
+        }
+
+        return $value;
     }
 
     public function markImportErrorResolved(int $errorId, bool $resolved): array
