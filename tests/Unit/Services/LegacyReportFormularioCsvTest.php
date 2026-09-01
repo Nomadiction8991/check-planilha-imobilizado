@@ -185,6 +185,49 @@ final class LegacyReportFormularioCsvTest extends TestCase
         $this->service->downloadFormularioCsv(7, '14.2');
     }
 
+    public function testSanitizaDescricaoComFormulaNoFormulario141(): void
+    {
+        $this->seedChurch();
+        $this->seedProduto141([
+            'codigo' => '12-3456 / 0099',
+            'bem' => '=2+2',
+            'complemento' => '',
+            'condicao_14_1' => '1',
+            'nota_fornecedor' => '+cmd|/C calc',
+        ]);
+
+        $file = $this->service->downloadFormularioCsv(7, '14.1');
+        $linhas = $this->parseCsv($file['content']);
+
+        // Descrições e fornecedor com prefixo perigoso devem vir com apóstrofo.
+        $this->assertStringStartsWith("'=2+2", $linhas[1][2]);
+        $this->assertStringStartsWith("'+cmd|/C calc", $linhas[1][8]);
+        // Código e data são valores sistêmicos e não devem ser prefixados.
+        $this->assertSame('12-3456 / 0099', $linhas[1][0]);
+    }
+
+    public function testSanitizaDependenciaNoFormulario146(): void
+    {
+        $this->seedChurch();
+        $this->seedTipoBem(4, '4', 'CADEIRA');
+        $this->seedDependencia(2, '@evil', 7);
+        $this->seedDependencia(3, '-injected', 7);
+        $this->seedProdutoEditado([
+            'codigo' => '12-3456 / 0020',
+            'bem' => 'BANCO',
+            'tipo_bem_id' => 4,
+            'dependencia_id' => 2,
+            'editado_bem' => 'BANCO',
+            'editado_dependencia_id' => 3,
+        ]);
+
+        $file = $this->service->downloadFormularioCsv(7, '14.6');
+        $linhas = $this->parseCsv($file['content']);
+
+        $this->assertSame("'@evil", $linhas[1][5]);
+        $this->assertSame("'-injected", $linhas[1][6]);
+    }
+
     /**
      * Interpreta o conteúdo CSV respeitando aspas e separador ';'.
      *
