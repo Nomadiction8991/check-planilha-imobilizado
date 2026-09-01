@@ -1,8 +1,5 @@
-# confirmacao-acoes-destrutivas Specification
+## MODIFIED Requirements
 
-## Purpose
-Define explicit, declarative confirmation behavior for destructive deletion actions in administrations, departments, and asset types management tables.
-## Requirements
 ### Requirement: Formulários destrutivos exigem confirmação explícita
 O sistema SHALL solicitar confirmação antes de enviar formulários marcados como destrutivos, utilizando o atributo declarativo `data-confirm` nos formulários de exclusão de usuários, administrações, dependências, tipos de bem e exclusão de produtos por igreja, com texto específico da ação e impedindo o envio quando a pessoa recusar.
 
@@ -41,4 +38,3 @@ O sistema SHALL solicitar confirmação antes de enviar formulários marcados co
 #### Scenario: Formulário comum sem confirmação
 - **WHEN** pessoa envia formulário sem marcação destrutiva
 - **THEN** formulário segue sem confirmação adicional
-
