@@ -10,6 +10,7 @@ use App\DTO\SpreadsheetImportUploadData;
 use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Models\Legacy\Usuario;
+use App\Support\LegacyCsvSanitizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -983,9 +984,9 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                     $originalName = trim((string) (($error->bem ?? '') . ' ' . ($error->complemento ?? '')));
                 }
 
-                $row[3] = $this->sanitizeCsvText($originalName);
-                $row[10] = $this->sanitizeCsvText((string) ($error->localidade ?? ''));
-                $row[15] = $this->sanitizeCsvText((string) ($error->dependencia ?? ''));
+                $row[3] = LegacyCsvSanitizer::sanitizeText($originalName);
+                $row[10] = LegacyCsvSanitizer::sanitizeText((string) ($error->localidade ?? ''));
+                $row[15] = LegacyCsvSanitizer::sanitizeText((string) ($error->dependencia ?? ''));
 
                 yield $row;
             }
@@ -995,17 +996,6 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             'filename' => 'correcao_erros_' . $suffix . '_' . date('Ymd_His') . '.csv',
             'rows' => $rows,
         ];
-    }
-
-    private function sanitizeCsvText(?string $value): string
-    {
-        $value ??= '';
-
-        if ($value !== '' && str_contains("=+-@\t\r", $value[0])) {
-            return "'" . $value;
-        }
-
-        return $value;
     }
 
     public function markImportErrorResolved(int $errorId, bool $resolved): array

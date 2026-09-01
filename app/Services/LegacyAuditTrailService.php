@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\LegacyAuditTrailServiceInterface;
 use App\DTO\LegacyAuditEntryData;
+use App\Support\LegacyCsvSanitizer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -288,18 +289,18 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
         foreach ($entries as $entry) {
             fputcsv($stream, [
                 $entry->occurredAt,
-                $this->sanitizeCsvText($entry->userName),
-                $this->sanitizeCsvText($entry->userEmail),
+                LegacyCsvSanitizer::sanitizeText($entry->userName),
+                LegacyCsvSanitizer::sanitizeText($entry->userEmail),
                 $entry->administrationId !== null ? (string) $entry->administrationId : '',
                 $entry->churchId !== null ? (string) $entry->churchId : '',
-                $this->sanitizeCsvText($entry->module),
-                $this->sanitizeCsvText($entry->action),
-                $this->sanitizeCsvText($entry->description),
-                $this->sanitizeCsvText($entry->routeName),
-                $this->sanitizeCsvText($entry->path),
-                $this->sanitizeCsvText($entry->method),
+                LegacyCsvSanitizer::sanitizeText($entry->module),
+                LegacyCsvSanitizer::sanitizeText($entry->action),
+                LegacyCsvSanitizer::sanitizeText($entry->description),
+                LegacyCsvSanitizer::sanitizeText($entry->routeName),
+                LegacyCsvSanitizer::sanitizeText($entry->path),
+                LegacyCsvSanitizer::sanitizeText($entry->method),
                 (string) $entry->statusCode,
-                $this->sanitizeCsvText($entry->ipAddress),
+                LegacyCsvSanitizer::sanitizeText($entry->ipAddress),
             ], ';');
         }
 
@@ -308,17 +309,6 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
         fclose($stream);
 
         return $content !== false ? $content : '';
-    }
-
-    private function sanitizeCsvText(?string $value): string
-    {
-        $value ??= '';
-
-        if ($value !== '' && str_contains("=+-@\t\r", $value[0])) {
-            return "'" . $value;
-        }
-
-        return $value;
     }
 
     /**
