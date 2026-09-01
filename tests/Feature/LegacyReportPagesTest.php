@@ -179,6 +179,18 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('2 item(ns)');
     }
 
+    public function testReportsIndexShowsChurchSearchField(): void
+    {
+        $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        $response->assertSee('Buscar igreja');
+        $response->assertSee('data-reports-church-search', escape: false);
+        $response->assertSee('data-reports-church-select', escape: false);
+        $response->assertSee('data-reports-church-status', escape: false);
+        $response->assertSee('Digite para filtrar');
+    }
+
     public function testReportsShowRendersPreview(): void
     {
         $response = $this->get(route('migration.reports.show', ['formulario' => '14.1', 'comum_id' => 7]));
