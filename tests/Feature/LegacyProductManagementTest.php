@@ -829,6 +829,35 @@ final class LegacyProductManagementTest extends TestCase
         ]);
     }
 
+    public function testIndexRendersChurchSearchFieldForFiltering(): void
+    {
+        $response = $this->get(route('migration.products.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        $response->assertSee('Buscar igreja', false);
+        $response->assertSee('data-product-church-search', false);
+        $response->assertSee('data-product-church-select', false);
+        $response->assertSee('role="status"', false);
+    }
+
+    public function testVerificationRendersChurchSearchFieldForFiltering(): void
+    {
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->get(route('migration.products.verification', ['comum_id' => 7]));
+
+        $response->assertOk();
+        $response->assertSee('Buscar igreja', false);
+        $response->assertSee('data-product-church-search', false);
+        $response->assertSee('data-product-church-select', false);
+        $response->assertSee('role="status"', false);
+    }
+
     /**
      * @param array<string, mixed> $overrides
      */
