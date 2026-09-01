@@ -1,8 +1,5 @@
-# auditoria Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change exportar-auditoria-csv. Update Purpose after archive.
-## Requirements
 ### Requirement: Exportação CSV da auditoria
 
 O sistema SHALL permitir exportar, em um único arquivo CSV, TODOS os eventos auditados que casam com os filtros atuais (busca geral, módulo e período), respeitando o escopo de visualização do usuário autenticado — sem o limite de paginação aplicado na tela. Campos textuais controlados por usuários SHALL ser neutralizados contra interpretação como fórmula por planilhas.
@@ -33,18 +30,3 @@ O sistema SHALL permitir exportar, em um único arquivo CSV, TODOS os eventos au
 
 - **WHEN** filtros não encontram eventos no escopo do usuário
 - **THEN** sistema não gera arquivo vazio e informa que não há eventos para os filtros atuais
-
-### Requirement: Acesso à exportação pela tela de auditoria
-A tela de auditoria SHALL oferecer um botão de exportação que dispara o download preservando os filtros atuais da consulta, e SHALL responder com mensagem clara quando não houver eventos para exportar.
-
-#### Scenario: Botão preserva filtros
-- GIVEN um usuário na tela de auditoria com filtros preenchidos
-- WHEN ele aciona o botão de exportar
-- THEN a requisição leva consigo os mesmos parâmetros de filtro exibidos na tela
-
-#### Scenario: Sem eventos para exportar
-- GIVEN filtros que não casam com nenhum evento auditado
-- WHEN o usuário solicita a exportação
-- THEN o sistema redireciona de volta à tela de auditoria mantendo os filtros
-- AND exibe mensagem informando que não há eventos para os filtros atuais
-

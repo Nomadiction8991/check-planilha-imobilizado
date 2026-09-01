@@ -12,6 +12,4 @@
 
 - [x] 3.1 Executar testes direcionados e suíte completa.
 - [x] 3.2 Validar sintaxe PHP, OpenSpec e saúde da aplicação.
-- [ ] 3.3 Commitar e enviar alteração para deploy automático.
-
-Nota: teste HTTP específico ficou pendente; suíte existente já cobre endpoint de download e teste unitário validou sanitização no gerador CSV.
+- [x] 3.3 Commitar e enviar alteração para deploy automático.
