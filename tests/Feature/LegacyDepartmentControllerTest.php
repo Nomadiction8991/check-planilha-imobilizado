@@ -205,6 +205,7 @@ final class LegacyDepartmentControllerTest extends TestCase
         $response->assertOk();
         $response->assertSee('Nova dependência.');
         $response->assertSee('Salvar dependência');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
     }
 
     public function testCreatePageRedirectsGuestsToLogin(): void
@@ -337,6 +338,7 @@ final class LegacyDepartmentControllerTest extends TestCase
         $response->assertSee('Editar dependência');
         $response->assertSee('SALAO');
         $response->assertSee('Salvar alterações');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
     }
 
     public function testEditPageRedirectsGuestsToLogin(): void

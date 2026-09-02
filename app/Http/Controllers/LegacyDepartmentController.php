@@ -42,6 +42,7 @@ class LegacyDepartmentController extends Controller
     {
         return view('departments.create', [
             'churches' => $this->departments->churchOptions(),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 
@@ -69,6 +70,7 @@ class LegacyDepartmentController extends Controller
         return view('departments.edit', [
             'department' => $department->load('comum:id,codigo,descricao'),
             'churches' => $this->departments->churchOptions(),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 
