@@ -168,7 +168,31 @@ final class LegacyDepartmentControllerTest extends TestCase
         $response->assertSee('data-departments-church-search', false);
         $response->assertSee('data-departments-church-select', false);
         $response->assertSee('data-departments-church-status', false);
+        $response->assertSee('Estado (UF)', false);
+        $response->assertSee('departments-estado-select', false);
+        $response->assertSee('Todos os estados', false);
         $response->assertSee('Digite para filtrar', false);
+    }
+
+    public function testIndexPassesStateFilterToService(): void
+    {
+        $this->mock(LegacyDepartmentBrowserServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('paginate')
+                ->once()
+                ->withArgs(function (DepartmentFilters $filters): bool {
+                    return $filters->state === 'SP';
+                })
+                ->andReturn(new Paginator(collect(), 0, 20, 1, ['path' => '/departments']));
+            $mock->shouldReceive('churchOptions')->andReturn(collect());
+            $mock->shouldReceive('administrationOptions')->andReturn(collect());
+            $mock->shouldReceive('countAll')->andReturn(0);
+        });
+
+        $response = $this->withSession($this->authSession())
+            ->get(route('migration.departments.index', ['estado' => 'SP']));
+
+        $response->assertOk();
+        $response->assertViewHas('states');
     }
 
     // ─── Create ───────────────────────────────────────────────────────────────
