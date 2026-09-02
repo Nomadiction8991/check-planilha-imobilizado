@@ -58,12 +58,16 @@ class LegacyReportService implements LegacyReportServiceInterface
     ) {
     }
 
-    public function churchOptions(?int $administrationId = null): Collection
+    public function churchOptions(?int $administrationId = null, ?string $state = null): Collection
     {
         $query = Comum::query();
 
         if ($administrationId !== null) {
             $query->where('administracao_id', $administrationId);
+        }
+
+        if ($state !== null && $state !== '') {
+            $query->where('estado', $state);
         }
 
         return $query

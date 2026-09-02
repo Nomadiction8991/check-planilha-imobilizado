@@ -19,10 +19,16 @@ final class LegacyReportPagesTest extends TestCase
             LegacyReportServiceInterface::class,
             new class implements LegacyReportServiceInterface
             {
-                public function churchOptions(?int $administrationId = null): Collection
+                public function churchOptions(?int $administrationId = null, ?string $state = null): Collection
                 {
-                    if ($administrationId === 99) {
+                    if ($administrationId === 99 || $state === 'XX') {
                         return collect();
+                    }
+
+                    if ($state === 'SP') {
+                        return collect([
+                            (object) ['id' => 8, 'codigo' => '35-0001', 'descricao' => 'Central São Paulo'],
+                        ]);
                     }
 
                     return collect([
@@ -215,6 +221,15 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertDontSee('Central Cuiabá');
     }
 
+    public function testReportsIndexFiltersChurchesByState(): void
+    {
+        $response = $this->get(route('migration.reports.index', ['estado' => 'SP']));
+
+        $response->assertOk();
+        $response->assertSee('Central São Paulo');
+        $response->assertDontSee('Central Cuiabá');
+    }
+
     public function testReportsShowRendersPreview(): void
     {
         $response = $this->get(route('migration.reports.show', ['formulario' => '14.1', 'comum_id' => 7]));
@@ -285,7 +300,7 @@ final class LegacyReportPagesTest extends TestCase
             LegacyReportServiceInterface::class,
             new class implements LegacyReportServiceInterface
             {
-                public function churchOptions(?int $administrationId = null): Collection
+                public function churchOptions(?int $administrationId = null, ?string $state = null): Collection
                 {
                     return collect();
                 }
