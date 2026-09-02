@@ -168,12 +168,16 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
         ];
     }
 
-    public function availableChurches(?int $administrationId = null): Collection
+    public function availableChurches(?int $administrationId = null, ?string $state = null): Collection
     {
         $query = Comum::query();
 
         if ($administrationId !== null && $administrationId > 0) {
             $query->where('administracao_id', $administrationId);
+        }
+
+        if ($state !== null && trim($state) !== '') {
+            $query->where('estado', strtoupper(trim($state)));
         }
 
         return $query

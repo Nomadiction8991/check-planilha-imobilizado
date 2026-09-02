@@ -86,18 +86,25 @@ class LegacyRouteCompatibilityController extends Controller
             $request->input('administracao_id'),
             $request->query('administracao_id'),
         );
+        $state = strtoupper(trim((string) ($request->input('estado') ?? $request->query('estado', ''))));
+        if ($state === '') {
+            $state = null;
+        }
         $churchId = $this->firstPositiveInt(
             $request->input('comum_id'),
             $request->query('comum_id'),
         );
         $dependencyId = $this->firstPositiveInt($request->query('dependencia'));
         $administrations = $this->auth->availableAdministrations();
-        $churches = $this->auth->availableChurches($administrationId);
+        $churches = $this->auth->availableChurches($administrationId, $state);
+        $states = (array) config('brazil.states', []);
 
         if ($churchId === null) {
             return view('labels.index', [
                 'administrations' => $administrations,
                 'selectedAdministrationId' => $administrationId,
+                'states' => $states,
+                'selectedState' => $state,
                 'churchId' => null,
                 'dependencyId' => $dependencyId,
                 'churches' => $churches,
@@ -129,6 +136,8 @@ class LegacyRouteCompatibilityController extends Controller
         return view('labels.index', [
             'administrations' => $administrations,
             'selectedAdministrationId' => $administrationId,
+            'states' => $states,
+            'selectedState' => $state,
             'churchId' => $churchId,
             'dependencyId' => $dependencyId,
             'churches' => $churches,

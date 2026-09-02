@@ -176,6 +176,18 @@
                     </label>
                     <p id="labels-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-labels-admin-status></p>
 
+                    <label class="filters-principal">
+                        Estado (UF)
+                        <select name="estado" id="labels-estado-select">
+                            <option value="">Todos os estados</option>
+                            @foreach ($states ?? (array) config('brazil.states', []) as $stateCode => $stateLabel)
+                                <option value="{{ $stateCode }}" @selected(($selectedState ?? '') === $stateCode)>
+                                    {{ $stateCode }} - {{ $stateLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
                     <label for="labels-church-search">
                         Buscar igreja
                         <input

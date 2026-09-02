@@ -179,6 +179,52 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('Administração Centro-Oeste');
     }
 
+    public function testCopyLabelsPageFiltersChurchesByState(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('currentUser')->andReturn([
+                'id' => 9,
+                'nome' => 'Maria Silva',
+                'email' => 'MARIA@EXEMPLO.COM',
+                'comum_id' => 7,
+                'administracao_id' => 4,
+                'is_admin' => false,
+            ]);
+            $mock->shouldReceive('currentChurch')->andReturn([
+                'id' => 7,
+                'codigo' => '12-3456',
+                'descricao' => 'Central Cuiabá',
+            ]);
+            $mock->shouldReceive('availableAdministrations')->andReturn(collect([
+                (object) ['id' => 4, 'descricao' => 'Administração Centro-Oeste'],
+            ]));
+            $mock->shouldReceive('availableChurches')->with(4, 'MT')->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+            ]));
+            $mock->shouldReceive('availableChurches')->withNoArgs()->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+            ]));
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('navigation')->andReturn([]);
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->get(route('migration.labels.index', ['administracao_id' => 4, 'estado' => 'mt']));
+
+        $response->assertOk();
+        $response->assertSee('Estado (UF)');
+        $response->assertSee('value="MT" selected', false);
+    }
+
     public function testManualLabelsEndpointPersistsCodes(): void
     {
         $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
