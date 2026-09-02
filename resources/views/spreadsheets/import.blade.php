@@ -104,9 +104,22 @@
                 <div class="field-grid">
                     <input type="hidden" name="usuario_id" value="{{ (int) session('usuario_id', 0) }}">
 
+                    <label for="spreadsheets-admin-search">
+                        Buscar administração
+                        <input
+                            id="spreadsheets-admin-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="spreadsheets-admin-select"
+                            data-spreadsheets-admin-search
+                            @disabled($administrations->isEmpty())
+                        >
+                    </label>
+
                     <label>
                         Administração
-                        <select name="administracao_id" required @disabled($administrations->isEmpty())>
+                        <select id="spreadsheets-admin-select" name="administracao_id" required @disabled($administrations->isEmpty()) data-spreadsheets-admin-select>
                             <option value="">Selecione</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected((int) old('administracao_id') === (int) $administration->id)>
@@ -115,6 +128,7 @@
                             @endforeach
                         </select>
                     </label>
+                    <p id="spreadsheets-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-spreadsheets-admin-status></p>
 
                     <label>
                         Arquivo CSV
@@ -238,4 +252,41 @@
             </div>
         @endif
     </section>
+
+    <script>
+        (() => {
+            const search = document.querySelector('[data-spreadsheets-admin-search]');
+            const select = document.querySelector('[data-spreadsheets-admin-select]');
+            const status = document.querySelector('[data-spreadsheets-admin-status]');
+            if (!search || !select || !status) return;
+            const options = Array.from(select.options);
+            const placeholder = options.find((o) => o.value === '');
+            const adminOptions = options.filter((o) => o.value !== '');
+            const applyFilter = () => {
+                const term = search.value.trim().toLowerCase();
+                let visible = 0;
+                adminOptions.forEach((opt) => {
+                    const match = term === '' || opt.textContent.toLowerCase().includes(term);
+                    opt.hidden = !match;
+                    opt.disabled = !match;
+                    if (match) visible += 1;
+                });
+                if (select.value !== '' && select.options[select.selectedIndex]?.hidden) {
+                    select.value = '';
+                }
+                if (visible === 0 && term !== '') {
+                    status.textContent = 'Nenhuma administração encontrada para "' + search.value.trim() + '".';
+                    status.hidden = false;
+                    select.disabled = true;
+                } else {
+                    status.textContent = '';
+                    status.hidden = true;
+                    select.disabled = false;
+                    if (placeholder) { placeholder.hidden = false; placeholder.disabled = false; }
+                }
+            };
+            search.addEventListener('input', applyFilter);
+            search.addEventListener('search', applyFilter);
+        })();
+    </script>
 @endsection

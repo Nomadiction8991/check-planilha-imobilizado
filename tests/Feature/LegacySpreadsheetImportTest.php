@@ -387,6 +387,9 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertSee('Relatório de Bens Imobilizado.csv');
         $response->assertSee('Administração');
         $response->assertSee('Administração Central');
+        $response->assertSee('data-spreadsheets-admin-search', false);
+        $response->assertSee('data-spreadsheets-admin-select', false);
+        $response->assertSee('data-spreadsheets-admin-status', false);
         $response->assertDontSee('name="usuario_id"');
         $response->assertDontSee('Arquivo Antigo 4.csv');
     }
