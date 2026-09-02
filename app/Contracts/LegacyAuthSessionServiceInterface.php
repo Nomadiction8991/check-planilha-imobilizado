@@ -34,7 +34,12 @@ interface LegacyAuthSessionServiceInterface
     /**
      * @return Collection<int, object{id:int,codigo:string,descricao:string}>
      */
-    public function availableChurches(): Collection;
+    public function availableChurches(?int $administrationId = null): Collection;
+
+    /**
+     * @return Collection<int, object{id:int,descricao:string}>
+     */
+    public function availableAdministrations(): Collection;
 
     /**
      * @return array<string, array<string, bool>>

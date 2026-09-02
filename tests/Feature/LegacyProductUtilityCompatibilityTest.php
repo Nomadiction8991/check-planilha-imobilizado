@@ -29,11 +29,14 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
                 'codigo' => '12-3456',
                 'descricao' => 'Central Cuiabá',
             ]);
-            $mock->shouldReceive('availableChurches')->andReturn(collect([
+            $mock->shouldReceive('availableAdministrations')->andReturn(collect([
+                (object) ['id' => 4, 'descricao' => 'Administração Centro-Oeste'],
+            ]));
+            $mock->shouldReceive('availableChurches')->withAnyArgs()->andReturn(collect([
                 (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
             ]));
             $mock->shouldReceive('filterPinStates')->andReturn([]);
-            $mock->shouldReceive('labelManualCodes')->once()->with(7, 3)->andReturn(['12-3456/000233']);
+            $mock->shouldReceive('labelManualCodes')->with(7, 3)->andReturn(['12-3456/000233']);
         });
 
         $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
@@ -78,6 +81,9 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('Selecione uma igreja');
         $response->assertSee('Buscar igreja', false);
         $response->assertSee('data-labels-church-search', false);
+        $response->assertSee('Buscar administração', false);
+        $response->assertSee('data-labels-admin-search', false);
+        $response->assertSee('Administração Centro-Oeste');
         $response->assertSee('Etiquetas manuais');
         $response->assertSee('Copiar manuais');
         $response->assertSee('Verificados');
@@ -100,7 +106,10 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
                 'codigo' => '12-3456',
                 'descricao' => 'Central Cuiabá',
             ]);
-            $mock->shouldReceive('availableChurches')->andReturn(collect([
+            $mock->shouldReceive('availableAdministrations')->andReturn(collect([
+                (object) ['id' => 4, 'descricao' => 'Administração Centro-Oeste'],
+            ]));
+            $mock->shouldReceive('availableChurches')->withAnyArgs()->andReturn(collect([
                 (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
             ]));
             $mock->shouldReceive('filterPinStates')->andReturn([]);
@@ -122,6 +131,52 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertOk();
         $response->assertSee('Selecione uma igreja acima para carregar as etiquetas.');
         $response->assertSee('Selecione uma igreja');
+        $response->assertSee('data-labels-admin-search', false);
+        $response->assertSee('Administração Centro-Oeste');
+    }
+
+    public function testCopyLabelsPageFiltersChurchesByAdministration(): void
+    {
+        $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('currentUser')->andReturn([
+                'id' => 9,
+                'nome' => 'Maria Silva',
+                'email' => 'MARIA@EXEMPLO.COM',
+                'comum_id' => 7,
+                'administracao_id' => 4,
+                'is_admin' => false,
+            ]);
+            $mock->shouldReceive('currentChurch')->andReturn([
+                'id' => 7,
+                'codigo' => '12-3456',
+                'descricao' => 'Central Cuiabá',
+            ]);
+            $mock->shouldReceive('availableAdministrations')->andReturn(collect([
+                (object) ['id' => 4, 'descricao' => 'Administração Centro-Oeste'],
+                (object) ['id' => 5, 'descricao' => 'Administração Sul'],
+            ]));
+            $mock->shouldReceive('availableChurches')->withAnyArgs()->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+            ]));
+            $mock->shouldReceive('filterPinStates')->andReturn([]);
+        });
+
+        $this->mock(LegacyNavigationServiceInterface::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('navigation')->andReturn([]);
+        });
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->get(route('migration.labels.index', ['administracao_id' => 4]));
+
+        $response->assertOk();
+        $response->assertSee('value="4" selected', false);
+        $response->assertSee('Administração Centro-Oeste');
     }
 
     public function testManualLabelsEndpointPersistsCodes(): void
