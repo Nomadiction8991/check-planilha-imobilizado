@@ -103,13 +103,92 @@ final class LegacyChurchBrowserServiceTest extends TestCase
         $filters = new ChurchFilters(
             administrationId: 10,
             search: '',
+            state: null,
             page: 1,
             perPage: 10,
         );
 
-        $result = $this->service->paginate($filters);
+        $results = $this->service->paginate($filters);
 
-        self::assertCount(1, $result->items());
-        self::assertSame('Igreja Alpha', $result->items()[0]->descricao);
+        self::assertCount(1, $results->items());
+        self::assertSame('Igreja Alpha', $results->items()[0]->descricao);
+    }
+
+    public function testPaginateFiltersByState(): void
+    {
+        $churchSp = new Comum();
+        $churchSp->forceFill([
+            'id' => 1,
+            'codigo' => 'BR-SP-01',
+            'descricao' => 'Igreja São Paulo',
+            'estado' => 'SP',
+        ]);
+        $churchSp->save();
+
+        $churchPr = new Comum();
+        $churchPr->forceFill([
+            'id' => 2,
+            'codigo' => 'BR-PR-01',
+            'descricao' => 'Igreja Curitiba',
+            'estado' => 'PR',
+        ]);
+        $churchPr->save();
+
+        $filtersPr = new ChurchFilters(
+            administrationId: null,
+            search: '',
+            state: 'PR',
+            page: 1,
+            perPage: 10,
+        );
+        $resultsPr = $this->service->paginate($filtersPr);
+
+        self::assertSame(1, $resultsPr->total());
+        self::assertSame('Igreja Curitiba', $resultsPr->items()[0]->descricao);
+
+        $filtersSp = new ChurchFilters(
+            administrationId: null,
+            search: '',
+            state: 'SP',
+            page: 1,
+            perPage: 10,
+        );
+        $resultsSp = $this->service->paginate($filtersSp);
+
+        self::assertSame(1, $resultsSp->total());
+        self::assertSame('Igreja São Paulo', $resultsSp->items()[0]->descricao);
+    }
+
+    public function testPaginateFiltersBySearchAndStateTogether(): void
+    {
+        $church1 = new Comum();
+        $church1->forceFill([
+            'id' => 1,
+            'codigo' => 'BR-01',
+            'descricao' => 'Central Curitiba',
+            'estado' => 'PR',
+        ]);
+        $church1->save();
+
+        $church2 = new Comum();
+        $church2->forceFill([
+            'id' => 2,
+            'codigo' => 'BR-02',
+            'descricao' => 'Central Campinas',
+            'estado' => 'SP',
+        ]);
+        $church2->save();
+
+        $filters = new ChurchFilters(
+            administrationId: null,
+            search: 'Central',
+            state: 'PR',
+            page: 1,
+            perPage: 10,
+        );
+        $results = $this->service->paginate($filters);
+
+        self::assertSame(1, $results->total());
+        self::assertSame('Central Curitiba', $results->items()[0]->descricao);
     }
 }

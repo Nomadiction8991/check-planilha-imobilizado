@@ -248,6 +248,64 @@ final class LegacyChurchControllerTest extends TestCase
         $response->assertSee('Central Cuiabá');
     }
 
+    public function testIndexPassesStateFilterToService(): void
+    {
+        $capturedState = null;
+        $this->app->instance(
+            LegacyChurchBrowserServiceInterface::class,
+            new class($capturedState) implements LegacyChurchBrowserServiceInterface
+            {
+                public function __construct(private ?string &$capturedState)
+                {
+                }
+
+                public function paginate(ChurchFilters $filters): LengthAwarePaginator
+                {
+                    $this->capturedState = $filters->state;
+
+                    return new LengthAwarePaginator(
+                        items: collect([
+                            (object) [
+                                'id' => 7,
+                                'codigo' => '12-3456',
+                                'descricao' => 'Central Curitiba',
+                                'cidade' => 'Curitiba',
+                                'estado' => 'PR',
+                                'setor' => 'Centro',
+                                'active_products_count' => 18,
+                            ],
+                        ]),
+                        total: 1,
+                        perPage: 20,
+                        currentPage: 1,
+                        options: ['path' => '/churches'],
+                    );
+                }
+
+                public function countAll(): int
+                {
+                    return 1;
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect();
+                }
+            },
+        );
+
+        $response = $this->withSession([
+            'is_admin' => true,
+            'legacy_permissions' => [
+                'churches.view' => true,
+            ],
+        ])->get(route('migration.churches.index', ['estado' => 'PR']));
+
+        $response->assertOk();
+        $response->assertSee('Central Curitiba');
+        $this->assertSame('PR', $capturedState);
+    }
+
     // ─── Edit ───────────────────────────────────────────────────────────────
 
     public function testEditPageRendersForm(): void

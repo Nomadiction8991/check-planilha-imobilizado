@@ -25,6 +25,12 @@ class LegacyChurchBrowserService implements LegacyChurchBrowserServiceInterface
                 }
             )
             ->when(
+                $filters->state !== null && $filters->state !== '',
+                static function ($query) use ($filters): void {
+                    $query->where('estado', $filters->state);
+                }
+            )
+            ->when(
                 $filters->search !== '',
                 static function ($query) use ($filters): void {
                     $query->where(function ($nested) use ($filters): void {
