@@ -76,6 +76,8 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('12-3456/000233');
         $response->assertSee('Igreja');
         $response->assertSee('Selecione uma igreja');
+        $response->assertSee('Buscar igreja', false);
+        $response->assertSee('data-labels-church-search', false);
         $response->assertSee('Etiquetas manuais');
         $response->assertSee('Copiar manuais');
         $response->assertSee('Verificados');
