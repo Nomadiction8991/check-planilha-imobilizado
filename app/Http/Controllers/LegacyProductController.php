@@ -102,6 +102,7 @@ class LegacyProductController extends Controller
             'churches' => $churches,
             'dependencies' => $dependencies,
             'assetTypes' => $assetTypes,
+            'states' => (array) config('brazil.states', []),
             'assetTypeOptionMap' => LegacyProductTypeOptionSupport::buildMap($assetTypes),
             'dependencyOptionMap' => $dependencies->groupBy('comum_id')->map(
                 static fn ($items) => $items->map(fn ($dependency) => [
@@ -149,6 +150,7 @@ class LegacyProductController extends Controller
             'product' => $product,
             'assetTypes' => $assetTypes,
             'dependencies' => $dependencies,
+            'states' => (array) config('brazil.states', []),
             'assetTypeOptionMap' => LegacyProductTypeOptionSupport::buildMap($assetTypes),
         ]);
     }

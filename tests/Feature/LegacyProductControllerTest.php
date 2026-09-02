@@ -183,6 +183,7 @@ final class LegacyProductControllerTest extends TestCase
         $response = $this->get(route('migration.products.create'));
 
         $response->assertOk();
+        $response->assertViewHas('states', (array) config('brazil.states', []));
         $response->assertSee('Novo produto.');
         $response->assertSee('Salvar produto');
         $response->assertSee('Central Cuiabá');
@@ -289,6 +290,7 @@ final class LegacyProductControllerTest extends TestCase
         $response = $this->get(route('migration.products.edit', ['product' => $this->boundProduct->id_produto]));
 
         $response->assertOk();
+        $response->assertViewHas('states', (array) config('brazil.states', []));
         $response->assertSee('Editar produto.');
         $response->assertSee('PROD-001');
         $response->assertSee('99 - MÓVEIS');
