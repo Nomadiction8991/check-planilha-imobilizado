@@ -310,4 +310,64 @@ final class LegacyReportServiceTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertSame('Igreja da Admin 5', $result->first()->descricao);
     }
+
+    #[RunInSeparateProcess]
+    public function testChurchOptionsFiltersByState(): void
+    {
+        $builder = Mockery::mock('alias:' . Comum::class);
+        $builder->shouldReceive('query')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('where')
+            ->once()
+            ->with('estado', 'MT')
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('codigo')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('get')
+            ->with(['id', 'codigo', 'descricao'])
+            ->once()
+            ->andReturn(collect([
+                (object) ['id' => 11, 'codigo' => '002', 'descricao' => 'Igreja de MT'],
+            ]));
+
+        $result = $this->service->churchOptions(null, 'MT');
+
+        $this->assertCount(1, $result);
+        $this->assertSame('Igreja de MT', $result->first()->descricao);
+    }
+
+    #[RunInSeparateProcess]
+    public function testChurchOptionsFiltersByAdministrationAndState(): void
+    {
+        $builder = Mockery::mock('alias:' . Comum::class);
+        $builder->shouldReceive('query')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('where')
+            ->once()
+            ->with('administracao_id', 5)
+            ->andReturnSelf();
+        $builder->shouldReceive('where')
+            ->once()
+            ->with('estado', 'SP')
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('codigo')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('get')
+            ->with(['id', 'codigo', 'descricao'])
+            ->once()
+            ->andReturn(collect([
+                (object) ['id' => 12, 'codigo' => '003', 'descricao' => 'Igreja Admin 5 SP'],
+            ]));
+
+        $result = $this->service->churchOptions(5, 'SP');
+
+        $this->assertCount(1, $result);
+        $this->assertSame('Igreja Admin 5 SP', $result->first()->descricao);
+    }
 }

@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 interface LegacyReportServiceInterface
 {
-    public function churchOptions(?int $administrationId = null): Collection;
+    public function churchOptions(?int $administrationId = null, ?string $state = null): Collection;
 
     public function administrationOptions(): Collection;
 
