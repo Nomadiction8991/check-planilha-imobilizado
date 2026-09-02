@@ -64,6 +64,7 @@ final class LegacyAssetTypeBrowserServiceTest extends TestCase
         $admin1->forceFill([
             'id' => 10,
             'descricao' => 'Administração SP',
+            'estado' => 'SP',
         ]);
         $admin1->save();
 
@@ -71,6 +72,7 @@ final class LegacyAssetTypeBrowserServiceTest extends TestCase
         $admin2->forceFill([
             'id' => 20,
             'descricao' => 'Administração RJ',
+            'estado' => 'RJ',
         ]);
         $admin2->save();
 
@@ -95,6 +97,7 @@ final class LegacyAssetTypeBrowserServiceTest extends TestCase
         $filters = new AssetTypeFilters(
             administrationId: 10,
             search: '',
+            state: null,
             page: 1,
             perPage: 10,
         );
@@ -103,6 +106,58 @@ final class LegacyAssetTypeBrowserServiceTest extends TestCase
 
         self::assertCount(1, $result->items());
         self::assertSame('CADEIRA SP', $result->items()[0]->descricao);
+    }
+
+    public function testPaginateFiltersByState(): void
+    {
+        Session::put('is_admin', true);
+
+        $admin1 = new Administracao();
+        $admin1->forceFill([
+            'id' => 10,
+            'descricao' => 'Administração SP',
+            'estado' => 'SP',
+        ]);
+        $admin1->save();
+
+        $admin2 = new Administracao();
+        $admin2->forceFill([
+            'id' => 20,
+            'descricao' => 'Administração RJ',
+            'estado' => 'RJ',
+        ]);
+        $admin2->save();
+
+        $type1 = new TipoBem();
+        $type1->forceFill([
+            'id' => 1,
+            'codigo' => 101,
+            'descricao' => 'CADEIRA SP',
+            'administracao_id' => 10,
+        ]);
+        $type1->save();
+
+        $type2 = new TipoBem();
+        $type2->forceFill([
+            'id' => 2,
+            'codigo' => 102,
+            'descricao' => 'MESA RJ',
+            'administracao_id' => 20,
+        ]);
+        $type2->save();
+
+        $filters = new AssetTypeFilters(
+            administrationId: null,
+            search: '',
+            state: 'RJ',
+            page: 1,
+            perPage: 10,
+        );
+
+        $result = $this->service->paginate($filters);
+
+        self::assertCount(1, $result->items());
+        self::assertSame('MESA RJ', $result->items()[0]->descricao);
     }
 
     public function testAdministrationOptionsReturnsOrderedAdministrations(): void

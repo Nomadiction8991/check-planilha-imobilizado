@@ -26,6 +26,14 @@ class LegacyAssetTypeBrowserService implements LegacyAssetTypeBrowserServiceInte
                 }
             )
             ->when(
+                $filters->state !== null && $filters->state !== '' && Schema::hasColumn('tipos_bens', 'administracao_id'),
+                static function ($query) use ($filters): void {
+                    $query->whereHas('administracao', static function ($adminQuery) use ($filters): void {
+                        $adminQuery->where('estado', $filters->state);
+                    });
+                }
+            )
+            ->when(
                 $filters->search !== '',
                 static function ($query) use ($filters): void {
                     $query->where(function ($nested) use ($filters): void {
@@ -61,7 +69,7 @@ class LegacyAssetTypeBrowserService implements LegacyAssetTypeBrowserServiceInte
         return $query->get(['id', 'descricao']);
     }
 
-    public function assetTypeOptions(): \Illuminate\Support\Collection
+    public function assetTypeOptions(): Collection
     {
         $supportsAdministrationScope = Schema::hasColumn('tipos_bens', 'administracao_id');
         $query = $this->baseQuery();

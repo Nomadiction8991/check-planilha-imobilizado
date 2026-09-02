@@ -15,6 +15,7 @@ final class AssetTypeFiltersTest extends TestCase
         $request = Request::create('/asset-types', 'GET', [
             'administracao_id' => '15',
             'busca' => 'CADEIRA',
+            'estado' => 'sp',
             'pagina' => '2',
         ]);
 
@@ -22,6 +23,7 @@ final class AssetTypeFiltersTest extends TestCase
 
         self::assertSame(15, $filters->administrationId);
         self::assertSame('CADEIRA', $filters->search);
+        self::assertSame('SP', $filters->state);
         self::assertSame(2, $filters->page);
         self::assertSame(20, $filters->perPage);
 
@@ -29,6 +31,7 @@ final class AssetTypeFiltersTest extends TestCase
         self::assertSame([
             'administracao_id' => 15,
             'busca' => 'CADEIRA',
+            'estado' => 'SP',
         ], $query);
     }
 
@@ -40,9 +43,22 @@ final class AssetTypeFiltersTest extends TestCase
 
         self::assertNull($filters->administrationId);
         self::assertSame('', $filters->search);
+        self::assertNull($filters->state);
         self::assertSame(1, $filters->page);
         self::assertSame(20, $filters->perPage);
 
         self::assertSame([], $filters->toQuery());
+    }
+
+    public function testFromRequestSanitizesState(): void
+    {
+        $request = Request::create('/asset-types', 'GET', [
+            'estado' => ' mg-extra ',
+        ]);
+
+        $filters = AssetTypeFilters::fromRequest($request);
+
+        self::assertSame('MG', $filters->state);
+        self::assertSame(['estado' => 'MG'], $filters->toQuery());
     }
 }
