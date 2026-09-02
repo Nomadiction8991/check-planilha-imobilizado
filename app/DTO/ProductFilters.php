@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 final readonly class ProductFilters
 {
     public function __construct(
+        public ?int $administrationId,
         public ?int $comumId,
         public string $search,
         public ?int $dependencyId,
@@ -22,6 +23,7 @@ final readonly class ProductFilters
 
     public static function fromRequest(Request $request): self
     {
+        $administrationId = (int) $request->query('administracao_id', 0);
         $comumId = (int) $request->query('comum_id', 0);
         $dependencyId = (int) $request->query('dependencia_id', 0);
         $assetTypeId = (int) $request->query('tipo_bem_id', 0);
@@ -36,6 +38,7 @@ final readonly class ProductFilters
         }
 
         return new self(
+            administrationId: $administrationId > 0 ? $administrationId : null,
             comumId: $comumId > 0 ? $comumId : null,
             search: $search,
             dependencyId: $dependencyId > 0 ? $dependencyId : null,
@@ -53,6 +56,10 @@ final readonly class ProductFilters
     public function toQuery(): array
     {
         $query = [];
+
+        if ($this->administrationId !== null) {
+            $query['administracao_id'] = $this->administrationId;
+        }
 
         if ($this->comumId !== null) {
             $query['comum_id'] = $this->comumId;

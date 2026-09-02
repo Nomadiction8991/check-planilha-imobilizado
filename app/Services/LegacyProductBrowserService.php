@@ -6,14 +6,15 @@ namespace App\Services;
 
 use App\Contracts\LegacyProductBrowserServiceInterface;
 use App\DTO\ProductFilters;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Models\Legacy\Dependencia;
 use App\Models\Legacy\Produto;
+use App\Models\Legacy\TipoBem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
-use App\Models\Legacy\TipoBem;
 
 class LegacyProductBrowserService implements LegacyProductBrowserServiceInterface
 {
@@ -26,6 +27,10 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
                 'dependencia:id,descricao',
                 'tipoBem:id,codigo,descricao',
             ])
+            ->when(
+                $filters->administrationId !== null,
+                static fn ($query) => $query->whereHas('comum', static fn ($churchQuery) => $churchQuery->where('administracao_id', $filters->administrationId))
+            )
             ->when(
                 $filters->comumId !== null,
                 static fn ($query) => $query->where('comum_id', $filters->comumId)
@@ -96,6 +101,13 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
         return Comum::query()
             ->orderBy('codigo')
             ->get(['id', 'codigo', 'descricao']);
+    }
+
+    public function administrationOptions(): Collection
+    {
+        return Administracao::query()
+            ->orderBy('descricao')
+            ->get(['id', 'descricao']);
     }
 
     public function dependencyOptions(?int $comumId): Collection
