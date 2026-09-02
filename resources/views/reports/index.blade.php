@@ -23,6 +23,30 @@
         <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.reports.index') }}">
                 <div class="filters-primary">
+                    <label for="reports-admin-search">
+                        Buscar administração
+                        <input
+                            id="reports-admin-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="reports-admin-select"
+                            data-reports-admin-search
+                        >
+                    </label>
+                    <label class="filters-principal">
+                        Administração
+                        <select id="reports-admin-select" name="administracao_id" data-reports-admin-select>
+                            <option value="">Todas as administrações</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected((int) ($selectedAdministrationId ?? 0) === (int) $administration->id)>
+                                    #{{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <p id="reports-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-reports-admin-status></p>
+
                     <label for="reports-church-search">
                         Buscar igreja
                         <input
@@ -55,6 +79,40 @@
             </form>
             <script>
                 (() => {
+                    const adminSearch = document.querySelector('[data-reports-admin-search]');
+                    const adminSelect = document.querySelector('[data-reports-admin-select]');
+                    const adminStatus = document.querySelector('[data-reports-admin-status]');
+                    if (adminSearch && adminSelect && adminStatus) {
+                        const adminOptions = Array.from(adminSelect.options);
+                        const adminPlaceholder = adminOptions.find((o) => o.value === '');
+                        const realAdminOptions = adminOptions.filter((o) => o.value !== '');
+                        const applyAdminFilter = () => {
+                            const term = adminSearch.value.trim().toLowerCase();
+                            let visible = 0;
+                            realAdminOptions.forEach((opt) => {
+                                const match = term === '' || opt.textContent.toLowerCase().includes(term);
+                                opt.hidden = !match;
+                                opt.disabled = !match;
+                                if (match) visible += 1;
+                            });
+                            if (adminSelect.value !== '' && adminSelect.options[adminSelect.selectedIndex]?.hidden) {
+                                adminSelect.value = '';
+                            }
+                            if (visible === 0 && term !== '') {
+                                adminStatus.textContent = 'Nenhuma administração encontrada para "' + adminSearch.value.trim() + '".';
+                                adminStatus.hidden = false;
+                                adminSelect.disabled = true;
+                            } else {
+                                adminStatus.textContent = '';
+                                adminStatus.hidden = true;
+                                adminSelect.disabled = false;
+                                if (adminPlaceholder) { adminPlaceholder.hidden = false; adminPlaceholder.disabled = false; }
+                            }
+                        };
+                        adminSearch.addEventListener('input', applyAdminFilter);
+                        adminSearch.addEventListener('search', applyAdminFilter);
+                    }
+
                     const search = document.querySelector('[data-reports-church-search]');
                     const select = document.querySelector('[data-reports-church-select]');
                     const status = document.querySelector('[data-reports-church-status]');

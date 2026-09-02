@@ -19,10 +19,21 @@ final class LegacyReportPagesTest extends TestCase
             LegacyReportServiceInterface::class,
             new class implements LegacyReportServiceInterface
             {
-                public function churchOptions(): Collection
+                public function churchOptions(?int $administrationId = null): Collection
                 {
+                    if ($administrationId === 99) {
+                        return collect();
+                    }
+
                     return collect([
                         (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+                    ]);
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect([
+                        (object) ['id' => 4, 'descricao' => 'Cuiabá'],
                     ]);
                 }
 
@@ -184,11 +195,24 @@ final class LegacyReportPagesTest extends TestCase
         $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
 
         $response->assertOk();
+        $response->assertSee('Buscar administração');
+        $response->assertSee('data-reports-admin-search', escape: false);
+        $response->assertSee('data-reports-admin-select', escape: false);
+        $response->assertSee('data-reports-admin-status', escape: false);
+        $response->assertSee('Cuiabá');
         $response->assertSee('Buscar igreja');
         $response->assertSee('data-reports-church-search', escape: false);
         $response->assertSee('data-reports-church-select', escape: false);
         $response->assertSee('data-reports-church-status', escape: false);
         $response->assertSee('Digite para filtrar');
+    }
+
+    public function testReportsIndexFiltersChurchesByAdministration(): void
+    {
+        $response = $this->get(route('migration.reports.index', ['administracao_id' => 99]));
+
+        $response->assertOk();
+        $response->assertDontSee('Central Cuiabá');
     }
 
     public function testReportsShowRendersPreview(): void
@@ -261,7 +285,12 @@ final class LegacyReportPagesTest extends TestCase
             LegacyReportServiceInterface::class,
             new class implements LegacyReportServiceInterface
             {
-                public function churchOptions(): Collection
+                public function churchOptions(?int $administrationId = null): Collection
+                {
+                    return collect();
+                }
+
+                public function administrationOptions(): Collection
                 {
                     return collect();
                 }

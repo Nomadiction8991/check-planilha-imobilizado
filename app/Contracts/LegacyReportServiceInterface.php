@@ -8,7 +8,9 @@ use Illuminate\Support\Collection;
 
 interface LegacyReportServiceInterface
 {
-    public function churchOptions(): Collection;
+    public function churchOptions(?int $administrationId = null): Collection;
+
+    public function administrationOptions(): Collection;
 
     /**
      * @return array<int, array{codigo: string, titulo: string, descricao: string, rota: string, quantidade: int}>

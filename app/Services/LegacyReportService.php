@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyReportServiceInterface;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Support\LegacyCsvSanitizer;
 use App\Support\LegacyProductNameSupport;
@@ -57,11 +58,24 @@ class LegacyReportService implements LegacyReportServiceInterface
     ) {
     }
 
-    public function churchOptions(): Collection
+    public function churchOptions(?int $administrationId = null): Collection
     {
-        return Comum::query()
+        $query = Comum::query();
+
+        if ($administrationId !== null) {
+            $query->where('administracao_id', $administrationId);
+        }
+
+        return $query
             ->orderBy('codigo')
             ->get(['id', 'codigo', 'descricao']);
+    }
+
+    public function administrationOptions(): Collection
+    {
+        return Administracao::query()
+            ->orderBy('descricao')
+            ->get(['id', 'descricao']);
     }
 
     public function listAvailableReports(int $churchId): array
