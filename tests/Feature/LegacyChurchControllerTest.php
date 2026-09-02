@@ -159,6 +159,45 @@ final class LegacyChurchControllerTest extends TestCase
         $response->assertSee('Central Cuiabá');
     }
 
+    public function testIndexRendersAdministrationFilterOptions(): void
+    {
+        $this->app->instance(
+            LegacyChurchBrowserServiceInterface::class,
+            new class implements LegacyChurchBrowserServiceInterface
+            {
+                public function paginate(ChurchFilters $filters): LengthAwarePaginator
+                {
+                    return new LengthAwarePaginator(
+                        items: collect(),
+                        total: 0,
+                        perPage: 20,
+                        currentPage: 1,
+                        options: ['path' => '/churches'],
+                    );
+                }
+
+                public function countAll(): int
+                {
+                    return 0;
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect([
+                        (object) ['id' => 15, 'descricao' => 'Administração Regional'],
+                    ]);
+                }
+            },
+        );
+
+        $response = $this->get(route('migration.churches.index', ['administracao_id' => 15]));
+
+        $response->assertOk();
+        $response->assertSee('Administração Regional');
+        $response->assertSee('data-churches-admin-search', false);
+        $response->assertSee('data-churches-admin-select', false);
+    }
+
     // ─── Public access (same controller, public route) ──────────────────────
 
     public function testPublicRouteRendersUsingPublicSession(): void

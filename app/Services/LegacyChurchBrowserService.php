@@ -19,6 +19,12 @@ class LegacyChurchBrowserService implements LegacyChurchBrowserServiceInterface
             ->with(['administracao:id,descricao'])
             ->withCount('activeProducts')
             ->when(
+                $filters->administrationId !== null,
+                static function ($query) use ($filters): void {
+                    $query->where('administracao_id', $filters->administrationId);
+                }
+            )
+            ->when(
                 $filters->search !== '',
                 static function ($query) use ($filters): void {
                     $query->where(function ($nested) use ($filters): void {
