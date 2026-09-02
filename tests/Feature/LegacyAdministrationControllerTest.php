@@ -213,6 +213,57 @@ final class LegacyAdministrationControllerTest extends TestCase
         $response->assertSee('Administração Central');
     }
 
+    public function testIndexPassesStateFilterToService(): void
+    {
+        $capturedState = null;
+        $this->app->instance(
+            LegacyAdministrationBrowserServiceInterface::class,
+            new class($capturedState) implements LegacyAdministrationBrowserServiceInterface
+            {
+                public function __construct(private ?string &$capturedState)
+                {
+                }
+
+                public function paginate(AdministrationFilters $filters): LengthAwarePaginator
+                {
+                    $this->capturedState = $filters->state;
+
+                    return new LengthAwarePaginator(
+                        items: collect([
+                            (object) [
+                                'id' => 4,
+                                'descricao' => 'Administração Paraná',
+                                'cnpj' => '12345678000190',
+                                'estado' => 'PR',
+                                'cidade' => 'Curitiba',
+                            ],
+                        ]),
+                        total: 1,
+                        perPage: 20,
+                        currentPage: 1,
+                        options: ['path' => '/administrations'],
+                    );
+                }
+
+                public function countAll(): int
+                {
+                    return 1;
+                }
+            },
+        );
+
+        $response = $this->withSession([
+            'is_admin' => true,
+            'legacy_permissions' => [
+                'administrations.view' => true,
+            ],
+        ])->get(route('migration.administrations.index', ['estado' => 'PR']));
+
+        $response->assertOk();
+        $response->assertSee('Administração Paraná');
+        $this->assertSame('PR', $capturedState);
+    }
+
     // ─── Create ──────────────────────────────────────────────────────────────
 
     public function testCreateRendersForm(): void
