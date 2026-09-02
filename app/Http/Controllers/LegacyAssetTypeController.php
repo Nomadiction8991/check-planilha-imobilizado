@@ -34,6 +34,7 @@ class LegacyAssetTypeController extends Controller
         return view('asset-types.index', [
             'filters' => $filters,
             'assetTypes' => $paginator,
+            'administrations' => $this->assetTypes->administrationOptions(),
             'totalAll' => $this->assetTypes->countAll(),
         ]);
     }

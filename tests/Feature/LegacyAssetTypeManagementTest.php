@@ -44,6 +44,9 @@ final class LegacyAssetTypeManagementTest extends TestCase
         self::assertIsString($view);
         self::assertStringContainsString('data-confirm="Excluir este tipo de bem?"', $view);
         self::assertStringNotContainsString("onclick=\"return confirm('Excluir este tipo de bem?');\"", $view);
+        self::assertStringContainsString('data-asset-types-admin-search', $view);
+        self::assertStringContainsString('data-asset-types-admin-select', $view);
+        self::assertStringContainsString('data-asset-types-admin-status', $view);
     }
 
     public function testCreatePageRendersForm(): void

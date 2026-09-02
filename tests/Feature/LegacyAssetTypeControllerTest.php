@@ -441,6 +441,11 @@ final class LegacyAssetTypeControllerTest extends TestCase
                 {
                     return $this->totalCount;
                 }
+
+                public function administrationOptions(): \Illuminate\Support\Collection
+                {
+                    return collect();
+                }
             }
         );
     }

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 final readonly class AssetTypeFilters
 {
     public function __construct(
+        public ?int $administrationId,
         public string $search,
         public int $page,
         public int $perPage,
@@ -17,7 +18,10 @@ final readonly class AssetTypeFilters
 
     public static function fromRequest(Request $request): self
     {
+        $administrationId = (int) $request->query('administracao_id', 0);
+
         return new self(
+            administrationId: $administrationId > 0 ? $administrationId : null,
             search: trim((string) $request->query('busca', '')),
             page: max(1, (int) $request->query('pagina', 1)),
             perPage: 20,
@@ -29,10 +33,16 @@ final readonly class AssetTypeFilters
      */
     public function toQuery(): array
     {
-        if ($this->search === '') {
-            return [];
+        $query = [];
+
+        if ($this->administrationId !== null) {
+            $query['administracao_id'] = $this->administrationId;
         }
 
-        return ['busca' => $this->search];
+        if ($this->search !== '') {
+            $query['busca'] = $this->search;
+        }
+
+        return $query;
     }
 }

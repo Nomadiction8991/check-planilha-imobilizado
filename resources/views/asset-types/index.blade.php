@@ -44,6 +44,30 @@
         <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.asset-types.index') }}">
                 <div class="filters-primary">
+                    <label for="asset-types-admin-search">
+                        Buscar administração
+                        <input
+                            id="asset-types-admin-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="asset-types-admin-select"
+                            data-asset-types-admin-search
+                        >
+                    </label>
+                    <label class="filters-principal">
+                        Administração
+                        <select id="asset-types-admin-select" name="administracao_id" data-asset-types-admin-select>
+                            <option value="">Todas</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected($filters->administrationId === $administration->id)>
+                                    #{{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <p id="asset-types-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-asset-types-admin-status></p>
+
                     <label class="filters-query">
                         Buscar por código ou descrição
                         <input type="text" name="busca" value="{{ $filters->search }}" placeholder="4 ou CADEIRA">
@@ -55,6 +79,41 @@
                     </div>
                 </div>
             </form>
+            <script>
+                (() => {
+                    const search = document.querySelector('[data-asset-types-admin-search]');
+                    const select = document.querySelector('[data-asset-types-admin-select]');
+                    const status = document.querySelector('[data-asset-types-admin-status]');
+                    if (!search || !select || !status) return;
+                    const options = Array.from(select.options);
+                    const placeholder = options.find((o) => o.value === '');
+                    const adminOptions = options.filter((o) => o.value !== '');
+                    const applyFilter = () => {
+                        const term = search.value.trim().toLowerCase();
+                        let visible = 0;
+                        adminOptions.forEach((opt) => {
+                            const match = term === '' || opt.textContent.toLowerCase().includes(term);
+                            opt.hidden = !match;
+                            opt.disabled = !match;
+                            if (match) visible += 1;
+                        });
+                        if (select.value !== '' && select.options[select.selectedIndex]?.hidden) {
+                            select.value = '';
+                        }
+                        if (visible === 0 && term !== '') {
+                            status.textContent = 'Nenhuma administração encontrada para "' + search.value.trim() + '".';
+                            status.hidden = false;
+                            select.disabled = true;
+                        } else {
+                            status.textContent = '';
+                            status.hidden = true;
+                            select.disabled = false;
+                            if (placeholder) { placeholder.hidden = false; placeholder.disabled = false; }
+                        }
+                    };
+                    search.addEventListener('input', applyFilter);
+                })();
+            </script>
         </div>
     </section>
 

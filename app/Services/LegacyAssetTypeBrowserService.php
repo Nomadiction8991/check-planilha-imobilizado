@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\LegacyAssetTypeBrowserServiceInterface;
 use App\DTO\AssetTypeFilters;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\TipoBem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -18,6 +19,12 @@ class LegacyAssetTypeBrowserService implements LegacyAssetTypeBrowserServiceInte
     {
         return $this->baseQuery()
             ->withCount(['activeProducts as active_products_count'])
+            ->when(
+                $filters->administrationId !== null && Schema::hasColumn('tipos_bens', 'administracao_id'),
+                static function ($query) use ($filters): void {
+                    $query->where('administracao_id', $filters->administrationId);
+                }
+            )
             ->when(
                 $filters->search !== '',
                 static function ($query) use ($filters): void {
@@ -40,6 +47,18 @@ class LegacyAssetTypeBrowserService implements LegacyAssetTypeBrowserServiceInte
     public function countAll(): int
     {
         return $this->baseQuery()->count();
+    }
+
+    public function administrationOptions(): Collection
+    {
+        $query = Administracao::query()->orderBy('descricao');
+        $administrationId = $this->currentAdministrationId();
+
+        if (!$this->canManageOtherAdministrations() && $administrationId !== null) {
+            $query->whereKey($administrationId);
+        }
+
+        return $query->get(['id', 'descricao']);
     }
 
     public function assetTypeOptions(): \Illuminate\Support\Collection
