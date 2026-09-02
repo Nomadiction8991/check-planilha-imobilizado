@@ -111,6 +111,7 @@ final class LegacyAuditControllerTest extends TestCase
         $response->assertViewHas('filters');
         $response->assertViewHas('modules');
         $response->assertViewHas('scopeLabel');
+        $response->assertViewHas('states');
         $response->assertSee('Auditoria do sistema');
         $response->assertSee('Escopo atual: Administração #2');
         $response->assertSee('Maria Oliveira');

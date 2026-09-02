@@ -99,3 +99,11 @@ O sistema SHALL permitir filtrar os registros de eventos auditados por uma admin
 - THEN o select correspondente oculta opções não correspondentes e exibe feedback acessível de contagem ou ausência de resultados
 - AND se nenhuma opção casar com o termo pesquisado, informa adequadamente no status acessível
 
+### Requirement: [ADDED] Passagem de Estados para View de Auditoria
+O sistema DEVE fornecer a lista de estados federativos brasileiros para a view de listagem de auditoria no `LegacyAuditController`.
+
+#### Scenario: Visualização da página de auditoria com estados
+- GIVEN um usuário com permissão de auditoria autenticado
+- WHEN o usuário acessa a listagem de auditoria
+- THEN a view recebe a coleção/array de estados configurados no sistema
+
