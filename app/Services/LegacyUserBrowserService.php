@@ -29,6 +29,10 @@ class LegacyUserBrowserService implements LegacyUserBrowserServiceInterface
             ->with(['administracao:id,descricao'])
             ->when($scopeAdministrationId !== null, static fn ($query) => $query->where('administracao_id', $scopeAdministrationId))
             ->when(
+                $filters->state !== null && $filters->state !== '',
+                static fn ($query) => $query->where('endereco_estado', $filters->state)
+            )
+            ->when(
                 $filters->search !== '',
                 static function ($query) use ($filters): void {
                     $query->where(function ($nested) use ($filters): void {

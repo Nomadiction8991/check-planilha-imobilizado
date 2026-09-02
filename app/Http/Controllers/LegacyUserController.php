@@ -36,6 +36,7 @@ class LegacyUserController extends Controller
             'filters' => $filters,
             'users' => $paginator,
             'administrations' => $this->users->administrationOptions(),
+            'states' => (array) config('brazil.states', []),
             'statusOptions' => $this->users->statusOptions(),
             'totalAll' => $this->users->countAll(),
         ]);

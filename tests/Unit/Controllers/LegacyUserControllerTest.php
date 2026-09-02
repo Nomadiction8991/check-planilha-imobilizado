@@ -98,7 +98,7 @@ final class LegacyUserControllerTest extends TestCase
 
     public function testIndexReturnsViewWithExpectedData(): void
     {
-        $request = new Request(['busca' => 'maria', 'status' => '1']);
+        $request = new Request(['busca' => 'maria', 'status' => '1', 'estado' => ' sp ']);
 
         $filters = UserFilters::fromRequest($request);
 
@@ -110,7 +110,11 @@ final class LegacyUserControllerTest extends TestCase
 
         $this->users->shouldReceive('paginate')
             ->once()
-            ->with(Mockery::on(fn (UserFilters $f): bool => $f->search === 'maria' && $f->status === '1'))
+            ->with(Mockery::on(fn (UserFilters $f): bool =>
+                $f->search === 'maria'
+                && $f->status === '1'
+                && $f->state === 'SP'
+            ))
             ->andReturn($paginator);
 
         $administrationOptions = collect([
@@ -128,12 +132,15 @@ final class LegacyUserControllerTest extends TestCase
 
         $data = $view->getData();
         $this->assertArrayHasKey('filters', $data);
+        self::assertSame('SP', $data['filters']->state);
         $this->assertArrayHasKey('users', $data);
-        $this->assertArrayHasKey('administrations', $data);
-        $this->assertArrayHasKey('statusOptions', $data);
-        $this->assertArrayHasKey('totalAll', $data);
-        $this->assertSame($administrationOptions, $data['administrations']);
-        $this->assertSame(['1' => 'Ativos'], $data['statusOptions']);
+        self::assertArrayHasKey('administrations', $data);
+        self::assertArrayHasKey('states', $data);
+        self::assertArrayHasKey('statusOptions', $data);
+        self::assertArrayHasKey('totalAll', $data);
+        self::assertSame($administrationOptions, $data['administrations']);
+        self::assertSame((array) config('brazil.states', []), $data['states']);
+        self::assertSame(['1' => 'Ativos'], $data['statusOptions']);
         $this->assertSame(42, $data['totalAll']);
     }
 

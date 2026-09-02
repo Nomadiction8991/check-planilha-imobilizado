@@ -12,6 +12,7 @@ final readonly class UserFilters
         public ?int $administrationId,
         public string $search,
         public string $status,
+        public ?string $state,
         public int $page,
         public int $perPage,
     ) {
@@ -21,11 +22,14 @@ final readonly class UserFilters
     {
         $administrationId = (int) $request->query('administracao_id', 0);
         $status = trim((string) $request->query('status', ''));
+        $rawState = trim((string) $request->query('estado', ''));
+        $state = $rawState !== '' ? mb_strtoupper(mb_substr($rawState, 0, 2, 'UTF-8'), 'UTF-8') : null;
 
         return new self(
             administrationId: $administrationId > 0 ? $administrationId : null,
             search: trim((string) $request->query('busca', '')),
             status: in_array($status, ['0', '1'], true) ? $status : '',
+            state: $state,
             page: max(1, (int) $request->query('pagina', 1)),
             perPage: 20,
         );
@@ -48,6 +52,10 @@ final readonly class UserFilters
 
         if ($this->status !== '') {
             $query['status'] = $this->status;
+        }
+
+        if ($this->state !== null && $this->state !== '') {
+            $query['estado'] = $this->state;
         }
 
         return $query;
