@@ -149,10 +149,15 @@ final class LegacyUserManagementTest extends TestCase
 
     public function testEditPageRendersForm(): void
     {
+        $this->boundUser->endereco_estado = 'SP';
+
         $response = $this->get(route('migration.users.edit', ['user' => 9]));
 
         $response->assertOk();
         $response->assertSee('Editar usuário vinculado a uma administração.');
+        $response->assertSee('name="endereco_estado"', false);
+        $response->assertSee('value="SP" selected', false);
+        $response->assertSee('São Paulo (SP)');
         $response->assertSee('Administrações permitidas');
         $response->assertDontSee('<select name="administracao_id"', false);
         $response->assertSee('Salvar alterações');

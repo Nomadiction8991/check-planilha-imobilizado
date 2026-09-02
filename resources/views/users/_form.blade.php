@@ -322,8 +322,10 @@
                         UF
                         <select name="endereco_estado" id="endereco_estado">
                             <option value="">Selecione</option>
-                            @foreach ($states as $state)
-                                <option value="{{ $state }}" @selected($selectedState === $state)>{{ $state }}</option>
+                            @foreach ($states as $stateCode => $stateLabel)
+                                <option value="{{ $stateCode }}" @selected($selectedState === $stateCode)>
+                                    {{ $stateLabel }} ({{ $stateCode }})
+                                </option>
                             @endforeach
                         </select>
                     </label>
