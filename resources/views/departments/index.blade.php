@@ -12,7 +12,7 @@
         <h1>Dependências disponíveis no sistema.</h1>
         <p class="hero-copy">
             Esta tela permite consultar e manter dependências vinculadas às igrejas. O usuário consegue filtrar por
-            igreja, cadastrar novas entradas, editar descrições e remover apenas dependências que ainda não estejam ligadas a produtos.
+            administração e igreja, cadastrar novas entradas, editar descrições e remover apenas dependências que ainda não estejam ligadas a produtos.
         </p>
     </section>
 
@@ -44,6 +44,30 @@
         <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.departments.index') }}">
                 <div class="filters-primary">
+                    <label for="departments-admin-search">
+                        Buscar administração
+                        <input
+                            id="departments-admin-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="departments-admin-select"
+                            data-departments-admin-search
+                        >
+                    </label>
+                    <label class="filters-principal">
+                        Administração
+                        <select id="departments-admin-select" name="administracao_id" data-departments-admin-select>
+                            <option value="">Todas</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected($filters->administrationId === $administration->id)>
+                                    #{{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <p id="departments-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-departments-admin-status></p>
+
                     <label for="departments-church-search">
                         Buscar igreja
                         <input
@@ -79,6 +103,42 @@
                     </div>
                 </div>
             </form>
+            <script>
+                (() => {
+                    const search = document.querySelector('[data-departments-admin-search]');
+                    const select = document.querySelector('[data-departments-admin-select]');
+                    const status = document.querySelector('[data-departments-admin-status]');
+                    if (!search || !select || !status) return;
+                    const options = Array.from(select.options);
+                    const placeholder = options.find((o) => o.value === '');
+                    const adminOptions = options.filter((o) => o.value !== '');
+                    const applyFilter = () => {
+                        const term = search.value.trim().toLowerCase();
+                        let visible = 0;
+                        adminOptions.forEach((opt) => {
+                            const match = term === '' || opt.textContent.toLowerCase().includes(term);
+                            opt.hidden = !match;
+                            opt.disabled = !match;
+                            if (match) visible += 1;
+                        });
+                        if (select.value !== '' && select.options[select.selectedIndex]?.hidden) {
+                            select.value = '';
+                        }
+                        if (visible === 0 && term !== '') {
+                            status.textContent = 'Nenhuma administração encontrada para "' + search.value.trim() + '".';
+                            status.hidden = false;
+                            select.disabled = true;
+                        } else {
+                            status.textContent = '';
+                            status.hidden = true;
+                            select.disabled = false;
+                            if (placeholder) { placeholder.hidden = false; placeholder.disabled = false; }
+                        }
+                    };
+                    search.addEventListener('input', applyFilter);
+                    search.addEventListener('search', applyFilter);
+                })();
+            </script>
         </div>
     </section>
 

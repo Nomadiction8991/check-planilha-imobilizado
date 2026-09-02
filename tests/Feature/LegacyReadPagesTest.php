@@ -242,6 +242,13 @@ final class LegacyReadPagesTest extends TestCase
                     ]);
                 }
 
+                public function administrationOptions(): Collection
+                {
+                    return collect([
+                        (object) ['id' => 1, 'descricao' => 'Administração Central'],
+                    ]);
+                }
+
                 public function countAll(): int
                 {
                     return 1;

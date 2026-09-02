@@ -32,6 +32,7 @@ class LegacyDepartmentController extends Controller
             'filters' => $filters,
             'departments' => $paginator,
             'churches' => $this->departments->churchOptions(),
+            'administrations' => $this->departments->administrationOptions(),
             'totalAll' => $this->departments->countAll(),
         ]);
     }

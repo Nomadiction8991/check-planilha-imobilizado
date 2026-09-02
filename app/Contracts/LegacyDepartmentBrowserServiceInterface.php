@@ -14,5 +14,7 @@ interface LegacyDepartmentBrowserServiceInterface
 
     public function churchOptions(): Collection;
 
+    public function administrationOptions(): Collection;
+
     public function countAll(): int;
 }
