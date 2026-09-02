@@ -392,6 +392,7 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertSee('data-spreadsheets-admin-status', false);
         $response->assertDontSee('name="usuario_id"');
         $response->assertDontSee('Arquivo Antigo 4.csv');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
     }
 
     public function testPreviewPageShowsChurchScopeWarning(): void

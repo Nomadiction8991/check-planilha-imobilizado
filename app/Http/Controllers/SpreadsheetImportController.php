@@ -29,6 +29,7 @@ class SpreadsheetImportController extends Controller
             'administrations' => $this->imports->administrationOptions(),
             'selectedAdministrationId' => $selectedAdministrationId,
             'recentImports' => $this->imports->recentImports(null, 5),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 
