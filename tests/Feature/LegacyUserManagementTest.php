@@ -206,6 +206,9 @@ final class LegacyUserManagementTest extends TestCase
         $response = $this->withSession(['is_admin' => true])->get(route('migration.users.index'));
 
         $response->assertOk();
+        $response->assertSee('name="estado"', false);
+        $response->assertSee('Todos os estados');
+        $response->assertSee('SP - São Paulo');
         $response->assertSee(route('migration.users.edit', ['user' => 1]), false);
         $response->assertDontSee('Protegido');
     }
