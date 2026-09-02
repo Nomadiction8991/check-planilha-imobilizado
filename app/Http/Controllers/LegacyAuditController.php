@@ -54,6 +54,7 @@ final class LegacyAuditController extends Controller
             'scopeLabel' => $this->resolveScopeLabel($currentUser),
             'administrations' => $this->auth->availableAdministrations(),
             'selectedAdministrationId' => $this->selectedAdministrationIdFromFilters($filters),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 
