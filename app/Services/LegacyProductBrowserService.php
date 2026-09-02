@@ -36,6 +36,10 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
                 static fn ($query) => $query->where('comum_id', $filters->comumId)
             )
             ->when(
+                $filters->state !== null && $filters->state !== '',
+                static fn ($query) => $query->whereHas('comum', static fn ($churchQuery) => $churchQuery->where('estado', $filters->state))
+            )
+            ->when(
                 $filters->search !== '',
                 static function ($query) use ($filters): void {
                     $query->where(function ($nested) use ($filters): void {

@@ -77,6 +77,18 @@
                     </label>
                     <p id="product-church-search-status" class="helper" role="status" aria-live="polite" hidden data-product-church-status></p>
 
+                    <label class="filters-principal">
+                        Estado (UF)
+                        <select name="estado" id="products-estado-select">
+                            <option value="">Todos os estados</option>
+                            @foreach ($states as $stateCode => $stateLabel)
+                                <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
+                                    {{ $stateCode }} - {{ $stateLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
                     <label class="filters-query">
                         Busca geral
                         <input

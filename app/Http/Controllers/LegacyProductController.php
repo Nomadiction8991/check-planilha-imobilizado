@@ -48,6 +48,7 @@ class LegacyProductController extends Controller
             'administrations' => $this->products->administrationOptions(),
             'dependencies' => $this->products->dependencyOptions($filters->comumId),
             'assetTypes' => $assetTypes,
+            'states' => (array) config('brazil.states', []),
             'statusOptions' => $this->products->statusOptions(),
         ]);
     }
@@ -83,6 +84,7 @@ class LegacyProductController extends Controller
             'administrations' => $this->products->administrationOptions(),
             'dependencies' => $this->products->dependencyOptions($filters->comumId),
             'assetTypes' => $this->products->assetTypeOptions(),
+            'states' => (array) config('brazil.states', []),
             'statusOptions' => $this->products->statusOptions(),
             'stats' => $stats,
         ]);

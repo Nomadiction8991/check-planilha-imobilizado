@@ -96,6 +96,53 @@ final class LegacyProductControllerTest extends TestCase
         $response->assertSee('data-product-admin-search', false);
         $response->assertSee('data-product-admin-select', false);
         $response->assertSee('data-product-admin-status', false);
+        $response->assertSee('id="products-estado-select"', false);
+    }
+
+    public function testIndexPassesStateFilterToService(): void
+    {
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->withArgs(fn (ProductFilters $filters): bool => $filters->state === 'SP')
+            ->andReturn(new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 20,
+                currentPage: 1,
+                options: ['path' => '/products'],
+            ));
+
+        $this->products
+            ->shouldReceive('churchOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('administrationOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('dependencyOptions')
+            ->once()
+            ->withSomeOfArgs()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('assetTypeOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('statusOptions')
+            ->once()
+            ->andReturn([]);
+
+        $response = $this->get(route('migration.products.index', ['estado' => 'SP']));
+
+        $response->assertOk();
+        $response->assertSee('id="products-estado-select"', false);
     }
 
     public function testIndexRedirectsGuestsToLogin(): void

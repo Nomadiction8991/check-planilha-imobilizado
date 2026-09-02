@@ -328,6 +328,20 @@
                     </label>
                     <p id="product-church-search-status-verification" class="helper" role="status" aria-live="polite" hidden data-product-church-status></p>
 
+                    <label class="filters-principal">
+                        Estado (UF)
+                        <div class="filters-principal__controls">
+                            <select name="estado" id="product-verification-estado-select">
+                                <option value="">Todos os estados</option>
+                                @foreach ($states as $stateCode => $stateLabel)
+                                    <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
+                                        {{ $stateCode }} - {{ $stateLabel }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </label>
+
                     <label class="filters-query">
                         Busca geral
                         <input

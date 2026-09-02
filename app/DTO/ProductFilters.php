@@ -14,6 +14,7 @@ final readonly class ProductFilters
         public string $search,
         public ?int $dependencyId,
         public ?int $assetTypeId,
+        public ?string $state,
         public string $status,
         public bool $onlyNew,
         public int $page,
@@ -28,6 +29,8 @@ final readonly class ProductFilters
         $dependencyId = (int) $request->query('dependencia_id', 0);
         $assetTypeId = (int) $request->query('tipo_bem_id', 0);
         $search = trim((string) $request->query('busca', ''));
+        $rawState = trim((string) $request->query('estado', ''));
+        $state = $rawState !== '' ? mb_strtoupper(mb_substr($rawState, 0, 2, 'UTF-8'), 'UTF-8') : null;
 
         if ($search === '') {
             $search = trim((string) $request->query('nome', ''));
@@ -43,6 +46,7 @@ final readonly class ProductFilters
             search: $search,
             dependencyId: $dependencyId > 0 ? $dependencyId : null,
             assetTypeId: $assetTypeId > 0 ? $assetTypeId : null,
+            state: $state,
             status: trim((string) $request->query('status', '')),
             onlyNew: $request->boolean('somente_novos') || $request->query('status') === 'novos',
             page: max(1, (int) $request->query('pagina', 1)),
@@ -75,6 +79,10 @@ final readonly class ProductFilters
 
         if ($this->assetTypeId !== null) {
             $query['tipo_bem_id'] = $this->assetTypeId;
+        }
+
+        if ($this->state !== null && $this->state !== '') {
+            $query['estado'] = $this->state;
         }
 
         if ($this->status !== '') {
