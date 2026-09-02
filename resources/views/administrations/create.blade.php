@@ -79,7 +79,7 @@
 
                     <label>
                         Cidade
-                        <select name="cidade" id="administration-cidade" required disabled>
+                        <select name="cidade" id="administration-cidade" required disabled data-selected-city="{{ old('cidade') }}">
                             <option value="">Selecione um estado primeiro</option>
                         </select>
                     </label>

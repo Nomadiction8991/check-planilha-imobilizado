@@ -132,6 +132,22 @@ final class LegacyAdministrationManagementTest extends TestCase
         $response->assertSee('data-mask="cnpj"', false);
     }
 
+    public function testCreatePagePreservesCityAfterValidationFailure(): void
+    {
+        $response = $this->followingRedirects()
+            ->from(route('migration.administrations.create'))
+            ->post(route('migration.administrations.store'), [
+                'descricao' => '',
+                'cnpj' => '12345678000191',
+                'estado' => 'MT',
+                'cidade' => 'Várzea Grande',
+            ]);
+
+        $response->assertOk();
+        $response->assertSee('data-selected-city="Várzea Grande"', false);
+        $response->assertSee($this->localidadesAsset, false);
+    }
+
     public function testStoreCreatesAdministration(): void
     {
         $this->mock(
