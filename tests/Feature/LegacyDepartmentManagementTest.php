@@ -52,6 +52,13 @@ final class LegacyDepartmentManagementTest extends TestCase
                     ]);
                 }
 
+                public function administrationOptions(): Collection
+                {
+                    return collect([
+                        (object) ['id' => 1, 'descricao' => 'Administração Central'],
+                    ]);
+                }
+
                 public function countAll(): int
                 {
                     return 2;

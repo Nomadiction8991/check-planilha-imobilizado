@@ -100,6 +100,13 @@ final class LegacyDepartmentControllerTest extends TestCase
                     ]);
                 }
 
+                public function administrationOptions(): Collection
+                {
+                    return collect([
+                        (object) ['id' => 1, 'descricao' => 'Administração Central'],
+                    ]);
+                }
+
                 public function countAll(): int
                 {
                     return 0;
@@ -153,6 +160,10 @@ final class LegacyDepartmentControllerTest extends TestCase
             ->get(route('migration.departments.index'));
 
         $response->assertOk();
+        $response->assertSee('Buscar administração', false);
+        $response->assertSee('data-departments-admin-search', false);
+        $response->assertSee('data-departments-admin-select', false);
+        $response->assertSee('data-departments-admin-status', false);
         $response->assertSee('Buscar igreja', false);
         $response->assertSee('data-departments-church-search', false);
         $response->assertSee('data-departments-church-select', false);
@@ -562,6 +573,13 @@ final class LegacyDepartmentControllerTest extends TestCase
                 {
                     return collect([
                         (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+                    ]);
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect([
+                        (object) ['id' => 1, 'descricao' => 'Administração Central'],
                     ]);
                 }
 

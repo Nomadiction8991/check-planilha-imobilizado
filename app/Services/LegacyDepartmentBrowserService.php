@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\LegacyDepartmentBrowserServiceInterface;
 use App\DTO\DepartmentFilters;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Models\Legacy\Dependencia;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -18,6 +19,10 @@ class LegacyDepartmentBrowserService implements LegacyDepartmentBrowserServiceIn
         return Dependencia::query()
             ->with(['comum:id,codigo,descricao'])
             ->withCount(['activeProducts as active_products_count'])
+            ->when(
+                $filters->administrationId !== null,
+                static fn ($query) => $query->whereHas('comum', static fn ($churchQuery) => $churchQuery->where('administracao_id', $filters->administrationId))
+            )
             ->when(
                 $filters->comumId !== null,
                 static fn ($query) => $query->where('comum_id', $filters->comumId)
@@ -39,6 +44,13 @@ class LegacyDepartmentBrowserService implements LegacyDepartmentBrowserServiceIn
         return Comum::query()
             ->orderBy('codigo')
             ->get(['id', 'codigo', 'descricao']);
+    }
+
+    public function administrationOptions(): Collection
+    {
+        return Administracao::query()
+            ->orderBy('descricao')
+            ->get(['id', 'descricao']);
     }
 
     public function countAll(): int
