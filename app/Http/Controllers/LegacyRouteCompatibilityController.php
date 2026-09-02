@@ -82,15 +82,22 @@ class LegacyRouteCompatibilityController extends Controller
     public function labels(
         Request $request,
     ): View|RedirectResponse {
+        $administrationId = $this->firstPositiveInt(
+            $request->input('administracao_id'),
+            $request->query('administracao_id'),
+        );
         $churchId = $this->firstPositiveInt(
             $request->input('comum_id'),
             $request->query('comum_id'),
         );
         $dependencyId = $this->firstPositiveInt($request->query('dependencia'));
-        $churches = $this->auth->availableChurches();
+        $administrations = $this->auth->availableAdministrations();
+        $churches = $this->auth->availableChurches($administrationId);
 
         if ($churchId === null) {
             return view('labels.index', [
+                'administrations' => $administrations,
+                'selectedAdministrationId' => $administrationId,
                 'churchId' => null,
                 'dependencyId' => $dependencyId,
                 'churches' => $churches,
@@ -120,6 +127,8 @@ class LegacyRouteCompatibilityController extends Controller
         }
 
         return view('labels.index', [
+            'administrations' => $administrations,
+            'selectedAdministrationId' => $administrationId,
             'churchId' => $churchId,
             'dependencyId' => $dependencyId,
             'churches' => $churches,

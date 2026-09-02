@@ -168,11 +168,24 @@ class LegacyAuthSessionService implements LegacyAuthSessionServiceInterface
         ];
     }
 
-    public function availableChurches(): Collection
+    public function availableChurches(?int $administrationId = null): Collection
     {
-        return Comum::query()
+        $query = Comum::query();
+
+        if ($administrationId !== null && $administrationId > 0) {
+            $query->where('administracao_id', $administrationId);
+        }
+
+        return $query
             ->orderBy('codigo')
             ->get(['id', 'codigo', 'descricao']);
+    }
+
+    public function availableAdministrations(): Collection
+    {
+        return Administracao::query()
+            ->orderBy('descricao')
+            ->get(['id', 'descricao']);
     }
 
     public function filterPinStates(): array
