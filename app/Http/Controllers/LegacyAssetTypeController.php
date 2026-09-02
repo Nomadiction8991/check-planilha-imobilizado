@@ -45,6 +45,7 @@ class LegacyAssetTypeController extends Controller
         return view('asset-types.create', [
             'administrations' => $this->administrations(),
             'selectedAdministrationId' => $this->currentAdministrationId(),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 
@@ -67,6 +68,7 @@ class LegacyAssetTypeController extends Controller
             'selectedAdministrationId' => (int) ($assetType->administracao_id ?? 0) > 0
                 ? (int) $assetType->administracao_id
                 : $this->currentAdministrationId(),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 
