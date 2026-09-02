@@ -33,6 +33,7 @@ class LegacyChurchController extends Controller
             'churches' => $churches,
             'totalAll' => $this->churchs->countAll(),
             'administrations' => $this->churchs->administrationOptions(),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 

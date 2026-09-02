@@ -15,6 +15,7 @@ final class ChurchFiltersTest extends TestCase
         $request = Request::create('/churches', 'GET', [
             'administracao_id' => '12',
             'busca' => 'Central',
+            'estado' => 'SP',
             'pagina' => '3',
         ]);
 
@@ -22,6 +23,7 @@ final class ChurchFiltersTest extends TestCase
 
         self::assertSame(12, $filters->administrationId);
         self::assertSame('Central', $filters->search);
+        self::assertSame('SP', $filters->state);
         self::assertSame(3, $filters->page);
         self::assertSame(20, $filters->perPage);
 
@@ -29,6 +31,7 @@ final class ChurchFiltersTest extends TestCase
         self::assertSame([
             'administracao_id' => 12,
             'busca' => 'Central',
+            'estado' => 'SP',
         ], $query);
     }
 
@@ -40,9 +43,22 @@ final class ChurchFiltersTest extends TestCase
 
         self::assertNull($filters->administrationId);
         self::assertSame('', $filters->search);
+        self::assertNull($filters->state);
         self::assertSame(1, $filters->page);
         self::assertSame(20, $filters->perPage);
 
         self::assertSame([], $filters->toQuery());
+    }
+
+    public function testFromRequestSanitizesState(): void
+    {
+        $request = Request::create('/churches', 'GET', [
+            'estado' => '  mt  ',
+        ]);
+
+        $filters = ChurchFilters::fromRequest($request);
+
+        self::assertSame('MT', $filters->state);
+        self::assertSame(['estado' => 'MT'], $filters->toQuery());
     }
 }
