@@ -149,37 +149,89 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.labels.index') }}">
-                <label>
-                    Igreja
-                    <select name="comum_id" onchange="this.form.submit()">
-                        <option value="">Selecione uma igreja</option>
-                        @foreach ($churches as $church)
-                            <option value="{{ $church->id }}" @selected((int) $churchId === (int) $church->id)>
-                                {{ $church->codigo }} - {{ $church->descricao }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+                <div class="filters-primary">
+                    <label for="labels-church-search">
+                        Buscar igreja
+                        <input
+                            id="labels-church-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="labels-church-select"
+                            data-labels-church-search
+                        >
+                    </label>
+                    <label class="filters-principal">
+                        Igreja
+                        <select id="labels-church-select" name="comum_id" data-labels-church-select>
+                            <option value="">Selecione uma igreja</option>
+                            @foreach ($churches as $church)
+                                <option value="{{ $church->id }}" @selected((int) $churchId === (int) $church->id)>
+                                    {{ $church->codigo }} - {{ $church->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <p id="labels-church-search-status" class="helper" role="status" aria-live="polite" hidden data-labels-church-status></p>
 
-                <label>
-                    Dependência
-                    <select name="dependencia" @disabled($churchId === null)>
-                        <option value="">Todas as dependências</option>
-                        @foreach ($data['dependencies'] as $dependency)
-                            <option value="{{ $dependency['id'] }}" @selected((string) $selectedDependencyId === (string) $dependency['id'])>
-                                {{ $dependency['descricao'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
-
-                <div class="actions">
-                    <button class="btn primary" type="submit">Filtrar</button>
-                    <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $churchId]) }}">Voltar aos produtos</a>
+                    <div class="actions filters-actions">
+                        <button class="btn primary" type="submit">Filtrar</button>
+                        <a class="btn" href="{{ route('migration.labels.index') }}">Limpar</a>
+                        <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $churchId]) }}">Voltar aos produtos</a>
+                    </div>
+                </div>
+                <div class="filters-advanced">
+                    <label>
+                        Dependência
+                        <select name="dependencia" @disabled($churchId === null)>
+                            <option value="">Todas as dependências</option>
+                            @foreach ($data['dependencies'] as $dependency)
+                                <option value="{{ $dependency['id'] }}" @selected((string) $selectedDependencyId === (string) $dependency['id'])>
+                                    {{ $dependency['descricao'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
                 </div>
             </form>
+            <script>
+                (() => {
+                    const search = document.querySelector('[data-labels-church-search]');
+                    const select = document.querySelector('[data-labels-church-select]');
+                    const status = document.querySelector('[data-labels-church-status]');
+                    if (!search || !select || !status) return;
+                    const options = Array.from(select.options);
+                    const placeholder = options.find((o) => o.value === '');
+                    const churchOptions = options.filter((o) => o.value !== '');
+                    const applyFilter = () => {
+                        const term = search.value.trim().toLowerCase();
+                        let visible = 0;
+                        churchOptions.forEach((opt) => {
+                            const match = term === '' || opt.textContent.toLowerCase().includes(term);
+                            opt.hidden = !match;
+                            opt.disabled = !match;
+                            if (match) visible += 1;
+                        });
+                        if (select.value !== '' && select.options[select.selectedIndex]?.hidden) {
+                            select.value = '';
+                        }
+                        if (visible === 0 && term !== '') {
+                            status.textContent = 'Nenhuma igreja encontrada para "' + search.value.trim() + '".';
+                            status.hidden = false;
+                            select.disabled = true;
+                        } else {
+                            status.textContent = '';
+                            status.hidden = true;
+                            select.disabled = false;
+                            if (placeholder) { placeholder.hidden = false; placeholder.disabled = false; }
+                        }
+                    };
+                    search.addEventListener('input', applyFilter);
+                    search.addEventListener('search', applyFilter);
+                })();
+            </script>
         </div>
     </section>
 
