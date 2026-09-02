@@ -254,4 +254,37 @@ final class LegacyAuditTrailServiceTest extends TestCase
         self::assertSame('2026-04-17 09:00:00', $row[0]);
         self::assertSame('9', $row[3]);
     }
+
+    public function testPaginateAndExportFilterByAdministrationWhenAdmin(): void
+    {
+        $service = new LegacyAuditTrailService($this->storageFile);
+        $this->recordEntry($service, '2026-04-17 09:00:00', 'Admin 1', 10);
+        $this->recordEntry($service, '2026-04-17 09:10:00', 'Admin 2', 20);
+
+        $paginator = $service->paginate(
+            ['administracao_id' => '20'],
+            1,
+            null,
+            null,
+            true,
+            '/audits',
+        );
+
+        self::assertSame(1, $paginator->total());
+        self::assertSame(20, $paginator->items()[0]->administrationId);
+
+        $export = $service->exportCsv(
+            ['administracao_id' => '20'],
+            1,
+            null,
+            null,
+            true,
+        );
+
+        $lines = preg_split('/\r\n|\r|\n/', trim($export['content'])) ?: [];
+        self::assertCount(2, $lines);
+        $row = str_getcsv($lines[1], ';');
+        self::assertSame('Admin 2', $row[1]);
+        self::assertSame('20', $row[3]);
+    }
 }

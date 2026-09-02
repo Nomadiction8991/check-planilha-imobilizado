@@ -32,6 +32,7 @@ final class LegacyAuditController extends Controller
             'module' => trim((string) $request->query('modulo', '')),
             'date_from' => trim((string) $request->query('data_inicio', '')),
             'date_to' => trim((string) $request->query('data_fim', '')),
+            'administracao_id' => trim((string) $request->query('administracao_id', '')),
         ];
 
         $audits = $this->audits->paginate(
@@ -51,7 +52,19 @@ final class LegacyAuditController extends Controller
             'filters' => $filters,
             'modules' => $this->audits->availableModules(),
             'scopeLabel' => $this->resolveScopeLabel($currentUser),
+            'administrations' => $this->auth->availableAdministrations(),
+            'selectedAdministrationId' => $this->selectedAdministrationIdFromFilters($filters),
         ]);
+    }
+
+    private function selectedAdministrationIdFromFilters(array $filters): ?int
+    {
+        $raw = $filters['administracao_id'] ?? null;
+        if ($raw !== null && is_numeric($raw) && (int) $raw > 0) {
+            return (int) $raw;
+        }
+
+        return null;
     }
 
     public function export(Request $request): StreamedResponse|RedirectResponse
@@ -67,6 +80,7 @@ final class LegacyAuditController extends Controller
             'module' => trim((string) $request->query('modulo', '')),
             'date_from' => trim((string) $request->query('data_inicio', '')),
             'date_to' => trim((string) $request->query('data_fim', '')),
+            'administracao_id' => trim((string) $request->query('administracao_id', '')),
         ];
 
         $file = $this->audits->exportCsv(
@@ -83,6 +97,7 @@ final class LegacyAuditController extends Controller
                 'modulo' => $filters['module'],
                 'data_inicio' => $filters['date_from'],
                 'data_fim' => $filters['date_to'],
+                'administracao_id' => $this->selectedAdministrationIdFromFilters($filters) !== null ? (string) $this->selectedAdministrationIdFromFilters($filters) : '',
             ], static fn (string $value): bool => $value !== '');
 
             return redirect()

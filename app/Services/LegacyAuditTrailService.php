@@ -62,12 +62,19 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
     ): LengthAwarePaginator {
         $module = mb_strtolower(trim((string) ($filters['module'] ?? '')), 'UTF-8');
         $search = mb_strtolower(trim((string) ($filters['search'] ?? '')), 'UTF-8');
+        $selectedAdminId = isset($filters['administracao_id']) && is_numeric($filters['administracao_id']) && (int) $filters['administracao_id'] > 0
+            ? (int) $filters['administracao_id']
+            : null;
         $dateFrom = $this->parseDateBoundary((string) ($filters['date_from'] ?? ''), false);
         $dateTo = $this->parseDateBoundary((string) ($filters['date_to'] ?? ''), true);
 
         $entries = collect($this->readEntries())
-            ->filter(static function (LegacyAuditEntryData $entry) use ($userId, $administrationId, $churchId, $isAdmin): bool {
+            ->filter(static function (LegacyAuditEntryData $entry) use ($userId, $administrationId, $churchId, $isAdmin, $selectedAdminId): bool {
                 if ($isAdmin) {
+                    if ($selectedAdminId !== null) {
+                        return $entry->administrationId === $selectedAdminId;
+                    }
+
                     return true;
                 }
 
@@ -211,6 +218,13 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
                     return false;
                 }
             } elseif ($userId !== null && $userId > 0 && $entry->userId !== $userId) {
+                return false;
+            }
+        } else {
+            $selectedAdminId = isset($filters['administracao_id']) && is_numeric($filters['administracao_id']) && (int) $filters['administracao_id'] > 0
+                ? (int) $filters['administracao_id']
+                : null;
+            if ($selectedAdminId !== null && $entry->administrationId !== $selectedAdminId) {
                 return false;
             }
         }

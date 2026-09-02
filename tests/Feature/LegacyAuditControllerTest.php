@@ -31,6 +31,7 @@ final class LegacyAuditControllerTest extends TestCase
             ]);
             $mock->shouldReceive('currentChurch')->andReturn(null);
             $mock->shouldReceive('availableChurches')->andReturn(collect());
+            $mock->shouldReceive('availableAdministrations')->andReturn(collect());
             $mock->shouldReceive('filterPinStates')->andReturn([]);
         });
 
@@ -260,7 +261,7 @@ final class LegacyAuditControllerTest extends TestCase
         $audits->shouldReceive('exportCsv')
             ->once()
             ->with(
-                ['search' => 'Login', 'module' => 'Sessão', 'date_from' => '2026-04-01', 'date_to' => '2026-04-30'],
+                ['search' => 'Login', 'module' => 'Sessão', 'date_from' => '2026-04-01', 'date_to' => '2026-04-30', 'administracao_id' => ''],
                 7,
                 2,
                 null,
@@ -419,6 +420,27 @@ final class LegacyAuditControllerTest extends TestCase
             ipAddress: '127.0.0.1',
             userAgent: 'PHPUnit',
         )));
+    }
+
+    public function testIndexPreservesSelectedAdministrationInViewAndExportLink(): void
+    {
+        $this->mockAuthenticatedUser();
+
+        $paginator = new LengthAwarePaginator(
+            items: collect(),
+            total: 0,
+            perPage: self::PER_PAGE,
+            currentPage: 1,
+            options: ['path' => url('/audits'), 'query' => ['administracao_id' => '15']],
+        );
+
+        $this->bindAuditTrailService($paginator);
+
+        $response = $this->get(route('migration.audits.index', ['administracao_id' => 15]));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedAdministrationId', 15);
+        $response->assertSee('administracao_id=15');
     }
 
     private function bindAuditTrailService(LengthAwarePaginator $paginator): void
