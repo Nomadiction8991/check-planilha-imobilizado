@@ -33,6 +33,7 @@ final class LegacyDepartmentBrowserServiceTest extends TestCase
             $table->id();
             $table->string('codigo')->nullable();
             $table->string('descricao')->nullable();
+            $table->string('estado', 2)->nullable();
             $table->unsignedBigInteger('administracao_id')->nullable();
         });
 
@@ -92,6 +93,7 @@ final class LegacyDepartmentBrowserServiceTest extends TestCase
             administrationId: 10,
             comumId: null,
             search: '',
+            state: null,
             page: 1,
             perPage: 10,
         );
@@ -101,6 +103,40 @@ final class LegacyDepartmentBrowserServiceTest extends TestCase
         self::assertSame(1, $result->total());
         self::assertSame(1, $result->items()[0]->id);
         self::assertSame('SALAO SP', $result->items()[0]->descricao);
+    }
+
+    public function testPaginateFiltersByState(): void
+    {
+        $church1 = new Comum();
+        $church1->forceFill(['id' => 100, 'codigo' => 'SP-01', 'descricao' => 'Central SP', 'estado' => 'SP']);
+        $church1->save();
+
+        $church2 = new Comum();
+        $church2->forceFill(['id' => 200, 'codigo' => 'RJ-01', 'descricao' => 'Central RJ', 'estado' => 'RJ']);
+        $church2->save();
+
+        $dep1 = new Dependencia();
+        $dep1->forceFill(['id' => 1, 'comum_id' => 100, 'descricao' => 'SALAO SP']);
+        $dep1->save();
+
+        $dep2 = new Dependencia();
+        $dep2->forceFill(['id' => 2, 'comum_id' => 200, 'descricao' => 'SALAO RJ']);
+        $dep2->save();
+
+        $filters = new DepartmentFilters(
+            administrationId: null,
+            comumId: null,
+            search: '',
+            state: 'RJ',
+            page: 1,
+            perPage: 10,
+        );
+
+        $result = $this->service->paginate($filters);
+
+        self::assertSame(1, $result->total());
+        self::assertSame(2, $result->items()[0]->id);
+        self::assertSame('SALAO RJ', $result->items()[0]->descricao);
     }
 
     public function testAdministrationOptionsReturnsAllAdministrationsOrdered(): void

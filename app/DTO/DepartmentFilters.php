@@ -12,6 +12,7 @@ final readonly class DepartmentFilters
         public ?int $administrationId,
         public ?int $comumId,
         public string $search,
+        public ?string $state,
         public int $page,
         public int $perPage,
     ) {
@@ -21,11 +22,14 @@ final readonly class DepartmentFilters
     {
         $administrationId = (int) $request->query('administracao_id', 0);
         $comumId = (int) $request->query('comum_id', 0);
+        $rawState = trim((string) $request->query('estado', ''));
+        $state = $rawState !== '' ? mb_strtoupper(mb_substr($rawState, 0, 2, 'UTF-8'), 'UTF-8') : null;
 
         return new self(
             administrationId: $administrationId > 0 ? $administrationId : null,
             comumId: $comumId > 0 ? $comumId : null,
             search: trim((string) $request->query('busca', '')),
+            state: $state,
             page: max(1, (int) $request->query('pagina', 1)),
             perPage: 20,
         );
@@ -48,6 +52,10 @@ final readonly class DepartmentFilters
 
         if ($this->search !== '') {
             $query['busca'] = $this->search;
+        }
+
+        if ($this->state !== null && $this->state !== '') {
+            $query['estado'] = $this->state;
         }
 
         return $query;

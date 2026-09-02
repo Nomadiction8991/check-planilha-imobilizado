@@ -33,6 +33,7 @@ class LegacyDepartmentController extends Controller
             'departments' => $paginator,
             'churches' => $this->departments->churchOptions(),
             'administrations' => $this->departments->administrationOptions(),
+            'states' => (array) config('brazil.states', []),
             'totalAll' => $this->departments->countAll(),
         ]);
     }

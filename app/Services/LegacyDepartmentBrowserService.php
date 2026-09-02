@@ -17,7 +17,7 @@ class LegacyDepartmentBrowserService implements LegacyDepartmentBrowserServiceIn
     public function paginate(DepartmentFilters $filters): LengthAwarePaginator
     {
         return Dependencia::query()
-            ->with(['comum:id,codigo,descricao'])
+            ->with(['comum:id,codigo,descricao,estado'])
             ->withCount(['activeProducts as active_products_count'])
             ->when(
                 $filters->administrationId !== null,
@@ -26,6 +26,10 @@ class LegacyDepartmentBrowserService implements LegacyDepartmentBrowserServiceIn
             ->when(
                 $filters->comumId !== null,
                 static fn ($query) => $query->where('comum_id', $filters->comumId)
+            )
+            ->when(
+                $filters->state !== null && $filters->state !== '',
+                static fn ($query) => $query->whereHas('comum', static fn ($churchQuery) => $churchQuery->where('estado', $filters->state))
             )
             ->when(
                 $filters->search !== '',
