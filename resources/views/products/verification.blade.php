@@ -276,6 +276,32 @@
         <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.products.verification') }}">
                 <div class="filters-primary">
+                    <label for="product-admin-search-verification">
+                        Buscar administração
+                        <input
+                            id="product-admin-search-verification"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="product-admin-select-verification"
+                            data-product-admin-search
+                        >
+                    </label>
+                    <label class="filters-principal">
+                        Administração
+                        <div class="filters-principal__controls">
+                            <select id="product-admin-select-verification" name="administracao_id" data-product-admin-select>
+                                <option value="">Todas</option>
+                                @foreach ($administrations as $administration)
+                                    <option value="{{ $administration->id }}" @selected($filters->administrationId === $administration->id)>
+                                        #{{ $administration->id }} - {{ $administration->descricao }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </label>
+                    <p id="product-admin-search-status-verification" class="helper" role="status" aria-live="polite" hidden data-product-admin-status></p>
+
                     <label for="product-church-search-verification">
                         Buscar igreja
                         <input
@@ -668,6 +694,40 @@
     @endif
     <script>
         (() => {
+            const adminSearch = document.querySelector('[data-product-admin-search]');
+            const adminSelect = document.querySelector('[data-product-admin-select]');
+            const adminStatus = document.querySelector('[data-product-admin-status]');
+            if (adminSearch && adminSelect && adminStatus) {
+                const adminOptionsList = Array.from(adminSelect.options);
+                const adminPlaceholder = adminOptionsList.find((o) => o.value === '');
+                const realAdminOptions = adminOptionsList.filter((o) => o.value !== '');
+                const applyAdminFilter = () => {
+                    const term = adminSearch.value.trim().toLowerCase();
+                    let visible = 0;
+                    realAdminOptions.forEach((opt) => {
+                        const match = term === '' || opt.textContent.toLowerCase().includes(term);
+                        opt.hidden = !match;
+                        opt.disabled = !match;
+                        if (match) visible += 1;
+                    });
+                    if (adminSelect.value !== '' && adminSelect.options[adminSelect.selectedIndex]?.hidden) {
+                        adminSelect.value = '';
+                    }
+                    if (visible === 0 && term !== '') {
+                        adminStatus.textContent = 'Nenhuma administração encontrada para "' + adminSearch.value.trim() + '".';
+                        adminStatus.hidden = false;
+                        adminSelect.disabled = true;
+                    } else {
+                        adminStatus.textContent = '';
+                        adminStatus.hidden = true;
+                        adminSelect.disabled = false;
+                        if (adminPlaceholder) { adminPlaceholder.hidden = false; adminPlaceholder.disabled = false; }
+                    }
+                };
+                adminSearch.addEventListener('input', applyAdminFilter);
+                adminSearch.addEventListener('search', applyAdminFilter);
+            }
+
             const search = document.querySelector('[data-product-church-search]');
             const select = document.querySelector('[data-product-church-select]');
             const status = document.querySelector('[data-product-church-status]');

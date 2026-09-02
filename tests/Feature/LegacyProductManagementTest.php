@@ -77,6 +77,11 @@ final class LegacyProductManagementTest extends TestCase
                     ]);
                 }
 
+                public function administrationOptions(): Collection
+                {
+                    return collect();
+                }
+
                 public function dependencyOptions(?int $comumId): Collection
                 {
                     return collect([
@@ -149,6 +154,11 @@ final class LegacyProductManagementTest extends TestCase
                     return collect([
                         (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
                     ]);
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect();
                 }
 
                 public function dependencyOptions(?int $comumId): Collection
@@ -227,6 +237,11 @@ final class LegacyProductManagementTest extends TestCase
                     ]);
                 }
 
+                public function administrationOptions(): Collection
+                {
+                    return collect();
+                }
+
                 public function dependencyOptions(?int $comumId): Collection
                 {
                     return collect([
@@ -298,6 +313,11 @@ final class LegacyProductManagementTest extends TestCase
                     return collect([
                         (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
                     ]);
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect();
                 }
 
                 public function dependencyOptions(?int $comumId): Collection
@@ -720,6 +740,11 @@ final class LegacyProductManagementTest extends TestCase
                     return collect([
                         (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
                     ]);
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect();
                 }
 
                 public function dependencyOptions(?int $comumId): Collection

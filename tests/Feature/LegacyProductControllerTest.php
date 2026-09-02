@@ -62,7 +62,16 @@ final class LegacyProductControllerTest extends TestCase
         $this->products
             ->shouldReceive('churchOptions')
             ->once()
-            ->andReturn(collect());
+            ->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+            ]));
+
+        $this->products
+            ->shouldReceive('administrationOptions')
+            ->once()
+            ->andReturn(collect([
+                (object) ['id' => 1, 'descricao' => 'Administração Central'],
+            ]));
 
         $this->products
             ->shouldReceive('dependencyOptions')
@@ -83,6 +92,10 @@ final class LegacyProductControllerTest extends TestCase
         $response = $this->get(route('migration.products.index'));
 
         $response->assertOk();
+        $response->assertSee('Buscar administração', false);
+        $response->assertSee('data-product-admin-search', false);
+        $response->assertSee('data-product-admin-select', false);
+        $response->assertSee('data-product-admin-status', false);
     }
 
     public function testIndexRedirectsGuestsToLogin(): void

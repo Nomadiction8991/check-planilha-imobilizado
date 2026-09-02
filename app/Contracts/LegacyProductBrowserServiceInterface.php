@@ -14,6 +14,8 @@ interface LegacyProductBrowserServiceInterface
 
     public function churchOptions(): Collection;
 
+    public function administrationOptions(): Collection;
+
     public function dependencyOptions(?int $comumId): Collection;
 
     public function assetTypeOptions(): Collection;
