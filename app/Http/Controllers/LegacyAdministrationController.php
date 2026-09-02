@@ -32,12 +32,15 @@ class LegacyAdministrationController extends Controller
             'filters' => $filters,
             'administrations' => $paginator,
             'totalAll' => $this->administrations->countAll(),
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 
     public function create(): View
     {
-        return view('administrations.create');
+        return view('administrations.create', [
+            'states' => (array) config('brazil.states', []),
+        ]);
     }
 
     public function store(StoreLegacyAdministrationRequest $request): RedirectResponse
@@ -63,6 +66,7 @@ class LegacyAdministrationController extends Controller
     {
         return view('administrations.edit', [
             'administration' => $administration,
+            'states' => (array) config('brazil.states', []),
         ]);
     }
 

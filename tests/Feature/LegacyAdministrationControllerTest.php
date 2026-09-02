@@ -128,7 +128,8 @@ final class LegacyAdministrationControllerTest extends TestCase
         ])->get(route('migration.administrations.index'));
 
         $response->assertOk();
-        $response->assertSee('Administrações do sistema.');
+        $response->assertViewIs('administrations.index');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
         $response->assertSee('Administração Central');
         $response->assertSee('12345678000190');
         $response->assertSee('Nova administração');
@@ -274,6 +275,8 @@ final class LegacyAdministrationControllerTest extends TestCase
         ])->get(route('migration.administrations.create'));
 
         $response->assertOk();
+        $response->assertViewIs('administrations.create');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
         $response->assertSee('Nova administração.');
         $response->assertSee('Salvar administração');
         $response->assertSee('data-mask="cnpj"', false);
@@ -398,6 +401,8 @@ final class LegacyAdministrationControllerTest extends TestCase
         ])->get(route('migration.administrations.edit', ['administration' => 4]));
 
         $response->assertOk();
+        $response->assertViewIs('administrations.edit');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
         $response->assertSee('Editar administração.');
         $response->assertSee('Salvar alterações');
         $response->assertSee(self::ADMIN_DESCRIPTION);
