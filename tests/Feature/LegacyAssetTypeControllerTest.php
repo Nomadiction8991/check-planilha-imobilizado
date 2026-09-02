@@ -123,6 +123,7 @@ final class LegacyAssetTypeControllerTest extends TestCase
         $response->assertSee('Novo tipo de bem.');
         $response->assertSee('Administração');
         $response->assertSee('Salvar tipo de bem');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
     }
 
     public function testCreatePageRedirectsGuestsToLogin(): void
@@ -225,6 +226,7 @@ final class LegacyAssetTypeControllerTest extends TestCase
         $response->assertSee('Editar tipo de bem');
         $response->assertSee('CADEIRA ANTIGA');
         $response->assertSee('Salvar alterações');
+        $response->assertViewHas('states', (array) config('brazil.states', []));
     }
 
     // ─── Update ──────────────────────────────────────────────────────
