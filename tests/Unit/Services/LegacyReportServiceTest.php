@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services;
 
 use App\Contracts\LegacyAuthSessionServiceInterface;
+use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Services\LegacyReportService;
 use App\Services\LegacyReportTemplateService;
@@ -254,5 +255,59 @@ final class LegacyReportServiceTest extends TestCase
         $codes = $result->pluck('codigo')->toArray();
 
         $this->assertSame(['001', '002', '003'], $codes);
+    }
+
+    #[RunInSeparateProcess]
+    public function testAdministrationOptionsReturnsOrderedAdministrations(): void
+    {
+        $builder = Mockery::mock('alias:' . Administracao::class);
+        $builder->shouldReceive('query')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('descricao')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('get')
+            ->with(['id', 'descricao'])
+            ->once()
+            ->andReturn(collect([
+                (object) ['id' => 1, 'descricao' => 'Administração Alpha'],
+                (object) ['id' => 2, 'descricao' => 'Administração Beta'],
+            ]));
+
+        $result = $this->service->administrationOptions();
+
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertCount(2, $result);
+        $this->assertSame('Administração Alpha', $result->first()->descricao);
+    }
+
+    #[RunInSeparateProcess]
+    public function testChurchOptionsFiltersByAdministrationId(): void
+    {
+        $builder = Mockery::mock('alias:' . Comum::class);
+        $builder->shouldReceive('query')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('where')
+            ->once()
+            ->with('administracao_id', 5)
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('codigo')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('get')
+            ->with(['id', 'codigo', 'descricao'])
+            ->once()
+            ->andReturn(collect([
+                (object) ['id' => 10, 'codigo' => '001', 'descricao' => 'Igreja da Admin 5'],
+            ]));
+
+        $result = $this->service->churchOptions(5);
+
+        $this->assertCount(1, $result);
+        $this->assertSame('Igreja da Admin 5', $result->first()->descricao);
     }
 }

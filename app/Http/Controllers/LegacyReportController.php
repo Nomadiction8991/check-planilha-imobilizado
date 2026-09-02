@@ -23,10 +23,13 @@ class LegacyReportController extends Controller
 
     public function index(Request $request): View
     {
+        $administrationId = $request->integer('administracao_id') ?: null;
         $churchId = $request->integer('comum_id') ?: ((int) Session::get('comum_id', 0) ?: null);
 
         return view('reports.index', [
-            'churches' => $this->reports->churchOptions(),
+            'administrations' => $this->reports->administrationOptions(),
+            'selectedAdministrationId' => $administrationId,
+            'churches' => $this->reports->churchOptions($administrationId),
             'selectedChurchId' => $churchId,
             'reports' => $churchId !== null ? $this->reports->listAvailableReports($churchId) : [],
         ]);
