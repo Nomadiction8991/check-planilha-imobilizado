@@ -28,6 +28,7 @@ final class LegacyAuditPagesTest extends TestCase
             ]);
             $mock->shouldReceive('currentChurch')->andReturn(null);
             $mock->shouldReceive('availableChurches')->andReturn(collect());
+            $mock->shouldReceive('availableAdministrations')->andReturn(collect());
             $mock->shouldReceive('filterPinStates')->andReturn([]);
         });
 

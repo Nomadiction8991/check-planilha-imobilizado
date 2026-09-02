@@ -22,6 +22,31 @@
         <div class="filters filters--audit" data-sticky-filters>
             <form method="GET" action="{{ route('migration.audits.index') }}">
                 <div class="filters-primary">
+                    <label for="audits-admin-search">
+                        Buscar administração
+                        <input
+                            id="audits-admin-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="audits-admin-select"
+                            data-audits-admin-search
+                        >
+                    </label>
+
+                    <label class="filters-principal">
+                        Administração
+                        <select id="audits-admin-select" name="administracao_id" data-audits-admin-select>
+                            <option value="">Todas as administrações</option>
+                            @foreach ($administrations as $administration)
+                                <option value="{{ $administration->id }}" @selected((int) ($selectedAdministrationId ?? 0) === (int) $administration->id)>
+                                    #{{ $administration->id }} - {{ $administration->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <p id="audits-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-audits-admin-status></p>
+
                     <label class="filters-query">
                         Busca geral
                         <input
@@ -42,6 +67,7 @@
                                 'modulo' => $filters['module'],
                                 'data_inicio' => $filters['date_from'],
                                 'data_fim' => $filters['date_to'],
+                                'administracao_id' => $selectedAdministrationId !== null ? (string) $selectedAdministrationId : '',
                             ], static fn (string $value): bool => $value !== '')) }}"
                         >Exportar CSV</a>
                     </div>
@@ -71,6 +97,43 @@
             </form>
         </div>
     </section>
+    <script>
+        (() => {
+            const adminSearch = document.querySelector('[data-audits-admin-search]');
+            const adminSelect = document.querySelector('[data-audits-admin-select]');
+            const adminStatus = document.querySelector('[data-audits-admin-status]');
+            if (adminSearch && adminSelect && adminStatus) {
+                const adminOptions = Array.from(adminSelect.options);
+                const adminPlaceholder = adminOptions.find((o) => o.value === '');
+                const realAdminOptions = adminOptions.filter((o) => o.value !== '');
+                const applyAdminFilter = () => {
+                    const term = adminSearch.value.trim().toLowerCase();
+                    let visible = 0;
+                    realAdminOptions.forEach((opt) => {
+                        const match = term === '' || opt.textContent.toLowerCase().includes(term);
+                        opt.hidden = !match;
+                        opt.disabled = !match;
+                        if (match) visible += 1;
+                    });
+                    if (adminSelect.value !== '' && adminSelect.options[adminSelect.selectedIndex]?.hidden) {
+                        adminSelect.value = '';
+                    }
+                    if (visible === 0 && term !== '') {
+                        adminStatus.textContent = 'Nenhuma administração encontrada para "' + adminSearch.value.trim() + '".';
+                        adminStatus.hidden = false;
+                        adminSelect.disabled = true;
+                    } else {
+                        adminStatus.textContent = '';
+                        adminStatus.hidden = true;
+                        adminSelect.disabled = false;
+                        if (adminPlaceholder) { adminPlaceholder.hidden = false; adminPlaceholder.disabled = false; }
+                    }
+                };
+                adminSearch.addEventListener('input', applyAdminFilter);
+                adminSearch.addEventListener('search', applyAdminFilter);
+            }
+        })();
+    </script>
 
     <section class="section">
         <div class="section-head">
