@@ -32,6 +32,7 @@ class LegacyChurchController extends Controller
             'filters' => $filters,
             'churches' => $churches,
             'totalAll' => $this->churchs->countAll(),
+            'administrations' => $this->churchs->administrationOptions(),
         ]);
     }
 
