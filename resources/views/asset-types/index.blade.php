@@ -68,6 +68,18 @@
                     </label>
                     <p id="asset-types-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-asset-types-admin-status></p>
 
+                    <label class="filters-principal">
+                        Estado (UF)
+                        <select name="estado" id="asset-types-estado-select">
+                            <option value="">Todos os estados</option>
+                            @foreach ($states as $stateCode => $stateLabel)
+                                <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
+                                    {{ $stateCode }} - {{ $stateLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
                     <label class="filters-query">
                         Buscar por código ou descrição
                         <input type="text" name="busca" value="{{ $filters->search }}" placeholder="4 ou CADEIRA">

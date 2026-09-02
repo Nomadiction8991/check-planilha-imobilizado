@@ -35,6 +35,7 @@ class LegacyAssetTypeController extends Controller
             'filters' => $filters,
             'assetTypes' => $paginator,
             'administrations' => $this->assetTypes->administrationOptions(),
+            'states' => (array) config('brazil.states', []),
             'totalAll' => $this->assetTypes->countAll(),
         ]);
     }

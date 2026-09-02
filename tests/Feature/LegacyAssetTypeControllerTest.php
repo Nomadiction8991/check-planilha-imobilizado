@@ -99,7 +99,7 @@ final class LegacyAssetTypeControllerTest extends TestCase
         $this->mockBrowserService(paginatorItems: [], totalCount: 0);
 
         $response = $this->withSession($this->authSession())
-            ->get(route('migration.asset-types.index', ['busca' => 'NONEXISTENT']));
+            ->get(route('migration.asset-types.index', ['busca' => 'NONEXISTENT', 'estado' => 'SP']));
 
         $response->assertOk();
     }
