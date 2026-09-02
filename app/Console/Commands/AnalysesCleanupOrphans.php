@@ -43,8 +43,7 @@ class AnalysesCleanupOrphans extends Command
 
     public function handle(): int
     {
-        $this->storageDir = $this->storageDir
-            ?? (__DIR__ . '/../../storage/tmp');
+        $this->storageDir = $this->storageDir ?? storage_path('tmp');
 
         $dryRun = (bool) $this->option('dry-run');
         $forceDelete = (bool) $this->option('force-delete');
