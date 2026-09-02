@@ -18,6 +18,7 @@ final class ProductFiltersTest extends TestCase
             'busca' => 'CADEIRA',
             'dependencia_id' => '3',
             'tipo_bem_id' => '2',
+            'estado' => 'sp',
             'status' => 'com_nota',
             'somente_novos' => '1',
             'pagina' => '4',
@@ -30,6 +31,7 @@ final class ProductFiltersTest extends TestCase
         self::assertSame('CADEIRA', $filters->search);
         self::assertSame(3, $filters->dependencyId);
         self::assertSame(2, $filters->assetTypeId);
+        self::assertSame('SP', $filters->state);
         self::assertSame('com_nota', $filters->status);
         self::assertTrue($filters->onlyNew);
         self::assertSame(4, $filters->page);
@@ -42,6 +44,7 @@ final class ProductFiltersTest extends TestCase
             'busca' => 'CADEIRA',
             'dependencia_id' => 3,
             'tipo_bem_id' => 2,
+            'estado' => 'SP',
             'status' => 'com_nota',
             'somente_novos' => 1,
         ], $query);
@@ -58,11 +61,24 @@ final class ProductFiltersTest extends TestCase
         self::assertSame('', $filters->search);
         self::assertNull($filters->dependencyId);
         self::assertNull($filters->assetTypeId);
+        self::assertNull($filters->state);
         self::assertSame('', $filters->status);
         self::assertFalse($filters->onlyNew);
         self::assertSame(1, $filters->page);
         self::assertSame(20, $filters->perPage);
 
         self::assertSame([], $filters->toQuery());
+    }
+
+    public function testFromRequestSanitizesState(): void
+    {
+        $request = Request::create('/products', 'GET', [
+            'estado' => ' mg ',
+        ]);
+
+        $filters = ProductFilters::fromRequest($request);
+
+        self::assertSame('MG', $filters->state);
+        self::assertSame(['estado' => 'MG'], $filters->toQuery());
     }
 }

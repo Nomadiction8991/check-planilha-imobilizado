@@ -36,6 +36,7 @@ final class LegacyProductBrowserServiceTest extends TestCase
             $table->string('codigo')->nullable();
             $table->string('descricao')->nullable();
             $table->unsignedBigInteger('administracao_id')->nullable();
+            $table->string('estado', 2)->nullable();
         });
 
         Schema::create('dependencias', function (Blueprint $table): void {
@@ -89,11 +90,11 @@ final class LegacyProductBrowserServiceTest extends TestCase
         $admin2->save();
 
         $church1 = new Comum();
-        $church1->forceFill(['id' => 100, 'codigo' => 'CTA-01', 'descricao' => 'Central Curitiba', 'administracao_id' => 10]);
+        $church1->forceFill(['id' => 100, 'codigo' => 'CTA-01', 'descricao' => 'Central Curitiba', 'administracao_id' => 10, 'estado' => 'PR']);
         $church1->save();
 
         $church2 = new Comum();
-        $church2->forceFill(['id' => 200, 'codigo' => 'MGA-01', 'descricao' => 'Central Maringá', 'administracao_id' => 20]);
+        $church2->forceFill(['id' => 200, 'codigo' => 'MGA-01', 'descricao' => 'Central Maringá', 'administracao_id' => 20, 'estado' => 'PR']);
         $church2->save();
 
         $prod1 = new Produto();
@@ -110,6 +111,7 @@ final class LegacyProductBrowserServiceTest extends TestCase
             search: '',
             dependencyId: null,
             assetTypeId: null,
+            state: null,
             status: '',
             onlyNew: false,
             page: 1,
@@ -121,6 +123,44 @@ final class LegacyProductBrowserServiceTest extends TestCase
         self::assertSame(1, $result->total());
         self::assertSame(1, $result->items()[0]->id_produto);
         self::assertSame('P-001', $result->items()[0]->codigo);
+    }
+
+    public function testPaginateFiltersByState(): void
+    {
+        $church1 = new Comum();
+        $church1->forceFill(['id' => 100, 'codigo' => 'SP-01', 'descricao' => 'Igreja SP', 'estado' => 'SP']);
+        $church1->save();
+
+        $church2 = new Comum();
+        $church2->forceFill(['id' => 200, 'codigo' => 'RJ-01', 'descricao' => 'Igreja RJ', 'estado' => 'RJ']);
+        $church2->save();
+
+        $prod1 = new Produto();
+        $prod1->forceFill(['id_produto' => 1, 'comum_id' => 100, 'codigo' => 'P-SP', 'bem' => 'MESA', 'ativo' => 1]);
+        $prod1->save();
+
+        $prod2 = new Produto();
+        $prod2->forceFill(['id_produto' => 2, 'comum_id' => 200, 'codigo' => 'P-RJ', 'bem' => 'CADEIRA', 'ativo' => 1]);
+        $prod2->save();
+
+        $filters = new ProductFilters(
+            administrationId: null,
+            comumId: null,
+            search: '',
+            dependencyId: null,
+            assetTypeId: null,
+            state: 'SP',
+            status: '',
+            onlyNew: false,
+            page: 1,
+            perPage: 10,
+        );
+
+        $result = $this->service->paginate($filters);
+
+        self::assertSame(1, $result->total());
+        self::assertSame(1, $result->items()[0]->id_produto);
+        self::assertSame('P-SP', $result->items()[0]->codigo);
     }
 
     public function testAdministrationOptionsReturnsAllAdministrationsOrdered(): void
