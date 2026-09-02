@@ -285,6 +285,11 @@ final class LegacyReadPagesTest extends TestCase
                 {
                     return 1;
                 }
+
+                public function administrationOptions(): \Illuminate\Support\Collection
+                {
+                    return collect();
+                }
             }
         );
 
