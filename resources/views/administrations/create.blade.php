@@ -68,10 +68,10 @@
                     <label>
                         Estado
                         <select name="estado" id="administration-estado" required>
-                            <option value="">Selecione</option>
-                            @foreach ((array) config('brazil.states', []) as $stateCode => $stateLabel)
+                            <option value="">Selecione o estado</option>
+                            @foreach ($states ?? (array) config('brazil.states', []) as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected(old('estado') === $stateCode)>
-                                    {{ $stateLabel }} ({{ $stateCode }})
+                                    {{ $stateCode }} - {{ $stateLabel }}
                                 </option>
                             @endforeach
                         </select>

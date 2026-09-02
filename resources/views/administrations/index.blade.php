@@ -48,7 +48,7 @@
                         Estado (UF)
                         <select name="estado" id="administrations-estado-select">
                             <option value="">Todos os estados</option>
-                            @foreach ((array) config('brazil.states', []) as $stateCode => $stateLabel)
+                            @foreach ($states ?? (array) config('brazil.states', []) as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
                                     {{ $stateCode }} - {{ $stateLabel }}
                                 </option>
