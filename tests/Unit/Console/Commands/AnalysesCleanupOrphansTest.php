@@ -162,6 +162,26 @@ final class AnalysesCleanupOrphansTest extends TestCase
     }
 
     /** @test */
+    public function test_default_storage_dir_matches_application_storage_path(): void
+    {
+        $this->app->useStoragePath($this->tempDir);
+        $storageDir = storage_path('tmp');
+        mkdir($storageDir, 0777, true);
+        file_put_contents($storageDir . '/analise_101.json', '{}');
+
+        $this->app->instance(
+            AnalysesCleanupOrphans::class,
+            $this->app->make(AnalysesCleanupOrphans::class),
+        );
+
+        $this->artisan('analyses:cleanup-orphans')
+            ->assertSuccessful();
+
+        $this->assertFileDoesNotExist($storageDir . '/analise_101.json');
+        @rmdir($storageDir);
+    }
+
+    /** @test */
     public function test_orphan_file_with_completed_import_is_deleted(): void
     {
         $this->bindCommandWithTempDir();
