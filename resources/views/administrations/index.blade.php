@@ -44,6 +44,18 @@
         <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.administrations.index') }}">
                 <div class="filters-primary">
+                    <label class="filters-principal">
+                        Estado (UF)
+                        <select name="estado" id="administrations-estado-select">
+                            <option value="">Todos os estados</option>
+                            @foreach ((array) config('brazil.states', []) as $stateCode => $stateLabel)
+                                <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
+                                    {{ $stateCode }} - {{ $stateLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
                     <label class="filters-query">
                         Buscar por ID, descrição ou CNPJ
                         <input type="text" name="busca" value="{{ $filters->search }}" placeholder="1, Administração Central ou 12345678000190">

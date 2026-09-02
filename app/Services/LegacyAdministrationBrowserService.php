@@ -31,6 +31,12 @@ class LegacyAdministrationBrowserService implements LegacyAdministrationBrowserS
                     });
                 }
             )
+            ->when(
+                $filters->state !== null && $filters->state !== '',
+                static function ($query) use ($filters): void {
+                    $query->where('estado', $filters->state);
+                }
+            )
             ->orderBy('descricao')
             ->paginate(
                 perPage: $filters->perPage,
