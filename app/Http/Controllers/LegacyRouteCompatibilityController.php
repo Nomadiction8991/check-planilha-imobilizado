@@ -229,7 +229,14 @@ class LegacyRouteCompatibilityController extends Controller
                 ->with('status_type', 'error');
         }
 
-        $product = $products->findForChurch($productId, $churchId);
+        try {
+            $product = $products->findForChurch($productId, $churchId);
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('migration.products.index', ['comum_id' => $churchId])
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
 
         if ($product === null) {
             return redirect()
@@ -266,11 +273,15 @@ class LegacyRouteCompatibilityController extends Controller
             return $this->productJsonOrRedirectError($request, 'Parâmetros inválidos.', 400);
         }
 
-        $updated = $products->updateObservation(
-            $productId,
-            $churchId,
-            (string) $request->input('observacoes', $request->input('observacao', '')),
-        );
+        try {
+            $updated = $products->updateObservation(
+                $productId,
+                $churchId,
+                (string) $request->input('observacoes', $request->input('observacao', '')),
+            );
+        } catch (RuntimeException $exception) {
+            return $this->productJsonOrRedirectError($request, $exception->getMessage(), 403);
+        }
 
         if (!$updated) {
             return $this->productJsonOrRedirectError($request, 'Produto não encontrado para a igreja selecionada.', 404);
@@ -363,7 +374,14 @@ class LegacyRouteCompatibilityController extends Controller
                 ->with('status_type', 'error');
         }
 
-        $products->clearEdits($productId, $churchId);
+        try {
+            $products->clearEdits($productId, $churchId);
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('migration.products.index', $this->buildProductReturnQuery($request, $churchId))
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
 
         return redirect()
             ->route('migration.products.index', $this->buildProductReturnQuery($request, $churchId))
@@ -723,7 +741,11 @@ class LegacyRouteCompatibilityController extends Controller
         }
 
         $rawValue = $request->input('checado', $request->input('imprimir', 0));
-        $updated = $callback($productId, $churchId, (int) $rawValue === 1);
+        try {
+            $updated = $callback($productId, $churchId, (int) $rawValue === 1);
+        } catch (RuntimeException $exception) {
+            return $this->productJsonOrRedirectError($request, $exception->getMessage(), 403);
+        }
 
         if (!$updated) {
             return $this->productJsonOrRedirectError($request, 'Produto não encontrado para a igreja selecionada.', 404);

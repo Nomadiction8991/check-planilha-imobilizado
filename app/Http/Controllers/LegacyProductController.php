@@ -189,10 +189,17 @@ class LegacyProductController extends Controller
             Session::put('comum_id', $request->integer('comum_id'));
         }
 
-        $this->productUtility->saveVerificationChecklist(
-            $request->integer('comum_id'),
-            $request->toItems(),
-        );
+        try {
+            $this->productUtility->saveVerificationChecklist(
+                $request->integer('comum_id'),
+                $request->toItems(),
+            );
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('migration.products.verification', $request->toReturnQuery())
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
 
         return redirect()
             ->route('migration.products.verification', $request->toReturnQuery())
@@ -202,7 +209,14 @@ class LegacyProductController extends Controller
 
     public function syncVerification(SyncProductVerificationRowRequest $request): JsonResponse
     {
-        $product = $this->productUtility->findForChurch($request->productId(), $request->churchId());
+        try {
+            $product = $this->productUtility->findForChurch($request->productId(), $request->churchId());
+        } catch (RuntimeException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ], 403);
+        }
 
         if ($product === null) {
             return response()->json([
@@ -211,9 +225,23 @@ class LegacyProductController extends Controller
             ], 404);
         }
 
-        $this->productUtility->saveVerificationChecklist($request->churchId(), [$request->toItem()]);
+        try {
+            $this->productUtility->saveVerificationChecklist($request->churchId(), [$request->toItem()]);
+        } catch (RuntimeException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ], 403);
+        }
 
-        $updatedProduct = $this->productUtility->findForChurch($request->productId(), $request->churchId());
+        try {
+            $updatedProduct = $this->productUtility->findForChurch($request->productId(), $request->churchId());
+        } catch (RuntimeException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,
