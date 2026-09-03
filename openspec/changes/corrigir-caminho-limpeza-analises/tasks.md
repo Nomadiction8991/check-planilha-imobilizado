@@ -11,5 +11,5 @@
 ## 3. Entrega
 
 - [x] 3.1 Executar a suíte completa e verificar a saúde da aplicação.
-- [ ] 3.2 Criar commit convencional e enviar alteração para a branch principal.
-- [ ] 3.3 Confirmar deploy automático e saúde pós-deploy.
+- [x] 3.2 Criar commit convencional e enviar alteração para a branch principal.
+- [x] 3.3 Confirmar deploy automático e saúde pós-deploy.
