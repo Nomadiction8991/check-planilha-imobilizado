@@ -27,12 +27,18 @@
         return onlyText(item?.nome ?? item?.label ?? item?.description ?? '');
     }
 
-    async function fetchJson(url) {
-        const response = await fetch(url, {
+    async function fetchJson(url, signal = null) {
+        const options = {
             headers: {
                 Accept: 'application/json',
             },
-        });
+        };
+
+        if (signal) {
+            options.signal = signal;
+        }
+
+        const response = await fetch(url, options);
         const payload = await response.json();
 
         if (!response.ok || payload.success !== true || !Array.isArray(payload.data)) {
@@ -40,6 +46,39 @@
         }
 
         return payload.data;
+    }
+
+    function createRequestState(stateSelect = null) {
+        return {
+            sequence: 0,
+            controller: null,
+            stateSelect,
+        };
+    }
+
+    function beginRequest(requestState) {
+        requestState.sequence += 1;
+        requestState.controller?.abort();
+        requestState.controller = typeof AbortController === 'function'
+            ? new AbortController()
+            : null;
+
+        return {
+            sequence: requestState.sequence,
+            controller: requestState.controller,
+        };
+    }
+
+    function isCurrentRequest(requestState, request, state) {
+        const currentState = requestState.stateSelect
+            ? onlyText(requestState.stateSelect.value).toUpperCase()
+            : state;
+
+        return requestState.sequence === request.sequence && currentState === state;
+    }
+
+    function isAbortError(error) {
+        return error?.name === 'AbortError';
     }
 
     function resetSelect(select, message) {
@@ -124,10 +163,12 @@
         }
     }
 
-    async function loadCities(select, endpointTemplate, state, selectedValue) {
+    async function loadCities(select, endpointTemplate, state, selectedValue, requestState = null) {
         if (!select) {
             return false;
         }
+
+        const request = requestState ? beginRequest(requestState) : null;
 
         if (!state) {
             resetSelect(select, 'Selecione um estado primeiro');
@@ -138,11 +179,23 @@
         select.innerHTML = '<option value="">Carregando cidades...</option>';
 
         try {
-            const cities = await fetchJson(endpointTemplate.replace('__STATE__', encodeURIComponent(state)));
+            const cities = await fetchJson(
+                endpointTemplate.replace('__STATE__', encodeURIComponent(state)),
+                request?.controller?.signal ?? null,
+            );
+
+            if (request && !isCurrentRequest(requestState, request, state)) {
+                return false;
+            }
+
             fillCities(select, cities, selectedValue);
             select.disabled = false;
             return true;
         } catch (error) {
+            if (isAbortError(error) || (request && !isCurrentRequest(requestState, request, state))) {
+                return false;
+            }
+
             console.error('Erro ao carregar cidades:', error);
             resetSelect(select, 'Não foi possível carregar as cidades');
             return false;
@@ -157,6 +210,7 @@
             return;
         }
 
+        const citiesRequestState = createRequestState(stateSelect);
         const selectedState = onlyText(config.selectedState ?? stateSelect.value).toUpperCase();
         const selectedCity = onlyText(config.selectedCity ?? citySelect.dataset.selectedCity ?? citySelect.value);
 
@@ -164,14 +218,16 @@
 
         const state = onlyText(stateSelect.value).toUpperCase() || selectedState;
         if (state) {
-            await loadCities(citySelect, config.citiesEndpointTemplate, state, selectedCity);
+            await loadCities(citySelect, config.citiesEndpointTemplate, state, selectedCity, citiesRequestState);
         } else {
+            citiesRequestState.sequence += 1;
+            citiesRequestState.controller?.abort();
             resetSelect(citySelect, 'Selecione um estado primeiro');
         }
 
         stateSelect.addEventListener('change', () => {
             const stateValue = onlyText(stateSelect.value).toUpperCase();
-            loadCities(citySelect, config.citiesEndpointTemplate, stateValue);
+            loadCities(citySelect, config.citiesEndpointTemplate, stateValue, '', citiesRequestState);
         });
     }
 
