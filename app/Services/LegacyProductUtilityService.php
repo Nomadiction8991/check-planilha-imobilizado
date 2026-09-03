@@ -33,18 +33,30 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
     public function labelCopyData(int $churchId, ?int $dependencyId): array
     {
         $church = $this->assertChurchWithinProductScope($churchId);
+        $editedDependencyCondition = "COALESCE(p.editado, 0) = 1
+            AND d_edit.descricao IS NOT NULL
+            AND TRIM(d_edit.descricao) <> ''";
+        $currentDependencyId = "CASE WHEN {$editedDependencyCondition}
+            THEN p.editado_dependencia_id
+            ELSE p.dependencia_id
+        END";
+        $currentDependencyDescription = "CASE WHEN {$editedDependencyCondition}
+            THEN d_edit.descricao
+            ELSE d_orig.descricao
+        END";
 
         $dependencies = DB::table('produtos as p')
             ->leftJoin('dependencias as d_orig', 'p.dependencia_id', '=', 'd_orig.id')
             ->leftJoin('dependencias as d_edit', 'p.editado_dependencia_id', '=', 'd_edit.id')
             ->where('p.comum_id', $churchId)
             ->whereRaw('COALESCE(p.imprimir_etiqueta, 0) = 1')
-            ->whereRaw('COALESCE(d_edit.descricao, d_orig.descricao) IS NOT NULL')
+            ->whereRaw("{$currentDependencyDescription} IS NOT NULL")
+            ->whereRaw("TRIM({$currentDependencyDescription}) <> ''")
             ->distinct()
-            ->orderByRaw('COALESCE(d_edit.descricao, d_orig.descricao)')
+            ->orderByRaw($currentDependencyDescription)
             ->get([
-                DB::raw('COALESCE(p.editado_dependencia_id, p.dependencia_id) as id'),
-                DB::raw('COALESCE(d_edit.descricao, d_orig.descricao) as descricao'),
+                DB::raw("{$currentDependencyId} as id"),
+                DB::raw("{$currentDependencyDescription} as descricao"),
             ])
             ->map(static fn (object $row): array => [
                 'id' => (int) $row->id,
@@ -60,14 +72,14 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
             ->whereRaw('COALESCE(p.imprimir_etiqueta, 0) = 1');
 
         if ($dependencyId !== null) {
-            $productsQuery->whereRaw('COALESCE(p.editado_dependencia_id, p.dependencia_id) = ?', [$dependencyId]);
+            $productsQuery->whereRaw("{$currentDependencyId} = ?", [$dependencyId]);
         }
 
         $products = $productsQuery
             ->orderBy('p.codigo')
             ->get([
                 'p.codigo',
-                DB::raw("COALESCE(d_edit.descricao, d_orig.descricao, '') as dependencia"),
+                DB::raw("COALESCE({$currentDependencyDescription}, '') as dependencia"),
             ])
             ->map(static fn (object $row): array => [
                 'codigo' => trim((string) $row->codigo),
