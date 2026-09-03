@@ -5,6 +5,7 @@
 @section('content')
     @php
         $isLegacyAdmin = !empty($legacySessionUser['is_admin'] ?? false) || (bool) session('is_admin', false);
+        $canEditProducts = $isLegacyAdmin || !empty($legacyPermissions['products.edit'] ?? false);
     @endphp
 
     <section class="hero">
@@ -221,12 +222,16 @@
                                 </td>
                                 <td data-label="Ações">
                                     <div class="inline-actions">
-                                        <a class="btn" href="{{ route('migration.products.edit', [
-                                            'product' => $product->id_produto,
-                                            'return_url' => url()->full(),
-                                        ]) }}">
-                                            Editar
-                                        </a>
+                                        @if ($canEditProducts)
+                                            <a class="btn" href="{{ route('migration.products.edit', [
+                                                'product' => $product->id_produto,
+                                                'return_url' => url()->full(),
+                                            ]) }}">
+                                                Editar
+                                            </a>
+                                        @else
+                                            <span class="table-note" role="status">Somente consulta</span>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
