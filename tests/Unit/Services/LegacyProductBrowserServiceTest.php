@@ -9,10 +9,10 @@ use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Models\Legacy\Dependencia;
 use App\Models\Legacy\Produto;
-use App\Models\Legacy\TipoBem;
 use App\Services\LegacyProductBrowserService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 final class LegacyProductBrowserServiceTest extends TestCase
@@ -66,6 +66,7 @@ final class LegacyProductBrowserServiceTest extends TestCase
             $table->string('nota_numero')->nullable();
         });
 
+        Session::put('is_admin', true);
         $this->service = new LegacyProductBrowserService();
     }
 
@@ -163,20 +164,222 @@ final class LegacyProductBrowserServiceTest extends TestCase
         self::assertSame('P-SP', $result->items()[0]->codigo);
     }
 
-    public function testAdministrationOptionsReturnsAllAdministrationsOrdered(): void
+    public function testRestrictedUserSeesOnlyProductsFromPermittedAdministrations(): void
     {
-        $adminB = new Administracao();
-        $adminB->forceFill(['id' => 2, 'descricao' => 'Brasília']);
-        $adminB->save();
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+            'usuario_id' => 7,
+        ]);
 
-        $adminA = new Administracao();
-        $adminA->forceFill(['id' => 1, 'descricao' => 'Anápolis']);
-        $adminA->save();
+        foreach ([10, 20, 30] as $administrationId) {
+            $church = new Comum();
+            $church->forceFill([
+                'id' => $administrationId * 10,
+                'codigo' => 'IG-' . $administrationId,
+                'descricao' => 'Igreja ' . $administrationId,
+                'administracao_id' => $administrationId,
+                'estado' => 'SP',
+            ]);
+            $church->save();
 
-        $options = $this->service->administrationOptions();
+            $product = new Produto();
+            $product->forceFill([
+                'id_produto' => $administrationId,
+                'comum_id' => $administrationId * 10,
+                'codigo' => 'P-' . $administrationId,
+                'bem' => 'MESA',
+                'ativo' => 1,
+            ]);
+            $product->save();
+        }
 
-        self::assertCount(2, $options);
-        self::assertSame(1, $options->first()->id);
-        self::assertSame('Anápolis', $options->first()->descricao);
+        $result = $this->service->paginate($this->filters());
+
+        self::assertSame(2, $result->total());
+        self::assertEqualsCanonicalizing(
+            ['P-10', 'P-20'],
+            array_map(static fn (Produto $product): string => (string) $product->codigo, $result->items()),
+        );
+    }
+
+    public function testRestrictedUserCannotUseAnAdministrationOutsideTheirScope(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+            'usuario_id' => 7,
+        ]);
+
+        $church = new Comum();
+        $church->forceFill([
+            'id' => 300,
+            'codigo' => 'IG-30',
+            'descricao' => 'Igreja 30',
+            'administracao_id' => 30,
+            'estado' => 'SP',
+        ]);
+        $church->save();
+
+        $product = new Produto();
+        $product->forceFill([
+            'id_produto' => 30,
+            'comum_id' => 300,
+            'codigo' => 'P-30',
+            'bem' => 'MESA',
+            'ativo' => 1,
+        ]);
+        $product->save();
+
+        $result = $this->service->paginate($this->filters(administrationId: 30));
+
+        self::assertSame(0, $result->total());
+    }
+
+    public function testAdministratorKeepsGlobalProductAccess(): void
+    {
+        Session::put([
+            'is_admin' => true,
+            'administracao_id' => null,
+            'administracoes_permitidas' => [],
+        ]);
+
+        foreach ([10, 20] as $administrationId) {
+            $church = new Comum();
+            $church->forceFill([
+                'id' => $administrationId * 10,
+                'codigo' => 'IG-' . $administrationId,
+                'descricao' => 'Igreja ' . $administrationId,
+                'administracao_id' => $administrationId,
+                'estado' => 'SP',
+            ]);
+            $church->save();
+
+            $product = new Produto();
+            $product->forceFill([
+                'id_produto' => $administrationId,
+                'comum_id' => $administrationId * 10,
+                'codigo' => 'P-' . $administrationId,
+                'bem' => 'MESA',
+                'ativo' => 1,
+            ]);
+            $product->save();
+        }
+
+        $result = $this->service->paginate($this->filters());
+
+        self::assertSame(2, $result->total());
+    }
+
+    public function testRestrictedUserSeesOnlyPermittedChurchesAndDependencies(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+            'usuario_id' => 7,
+        ]);
+
+        $permittedChurch = new Comum();
+        $permittedChurch->forceFill([
+            'id' => 100,
+            'codigo' => 'IG-10',
+            'descricao' => 'Igreja permitida',
+            'administracao_id' => 10,
+        ]);
+        $permittedChurch->save();
+
+        $outsideChurch = new Comum();
+        $outsideChurch->forceFill([
+            'id' => 200,
+            'codigo' => 'IG-20',
+            'descricao' => 'Igreja fora do escopo',
+            'administracao_id' => 20,
+        ]);
+        $outsideChurch->save();
+
+        $permittedDependency = new Dependencia();
+        $permittedDependency->forceFill(['id' => 1, 'comum_id' => 100, 'descricao' => 'SALAO permitido']);
+        $permittedDependency->save();
+
+        $outsideDependency = new Dependencia();
+        $outsideDependency->forceFill(['id' => 2, 'comum_id' => 200, 'descricao' => 'SALAO fora']);
+        $outsideDependency->save();
+
+        self::assertEqualsCanonicalizing(
+            [100],
+            $this->service->churchOptions()->pluck('id')->all(),
+        );
+        self::assertSame([1], $this->service->dependencyOptions(null)->pluck('id')->all());
+        self::assertSame([], $this->service->dependencyOptions(200)->pluck('id')->all());
+    }
+
+    public function testAdministratorSeesAllChurchesAndDependencies(): void
+    {
+        Session::put('is_admin', true);
+
+        foreach ([100, 200] as $churchId) {
+            $church = new Comum();
+            $church->forceFill([
+                'id' => $churchId,
+                'codigo' => 'IG-' . $churchId,
+                'descricao' => 'Igreja ' . $churchId,
+                'administracao_id' => intdiv($churchId, 10),
+            ]);
+            $church->save();
+
+            $dependency = new Dependencia();
+            $dependency->forceFill([
+                'id' => $churchId,
+                'comum_id' => $churchId,
+                'descricao' => 'SALAO ' . $churchId,
+            ]);
+            $dependency->save();
+        }
+
+        self::assertCount(2, $this->service->churchOptions());
+        self::assertCount(2, $this->service->dependencyOptions(null));
+    }
+
+    public function testAdministrationOptionsFollowTheCurrentScope(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+            'usuario_id' => 7,
+        ]);
+
+        foreach ([10, 20, 30] as $administrationId) {
+            $administration = new Administracao();
+            $administration->forceFill([
+                'id' => $administrationId,
+                'descricao' => 'Administração ' . $administrationId,
+            ]);
+            $administration->save();
+        }
+
+        self::assertEqualsCanonicalizing(
+            [10, 20],
+            $this->service->administrationOptions()->pluck('id')->all(),
+        );
+    }
+
+    private function filters(?int $administrationId = null): ProductFilters
+    {
+        return new ProductFilters(
+            administrationId: $administrationId,
+            comumId: null,
+            search: '',
+            dependencyId: null,
+            assetTypeId: null,
+            state: null,
+            status: '',
+            onlyNew: false,
+            page: 1,
+            perPage: 10,
+        );
     }
 }
