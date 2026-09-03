@@ -745,7 +745,7 @@ final class LegacyProductManagementTest extends TestCase
         $response->assertJson(['success' => true]);
     }
 
-    public function testIndexAndVerificationShowEditButtonWithoutEditPermission(): void
+    public function testIndexAndVerificationHideEditButtonWithoutEditPermission(): void
     {
         $this->mock(LegacyPermissionServiceInterface::class, function (MockInterface $mock): void {
             $mock->shouldReceive('currentPermissions')->andReturn([
@@ -820,12 +820,28 @@ final class LegacyProductManagementTest extends TestCase
         $response = $this->get(route('migration.products.index', ['comum_id' => 7]));
 
         $response->assertOk();
-        $response->assertSee('Editar');
+        $response->assertDontSee('Editar');
+        $response->assertSee('A-101');
+        $response->assertSee('Somente consulta');
 
         $verificationResponse = $this->get(route('migration.products.verification', ['comum_id' => 7]));
 
         $verificationResponse->assertOk();
-        $verificationResponse->assertSee('Editar cadastro');
+        $verificationResponse->assertDontSee('Editar cadastro');
+        $verificationResponse->assertSee('A-101');
+        $verificationResponse->assertSee('Somente consulta');
+
+        $adminIndexResponse = $this->withSession(['is_admin' => true])
+            ->get(route('migration.products.index', ['comum_id' => 7]));
+
+        $adminIndexResponse->assertOk();
+        $adminIndexResponse->assertSee('Editar');
+
+        $adminVerificationResponse = $this->withSession(['is_admin' => true])
+            ->get(route('migration.products.verification', ['comum_id' => 7]));
+
+        $adminVerificationResponse->assertOk();
+        $adminVerificationResponse->assertSee('Editar cadastro');
     }
 
     public function testUpdateMarksProductAsVerifiedAndLabeled(): void

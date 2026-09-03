@@ -4,6 +4,8 @@
 
 @section('content')
     @php
+        $isLegacyAdmin = !empty($legacySessionUser['is_admin'] ?? false) || (bool) session('is_admin', false);
+        $canEditProducts = $isLegacyAdmin || !empty($legacyPermissions['products.edit'] ?? false);
         $selectedChurchId = $filters->comumId;
         $copyLabelsQuery = array_filter([
             'comum_id' => $selectedChurchId,
@@ -517,17 +519,21 @@
                                         >
                                     </td>
                                     <td class="verification-cell--actions" data-label="Ações">
-                                        <a
-                                            class="btn verification-edit-btn"
-                                            href="{{ route('migration.products.edit', [
-                                                'product' => data_get($product, 'id_produto'),
-                                                'return_url' => url()->full(),
-                                            ]) }}"
-                                            aria-label="Editar cadastro do produto {{ $code !== '' ? $code : 'selecionado' }}"
-                                            title="Editar cadastro"
-                                        >
-                                            <span class="material-symbols-outlined" aria-hidden="true">edit</span>
-                                        </a>
+                                        @if ($canEditProducts)
+                                            <a
+                                                class="btn verification-edit-btn"
+                                                href="{{ route('migration.products.edit', [
+                                                    'product' => data_get($product, 'id_produto'),
+                                                    'return_url' => url()->full(),
+                                                ]) }}"
+                                                aria-label="Editar cadastro do produto {{ $code !== '' ? $code : 'selecionado' }}"
+                                                title="Editar cadastro"
+                                            >
+                                                <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                            </a>
+                                        @else
+                                            <span class="table-note" role="status">Somente consulta</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
