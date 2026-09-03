@@ -613,6 +613,55 @@ final class LegacyProductManagementTest extends TestCase
         $response->assertSee('Salvar alterações');
     }
 
+    public function testEditPageRendersCurrentEditedClassification(): void
+    {
+        $this->boundProduct->editado = 1;
+        $this->boundProduct->setRelation('editadoTipoBem', (object) [
+            'id' => 7,
+            'codigo' => 7,
+            'descricao' => 'MESA',
+        ]);
+        $this->boundProduct->setRelation('editadoDependencia', (object) [
+            'id' => 3,
+            'descricao' => 'SECRETARIA',
+        ]);
+
+        $response = $this->get(route('migration.products.edit', ['product' => 19]));
+
+        $response->assertOk();
+        $response->assertSee('value="7 - MESA"', false);
+        $response->assertSee('value="SECRETARIA"', false);
+        $response->assertDontSee('value="4 - CADEIRA/CADEIRA GIRATORIA"', false);
+        $response->assertDontSee('value="SALAO"', false);
+        self::assertSame([
+            'comum:id,codigo,descricao',
+            'dependencia:id,descricao',
+            'tipoBem:id,codigo,descricao',
+            'editadoDependencia:id,descricao',
+            'editadoTipoBem:id,codigo,descricao',
+        ], $this->boundProduct->loadedRelations);
+    }
+
+    public function testEditPageFallsBackToOriginalClassificationWhenEditedRelationsAreInvalid(): void
+    {
+        $this->boundProduct->editado = 1;
+        $this->boundProduct->setRelation('editadoTipoBem', (object) [
+            'id' => 7,
+            'codigo' => '',
+            'descricao' => '',
+        ]);
+        $this->boundProduct->setRelation('editadoDependencia', (object) [
+            'id' => 3,
+            'descricao' => '',
+        ]);
+
+        $response = $this->get(route('migration.products.edit', ['product' => 19]));
+
+        $response->assertOk();
+        $response->assertSee('value="4 - CADEIRA/CADEIRA GIRATORIA"', false);
+        $response->assertSee('value="SALAO"', false);
+    }
+
     public function testUpdateChangesProduct(): void
     {
         $this->mock(
@@ -889,8 +938,13 @@ final class LegacyProductManagementTest extends TestCase
     private function makeProduct(array $overrides = []): Produto
     {
         $product = new class extends Produto {
+            /** @var array<int, string> */
+            public array $loadedRelations = [];
+
             public function loadMissing($relations = null): static
             {
+                $this->loadedRelations = is_array($relations) ? $relations : [$relations];
+
                 return $this;
             }
         };
