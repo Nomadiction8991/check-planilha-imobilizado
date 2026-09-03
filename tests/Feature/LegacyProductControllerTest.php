@@ -145,6 +145,119 @@ final class LegacyProductControllerTest extends TestCase
         $response->assertSee('id="products-estado-select"', false);
     }
 
+    public function testIndexDeduplicatesOnlyNewAliasesInActiveFilters(): void
+    {
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->withArgs(fn (ProductFilters $filters): bool =>
+                $filters->status === 'novos' && $filters->onlyNew
+            )
+            ->andReturn(new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 20,
+                currentPage: 1,
+                options: ['path' => '/products'],
+            ));
+
+        $this->products
+            ->shouldReceive('churchOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('administrationOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('dependencyOptions')
+            ->once()
+            ->withSomeOfArgs()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('assetTypeOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('statusOptions')
+            ->once()
+            ->andReturn(['novos' => 'Somente novos']);
+
+        $response = $this->get(route('migration.products.index', [
+            'status' => 'novos',
+            'somente_novos' => 1,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('data-active-count="1"', false);
+        $response->assertSee('Filtros · 1 ativo', false);
+        $response->assertSee('Somente novos', false);
+        $response->assertDontSee('Status: Somente novos', false);
+
+        $html = $response->getContent();
+        self::assertStringContainsString(
+            'href="' . route('migration.products.index') . '"',
+            $html,
+        );
+    }
+
+    public function testIndexRemovesBothOnlyNewAliasesFromActiveFilterLink(): void
+    {
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->andReturn(new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 20,
+                currentPage: 1,
+                options: ['path' => '/products'],
+            ));
+
+        $this->products
+            ->shouldReceive('churchOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('administrationOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('dependencyOptions')
+            ->once()
+            ->withSomeOfArgs()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('assetTypeOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('statusOptions')
+            ->once()
+            ->andReturn(['novos' => 'Somente novos']);
+
+        $response = $this->get(route('migration.products.index', [
+            'status' => 'novos',
+            'somente_novos' => 1,
+        ]));
+
+        $html = $response->getContent();
+        self::assertStringContainsString(
+            'href="' . route('migration.products.index') . '"',
+            $html,
+        );
+        self::assertStringNotContainsString('status=novos&amp;', $html);
+        self::assertStringNotContainsString('somente_novos', $html);
+    }
+
     public function testIndexRendersOnlyScopedChurchOptions(): void
     {
         $this->products

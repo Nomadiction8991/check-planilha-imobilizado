@@ -89,10 +89,38 @@ final readonly class ProductFilters
             $query['status'] = $this->status;
         }
 
-        if ($this->onlyNew) {
+        if ($this->onlyNew && $this->status !== 'novos') {
             $query['somente_novos'] = 1;
         }
 
         return $query;
+    }
+
+    public function activeCriteriaCount(): int
+    {
+        $count = 0;
+
+        foreach ([
+            $this->administrationId,
+            $this->comumId,
+            $this->search,
+            $this->dependencyId,
+            $this->assetTypeId,
+            $this->state,
+        ] as $value) {
+            if ($value !== null && $value !== '') {
+                $count++;
+            }
+        }
+
+        if ($this->status !== '') {
+            $count++;
+        }
+
+        if ($this->onlyNew && $this->status !== 'novos') {
+            $count++;
+        }
+
+        return $count;
     }
 }

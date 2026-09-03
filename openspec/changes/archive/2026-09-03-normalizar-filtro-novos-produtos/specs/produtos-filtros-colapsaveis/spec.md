@@ -1,8 +1,5 @@
-# produtos-filtros-colapsaveis Specification
+## MODIFIED Requirements
 
-## Purpose
-Tornar os filtros de produtos usáveis em telas pequenas, recolhendo o bloco de filtros no mobile sem remover o acesso às opções avançadas.
-## Requirements
 ### Requirement: Filtros colapsáveis no mobile para listagem e verificação de produtos
 
 O sistema SHALL exibir, nas telas `/products` (index) e `/products/verification` (verificação), o bloco de filtros (formulário + chips ativos) dentro de um contêiner colapsável cujo estado é controlado por um botão de alternância dedicado. No mobile (largura de viewport `≤860px`), o contêiner SHALL iniciar colapsado (filtros não visíveis) por padrão e SHALL expandir/recolher ao acionar o botão. No desktop (`≥861px`), o contêiner SHALL permanecer sempre expandido (filtros visíveis) e o botão de alternância SHALL estar oculto. O contador e os chips de filtros ativos SHALL considerar `status=novos` e `somente_novos=1` como uma única condição de “Somente novos”, inclusive quando os dois parâmetros estiverem presentes.
