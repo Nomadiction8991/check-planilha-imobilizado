@@ -9,6 +9,7 @@ use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Models\Legacy\Dependencia;
 use App\Models\Legacy\Produto;
+use App\Models\Legacy\TipoBem;
 use App\Services\LegacyProductBrowserService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -301,7 +302,7 @@ final class LegacyProductBrowserServiceTest extends TestCase
             [4, 'CADEIRA'],
             [7, 'MESA'],
         ] as [$id, $description]) {
-            $type = new \App\Models\Legacy\TipoBem();
+            $type = new TipoBem();
             $type->forceFill(['id' => $id, 'codigo' => (string) $id, 'descricao' => $description]);
             $type->save();
         }
@@ -324,6 +325,183 @@ final class LegacyProductBrowserServiceTest extends TestCase
         self::assertTrue($loadedProduct->relationLoaded('editadoDependencia'));
         self::assertSame('MESA', $loadedProduct->editadoTipoBem->descricao);
         self::assertSame('SECRETARIA', $loadedProduct->editadoDependencia->descricao);
+    }
+
+    public function testSearchUsesCurrentEditedClassification(): void
+    {
+        $this->seedEditedProduct();
+
+        $byType = $this->service->paginate($this->filters(search: 'MESA'));
+        $byDependency = $this->service->paginate($this->filters(search: 'SECRETARIA'));
+        $byReplacedType = $this->service->paginate($this->filters(search: 'CADEIRA'));
+        $byReplacedDependency = $this->service->paginate($this->filters(search: 'SALAO'));
+
+        self::assertSame(1, $byType->total());
+        self::assertSame(1, $byDependency->total());
+        self::assertSame(0, $byReplacedType->total());
+        self::assertSame(0, $byReplacedDependency->total());
+    }
+
+    public function testClassificationFiltersUseCurrentEditedRelations(): void
+    {
+        $this->seedEditedProduct();
+
+        $byType = $this->service->paginate($this->filters(assetTypeId: 7));
+        $byDependency = $this->service->paginate($this->filters(dependencyId: 3));
+        $byOriginalType = $this->service->paginate($this->filters(assetTypeId: 4));
+        $byOriginalDependency = $this->service->paginate($this->filters(dependencyId: 2));
+
+        self::assertSame(1, $byType->total());
+        self::assertSame(1, $byDependency->total());
+        self::assertSame(0, $byOriginalType->total());
+        self::assertSame(0, $byOriginalDependency->total());
+    }
+
+    public function testClassificationSearchAndFiltersFallbackToOriginalRelations(): void
+    {
+        $product = $this->seedEditedProduct(
+            editedTypeId: null,
+            editedDependencyId: null,
+        );
+
+        $byType = $this->service->paginate($this->filters(search: 'CADEIRA'));
+        $byDependency = $this->service->paginate($this->filters(search: 'SALAO'));
+        $byTypeFilter = $this->service->paginate($this->filters(assetTypeId: 4));
+        $byDependencyFilter = $this->service->paginate($this->filters(dependencyId: 2));
+
+        self::assertSame(1, $byType->total());
+        self::assertSame(1, $byDependency->total());
+        self::assertSame(1, $byTypeFilter->total());
+        self::assertSame(1, $byDependencyFilter->total());
+        self::assertSame(1, $product->id_produto);
+    }
+
+    public function testClassificationSearchAndFiltersFallbackWhenEditedRelationsHaveNoDisplayValue(): void
+    {
+        $this->seedEditedProduct(
+            editedTypeId: 7,
+            editedDependencyId: 3,
+            editedTypeCode: null,
+            editedTypeDescription: '',
+            editedDependencyDescription: '',
+        );
+
+        $byType = $this->service->paginate($this->filters(search: 'CADEIRA'));
+        $byDependency = $this->service->paginate($this->filters(search: 'SALAO'));
+        $byTypeFilter = $this->service->paginate($this->filters(assetTypeId: 4));
+        $byDependencyFilter = $this->service->paginate($this->filters(dependencyId: 2));
+
+        self::assertSame(1, $byType->total());
+        self::assertSame(1, $byDependency->total());
+        self::assertSame(1, $byTypeFilter->total());
+        self::assertSame(1, $byDependencyFilter->total());
+    }
+
+    public function testRestrictedUserCannotFindOutOfScopeProductByEditedClassification(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+            'usuario_id' => 7,
+        ]);
+        $this->seedEditedProduct();
+
+        $result = $this->service->paginate($this->filters(search: 'MESA'));
+
+        self::assertSame(0, $result->total());
+    }
+
+    public function testRestrictedUserCanFindPermittedProductByEditedClassification(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+            'usuario_id' => 7,
+        ]);
+        $this->seedEditedProduct(administrationId: 10);
+
+        $result = $this->service->paginate($this->filters(search: 'MESA'));
+
+        self::assertSame(1, $result->total());
+    }
+
+    public function testRestrictedUserCanFindPermittedProductByEditedClassificationWithAdditionalScope(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+            'usuario_id' => 7,
+        ]);
+        $this->seedEditedProduct(administrationId: 20);
+
+        $result = $this->service->paginate($this->filters(search: 'MESA'));
+
+        self::assertSame(1, $result->total());
+    }
+
+    public function testSearchStillUsesProductCodeNameAndComplement(): void
+    {
+        $product = $this->seedEditedProduct();
+
+        $byCode = $this->service->paginate($this->filters(search: 'P-001'));
+        $byName = $this->service->paginate($this->filters(search: 'ARMARIO'));
+        $byComplement = $this->service->paginate($this->filters(search: 'GRANDE'));
+
+        self::assertSame(1, $byCode->total());
+        self::assertSame(1, $byName->total());
+        self::assertSame(1, $byComplement->total());
+        self::assertSame(1, $product->id_produto);
+    }
+
+    public function testRestrictedUserSearchByEditedClassificationRespectsCurrentAdministrationFilter(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+            'usuario_id' => 7,
+        ]);
+        $this->seedEditedProduct(administrationId: 20);
+
+        $result = $this->service->paginate($this->filters(search: 'MESA', administrationId: 10));
+
+        self::assertSame(0, $result->total());
+    }
+
+    public function testProductWithEditedClassificationAndOriginalFallbackCanBePaginatedTogether(): void
+    {
+        $this->seedEditedProduct(administrationId: 30);
+        $this->seedEditedProduct(
+            id: 2,
+            code: 'P-002',
+            administrationId: 31,
+            editedTypeId: null,
+            editedDependencyId: null,
+        );
+
+        $result = $this->service->paginate($this->filters(search: 'CADEIRA'));
+
+        self::assertSame(1, $result->total());
+        self::assertSame(2, $result->items()[0]->id_produto);
+    }
+
+    public function testNoClassificationFilterReturnsBothCurrentClassifications(): void
+    {
+        $this->seedEditedProduct(administrationId: 30);
+        $this->seedEditedProduct(
+            id: 2,
+            code: 'P-002',
+            administrationId: 31,
+            editedTypeId: null,
+            editedDependencyId: null,
+        );
+
+        $result = $this->service->paginate($this->filters());
+
+        self::assertSame(2, $result->total());
     }
 
     public function testRestrictedUserSeesOnlyPermittedChurchesAndDependencies(): void
@@ -420,14 +598,81 @@ final class LegacyProductBrowserServiceTest extends TestCase
         );
     }
 
-    private function filters(?int $administrationId = null): ProductFilters
-    {
+    private function seedEditedProduct(
+        int $id = 1,
+        string $code = 'P-001',
+        int $administrationId = 30,
+        ?int $editedTypeId = 7,
+        ?int $editedDependencyId = 3,
+        ?string $editedTypeCode = '7',
+        string $editedTypeDescription = 'MESA',
+        string $editedDependencyDescription = 'SECRETARIA',
+    ): Produto {
+        $churchId = $administrationId * 10;
+        $church = Comum::query()->whereKey($churchId)->first() ?? new Comum();
+        $church->forceFill([
+            'id' => $churchId,
+            'codigo' => 'IG-' . $administrationId,
+            'descricao' => 'Igreja ' . $administrationId,
+            'administracao_id' => $administrationId,
+            'estado' => 'SP',
+        ]);
+        $church->save();
+
+        $originalType = TipoBem::query()->whereKey(4)->first() ?? new TipoBem();
+        $originalType->forceFill(['id' => 4, 'codigo' => '4', 'descricao' => 'CADEIRA']);
+        $originalType->save();
+
+        $editedType = TipoBem::query()->whereKey(7)->first() ?? new TipoBem();
+        $editedType->forceFill(['id' => 7, 'codigo' => $editedTypeCode, 'descricao' => $editedTypeDescription]);
+        $editedType->save();
+
+        $dependencyRecordId = $administrationId === 30 ? 2 : $administrationId * 10 + 2;
+        $editedDependencyRecordId = $dependencyRecordId + 1;
+
+        $originalDependency = Dependencia::query()->whereKey($dependencyRecordId)->first() ?? new Dependencia();
+        $originalDependency->forceFill(['id' => $dependencyRecordId, 'comum_id' => $church->id, 'descricao' => 'SALAO']);
+        $originalDependency->save();
+
+        $editedDependency = Dependencia::query()->whereKey($editedDependencyRecordId)->first() ?? new Dependencia();
+        $editedDependency->forceFill([
+            'id' => $editedDependencyRecordId,
+            'comum_id' => $church->id,
+            'descricao' => $editedDependencyDescription,
+        ]);
+        $editedDependency->save();
+
+        $product = new Produto();
+        $product->forceFill([
+            'id_produto' => $id,
+            'comum_id' => $church->id,
+            'codigo' => $code,
+            'tipo_bem_id' => $originalType->id,
+            'editado_tipo_bem_id' => $editedTypeId !== null ? $editedType->id : null,
+            'bem' => 'ARMARIO',
+            'complemento' => 'GRANDE',
+            'dependencia_id' => $originalDependency->id,
+            'editado_dependencia_id' => $editedDependencyId !== null ? $editedDependencyRecordId : null,
+            'editado' => 1,
+            'ativo' => 1,
+        ]);
+        $product->save();
+
+        return $product;
+    }
+
+    private function filters(
+        ?int $administrationId = null,
+        string $search = '',
+        ?int $dependencyId = null,
+        ?int $assetTypeId = null,
+    ): ProductFilters {
         return new ProductFilters(
             administrationId: $administrationId,
             comumId: null,
-            search: '',
-            dependencyId: null,
-            assetTypeId: null,
+            search: $search,
+            dependencyId: $dependencyId,
+            assetTypeId: $assetTypeId,
             state: null,
             status: '',
             onlyNew: false,
