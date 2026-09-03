@@ -396,6 +396,7 @@
                     </label>
                 </div>
             </form>
+            @include('products.partials.active-filter-chips')
         </div>
     </section>
 
