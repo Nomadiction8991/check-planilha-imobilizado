@@ -31,6 +31,17 @@ trait ResolvesLegacyProductScope
         return $church;
     }
 
+    protected function assertAdministrationWithinScope(int $administrationId): void
+    {
+        if ($this->productScopeIsGlobal()) {
+            return;
+        }
+
+        if ($administrationId <= 0 || !in_array($administrationId, $this->productScopeAdministrationIds(), true)) {
+            throw new RuntimeException('A administração selecionada está fora do seu escopo permitido.');
+        }
+    }
+
     protected function assertProductWithinProductScope(\App\Models\Legacy\Produto $product): void
     {
         $this->assertChurchWithinProductScope((int) $product->comum_id);

@@ -12,8 +12,12 @@ use RuntimeException;
 
 class LegacyChurchManagementService implements LegacyChurchManagementServiceInterface
 {
+    use ResolvesLegacyProductScope;
+
     public function update(Comum $church, ChurchMutationData $data): Comum
     {
+        $this->assertChurchWithinProductScope((int) $church->id);
+        $this->assertAdministrationWithinScope((int) $data->administrationId);
         $normalizedCode = $this->normalizeCode((string) $church->codigo);
 
         if ($normalizedCode === '') {
