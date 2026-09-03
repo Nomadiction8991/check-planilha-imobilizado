@@ -312,6 +312,62 @@ final class LegacyProductControllerTest extends TestCase
         $response->assertSee('data-product-church-select', false);
     }
 
+    public function testIndexRendersEditedClassification(): void
+    {
+        $product = $this->makeProduct(19, 7, 'P-019', 'MESA');
+        $product->editado = 1;
+        $product->setRelation('tipoBem', (object) ['codigo' => '4', 'descricao' => 'CADEIRA']);
+        $product->setRelation('dependencia', (object) ['descricao' => 'SALAO']);
+        $product->setRelation('editadoTipoBem', (object) ['codigo' => '7', 'descricao' => 'MESA']);
+        $product->setRelation('editadoDependencia', (object) ['descricao' => 'SECRETARIA']);
+
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->andReturn(new LengthAwarePaginator(collect([$product]), 1, 20, 1, ['path' => '/products']));
+        $this->products->shouldReceive('churchOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('administrationOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('dependencyOptions')->once()->withSomeOfArgs()->andReturn(collect());
+        $this->products->shouldReceive('assetTypeOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('statusOptions')->once()->andReturn([]);
+
+        $response = $this->get(route('migration.products.index'));
+
+        $response->assertOk();
+        $response->assertSee('7 - MESA');
+        $response->assertSee('SECRETARIA');
+        $response->assertDontSee('4 - CADEIRA');
+        $response->assertDontSee('SALAO');
+    }
+
+    public function testVerificationRendersEditedClassification(): void
+    {
+        $product = $this->makeProduct(19, 7, 'P-019', 'MESA');
+        $product->editado = 1;
+        $product->setRelation('tipoBem', (object) ['codigo' => '4', 'descricao' => 'CADEIRA']);
+        $product->setRelation('dependencia', (object) ['descricao' => 'SALAO']);
+        $product->setRelation('editadoTipoBem', (object) ['codigo' => '7', 'descricao' => 'MESA']);
+        $product->setRelation('editadoDependencia', (object) ['descricao' => 'SECRETARIA']);
+
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->andReturn(new LengthAwarePaginator(collect([$product]), 1, 20, 1, ['path' => '/products/verificacao']));
+        $this->products->shouldReceive('churchOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('administrationOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('dependencyOptions')->once()->withSomeOfArgs()->andReturn(collect());
+        $this->products->shouldReceive('assetTypeOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('statusOptions')->once()->andReturn([]);
+
+        $response = $this->get(route('migration.products.verification'));
+
+        $response->assertOk();
+        $response->assertSee('MESA');
+        $response->assertSee('SECRETARIA');
+        $response->assertDontSee('CADEIRA');
+        $response->assertDontSee('SALAO');
+    }
+
     public function testIndexRedirectsGuestsToLogin(): void
     {
         $response = $this->withSession(['_enforce_legacy_auth' => true])

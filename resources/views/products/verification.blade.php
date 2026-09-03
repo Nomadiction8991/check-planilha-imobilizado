@@ -454,9 +454,9 @@
                                     $code = trim((string) data_get($product, 'codigo', ''));
                                     $codeParts = $code !== '' ? explode('/', $code) : [];
                                     $displayCode = $codeParts !== [] ? trim((string) $codeParts[array_key_last($codeParts)]) : '';
-                                    $typeDescription = trim((string) data_get($product, 'tipoBem.descricao', ''));
+                                    $typeDescription = \App\Support\LegacyProductClassificationSupport::currentTypeDescription($product);
                                     $productDescription = \App\Support\LegacyProductNameSupport::formatCurrentName($product);
-                                    $dependencyDescription = trim((string) data_get($product, 'dependencia.descricao', ''));
+                                    $dependencyDescription = \App\Support\LegacyProductClassificationSupport::currentDependencyDescription($product);
                                     $mainDescription = $productDescription !== '' ? $productDescription : 'Sem descrição';
                                     $currentObservation = trim((string) data_get($product, 'observacao', ''));
                                     $observation = old("itens.$index.observacao", $currentObservation);
