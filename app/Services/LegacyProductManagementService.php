@@ -17,9 +17,11 @@ use RuntimeException;
 
 class LegacyProductManagementService implements LegacyProductManagementServiceInterface
 {
+    use ResolvesLegacyProductScope;
+
     public function createMany(CreateLegacyProductData $data): int
     {
-        $church = $this->resolveChurch($data->churchId);
+        $church = $this->assertChurchWithinProductScope($data->churchId);
         $assetType = $this->resolveAssetType($data->assetTypeId);
         $dependency = $this->resolveDependency($data->dependencyId, $church->id);
         $itemName = $this->normalizeItemName($assetType, $data->itemName);
@@ -66,6 +68,7 @@ class LegacyProductManagementService implements LegacyProductManagementServiceIn
 
     public function update(Produto $product, UpdateLegacyProductData $data): Produto
     {
+        $this->assertProductWithinProductScope($product);
         $assetType = $this->resolveAssetType($data->editedAssetTypeId);
         $dependency = $this->resolveDependency($data->editedDependencyId, (int) $product->comum_id);
         $itemName = $this->normalizeItemName($assetType, $data->editedItemName);
@@ -102,13 +105,7 @@ class LegacyProductManagementService implements LegacyProductManagementServiceIn
 
     private function resolveChurch(int $churchId): Comum
     {
-        $church = Comum::query()->find($churchId);
-
-        if ($church === null) {
-            throw new RuntimeException('A igreja selecionada não está mais disponível.');
-        }
-
-        return $church;
+        return $this->assertChurchWithinProductScope($churchId);
     }
 
     private function resolveAssetType(int $assetTypeId): TipoBem

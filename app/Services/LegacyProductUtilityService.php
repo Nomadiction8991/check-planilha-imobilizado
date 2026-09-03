@@ -13,8 +13,12 @@ use RuntimeException;
 
 class LegacyProductUtilityService implements LegacyProductUtilityServiceInterface
 {
+    use ResolvesLegacyProductScope;
+
     public function findForChurch(int $productId, int $churchId): ?Produto
     {
+        $this->assertChurchWithinProductScope($churchId);
+
         return Produto::query()
             ->with([
                 'tipoBem:id,codigo,descricao',
@@ -28,13 +32,7 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
 
     public function labelCopyData(int $churchId, ?int $dependencyId): array
     {
-        $church = Comum::query()
-            ->whereKey($churchId)
-            ->first(['id', 'descricao']);
-
-        if ($church === null) {
-            throw new RuntimeException('Igreja não encontrada.');
-        }
+        $church = $this->assertChurchWithinProductScope($churchId);
 
         $dependencies = DB::table('produtos as p')
             ->leftJoin('dependencias as d_orig', 'p.dependencia_id', '=', 'd_orig.id')
@@ -100,6 +98,8 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
 
     public function updateObservation(int $productId, int $churchId, string $observation): bool
     {
+        $this->assertChurchWithinProductScope($churchId);
+
         return Produto::query()
             ->whereKey($productId)
             ->where('comum_id', $churchId)
@@ -108,6 +108,8 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
 
     public function updateCheck(int $productId, int $churchId, bool $checked): bool
     {
+        $this->assertChurchWithinProductScope($churchId);
+
         return Produto::query()
             ->whereKey($productId)
             ->where('comum_id', $churchId)
@@ -116,6 +118,8 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
 
     public function updateLabel(int $productId, int $churchId, bool $printLabel): bool
     {
+        $this->assertChurchWithinProductScope($churchId);
+
         return Produto::query()
             ->whereKey($productId)
             ->where('comum_id', $churchId)
@@ -127,6 +131,8 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
      */
     public function saveVerificationChecklist(int $churchId, array $items): int
     {
+        $this->assertChurchWithinProductScope($churchId);
+
         $processed = 0;
 
         DB::transaction(function () use ($churchId, $items, &$processed): void {
@@ -151,6 +157,8 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
 
     public function signProducts(array $productIds, int $churchId, int $userId, string $action): int
     {
+        $this->assertChurchWithinProductScope($churchId);
+
         if (!in_array($action, ['assinar', 'desassinar'], true)) {
             throw new RuntimeException('Ação inválida.');
         }
@@ -174,6 +182,8 @@ class LegacyProductUtilityService implements LegacyProductUtilityServiceInterfac
 
     public function clearEdits(int $productId, int $churchId): void
     {
+        $this->assertChurchWithinProductScope($churchId);
+
         Produto::query()
             ->whereKey($productId)
             ->where('comum_id', $churchId)
