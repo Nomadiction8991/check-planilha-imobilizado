@@ -107,6 +107,40 @@ O sistema SHALL exibir o tipo de bem e a dependência que representam a classifi
 - **THEN** as relações originais e editadas necessárias para exibir a classificação são carregadas antes da renderização
 - **AND** a quantidade de consultas não cresce uma vez por produto renderizado
 
+### Requirement: Ações de produto respeitam a capacidade de edição
+
+O sistema SHALL oferecer links para editar produtos na listagem e na verificação somente para administradores ou usuários autenticados que possuam a permissão `products.edit`. Usuários que possam consultar a tela, mas não tenham capacidade de edição, SHALL continuar vendo a identificação e os dados do produto, porém sem uma ação que conduza ao formulário de edição.
+
+#### Scenario: Usuário com permissão pode editar pela listagem
+
+- **GIVEN** um usuário autenticado com permissão `products.edit`
+- **WHEN** ele abre a listagem de produtos
+- **THEN** cada produto elegível exibe a ação para editar seu cadastro
+
+#### Scenario: Usuário sem permissão vê a listagem em modo consulta
+
+- **GIVEN** um usuário autenticado sem permissão `products.edit` que pode consultar produtos
+- **WHEN** ele abre a listagem de produtos
+- **THEN** os dados do produto permanecem visíveis e a ação de editar não é exibida
+
+#### Scenario: Verificação oculta edição para usuário sem permissão
+
+- **GIVEN** um usuário autenticado que acessa a verificação, mas não possui `products.edit`
+- **WHEN** a tela de verificação é renderizada
+- **THEN** a identificação, o checklist e as ações permitidas permanecem disponíveis, mas o link de edição não é exibido
+
+#### Scenario: Administrador mantém a ação de edição
+
+- **GIVEN** um administrador autenticado
+- **WHEN** ele abre a listagem ou a verificação de produtos
+- **THEN** a ação de editar permanece disponível
+
+#### Scenario: Autorização do servidor permanece obrigatória
+
+- **GIVEN** um usuário sem permissão que tenta acessar diretamente a rota de edição
+- **WHEN** a requisição é processada
+- **THEN** o servidor continua recusando o acesso conforme a autorização existente
+
 ### Requirement: Busca e filtros usam a classificação atual do produto
 
 O sistema SHALL aplicar a busca geral e os filtros de dependência e tipo de bem sobre a classificação atual do produto. Para produtos editados, os valores editados válidos DEVEM ser considerados; quando não houver valor editado válido, a relação original DEVE ser usada como fallback. O sistema SHALL preservar o escopo de acesso vigente.

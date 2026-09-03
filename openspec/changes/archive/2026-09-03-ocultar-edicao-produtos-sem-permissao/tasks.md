@@ -14,4 +14,4 @@
 
 - [x] 3.1 Executar os testes direcionados e a suíte completa do projeto, interrompendo repetição de qualquer falha idêntica conforme as guardas do job.
 - [x] 3.2 Executar a validação do OpenSpec, a verificação de sintaxe PHP aplicável e as sondas de saúde das telas.
-- [ ] 3.3 Atualizar as tarefas concluídas, criar o commit convencional e enviar para a branch principal; confirmar o deploy e a saúde após publicação.
+- [x] 3.3 Atualizar as tarefas concluídas, criar o commit convencional e enviar para a branch principal; confirmar o deploy e a saúde após publicação.
