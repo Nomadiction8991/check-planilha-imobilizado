@@ -96,4 +96,14 @@ class Produto extends Model
     {
         return $this->belongsTo(TipoBem::class, 'tipo_bem_id', 'id');
     }
+
+    public function editadoTipoBem(): BelongsTo
+    {
+        return $this->belongsTo(TipoBem::class, 'editado_tipo_bem_id', 'id');
+    }
+
+    public function editadoDependencia(): BelongsTo
+    {
+        return $this->belongsTo(Dependencia::class, 'editado_dependencia_id', 'id');
+    }
 }

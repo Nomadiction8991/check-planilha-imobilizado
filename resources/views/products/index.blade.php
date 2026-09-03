@@ -192,11 +192,9 @@
                     <tbody>
                         @foreach ($products as $product)
                             @php
-                                $type = trim(implode(' - ', array_filter([
-                                    data_get($product, 'tipoBem.codigo'),
-                                    data_get($product, 'tipoBem.descricao'),
-                                ])));
+                                $type = \App\Support\LegacyProductClassificationSupport::currentTypeLabel($product);
                                 $description = \App\Support\LegacyProductNameSupport::formatCurrentName($product);
+                                $dependency = \App\Support\LegacyProductClassificationSupport::currentDependencyDescription($product);
                             @endphp
                             <tr>
                                 <td data-label="Produto">
@@ -206,7 +204,7 @@
                                         <div class="table-note">{{ $type }}</div>
                                     @endif
                                 </td>
-                                <td data-label="Dependência">{{ data_get($product, 'dependencia.descricao', 'Nenhuma') }}</td>
+                                <td data-label="Dependência">{{ $dependency !== '' ? $dependency : 'Nenhuma' }}</td>
                                 <td data-label="Status">
                                     @if ((int) $product->imprimir_14_1 === 1)
                                         <span class="capsule dark">14.1</span>

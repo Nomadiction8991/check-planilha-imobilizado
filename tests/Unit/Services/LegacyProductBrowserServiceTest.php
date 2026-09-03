@@ -57,10 +57,13 @@ final class LegacyProductBrowserServiceTest extends TestCase
             $table->unsignedBigInteger('comum_id')->nullable();
             $table->unsignedBigInteger('dependencia_id')->nullable();
             $table->unsignedBigInteger('tipo_bem_id')->nullable();
+            $table->unsignedBigInteger('editado_tipo_bem_id')->nullable();
+            $table->unsignedBigInteger('editado_dependencia_id')->nullable();
             $table->string('codigo')->nullable();
             $table->string('bem')->nullable();
             $table->string('complemento')->nullable();
             $table->integer('novo')->default(0);
+            $table->integer('editado')->default(0);
             $table->integer('ativo')->default(1);
             $table->integer('imprimir_14_1')->default(0);
             $table->string('nota_numero')->nullable();
@@ -271,6 +274,56 @@ final class LegacyProductBrowserServiceTest extends TestCase
         $result = $this->service->paginate($this->filters());
 
         self::assertSame(2, $result->total());
+    }
+
+    public function testPaginateEagerLoadsOriginalAndEditedClassificationRelations(): void
+    {
+        $product = new Produto();
+        $product->forceFill([
+            'id_produto' => 1,
+            'comum_id' => 100,
+            'codigo' => 'P-001',
+            'bem' => 'MESA',
+            'ativo' => 1,
+            'editado' => 1,
+            'tipo_bem_id' => 4,
+            'editado_tipo_bem_id' => 7,
+            'dependencia_id' => 2,
+            'editado_dependencia_id' => 3,
+        ]);
+        $product->save();
+
+        $church = new Comum();
+        $church->forceFill(['id' => 100, 'codigo' => 'IG-100', 'descricao' => 'Igreja 100']);
+        $church->save();
+
+        foreach ([
+            [4, 'CADEIRA'],
+            [7, 'MESA'],
+        ] as [$id, $description]) {
+            $type = new \App\Models\Legacy\TipoBem();
+            $type->forceFill(['id' => $id, 'codigo' => (string) $id, 'descricao' => $description]);
+            $type->save();
+        }
+
+        foreach ([
+            [2, 'SALAO'],
+            [3, 'SECRETARIA'],
+        ] as [$id, $description]) {
+            $dependency = new Dependencia();
+            $dependency->forceFill(['id' => $id, 'comum_id' => 100, 'descricao' => $description]);
+            $dependency->save();
+        }
+
+        $result = $this->service->paginate($this->filters());
+        $loadedProduct = $result->items()[0];
+
+        self::assertTrue($loadedProduct->relationLoaded('tipoBem'));
+        self::assertTrue($loadedProduct->relationLoaded('dependencia'));
+        self::assertTrue($loadedProduct->relationLoaded('editadoTipoBem'));
+        self::assertTrue($loadedProduct->relationLoaded('editadoDependencia'));
+        self::assertSame('MESA', $loadedProduct->editadoTipoBem->descricao);
+        self::assertSame('SECRETARIA', $loadedProduct->editadoDependencia->descricao);
     }
 
     public function testRestrictedUserSeesOnlyPermittedChurchesAndDependencies(): void
