@@ -930,6 +930,41 @@ final class LegacyProductManagementTest extends TestCase
         $response->assertSee('role="status"', false);
     }
 
+    public function testIndexFilterFormAutosubmitsResultFiltersWithoutSubmittingLocalSearches(): void
+    {
+        $response = $this->get(route('migration.products.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-product-filter-form', false);
+        $response->assertSee("form.dataset.productFilterAutosubmit = 'ready';", false);
+        $response->assertSee('input[name="busca"]', false);
+        $response->assertSee('searchInput.addEventListener(\'input\', () => scheduleSubmit(350))', false);
+        $response->assertSee('select[name="tipo_bem_id"]', false);
+        $response->assertSee('select.addEventListener(\'change\', () => scheduleSubmit(80))', false);
+        $response->assertSee('form.requestSubmit()', false);
+        $response->assertSee('data-product-filter-status', false);
+        $response->assertDontSee('data-product-admin-search].addEventListener(\'input\', () => scheduleSubmit', false);
+        $response->assertDontSee('data-product-church-search].addEventListener(\'input\', () => scheduleSubmit', false);
+    }
+
+    public function testVerificationFilterFormAutosubmitsResultFilters(): void
+    {
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => true,
+            'usuario_id' => 9,
+            'usuario_nome' => 'Maria Silva',
+            'usuario_email' => 'MARIA@EXEMPLO.COM',
+            'comum_id' => 7,
+            'is_admin' => false,
+        ])->get(route('migration.products.verification'));
+
+        $response->assertOk();
+        $response->assertSee('data-product-filter-form', false);
+        $response->assertSee('searchInput.addEventListener(\'input\', () => scheduleSubmit(350))', false);
+        $response->assertSee('form.requestSubmit()', false);
+        $response->assertSee('data-product-filter-status', false);
+    }
+
     public function testVerificationRendersChurchSearchFieldForFiltering(): void
     {
         $response = $this->withSession([

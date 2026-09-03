@@ -36,7 +36,7 @@
                 <span class="material-symbols-outlined product-filters-toggle__icon" aria-hidden="true">expand_more</span>
             </button>
             <div id="product-filters-panel-index" data-product-filters-panel>
-            <form method="GET" action="{{ route('migration.products.index') }}">
+            <form method="GET" action="{{ route('migration.products.index') }}" data-product-filter-form>
                 <div class="filters-primary">
                     <label for="product-admin-search">
                         Buscar administração
@@ -111,6 +111,7 @@
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Filtrar</button>
                         <a class="btn" href="{{ route('migration.products.index') }}">Limpar</a>
+                        <span class="helper" role="status" aria-live="polite" data-product-filter-status></span>
                     </div>
                 </div>
 
@@ -243,6 +244,65 @@
         </div>
     </section>
 
+    <script>
+        (() => {
+            document.querySelectorAll('[data-product-filter-form]').forEach((form) => {
+                if (form.dataset.productFilterAutosubmit === 'ready') {
+                    return;
+                }
+
+                form.dataset.productFilterAutosubmit = 'ready';
+                const submitButton = form.querySelector('button[type="submit"]');
+                const searchInput = form.querySelector('input[name="busca"]');
+                let submitTimer = 0;
+                let lastSignature = new URLSearchParams(new FormData(form)).toString();
+
+                const getSignature = () => new URLSearchParams(new FormData(form)).toString();
+                const status = form.querySelector('[data-product-filter-status]');
+                const submitIfChanged = () => {
+                    submitTimer = 0;
+                    const signature = getSignature();
+                    if (signature === lastSignature) {
+                        return;
+                    }
+
+                    lastSignature = signature;
+                    form.dataset.productFilterSubmitting = 'true';
+                    if (status) {
+                        status.textContent = 'Atualizando resultados…';
+                    }
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        submitButton.setAttribute('aria-busy', 'true');
+                    }
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                };
+                const scheduleSubmit = (delay) => {
+                    window.clearTimeout(submitTimer);
+                    submitTimer = window.setTimeout(submitIfChanged, delay);
+                };
+
+                form.addEventListener('submit', () => {
+                    window.clearTimeout(submitTimer);
+                    form.dataset.productFilterSubmitting = 'true';
+                });
+
+                form.querySelectorAll('select[name="administracao_id"], select[name="comum_id"], select[name="estado"], select[name="dependencia_id"], select[name="tipo_bem_id"], select[name="status"]').forEach((select) => {
+                    select.addEventListener('change', () => scheduleSubmit(80));
+                });
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', () => scheduleSubmit(350));
+                    searchInput.addEventListener('search', () => scheduleSubmit(0));
+                    searchInput.addEventListener('change', () => scheduleSubmit(0));
+                }
+            });
+        })();
+    </script>
     <script>
         (() => {
             const adminSearch = document.querySelector('[data-product-admin-search]');
