@@ -81,4 +81,28 @@ final class ProductFiltersTest extends TestCase
         self::assertSame('MG', $filters->state);
         self::assertSame(['estado' => 'MG'], $filters->toQuery());
     }
+
+    public function testToQueryUsesStatusAsCanonicalRepresentationForOnlyNew(): void
+    {
+        $filters = ProductFilters::fromRequest(Request::create('/products', 'GET', [
+            'status' => 'novos',
+            'somente_novos' => '1',
+        ]));
+
+        self::assertTrue($filters->onlyNew);
+        self::assertSame(['status' => 'novos'], $filters->toQuery());
+        self::assertSame(1, $filters->activeCriteriaCount());
+    }
+
+    public function testActiveCriteriaCountTreatsOnlyNewAliasAsOneCriterion(): void
+    {
+        $filters = ProductFilters::fromRequest(Request::create('/products', 'GET', [
+            'administracao_id' => '10',
+            'status' => 'novos',
+            'somente_novos' => '1',
+            'busca' => 'CADEIRA',
+        ]));
+
+        self::assertSame(3, $filters->activeCriteriaCount());
+    }
 }

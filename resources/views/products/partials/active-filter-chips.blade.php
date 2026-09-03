@@ -16,9 +16,16 @@
 
     $removeUrl = static function (array $currentQuery, string $key): string {
         $next = $currentQuery;
-        unset($next[$key]);
-        // aliases: busca pode vir de nome/codigo mas normaliza para 'busca'
-        if ($key === 'busca') { unset($next['nome'], $next['codigo']); }
+        if ($key === 'only_new') {
+            unset($next['somente_novos']);
+            if (($next['status'] ?? null) === 'novos') {
+                unset($next['status']);
+            }
+        } else {
+            unset($next[$key]);
+            // aliases: busca pode vir de nome/codigo mas normaliza para 'busca'
+            if ($key === 'busca') { unset($next['nome'], $next['codigo']); }
+        }
         $qs = http_build_query(array_filter($next, static fn ($v) => $v !== '' && $v !== null));
         $base = request()->url();
         return $qs !== '' ? $base . '?' . $qs : $base;
@@ -68,7 +75,7 @@
         }
         $chips[] = ['key' => 'tipo_bem_id', 'label' => 'Tipo: ' . ($label ?: ('#' . $id)), 'aria' => 'Remover filtro de tipo de bem'];
     }
-    if (($filters->status ?? '') !== '') {
+    if (($filters->status ?? '') !== '' && $filters->status !== 'novos') {
         $label = $statusLabels[$filters->status] ?? $filters->status;
         $chips[] = ['key' => 'status', 'label' => 'Status: ' . $label, 'aria' => 'Remover filtro de status'];
     }
@@ -76,7 +83,7 @@
         $chips[] = ['key' => 'busca', 'label' => 'Busca: "' . $filters->search . '"', 'aria' => 'Remover filtro de busca'];
     }
     if (($filters->onlyNew ?? false) === true) {
-        $chips[] = ['key' => 'somente_novos', 'label' => 'Somente novos', 'aria' => 'Remover filtro de somente novos'];
+        $chips[] = ['key' => 'only_new', 'label' => 'Somente novos', 'aria' => 'Remover filtro de somente novos'];
     }
 @endphp
 
