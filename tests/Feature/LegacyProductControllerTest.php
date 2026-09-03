@@ -312,6 +312,108 @@ final class LegacyProductControllerTest extends TestCase
         $response->assertSee('data-product-church-select', false);
     }
 
+    public function testIndexRemovesActiveFilterAndResetsPagination(): void
+    {
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->andReturn(new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 20,
+                currentPage: 3,
+                options: ['path' => '/products'],
+            ));
+        $this->products->shouldReceive('churchOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('administrationOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('dependencyOptions')->once()->withSomeOfArgs()->andReturn(collect());
+        $this->products->shouldReceive('assetTypeOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('statusOptions')->once()->andReturn([]);
+
+        $response = $this->get(route('migration.products.index', [
+            'busca' => 'cadeira',
+            'estado' => 'SP',
+            'pagina' => 3,
+        ]));
+
+        $response->assertOk();
+        $html = $response->getContent();
+        self::assertStringContainsString(
+            'href="' . route('migration.products.index', ['estado' => 'SP']) . '"',
+            html_entity_decode($html),
+        );
+        self::assertStringNotContainsString('pagina=3', html_entity_decode($html));
+        self::assertStringNotContainsString('busca=cadeira&amp;estado=SP&amp;pagina=3', $html);
+    }
+
+    public function testVerificationRemovesActiveFilterAndResetsPagination(): void
+    {
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->andReturn(new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 20,
+                currentPage: 2,
+                options: ['path' => '/products/verificacao'],
+            ));
+        $this->products->shouldReceive('churchOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('administrationOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('dependencyOptions')->once()->withSomeOfArgs()->andReturn(collect());
+        $this->products->shouldReceive('assetTypeOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('statusOptions')->once()->andReturn([]);
+
+        $response = $this->get(route('migration.products.verification', [
+            'comum_id' => 7,
+            'status' => 'com_nota',
+            'pagina' => 2,
+        ]));
+
+        $response->assertOk();
+        $html = html_entity_decode($response->getContent());
+        self::assertStringContainsString(
+            'href="' . route('migration.products.verification', ['comum_id' => 7]) . '"',
+            $html,
+        );
+        self::assertStringNotContainsString('pagina=2', $html);
+    }
+
+    public function testOnlyNewFilterRemovalResetsPaginationWithoutKeepingEitherAlias(): void
+    {
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->andReturn(new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 20,
+                currentPage: 4,
+                options: ['path' => '/products'],
+            ));
+        $this->products->shouldReceive('churchOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('administrationOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('dependencyOptions')->once()->withSomeOfArgs()->andReturn(collect());
+        $this->products->shouldReceive('assetTypeOptions')->once()->andReturn(collect());
+        $this->products->shouldReceive('statusOptions')->once()->andReturn(['novos' => 'Somente novos']);
+
+        $response = $this->get(route('migration.products.index', [
+            'status' => 'novos',
+            'somente_novos' => 1,
+            'pagina' => 4,
+        ]));
+
+        $response->assertOk();
+        $html = html_entity_decode($response->getContent());
+        self::assertStringContainsString(
+            'href="' . route('migration.products.index') . '"',
+            $html,
+        );
+        self::assertStringNotContainsString('status=novos', $html);
+        self::assertStringNotContainsString('somente_novos', $html);
+        self::assertStringNotContainsString('pagina=4', $html);
+    }
+
     public function testIndexRendersEditedClassification(): void
     {
         $product = $this->makeProduct(19, 7, 'P-019', 'MESA');
