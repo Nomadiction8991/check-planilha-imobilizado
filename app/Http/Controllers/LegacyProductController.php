@@ -141,6 +141,8 @@ class LegacyProductController extends Controller
             'comum:id,codigo,descricao',
             'dependencia:id,descricao',
             'tipoBem:id,codigo,descricao',
+            'editadoDependencia:id,descricao',
+            'editadoTipoBem:id,codigo,descricao',
         ]);
 
         $assetTypes = $this->products->assetTypeOptions();

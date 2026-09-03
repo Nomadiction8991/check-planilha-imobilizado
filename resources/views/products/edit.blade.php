@@ -211,12 +211,9 @@
                         ? $currentChurchCode . ' - ' . $currentChurchDescription
                         : 'Nenhuma';
                     $currentCode = $product->codigo !== '' ? $product->codigo : 'Sem código';
-                    $currentTypeCode = trim((string) data_get($product, 'tipoBem.codigo', ''));
-                    $currentTypeDescription = trim((string) data_get($product, 'tipoBem.descricao', ''));
-                    $currentType = $currentTypeCode !== '' && $currentTypeDescription !== ''
-                        ? $currentTypeCode . ' - ' . $currentTypeDescription
-                        : ($currentTypeDescription !== '' ? $currentTypeDescription : 'Nenhum');
-                    $currentDependency = trim((string) data_get($product, 'dependencia.descricao', ''));
+                    $currentType = \App\Support\LegacyProductClassificationSupport::currentTypeLabel($product);
+                    $currentType = $currentType !== '' ? $currentType : 'Nenhum';
+                    $currentDependency = \App\Support\LegacyProductClassificationSupport::currentDependencyDescription($product);
                     $currentDependency = $currentDependency !== '' ? $currentDependency : 'Nenhuma';
                     $currentBrand = trim((string) data_get($product, 'editado_marca', ''));
                     $currentBrand = $currentBrand !== '' ? $currentBrand : 'Sem marca';
