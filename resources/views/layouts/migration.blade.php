@@ -802,6 +802,55 @@
             justify-self: end;
         }
 
+        .product-filters-toggle {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--surface);
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .product-filters-toggle__icon {
+            font-size: 18px;
+            line-height: 1;
+            transition: transform 0.18s ease;
+        }
+
+        .product-filters-toggle[aria-expanded="true"] .product-filters-toggle__icon {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 860px) {
+            .product-filters-toggle {
+                display: inline-flex;
+            }
+
+            [data-product-filters-panel][data-collapsed="true"] {
+                display: none;
+            }
+        }
+
+        @media (min-width: 861px) {
+            .product-filters-toggle {
+                display: none !important;
+            }
+
+            [data-product-filters-panel] {
+                display: block !important;
+            }
+        }
+
         .table-shell {
             overflow: hidden;
             border-radius: var(--radius);
@@ -2149,6 +2198,54 @@
                     event.preventDefault();
                 }
             });
+
+            // Product filters collapsible on mobile (≤860px)
+            (() => {
+                const panels = Array.from(document.querySelectorAll('[data-product-filters-panel]'));
+                const toggles = Array.from(document.querySelectorAll('[data-product-filters-toggle]'));
+                if (panels.length === 0 || toggles.length === 0) return;
+                const mq = window.matchMedia('(max-width: 860px)');
+                const labelFor = (count) => count > 0 ? `Filtros · ${count} ${count === 1 ? 'ativo' : 'ativos'}` : 'Filtros';
+                const sync = (collapsed) => {
+                    panels.forEach((p) => { p.dataset.collapsed = collapsed ? 'true' : 'false'; });
+                    toggles.forEach((t) => {
+                        const n = parseInt(t.getAttribute('data-active-count') || '0', 10);
+                        t.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                        const lab = t.querySelector('[data-product-filters-toggle-label]');
+                        if (lab) lab.textContent = labelFor(isNaN(n) ? 0 : n);
+                    });
+                };
+                const applyBreakpoint = () => {
+                    if (mq.matches) {
+                        // mobile: collapsed by default
+                        const anyExpanded = panels.some((p) => p.dataset.collapsed === 'false');
+                        if (!anyExpanded && !panels.some((p) => 'collapsed' in p.dataset)) sync(true);
+                        else sync(panels[0]?.dataset.collapsed === 'true');
+                    } else {
+                        sync(false);
+                    }
+                };
+                // init collapsed on mobile
+                if (mq.matches) sync(true);
+                else sync(false);
+                toggles.forEach((t) => t.addEventListener('click', () => {
+                    const isCollapsed = panels[0]?.dataset.collapsed === 'true';
+                    sync(!isCollapsed);
+                    if (!isCollapsed) return;
+                    // when expanding, bring filters into view
+                    const anchor = document.querySelector('[data-sticky-filters]');
+                    if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }));
+                const onChange = () => {
+                    if (mq.matches) {
+                        // keep current collapsed state on mobile resize within breakpoint
+                    } else {
+                        sync(false);
+                    }
+                };
+                if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
+                else if (typeof mq.addListener === 'function') mq.addListener(onChange);
+            })();
         })();
     </script>
     <script src="{{ asset('assets/forms/input-mask.js') }}?v={{ filemtime(public_path('assets/forms/input-mask.js')) }}"></script>
