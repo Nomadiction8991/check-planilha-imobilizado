@@ -16,6 +16,7 @@
 
     $removeUrl = static function (array $currentQuery, string $key): string {
         $next = $currentQuery;
+        unset($next['pagina']);
         if ($key === 'only_new') {
             unset($next['somente_novos']);
             if (($next['status'] ?? null) === 'novos') {

@@ -181,3 +181,25 @@ O sistema SHALL aplicar a busca geral e os filtros de dependência e tipo de bem
 - **WHEN** o usuário consulta por essa classificação original
 - **THEN** o produto é retornado usando a relação original como fallback
 
+### Requirement: Remoção de filtro ativo reinicia a paginação
+
+A listagem e a verificação de produtos SHALL remove the current page parameter when the user removes an active filter or clears all filters, so the resulting view starts at the first page while preserving the remaining filter criteria.
+
+#### Scenario: Remover um filtro em uma página posterior
+
+- GIVEN o usuário está na página 3 com filtros ativos e seleciona o controle para remover um deles
+- WHEN a nova URL é construída
+- THEN o filtro escolhido é removido, os demais parâmetros são preservados e o parâmetro de página não é enviado
+
+#### Scenario: Limpar todos os filtros em uma página posterior
+
+- GIVEN o usuário está na página 2 com filtros ativos
+- WHEN ele aciona "Limpar todos"
+- THEN a nova URL mantém somente o caminho da tela, sem filtros nem parâmetro de página
+
+#### Scenario: Remover filtro sem página informada
+
+- GIVEN o usuário está na primeira página ou não possui parâmetro de página na URL
+- WHEN remove um filtro ativo
+- THEN a navegação continua funcionando sem adicionar um parâmetro de página vazio ou inválido
+
