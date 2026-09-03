@@ -274,6 +274,17 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
+            @php
+                $q = request()->query();
+                $activeCount = 0;
+                foreach (['administracao_id','comum_id','estado','dependencia_id','tipo_bem_id','status','somente_novos'] as $k) { if (isset($q[$k]) && trim((string)$q[$k]) !== '') $activeCount++; }
+                if (trim((string)($q['busca'] ?? $q['nome'] ?? $q['codigo'] ?? '')) !== '') $activeCount++;
+            @endphp
+            <button type="button" class="product-filters-toggle" data-product-filters-toggle data-active-count="{{ $activeCount }}" aria-expanded="false" aria-controls="product-filters-panel-verification">
+                <span data-product-filters-toggle-label>{{ $activeCount > 0 ? 'Filtros · ' . $activeCount . ' ' . ($activeCount === 1 ? 'ativo' : 'ativos') : 'Filtros' }}</span>
+                <span class="material-symbols-outlined product-filters-toggle__icon" aria-hidden="true">expand_more</span>
+            </button>
+            <div id="product-filters-panel-verification" data-product-filters-panel>
             <form method="GET" action="{{ route('migration.products.verification') }}">
                 <div class="filters-primary">
                     <label for="product-admin-search-verification">
@@ -397,6 +408,7 @@
                 </div>
             </form>
             @include('products.partials.active-filter-chips')
+            </div>
         </div>
     </section>
 
