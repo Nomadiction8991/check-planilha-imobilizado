@@ -11,7 +11,9 @@ use App\Models\Legacy\Comum;
 use App\Models\Legacy\Dependencia;
 use App\Models\Legacy\Produto;
 use App\Models\Legacy\TipoBem;
+use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
@@ -52,34 +54,66 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
             )
             ->when(
                 $filters->search !== '',
-                static function ($query) use ($filters): void {
-                    $query->where(function ($nested) use ($filters): void {
-                        $search = $filters->search;
+                function (Builder $query) use ($filters): void {
+                    $search = $filters->search;
 
+                    $query->where(function (Builder $nested) use ($search): void {
                         $nested
                             ->where('codigo', 'like', '%' . $search . '%')
                             ->orWhere('bem', 'like', '%' . $search . '%')
                             ->orWhere('complemento', 'like', '%' . $search . '%')
-                            ->orWhereHas('dependencia', static function ($dependencyQuery) use ($search): void {
-                                $dependencyQuery->where('descricao', 'like', '%' . $search . '%');
+                            ->orWhere(function (Builder $current) use ($search): void {
+                                $this->whereCurrentClassification(
+                                    $current,
+                                    'dependencia',
+                                    'editadoDependencia',
+                                    static function (Builder $relationQuery) use ($search): void {
+                                        $relationQuery->where('descricao', 'like', '%' . $search . '%');
+                                    },
+                                    false,
+                                );
                             })
-                            ->orWhereHas('tipoBem', static function ($assetTypeQuery) use ($search): void {
-                                $assetTypeQuery->where(function ($nestedAssetTypeQuery) use ($search): void {
-                                    $nestedAssetTypeQuery
-                                        ->where('codigo', 'like', '%' . $search . '%')
-                                        ->orWhere('descricao', 'like', '%' . $search . '%');
-                                });
+                            ->orWhere(function (Builder $current) use ($search): void {
+                                $this->whereCurrentClassification(
+                                    $current,
+                                    'tipoBem',
+                                    'editadoTipoBem',
+                                    static function (Builder $relationQuery) use ($search): void {
+                                        $relationQuery->where(function (Builder $match) use ($search): void {
+                                            $match
+                                                ->where('codigo', 'like', '%' . $search . '%')
+                                                ->orWhere('descricao', 'like', '%' . $search . '%');
+                                        });
+                                    },
+                                    true,
+                                );
                             });
                     });
                 }
             )
             ->when(
                 $filters->dependencyId !== null,
-                static fn ($query) => $query->where('dependencia_id', $filters->dependencyId)
+                function (Builder $query) use ($filters): void {
+                    $this->whereCurrentClassification(
+                        $query,
+                        'dependencia',
+                        'editadoDependencia',
+                        static fn (Builder $relationQuery) => $relationQuery->whereKey($filters->dependencyId),
+                        false,
+                    );
+                }
             )
             ->when(
                 $filters->assetTypeId !== null,
-                static fn ($query) => $query->where('tipo_bem_id', $filters->assetTypeId)
+                function (Builder $query) use ($filters): void {
+                    $this->whereCurrentClassification(
+                        $query,
+                        'tipoBem',
+                        'editadoTipoBem',
+                        static fn (Builder $relationQuery) => $relationQuery->whereKey($filters->assetTypeId),
+                        true,
+                    );
+                }
             )
             ->when(
                 $filters->onlyNew,
@@ -109,6 +143,55 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
                 pageName: 'pagina',
                 page: $filters->page,
             );
+    }
+
+    private function whereCurrentClassification(
+        Builder $query,
+        string $originalRelation,
+        string $editedRelation,
+        Closure $relationConstraint,
+        bool $relationHasCode = false,
+    ): void {
+        $query->where(function (Builder $current) use ($originalRelation, $editedRelation, $relationConstraint, $relationHasCode): void {
+            $current
+                ->where(function (Builder $edited) use ($editedRelation, $relationConstraint, $relationHasCode): void {
+                    $edited
+                        ->where('editado', 1)
+                        ->whereHas($editedRelation, function (Builder $related) use ($relationConstraint, $relationHasCode): void {
+                            $this->whereRelationHasDisplayValue($related, $relationHasCode);
+                            $relationConstraint($related);
+                        });
+                })
+                ->orWhere(function (Builder $original) use ($originalRelation, $editedRelation, $relationConstraint, $relationHasCode): void {
+                    $original
+                        ->where(function (Builder $fallback) use ($editedRelation, $relationHasCode): void {
+                            $fallback
+                                ->where('editado', '!=', 1)
+                                ->orWhereNull('editado')
+                                ->orWhereDoesntHave($editedRelation, function (Builder $related) use ($relationHasCode): void {
+                                    $this->whereRelationHasDisplayValue($related, $relationHasCode);
+                                });
+                        })
+                        ->whereHas($originalRelation, $relationConstraint);
+                });
+        });
+    }
+
+    private function whereRelationHasDisplayValue(Builder $query, bool $relationHasCode): void
+    {
+        $query->where(function (Builder $display) use ($relationHasCode): void {
+            $display
+                ->whereNotNull('descricao')
+                ->where('descricao', '!=', '');
+
+            if ($relationHasCode) {
+                $display->orWhere(function (Builder $code): void {
+                    $code
+                        ->whereNotNull('codigo')
+                        ->where('codigo', '!=', '');
+                });
+            }
+        });
     }
 
     public function churchOptions(): Collection
