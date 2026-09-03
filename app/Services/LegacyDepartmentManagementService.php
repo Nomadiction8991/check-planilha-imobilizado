@@ -13,8 +13,11 @@ use RuntimeException;
 
 class LegacyDepartmentManagementService implements LegacyDepartmentManagementServiceInterface
 {
+    use ResolvesLegacyProductScope;
+
     public function create(DepartmentMutationData $data): Dependencia
     {
+        $this->assertChurchWithinProductScope((int) $data->churchId);
         $normalizedDescription = $this->normalizeDescription($data->description);
         $this->assertChurchExists($data->churchId);
         $this->assertUniqueDescription(
@@ -30,6 +33,8 @@ class LegacyDepartmentManagementService implements LegacyDepartmentManagementSer
 
     public function update(Dependencia $department, DepartmentMutationData $data): Dependencia
     {
+        $this->assertChurchWithinProductScope((int) $department->comum_id);
+        $this->assertChurchWithinProductScope((int) $data->churchId);
         $normalizedDescription = $this->normalizeDescription($data->description);
         $this->assertChurchExists($data->churchId);
         $this->assertUniqueDescription(
@@ -49,6 +54,7 @@ class LegacyDepartmentManagementService implements LegacyDepartmentManagementSer
 
     public function delete(Dependencia $department): void
     {
+        $this->assertChurchWithinProductScope((int) $department->comum_id);
         if ($department->products()->exists()) {
             throw new RuntimeException('Esta dependência não pode ser excluída porque já está vinculada a produtos.');
         }
