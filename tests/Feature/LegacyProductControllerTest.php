@@ -145,6 +145,60 @@ final class LegacyProductControllerTest extends TestCase
         $response->assertSee('id="products-estado-select"', false);
     }
 
+    public function testIndexRendersOnlyScopedChurchOptions(): void
+    {
+        $this->products
+            ->shouldReceive('paginate')
+            ->once()
+            ->andReturn(new LengthAwarePaginator(
+                items: collect(),
+                total: 0,
+                perPage: 20,
+                currentPage: 1,
+                options: ['path' => '/products'],
+            ));
+
+        $this->products
+            ->shouldReceive('churchOptions')
+            ->once()
+            ->andReturn(collect([
+                (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+            ]));
+
+        $this->products
+            ->shouldReceive('administrationOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('dependencyOptions')
+            ->once()
+            ->withSomeOfArgs()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('assetTypeOptions')
+            ->once()
+            ->andReturn(collect());
+
+        $this->products
+            ->shouldReceive('statusOptions')
+            ->once()
+            ->andReturn([]);
+
+        $response = $this->withSession([
+            '_enforce_legacy_auth' => false,
+            'usuario_id' => null,
+            'administracao_id' => 4,
+            'administracoes_permitidas' => [4],
+            'is_admin' => false,
+        ])->get(route('migration.products.index'));
+
+        $response->assertOk();
+        $response->assertSee('Central Cuiabá');
+        $response->assertSee('data-product-church-select', false);
+    }
+
     public function testIndexRedirectsGuestsToLogin(): void
     {
         $response = $this->withSession(['_enforce_legacy_auth' => true])
