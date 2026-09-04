@@ -48,6 +48,46 @@
             color: inherit;
         }
 
+        .skip-link {
+            position: fixed;
+            inset-block-start: 12px;
+            inset-inline-start: 12px;
+            z-index: 200;
+            padding: 12px 16px;
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            background: var(--surface-strong);
+            color: var(--ink);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-180%);
+            transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .skip-link:focus-visible {
+            transform: translateY(0);
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        input[type="checkbox"]:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .skip-link,
+            .skip-link:focus-visible {
+                transition: none;
+            }
+        }
+
         .shell {
             width: min(1240px, calc(100% - 28px));
             margin: 0 auto;
@@ -1480,7 +1520,8 @@
     data-route-name="{{ request()->route()?->getName() ?? '' }}"
     data-ui-user="{{ $legacySessionUser['email'] ?? $legacySessionUser['nome'] ?? '' }}"
 >
-    <main class="shell">
+    <a class="skip-link" href="#main-content">Ir para o conteúdo principal</a>
+    <main class="shell" id="main-content" tabindex="-1">
         <div class="sticky-stack">
         <header class="topbar">
             <div class="topbar-main">
