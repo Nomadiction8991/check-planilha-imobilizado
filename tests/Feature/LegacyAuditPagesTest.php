@@ -170,4 +170,41 @@ final class LegacyAuditPagesTest extends TestCase
         $response->assertSee($exportPath, false);
         $response->assertSee('Exportar CSV', false);
     }
+
+    public function testAuditPageAutoSubmitsServerFiltersAfterTheyChange(): void
+    {
+        $this->mockAuditUser();
+
+        $this->bindAuditServiceWithEntry(new LegacyAuditEntryData(
+            occurredAt: '2026-04-17 10:30:15',
+            userId: 7,
+            userName: 'Maria Oliveira',
+            userEmail: 'maria@example.com',
+            administrationId: 2,
+            churchId: null,
+            isAdmin: false,
+            module: 'Sessão',
+            action: 'Login',
+            description: 'Autenticação realizada com sucesso.',
+            routeName: 'migration.login.store',
+            path: 'login',
+            method: 'POST',
+            statusCode: 302,
+            ipAddress: '127.0.0.1',
+            userAgent: 'PHPUnit',
+        ));
+
+        $response = $this->get('/audits');
+
+        $response->assertOk();
+        $response->assertSee('data-audits-filter-form', false);
+        $response->assertSee('data-audits-filter-autosubmit', false);
+        $response->assertSee('data-audits-server-filter', false);
+        $response->assertSee('data-audits-filter-status', false);
+        $response->assertSee('submitAuditsIfChanged', false);
+        $response->assertSee('Atualizando auditoria…', false);
+        $response->assertSee("form.querySelectorAll('[data-audits-server-filter]')", false);
+        $response->assertSee("searchInput.addEventListener('input'", false);
+        $response->assertSee("field.addEventListener('change'", false);
+    }
 }

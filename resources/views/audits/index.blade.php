@@ -20,7 +20,7 @@
 
     <section class="section">
         <div class="filters filters--audit" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.audits.index') }}">
+            <form method="GET" action="{{ route('migration.audits.index') }}" data-audits-filter-form data-audits-filter-autosubmit>
                 <div class="filters-primary">
                     <label for="audits-admin-search">
                         Buscar administração
@@ -36,7 +36,7 @@
 
                     <label class="filters-principal">
                         Administração
-                        <select id="audits-admin-select" name="administracao_id" data-audits-admin-select>
+                        <select id="audits-admin-select" name="administracao_id" data-audits-admin-select data-audits-server-filter>
                             <option value="">Todas as administrações</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected((int) ($selectedAdministrationId ?? 0) === (int) $administration->id)>
@@ -54,6 +54,7 @@
                             name="busca"
                             value="{{ $filters['search'] }}"
                             placeholder="Usuário, ação, descrição, rota ou método"
+                            data-audits-search
                         >
                     </label>
 
@@ -70,13 +71,14 @@
                                 'administracao_id' => $selectedAdministrationId !== null ? (string) $selectedAdministrationId : '',
                             ], static fn (string $value): bool => $value !== '')) }}"
                         >Exportar CSV</a>
+                        <span class="helper" role="status" aria-live="polite" data-audits-filter-status></span>
                     </div>
                 </div>
 
                 <div class="filters-advanced">
                     <label>
                         Módulo
-                        <select name="modulo">
+                        <select name="modulo" data-audits-server-filter>
                             <option value="">Todos</option>
                             @foreach ($modules as $module)
                                 <option value="{{ $module }}" @selected($filters['module'] === $module)>{{ $module }}</option>
@@ -86,17 +88,75 @@
 
                     <label>
                         Data inicial
-                        <input type="date" name="data_inicio" value="{{ $filters['date_from'] }}">
+                        <input type="date" name="data_inicio" value="{{ $filters['date_from'] }}" data-audits-server-filter>
                     </label>
 
                     <label>
                         Data final
-                        <input type="date" name="data_fim" value="{{ $filters['date_to'] }}">
+                        <input type="date" name="data_fim" value="{{ $filters['date_to'] }}" data-audits-server-filter>
                     </label>
                 </div>
             </form>
         </div>
     </section>
+    <script>
+        (() => {
+            const form = document.querySelector('[data-audits-filter-form][data-audits-filter-autosubmit]');
+            if (!form) {
+                return;
+            }
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            const status = form.querySelector('[data-audits-filter-status]');
+            const searchInput = form.querySelector('[data-audits-search]');
+            const serverFields = form.querySelectorAll('[data-audits-server-filter]');
+            let submitTimer = 0;
+            let lastSignature = new URLSearchParams(new FormData(form)).toString();
+
+            const getSignature = () => new URLSearchParams(new FormData(form)).toString();
+            const submitAuditsIfChanged = () => {
+                submitTimer = 0;
+                const signature = getSignature();
+                if (signature === lastSignature) {
+                    return;
+                }
+
+                lastSignature = signature;
+                form.dataset.auditsFilterSubmitting = 'true';
+                if (status) {
+                    status.textContent = 'Atualizando auditoria…';
+                }
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.setAttribute('aria-busy', 'true');
+                }
+
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                } else {
+                    form.submit();
+                }
+            };
+            const scheduleSubmit = (delay) => {
+                window.clearTimeout(submitTimer);
+                submitTimer = window.setTimeout(submitAuditsIfChanged, delay);
+            };
+
+            form.addEventListener('submit', () => {
+                window.clearTimeout(submitTimer);
+                form.dataset.auditsFilterSubmitting = 'true';
+            });
+
+            serverFields.forEach((field) => {
+                field.addEventListener('change', () => scheduleSubmit(80));
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener('input', () => scheduleSubmit(350));
+                searchInput.addEventListener('search', () => scheduleSubmit(0));
+            }
+        })();
+    </script>
     <script>
         (() => {
             const adminSearch = document.querySelector('[data-audits-admin-search]');
