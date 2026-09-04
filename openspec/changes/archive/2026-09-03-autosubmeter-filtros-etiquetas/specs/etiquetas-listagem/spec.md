@@ -1,8 +1,5 @@
-# etiquetas-listagem Specification
+## MODIFIED Requirements
 
-## Purpose
-Filtros da tela de etiquetas com seleção de igreja eficiente por busca filtrável client-side.
-## Requirements
 ### Requirement: Busca filtrável de igreja nos filtros de etiquetas
 
 O sistema SHALL exibir, na tela de etiquetas (`GET /labels`), um campo de busca digitável associado ao seletor de igreja (`comum_id`) que filtra em tempo real as opções por correspondência case-insensitive no texto exibido (codigo - descricao), sem recarregar a página e sem alterar o conjunto retornado pelo servidor. A seleção de uma igreja visível SHALL submeter automaticamente os filtros enviados ao servidor, e a limpeza da busca local SHALL restaurar as opções permitidas e remover uma seleção que tenha ficado incompatível antes da submissão automática.
@@ -101,4 +98,3 @@ O sistema SHALL permitir filtrar os produtos marcados para impressão por depend
 
 - **WHEN** o usuário escolhe ou limpa uma dependência no filtro
 - **THEN** o formulário é submetido automaticamente com a igreja selecionada e a lista de códigos é atualizada
-

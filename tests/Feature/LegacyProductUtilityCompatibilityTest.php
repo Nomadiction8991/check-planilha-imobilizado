@@ -83,6 +83,15 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('data-labels-church-search', false);
         $response->assertSee('Buscar administração', false);
         $response->assertSee('data-labels-admin-search', false);
+        $response->assertSee('data-labels-filter-form', false);
+        $response->assertSee('data-labels-server-filter', false);
+        $response->assertSee('data-labels-filter-status', false);
+        $response->assertSee('data-labels-filter-autosubmit', false);
+        $response->assertSee('submitLabelsIfChanged', false);
+        $response->assertSee('Atualizando etiquetas…', false);
+        $response->assertSee("form.querySelectorAll('[data-labels-server-filter]')", false);
+        $response->assertSee("adminSelect.dispatchEvent(new Event('change'", false);
+        $response->assertSee("select.dispatchEvent(new Event('change'", false);
         $response->assertSee('Administração Centro-Oeste');
         $response->assertSee('Etiquetas manuais');
         $response->assertSee('Copiar manuais');
