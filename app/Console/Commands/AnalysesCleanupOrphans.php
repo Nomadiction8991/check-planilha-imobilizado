@@ -30,6 +30,8 @@ class AnalysesCleanupOrphans extends Command
 
     protected $description = 'Remove arquivos de análise órfãos (importação concluída, com erro ou inexistente)';
 
+    private const array REMOVABLE_STATUSES = ['concluida', 'erro'];
+
     private string $storageDir;
 
     /**
@@ -92,18 +94,18 @@ class AnalysesCleanupOrphans extends Command
             }
 
             if ($import === null) {
-                $orphans[] = ['file' => $filename, 'id' => $importId, 'status' => 'sem registro'];
+                $orphans[] = ['file' => $filename, 'id' => $importId, 'status' => 'sem registro', 'removable' => true];
                 continue;
             }
 
             $status = (string) ($import->status ?? '');
 
-            if (in_array($status, ['aguardando', 'processando'], true)) {
-                // Importação ativa — preserva o arquivo.
+            if (! in_array($status, self::REMOVABLE_STATUSES, true)) {
+                $this->warn('Importação ' . $importId . ' com estado não reconhecido (' . ($status !== '' ? $status : 'vazio') . ') — arquivo preservado.');
                 continue;
             }
 
-            $orphans[] = ['file' => $filename, 'id' => $importId, 'status' => $status];
+            $orphans[] = ['file' => $filename, 'id' => $importId, 'status' => $status, 'removable' => true];
         }
 
         if ($dryRun) {
@@ -124,7 +126,7 @@ class AnalysesCleanupOrphans extends Command
                 $deletedFiles++;
             }
 
-            if ($forceDelete && $orphan['status'] !== 'sem registro') {
+            if ($forceDelete && ($orphan['removable'] ?? false) && $orphan['status'] !== 'sem registro') {
                 try {
                     DB::connection('pgsql')->transaction(function () use ($orphan): void {
                         DB::connection('pgsql')->table('import_erros')
