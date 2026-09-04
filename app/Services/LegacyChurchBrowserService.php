@@ -10,14 +10,21 @@ use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 
 class LegacyChurchBrowserService implements LegacyChurchBrowserServiceInterface
 {
     public function paginate(ChurchFilters $filters): LengthAwarePaginator
     {
+        $administrationScopeIds = $this->currentAdministrationScopeIds();
+
         return Comum::query()
             ->with(['administracao:id,descricao'])
             ->withCount('activeProducts')
+            ->when(
+                $administrationScopeIds !== null,
+                static fn ($query) => $query->whereIn('administracao_id', $administrationScopeIds),
+            )
             ->when(
                 $filters->administrationId !== null,
                 static function ($query) use ($filters): void {
@@ -50,13 +57,57 @@ class LegacyChurchBrowserService implements LegacyChurchBrowserServiceInterface
 
     public function countAll(): int
     {
-        return Comum::query()->count();
+        $administrationScopeIds = $this->currentAdministrationScopeIds();
+
+        return Comum::query()
+            ->when(
+                $administrationScopeIds !== null,
+                static fn ($query) => $query->whereIn('administracao_id', $administrationScopeIds),
+            )
+            ->count();
     }
 
     public function administrationOptions(): Collection
     {
+        $administrationScopeIds = $this->currentAdministrationScopeIds();
+
         return Administracao::query()
+            ->when(
+                $administrationScopeIds !== null,
+                static fn ($query) => $query->whereIn('id', $administrationScopeIds),
+            )
             ->orderBy('descricao')
             ->get(['id', 'descricao']);
+    }
+
+    /**
+     * @return array<int, int>|null
+     */
+    private function currentAdministrationScopeIds(): ?array
+    {
+        if ((bool) Session::get('is_admin', false)) {
+            return null;
+        }
+
+        if (!Session::has('is_admin')
+            && !Session::has('administracao_id')
+            && !Session::has('administracoes_permitidas')
+        ) {
+            return null;
+        }
+
+        $permittedAdministrationIds = array_values(array_filter(array_map(
+            static fn (mixed $value): int => (int) $value,
+            (array) Session::get('administracoes_permitidas', []),
+        ), static fn (int $value): bool => $value > 0));
+
+        $currentAdministrationId = (int) Session::get('administracao_id', 0);
+        if ($currentAdministrationId > 0) {
+            $permittedAdministrationIds[] = $currentAdministrationId;
+        }
+
+        $permittedAdministrationIds = array_values(array_unique($permittedAdministrationIds));
+
+        return $permittedAdministrationIds !== [] ? $permittedAdministrationIds : [];
     }
 }

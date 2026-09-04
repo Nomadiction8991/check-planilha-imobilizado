@@ -12,6 +12,7 @@ use App\Services\LegacyChurchBrowserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 final class LegacyChurchBrowserServiceTest extends TestCase
@@ -190,5 +191,120 @@ final class LegacyChurchBrowserServiceTest extends TestCase
 
         self::assertSame(1, $results->total());
         self::assertSame('Central Curitiba', $results->items()[0]->descricao);
+    }
+
+    public function testRestrictedUserSeesChurchesFromMainAndAdditionalAdministrations(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+        ]);
+
+        foreach ([10, 20, 30] as $administrationId) {
+            $church = new Comum();
+            $church->forceFill([
+                'id' => $administrationId,
+                'codigo' => 'IG-' . $administrationId,
+                'descricao' => 'Igreja ' . $administrationId,
+                'administracao_id' => $administrationId,
+            ]);
+            $church->save();
+        }
+
+        $results = $this->service->paginate(new ChurchFilters(
+            administrationId: null,
+            search: '',
+            state: null,
+            page: 1,
+            perPage: 10,
+        ));
+
+        self::assertSame(2, $results->total());
+        self::assertEqualsCanonicalizing(
+            ['Igreja 10', 'Igreja 20'],
+            array_map(static fn (Comum $church): string => (string) $church->descricao, $results->items()),
+        );
+    }
+
+    public function testRestrictedUserCannotUseAdministrationOutsideTheirScope(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+        ]);
+
+        $church = new Comum();
+        $church->forceFill([
+            'id' => 30,
+            'codigo' => 'IG-30',
+            'descricao' => 'Igreja externa',
+            'administracao_id' => 30,
+        ]);
+        $church->save();
+
+        $results = $this->service->paginate(new ChurchFilters(
+            administrationId: 30,
+            search: '',
+            state: null,
+            page: 1,
+            perPage: 10,
+        ));
+
+        self::assertSame(0, $results->total());
+    }
+
+    public function testRestrictedUserReceivesOnlyAdministrationsFromTheirScope(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+        ]);
+
+        foreach ([10, 20, 30] as $administrationId) {
+            $administration = new Administracao();
+            $administration->forceFill([
+                'id' => $administrationId,
+                'descricao' => 'Administração ' . $administrationId,
+            ]);
+            $administration->save();
+        }
+
+        self::assertEqualsCanonicalizing(
+            [10, 20],
+            $this->service->administrationOptions()->pluck('id')->all(),
+        );
+    }
+
+    public function testAdministratorKeepsGlobalChurchAccess(): void
+    {
+        Session::put([
+            'is_admin' => true,
+            'administracao_id' => null,
+            'administracoes_permitidas' => [],
+        ]);
+
+        foreach ([10, 20] as $administrationId) {
+            $church = new Comum();
+            $church->forceFill([
+                'id' => $administrationId,
+                'codigo' => 'IG-' . $administrationId,
+                'descricao' => 'Igreja ' . $administrationId,
+                'administracao_id' => $administrationId,
+            ]);
+            $church->save();
+        }
+
+        $results = $this->service->paginate(new ChurchFilters(
+            administrationId: null,
+            search: '',
+            state: null,
+            page: 1,
+            perPage: 10,
+        ));
+
+        self::assertSame(2, $results->total());
     }
 }
