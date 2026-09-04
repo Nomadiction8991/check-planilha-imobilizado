@@ -243,20 +243,17 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
     public function assetTypeOptions(): Collection
     {
         $supportsAdministrationScope = Schema::hasColumn('tipos_bens', 'administracao_id');
+        $administrationScopeIds = $this->currentAdministrationScopeIds();
         $query = TipoBem::query();
 
-        if ($supportsAdministrationScope && !((bool) Session::get('is_admin', false))) {
-            $administrationId = (int) Session::get('administracao_id', 0);
+        if ($supportsAdministrationScope && $administrationScopeIds !== null) {
+            $query->where(function ($nested) use ($administrationScopeIds): void {
+                if ($administrationScopeIds !== []) {
+                    $nested->whereIn('administracao_id', $administrationScopeIds);
+                }
 
-            if ($administrationId > 0) {
-                $query->where(function ($nested) use ($administrationId): void {
-                    $nested
-                        ->where('administracao_id', $administrationId)
-                        ->orWhereNull('administracao_id');
-                });
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+                $nested->orWhereNull('administracao_id');
+            });
         }
 
         $select = ['id', 'codigo', 'descricao'];
