@@ -60,7 +60,12 @@ class LegacyReportService implements LegacyReportServiceInterface
 
     public function churchOptions(?int $administrationId = null, ?string $state = null): Collection
     {
+        $administrationScopeIds = $this->currentAdministrationScopeIds();
         $query = Comum::query();
+
+        if ($administrationScopeIds !== null) {
+            $query->whereIn('administracao_id', $administrationScopeIds);
+        }
 
         if ($administrationId !== null) {
             $query->where('administracao_id', $administrationId);
@@ -77,13 +82,21 @@ class LegacyReportService implements LegacyReportServiceInterface
 
     public function administrationOptions(): Collection
     {
-        return Administracao::query()
+        $administrationScopeIds = $this->currentAdministrationScopeIds();
+        $query = Administracao::query();
+
+        if ($administrationScopeIds !== null) {
+            $query->whereIn('id', $administrationScopeIds);
+        }
+
+        return $query
             ->orderBy('descricao')
             ->get(['id', 'descricao']);
     }
 
     public function listAvailableReports(int $churchId): array
     {
+        $this->assertChurchWithinReportScope($churchId);
         $reports = [];
         $permissions = (array) Session::get('legacy_permissions', []);
 
@@ -135,6 +148,7 @@ class LegacyReportService implements LegacyReportServiceInterface
 
     public function buildReportPreview(int $churchId, string $formulario): array
     {
+        $this->assertChurchWithinReportScope($churchId);
         $normalizedForm = str_replace('-', '.', trim($formulario));
 
         if (!array_key_exists($normalizedForm, self::REPORTS)) {
@@ -202,6 +216,7 @@ class LegacyReportService implements LegacyReportServiceInterface
      */
     public function buildVerificationPositionReport(int $churchId): array
     {
+        $this->assertChurchWithinReportScope($churchId);
         $churchData = $this->loadChurchData($churchId);
 
         if ($churchData === []) {
@@ -333,6 +348,7 @@ class LegacyReportService implements LegacyReportServiceInterface
      */
     public function downloadFormularioCsv(int $churchId, string $formulario): array
     {
+        $this->assertChurchWithinReportScope($churchId);
         $normalizedForm = str_replace('-', '.', trim($formulario));
 
         if (!array_key_exists($normalizedForm, self::REPORTS)) {
@@ -668,6 +684,7 @@ class LegacyReportService implements LegacyReportServiceInterface
 
     public function buildChangeHistory(int $churchId, array $filters): array
     {
+        $this->assertChurchWithinReportScope($churchId);
         $churchData = $this->loadChurchData($churchId);
 
         if ($churchData === []) {
@@ -791,6 +808,63 @@ class LegacyReportService implements LegacyReportServiceInterface
         }
 
         return trim((string) Session::get('usuario_nome', ''));
+    }
+
+    private function assertChurchWithinReportScope(int $churchId): void
+    {
+        $administrationScopeIds = $this->currentAdministrationScopeIds();
+
+        if ($administrationScopeIds === null) {
+            return;
+        }
+
+        if ($churchId <= 0) {
+            throw new RuntimeException('Igreja não encontrada.');
+        }
+
+        $church = DB::table('comums')
+            ->select(['id', 'administracao_id'])
+            ->where('id', $churchId)
+            ->first();
+
+        if ($church === null) {
+            throw new RuntimeException('Igreja não encontrada.');
+        }
+
+        if (!in_array((int) ($church->administracao_id ?? 0), $administrationScopeIds, true)) {
+            throw new RuntimeException('A igreja selecionada está fora do seu escopo permitido.');
+        }
+    }
+
+    /**
+     * @return array<int, int>|null
+     */
+    private function currentAdministrationScopeIds(): ?array
+    {
+        $session = (array) Session::all();
+
+        if ((bool) ($session['is_admin'] ?? false)) {
+            return null;
+        }
+
+        if (!array_key_exists('is_admin', $session)
+            && !array_key_exists('administracao_id', $session)
+            && !array_key_exists('administracoes_permitidas', $session)
+        ) {
+            return null;
+        }
+
+        $administrationIds = array_values(array_filter(array_map(
+            static fn (mixed $value): int => (int) $value,
+            (array) ($session['administracoes_permitidas'] ?? []),
+        ), static fn (int $value): bool => $value > 0));
+
+        $currentAdministrationId = (int) ($session['administracao_id'] ?? 0);
+        if ($currentAdministrationId > 0) {
+            $administrationIds[] = $currentAdministrationId;
+        }
+
+        return array_values(array_unique($administrationIds));
     }
 
     /**

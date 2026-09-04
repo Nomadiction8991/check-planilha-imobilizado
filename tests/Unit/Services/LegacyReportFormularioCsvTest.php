@@ -8,6 +8,7 @@ use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Services\LegacyReportService;
 use App\Services\LegacyReportTemplateService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Mockery;
 use Mockery\MockInterface;
 use RuntimeException;
@@ -164,6 +165,31 @@ final class LegacyReportFormularioCsvTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $this->service->downloadFormularioCsv(999, '14.1');
+    }
+
+    public function testRejeitaExportacaoDeIgrejaForaDoEscopo(): void
+    {
+        $this->criarTabelas();
+        DB::table('administracoes')->insert([
+            ['id' => 10, 'descricao' => 'Administração permitida'],
+            ['id' => 30, 'descricao' => 'Administração bloqueada'],
+        ]);
+        DB::table('comums')->insert([
+            'id' => 7,
+            'codigo' => '12-3456',
+            'descricao' => 'Igreja fora do escopo',
+            'administracao_id' => 30,
+        ]);
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('fora do seu escopo permitido');
+
+        $this->service->downloadFormularioCsv(7, '14.1');
     }
 
     public function testRejeitaFormularioSemItens(): void
