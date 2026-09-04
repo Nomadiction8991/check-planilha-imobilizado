@@ -301,6 +301,8 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('Atualizando relatórios…', escape: false);
         $response->assertSee("form.querySelectorAll('[data-reports-server-filter]')", escape: false);
         $response->assertSee("select.addEventListener('change'", escape: false);
+        $response->assertSee('resetPage', escape: false);
+        $response->assertSee('field.disabled = true', escape: false);
         $response->assertSee('data-reports-admin-search', escape: false);
         $response->assertSee('data-reports-church-search', escape: false);
     }
