@@ -130,7 +130,7 @@ final class PublicAccessTest extends TestCase
         $response->assertSessionHas('status_type', 'error');
     }
 
-    public function testLogoutClearsSessionAndDoesNotRedirectToAuthRoutes(): void
+    public function testLogoutClearsSessionAndRedirectsToPublicSelection(): void
     {
         $response = $this->withSession([
             'public_acesso' => true,
@@ -143,20 +143,14 @@ final class PublicAccessTest extends TestCase
         $response->assertSessionMissing('public_planilha_id');
         $response->assertSessionMissing('public_comum_id');
         $response->assertSessionMissing('public_comum');
-    }
-
-    public function testLogoutRedirectsToLoginRoute(): void
-    {
-        $response = $this->post(route('public.access.logout'));
-
-        $response->assertRedirect(route('migration.login'));
+        $response->assertRedirect(route('public.access.create'));
     }
 
     public function testLogoutWorksWithoutPriorSession(): void
     {
         $response = $this->post(route('public.access.logout'));
 
-        $response->assertRedirect(route('migration.login'));
+        $response->assertRedirect(route('public.access.create'));
         $response->assertSessionMissing('public_acesso');
     }
 
