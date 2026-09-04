@@ -1,8 +1,5 @@
-# relatorios-listagem Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change filtro-relatorios-busca-administracao. Update Purpose after archive.
-## Requirements
 ### Requirement: Filtro por administração na seleção de relatórios
 
 O sistema SHALL permitir filtrar a lista de congregações disponíveis na tela de relatórios por administração informada (`administracao_id`), além de fornecer as opções de administração para o formulário. Ao alterar administração, estado ou igreja no formulário, a tela SHALL submeter automaticamente uma única consulta GET preservando os demais critérios; a submissão manual pelo botão existente SHALL continuar disponível.
@@ -31,19 +28,7 @@ O sistema SHALL permitir filtrar a lista de congregações disponíveis na tela 
 - WHEN o usuário altera um filtro que muda a consulta
 - THEN a mensagem de atualização é exibida na região reservada de status, sem criar ou remover elementos durante o envio
 
-### Requirement: [ADDED] Filtrar opções de igrejas por estado na listagem de relatórios
-O sistema SHALL permitir que o usuário filtre a lista de igrejas pelo estado (UF) no seletor de relatórios.
-
-#### Scenario: Filtrando igrejas por estado
-- GIVEN um usuário autenticado na tela de relatórios
-- WHEN o usuário seleciona uma UF (ex: "MT") no filtro de estado
-- THEN o seletor de igrejas exibe apenas as igrejas correspondentes ao estado informado
-- AND a seleção de estado é preservada na interface
-
-#### Scenario: Sem filtro de estado
-- GIVEN um usuário na tela de relatórios sem filtro de estado
-- WHEN o usuário carrega a página
-- THEN todas as igrejas disponíveis são exibidas no seletor
+## ADDED Requirements
 
 ### Requirement: Atualização automática dos filtros de relatórios
 
@@ -58,4 +43,3 @@ A tela de relatórios SHALL atualizar os resultados automaticamente quando um fi
 - GIVEN o usuário limpou o campo de busca de administração ou igreja
 - WHEN o controle local é atualizado
 - THEN as opções permitidas voltam a ser exibidas e nenhuma consulta ao servidor é criada apenas pela limpeza
-

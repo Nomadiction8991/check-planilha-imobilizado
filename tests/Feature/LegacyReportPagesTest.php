@@ -213,6 +213,36 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('Digite para filtrar');
     }
 
+    public function testReportsIndexSubmitsServerFiltersAutomatically(): void
+    {
+        $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        $response->assertSee('data-reports-filter-form', escape: false);
+        $response->assertSee('data-reports-filter-autosubmit', escape: false);
+        $response->assertSee('data-reports-server-filter', escape: false);
+        $response->assertSee('data-reports-filter-status', escape: false);
+        $response->assertSee('submitReportsIfChanged', escape: false);
+        $response->assertSee('Atualizando relatórios…', escape: false);
+        $response->assertSee("form.querySelectorAll('[data-reports-server-filter]')", escape: false);
+        $response->assertSee("select.addEventListener('change'", escape: false);
+        $response->assertSee('data-reports-admin-search', escape: false);
+        $response->assertSee('data-reports-church-search', escape: false);
+    }
+
+    public function testReportsIndexKeepsLocalSearchesOutsideAutomaticSubmission(): void
+    {
+        $response = $this->get(route('migration.reports.index'));
+
+        $response->assertOk();
+        $html = $response->getContent();
+        $autosubmitScript = substr($html, strpos($html, 'data-reports-filter-form'), 4000);
+
+        $this->assertStringNotContainsString('data-reports-admin-search]', $autosubmitScript);
+        $this->assertStringNotContainsString('data-reports-church-search]', $autosubmitScript);
+        $this->assertStringContainsString('data-reports-server-filter', $autosubmitScript);
+    }
+
     public function testReportsIndexFiltersChurchesByAdministration(): void
     {
         $response = $this->get(route('migration.reports.index', ['administracao_id' => 99]));
