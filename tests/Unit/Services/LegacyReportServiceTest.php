@@ -95,6 +95,9 @@ final class LegacyReportServiceTest extends TestCase
     public function testListAvailableReportsWithoutPermissions(): void
     {
         $this->mockProductsTableReturnsEmpty();
+        Session::shouldReceive('all')
+            ->once()
+            ->andReturn([]);
         Session::shouldReceive('get')
             ->with('legacy_permissions', [])
             ->once()
@@ -129,6 +132,9 @@ final class LegacyReportServiceTest extends TestCase
     public function testListAvailableReportsWithPermissions(): void
     {
         $this->mockProductsTableReturnsEmpty();
+        Session::shouldReceive('all')
+            ->once()
+            ->andReturn([]);
         Session::shouldReceive('get')
             ->with('legacy_permissions', [])
             ->once()
@@ -281,6 +287,40 @@ final class LegacyReportServiceTest extends TestCase
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertCount(2, $result);
         $this->assertSame('Administração Alpha', $result->first()->descricao);
+    }
+
+    #[RunInSeparateProcess]
+    public function testAdministrationOptionsFiltersByRestrictedScope(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+        ]);
+
+        $builder = Mockery::mock('alias:' . Administracao::class);
+        $builder->shouldReceive('query')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('whereIn')
+            ->with('id', [20, 10])
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('descricao')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('get')
+            ->with(['id', 'descricao'])
+            ->once()
+            ->andReturn(collect([
+                (object) ['id' => 10, 'descricao' => 'Administração A'],
+                (object) ['id' => 20, 'descricao' => 'Administração B'],
+            ]));
+
+        $result = $this->service->administrationOptions();
+
+        $this->assertSame([10, 20], $result->pluck('id')->all());
     }
 
     #[RunInSeparateProcess]
