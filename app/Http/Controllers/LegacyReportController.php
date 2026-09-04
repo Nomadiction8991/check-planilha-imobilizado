@@ -9,6 +9,7 @@ use App\Services\LegacyReportTemplateService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,15 +29,32 @@ class LegacyReportController extends Controller
         $state = $state !== '' ? $state : null;
         $churchId = $request->integer('comum_id') ?: ((int) Session::get('comum_id', 0) ?: null);
 
+        $churches = $this->reports->churchOptions($administrationId, $state);
+        $selectedChurchId = $this->normalizeSelectedChurchId($churchId, $churches);
+
         return view('reports.index', [
             'administrations' => $this->reports->administrationOptions(),
             'selectedAdministrationId' => $administrationId,
             'selectedState' => $state,
             'states' => (array) config('brazil.states', []),
-            'churches' => $this->reports->churchOptions($administrationId, $state),
-            'selectedChurchId' => $churchId,
-            'reports' => $churchId !== null ? $this->reports->listAvailableReports($churchId) : [],
+            'churches' => $churches,
+            'selectedChurchId' => $selectedChurchId,
+            'reports' => $selectedChurchId !== null ? $this->reports->listAvailableReports($selectedChurchId) : [],
         ]);
+    }
+
+    /**
+     * @param Collection<int, object> $churches
+     */
+    private function normalizeSelectedChurchId(?int $churchId, Collection $churches): ?int
+    {
+        if ($churchId === null || $churchId <= 0) {
+            return null;
+        }
+
+        return $churches->contains(
+            static fn (mixed $church): bool => (int) data_get($church, 'id') === $churchId,
+        ) ? $churchId : null;
     }
 
     public function show(Request $request, string $formulario): View|RedirectResponse

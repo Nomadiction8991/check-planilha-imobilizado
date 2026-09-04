@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Contracts\LegacyReportServiceInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -182,6 +183,80 @@ final class LegacyReportPagesTest extends TestCase
                 }
             }
         );
+    }
+
+    private function bindReportService(
+        ?Collection $churches = null,
+        ?array $reports = null,
+        bool $expectReports = true,
+    ): void {
+        $service = $this->mock(LegacyReportServiceInterface::class);
+        $availableChurches = $churches ?? collect([
+            (object) ['id' => 7, 'codigo' => '12-3456', 'descricao' => 'Central Cuiabá'],
+        ]);
+
+        $service->shouldReceive('churchOptions')
+            ->withAnyArgs()
+            ->andReturn($availableChurches);
+        $service->shouldReceive('administrationOptions')
+            ->andReturn(collect([
+                (object) ['id' => 4, 'descricao' => 'Cuiabá'],
+            ]));
+
+        if ($expectReports) {
+            $service->shouldReceive('listAvailableReports')
+                ->with(7)
+                ->andReturn($reports ?? [
+                    [
+                        'codigo' => '14.1',
+                        'titulo' => 'Relatório 14.1',
+                        'descricao' => 'Formulário de doação e aquisição de bens',
+                        'rota' => '/reports/14.1?comum_id=7',
+                        'quantidade' => 3,
+                    ],
+                ]);
+        } else {
+            $service->shouldNotReceive('listAvailableReports');
+        }
+    }
+
+    public function testReportsIndexKeepsSelectionWhenChurchMatchesFilters(): void
+    {
+        $this->bindReportService();
+
+        $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedChurchId', 7);
+        $response->assertSee('Relatório 14.1');
+    }
+
+    public function testReportsIndexClearsChurchSelectionWhenChurchIsOutsideFilters(): void
+    {
+        $this->bindReportService(collect([
+            (object) ['id' => 8, 'codigo' => '35-0001', 'descricao' => 'Central São Paulo'],
+        ]), expectReports: false);
+
+        $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedChurchId', null);
+        $response->assertSee('Escolha uma igreja para liberar a lista de relatórios disponíveis.');
+        $response->assertDontSee('Relatório 14.1');
+    }
+
+    public function testReportsIndexClearsSessionChurchSelectionWhenChurchIsOutsideFilters(): void
+    {
+        Session::put('comum_id', 7);
+        $this->bindReportService(collect([
+            (object) ['id' => 8, 'codigo' => '35-0001', 'descricao' => 'Central São Paulo'],
+        ]), expectReports: false);
+
+        $response = $this->get(route('migration.reports.index', ['estado' => 'SP']));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedChurchId', null);
+        $response->assertSee('Escolha uma igreja para liberar a lista de relatórios disponíveis.');
     }
 
     public function testReportsIndexRendersFilterAndCards(): void
