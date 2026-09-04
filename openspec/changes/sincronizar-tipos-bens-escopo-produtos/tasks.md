@@ -12,4 +12,4 @@
 
 - [x] 3.1 Executar os testes unitários relevantes e o lint PHP dos arquivos alterados.
 - [x] 3.2 Validar o change OpenSpec e a saúde das telas de produtos.
-- [ ] 3.3 Commitar, enviar para a branch principal e confirmar o deploy.
+- [x] 3.3 Commitar, enviar para a branch principal e confirmar o deploy.
