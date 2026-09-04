@@ -406,4 +406,31 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('report-cell-editor.js');
         $response->assertSee('secao14-templates.css');
     }
+
+    public function testReportsIndexRendersCollapsibleFiltersOnMobile(): void
+    {
+        $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        $response->assertSee('data-product-filters-toggle', escape: false);
+        $response->assertSee('data-product-filters-panel', escape: false);
+        $response->assertSee('aria-expanded="false"', escape: false);
+        $response->assertSee('aria-controls="reports-filters-panel"', escape: false);
+        $response->assertSee('data-active-count="', escape: false);
+        $response->assertSee('Filtros', escape: false);
+    }
+
+    public function testReportsIndexCollapsibleButtonReflectsActiveFiltersCount(): void
+    {
+        // sem filtros -> apenas "Filtros"
+        $response = $this->get(route('migration.reports.index'));
+        $response->assertOk();
+        $response->assertSee('data-active-count="0"', escape: false);
+
+        // com administracao + estado + igreja -> Filtros · 3 ativos
+        $response = $this->get(route('migration.reports.index', ['administracao_id' => 4, 'estado' => 'MT', 'comum_id' => 7]));
+        $response->assertOk();
+        $response->assertSee('data-active-count="3"', escape: false);
+        $response->assertSee('Filtros · 3 ativos', escape: false);
+    }
 }
