@@ -204,6 +204,8 @@ final class LegacyAuditPagesTest extends TestCase
         $response->assertSee('submitAuditsIfChanged', false);
         $response->assertSee('Atualizando auditoria…', false);
         $response->assertSee("form.querySelectorAll('[data-audits-server-filter]')", false);
+        $response->assertSee('resetPage', false);
+        $response->assertSee('field.disabled = true', false);
         $response->assertSee("searchInput.addEventListener('input'", false);
         $response->assertSee("field.addEventListener('change'", false);
     }

@@ -115,6 +115,14 @@
                     let lastSignature = new URLSearchParams(new FormData(form)).toString();
 
                     const getSignature = () => new URLSearchParams(new FormData(form)).toString();
+                    const resetPage = () => {
+                        ['page', 'pagina'].forEach((pageName) => {
+                            form.querySelectorAll(`[name="${pageName}"]`).forEach((field) => {
+                                field.value = '';
+                                field.disabled = true;
+                            });
+                        });
+                    };
                     const submitReportsIfChanged = () => {
                         submitTimer = 0;
                         const signature = getSignature();
@@ -123,6 +131,7 @@
                         }
 
                         lastSignature = signature;
+                        resetPage();
                         form.dataset.reportsFilterSubmitting = 'true';
                         if (status) {
                             status.textContent = 'Atualizando relatórios…';

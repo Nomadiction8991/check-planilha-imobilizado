@@ -260,10 +260,12 @@
 
                     const getSignature = () => new URLSearchParams(new FormData(form)).toString();
                     const resetPage = () => {
-                        const url = new URL(window.location.href);
-                        url.searchParams.delete('page');
-                        url.searchParams.delete('pagina');
-                        window.history.replaceState(null, '', url);
+                        ['page', 'pagina'].forEach((pageName) => {
+                            form.querySelectorAll(`[name="${pageName}"]`).forEach((field) => {
+                                field.value = '';
+                                field.disabled = true;
+                            });
+                        });
                     };
                     const submitLabelsIfChanged = () => {
                         submitTimer = 0;

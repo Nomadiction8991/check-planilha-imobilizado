@@ -101,6 +101,8 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('submitLabelsIfChanged', false);
         $response->assertSee('Atualizando etiquetas…', false);
         $response->assertSee("form.querySelectorAll('[data-labels-server-filter]')", false);
+        $response->assertSee('resetPage', false);
+        $response->assertSee('field.disabled = true', false);
         $response->assertSee("adminSelect.dispatchEvent(new Event('change'", false);
         $response->assertSee("select.dispatchEvent(new Event('change'", false);
         $response->assertSee('Administração Centro-Oeste');
