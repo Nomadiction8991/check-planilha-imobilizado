@@ -234,6 +234,38 @@ final class AnalysesCleanupOrphansTest extends TestCase
     }
 
     /** @test */
+    public function test_unknown_import_status_keeps_analysis_file(): void
+    {
+        $this->bindCommandWithTempDir();
+        $this->criarImportacao(25, 'pausada');
+        $this->criarArquivoAnalise(25);
+
+        $this->artisan('analyses:cleanup-orphans')
+            ->expectsOutputToContain('preservado')
+            ->assertSuccessful();
+
+        $this->assertFileExists($this->tempDir . '/analise_25.json');
+        $this->assertSame(1, DB::connection('pgsql')->table('importacoes')->where('id', 25)->count());
+    }
+
+    /** @test */
+    public function test_force_delete_does_not_remove_unknown_import_status(): void
+    {
+        $this->bindCommandWithTempDir();
+        $this->criarImportacao(26, 'pausada');
+        $this->criarArquivoAnalise(26);
+        $this->criarErroImportacao(26);
+
+        $this->artisan('analyses:cleanup-orphans', ['--force-delete' => true])
+            ->expectsOutputToContain('preservado')
+            ->assertSuccessful();
+
+        $this->assertFileExists($this->tempDir . '/analise_26.json');
+        $this->assertSame(1, DB::connection('pgsql')->table('importacoes')->where('id', 26)->count());
+        $this->assertSame(1, DB::connection('pgsql')->table('import_erros')->where('importacao_id', 26)->count());
+    }
+
+    /** @test */
     public function test_dry_run_does_not_delete_files(): void
     {
         $this->bindCommandWithTempDir();
