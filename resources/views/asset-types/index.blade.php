@@ -42,7 +42,7 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.asset-types.index') }}">
+            <form method="GET" action="{{ route('migration.asset-types.index') }}" data-filter-autosubmit data-filter-message="Atualizando tipos de bem…">
                 <div class="filters-primary">
                     <label for="asset-types-admin-search">
                         Buscar administração
@@ -57,7 +57,7 @@
                     </label>
                     <label class="filters-principal">
                         Administração
-                        <select id="asset-types-admin-select" name="administracao_id" data-asset-types-admin-select>
+                        <select id="asset-types-admin-select" name="administracao_id" data-asset-types-admin-select data-filter-server>
                             <option value="">Todas</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected($filters->administrationId === $administration->id)>
@@ -70,7 +70,7 @@
 
                     <label class="filters-principal">
                         Estado (UF)
-                        <select name="estado" id="asset-types-estado-select">
+                        <select name="estado" id="asset-types-estado-select" data-filter-server>
                             <option value="">Todos os estados</option>
                             @foreach ($states as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
@@ -82,15 +82,17 @@
 
                     <label class="filters-query">
                         Buscar por código ou descrição
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="4 ou CADEIRA">
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="4 ou CADEIRA" data-filter-search>
                     </label>
 
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Filtrar</button>
                         <a class="btn" href="{{ route('migration.asset-types.index') }}">Limpar</a>
+                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
                 </div>
             </form>
+            @include('partials.filter-autosubmit')
             <script>
                 (() => {
                     const search = document.querySelector('[data-asset-types-admin-search]');

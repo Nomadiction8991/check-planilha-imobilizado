@@ -76,6 +76,17 @@ final class LegacyChurchControllerTest extends TestCase
         $response->assertSee('Igrejas cadastradas no sistema.');
         $response->assertSee('Central Cuiabá');
         $response->assertSee('18');
+        $html = $response->getContent();
+        self::assertMatchesRegularExpression('/<form[^>]+data-filter-autosubmit/', $html);
+        self::assertMatchesRegularExpression('/<select[^>]+name="administracao_id"[^>]+data-filter-server/', $html);
+        self::assertMatchesRegularExpression('/<input[^>]+name="busca"[^>]+data-filter-search/', $html);
+        self::assertMatchesRegularExpression('/<span[^>]+data-filter-status/', $html);
+        self::assertStringContainsString('submitFilterIfChanged', $html);
+        self::assertStringContainsString("field.addEventListener('change'", $html);
+        self::assertStringContainsString("searchInput.addEventListener('input'", $html);
+        self::assertStringContainsString("searchInput.addEventListener('search'", $html);
+        self::assertStringContainsString('window.setTimeout(submitFilterIfChanged, delay)', $html);
+        self::assertStringNotContainsString('data-churches-admin-search data-filter-search', $html);
     }
 
     public function testIndexHandlesEmptyData(): void

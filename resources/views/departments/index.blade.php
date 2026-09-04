@@ -42,7 +42,7 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.departments.index') }}">
+            <form method="GET" action="{{ route('migration.departments.index') }}" data-filter-autosubmit data-filter-message="Atualizando dependências…">
                 <div class="filters-primary">
                     <label for="departments-admin-search">
                         Buscar administração
@@ -57,7 +57,7 @@
                     </label>
                     <label class="filters-principal">
                         Administração
-                        <select id="departments-admin-select" name="administracao_id" data-departments-admin-select>
+                        <select id="departments-admin-select" name="administracao_id" data-departments-admin-select data-filter-server>
                             <option value="">Todas</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected($filters->administrationId === $administration->id)>
@@ -81,7 +81,7 @@
                     </label>
                     <label class="filters-principal">
                         Igreja
-                        <select id="departments-church-select" name="comum_id" data-departments-church-select>
+                        <select id="departments-church-select" name="comum_id" data-departments-church-select data-filter-server>
                             <option value="">Todas</option>
                             @foreach ($churches as $church)
                                 <option value="{{ $church->id }}" @selected($filters->comumId === $church->id)>
@@ -94,7 +94,7 @@
 
                     <label class="filters-principal">
                         Estado (UF)
-                        <select name="estado" id="departments-estado-select">
+                        <select name="estado" id="departments-estado-select" data-filter-server>
                             <option value="">Todos os estados</option>
                             @foreach ($states as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
@@ -106,15 +106,17 @@
 
                     <label class="filters-query">
                         Descrição
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome da dependência">
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome da dependência" data-filter-search>
                     </label>
 
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Filtrar</button>
                         <a class="btn" href="{{ route('migration.departments.index') }}">Limpar</a>
+                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
                 </div>
             </form>
+            @include('partials.filter-autosubmit')
             <script>
                 (() => {
                     const search = document.querySelector('[data-departments-admin-search]');
