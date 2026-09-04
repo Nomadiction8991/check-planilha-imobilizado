@@ -77,6 +77,20 @@ class LegacyChurchController extends Controller
 
         try {
             $count = $this->churchManager->countProducts($churchId);
+        } catch (RuntimeException $exception) {
+            $message = $exception->getMessage();
+
+            if ($message === 'A igreja selecionada está fora do seu escopo permitido.') {
+                return response()->json([
+                    'count' => 0,
+                    'error' => $message,
+                ], 403);
+            }
+
+            return response()->json([
+                'count' => 0,
+                'error' => $message,
+            ], 500);
         } catch (\Throwable $exception) {
             return response()->json([
                 'count' => 0,
@@ -98,7 +112,23 @@ class LegacyChurchController extends Controller
                 ->with('status_type', 'error');
         }
 
-        $church = $this->churchManager->findChurch($churchId);
+        try {
+            $church = $this->churchManager->findChurch($churchId);
+        } catch (RuntimeException $exception) {
+            $message = $exception->getMessage();
+
+            if ($message === 'A igreja selecionada está fora do seu escopo permitido.') {
+                return redirect()
+                    ->route('migration.churches.index')
+                    ->with('status', $message)
+                    ->with('status_type', 'error');
+            }
+
+            return redirect()
+                ->route('migration.churches.index')
+                ->with('status', 'Erro ao excluir produtos: ' . $message)
+                ->with('status_type', 'error');
+        }
 
         if ($church === null) {
             return redirect()
@@ -109,6 +139,20 @@ class LegacyChurchController extends Controller
 
         try {
             $deleted = $this->churchManager->deleteProducts($church);
+        } catch (RuntimeException $exception) {
+            $message = $exception->getMessage();
+
+            if ($message === 'A igreja selecionada está fora do seu escopo permitido.') {
+                return redirect()
+                    ->route('migration.churches.index')
+                    ->with('status', $message)
+                    ->with('status_type', 'error');
+            }
+
+            return redirect()
+                ->route('migration.churches.index')
+                ->with('status', 'Erro ao excluir produtos: ' . $message)
+                ->with('status_type', 'error');
         } catch (\Throwable $exception) {
             return redirect()
                 ->route('migration.churches.index')

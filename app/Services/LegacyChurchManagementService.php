@@ -47,7 +47,15 @@ class LegacyChurchManagementService implements LegacyChurchManagementServiceInte
 
     public function findChurch(int $churchId): ?Comum
     {
-        return Comum::query()->find($churchId);
+        $church = Comum::query()->find($churchId);
+
+        if ($church === null) {
+            return null;
+        }
+
+        $this->assertChurchWithinProductScope((int) $church->id);
+
+        return $church;
     }
 
     public function countProducts(int $churchId): int
@@ -63,6 +71,8 @@ class LegacyChurchManagementService implements LegacyChurchManagementServiceInte
 
     public function deleteProducts(Comum $church): int
     {
+        $this->assertChurchWithinProductScope((int) $church->id);
+
         return $church->products()->delete();
     }
 

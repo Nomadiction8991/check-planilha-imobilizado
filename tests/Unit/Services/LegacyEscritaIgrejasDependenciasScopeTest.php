@@ -164,6 +164,79 @@ final class LegacyEscritaIgrejasDependenciasScopeTest extends TestCase
         self::assertSame(10, (int) $updated->administracao_id);
     }
 
+    public function testChurchProductCountBlockedWhenChurchOutsideScope(): void
+    {
+        $this->seedChurches();
+        Produto::query()->create([
+            'comum_id' => 200,
+            'codigo' => 'RJ-001',
+            'bem' => 'CADEIRA',
+        ]);
+
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+        ]);
+
+        $service = new LegacyChurchManagementService();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('A igreja selecionada está fora do seu escopo permitido.');
+
+        $service->countProducts(200);
+    }
+
+    public function testChurchProductDeletionBlockedWhenChurchOutsideScope(): void
+    {
+        $this->seedChurches();
+        Produto::query()->create([
+            'comum_id' => 200,
+            'codigo' => 'RJ-001',
+            'bem' => 'CADEIRA',
+        ]);
+
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+        ]);
+
+        $churchOutside = Comum::query()->find(200);
+        self::assertNotNull($churchOutside);
+
+        $service = new LegacyChurchManagementService();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('A igreja selecionada está fora do seu escopo permitido.');
+
+        $service->deleteProducts($churchOutside);
+    }
+
+    public function testGlobalAdministratorKeepsChurchProductActions(): void
+    {
+        $this->seedChurches();
+        Produto::query()->create([
+            'comum_id' => 200,
+            'codigo' => 'RJ-001',
+            'bem' => 'CADEIRA',
+        ]);
+
+        Session::put([
+            'is_admin' => true,
+            'administracao_id' => null,
+            'administracoes_permitidas' => [],
+        ]);
+
+        $service = new LegacyChurchManagementService();
+        $church = Comum::query()->find(200);
+        self::assertNotNull($church);
+
+        self::assertSame(1, $service->countProducts(200));
+        self::assertSame(1, $service->deleteProducts($church));
+        self::assertSame(0, $service->countProducts(200));
+    }
+
     // ——— Dependências ———
 
     public function testDepartmentCreateBlockedWhenChurchOutsideScope(): void
