@@ -802,6 +802,7 @@
                     });
                     if (adminSelect.value !== '' && adminSelect.options[adminSelect.selectedIndex]?.hidden) {
                         adminSelect.value = '';
+                        adminSelect.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                     if (visible === 0 && term !== '') {
                         adminStatus.textContent = 'Nenhuma administração encontrada para "' + adminSearch.value.trim() + '".';
@@ -836,6 +837,7 @@
                 });
                 if (select.value !== '' && select.options[select.selectedIndex]?.hidden) {
                     select.value = '';
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
                 }
                 if (visible === 0 && term !== '') {
                     status.textContent = 'Nenhuma igreja encontrada para "' + search.value.trim() + '".';

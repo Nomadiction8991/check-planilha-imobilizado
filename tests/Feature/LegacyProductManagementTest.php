@@ -943,6 +943,8 @@ final class LegacyProductManagementTest extends TestCase
         $response->assertSee('select.addEventListener(\'change\', () => scheduleSubmit(80))', false);
         $response->assertSee('form.requestSubmit()', false);
         $response->assertSee('data-product-filter-status', false);
+        $response->assertSee("adminSelect.dispatchEvent(new Event('change', { bubbles: true }))", false);
+        $response->assertSee("select.dispatchEvent(new Event('change', { bubbles: true }))", false);
         $response->assertDontSee('data-product-admin-search].addEventListener(\'input\', () => scheduleSubmit', false);
         $response->assertDontSee('data-product-church-search].addEventListener(\'input\', () => scheduleSubmit', false);
     }
@@ -963,6 +965,8 @@ final class LegacyProductManagementTest extends TestCase
         $response->assertSee('searchInput.addEventListener(\'input\', () => scheduleSubmit(350))', false);
         $response->assertSee('form.requestSubmit()', false);
         $response->assertSee('data-product-filter-status', false);
+        $response->assertSee("adminSelect.dispatchEvent(new Event('change', { bubbles: true }))", false);
+        $response->assertSee("select.dispatchEvent(new Event('change', { bubbles: true }))", false);
     }
 
     public function testVerificationRendersChurchSearchFieldForFiltering(): void
