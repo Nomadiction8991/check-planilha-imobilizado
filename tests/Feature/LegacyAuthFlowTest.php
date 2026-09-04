@@ -298,7 +298,7 @@ final class LegacyAuthFlowTest extends TestCase
             'public_comum' => 'Central Cuiabá',
         ])->post(route('public.access.logout'));
 
-        $response->assertRedirect(route('migration.login'));
+        $response->assertRedirect(route('public.access.create'));
         $response->assertSessionMissing('public_acesso');
         $response->assertSessionMissing('public_planilha_id');
         $response->assertSessionMissing('public_comum_id');

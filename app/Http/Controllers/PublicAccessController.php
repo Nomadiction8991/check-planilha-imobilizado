@@ -65,6 +65,6 @@ final class PublicAccessController extends Controller
             'public_comum',
         ]);
 
-        return redirect()->route('migration.login');
+        return redirect()->route('public.access.create');
     }
 }

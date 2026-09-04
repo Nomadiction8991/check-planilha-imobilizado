@@ -404,6 +404,22 @@
                 0 8px 18px rgba(139, 61, 25, 0.08);
         }
 
+        .session-logout--public {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            min-width: 44px;
+            padding: 0 14px;
+            gap: 8px;
+        }
+
+        .session-logout-label {
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
         .session-logout .material-symbols-outlined {
             font-size: 20px;
             line-height: 1;
@@ -1333,6 +1349,17 @@
                 display: none;
             }
 
+            .session-logout--public {
+                display: inline-flex;
+                width: auto;
+                min-width: 44px;
+                padding: 0 12px;
+            }
+
+            .session-logout-label {
+                display: none;
+            }
+
             button.menu-toggle.theme-toggle {
                 display: inline-grid;
                 min-width: 44px;
@@ -1530,12 +1557,14 @@
                     <strong>Check Planilha</strong>
                 </div>
                 <div class="topbar-tools">
-                    @if (!empty($legacySessionUser))
+                    @if (!empty($legacySessionUser) || session('public_acesso'))
                         <div class="session-tools">
-                            <div class="session-user">
-                                <strong>{{ $legacySessionUser['nome'] }}</strong>
-                                <small title="{{ $legacySessionUser['email'] }}">{{ $legacySessionUser['email'] }}</small>
-                            </div>
+                            @if (!empty($legacySessionUser))
+                                <div class="session-user">
+                                    <strong>{{ $legacySessionUser['nome'] }}</strong>
+                                    <small title="{{ $legacySessionUser['email'] }}">{{ $legacySessionUser['email'] }}</small>
+                                </div>
+                            @endif
                             <div class="session-actions">
                                 <button
                                     class="theme-toggle menu-toggle"
@@ -1548,12 +1577,22 @@
                                 >
                                     <span class="material-symbols-outlined theme-toggle-icon" aria-hidden="true">menu</span>
                                 </button>
-                                <form method="POST" action="{{ route('migration.logout') }}">
-                                    @csrf
-                                    <button class="session-logout" type="submit" aria-label="Sair" title="Sair">
-                                        <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-                                    </button>
-                                </form>
+                                @if (session('public_acesso'))
+                                    <form method="POST" action="{{ route('public.access.logout') }}">
+                                        @csrf
+                                        <button class="session-logout session-logout--public" type="submit" aria-label="Sair do acesso público" title="Sair do acesso público">
+                                            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                                            <span class="session-logout-label">Sair do acesso público</span>
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('migration.logout') }}">
+                                        @csrf
+                                        <button class="session-logout" type="submit" aria-label="Sair" title="Sair">
+                                            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                                        </button>
+                                    </form>
+                                @endif
                                 @include('partials.theme-toggle')
                             </div>
                         </div>
@@ -1640,16 +1679,21 @@
             <span class="page-quick-actions-toggle-label">Ações</span>
         </button>
     </div>
-    @unless (session('public_acesso'))
         <div class="mobile-menu" id="mobile-menu" data-mobile-menu aria-hidden="true">
             <div class="mobile-menu-backdrop" data-mobile-menu-backdrop></div>
             <aside class="mobile-menu-panel" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title">
                 <div class="mobile-menu-head">
                     <div class="mobile-menu-copy">
+                    @if (session('public_acesso'))
+                        <span class="eyebrow">Atendimento público</span>
+                        <strong id="mobile-menu-title">Check Planilha</strong>
+                        <p>Encerre o atendimento antes de devolver este dispositivo.</p>
+                    @else
                         <span class="eyebrow">Menu</span>
                         <strong id="mobile-menu-title">Check Planilha</strong>
                         <p>Acesse cadastros e rotinas administrativas.</p>
-                    </div>
+                    @endif
+                </div>
                     <button
                         type="button"
                         class="theme-toggle mobile-menu-close"
@@ -1667,7 +1711,7 @@
                         <span>{{ $legacySessionUser['email'] }}</span>
                     </div>
                 @endif
-                @if (!empty($legacyNavigation))
+                @if (! session('public_acesso') && ! empty($legacyNavigation))
                     <nav class="mobile-menu-nav" aria-label="Navegação principal">
                         @foreach ($legacyNavigation as $item)
                             <a
@@ -1681,7 +1725,14 @@
                         @endforeach
                     </nav>
                 @endif
-                @if (!empty($legacySessionUser))
+                @if (session('public_acesso'))
+                    <div class="mobile-menu-footer">
+                        <form method="POST" action="{{ route('public.access.logout') }}">
+                            @csrf
+                            <button class="mobile-menu-logout" type="submit">Sair do acesso público</button>
+                        </form>
+                    </div>
+                @elseif (!empty($legacySessionUser))
                     <div class="mobile-menu-footer">
                         <form method="POST" action="{{ route('migration.logout') }}">
                             @csrf
@@ -1691,7 +1742,6 @@
                 @endif
             </aside>
         </div>
-    @endunless
     <script>
         (() => {
             const menu = document.querySelector('[data-mobile-menu]');
