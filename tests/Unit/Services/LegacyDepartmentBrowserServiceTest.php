@@ -155,4 +155,58 @@ final class LegacyDepartmentBrowserServiceTest extends TestCase
         self::assertSame(1, $options->first()->id);
         self::assertSame('Aracaju', $options->first()->descricao);
     }
+
+    public function testBrowserRespectsAdministrationScope(): void
+    {
+        $admin1 = new Administracao();
+        $admin1->forceFill(['id' => 10, 'descricao' => 'Administração SP']);
+        $admin1->save();
+
+        $admin2 = new Administracao();
+        $admin2->forceFill(['id' => 20, 'descricao' => 'Administração RJ']);
+        $admin2->save();
+
+        $church1 = new Comum();
+        $church1->forceFill(['id' => 100, 'codigo' => 'SP-01', 'descricao' => 'Central SP', 'administracao_id' => 10]);
+        $church1->save();
+
+        $church2 = new Comum();
+        $church2->forceFill(['id' => 200, 'codigo' => 'RJ-01', 'descricao' => 'Central RJ', 'administracao_id' => 20]);
+        $church2->save();
+
+        $dep1 = new Dependencia();
+        $dep1->forceFill(['id' => 1, 'comum_id' => 100, 'descricao' => 'SALAO SP']);
+        $dep1->save();
+
+        $dep2 = new Dependencia();
+        $dep2->forceFill(['id' => 2, 'comum_id' => 200, 'descricao' => 'SALAO RJ']);
+        $dep2->save();
+
+        \Illuminate\Support\Facades\Session::put('is_admin', false);
+        \Illuminate\Support\Facades\Session::put('administracao_id', 10);
+        \Illuminate\Support\Facades\Session::put('administracoes_permitidas', [10]);
+
+        $filters = new DepartmentFilters(
+            administrationId: null,
+            comumId: null,
+            search: '',
+            state: null,
+            page: 1,
+            perPage: 10,
+        );
+
+        $result = $this->service->paginate($filters);
+        self::assertSame(1, $result->total());
+        self::assertSame(1, $result->items()[0]->id);
+
+        self::assertSame(1, $this->service->countAll());
+
+        $churches = $this->service->churchOptions();
+        self::assertCount(1, $churches);
+        self::assertSame(100, $churches->first()->id);
+
+        $administrations = $this->service->administrationOptions();
+        self::assertCount(1, $administrations);
+        self::assertSame(10, $administrations->first()->id);
+    }
 }
