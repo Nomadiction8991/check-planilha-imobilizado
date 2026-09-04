@@ -21,6 +21,17 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
+            @php
+                $reportsActiveCount = 0;
+                if ((int) ($selectedAdministrationId ?? 0) > 0) $reportsActiveCount++;
+                if (($selectedState ?? '') !== '') $reportsActiveCount++;
+                if ((int) ($selectedChurchId ?? 0) > 0) $reportsActiveCount++;
+            @endphp
+            <button type="button" class="product-filters-toggle" data-product-filters-toggle data-active-count="{{ $reportsActiveCount }}" aria-expanded="false" aria-controls="reports-filters-panel">
+                <span data-product-filters-toggle-label>{{ $reportsActiveCount > 0 ? 'Filtros · ' . $reportsActiveCount . ' ' . ($reportsActiveCount === 1 ? 'ativo' : 'ativos') : 'Filtros' }}</span>
+                <span class="material-symbols-outlined product-filters-toggle__icon" aria-hidden="true">expand_more</span>
+            </button>
+            <div id="reports-filters-panel" data-product-filters-panel>
             <form method="GET" action="{{ route('migration.reports.index') }}" data-reports-filter-form data-reports-filter-autosubmit>
                 <div class="filters-primary">
                     <label for="reports-admin-search">
@@ -212,6 +223,7 @@
                     search.addEventListener('search', applyFilter);
                 })();
             </script>
+            </div>
         </div>
     </section>
 

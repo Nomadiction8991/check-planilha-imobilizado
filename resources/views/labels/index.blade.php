@@ -150,6 +150,18 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
+            @php
+                $labelsActiveCount = 0;
+                if ((int) ($selectedAdministrationId ?? 0) > 0) $labelsActiveCount++;
+                if (($selectedState ?? '') !== '') $labelsActiveCount++;
+                if ((int) ($churchId ?? 0) > 0) $labelsActiveCount++;
+                if (($selectedDependencyId ?? '') !== '' && $selectedDependencyId !== null) $labelsActiveCount++;
+            @endphp
+            <button type="button" class="product-filters-toggle" data-product-filters-toggle data-active-count="{{ $labelsActiveCount }}" aria-expanded="false" aria-controls="labels-filters-panel">
+                <span data-product-filters-toggle-label>{{ $labelsActiveCount > 0 ? 'Filtros · ' . $labelsActiveCount . ' ' . ($labelsActiveCount === 1 ? 'ativo' : 'ativos') : 'Filtros' }}</span>
+                <span class="material-symbols-outlined product-filters-toggle__icon" aria-hidden="true">expand_more</span>
+            </button>
+            <div id="labels-filters-panel" data-product-filters-panel>
             <form method="GET" action="{{ route('migration.labels.index') }}" data-labels-filter-form data-labels-filter-autosubmit>
                 <div class="filters-primary">
                     <label for="labels-admin-search">
@@ -364,6 +376,7 @@
                     search.addEventListener('search', applyFilter);
                 })();
             </script>
+            </div>
         </div>
     </section>
 

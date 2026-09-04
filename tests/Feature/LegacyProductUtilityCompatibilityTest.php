@@ -72,7 +72,12 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
             'usuario_email' => 'MARIA@EXEMPLO.COM',
             'comum_id' => 7,
             'is_admin' => false,
-        ])->get(route('migration.labels.index', ['comum_id' => 7, 'dependencia' => 3]));
+        ])->get(route('migration.labels.index', [
+            'administracao_id' => 4,
+            'estado' => 'MT',
+            'comum_id' => 7,
+            'dependencia' => 3,
+        ]));
 
         $response->assertOk();
         $response->assertSee('A-101,A-102');
@@ -87,6 +92,12 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('data-labels-server-filter', false);
         $response->assertSee('data-labels-filter-status', false);
         $response->assertSee('data-labels-filter-autosubmit', false);
+        $response->assertSee('data-product-filters-toggle', false);
+        $response->assertSee('data-product-filters-panel', false);
+        $response->assertSee('aria-expanded="false"', false);
+        $response->assertSee('aria-controls="labels-filters-panel"', false);
+        $response->assertSee('data-active-count="4"', false);
+        $response->assertSee('Filtros · 4 ativos', false);
         $response->assertSee('submitLabelsIfChanged', false);
         $response->assertSee('Atualizando etiquetas…', false);
         $response->assertSee("form.querySelectorAll('[data-labels-server-filter]')", false);
@@ -142,6 +153,8 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('Selecione uma igreja');
         $response->assertSee('data-labels-admin-search', false);
         $response->assertSee('Administração Centro-Oeste');
+        $response->assertSee('data-active-count="0"', false);
+        $response->assertSee('aria-controls="labels-filters-panel"', false);
     }
 
     public function testCopyLabelsPageFiltersChurchesByAdministration(): void
