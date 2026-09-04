@@ -738,6 +738,14 @@
 
                 const getSignature = () => new URLSearchParams(new FormData(form)).toString();
                 const status = form.querySelector('[data-product-filter-status]');
+                const resetPage = () => {
+                    ['page', 'pagina'].forEach((pageName) => {
+                        form.querySelectorAll(`[name="${pageName}"]`).forEach((field) => {
+                            field.value = '';
+                            field.disabled = true;
+                        });
+                    });
+                };
                 const submitIfChanged = () => {
                     submitTimer = 0;
                     const signature = getSignature();
@@ -746,6 +754,7 @@
                     }
 
                     lastSignature = signature;
+                    resetPage();
                     form.dataset.productFilterSubmitting = 'true';
                     if (status) {
                         status.textContent = 'Atualizando resultados…';
