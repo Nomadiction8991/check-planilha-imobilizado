@@ -133,6 +133,16 @@ final class LegacyAdministrationControllerTest extends TestCase
         $response->assertSee('Administração Central');
         $response->assertSee('12345678000190');
         $response->assertSee('Nova administração');
+        $html = $response->getContent();
+        self::assertMatchesRegularExpression('/<form[^>]+data-filter-autosubmit/', $html);
+        self::assertMatchesRegularExpression('/<select[^>]+name="estado"[^>]+data-filter-server/', $html);
+        self::assertMatchesRegularExpression('/<input[^>]+name="busca"[^>]+data-filter-search/', $html);
+        self::assertMatchesRegularExpression('/<span[^>]+data-filter-status/', $html);
+        self::assertStringContainsString('submitFilterIfChanged', $html);
+        self::assertStringContainsString("field.addEventListener('change'", $html);
+        self::assertStringContainsString("searchInput.addEventListener('input'", $html);
+        self::assertStringContainsString("searchInput.addEventListener('search'", $html);
+        self::assertStringContainsString('window.setTimeout(submitFilterIfChanged, delay)', $html);
     }
 
     public function testIndexShowsEmptyStateWhenNoRecords(): void

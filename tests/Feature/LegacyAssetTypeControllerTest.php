@@ -92,6 +92,17 @@ final class LegacyAssetTypeControllerTest extends TestCase
         $response->assertOk();
         $response->assertSee('MESA ESCRITÓRIO');
         $response->assertSee('10');
+        $html = $response->getContent();
+        self::assertMatchesRegularExpression('/<form[^>]+data-filter-autosubmit/', $html);
+        self::assertMatchesRegularExpression('/<select[^>]+name="administracao_id"[^>]+data-filter-server/', $html);
+        self::assertMatchesRegularExpression('/<input[^>]+name="busca"[^>]+data-filter-search/', $html);
+        self::assertMatchesRegularExpression('/<span[^>]+data-filter-status/', $html);
+        self::assertStringContainsString('submitFilterIfChanged', $html);
+        self::assertStringContainsString("field.addEventListener('change'", $html);
+        self::assertStringContainsString("searchInput.addEventListener('input'", $html);
+        self::assertStringContainsString("searchInput.addEventListener('search'", $html);
+        self::assertStringContainsString('window.setTimeout(submitFilterIfChanged, delay)', $html);
+        self::assertStringNotContainsString('data-asset-types-admin-search data-filter-search', $html);
     }
 
     public function testIndexPageRespectsSearchFilter(): void

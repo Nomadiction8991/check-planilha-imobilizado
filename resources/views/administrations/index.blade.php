@@ -42,11 +42,11 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.administrations.index') }}">
+            <form method="GET" action="{{ route('migration.administrations.index') }}" data-filter-autosubmit data-filter-message="Atualizando administrações…">
                 <div class="filters-primary">
                     <label class="filters-principal">
                         Estado (UF)
-                        <select name="estado" id="administrations-estado-select">
+                        <select name="estado" id="administrations-estado-select" data-filter-server>
                             <option value="">Todos os estados</option>
                             @foreach ($states ?? (array) config('brazil.states', []) as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
@@ -58,15 +58,17 @@
 
                     <label class="filters-query">
                         Buscar por ID, descrição ou CNPJ
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="1, Administração Central ou 12345678000190">
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="1, Administração Central ou 12345678000190" data-filter-search>
                     </label>
 
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Filtrar</button>
                         <a class="btn" href="{{ route('migration.administrations.index') }}">Limpar</a>
+                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
                 </div>
             </form>
+            @include('partials.filter-autosubmit')
         </div>
     </section>
 

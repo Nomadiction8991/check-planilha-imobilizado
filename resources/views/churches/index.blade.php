@@ -28,7 +28,7 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.churches.index') }}">
+            <form method="GET" action="{{ route('migration.churches.index') }}" data-filter-autosubmit data-filter-message="Atualizando igrejas…">
                 <div class="filters-primary">
                     <label for="churches-admin-search">
                         Buscar administração
@@ -43,7 +43,7 @@
                     </label>
                     <label class="filters-principal">
                         Administração
-                        <select id="churches-admin-select" name="administracao_id" data-churches-admin-select>
+                        <select id="churches-admin-select" name="administracao_id" data-churches-admin-select data-filter-server>
                             <option value="">Todas</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected($filters->administrationId === $administration->id)>
@@ -56,7 +56,7 @@
 
                     <label class="filters-principal">
                         Estado (UF)
-                        <select name="estado" id="churches-estado-select">
+                        <select name="estado" id="churches-estado-select" data-filter-server>
                             <option value="">Todos os estados</option>
                             @foreach ($states as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
@@ -68,15 +68,17 @@
 
                     <label class="filters-query">
                         Buscar por código ou descrição
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="BR 12-3456 ou descrição">
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="BR 12-3456 ou descrição" data-filter-search>
                     </label>
 
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Filtrar</button>
                         <a class="btn" href="{{ route('migration.churches.index') }}">Limpar</a>
+                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
                 </div>
             </form>
+            @include('partials.filter-autosubmit')
             <script>
                 (() => {
                     const search = document.querySelector('[data-churches-admin-search]');

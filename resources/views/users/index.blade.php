@@ -28,7 +28,7 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.users.index') }}">
+            <form method="GET" action="{{ route('migration.users.index') }}" data-filter-autosubmit data-filter-message="Atualizando usuários…">
                 <div class="filters-primary">
                     <label for="users-admin-search">
                         Buscar administração
@@ -43,7 +43,7 @@
                     </label>
                     <label class="filters-principal">
                         Administração
-                        <select id="users-admin-select" name="administracao_id" data-users-admin-select>
+                        <select id="users-admin-select" name="administracao_id" data-users-admin-select data-filter-server>
                             <option value="">Todas</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected($filters->administrationId === $administration->id)>
@@ -56,7 +56,7 @@
 
                     <label class="filters-principal">
                         Estado (UF)
-                        <select name="estado" id="users-estado-select">
+                        <select name="estado" id="users-estado-select" data-filter-server>
                             <option value="">Todos os estados</option>
                             @foreach ($states as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected($filters->state === $stateCode)>
@@ -68,19 +68,20 @@
 
                     <label class="filters-query">
                         Buscar por nome ou email
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome ou email">
+                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome ou email" data-filter-search>
                     </label>
 
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Filtrar</button>
                         <a class="btn" href="{{ route('migration.users.index') }}">Limpar</a>
+                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
                 </div>
 
                 <div class="filters-advanced">
                     <label>
                         Status
-                        <select name="status">
+                        <select name="status" data-filter-server>
                             <option value="">Todos</option>
                             @foreach ($statusOptions as $statusKey => $statusLabel)
                                 <option value="{{ $statusKey }}" @selected($filters->status === $statusKey)>
@@ -91,6 +92,7 @@
                     </label>
                 </div>
             </form>
+            @include('partials.filter-autosubmit')
             <script>
                 (() => {
                     const search = document.querySelector('[data-users-admin-search]');
