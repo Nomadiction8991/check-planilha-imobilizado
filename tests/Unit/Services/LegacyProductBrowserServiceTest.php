@@ -598,6 +598,37 @@ final class LegacyProductBrowserServiceTest extends TestCase
         );
     }
 
+    public function testAssetTypeOptionsIncludeAllPermittedAdministrationsAndSharedTypes(): void
+    {
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [20],
+            'usuario_id' => 7,
+        ]);
+
+        foreach ([
+            [10, 10, 'Tipo permitido ativo'],
+            [20, 20, 'Tipo permitido adicional'],
+            [30, 30, 'Tipo fora do escopo'],
+            [40, null, 'Tipo compartilhado'],
+        ] as [$id, $administrationId, $description]) {
+            $assetType = new TipoBem();
+            $assetType->forceFill([
+                'id' => $id,
+                'codigo' => $id,
+                'descricao' => $description,
+                'administracao_id' => $administrationId,
+            ]);
+            $assetType->save();
+        }
+
+        self::assertEqualsCanonicalizing(
+            [10, 20, 40],
+            $this->service->assetTypeOptions()->pluck('id')->all(),
+        );
+    }
+
     private function seedEditedProduct(
         int $id = 1,
         string $code = 'P-001',
