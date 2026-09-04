@@ -21,7 +21,7 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.reports.index') }}">
+            <form method="GET" action="{{ route('migration.reports.index') }}" data-reports-filter-form data-reports-filter-autosubmit>
                 <div class="filters-primary">
                     <label for="reports-admin-search">
                         Buscar administração
@@ -36,7 +36,7 @@
                     </label>
                     <label class="filters-principal">
                         Administração
-                        <select id="reports-admin-select" name="administracao_id" data-reports-admin-select>
+                        <select id="reports-admin-select" name="administracao_id" data-reports-admin-select data-reports-server-filter>
                             <option value="">Todas as administrações</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected((int) ($selectedAdministrationId ?? 0) === (int) $administration->id)>
@@ -49,7 +49,7 @@
 
                     <label class="filters-principal">
                         Estado (UF)
-                        <select name="estado" id="reports-estado-select">
+                        <select name="estado" id="reports-estado-select" data-reports-server-filter>
                             <option value="">Todos os estados</option>
                             @foreach ($states as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected(($selectedState ?? '') === $stateCode)>
@@ -72,7 +72,7 @@
                     </label>
                     <label class="filters-principal">
                         Igreja
-                        <select id="reports-church-select" name="comum_id" data-reports-church-select>
+                        <select id="reports-church-select" name="comum_id" data-reports-church-select data-reports-server-filter>
                             <option value="">Selecione</option>
                             @foreach ($churches as $church)
                                 <option value="{{ $church->id }}" @selected((int) $selectedChurchId === (int) $church->id)>
@@ -86,9 +86,62 @@
                     <div class="actions filters-actions">
                         <button class="btn primary" type="submit">Carregar relatórios</button>
                         <a class="btn" href="{{ route('migration.reports.index') }}">Limpar</a>
+                        <span class="helper" role="status" aria-live="polite" data-reports-filter-status></span>
                     </div>
                 </div>
             </form>
+            <script>
+                (() => {
+                    const form = document.querySelector('[data-reports-filter-form][data-reports-filter-autosubmit]');
+                    if (!form) {
+                        return;
+                    }
+
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    const status = form.querySelector('[data-reports-filter-status]');
+                    const serverSelects = form.querySelectorAll('[data-reports-server-filter]');
+                    let submitTimer = 0;
+                    let lastSignature = new URLSearchParams(new FormData(form)).toString();
+
+                    const getSignature = () => new URLSearchParams(new FormData(form)).toString();
+                    const submitReportsIfChanged = () => {
+                        submitTimer = 0;
+                        const signature = getSignature();
+                        if (signature === lastSignature) {
+                            return;
+                        }
+
+                        lastSignature = signature;
+                        form.dataset.reportsFilterSubmitting = 'true';
+                        if (status) {
+                            status.textContent = 'Atualizando relatórios…';
+                        }
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                            submitButton.setAttribute('aria-busy', 'true');
+                        }
+
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            form.submit();
+                        }
+                    };
+                    const scheduleSubmit = (delay) => {
+                        window.clearTimeout(submitTimer);
+                        submitTimer = window.setTimeout(submitReportsIfChanged, delay);
+                    };
+
+                    form.addEventListener('submit', () => {
+                        window.clearTimeout(submitTimer);
+                        form.dataset.reportsFilterSubmitting = 'true';
+                    });
+
+                    serverSelects.forEach((select) => {
+                        select.addEventListener('change', () => scheduleSubmit(80));
+                    });
+                })();
+            </script>
             <script>
                 (() => {
                     const adminSearch = document.querySelector('[data-reports-admin-search]');
