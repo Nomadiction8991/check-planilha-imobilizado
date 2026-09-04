@@ -973,6 +973,72 @@ final class LegacyChurchControllerTest extends TestCase
         $response->assertRedirect(route('migration.login'));
     }
 
+    public function testProductsCountReturnsForbiddenWhenChurchOutsideScope(): void
+    {
+        $this->mock(
+            LegacyChurchManagementServiceInterface::class,
+            function (MockInterface $mock): void {
+                $mock->shouldReceive('countProducts')
+                    ->once()
+                    ->with(7)
+                    ->andThrow(new RuntimeException('A igreja selecionada está fora do seu escopo permitido.'));
+            },
+        );
+
+        $response = $this->get(route('migration.churches.products-count', ['comum_id' => 7]));
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'count' => 0,
+            'error' => 'A igreja selecionada está fora do seu escopo permitido.',
+        ]);
+    }
+
+    public function testDeleteProductsShowsScopeErrorWhenFindReturnsUnauthorized(): void
+    {
+        $this->mock(
+            LegacyChurchManagementServiceInterface::class,
+            function (MockInterface $mock): void {
+                $mock->shouldReceive('findChurch')
+                    ->once()
+                    ->with(7)
+                    ->andThrow(new RuntimeException('A igreja selecionada está fora do seu escopo permitido.'));
+            },
+        );
+
+        $response = $this->post(route('migration.churches.delete-products'), [
+            'comum_id' => 7,
+        ]);
+
+        $response->assertRedirect(route('migration.churches.index'));
+        $response->assertSessionHas('status', 'A igreja selecionada está fora do seu escopo permitido.');
+        $response->assertSessionHas('status_type', 'error');
+    }
+
+    public function testDeleteProductsShowsScopeErrorWhenDeletionOutsideScope(): void
+    {
+        $this->mock(
+            LegacyChurchManagementServiceInterface::class,
+            function (MockInterface $mock): void {
+                $mock->shouldReceive('findChurch')
+                    ->once()
+                    ->with(7)
+                    ->andReturn($this->makeChurch());
+                $mock->shouldReceive('deleteProducts')
+                    ->once()
+                    ->andThrow(new RuntimeException('A igreja selecionada está fora do seu escopo permitido.'));
+            },
+        );
+
+        $response = $this->post(route('migration.churches.delete-products'), [
+            'comum_id' => 7,
+        ]);
+
+        $response->assertRedirect(route('migration.churches.index'));
+        $response->assertSessionHas('status', 'A igreja selecionada está fora do seu escopo permitido.');
+        $response->assertSessionHas('status_type', 'error');
+    }
+
     // ─── Helpers ────────────────────────────────────────────────────────────
 
     private function makeChurch(string $description = 'Central Cuiabá'): Comum
