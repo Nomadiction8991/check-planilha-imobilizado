@@ -6,7 +6,6 @@ namespace App\Http\Requests;
 
 use App\DTO\SpreadsheetImportUploadData;
 use Illuminate\Foundation\Http\FormRequest;
-use RuntimeException;
 
 class StoreSpreadsheetImportRequest extends FormRequest
 {
@@ -22,7 +21,7 @@ class StoreSpreadsheetImportRequest extends FormRequest
     {
         return [
             'administracao_id' => ['required', 'integer', 'min:1'],
-            'arquivo_csv' => ['required', 'file', 'mimes:csv,txt', 'max:51200'],
+            'arquivo_csv' => ['required', 'file', 'extensions:csv,txt,xls,xlsx', 'max:51200'],
         ];
     }
 
@@ -32,26 +31,19 @@ class StoreSpreadsheetImportRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'administracao_id.required' => 'Selecione a administração da importação.',
+            'administracao_id.required' => 'O campo administração é obrigatório.',
             'administracao_id.min' => 'Selecione uma administração válida.',
-            'arquivo_csv.required' => 'Selecione um arquivo CSV.',
-            'arquivo_csv.mimes' => 'Envie um arquivo CSV ou TXT válido.',
-            'arquivo_csv.max' => 'O arquivo deve ter no máximo 50MB.',
+            'arquivo_csv.required' => 'Selecione um arquivo de planilha (CSV, XLS ou XLSX).',
+            'arquivo_csv.extensions' => 'Envie um arquivo CSV, TXT, XLS ou XLSX válido.',
+            'arquivo_csv.max' => 'O arquivo não pode ser maior que 50MB.',
         ];
     }
 
     public function toDto(): SpreadsheetImportUploadData
     {
-        $responsibleUserId = (int) $this->session()->get('usuario_id', 0);
-
-        if ($responsibleUserId <= 0) {
-            throw new RuntimeException('Sessão inválida para identificar o responsável.');
-        }
-
         return new SpreadsheetImportUploadData(
-            responsibleUserId: $responsibleUserId,
-            churchId: null,
-            administrationId: (int) $this->validated('administracao_id'),
+            (int) $this->input('administracao_id'),
+            $this->input('church_id') ? (int) $this->input('church_id') : null,
         );
     }
 }
