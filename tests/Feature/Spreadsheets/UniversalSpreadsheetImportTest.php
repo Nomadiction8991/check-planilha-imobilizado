@@ -12,6 +12,22 @@ use Tests\TestCase;
 
 class UniversalSpreadsheetImportTest extends TestCase
 {
+    public function test_import_page_renders_successfully(): void
+    {
+        $this->withSession([
+            'usuario_id' => 1,
+            'is_admin' => true,
+            'legacy_permissions' => [
+                'spreadsheets.import' => true,
+            ],
+        ]);
+
+        $response = $this->get(route('migration.spreadsheets.create'));
+        $response->assertOk();
+        $response->assertSee('Importação de planilhas');
+        $response->assertSee('arquivo_csv');
+    }
+
     public function test_store_request_accepts_csv_xls_and_xlsx_extensions(): void
     {
         $request = new StoreSpreadsheetImportRequest();
