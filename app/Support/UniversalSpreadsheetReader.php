@@ -10,6 +10,59 @@ use ZipArchive;
 final class UniversalSpreadsheetReader
 {
     /**
+     * Garante que o arquivo fornecido esteja no formato CSV legível.
+     * Se for um arquivo binário XLS ou XLSX, converte automaticamente para CSV
+     * e retorna o caminho do arquivo convertido.
+     * Se já for CSV, retorna o próprio caminho.
+     */
+    public static function ensureCsv(string $filePath): string
+    {
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            return $filePath;
+        }
+
+        $handle = @fopen($filePath, 'rb');
+        if ($handle === false) {
+            return $filePath;
+        }
+        $magic = (string) fread($handle, 8);
+        fclose($handle);
+
+        $isXls = str_starts_with($magic, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1");
+        $isXlsx = str_starts_with($magic, "PK\x03\x04");
+
+        if (!$isXls && !$isXlsx) {
+            return $filePath;
+        }
+
+        $rows = self::read($filePath);
+        if (empty($rows)) {
+            return $filePath;
+        }
+
+        $dir = dirname($filePath);
+        $filename = pathinfo($filePath, PATHINFO_FILENAME);
+        $csvPath = $dir . DIRECTORY_SEPARATOR . $filename . '_converted.csv';
+
+        $fp = @fopen($csvPath, 'w');
+        if ($fp === false) {
+            $csvPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $filename . '_' . uniqid() . '_converted.csv';
+            $fp = @fopen($csvPath, 'w');
+        }
+
+        if ($fp === false) {
+            return $filePath;
+        }
+
+        foreach ($rows as $row) {
+            fputcsv($fp, $row, ',', '"', "\\");
+        }
+        fclose($fp);
+
+        return $csvPath;
+    }
+
+    /**
      * Lê qualquer arquivo de planilha (CSV, XLS ou XLSX) e retorna uma matriz de linhas.
      *
      * @return array<int, array<int, string>>
@@ -65,7 +118,7 @@ final class UniversalSpreadsheetReader
 
         $rows = [];
         while (($row = fgetcsv($stream, 0, $delimiter, '"', '\\')) !== false) {
-            $rows[] = array_map(static fn($c) => trim((string) $c, " \t\n\r\0\x0B"), $row);
+            $rows[] = array_map(static fn($c) => trim((string) $c), $row);
         }
         fclose($stream);
 
@@ -286,6 +339,8 @@ final class UniversalSpreadsheetReader
                 if ($numVal >= 10000 && $numVal <= 70000 && floor($numVal) == $numVal && $col == 19) {
                     $ts = (int) (($numVal - 25569) * 86400);
                     $val = gmdate('d/m/Y', $ts);
+                } elseif (floor($numVal) == $numVal && abs($numVal) < 1e15) {
+                    $val = (string) (int) $numVal;
                 } else {
                     $val = (string) $numVal;
                 }

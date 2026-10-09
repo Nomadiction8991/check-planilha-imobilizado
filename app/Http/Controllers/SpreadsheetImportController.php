@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Contracts\LegacySpreadsheetImportServiceInterface;
 use App\Http\Requests\StoreSpreadsheetImportRequest;
+use App\Support\UniversalSpreadsheetReader;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Session;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -36,9 +38,25 @@ class SpreadsheetImportController extends Controller
     public function store(StoreSpreadsheetImportRequest $request): RedirectResponse
     {
         try {
+            /** @var UploadedFile $file */
+            $file = $request->file('arquivo_csv');
+            if ($file instanceof UploadedFile) {
+                $realPath = $file->getRealPath();
+                $csvPath = UniversalSpreadsheetReader::ensureCsv($realPath);
+                if ($csvPath !== $realPath) {
+                    $file = new UploadedFile(
+                        $csvPath,
+                        pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.csv',
+                        'text/csv',
+                        null,
+                        true
+                    );
+                }
+            }
+
             $importacaoId = $this->imports->uploadAndAnalyze(
                 $request->toDto(),
-                $request->file('arquivo_csv'),
+                $file,
             );
         } catch (RuntimeException $exception) {
             return redirect()
