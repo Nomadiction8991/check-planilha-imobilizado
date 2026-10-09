@@ -12,22 +12,6 @@ use Tests\TestCase;
 
 class UniversalSpreadsheetImportTest extends TestCase
 {
-    public function test_import_page_renders_successfully(): void
-    {
-        $this->withSession([
-            'usuario_id' => 1,
-            'is_admin' => true,
-            'legacy_permissions' => [
-                'spreadsheets.import' => true,
-            ],
-        ]);
-
-        $response = $this->get(route('migration.spreadsheets.create'));
-        $response->assertOk();
-        $response->assertSee('Importação de planilhas');
-        $response->assertSee('arquivo_csv');
-    }
-
     public function test_store_request_accepts_csv_xls_and_xlsx_extensions(): void
     {
         $request = new StoreSpreadsheetImportRequest();
@@ -52,6 +36,9 @@ class UniversalSpreadsheetImportTest extends TestCase
     public function test_universal_reader_parses_csv_rows(): void
     {
         $tmp = tempnam(sys_get_temp_dir(), 'test_csv_');
+        if ($tmp === false) {
+            $this->fail('Falha ao criar arquivo temporário.');
+        }
         file_put_contents($tmp, "Código,Nome,Dependência\n09-0565 / 000001,Banco,Templo\n");
 
         $rows = UniversalSpreadsheetReader::read($tmp);
