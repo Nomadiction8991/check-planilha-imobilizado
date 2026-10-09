@@ -24,7 +24,7 @@ final class UniversalSpreadsheetReader
         if ($handle === false) {
             throw new Exception("Não foi possível abrir o arquivo: {$filePath}");
         }
-        $magic = fread($handle, 8);
+        $magic = (string) fread($handle, 8);
         fclose($handle);
 
         if (str_starts_with($magic, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1")) {
@@ -86,7 +86,7 @@ final class UniversalSpreadsheetReader
         $ssXml = $zip->getFromName('xl/sharedStrings.xml');
         if ($ssXml !== false) {
             $xml = @simplexml_load_string($ssXml);
-            if ($xml !== false) {
+            if ($xml !== false && isset($xml->si)) {
                 foreach ($xml->si as $si) {
                     if (isset($si->t)) {
                         $sharedStrings[] = (string) $si->t;
@@ -107,7 +107,7 @@ final class UniversalSpreadsheetReader
         if ($sheetXml === false) {
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $stat = $zip->statIndex($i);
-                if ($stat && str_starts_with($stat['name'], 'xl/worksheets/sheet') && str_ends_with($stat['name'], '.xml')) {
+                if ($stat && str_starts_with((string) $stat['name'], 'xl/worksheets/sheet') && str_ends_with((string) $stat['name'], '.xml')) {
                     $sheetXml = $zip->getFromIndex($i);
                     break;
                 }
@@ -125,35 +125,41 @@ final class UniversalSpreadsheetReader
         }
 
         $rows = [];
-        foreach ($xml->sheetData->row as $row) {
-            $rIndex = (int) $row['r'] - 1;
-            $rowCells = [];
-            foreach ($row->c as $cell) {
-                $r = (string) $cell['r'];
-                preg_match('/^([A-Z]+)/', $r, $m);
-                $colLetters = $m[1] ?? 'A';
-                $colIdx = self::lettersToColumnIndex($colLetters);
+        /** @var \SimpleXMLElement $sheetData */
+        $sheetData = $xml->sheetData;
+        if (isset($sheetData->row)) {
+            foreach ($sheetData->row as $row) {
+                $rIndex = max(0, (int) $row['r'] - 1);
+                $rowCells = [];
+                if (isset($row->c)) {
+                    foreach ($row->c as $cell) {
+                        $r = (string) $cell['r'];
+                        preg_match('/^([A-Z]+)/', $r, $m);
+                        $colLetters = $m[1] ?? 'A';
+                        $colIdx = self::lettersToColumnIndex($colLetters);
 
-                $val = '';
-                $type = (string) $cell['t'];
-                if ($type === 's') {
-                    $sIndex = (int) $cell->v;
-                    $val = $sharedStrings[$sIndex] ?? '';
-                } elseif ($type === 'inlineStr' && isset($cell->is->t)) {
-                    $val = (string) $cell->is->t;
-                } elseif (isset($cell->v)) {
-                    $val = (string) $cell->v;
+                        $val = '';
+                        $type = (string) $cell['t'];
+                        if ($type === 's' && isset($cell->v)) {
+                            $sIndex = (int) $cell->v;
+                            $val = $sharedStrings[$sIndex] ?? '';
+                        } elseif ($type === 'inlineStr' && isset($cell->is->t)) {
+                            $val = (string) $cell->is->t;
+                        } elseif (isset($cell->v)) {
+                            $val = (string) $cell->v;
+                        }
+                        $rowCells[$colIdx] = trim($val, " \t\n\r\0\x0B");
+                    }
                 }
-                $rowCells[$colIdx] = trim($val, " \t\n\r\0\x0B");
-            }
 
-            if (!empty($rowCells)) {
-                $maxCol = max(array_keys($rowCells));
-                $denseRow = [];
-                for ($c = 0; $c <= $maxCol; $c++) {
-                    $denseRow[$c] = $rowCells[$c] ?? '';
+                if (!empty($rowCells)) {
+                    $maxCol = max(array_keys($rowCells));
+                    $denseRow = [];
+                    for ($c = 0; $c <= $maxCol; $c++) {
+                        $denseRow[$c] = $rowCells[$c] ?? '';
+                    }
+                    $rows[$rIndex] = $denseRow;
                 }
-                $rows[$rIndex] = $denseRow;
             }
         }
 
@@ -171,23 +177,27 @@ final class UniversalSpreadsheetReader
             return [];
         }
 
-        $secSize = 1 << unpack('v', substr($data, 30, 2))[1];
+        $unpackSec = unpack('v', substr($data, 30, 2));
+        $secSize = 1 << ($unpackSec ? (int) $unpackSec[1] : 9);
         $msat = [];
         for ($i = 0; $i < 109; $i++) {
-            $msat[] = unpack('V', substr($data, 76 + $i * 4, 4))[1];
+            $u = unpack('V', substr($data, 76 + $i * 4, 4));
+            $msat[] = $u ? (int) $u[1] : 0;
         }
 
         $fat = [];
         foreach ($msat as $s) {
             if ($s < 0xFFFFFFFE) {
-                $offset = $secSize + $s * sec_size;
+                $offset = $secSize + $s * $secSize;
                 for ($j = 0; $j < ($secSize / 4); $j++) {
-                    $fat[] = unpack('V', substr($data, $offset + $j * 4, 4))[1];
+                    $u = unpack('V', substr($data, $offset + $j * 4, 4));
+                    $fat[] = $u ? (int) $u[1] : 0;
                 }
             }
         }
 
-        $firstDirSec = unpack('V', substr($data, 48, 4))[1];
+        $unpackDir = unpack('V', substr($data, 48, 4));
+        $firstDirSec = $unpackDir ? (int) $unpackDir[1] : 0;
         $dirData = '';
         $curr = $firstDirSec;
         while ($curr < 0xFFFFFFFE && isset($fat[$curr])) {
@@ -203,14 +213,17 @@ final class UniversalSpreadsheetReader
             if (strlen($chunk) < 128) {
                 break;
             }
-            $nameLen = unpack('v', substr($chunk, 64, 2))[1];
+            $uLen = unpack('v', substr($chunk, 64, 2));
+            $nameLen = $uLen ? (int) $uLen[1] : 0;
             $nameRaw = substr($chunk, 0, $nameLen);
             $name = (string) @iconv('UTF-16LE', 'UTF-8//IGNORE', $nameRaw);
             $name = trim($name, "\x00");
 
             if ($name === 'Workbook' || $name === 'Book') {
-                $wbStartSec = unpack('V', substr($chunk, 116, 4))[1];
-                $wbSize = unpack('V', substr($chunk, 120, 4))[1];
+                $uSec = unpack('V', substr($chunk, 116, 4));
+                $uSize = unpack('V', substr($chunk, 120, 4));
+                $wbStartSec = $uSec ? (int) $uSec[1] : 0;
+                $wbSize = $uSize ? (int) $uSize[1] : 0;
                 break;
             }
         }
@@ -234,14 +247,19 @@ final class UniversalSpreadsheetReader
         $dataLen = strlen($wbData);
 
         while ($pos < $dataLen - 4) {
-            $code = unpack('v', substr($wbData, $pos, 2))[1];
-            $length = unpack('v', substr($wbData, $pos + 2, 2))[1];
+            $uCode = unpack('v', substr($wbData, $pos, 2));
+            $uLen = unpack('v', substr($wbData, $pos + 2, 2));
+            $code = $uCode ? (int) $uCode[1] : 0;
+            $length = $uLen ? (int) $uLen[1] : 0;
             $rec = substr($wbData, $pos + 4, $length);
 
             if ($code === 0x0204 && strlen($rec) >= 8) { // LABEL
-                $row = unpack('v', substr($rec, 0, 2))[1];
-                $col = unpack('v', substr($rec, 2, 2))[1];
-                $strLen = unpack('v', substr($rec, 6, 2))[1];
+                $uR = unpack('v', substr($rec, 0, 2));
+                $uC = unpack('v', substr($rec, 2, 2));
+                $uS = unpack('v', substr($rec, 6, 2));
+                $row = $uR ? (int) $uR[1] : 0;
+                $col = $uC ? (int) $uC[1] : 0;
+                $strLen = $uS ? (int) $uS[1] : 0;
                 $val = '';
                 if (strlen($rec) > 8) {
                     $flags = ord($rec[8]);
@@ -257,9 +275,12 @@ final class UniversalSpreadsheetReader
                 $maxRow = max($maxRow, $row);
                 $maxCol = max($maxCol, $col);
             } elseif ($code === 0x0203 && strlen($rec) >= 14) { // NUMBER
-                $row = unpack('v', substr($rec, 0, 2))[1];
-                $col = unpack('v', substr($rec, 2, 2))[1];
-                $numVal = unpack('d', substr($rec, 6, 8))[1];
+                $uR = unpack('v', substr($rec, 0, 2));
+                $uC = unpack('v', substr($rec, 2, 2));
+                $uNum = unpack('d', substr($rec, 6, 8));
+                $row = $uR ? (int) $uR[1] : 0;
+                $col = $uC ? (int) $uC[1] : 0;
+                $numVal = $uNum ? (float) $uNum[1] : 0.0;
 
                 // Detectar se é data serial do Excel (ex: 41274 = 31/12/2012)
                 if ($numVal >= 10000 && $numVal <= 70000 && floor($numVal) == $numVal && $col == 19) {
