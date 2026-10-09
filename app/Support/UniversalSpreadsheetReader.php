@@ -65,7 +65,7 @@ final class UniversalSpreadsheetReader
 
         $rows = [];
         while (($row = fgetcsv($stream, 0, $delimiter, '"', '\\')) !== false) {
-            $rows[] = array_map(static fn($c) => trim((string) $c), $row);
+            $rows[] = array_map(static fn($c) => trim((string) $c, " \t\n\r\0\x0B"), $row);
         }
         fclose($stream);
 
@@ -144,7 +144,7 @@ final class UniversalSpreadsheetReader
                 } elseif (isset($cell->v)) {
                     $val = (string) $cell->v;
                 }
-                $rowCells[$colIdx] = trim($val);
+                $rowCells[$colIdx] = trim($val, " \t\n\r\0\x0B");
             }
 
             if (!empty($rowCells)) {
@@ -180,7 +180,7 @@ final class UniversalSpreadsheetReader
         $fat = [];
         foreach ($msat as $s) {
             if ($s < 0xFFFFFFFE) {
-                $offset = $secSize + $s * $secSize;
+                $offset = $secSize + $s * sec_size;
                 for ($j = 0; $j < ($secSize / 4); $j++) {
                     $fat[] = unpack('V', substr($data, $offset + $j * 4, 4))[1];
                 }
@@ -253,7 +253,7 @@ final class UniversalSpreadsheetReader
                         $val = (string) @iconv('ISO-8859-1', 'UTF-8//IGNORE', $rawStr);
                     }
                 }
-                $cells[$row][$col] = trim($val);
+                $cells[$row][$col] = trim($val, " \t\n\r\0\x0B");
                 $maxRow = max($maxRow, $row);
                 $maxCol = max($maxCol, $col);
             } elseif ($code === 0x0203 && strlen($rec) >= 14) { // NUMBER
