@@ -36,7 +36,21 @@ class ProcessarImportacoes extends Command
         if ($importId) {
             $importacoes = [(int) $importId];
         } elseif ($todas) {
-            $importacoes = $this->getPendingImports();
+            try {
+                $importacoes = $this->getPendingImports();
+            } catch (Throwable $e) {
+                // A lista de pendentes é o que define o batch inteiro. Se a
+                // consulta quebra, nada foi processado — tratar o erro como
+                // lista vazia faria o comando anunciar "nenhuma importação
+                // pendente" e sair com 0, sinalizando sucesso ao cron/CI.
+                $this->error('Erro ao buscar importações: ' . $e->getMessage());
+
+                // report() manda a causa para o log/handler da aplicação.
+                // Sem isso o rastro existia só no stdout do cron.
+                report($e);
+
+                return Command::FAILURE;
+            }
         } else {
             $importacoes = [$this->askId()];
         }
@@ -117,25 +131,31 @@ class ProcessarImportacoes extends Command
         }
     }
 
+    /**
+     * Devolve os IDs das importações aguardando, na conexão padrão.
+     *
+     * Não há catch: a consulta define o batch inteiro. Uma falha de banco
+     * precisa subir para handle(), que imprime o erro, registra a exceção e
+     * devolve exit code de falha. Quando este método engolia o erro e
+     * devolvia [], o comando anunciava "nenhuma importação pendente" e saía
+     * com 0 — sucesso falso enquanto nada tinha sido processado.
+     *
+     * @return int[]
+     */
     private function getPendingImports(): array
     {
-        try {
-            // A conexao e sempre a padrao da aplicacao (config('database.default'),
-            // via DB facade sem argumento). O cod anterior fixava 'pgsql': no
-            // ambiente padrao (docker-compose + .env.example) so existe MySQL,
-            // e a consulta falhava antes mesmo de achar os registros.
-            $rows = \DB::connection(config('database.default'))
-                ->table('importacoes')
-                ->where('status', 'aguardando')
-                ->orderBy('id')
-                ->pluck('id')
-                ->toArray();
+        // A conexao e sempre a padrao da aplicacao (config('database.default'),
+        // via DB facade sem argumento). O cod anterior fixava 'pgsql': no
+        // ambiente padrao (docker-compose + .env.example) so existe MySQL,
+        // e a consulta falhava antes mesmo de achar os registros.
+        $rows = \DB::connection(config('database.default'))
+            ->table('importacoes')
+            ->where('status', 'aguardando')
+            ->orderBy('id')
+            ->pluck('id')
+            ->toArray();
 
-            return array_map('intval', $rows);
-        } catch (\Throwable $e) {
-            $this->error('Erro ao buscar importações: ' . $e->getMessage());
-            return [];
-        }
+        return array_map('intval', $rows);
     }
 
     private function askId(): int
