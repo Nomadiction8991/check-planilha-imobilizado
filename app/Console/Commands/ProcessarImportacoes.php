@@ -120,7 +120,11 @@ class ProcessarImportacoes extends Command
     private function getPendingImports(): array
     {
         try {
-            $rows = \DB::connection('pgsql')
+            // A conexao e sempre a padrao da aplicacao (config('database.default'),
+            // via DB facade sem argumento). O cod anterior fixava 'pgsql': no
+            // ambiente padrao (docker-compose + .env.example) so existe MySQL,
+            // e a consulta falhava antes mesmo de achar os registros.
+            $rows = \DB::connection(config('database.default'))
                 ->table('importacoes')
                 ->where('status', 'aguardando')
                 ->orderBy('id')
