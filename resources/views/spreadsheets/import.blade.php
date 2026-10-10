@@ -173,11 +173,7 @@
             </div>
         </div>
 
-        @if ($recentImports->isEmpty())
-            <div class="empty-state">
-                Nenhuma importação registrada ainda.
-            </div>
-        @else
+        @if ($recentImports->isNotEmpty())
             <div class="table-shell">
                 <table>
                     <thead>
@@ -248,6 +244,10 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        @else
+            <div class="empty-state">
+                Nenhuma importação encontrada.
             </div>
         @endif
     </section>

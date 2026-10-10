@@ -395,6 +395,109 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertViewHas('states', (array) config('brazil.states', []));
     }
 
+    public function testImportPageRendersEmptyStateWhenScopeHasNoImports(): void
+    {
+        $this->app->instance(
+            LegacySpreadsheetImportServiceInterface::class,
+            new class implements LegacySpreadsheetImportServiceInterface
+            {
+                public function previewActionsKey(int $importacaoId): string
+                {
+                    return 'preview-actions-' . $importacaoId;
+                }
+
+                public function previewChurchesKey(int $importacaoId): string
+                {
+                    return 'preview-churches-' . $importacaoId;
+                }
+
+                public function previewDependenciesKey(int $importacaoId): string
+                {
+                    return 'preview-dependencies-' . $importacaoId;
+                }
+
+                public function responsibleUserOptions(): Collection
+                {
+                    return collect();
+                }
+
+                public function churchOptions(): Collection
+                {
+                    return collect();
+                }
+
+                public function administrationOptions(): Collection
+                {
+                    return collect();
+                }
+
+                public function uploadAndAnalyze(SpreadsheetImportUploadData $data, UploadedFile $file): int
+                {
+                    return 15;
+                }
+
+                public function recentImports(?int $churchId, int $limit = 5): array
+                {
+                    return [];
+                }
+
+                public function loadPreview(int $importacaoId): ?array
+                {
+                    return null;
+                }
+
+                public function savePreviewActions(int $importacaoId, array $acoes, array $igrejas, array $dependencias = []): array
+                {
+                    return ['total_salvas' => 0, 'igrejas_salvas' => 0, 'dependencias_salvas' => 0];
+                }
+
+                public function applyBulkPreviewAction(int $importacaoId, string $acao): array
+                {
+                    return ['acao' => $acao, 'total_aplicadas' => 0];
+                }
+
+                public function confirmImport(int $importacaoId, bool $importAll = true, array $acoes = [], array $igrejas = [], array $dependencias = []): array
+                {
+                    return ['sucesso' => 0, 'erro' => 0];
+                }
+
+                public function loadProgress(int $importacaoId): ?array
+                {
+                    return null;
+                }
+
+                public function loadImportErrors(?int $churchId, ?int $importacaoId, int $page = 1, int $perPage = 30): array
+                {
+                    return [
+                        'modo' => 'geral',
+                        'comum' => null,
+                        'administracao' => null,
+                        'importacao' => null,
+                        'resumo' => ['pendentes' => 0, 'resolvidos' => 0],
+                        'erros' => new LengthAwarePaginator(collect(), 0, $perPage, $page),
+                    ];
+                }
+
+                public function downloadImportErrorsCsv(?int $churchId, ?int $importacaoId): array
+                {
+                    return ['filename' => 'vazio.csv', 'content' => ''];
+                }
+
+                public function markImportErrorResolved(int $errorId, bool $resolved): array
+                {
+                    return ['pendentes' => 0, 'resolvido' => $resolved];
+                }
+            }
+        );
+
+        $response = $this->get(route('migration.spreadsheets.create'));
+
+        $response->assertOk();
+        $response->assertSee('Nenhuma importação encontrada');
+        $response->assertDontSee('Arquivo Antigo 4.csv');
+        $response->assertDontSee('maria@exemplo.com');
+    }
+
     public function testPreviewPageShowsChurchScopeWarning(): void
     {
         $response = $this->get(route('migration.spreadsheets.preview', ['importacao' => 15]));
