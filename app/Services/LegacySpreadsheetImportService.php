@@ -417,47 +417,63 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             return $resultado;
         } catch (Throwable $throwable) {
             if ($throwable instanceof RuntimeException) {
-                try {
-                    $importacao = $importacaoService->buscarProgresso($importacaoId);
-                    if ($importacao !== null && (string) ($importacao['status'] ?? '') === 'concluida') {
-                        Session::forget($this->previewActionsKey($importacaoId));
-                        Session::forget($this->previewChurchesKey($importacaoId));
-                        Session::forget($this->previewDependenciesKey($importacaoId));
-                        Session::forget($this->confirmOptionsKey($importacaoId));
-
-                        return [
-                            'sucesso' => (int) ($importacao['linhas_sucesso'] ?? 0),
-                            'erro' => (int) ($importacao['linhas_erro'] ?? 0),
-                            'status' => 'concluida',
-                            'reutilizada' => true,
-                        ];
-                    }
-                } catch (Throwable) {
-                    // Mantém o erro original abaixo.
+                $reaproveitada = $this->reuseCompletedImportation($importacaoService, $importacaoId);
+                if ($reaproveitada !== null) {
+                    return $reaproveitada;
                 }
 
                 throw $throwable;
             }
 
-            try {
-                $importacao = $importacaoService->buscarProgresso($importacaoId);
-                if ($importacao !== null && (string) ($importacao['status'] ?? '') === 'concluida') {
-                    Session::forget($this->previewActionsKey($importacaoId));
-                    Session::forget($this->previewChurchesKey($importacaoId));
-                    Session::forget($this->confirmOptionsKey($importacaoId));
-
-                    return [
-                        'sucesso' => (int) ($importacao['linhas_sucesso'] ?? 0),
-                        'erro' => (int) ($importacao['linhas_erro'] ?? 0),
-                        'status' => 'concluida',
-                        'reutilizada' => true,
-                    ];
-                }
-            } catch (Throwable) {
-                // Mantém a mensagem genérica abaixo.
+            $reaproveitada = $this->reuseCompletedImportation($importacaoService, $importacaoId);
+            if ($reaproveitada !== null) {
+                return $reaproveitada;
             }
 
             throw new RuntimeException('Falha ao concluir a importação.', previous: $throwable);
+        }
+    }
+
+    /**
+     * Consulta o progresso de uma importação que já consta como concluída para
+     * reaproveitar o resultado. Usado nos catch de confirmImport(): se o
+     * processamento falhou mas o trabalho já tinha terminado (retry de
+     * requisição, timeout de rede), devolve o resumo em vez de falhar.
+     *
+     * @return array{sucesso: int, erro: int, status: string, reutilizada: bool}|null
+     *         null quando não existe importação concluída para reaproveitar
+     */
+    private function reuseCompletedImportation(
+        ImportacaoService $importacaoService,
+        int $importacaoId,
+    ): ?array {
+        try {
+            $importacao = $importacaoService->buscarProgresso($importacaoId);
+
+            if ($importacao === null || (string) ($importacao['status'] ?? '') !== 'concluida') {
+                return null;
+            }
+
+            Session::forget($this->previewActionsKey($importacaoId));
+            Session::forget($this->previewChurchesKey($importacaoId));
+            Session::forget($this->previewDependenciesKey($importacaoId));
+            Session::forget($this->confirmOptionsKey($importacaoId));
+
+            return [
+                'sucesso' => (int) ($importacao['linhas_sucesso'] ?? 0),
+                'erro' => (int) ($importacao['linhas_erro'] ?? 0),
+                'status' => 'concluida',
+                'reutilizada' => true,
+            ];
+        } catch (Throwable $lookupThrowable) {
+            // O lookup de reaproveitamento é best-effort: falhar aqui não pode
+            // substituir o erro original da importação, mas também não pode
+            // desaparecer em silêncio. Sem registro, a causa real (banco fora,
+            // PDO, timeout) se perdia e sobrava apenas "Falha ao concluir a
+            // importação." — impossível de diagnosticar a partir do log.
+            report($lookupThrowable);
+
+            return null;
         }
     }
 
