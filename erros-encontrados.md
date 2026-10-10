@@ -2,17 +2,32 @@
 
 ## Resumo
 - Críticos: 0
-- Altos: 4
+- Altos: 5
 - Médios: 1
 - Baixos: 0
 
 ## Erros por Categoria
 ### Segurança (0)
-### Lógica (3)
+### Lógica (4)
 ### Performance (0)
 ### Code Smell (0)
 
 ## Detalhes dos Erros
+
+### REL-001 - Relatório corrompe valores com cifrão ($) no preenchimento
+
+**Arquivo**: `resources/legacy-reports/fillers/bootstrap.php` (linha 37, função `appReportPreencherCampoPorName`)
+**Severidade**: 🟠 ALTO
+**Categoria**: Lógica
+**Status**: Corrigido nesta rodada.
+**Descrição**: O valor do campo já escapado com `htmlspecialchars` era interpolado cru no *replacement* do `preg_replace`, onde a sequência `$N` é interpretada como backreference. Um produto chamado `Caixa $100` era entregue como `Caixa 0` no HTML do relatório. Afetava os três caminhos do helper (textarea, input com value, input sem value) e, por consequência, todos os fillers 14.1 a 14.8 que passam pelo helper — inclusive descrição do bem, fornecedor, valor de nota e nome do responsável.
+
+**Risco/Impacto**: O documento de inventário da igreja é impresso/exportado com valor diferente do cadastrado, sem nenhum erro visível para o usuário.
+
+**Recomendação**: Escapar o cifrão do replacement com `addcslashes($valor, '\\$')` logo após o `htmlspecialchars`. O round-trip do valor fica literal em textarea e input.
+
+**Padrão Recorrente**: Sim — qualquer interpolação de valor de usuário em replacement de `preg_replace` precisa do escape.
+**Prioridade de Correção**: 🚨 Imediata
 
 ### LEG-001 - Reconhecer admin pela sessão nas listagens
 

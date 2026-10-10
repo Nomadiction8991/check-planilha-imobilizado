@@ -87,6 +87,53 @@ HTML;
         self::assertStringNotContainsString('cidade_administracao', $filled);
     }
 
+    public function testReport141PreservaValoresComCifraoETodosOsTiposDeCampo(): void
+    {
+        $html = <<<HTML
+<textarea name="descricao_bem"></textarea>
+<textarea name="casa_de_oracao"></textarea>
+<input type="text" name="valor" value="">
+<input type="text" name="fornecedor" value="">
+<input type="text" name="nota_fiscal">
+HTML;
+
+        $html = appReportPreencherCampoPorName($html, 'descricao_bem', 'Caixa $100');
+        $html = appReportPreencherCampoPorName($html, 'casa_de_oracao', 'Igreja $1 de Maio');
+        $html = appReportPreencherCampoPorName($html, 'valor', 'R$ 1.500,00 ($ total)');
+        $html = appReportPreencherCampoPorName($html, 'fornecedor', 'Loja $var & Cia');
+        $html = appReportPreencherCampoPorName($html, 'nota_fiscal', 'NF $99');
+
+        self::assertSame('Caixa $100', $this->extractTextareaValue($html, 'descricao_bem'));
+        self::assertSame('Igreja $1 de Maio', $this->extractTextareaValue($html, 'casa_de_oracao'));
+
+        self::assertSame('R$ 1.500,00 ($ total)', $this->extractInputValue($html, 'valor'));
+        self::assertSame('Loja $var & Cia', html_entity_decode($this->extractInputValue($html, 'fornecedor')));
+        self::assertSame('NF $99', html_entity_decode($this->extractInputValue($html, 'nota_fiscal')));
+    }
+
+    public function testReport141FillsProductDescriptionWithDollarInsideFiller(): void
+    {
+        $html = <<<HTML
+<textarea name="descricao_bem"></textarea>
+<textarea name="n_relatorio"></textarea>
+HTML;
+
+        $filled = appReportAplicarPreenchimentoRelatorio('14.1', $html, [
+            'descricao_completa' => 'Caixa organizadora $100',
+        ], [
+            'descricao' => 'Igreja Central',
+            'cidade' => 'Cuiabá',
+            'estado' => 'MT',
+            'administracao_descricao' => 'Administração Central',
+            'administracao_cnpj' => '12345678000190',
+            'usuario_nome_relatorio' => 'Maria Silva',
+            'codigo' => '12-3456',
+        ]);
+
+        self::assertSame('Caixa organizadora $100', html_entity_decode($this->extractTextareaValue($filled, 'descricao_bem')));
+        self::assertSame('12-3456', $this->extractTextareaValue($filled, 'n_relatorio'));
+    }
+
     private function extractTextareaValue(string $html, string $name): string
     {
         $pattern = '/<textarea[^>]*name="' . preg_quote($name, '/') . '"[^>]*>(.*?)<\/textarea>/s';
@@ -95,5 +142,15 @@ HTML;
         }
 
         return html_entity_decode(trim((string) $matches[1]), ENT_QUOTES, 'UTF-8');
+    }
+
+    private function extractInputValue(string $html, string $name): string
+    {
+        $pattern = '/<input[^>]*name="' . preg_quote($name, '/') . '"[^>]*value="([^"]*)"/';
+        if (preg_match($pattern, $html, $matches) !== 1) {
+            self::fail('Campo input não encontrado: ' . $name);
+        }
+
+        return (string) $matches[1];
     }
 }

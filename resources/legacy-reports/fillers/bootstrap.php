@@ -32,6 +32,7 @@ if (!function_exists('appReportPreencherCampoPorName')) {
         }
 
         $valor = htmlspecialchars((string)$valor, ENT_QUOTES, 'UTF-8');
+        $valor = addcslashes($valor, '\\$');
 
         $patternTextarea = '/(<textarea[^>]*name=["\']' . preg_quote($name, '/') . '["\'][^>]*>).*?(<\/textarea>)/s';
         $html = preg_replace($patternTextarea, '${1}' . $valor . '${2}', $html);
