@@ -62,11 +62,15 @@ class LegacyAssetTypeBrowserService implements LegacyAssetTypeBrowserServiceInte
         $query = Administracao::query()->orderBy('descricao');
         $administrationId = $this->currentAdministrationId();
 
-        if (!$this->canManageOtherAdministrations() && $administrationId !== null) {
-            $query->whereKey($administrationId);
+        if ($this->canManageOtherAdministrations()) {
+            return $query->get(['id', 'descricao']);
         }
 
-        return $query->get(['id', 'descricao']);
+        if ($administrationId === null) {
+            return collect();
+        }
+
+        return $query->whereKey($administrationId)->get(['id', 'descricao']);
     }
 
     public function assetTypeOptions(): Collection

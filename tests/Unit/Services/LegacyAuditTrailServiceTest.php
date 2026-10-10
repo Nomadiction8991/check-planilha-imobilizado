@@ -93,6 +93,44 @@ final class LegacyAuditTrailServiceTest extends TestCase
         self::assertSame('Produto atualizado com sucesso.', $items[0]->description);
     }
 
+    public function testNonAdminWithoutScopeReceivesNoAuditEntries(): void
+    {
+        $service = new LegacyAuditTrailService($this->storageFile);
+
+        $service->record($this->makeEntry(userId: 1, administrationId: 9));
+        $service->record($this->makeEntry(userId: 2, administrationId: 8));
+
+        $paginator = $service->paginate([], null, null, null, false, '/audits');
+
+        self::assertSame(0, $paginator->total());
+
+        $export = $service->exportCsv([], null, null, null, false);
+
+        self::assertSame('', $export['content']);
+    }
+
+    private function makeEntry(int $userId, ?int $administrationId): LegacyAuditEntryData
+    {
+        return new LegacyAuditEntryData(
+            occurredAt: '2026-04-17 09:15:00',
+            userId: $userId,
+            userName: 'Usuario ' . $userId,
+            userEmail: 'usuario' . $userId . '@example.com',
+            administrationId: $administrationId,
+            churchId: null,
+            isAdmin: false,
+            module: 'Produtos',
+            action: 'Atualização',
+            description: 'Produto atualizado com sucesso.',
+            routeName: 'migration.products.update',
+            path: 'products/1',
+            method: 'PUT',
+            statusCode: 302,
+            ipAddress: '127.0.0.1',
+            userAgent: 'PHPUnit',
+        );
+    }
+
     public function testAvailableModulesUsesConfiguredValues(): void
     {
         $service = new LegacyAuditTrailService($this->storageFile);

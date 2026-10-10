@@ -90,7 +90,7 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
                     return $entry->userId === $userId;
                 }
 
-                return true;
+                return false;
             })
             ->filter(static function (LegacyAuditEntryData $entry) use ($module): bool {
                 if ($module === '') {
@@ -217,7 +217,11 @@ final class LegacyAuditTrailService implements LegacyAuditTrailServiceInterface
                 if ($entry->churchId !== $churchId) {
                     return false;
                 }
-            } elseif ($userId !== null && $userId > 0 && $entry->userId !== $userId) {
+            } elseif ($userId !== null && $userId > 0) {
+                if ($entry->userId !== $userId) {
+                    return false;
+                }
+            } else {
                 return false;
             }
         } else {

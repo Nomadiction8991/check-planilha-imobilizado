@@ -24,10 +24,12 @@ class LegacyUserBrowserService implements LegacyUserBrowserServiceInterface
     public function paginate(UserFilters $filters): LengthAwarePaginator
     {
         $scopeAdministrationId = $this->scopeAdministrationId($filters->administrationId);
+        $denyAll = !$this->canManageOtherAdministrations() && $scopeAdministrationId === null;
 
         return Usuario::query()
             ->with(['administracao:id,descricao'])
             ->when($scopeAdministrationId !== null, static fn ($query) => $query->where('administracao_id', $scopeAdministrationId))
+            ->when($denyAll, static fn ($query) => $query->whereRaw('1 = 0'))
             ->when(
                 $filters->state !== null && $filters->state !== '',
                 static fn ($query) => $query->where('endereco_estado', $filters->state)
@@ -84,11 +86,17 @@ class LegacyUserBrowserService implements LegacyUserBrowserServiceInterface
 
     public function countAll(): int
     {
-        $scopeAdministrationId = $this->scopeAdministrationId(null);
+        return $this->scopeQuery(null)->count();
+    }
+
+    private function scopeQuery(?int $requestedAdministrationId): \Illuminate\Database\Eloquent\Builder
+    {
+        $scopeAdministrationId = $this->scopeAdministrationId($requestedAdministrationId);
+        $denyAll = !$this->canManageOtherAdministrations() && $scopeAdministrationId === null;
 
         return Usuario::query()
             ->when($scopeAdministrationId !== null, static fn ($query) => $query->where('administracao_id', $scopeAdministrationId))
-            ->count();
+            ->when($denyAll, static fn ($query) => $query->whereRaw('1 = 0'));
     }
 
     private function scopeAdministrationId(?int $requestedAdministrationId): ?int

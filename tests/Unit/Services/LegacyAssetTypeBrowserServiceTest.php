@@ -162,6 +162,8 @@ final class LegacyAssetTypeBrowserServiceTest extends TestCase
 
     public function testAdministrationOptionsReturnsOrderedAdministrations(): void
     {
+        Session::put('is_admin', true);
+
         $admin1 = new Administracao();
         $admin1->forceFill([
             'id' => 2,
@@ -181,5 +183,21 @@ final class LegacyAssetTypeBrowserServiceTest extends TestCase
         self::assertCount(2, $options);
         self::assertSame(1, $options->first()->id);
         self::assertSame('Administração A', $options->first()->descricao);
+    }
+
+    public function testAdministrationOptionsAreEmptyForNonAdminWithoutAdministration(): void
+    {
+        Session::forget('is_admin');
+        Session::put('administracao_id', null);
+
+        $admin1 = new Administracao();
+        $admin1->forceFill(['id' => 2, 'descricao' => 'Administração B']);
+        $admin1->save();
+
+        $admin2 = new Administracao();
+        $admin2->forceFill(['id' => 1, 'descricao' => 'Administração A']);
+        $admin2->save();
+
+        self::assertCount(0, $this->service->administrationOptions());
     }
 }
