@@ -1,0 +1,5 @@
+id: raw-blade-echo
+language: html
+message: "XSS potencial — {!! !!} sem escape, verificar origem do dado"
+rule:
+  pattern: '{!! $$$ !!}'

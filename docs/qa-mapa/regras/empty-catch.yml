@@ -1,0 +1,5 @@
+id: empty-catch
+language: php
+message: "Erro engolido em silêncio — logar ou tratar"
+rule:
+  pattern: 'try { $$$ } catch ($E) {}'
