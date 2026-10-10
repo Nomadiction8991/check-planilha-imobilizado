@@ -173,6 +173,12 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             $query->where('i.comum_id', '=', $churchId);
         }
 
+        // Escopo vazio ([]) continua sendo um filtro real: whereIn([]) gera
+        // `0 = 1` e devolve zero importações, em vez de cair no filtro de igreja.
+        if ($administrationIds === []) {
+            $query->whereRaw('1 = 0');
+        }
+
         return $query->get()
             ->map(static function (object $importacao): array {
                 $churchCode = trim((string) ($importacao->comum_codigo ?? ''));
@@ -1226,6 +1232,13 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
     }
 
     /**
+     * Escopo administrativo do usuário legado.
+     *
+     * `null` continua significando "sem restrição" (administrador). Um escopo
+     * vazio (`[]`) agora significa "nenhuma administração acessível": o usuário
+     * legado não-admin sem `administracoes_permitidas` e sem `administracao_id`
+     * não pode ver importações de outras administrações.
+     *
      * @return array<int, int>|null
      */
     private function currentAdministrationScopeIds(): ?array
@@ -1248,7 +1261,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             return [$administrationId];
         }
 
-        return null;
+        return [];
     }
 
     private function currentChurchId(): ?int
