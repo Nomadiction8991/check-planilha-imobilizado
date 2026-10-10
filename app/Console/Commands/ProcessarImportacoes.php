@@ -18,6 +18,7 @@ namespace App\Console\Commands;
 use App\Services\CsvParserService;
 use App\Services\ImportacaoService;
 use Illuminate\Console\Command;
+use Throwable;
 
 class ProcessarImportacoes extends Command
 {
@@ -46,28 +47,41 @@ class ProcessarImportacoes extends Command
         }
 
         $total = 0;
+        $falhas = 0;
+
         foreach ($importacoes as $id) {
-            $total += $this->processSingle($id, $importService, $csvParser);
+            $resultado = $this->processSingle($id, $importService, $csvParser);
+            $total += $resultado['total'];
+            $falhas += $resultado['falhou'];
         }
 
         $this->info("Total: {$total} registros importados.");
-        return 0;
+
+        // Um importador só confia no exit code. Se qualquer importação falhou,
+        // o processo precisa sinalizar falha — antes ele devolvia 0 mesmo
+        // imprimindo "❌", e o runner marcava a execução como sucesso.
+        return $falhas > 0 ? Command::FAILURE : Command::SUCCESS;
     }
 
-    private function processSingle(int $importId, ImportacaoService $importService, CsvParserService $csvParser): int
+    /**
+     * Processa uma importação e devolve o resultado sinalizando se falhou.
+     *
+     * @return array{total: int, falhou: int}
+     */
+    private function processSingle(int $importId, ImportacaoService $importService, CsvParserService $csvParser): array
     {
         $this->line("Processando importação #{$importId}...");
 
         $import = $importService->buscarProgresso($importId);
         if (!$import || ($import['status'] ?? '') !== 'aguardando') {
             $this->warn("  Status: " . ($import['status'] ?? 'nulo') . " — pulando.");
-            return 0;
+            return ['total' => 0, 'falhou' => 0];
         }
 
         $analise = $csvParser->carregarAnalise($importId);
         if (!$analise) {
             $this->error("  Análise não encontrada.");
-            return 0;
+            return ['total' => 0, 'falhou' => 1];
         }
 
         $actions = [];
@@ -85,10 +99,21 @@ class ProcessarImportacoes extends Command
             $sucesso = $result['sucesso'] ?? 0;
             $erro = $result['erro'] ?? 0;
             $this->info("  ✅ {$sucesso} sucesso, {$erro} erros.");
-            return $sucesso;
-        } catch (\Exception $e) {
-            $this->error("  ❌ " . $e->getMessage());
-            return 0;
+
+            // Erros por registro são situação normal da importação (dados
+            // inconsistentes na planilha) e ficam visíveis para o usuário em
+            // import_erros. Não são falha do comando — só uma exceção é.
+            return ['total' => $sucesso, 'falhou' => 0];
+        } catch (Throwable $e) {
+            $mensagem = $e->getMessage();
+
+            $this->error("  ❌ " . $mensagem);
+
+            // report() manda a causa para o log/handler da aplicação. Sem isso
+            // o rastro existia só no stdout do cron, que ninguém lê depois.
+            report($e);
+
+            return ['total' => 0, 'falhou' => 1];
         }
     }
 
