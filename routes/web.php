@@ -30,6 +30,7 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::get('/esqueci-minha-senha', [LegacyAuthController::class, 'showForgotPassword'])
         ->name('migration.password.request');
     Route::post('/esqueci-minha-senha', [LegacyAuthController::class, 'sendForgotPassword'])
+        ->middleware('throttle:5,1')
         ->name('migration.password.store');
 
     Route::middleware('legacy.auth')->group(function (): void {

@@ -232,6 +232,23 @@ final class LegacyReportFormularioCsvTest extends TestCase
         $this->assertSame('12-3456 / 0099', $linhas[1][0]);
     }
 
+    public function testSanitizaCodigoENotaValorComFormulaNoFormulario141(): void
+    {
+        $this->seedChurch();
+        $this->seedProduto141([
+            'codigo' => '=1+1',
+            'bem' => 'CADEIRA',
+            'condicao_14_1' => '1',
+            'nota_valor' => '=1+1',
+        ]);
+
+        $file = $this->service->downloadFormularioCsv(7, '14.1');
+        $linhas = $this->parseCsv($file['content']);
+
+        $this->assertSame("'=1+1", $linhas[1][0]);
+        $this->assertSame("'=1+1", $linhas[1][7]);
+    }
+
     public function testSanitizaDependenciaNoFormulario146(): void
     {
         $this->seedChurch();

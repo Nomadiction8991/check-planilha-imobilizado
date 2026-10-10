@@ -42,3 +42,7 @@ napkin.md
 
 # PHPUnit result cache
 .phpunit.result.cache
+
+# Local tooling (nao commitar)
+.codegraph/
+.serena/
