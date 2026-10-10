@@ -403,14 +403,14 @@ class LegacyReportService implements LegacyReportServiceInterface
             $currentDescription = trim((string) ($product['descricao_completa'] ?? ''));
 
             $rows[] = [
-                (string) ($product['codigo'] ?? ''),
+                LegacyCsvSanitizer::sanitizeText((string) ($product['codigo'] ?? '')),
                 $conditionLabels[$condition] ?? '',
                 LegacyCsvSanitizer::sanitizeText((string) ($product['nome_original'] ?? '')),
                 LegacyCsvSanitizer::sanitizeText($currentDescription !== '' ? $currentDescription : (string) ($product['nome_original'] ?? '')),
                 LegacyCsvSanitizer::sanitizeText((string) ($product['dependencia_descricao'] ?? '')),
                 $hasInvoice ? (string) ($product['nota_numero'] ?? '') : '',
                 $hasInvoice ? $this->formatReportDate((string) ($product['nota_data'] ?? '')) : '',
-                $hasInvoice ? (string) ($product['nota_valor'] ?? '') : '',
+                $hasInvoice ? LegacyCsvSanitizer::sanitizeText((string) ($product['nota_valor'] ?? '')) : '',
                 $hasInvoice ? LegacyCsvSanitizer::sanitizeText((string) ($product['nota_fornecedor'] ?? '')) : '',
             ];
         }
