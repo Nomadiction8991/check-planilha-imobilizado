@@ -197,6 +197,27 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
         self::assertTrue(true);
     }
 
+    public function testAssertImportErrorScopeRejectsWhenUserHasNoScopeAtAll(): void
+    {
+        // Regressão: um usuário sem administração permitida e sem igreja na
+        // sessão não deve enxergar erro de importação de nenhum tenant.
+        Session::forget('administracao_id');
+        Session::put('administracoes_permitidas', []);
+        Session::put('is_admin', false);
+        Session::forget('comum_id');
+
+        $service = new LegacySpreadsheetImportService();
+
+        $method = new ReflectionMethod($service, 'assertImportErrorScope');
+        $method->setAccessible(true);
+
+        $this->expectException(\RuntimeException::class);
+        $method->invoke($service, (object) [
+            'administracao_id' => 4,
+            'comum_id' => 7,
+        ]);
+    }
+
     public function testIsUserAllowedForAdministrationAcceptsPermittedAdministration(): void
     {
         $service = new LegacySpreadsheetImportService();
