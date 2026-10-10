@@ -132,4 +132,39 @@ final class LegacyUserBrowserServiceTest extends TestCase
         self::assertSame(1, $resultsRj->total());
         self::assertSame('Carlos Souza', $resultsRj->items()[0]->nome);
     }
+
+    public function testNonAdminWithoutAdministrationSeesNoUsers(): void
+    {
+        $this->auth = Mockery::mock(LegacyAuthSessionServiceInterface::class);
+        $this->permissions = Mockery::mock(LegacyPermissionServiceInterface::class);
+        $this->auth->shouldReceive('currentUser')->andReturn([
+            'id' => 2,
+            'is_admin' => false,
+            'administracao_id' => null,
+        ]);
+        $this->permissions->shouldReceive('can')->andReturn(false);
+        $service = new LegacyUserBrowserService($this->auth, $this->permissions);
+
+        foreach ([[1, 'Ana Silva'], [2, 'Bruno Dias']] as [$administrationId, $name]) {
+            Usuario::query()->create([
+                'administracao_id' => $administrationId,
+                'nome' => $name,
+                'email' => strtolower(str_replace(' ', '.', $name)) . '@example.com',
+                'ativo' => 1,
+            ]);
+        }
+
+        $filters = new UserFilters(
+            administrationId: null,
+            search: '',
+            status: '',
+            state: null,
+            page: 1,
+            perPage: 10,
+        );
+
+        self::assertSame(0, $service->paginate($filters)->total());
+        self::assertSame(0, $service->countAll());
+        self::assertCount(0, $service->administrationOptions());
+    }
 }

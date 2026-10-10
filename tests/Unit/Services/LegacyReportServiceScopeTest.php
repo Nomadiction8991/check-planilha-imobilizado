@@ -60,6 +60,20 @@ final class LegacyReportServiceScopeTest extends TestCase
         self::assertSame([100, 200, 300], $this->service->churchOptions()->pluck('id')->all());
     }
 
+    public function testNonAdminWithoutScopeDoesNotLeakGlobalReportOptions(): void
+    {
+        $this->createScopeTables();
+        $this->insertAdministrationsAndChurches();
+        Session::put([
+            'is_admin' => false,
+            'administracao_id' => null,
+            'administracoes_permitidas' => [],
+        ]);
+
+        self::assertSame([], $this->service->administrationOptions()->pluck('id')->all());
+        self::assertSame([], $this->service->churchOptions()->pluck('id')->all());
+    }
+
     public function testRejectsReportPreviewForChurchOutsideScopeBeforeLoadingReportData(): void
     {
         $this->createScopeTables();
