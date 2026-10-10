@@ -1277,17 +1277,25 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
     private function assertImportErrorScope(object $error): void
     {
         $administrationIds = $this->currentAdministrationScopeIds();
-        if ($administrationIds !== null) {
-            $errorAdministrationId = (int) ($error->administracao_id ?? 0);
-            if (!in_array($errorAdministrationId, $administrationIds, true)) {
+
+        // Sem escopo administrativo (admin), a checagem cai na igreja da sessão.
+        if ($administrationIds === null || $administrationIds === []) {
+            $churchId = $this->currentChurchId();
+
+            // Usuário sem administração E sem igreja não enxerga nada.
+            if ($churchId === null) {
+                throw new RuntimeException('Erro de importação não encontrado.');
+            }
+
+            if ((int) ($error->comum_id ?? 0) !== $churchId) {
                 throw new RuntimeException('Erro de importação não encontrado.');
             }
 
             return;
         }
 
-        $churchId = $this->currentChurchId();
-        if ($churchId !== null && (int) ($error->comum_id ?? 0) !== $churchId) {
+        $errorAdministrationId = (int) ($error->administracao_id ?? 0);
+        if (!in_array($errorAdministrationId, $administrationIds, true)) {
             throw new RuntimeException('Erro de importação não encontrado.');
         }
     }

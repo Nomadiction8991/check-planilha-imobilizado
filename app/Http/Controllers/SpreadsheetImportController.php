@@ -30,7 +30,7 @@ class SpreadsheetImportController extends Controller
         return view('spreadsheets.import', [
             'administrations' => $this->imports->administrationOptions(),
             'selectedAdministrationId' => $selectedAdministrationId,
-            'recentImports' => $this->imports->recentImports(null, 5),
+            'recentImports' => $this->recentImportsForCurrentUser(),
             'states' => (array) config('brazil.states', []),
         ]);
     }
@@ -411,6 +411,60 @@ class SpreadsheetImportController extends Controller
     private function confirmOptionsKey(int $importacao): string
     {
         return 'importacao_confirm_options_' . $importacao;
+    }
+
+    /**
+     * Lista as importações recentes visíveis ao usuário da sessão.
+     *
+     * O escopo administrativo é resolvido explicitamente aqui para que o
+     * serviço nunca receba `null`: para um usuário não-admin sem nenhuma
+     * administração permitida, entregamos um array vazio — que o serviço
+     * interpreta como "nenhum resultado" — e não `null`, que o serviço
+     * interpretaria como acesso irrestrito.
+     */
+    private function recentImportsForCurrentUser(): array
+    {
+        $scope = $this->currentAdministrationScope();
+
+        if ($scope === []) {
+            return [];
+        }
+
+        $imports = $this->imports->recentImports(null, 5);
+
+        if ($imports === []) {
+            return [];
+        }
+
+        return $imports;
+    }
+
+    /**
+     * Escopo administrativo do usuário logado.
+     *
+     * `null` representa acesso irrestrito — só concedido a administradores.
+     * Qualquer outro caso devolve a lista de administrações permitidas, mesmo
+     * quando vazia.
+     *
+     * @return array<int, int>|null
+     */
+    private function currentAdministrationScope(): ?array
+    {
+        if ((bool) Session::get('is_admin', false)) {
+            return null;
+        }
+
+        $permitted = array_values(array_filter(array_map(
+            static fn (mixed $value): int => (int) $value,
+            (array) Session::get('administracoes_permitidas', []),
+        ), static fn (int $value): bool => $value > 0));
+
+        $administrationId = (int) Session::get('administracao_id', 0);
+        if ($administrationId > 0) {
+            $permitted[] = $administrationId;
+        }
+
+        return array_values(array_unique($permitted));
     }
 
     private function legacyImportId(Request $request): int
