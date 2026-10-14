@@ -12,6 +12,7 @@ use App\Models\Legacy\Produto;
 use App\Models\Legacy\TipoBem;
 use App\Services\LegacyProductBrowserService;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
@@ -30,6 +31,12 @@ final class LegacyProductBrowserServiceTest extends TestCase
             $table->string('estado', 2)->nullable();
             $table->string('cidade')->nullable();
             $table->string('cnpj')->nullable();
+        });
+
+        Schema::create('usuarios', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('administracao_id')->nullable();
+            $table->integer('ativo')->default(1);
         });
 
         Schema::create('comums', function (Blueprint $table): void {
@@ -77,6 +84,7 @@ final class LegacyProductBrowserServiceTest extends TestCase
     protected function tearDown(): void
     {
         Schema::dropIfExists('produtos');
+        Schema::dropIfExists('usuarios');
         Schema::dropIfExists('tipos_bens');
         Schema::dropIfExists('dependencias');
         Schema::dropIfExists('comums');
@@ -275,6 +283,48 @@ final class LegacyProductBrowserServiceTest extends TestCase
         $result = $this->service->paginate($this->filters());
 
         self::assertSame(2, $result->total());
+    }
+
+    public function testInactiveAdministratorIsRestrictedToTheirAdministration(): void
+    {
+        foreach ([10, 20] as $administrationId) {
+            $church = new Comum();
+            $church->forceFill([
+                'id' => $administrationId * 10,
+                'codigo' => 'IG-' . $administrationId,
+                'descricao' => 'Igreja ' . $administrationId,
+                'administracao_id' => $administrationId,
+                'estado' => 'SP',
+            ]);
+            $church->save();
+
+            $product = new Produto();
+            $product->forceFill([
+                'id_produto' => $administrationId,
+                'comum_id' => $administrationId * 10,
+                'codigo' => 'P-' . $administrationId,
+                'bem' => 'MESA',
+                'ativo' => 1,
+            ]);
+            $product->save();
+        }
+
+        DB::table('usuarios')->insert([
+            'id' => 7,
+            'administracao_id' => 10,
+            'ativo' => 0,
+        ]);
+        Session::put([
+            'is_admin' => true,
+            'usuario_id' => 7,
+            'administracao_id' => 10,
+            'administracoes_permitidas' => [],
+        ]);
+
+        $result = $this->service->paginate($this->filters());
+
+        self::assertSame(1, $result->total());
+        self::assertSame('P-10', $result->items()[0]->codigo);
     }
 
     public function testPaginateEagerLoadsOriginalAndEditedClassificationRelations(): void
