@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\LegacyPermissionServiceInterface;
 use App\Models\Legacy\Usuario;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Throwable;
 
@@ -30,13 +31,14 @@ class LegacyPermissionService implements LegacyPermissionServiceInterface
         }
 
         $userId = (int) Session::get('usuario_id', 0);
-        $cacheKey = "user_permissions_{$userId}_" . md5($signature);
+        $cacheKey = "user_permissions_{$userId}_".md5($signature);
 
-        $permissions = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addMinutes(30), function () use ($userId) {
+        $permissions = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($userId) {
             $perms = $this->resolvePermissions($userId);
             foreach ($this->permissionAliases() as $alias => $abilities) {
                 $perms[$alias] = $this->anyGranted($perms, $abilities);
             }
+
             return $perms;
         });
 
@@ -63,8 +65,28 @@ class LegacyPermissionService implements LegacyPermissionServiceInterface
         $userId = (int) Session::get('usuario_id', 0);
         $isAdmin = (bool) Session::get('is_admin', false);
         $storedPermissions = Session::get('legacy_permissions', []);
+        $activeStatus = $this->activeUserStatus($userId);
 
-        return $userId . '|' . (int) $isAdmin . '|' . (is_array($storedPermissions) ? md5(serialize($storedPermissions)) : 'na');
+        return $userId.'|'.(int) $isAdmin.'|'.(is_array($storedPermissions) ? md5(serialize($storedPermissions)) : 'na').'|'.$activeStatus;
+    }
+
+    private function activeUserStatus(int $userId): string
+    {
+        if ($userId <= 0) {
+            return 'none';
+        }
+
+        try {
+            $user = Usuario::query()->whereKey($userId)->first(['ativo']);
+        } catch (Throwable) {
+            return 'unknown';
+        }
+
+        if ($user === null) {
+            return 'missing';
+        }
+
+        return (int) $user->ativo === 1 ? 'active' : 'inactive';
     }
 
     /**
@@ -79,21 +101,31 @@ class LegacyPermissionService implements LegacyPermissionServiceInterface
             $user = null;
 
             try {
-                $user = Usuario::query()->find($userId);
+                $user = Usuario::query()->whereKey($userId)->first();
             } catch (Throwable) {
                 $user = null;
             }
 
-            if ($user !== null) {
-                if ($user->isAdministrator()) {
-                    return array_fill_keys(array_keys($defaults), true);
-                }
+            if ($user !== null && (int) $user->ativo !== 1) {
+                // Registro existe e está inativo: nega tudo, inclusive os atalhos
+                // de sessão (is_admin / legacy_permissions) — é justamente o caso
+                // de conta desativada com sessão ainda aberta.
+                return array_fill_keys(array_keys($defaults), false);
+            }
 
+            if ($user !== null && $user->isAdministrator()) {
+                return array_fill_keys(array_keys($defaults), true);
+            }
+
+            if ($user !== null) {
                 $storedPermissions = $user->permissions;
                 if (is_array($storedPermissions)) {
                     return $this->mergePermissionValues($defaults, $storedPermissions);
                 }
             }
+            // Sem registro persistido não dá para afirmar inatividade: segue o
+            // comportamento anterior e cai nos flags da sessão (is_admin /
+            // legacy_permissions), sem introduzir bloqueio novo.
         }
 
         if ($this->isAdmin()) {
@@ -125,9 +157,8 @@ class LegacyPermissionService implements LegacyPermissionServiceInterface
     }
 
     /**
-     * @param array<string, bool> $defaults
-     * @param array<string, mixed> $storedPermissions
-     *
+     * @param  array<string, bool>  $defaults
+     * @param  array<string, mixed>  $storedPermissions
      * @return array<string, bool>
      */
     private function mergePermissionValues(array $defaults, array $storedPermissions): array
@@ -144,13 +175,13 @@ class LegacyPermissionService implements LegacyPermissionServiceInterface
     }
 
     /**
-     * @param array<string, bool> $permissions
-     * @param array<int, string> $abilities
+     * @param  array<string, bool>  $permissions
+     * @param  array<int, string>  $abilities
      */
     private function anyGranted(array $permissions, array $abilities): bool
     {
         foreach ($abilities as $ability) {
-            if (!empty($permissions[$ability])) {
+            if (! empty($permissions[$ability])) {
                 return true;
             }
         }
