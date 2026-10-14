@@ -40,6 +40,7 @@ class LegacyNativeSessionBridge
 
         if ($this->hasAuthenticatedUser($nativeSession)) {
             $request->session()->put($this->normalizeAuthenticatedPayload($nativeSession));
+
             return;
         }
 
@@ -58,7 +59,7 @@ class LegacyNativeSessionBridge
         $hadNativeCookie = (bool) $request->attributes->get('_legacy_native_cookie_present', false);
         $laravelSession = $this->extractLaravelSession($request->session());
 
-        if (!$this->hasAuthenticatedUser($laravelSession)) {
+        if (! $this->hasAuthenticatedUser($laravelSession)) {
             if ($this->hasAuthenticatedUser($initialNativeSession) || $hadNativeCookie) {
                 $this->destroyNativeSession($request);
             }
@@ -78,6 +79,7 @@ class LegacyNativeSessionBridge
         foreach (self::SYNC_KEYS as $key) {
             if (array_key_exists($key, $laravelSession)) {
                 $_SESSION[$key] = $laravelSession[$key];
+
                 continue;
             }
 
@@ -133,7 +135,7 @@ class LegacyNativeSessionBridge
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
     private function normalizeAuthenticatedPayload(array $payload): array
@@ -149,12 +151,21 @@ class LegacyNativeSessionBridge
 
         try {
             /** @var Usuario|null $user */
-            $user = Usuario::query()->find($userId);
+            $user = Usuario::query()->active()->find($userId);
         } catch (\Throwable $throwable) {
-            return $this->normalizeAuthenticatedPayloadWithoutDatabase($payload);
+            // Falha ao confirmar que a conta continua ativa: remova qualquer privilégio em cache.
+            $payload['is_admin'] = false;
+            $payload['legacy_permissions'] = [];
+
+            return $payload;
         }
 
         if ($user === null) {
+            // A conta foi desativada ou removida; não confie nas permissões da sessão antiga.
+            $payload['is_admin'] = false;
+            $payload['legacy_permissions'] = [];
+            $payload['administracoes_permitidas'] = [];
+
             return $payload;
         }
 
@@ -177,12 +188,12 @@ class LegacyNativeSessionBridge
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
     private function normalizeAuthenticatedPayloadWithoutDatabase(array $payload): array
     {
-        $user = new Usuario();
+        $user = new Usuario;
         $user->forceFill([
             'id' => (int) ($payload['usuario_id'] ?? 0),
             'email' => (string) ($payload['usuario_email'] ?? ''),
@@ -246,7 +257,7 @@ class LegacyNativeSessionBridge
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      */
     private function hasAuthenticatedUser(array $payload): bool
     {
@@ -269,11 +280,11 @@ class LegacyNativeSessionBridge
 
     private function shouldSkipInTesting(Request $request): bool
     {
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             return false;
         }
 
-        return !$request->session()->get('_enforce_native_bridge', false)
-            && !$this->hasNativeCookie($request);
+        return ! $request->session()->get('_enforce_native_bridge', false)
+            && ! $this->hasNativeCookie($request);
     }
 }

@@ -15,6 +15,7 @@ use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 
@@ -59,16 +60,16 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
 
                     $query->where(function (Builder $nested) use ($search): void {
                         $nested
-                            ->where('codigo', 'like', '%' . $search . '%')
-                            ->orWhere('bem', 'like', '%' . $search . '%')
-                            ->orWhere('complemento', 'like', '%' . $search . '%')
+                            ->where('codigo', 'like', '%'.$search.'%')
+                            ->orWhere('bem', 'like', '%'.$search.'%')
+                            ->orWhere('complemento', 'like', '%'.$search.'%')
                             ->orWhere(function (Builder $current) use ($search): void {
                                 $this->whereCurrentClassification(
                                     $current,
                                     'dependencia',
                                     'editadoDependencia',
                                     static function (Builder $relationQuery) use ($search): void {
-                                        $relationQuery->where('descricao', 'like', '%' . $search . '%');
+                                        $relationQuery->where('descricao', 'like', '%'.$search.'%');
                                     },
                                     false,
                                 );
@@ -81,8 +82,8 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
                                     static function (Builder $relationQuery) use ($search): void {
                                         $relationQuery->where(function (Builder $match) use ($search): void {
                                             $match
-                                                ->where('codigo', 'like', '%' . $search . '%')
-                                                ->orWhere('descricao', 'like', '%' . $search . '%');
+                                                ->where('codigo', 'like', '%'.$search.'%')
+                                                ->orWhere('descricao', 'like', '%'.$search.'%');
                                         });
                                     },
                                     true,
@@ -284,12 +285,15 @@ class LegacyProductBrowserService implements LegacyProductBrowserServiceInterfac
     private function currentAdministrationScopeIds(): ?array
     {
         if ((bool) Session::get('is_admin', false)) {
-            return null;
+            $userId = (int) Session::get('usuario_id', 0);
+            if ($userId <= 0 || DB::table('usuarios')->where('id', $userId)->where('ativo', 1)->exists()) {
+                return null;
+            }
         }
 
-        if (!Session::has('is_admin')
-            && !Session::has('administracao_id')
-            && !Session::has('administracoes_permitidas')
+        if (! Session::has('is_admin')
+            && ! Session::has('administracao_id')
+            && ! Session::has('administracoes_permitidas')
         ) {
             return null;
         }
