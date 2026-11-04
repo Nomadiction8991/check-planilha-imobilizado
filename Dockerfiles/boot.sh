@@ -26,13 +26,14 @@ else
     echo "Variáveis do banco ausentes ou cliente MySQL indisponível, pulando espera."
 fi
 
-echo "Preparando diretórios de storage..."
+echo "Preparando diretórios de storage e bootstrap..."
 if [ ! -d storage ]; then
     echo "Diretório storage ausente, criando..."
     mkdir -p storage
 fi
 
 mkdir -p \
+    bootstrap/cache \
     storage/framework/cache/data \
     storage/framework/sessions \
     storage/framework/testing \
@@ -44,11 +45,11 @@ mkdir -p \
     storage/tmp
 
 if id -u www-data >/dev/null 2>&1; then
-    chown -R www-data:www-data storage 2>/dev/null || true
+    chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 fi
 
-chmod -R ug+rwX,o+rX storage 2>/dev/null || true
-chmod -R 777 storage/framework storage/logs storage/importacao storage/tmp 2>/dev/null || true
+chmod -R ug+rwX,o+rX storage bootstrap/cache 2>/dev/null || true
+chmod -R 777 bootstrap/cache storage/framework storage/logs storage/importacao storage/tmp 2>/dev/null || true
 
 if [ ! -w storage ]; then
     echo "storage não está gravável para o usuário atual ($(id -u):$(id -g))."

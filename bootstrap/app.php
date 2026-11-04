@@ -12,6 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         // Substituição dentro do grupo 'web': replace() global não afeta o grupo,
         // e as isenções de rota do middleware híbrido precisam valer nas requests reais.
         $middleware->replaceInGroup(
