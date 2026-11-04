@@ -1,0 +1,14 @@
+SET NAMES utf8mb4;
+CREATE TABLE administracoes (id BIGINT PRIMARY KEY AUTO_INCREMENT, descricao VARCHAR(255));
+CREATE TABLE usuarios (id BIGINT PRIMARY KEY AUTO_INCREMENT, nome VARCHAR(255), email VARCHAR(255), senha VARCHAR(255), administracao_id BIGINT, tipo VARCHAR(255), ativo BOOLEAN, permissions TEXT, administracoes_permitidas TEXT, comum_id BIGINT, ui_preferences TEXT);
+CREATE TABLE comums (id BIGINT PRIMARY KEY AUTO_INCREMENT, codigo VARCHAR(255), descricao VARCHAR(255), administracao_id BIGINT, estado VARCHAR(2));
+CREATE TABLE tipos_bens (id BIGINT PRIMARY KEY AUTO_INCREMENT, codigo VARCHAR(255), descricao VARCHAR(255));
+CREATE TABLE dependencias (id BIGINT PRIMARY KEY AUTO_INCREMENT, comum_id BIGINT, descricao VARCHAR(255));
+CREATE TABLE produtos (id_produto BIGINT PRIMARY KEY AUTO_INCREMENT, comum_id BIGINT, codigo VARCHAR(255), tipo_bem_id BIGINT, bem VARCHAR(255), complemento VARCHAR(255) DEFAULT '', dependencia_id BIGINT, novo INT DEFAULT 0, importado INT DEFAULT 0, checado INT DEFAULT 0, editado INT DEFAULT 0, imprimir_etiqueta INT DEFAULT 0, imprimir_14_1 INT DEFAULT 0, ativo INT DEFAULT 0, observacao VARCHAR(255) DEFAULT '');
+CREATE TABLE import_erros (id BIGINT PRIMARY KEY AUTO_INCREMENT, importacao_id BIGINT, linha_csv TEXT, codigo TEXT, localidade TEXT, codigo_comum TEXT, descricao_csv TEXT, bem TEXT, complemento TEXT, dependencia TEXT, mensagem_erro TEXT);
+CREATE TABLE configuracoes (pulo_linhas INT, mapeamento_colunas VARCHAR(255));
+CREATE TABLE importacoes (id BIGINT PRIMARY KEY AUTO_INCREMENT, usuario_id BIGINT, comum_id BIGINT NULL, administracao_id BIGINT NULL, arquivo_nome VARCHAR(255), arquivo_caminho VARCHAR(255), total_linhas INT, status VARCHAR(255), iniciada_em TIMESTAMP NULL, concluida_em TIMESTAMP NULL, created_at TIMESTAMP NULL, linhas_processadas INT DEFAULT 0, linhas_sucesso INT DEFAULT 0, linhas_erro INT DEFAULT 0, porcentagem DECIMAL(5,2) DEFAULT 0, mensagem_erro TEXT NULL);
+INSERT INTO administracoes VALUES (1, 'Administração fictícia');
+INSERT INTO usuarios (id,nome,email,senha,administracao_id,tipo,ativo) VALUES (1,'Pessoa fictícia','TESTE@EXAMPLE.COM','$2y$12$hHbje5wiAq0J0Tgu.6G49.9iLe.Kx3bmE0zK7WLaHYhC8RYRt43wi',1,'admin',1);
+INSERT INTO comums (id,codigo,descricao,administracao_id) VALUES (1,'99-9999','Igreja fictícia',1);
+INSERT INTO tipos_bens (codigo,descricao) VALUES ('4','CADEIRA'),('7','MESA');

@@ -4,11 +4,51 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Core;
 
-use App\Core\LerEnv;
+use Tests\Fixtures\IsolatedLerEnv\LerEnv;
 use Tests\TestCase;
 
 final class LerEnvTest extends TestCase
 {
+    private static string $fixtureDirectory;
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        self::$fixtureDirectory = sys_get_temp_dir() . '/ler-env-test-' . bin2hex(random_bytes(8));
+        mkdir(self::$fixtureDirectory . '/app/Core', 0700, true);
+        $source = file_get_contents(__DIR__ . '/../../../app/Core/LerEnv.php');
+        file_put_contents(
+            self::$fixtureDirectory . '/app/Core/LerEnv.php',
+            str_replace('namespace App\\Core;', 'namespace Tests\\Fixtures\\IsolatedLerEnv;', $source),
+        );
+        file_put_contents(self::$fixtureDirectory . '/.env', <<<'ENV'
+APP_NAME=check-planilha
+APP_ENV=testing
+APP_TIMEZONE=UTC
+DB_CONNECTION=sqlite
+CACHE_STORE=array
+SESSION_DRIVER=array
+QUEUE_CONNECTION=sync
+LOG_CHANNEL=single
+MAIL_MAILER=log
+AWS_ACCESS_KEY_ID=
+MAIL_FROM_ADDRESS="hello@example.com"
+# APP_MAINTENANCE_STORE=database
+ENV);
+        require self::$fixtureDirectory . '/app/Core/LerEnv.php';
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        unlink(self::$fixtureDirectory . '/.env');
+        unlink(self::$fixtureDirectory . '/app/Core/LerEnv.php');
+        rmdir(self::$fixtureDirectory . '/app/Core');
+        rmdir(self::$fixtureDirectory . '/app');
+        rmdir(self::$fixtureDirectory);
+        parent::tearDownAfterClass();
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
