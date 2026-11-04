@@ -371,7 +371,7 @@ final class LegacySpreadsheetImportTest extends TestCase
 
     public function testImportPageRendersForm(): void
     {
-        $response = $this->get(route('migration.spreadsheets.create'));
+        $response = $this->withSession(['is_admin' => true])->get(route('migration.spreadsheets.create'));
 
         $response->assertOk();
         $response->assertSee('Importe uma planilha para análise.');
@@ -381,7 +381,7 @@ final class LegacySpreadsheetImportTest extends TestCase
         $response->assertSee('não apenas um setor');
         $response->assertSee('Enviar e analisar');
         $response->assertDontSee('Igreja base');
-        $response->assertSee('A análise detecta as igrejas do CSV');
+        $response->assertSee('A análise detecta as igrejas da planilha (CSV, TXT, XLS ou XLSX)');
         $response->assertSee('Importações recentes');
         $response->assertSee('5 registro(s)');
         $response->assertSee('Relatório de Bens Imobilizado.csv');

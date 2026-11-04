@@ -21,7 +21,7 @@ final class LegacySpreadsheetImportServiceTest extends TestCase
         $method->setAccessible(true);
 
         self::assertSame(
-            storage_path('tmp'),
+            storage_path('importacao'),
             $method->invoke($service),
         );
     }

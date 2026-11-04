@@ -9,8 +9,38 @@ use Tests\TestCase;
 
 class SystemMaintenanceCommandTest extends TestCase
 {
+    private ?string $healthDirectory = null;
+    private string $originalBasePath;
+    private string $originalStoragePath;
+
+    private function isolateHealthDirectories(): void
+    {
+        $this->originalBasePath = base_path();
+        $this->originalStoragePath = storage_path();
+        $this->healthDirectory = sys_get_temp_dir() . '/health-test-' . bin2hex(random_bytes(8));
+        foreach (['storage/app', 'storage/framework', 'storage/logs', 'bootstrap/cache'] as $directory) {
+            mkdir($this->healthDirectory . '/' . $directory, 0700, true);
+        }
+        $this->app->setBasePath($this->healthDirectory);
+        $this->app->useStoragePath($this->healthDirectory . '/storage');
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->healthDirectory !== null) {
+            $this->app->setBasePath($this->originalBasePath);
+            $this->app->useStoragePath($this->originalStoragePath);
+            foreach (['storage/app', 'storage/framework', 'storage/logs', 'storage', 'bootstrap/cache', 'bootstrap'] as $directory) {
+                rmdir($this->healthDirectory . '/' . $directory);
+            }
+            rmdir($this->healthDirectory);
+        }
+        parent::tearDown();
+    }
+
     public function test_system_health_check_command_runs_successfully(): void
     {
+        $this->isolateHealthDirectories();
         $exitCode = Artisan::call('system:health-check');
 
         $this->assertSame(0, $exitCode);
@@ -20,6 +50,7 @@ class SystemMaintenanceCommandTest extends TestCase
 
     public function test_system_health_check_json_output(): void
     {
+        $this->isolateHealthDirectories();
         $exitCode = Artisan::call('system:health-check', ['--json' => true]);
 
         $this->assertSame(0, $exitCode);

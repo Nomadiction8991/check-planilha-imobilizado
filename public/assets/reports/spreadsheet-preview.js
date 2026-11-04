@@ -20,10 +20,12 @@
 
     function collectDependencyActions() {
         const dependencies = {};
+        const churches = collectChurchActions();
         document.querySelectorAll('.js-preview-dependency-action').forEach((select) => {
             const key = select.dataset.depKey;
             if (key) {
-                dependencies[key] = select.value;
+                const churchKey = select.closest('.dependency-row')?.dataset.forChurch;
+                dependencies[key] = churches[churchKey] === 'importar' ? 'importar' : select.value;
             }
         });
         return dependencies;

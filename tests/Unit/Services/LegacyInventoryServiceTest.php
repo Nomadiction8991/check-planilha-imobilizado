@@ -34,7 +34,7 @@ final class LegacyInventoryServiceTest extends TestCase
 
         $this->mockDatabaseConnection(true, 'pgsql', 'checkplanilha');
         $this->mockConfig([
-            'legacy.root_path' => '/var/www/checkplanilha',
+            'legacy.root_path' => base_path(),
             'legacy.public_url' => 'http://legacy.test',
             'legacy.paths' => [
                 'controllers' => 'app',
@@ -54,14 +54,14 @@ final class LegacyInventoryServiceTest extends TestCase
             ],
         ]);
         $this->mockFileAllFiles([
-            '/var/www/checkplanilha/app' => 2,
-            '/var/www/checkplanilha/app/Services' => 1,
+            base_path('app') => 2,
+            base_path('app/Services') => 1,
         ]);
 
         $result = (new LegacyInventoryService())->buildSnapshot();
 
         $this->assertInstanceOf(LegacyInventorySnapshot::class, $result);
-        $this->assertSame('/var/www/checkplanilha', $result->legacyRootPath);
+        $this->assertSame(base_path(), $result->legacyRootPath);
         $this->assertSame('http://legacy.test', $result->legacyPublicUrl);
         $this->assertTrue($result->databaseReachable);
         $this->assertSame('pgsql', $result->databaseDriver);
@@ -88,7 +88,7 @@ final class LegacyInventoryServiceTest extends TestCase
 
         $this->mockDatabaseUnreachable(new PDOException('Connection refused'));
         $this->mockConfig([
-            'legacy.root_path' => '/var/www/checkplanilha',
+            'legacy.root_path' => base_path(),
             'legacy.public_url' => 'http://legacy.test',
             'legacy.paths' => [
                 'controllers' => 'app',
@@ -116,7 +116,7 @@ final class LegacyInventoryServiceTest extends TestCase
                 ],
             ],
         ]);
-        $this->mockFileAllFiles(['/var/www/checkplanilha/app' => 3]);
+        $this->mockFileAllFiles([base_path('app') => 3]);
 
         $result = (new LegacyInventoryService())->buildSnapshot();
 
@@ -199,7 +199,7 @@ final class LegacyInventoryServiceTest extends TestCase
         Config::shouldReceive('get')
             ->with('legacy.root_path', null)
             ->once()
-            ->andReturn('/var/www/checkplanilha');
+            ->andReturn(base_path());
         Config::shouldReceive('get')
             ->with('legacy.public_url', null)
             ->once()
@@ -227,7 +227,7 @@ final class LegacyInventoryServiceTest extends TestCase
 
         // 'app' exists on this filesystem; 'nonexistent_dir' does not
         File::shouldReceive('allFiles')
-            ->with('/var/www/checkplanilha/app')
+            ->with(base_path('app'))
             ->once()
             ->andReturn([new SplFileInfo(__FILE__), new SplFileInfo(__FILE__)]);
 
@@ -244,11 +244,11 @@ final class LegacyInventoryServiceTest extends TestCase
     {
         $this->mockDatabaseConnection(true, 'pgsql', 'db');
         $this->mockConfig([
-            'legacy.root_path' => '/var/www/checkplanilha',
+            'legacy.root_path' => base_path(),
             'legacy.paths' => ['test' => 'app'],
             'legacy.modules' => [],
         ]);
-        $this->mockFileAllFiles(['/var/www/checkplanilha/app' => 1]);
+        $this->mockFileAllFiles([base_path('app') => 1]);
 
         $result = (new LegacyInventoryService())->buildSnapshot();
 

@@ -1095,7 +1095,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
     private function resolveImportDirectory(): string
     {
         $candidates = [
-            storage_path('tmp'),
+            storage_path('importacao'),
             sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'check-planilha-imobilizado' . DIRECTORY_SEPARATOR . 'importacao',
         ];
 
