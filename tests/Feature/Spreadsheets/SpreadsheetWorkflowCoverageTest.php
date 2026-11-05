@@ -12,7 +12,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use ReflectionProperty;
 use Tests\TestCase;
 
 final class SpreadsheetWorkflowCoverageTest extends TestCase
@@ -87,6 +86,7 @@ final class SpreadsheetWorkflowCoverageTest extends TestCase
             $t->decimal('porcentagem', 5, 2)->default(0);
             $t->text('mensagem_erro')->nullable();
         });
+        (require database_path('migrations/20261104180000_create_importacao_acoes_table.php'))->up();
         DB::table('administracoes')->insert(['id' => 1, 'descricao' => 'Administração de teste']);
         DB::table('usuarios')->insert(['id' => 1, 'nome' => 'Usuário de teste', 'email' => 'teste@example.com', 'administracao_id' => 1, 'tipo' => 'usuario', 'ativo' => 1]);
         DB::table('comums')->insert(['id' => 1, 'codigo' => '99-9999', 'administracao_id' => 1]);
@@ -112,7 +112,6 @@ final class SpreadsheetWorkflowCoverageTest extends TestCase
         if (DB::getDriverName() === 'sqlite') {
             $pdo = DB::connection()->getPdo();
             $pdo->sqliteCreateFunction('NOW', static fn (): string => date('Y-m-d H:i:s'));
-            (new ReflectionProperty(ConnectionManager::class, 'conexao'))->setValue(null, $pdo);
         }
 
         $origem = tempnam(sys_get_temp_dir(), 'planilha_http_');
@@ -144,9 +143,9 @@ final class SpreadsheetWorkflowCoverageTest extends TestCase
             $this->postJson(route('migration.spreadsheets.preview.actions', ['importacao' => $id]), [
                 'igrejas' => ['99-9999' => 'importar'],
             ])->assertOk()->assertJsonPath('sucesso', true)->assertJsonPath('igrejas_salvas', 1);
+            $this->assertDatabaseHas('importacao_acoes', ['importacao_id' => $id, 'chave' => '99-9999', 'tipo' => 'igreja', 'acao' => 'importar']);
             $this->post(route('migration.spreadsheets.confirm', ['importacao' => $id]), ['importar_tudo' => 1])
-                ->assertRedirect(route('migration.spreadsheets.processing', ['importacao' => $id]))
-                ->assertSessionHas('importacao_confirm_options_' . $id . '.igrejas.99-9999', 'importar');
+                ->assertRedirect(route('migration.spreadsheets.processing', ['importacao' => $id]));
             $this->get(route('migration.spreadsheets.processing', ['importacao' => $id]))->assertOk();
             $processamento = $this->postJson(route('migration.spreadsheets.start', ['importacao' => $id]));
             $processamento->assertOk()->assertJsonPath('success', true);

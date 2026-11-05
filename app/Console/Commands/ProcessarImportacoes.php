@@ -99,10 +99,21 @@ class ProcessarImportacoes extends Command
         }
 
         $actions = [];
+        $savedLineActions = [];
+        try {
+            $savedLineActions = \Illuminate\Support\Facades\DB::table('importacao_acoes')
+                ->where('importacao_id', $importId)
+                ->where('tipo', 'linha')
+                ->pluck('acao', 'chave')
+                ->all();
+        } catch (\Throwable) {
+            // Tabela pode não existir em ambiente legado
+        }
+
         foreach ($analise['registros'] ?? [] as $reg) {
             $line = (string) ($reg['linha_csv'] ?? '');
             if ($line !== '' && ($reg['status'] ?? '') !== 'erro') {
-                $actions[$line] = 'importar';
+                $actions[$line] = $savedLineActions[$line] ?? 'importar';
             }
         }
 

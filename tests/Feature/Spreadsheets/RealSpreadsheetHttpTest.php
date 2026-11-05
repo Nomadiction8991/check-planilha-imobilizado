@@ -12,7 +12,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use ReflectionProperty;
 use Tests\TestCase;
 
 final class RealSpreadsheetHttpTest extends TestCase
@@ -87,6 +86,7 @@ final class RealSpreadsheetHttpTest extends TestCase
             $t->decimal('porcentagem', 5, 2)->default(0);
             $t->text('mensagem_erro')->nullable();
         });
+        (require database_path('migrations/20261104180000_create_importacao_acoes_table.php'))->up();
         DB::table('administracoes')->insert(['id' => 1, 'descricao' => 'Administração de teste']);
         DB::table('usuarios')->insert(['id' => 1, 'nome' => 'Usuário de teste', 'email' => 'teste@example.com', 'administracao_id' => 1, 'tipo' => 'usuario', 'ativo' => 1]);
         DB::table('comums')->insert(['id' => 1, 'codigo' => '99-9999', 'administracao_id' => 1]);
@@ -112,7 +112,6 @@ final class RealSpreadsheetHttpTest extends TestCase
         if (DB::getDriverName() === 'sqlite') {
             $pdo = DB::connection()->getPdo();
             $pdo->sqliteCreateFunction('NOW', static fn (): string => date('Y-m-d H:i:s'));
-            (new ReflectionProperty(ConnectionManager::class, 'conexao'))->setValue(null, $pdo);
         }
 
         $origem = tempnam(sys_get_temp_dir(), 'planilha_http_');
