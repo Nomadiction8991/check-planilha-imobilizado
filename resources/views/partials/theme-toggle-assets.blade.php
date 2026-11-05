@@ -142,10 +142,7 @@
     }
 
     html[data-theme='light'] body {
-        background:
-            radial-gradient(circle at top left, rgba(31, 111, 95, 0.11), transparent 28%),
-            radial-gradient(circle at bottom right, rgba(181, 125, 78, 0.12), transparent 25%),
-            linear-gradient(180deg, #fbf7f2 0%, var(--bg) 100%);
+        background: var(--ui-bg);
     }
 
     html[data-theme='light'] ::selection {
@@ -157,42 +154,42 @@
         --tone-bg: rgba(111, 100, 88, 0.12);
         --tone-text: #5f554a;
         --tone-line: rgba(111, 100, 88, 0.24);
-        --tone-card: linear-gradient(180deg, rgba(111, 100, 88, 0.08), rgba(255, 252, 247, 0.98));
+        --tone-card: var(--ui-surface);
     }
 
     html[data-theme='light'] .module-tone--catalog {
         --tone-bg: rgba(86, 116, 63, 0.14);
         --tone-text: #4f6b39;
         --tone-line: rgba(86, 116, 63, 0.24);
-        --tone-card: linear-gradient(180deg, rgba(86, 116, 63, 0.08), rgba(255, 252, 247, 0.98));
+        --tone-card: var(--ui-surface);
     }
 
     html[data-theme='light'] .module-tone--inventory {
         --tone-bg: rgba(31, 111, 95, 0.14);
         --tone-text: #1f6f5f;
         --tone-line: rgba(31, 111, 95, 0.24);
-        --tone-card: linear-gradient(180deg, rgba(31, 111, 95, 0.08), rgba(255, 252, 247, 0.98));
+        --tone-card: var(--ui-surface);
     }
 
     html[data-theme='light'] .module-tone--access {
         --tone-bg: rgba(69, 105, 165, 0.14);
         --tone-text: #35558f;
         --tone-line: rgba(69, 105, 165, 0.24);
-        --tone-card: linear-gradient(180deg, rgba(69, 105, 165, 0.08), rgba(255, 252, 247, 0.98));
+        --tone-card: var(--ui-surface);
     }
 
     html[data-theme='light'] .module-tone--flow {
         --tone-bg: rgba(177, 118, 60, 0.14);
         --tone-text: #915a25;
         --tone-line: rgba(177, 118, 60, 0.24);
-        --tone-card: linear-gradient(180deg, rgba(177, 118, 60, 0.08), rgba(255, 252, 247, 0.98));
+        --tone-card: var(--ui-surface);
     }
 
     html[data-theme='light'] .module-tone--audit {
         --tone-bg: rgba(88, 103, 133, 0.14);
         --tone-text: #4b5d7a;
         --tone-line: rgba(88, 103, 133, 0.24);
-        --tone-card: linear-gradient(180deg, rgba(88, 103, 133, 0.08), rgba(255, 252, 247, 0.98));
+        --tone-card: var(--ui-surface);
     }
 
     html[data-theme='light'] .module-card.module-tone--structure,
@@ -205,7 +202,7 @@
     }
 
     html[data-theme='light'] .dashboard-panel {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 252, 247, 0.96));
+        background: var(--ui-surface);
     }
 
     html[data-theme='light'] .palette-legend {
@@ -225,14 +222,20 @@
     html[data-theme='light'] .pagination,
     html[data-theme='light'] .card,
     html[data-theme='light'] .section-card {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.90), rgba(255, 252, 247, 0.94));
+        background: var(--ui-surface);
         border-color: var(--line);
         box-shadow: var(--shadow);
     }
 
-    html[data-theme='light'] .topbar,
-    html[data-theme='light'] .hero {
+    html[data-theme='light'] .topbar {
         box-shadow: var(--shadow-strong);
+    }
+
+    html[data-theme='light'] .hero {
+        background: var(--ui-surface);
+        border: 1px solid var(--ui-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
     }
 
     html[data-theme='light'] .nav a,
@@ -269,14 +272,14 @@
     html[data-theme='light'] .btn.primary,
     html[data-theme='light'] button:not(.theme-toggle):not(.session-logout):not(.mobile-menu-logout) {
         color: #fffdf8;
-        background: linear-gradient(180deg, #235d51 0%, #1f6f5f 100%);
+        background: var(--product-primary);
         border-color: rgba(31, 111, 95, 0.22);
         box-shadow: 0 8px 18px rgba(31, 111, 95, 0.14);
     }
 
     html[data-theme='light'] .btn.primary:hover,
     html[data-theme='light'] button:not(.theme-toggle):not(.session-logout):not(.mobile-menu-logout):hover {
-        background: linear-gradient(180deg, #2a6b5d 0%, #247163 100%);
+        background: var(--product-primary-hover);
     }
 
     html[data-theme='light'] select {

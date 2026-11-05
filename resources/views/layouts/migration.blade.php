@@ -38,10 +38,7 @@
             min-height: 100vh;
             font-family: Georgia, "Times New Roman", serif;
             color: var(--ink);
-            background:
-                radial-gradient(circle at top left, rgba(31, 111, 95, 0.14), transparent 30%),
-                radial-gradient(circle at right center, rgba(139, 61, 25, 0.14), transparent 24%),
-                linear-gradient(180deg, #f8f3ed 0%, var(--bg) 100%);
+            background: var(--ui-bg);
         }
 
         a {
@@ -243,7 +240,7 @@
             padding: 10px;
             border: 1px solid var(--line);
             border-radius: 18px;
-            background: linear-gradient(180deg, var(--surface), var(--surface-soft));
+            background: var(--ui-surface);
             box-shadow: var(--shadow-strong);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
@@ -270,7 +267,7 @@
             padding: 12px 14px;
             border: 1px solid var(--line);
             border-radius: 14px;
-            background: linear-gradient(180deg, var(--surface-strong), var(--surface));
+            background: var(--ui-surface);
             color: var(--ink);
             box-shadow: 0 1px 0 rgba(24, 21, 17, 0.04);
             cursor: pointer;
@@ -308,7 +305,7 @@
 
         .page-quick-actions-item.is-primary {
             color: #f9f7f2;
-            background: linear-gradient(180deg, var(--ink), #1f1a14);
+            background: var(--accent);
             border-color: rgba(24, 21, 17, 0.18);
         }
 
@@ -336,7 +333,7 @@
 
         .page-quick-actions-item--voice.is-listening {
             border-color: rgba(31, 111, 95, 0.28);
-            background: linear-gradient(180deg, rgba(31, 111, 95, 0.18), rgba(255, 255, 255, 0.92));
+            background: var(--accent-soft);
             color: var(--accent);
             animation: page-quick-actions-pulse 1.2s ease-in-out infinite;
         }
@@ -397,7 +394,7 @@
             padding: 0;
             border: 1px solid rgba(139, 61, 25, 0.20);
             border-radius: 999px;
-            background: linear-gradient(180deg, rgba(255, 245, 240, 0.92), rgba(245, 228, 221, 0.84));
+            background: var(--ui-surface-muted);
             color: var(--warn);
             box-shadow:
                 0 1px 0 rgba(24, 21, 17, 0.04),
@@ -1138,7 +1135,7 @@
             padding: 18px;
             border: 1px solid var(--line);
             border-radius: 28px;
-            background: linear-gradient(180deg, var(--surface), var(--surface-soft));
+            background: var(--surface-strong);
             box-shadow: var(--shadow-strong);
             backdrop-filter: blur(14px);
             transform: translateX(-110%);
@@ -1524,6 +1521,53 @@
         }
     </style>
     @include('partials.theme-toggle-assets')
+    @include('partials.design-tokens')
+    <style>
+        html[data-theme='light'] {
+            --bg: var(--ui-bg);
+            --surface: var(--ui-surface);
+            --surface-strong: var(--ui-surface);
+            --surface-soft: var(--ui-surface-muted);
+            --ink: var(--ui-text);
+            --muted: var(--ui-text-muted);
+            --line: var(--ui-border);
+            --accent: var(--product-primary);
+            --accent-soft: var(--product-primary-soft);
+            --shadow: var(--shadow-card);
+            --shadow-soft: var(--shadow-card);
+        }
+        html[data-theme='light'] body { background: var(--ui-bg); }
+        html[data-theme='light'] .btn.primary { background: var(--product-primary); }
+        html[data-theme='light'] .page-quick-actions-toggle { background: var(--product-primary); color: #fff; }
+        html[data-theme='light'] .btn.primary:hover,
+        html[data-theme='light'] .page-quick-actions-toggle:hover { background: var(--product-primary-hover); }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .topbar-nav { display: none; }
+        button.menu-toggle.theme-toggle { display: inline-flex; }
+        .mobile-menu-panel {
+            top: 0; bottom: 0; left: 0;
+            border-radius: 0;
+            background: var(--surface-strong);
+            backdrop-filter: none;
+        }
+        .mobile-menu-link { border-radius: var(--radius-md); }
+        .mobile-menu-link.active { font-weight: 700; border-left: 4px solid currentColor; }
+        @media (min-width: 1024px) {
+            .shell, body.page-operational .shell {
+                width: calc(100% - 288px);
+                max-width: 1440px;
+                margin-left: 264px;
+                margin-right: 24px;
+            }
+            .mobile-menu { inset: 0 auto 0 0; width: 240px; opacity: 1; pointer-events: auto; }
+            .mobile-menu-backdrop, .mobile-menu-close, button.menu-toggle.theme-toggle { display: none; }
+            .mobile-menu-panel { position: fixed; width: 240px; transform: none; box-shadow: none; }
+            body.mobile-menu-open { overflow: auto; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .mobile-menu, .mobile-menu-panel { transition: none; }
+        }
+    </style>
     @php
         $hideHeroOnOperationalRoutes = request()->routeIs(
             'migration.products.*',
@@ -1599,22 +1643,6 @@
                     @endif
                 </div>
             </div>
-            @unless (session('public_acesso'))
-            @if (!empty($legacyNavigation))
-                <div class="topbar-nav">
-                    <nav class="nav" aria-label="Navegação principal">
-                        @foreach ($legacyNavigation as $item)
-                            <a
-                                href="{{ $item['route'] }}"
-                                class="{{ request()->routeIs(...$item['active_patterns']) ? 'active' : '' }}"
-                            >
-                                {{ $item['label'] }}
-                            </a>
-                        @endforeach
-                    </nav>
-                </div>
-            @endif
-            @endunless
         </header>
         </div>
 
@@ -1681,7 +1709,7 @@
     </div>
         <div class="mobile-menu" id="mobile-menu" data-mobile-menu aria-hidden="true">
             <div class="mobile-menu-backdrop" data-mobile-menu-backdrop></div>
-            <aside class="mobile-menu-panel" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title">
+            <aside class="mobile-menu-panel app-sidebar" aria-labelledby="mobile-menu-title">
                 <div class="mobile-menu-head">
                     <div class="mobile-menu-copy">
                     @if (session('public_acesso'))
@@ -1717,6 +1745,7 @@
                             <a
                                 href="{{ $item['route'] }}"
                                 class="mobile-menu-link {{ request()->routeIs(...$item['active_patterns']) ? 'active' : '' }}"
+                                @if (request()->routeIs(...$item['active_patterns'])) aria-current="page" @endif
                                 data-mobile-menu-link
                             >
                                 <span class="mobile-menu-link-label">{{ $item['label'] }}</span>
@@ -1754,8 +1783,30 @@
             const backdrop = menu.querySelector('[data-mobile-menu-backdrop]');
             const closeButtons = menu.querySelectorAll('[data-mobile-menu-close]');
             const links = menu.querySelectorAll('[data-mobile-menu-link]');
+            const panel = menu.querySelector('.mobile-menu-panel');
+            const desktop = window.matchMedia('(min-width: 1024px)');
+
+            const syncViewport = () => {
+                const isDesktop = desktop.matches;
+                menu.classList.remove('is-open');
+                document.body.classList.remove('mobile-menu-open');
+                menu.setAttribute('aria-hidden', isDesktop ? 'false' : 'true');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', 'Abrir menu');
+                toggle.title = 'Abrir menu';
+                if (isDesktop) {
+                    panel.removeAttribute('role');
+                    panel.removeAttribute('aria-modal');
+                } else {
+                    panel.setAttribute('role', 'dialog');
+                    panel.setAttribute('aria-modal', 'true');
+                }
+            };
+            desktop.addEventListener('change', syncViewport);
+            syncViewport();
 
             const setMenuState = (open) => {
+                if (desktop.matches) return;
                 menu.classList.toggle('is-open', open);
                 document.body.classList.toggle('mobile-menu-open', open);
                 menu.setAttribute('aria-hidden', open ? 'false' : 'true');
