@@ -193,8 +193,8 @@ final class LegacyProductControllerTest extends TestCase
         ]));
 
         $response->assertOk();
-        $response->assertSee('data-active-count="1"', false);
-        $response->assertSee('Filtros · 1 ativo', false);
+        $response->assertSee('data-filter-open', false);
+        $response->assertSee('Filtros', false);
         $response->assertSee('Somente novos', false);
         $response->assertDontSee('Status: Somente novos', false);
 

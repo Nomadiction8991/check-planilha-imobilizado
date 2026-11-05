@@ -288,7 +288,7 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('Digite para filtrar');
     }
 
-    public function testReportsIndexSubmitsServerFiltersAutomatically(): void
+    public function testReportsIndexKeepsServerFiltersInDialog(): void
     {
         $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
 
@@ -300,7 +300,8 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('submitReportsIfChanged', escape: false);
         $response->assertSee('Atualizando relatórios…', escape: false);
         $response->assertSee("form.querySelectorAll('[data-reports-server-filter]')", escape: false);
-        $response->assertSee("select.addEventListener('change'", escape: false);
+        $response->assertDontSee("select.addEventListener('change'", escape: false);
+        $this->assertMatchesRegularExpression('/<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?name="comum_id".*?<\/dialog>/s', $response->getContent());
         $response->assertSee('resetPage', escape: false);
         $response->assertSee('field.disabled = true', escape: false);
         $response->assertSee('data-reports-admin-search', escape: false);
@@ -484,30 +485,26 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('secao14-templates.css');
     }
 
-    public function testReportsIndexRendersCollapsibleFiltersOnMobile(): void
+    public function testReportsIndexRendersFilterDialogOnMobile(): void
     {
         $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
 
         $response->assertOk();
-        $response->assertSee('data-product-filters-toggle', escape: false);
-        $response->assertSee('data-product-filters-panel', escape: false);
-        $response->assertSee('aria-expanded="false"', escape: false);
-        $response->assertSee('aria-controls="reports-filters-panel"', escape: false);
-        $response->assertSee('data-active-count="', escape: false);
+        $response->assertSee('data-filter-open', escape: false);
+        $response->assertSee('aria-controls="filtros-reports"', escape: false);
+        $this->assertMatchesRegularExpression('/<div class="filters-bar">.*?data-filter-search.*?<\/div>.*?<dialog\b[^>]*data-filter-dialog/s', $response->getContent());
         $response->assertSee('Filtros', escape: false);
     }
 
-    public function testReportsIndexCollapsibleButtonReflectsActiveFiltersCount(): void
+    public function testReportsIndexDialogPreservesActiveFilters(): void
     {
-        // sem filtros -> apenas "Filtros"
         $response = $this->get(route('migration.reports.index'));
         $response->assertOk();
-        $response->assertSee('data-active-count="0"', escape: false);
+        $response->assertSee('aria-controls="filtros-reports"', escape: false);
 
-        // com administracao + estado + igreja -> Filtros · 3 ativos
         $response = $this->get(route('migration.reports.index', ['administracao_id' => 4, 'estado' => 'MT', 'comum_id' => 7]));
         $response->assertOk();
-        $response->assertSee('data-active-count="3"', escape: false);
-        $response->assertSee('Filtros · 3 ativos', escape: false);
+        $this->assertMatchesRegularExpression('/<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?name="comum_id".*?<\/dialog>/s', $response->getContent());
+        $response->assertSee('Aplicar filtros');
     }
 }

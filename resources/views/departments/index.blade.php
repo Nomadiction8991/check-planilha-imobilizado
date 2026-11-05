@@ -49,9 +49,23 @@
     </div>
 
     <section class="section">
-        <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.departments.index') }}" data-filter-autosubmit data-filter-message="Atualizando dependências…">
-                <div class="filters-primary">
+        <div data-sticky-filters>
+            <form method="GET" action="{{ route('migration.departments.index') }}" class="filters" data-filter-autosubmit data-filter-message="Atualizando dependências…">
+                <div class="filters-bar">
+                    <div class="filters-search">
+                        <label for="departments-search">Descrição</label>
+                        <input id="departments-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="Nome da dependência" data-filter-search data-filter-server>
+                    </div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-departments"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <span class="helper" role="status" aria-live="polite" data-filter-status></span>
+                <dialog id="filtros-departments" class="filters-dialog" aria-labelledby="filtros-departments-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head">
+                        <h2 id="filtros-departments-titulo">Filtros</h2>
+                        <button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+                    </header>
+                    <div class="filters-dialog-fields">
                     <label for="departments-admin-search">
                         Buscar administração
                         <input
@@ -112,17 +126,13 @@
                         </select>
                     </label>
 
-                    <label class="filters-query">
-                        Descrição
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome da dependência" data-filter-search>
-                    </label>
 
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Filtrar</button>
-                        <a class="btn" href="{{ route('migration.departments.index') }}">Limpar</a>
-                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
-                </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.departments.index') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
             @include('partials.filter-autosubmit')
             <script>

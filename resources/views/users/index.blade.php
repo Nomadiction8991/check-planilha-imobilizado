@@ -50,9 +50,23 @@
     @endif
 
     <section class="section">
-        <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.users.index') }}" data-filter-autosubmit data-filter-message="Atualizando usuários…">
-                <div class="filters-primary">
+        <div data-sticky-filters>
+            <form method="GET" action="{{ route('migration.users.index') }}" class="filters" data-filter-autosubmit data-filter-message="Atualizando usuários…">
+                <div class="filters-bar">
+                    <div class="filters-search">
+                        <label for="users-search">Buscar por nome ou email</label>
+                        <input id="users-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="Nome ou email" data-filter-search data-filter-server>
+                    </div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-users"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <span class="helper" role="status" aria-live="polite" data-filter-status></span>
+                <dialog id="filtros-users" class="filters-dialog" aria-labelledby="filtros-users-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head">
+                        <h2 id="filtros-users-titulo">Filtros</h2>
+                        <button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+                    </header>
+                    <div class="filters-dialog-fields">
                     <label for="users-admin-search">
                         Buscar administração
                         <input
@@ -89,19 +103,7 @@
                         </select>
                     </label>
 
-                    <label class="filters-query">
-                        Buscar por nome ou email
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="Nome ou email" data-filter-search>
-                    </label>
 
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Filtrar</button>
-                        <a class="btn" href="{{ route('migration.users.index') }}">Limpar</a>
-                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
-                    </div>
-                </div>
-
-                <div class="filters-advanced">
                     <label>
                         Status
                         <select name="status" data-filter-server>
@@ -113,7 +115,12 @@
                             @endforeach
                         </select>
                     </label>
-                </div>
+                    </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.users.index') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
             @include('partials.filter-autosubmit')
             <script>

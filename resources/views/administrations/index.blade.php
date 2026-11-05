@@ -49,9 +49,23 @@
     </div>
 
     <section class="section">
-        <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.administrations.index') }}" data-filter-autosubmit data-filter-message="Atualizando administrações…">
-                <div class="filters-primary">
+        <div data-sticky-filters>
+            <form method="GET" action="{{ route('migration.administrations.index') }}" class="filters" data-filter-autosubmit data-filter-message="Atualizando administrações…">
+                <div class="filters-bar">
+                    <div class="filters-search">
+                        <label for="administrations-search">Buscar por ID, descrição ou CNPJ</label>
+                        <input id="administrations-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="1, Administração Central ou 12345678000190" data-filter-search data-filter-server>
+                    </div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-administrations"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <span class="helper" role="status" aria-live="polite" data-filter-status></span>
+                <dialog id="filtros-administrations" class="filters-dialog" aria-labelledby="filtros-administrations-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head">
+                        <h2 id="filtros-administrations-titulo">Filtros</h2>
+                        <button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+                    </header>
+                    <div class="filters-dialog-fields">
                     <label class="filters-principal">
                         Estado (UF)
                         <select name="estado" id="administrations-estado-select" data-filter-server>
@@ -64,17 +78,13 @@
                         </select>
                     </label>
 
-                    <label class="filters-query">
-                        Buscar por ID, descrição ou CNPJ
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="1, Administração Central ou 12345678000190" data-filter-search>
-                    </label>
 
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Filtrar</button>
-                        <a class="btn" href="{{ route('migration.administrations.index') }}">Limpar</a>
-                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
-                </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.administrations.index') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
             @include('partials.filter-autosubmit')
         </div>

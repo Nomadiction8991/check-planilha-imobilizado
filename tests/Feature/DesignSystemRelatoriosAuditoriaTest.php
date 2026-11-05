@@ -8,6 +8,15 @@ use Tests\TestCase;
 
 final class DesignSystemRelatoriosAuditoriaTest extends TestCase
 {
+    public function test_filtros_das_listagens_ficam_em_dialogo_no_formulario(): void
+    {
+        foreach (['reports', 'audits', 'labels'] as $area) {
+            $view = file_get_contents(resource_path("views/{$area}/index.blade.php"));
+            $this->assertMatchesRegularExpression('/<form\b[^>]*>.*?<dialog\b[^>]*data-filter-dialog.*?<\/dialog>\s*<\/form>/s', $view);
+            $this->assertStringContainsString('data-filter-open', $view);
+            $this->assertStringContainsString('Aplicar filtros', $view);
+        }
+    }
     public function test_editor_usa_texto_do_tema_no_botao_salvar(): void
     {
         $response = \Illuminate\Testing\TestResponse::fromBaseResponse(response()->view('reports.editor', [

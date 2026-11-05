@@ -171,7 +171,7 @@ final class LegacyAuditPagesTest extends TestCase
         $response->assertSee('Exportar CSV', false);
     }
 
-    public function testAuditPageAutoSubmitsServerFiltersAfterTheyChange(): void
+    public function testAuditPageAutoSubmitsSearchButAppliesDialogFiltersOnSubmit(): void
     {
         $this->mockAuditUser();
 
@@ -207,6 +207,10 @@ final class LegacyAuditPagesTest extends TestCase
         $response->assertSee('resetPage', false);
         $response->assertSee('field.disabled = true', false);
         $response->assertSee("searchInput.addEventListener('input'", false);
-        $response->assertSee("field.addEventListener('change'", false);
+        $response->assertSee("if (!field.closest('[data-filter-dialog]')) scheduleSubmit(80)", false);
+        $response->assertDontSee("field.addEventListener('change', () => scheduleSubmit(80))", false);
+        $response->assertSee('Aplicar filtros');
+        $response->assertSee('data-filter-open', false);
+        $this->assertMatchesRegularExpression('/<div class="filters-bar">.*?data-filter-search.*?<\/div>.*?<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="modulo".*?name="data_inicio".*?name="data_fim".*?<\/dialog>/s', $response->getContent());
     }
 }

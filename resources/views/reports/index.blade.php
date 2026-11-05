@@ -21,20 +21,28 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            @php
-                $reportsActiveCount = 0;
-                if ((int) ($selectedAdministrationId ?? 0) > 0) $reportsActiveCount++;
-                if (($selectedState ?? '') !== '') $reportsActiveCount++;
-                if ((int) ($selectedChurchId ?? 0) > 0) $reportsActiveCount++;
-            @endphp
-            <button type="button" class="product-filters-toggle" data-product-filters-toggle data-active-count="{{ $reportsActiveCount }}" aria-expanded="false" aria-controls="reports-filters-panel">
-                <span data-product-filters-toggle-label>{{ $reportsActiveCount > 0 ? 'Filtros · ' . $reportsActiveCount . ' ' . ($reportsActiveCount === 1 ? 'ativo' : 'ativos') : 'Filtros' }}</span>
-                <span class="material-symbols-outlined product-filters-toggle__icon" aria-hidden="true">expand_more</span>
-            </button>
-            <div id="reports-filters-panel" data-product-filters-panel>
             <form method="GET" action="{{ route('migration.reports.index') }}" data-reports-filter-form data-reports-filter-autosubmit>
-                <div class="filters-primary">
-                    <label for="reports-admin-search">
+                <div class="filters-bar">
+                    <div class="filters-search">
+
+                    <label for="reports-church-search">
+                        Buscar igreja
+                        <input
+                            id="reports-church-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="reports-church-select"
+                            data-reports-church-search data-filter-search
+                        >
+                    </label></div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-reports"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <dialog id="filtros-reports" class="filters-dialog" aria-labelledby="filtros-reports-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head"><h2 id="filtros-reports-titulo">Filtros</h2><button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></header>
+                    <div class="filters-dialog-fields">
+                        <label for="reports-admin-search">
                         Buscar administração
                         <input
                             id="reports-admin-search"
@@ -69,18 +77,6 @@
                             @endforeach
                         </select>
                     </label>
-
-                    <label for="reports-church-search">
-                        Buscar igreja
-                        <input
-                            id="reports-church-search"
-                            type="search"
-                            placeholder="Digite para filtrar"
-                            autocomplete="off"
-                            aria-controls="reports-church-select"
-                            data-reports-church-search
-                        >
-                    </label>
                     <label class="filters-principal">
                         Igreja
                         <select id="reports-church-select" name="comum_id" data-reports-church-select data-reports-server-filter>
@@ -94,13 +90,16 @@
                     </label>
                     <p id="reports-church-search-status" class="helper" role="status" aria-live="polite" hidden data-reports-church-status></p>
 
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Carregar relatórios</button>
-                        <a class="btn" href="{{ route('migration.reports.index') }}">Limpar</a>
-                        <span class="helper" role="status" aria-live="polite" data-reports-filter-status></span>
+                    
                     </div>
-                </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.reports.index') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
+            
+            <span class="helper" role="status" aria-live="polite" data-reports-filter-status></span>
             <script>
                 (() => {
                     const form = document.querySelector('[data-reports-filter-form][data-reports-filter-autosubmit]');
@@ -155,10 +154,6 @@
                     form.addEventListener('submit', () => {
                         window.clearTimeout(submitTimer);
                         form.dataset.reportsFilterSubmitting = 'true';
-                    });
-
-                    serverSelects.forEach((select) => {
-                        select.addEventListener('change', () => scheduleSubmit(80));
                     });
                 })();
             </script>
@@ -232,7 +227,6 @@
                     search.addEventListener('search', applyFilter);
                 })();
             </script>
-            </div>
         </div>
     </section>
 
@@ -280,4 +274,5 @@
         </div>
 
     </section>
+    @include('partials.filter-autosubmit')
 @endsection
