@@ -241,7 +241,7 @@ final class LegacyReportPagesTest extends TestCase
 
         $response->assertOk();
         $response->assertViewHas('selectedChurchId', null);
-        $response->assertSee('Escolha uma igreja para liberar a lista de relatórios disponíveis.');
+        $response->assertSee('Escolha uma igreja para ver os relatórios.');
         $response->assertDontSee('Relatório 14.1');
     }
 
@@ -256,7 +256,7 @@ final class LegacyReportPagesTest extends TestCase
 
         $response->assertOk();
         $response->assertViewHas('selectedChurchId', null);
-        $response->assertSee('Escolha uma igreja para liberar a lista de relatórios disponíveis.');
+        $response->assertSee('Escolha uma igreja para ver os relatórios.');
     }
 
     public function testReportsIndexRendersFilterAndCards(): void
