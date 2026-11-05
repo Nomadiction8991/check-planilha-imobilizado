@@ -100,11 +100,11 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--surface, #ffffff);
-    border: 1px solid var(--border, #e2e8f0);
+    background: var(--surface);
+    border: 1px solid var(--border);
     padding: 0.35rem 0.5rem;
     border-radius: 9999px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-card);
     backdrop-filter: blur(8px);
 }
 .quick-action-btn {
@@ -115,7 +115,7 @@
     border-radius: 9999px;
     border: none;
     background: transparent;
-    color: var(--text, #1e293b);
+    color: var(--text);
     font-size: 0.8125rem;
     font-weight: 500;
     cursor: pointer;
@@ -125,7 +125,7 @@
     transition: background 0.15s ease, transform 0.1s ease;
 }
 .quick-action-btn:hover {
-    background: var(--surface-hover, #f1f5f9);
+    background: var(--surface-hover);
 }
 .quick-action-btn:active {
     transform: scale(0.96);
@@ -142,8 +142,8 @@
     font-size: 0.6875rem;
     font-family: inherit;
     font-weight: 600;
-    background: var(--muted, #e2e8f0);
-    color: var(--muted-foreground, #64748b);
+    background: var(--muted);
+    color: var(--muted-foreground);
     border-radius: 0.25rem;
 }
 @media (max-width: 768px) {
@@ -191,17 +191,17 @@
 .quick-shortcuts-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--ui-overlay);
     backdrop-filter: blur(4px);
 }
 .quick-shortcuts-dialog {
     position: relative;
     width: 100%;
     max-width: 480px;
-    background: var(--surface, #ffffff);
-    border: 1px solid var(--border, #e2e8f0);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 1rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
 }
 .quick-shortcuts-header {
@@ -209,7 +209,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border, #e2e8f0);
+    border-bottom: 1px solid var(--border);
 }
 .quick-shortcuts-title {
     display: flex;
@@ -218,7 +218,7 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
-    color: var(--text, #0f172a);
+    color: var(--text);
 }
 .quick-shortcuts-close {
     border: none;
@@ -226,7 +226,7 @@
     cursor: pointer;
     padding: 0.25rem;
     border-radius: 0.375rem;
-    color: var(--muted-foreground, #64748b);
+    color: var(--muted-foreground);
     display: flex;
 }
 .quick-shortcuts-body {
@@ -245,7 +245,7 @@
     align-items: center;
     gap: 0.75rem;
     font-size: 0.875rem;
-    color: var(--text, #334155);
+    color: var(--text);
 }
 .quick-shortcuts-list kbd {
     display: inline-flex;
@@ -255,16 +255,16 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     font-weight: 700;
-    border: 1px solid var(--border, #cbd5e1);
-    background: var(--surface-hover, #f8fafc);
+    border: 1px solid var(--border);
+    background: var(--surface-hover);
     border-radius: 0.375rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-card);
 }
 .quick-shortcuts-footer {
     margin-top: 1.25rem;
     padding-top: 0.75rem;
-    border-top: 1px dashed var(--border, #e2e8f0);
-    color: var(--muted-foreground, #64748b);
+    border-top: 1px dashed var(--border);
+    color: var(--muted-foreground);
 }
 </style>
 
