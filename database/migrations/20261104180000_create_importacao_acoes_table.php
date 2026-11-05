@@ -12,13 +12,17 @@ return new class extends Migration
     {
         Schema::create('importacao_acoes', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('importacao_id')->constrained('importacoes')->cascadeOnDelete();
+            $table->integer('importacao_id');
             $table->string('chave');
             $table->string('tipo');
             $table->string('acao');
             $table->timestamps();
             $table->unique(['importacao_id', 'tipo', 'chave']);
             $table->index(['importacao_id', 'chave']);
+            $table->foreign('importacao_id')
+                ->references('id')
+                ->on('importacoes')
+                ->cascadeOnDelete();
         });
     }
 
