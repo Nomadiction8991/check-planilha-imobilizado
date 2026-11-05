@@ -20,7 +20,7 @@
         label { display: grid; gap: 6px; font-weight: 600; }
         input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--ui-border); border-radius: var(--radius-sm); background: var(--ui-surface); color: var(--ui-text); font: inherit; }
         input:focus-visible, button:focus-visible, .link:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
-        button { min-height: 44px; padding: 10px 16px; border: 1px solid var(--product-primary); border-radius: var(--radius-sm); background: var(--product-primary); color: white; font: inherit; font-weight: 700; cursor: pointer; }
+        button { min-height: 44px; padding: 10px 16px; border: 1px solid var(--product-primary); border-radius: var(--radius-sm); background: var(--product-primary); color: var(--product-primary-text); font: inherit; font-weight: 700; cursor: pointer; }
         button:hover { background: var(--product-primary-hover); }
         button:active { transform: translateY(1px); }
         button:disabled { opacity: .6; cursor: wait; }

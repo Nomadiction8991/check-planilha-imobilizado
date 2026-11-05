@@ -6,7 +6,7 @@
     <style>
         .users-permissions { color: var(--ui-text); font-size: 16px; line-height: 1.5; }
         .users-permissions h1 { font-size: 24px; line-height: 1.2; }
-        .users-permissions .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .users-permissions .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: var(--product-primary-text); }
         .users-permissions .btn.primary:hover { background: var(--product-primary-hover); }
         .users-permissions :is(input, button, a):focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
         .users-permissions .form-actions { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 12px; }

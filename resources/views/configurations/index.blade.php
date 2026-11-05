@@ -210,7 +210,7 @@
     <style>
         .cadastro-field-error { display: block; color: var(--ui-danger); margin-top: 4px; }
         .config-card { font-size: 16px; line-height: 1.5; }
-        .config-card .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .config-card .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: var(--product-primary-text); }
         .config-card .btn.primary:hover { background: var(--product-primary-hover); box-shadow: none; }
         .config-card :focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
         .config-grid {
