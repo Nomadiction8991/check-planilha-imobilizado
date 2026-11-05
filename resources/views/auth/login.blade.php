@@ -52,11 +52,19 @@
             gap: 20px;
         }
 
-        .login-card-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
+        /* Posicionamento do botão de tema fora do formulário (canto superior direito da tela) */
+        .page-theme-toggle-wrapper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+        }
+
+        @media (max-width: 480px) {
+            .page-theme-toggle-wrapper {
+                top: 14px;
+                right: 14px;
+            }
         }
 
         .eyebrow {
@@ -332,13 +340,13 @@
     </style>
 </head>
 <body>
-    <main class="login-card card">
-        <div class="login-card-head">
-            <h1 class="login-title">Entrar</h1>
-            @include('partials.theme-toggle')
-        </div>
+    <div class="page-theme-toggle-wrapper">
+        @include('partials.theme-toggle')
+    </div>
 
+    <main class="login-card card">
         <div class="login-title-group">
+            <h1 class="login-title">Entrar</h1>
             <p class="copy copy-restricted">Acesso restrito</p>
             <p class="copy">Use suas credenciais para acessar o sistema.</p>
         </div>
