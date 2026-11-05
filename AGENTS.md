@@ -83,6 +83,7 @@ a tela pequena, depois adaptada para desktop.
   e como voltar. Nada de fluxo que só funciona com mouse.
 - **Não invente dependência nova de frontend** sem necessidade —
   o projeto já usa Tailwind; resolva com ele.
+- **Design System:** Consulte o arquivo `DESIGN.md` na raiz para a linguagem visual oficial (estilo rustic minimal, tokens de cores, superfícies, tipografia e diretrizes de marca do ecossistema Anvy Softwares). Toda alteração ou criação de tela deve seguir os tokens e diretrizes estabelecidos nele.
 
 **Teste de UI:** toda tela nova ou alterada precisa de cobertura em
 `tests/Feature` verificando o que o usuário vê (status HTTP, elementos
