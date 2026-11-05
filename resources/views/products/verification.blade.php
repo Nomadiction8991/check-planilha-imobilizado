@@ -424,7 +424,7 @@
         @if ($products->isEmpty())
             <div class="empty-state">
                 <strong>Nenhum produto encontrado para os filtros atuais.</strong>
-                <p>Selecione outra igreja, ajuste os filtros ou volte para a listagem principal.</p>
+                <p>Ajuste os filtros ou escolha outra igreja.</p>
             </div>
         @else
             <div

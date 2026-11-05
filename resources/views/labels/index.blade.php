@@ -16,7 +16,9 @@
 
     <style>
         .manual-label-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
-        .manual-label-controls input { width: 12ch; max-width: 100%; min-height: 44px; }
+        .manual-label-controls label { flex: 1 1 12ch; min-width: 0; max-width: 100%; }
+        .manual-label-controls input { width: 100%; min-width: 0; max-width: 100%; min-height: 44px; }
+        .manual-label-controls button { flex: 0 0 auto; }
         #labels-church-select { min-height: 44px; }
         .manual-tag-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
         .manual-tag-chip { display: inline-flex; align-items: center; gap: 8px; padding-left: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font-weight: 600; }
@@ -57,17 +59,6 @@
                             data-labels-church-search data-filter-search
                         >
                     </label></div>
-                    <label class="filters-principal">
-                        Igreja
-                        <select id="labels-church-select" name="comum_id" data-labels-church-select data-labels-server-filter>
-                            <option value="">Selecione uma igreja</option>
-                            @foreach ($churches as $church)
-                                <option value="{{ $church->id }}" @selected((int) $churchId === (int) $church->id)>
-                                    {{ $church->codigo }} - {{ $church->descricao }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </label>
                     <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
                     <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-labels"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
                 </div>
@@ -104,6 +95,18 @@
                             @foreach ($states ?? (array) config('brazil.states', []) as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected(($selectedState ?? '') === $stateCode)>
                                     {{ $stateCode }} - {{ $stateLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label class="filters-principal">
+                        Igreja
+                        <select id="labels-church-select" name="comum_id" data-labels-church-select>
+                            <option value="">Selecione uma igreja</option>
+                            @foreach ($churches as $church)
+                                <option value="{{ $church->id }}" @selected((int) $churchId === (int) $church->id)>
+                                    {{ $church->codigo }} - {{ $church->descricao }}
                                 </option>
                             @endforeach
                         </select>
@@ -176,7 +179,6 @@
                         submitTimer = window.setTimeout(submitLabelsIfChanged, delay);
                     };
 
-                    form.querySelector('[data-labels-church-select]')?.addEventListener('change', () => scheduleSubmit(0));
                     form.addEventListener('submit', () => {
                         window.clearTimeout(submitTimer);
                         form.dataset.labelsFilterSubmitting = 'true';

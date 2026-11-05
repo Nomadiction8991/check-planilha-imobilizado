@@ -240,9 +240,9 @@
 
         <div class="table-shell">
             @if (!$selectedChurchId)
-                <div class="empty-state">Escolha uma igreja para liberar a lista de relatórios disponíveis.</div>
+                <div class="empty-state">Escolha uma igreja para ver os relatórios.</div>
             @elseif ($reports === [])
-                <div class="empty-state">Não há relatórios disponíveis para a igreja selecionada no momento.</div>
+                <div class="empty-state">Nenhum relatório disponível para esta igreja.</div>
             @else
                 <table>
                     <thead>
