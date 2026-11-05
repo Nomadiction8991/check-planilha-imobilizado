@@ -29,6 +29,7 @@
         .label-output-card h3, .label-output-card p { margin: 0; }
         .label-output-card p { color: var(--muted); }
         .label-output-card textarea { min-height: 108px; resize: vertical; }
+        .label-output-card .btn:not(.primary) { color: var(--ui-text); }
         @media (min-width: 640px) { .manual-tag-input { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; } }
     </style>
 

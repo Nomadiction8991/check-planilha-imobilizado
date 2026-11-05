@@ -18,7 +18,7 @@
         #topbar button, #topbar a { display: inline-flex; align-items: center; justify-content: center; }
         #topbar a { color: var(--ui-text) !important; border: 1px solid var(--ui-border) !important; border-radius: var(--radius-sm) !important; font-size: 16px !important; }
         #topbar a:hover { background: var(--ui-surface-muted); }
-        #topbar #btn-save { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        #topbar #btn-save { background: var(--product-primary); border-color: var(--product-primary); color: var(--product-primary-text); }
         #topbar #btn-save:hover { background: var(--product-primary-hover); }
         #topbar #btn-save:disabled, button:disabled { opacity: .6; cursor: not-allowed; }
         #topbar .tb-label, #zoom-display, #mouse-display { color: var(--ui-text-muted); font-size: 16px; }
@@ -61,11 +61,11 @@
     <div class="tb-group" id="cell-mode-controls">
         <label class="tb-label" for="cell-name-input">Nome:</label>
         <input type="text" id="cell-name-input" placeholder="ex: administracao">
-        <span class="tb-label" style="font-size:10px;color:#666">(desenhe e pressione Enter)</span>
+        <span class="tb-label" style="font-size:10px;color:var(--ui-text-muted)">(desenhe e pressione Enter)</span>
     </div>
 
     <div class="tb-group" id="grid-mode-controls" style="display:none;">
-        <span class="tb-label" style="color:#4fc3f7;">Desenhe a área da grade no formulário →</span>
+        <span class="tb-label" style="color:var(--product-primary);">Desenhe a área da grade no formulário →</span>
     </div>
 
     <div class="sep"></div>
@@ -81,14 +81,14 @@
     <div class="sep"></div>
 
     <div class="tb-group">
-        <button id="btn-detect" style="background:#4a1f6e;border-color:#7b3fa0;">🔍 Detectar Campos</button>
-        <button id="btn-docs" style="background:#37474f;border-color:#546e7a;">📂 Documentos</button>
+        <button id="btn-detect" style="background:var(--ui-surface);border-color:var(--ui-border);color:var(--ui-text);">🔍 Detectar Campos</button>
+        <button id="btn-docs" style="background:var(--ui-surface);border-color:var(--ui-border);color:var(--ui-text);">📂 Documentos</button>
         <button class="btn-save"  id="btn-save">💾 Salvar</button>
         <button class="btn-green" id="btn-copy">⬇ Copiar Código</button>
         <button class="btn-red"   id="btn-clear-all">✕ Limpar Tudo</button>
-        <span id="save-indicator" style="font-size:10px;color:#666;"></span>
+        <span id="save-indicator" style="font-size:10px;color:var(--ui-text-muted);"></span>
         <a href="{{ $editorBackUrl }}"
-           style="color:#aaa;font-size:12px;text-decoration:none;padding:5px 10px;border:1px solid #555;border-radius:3px;">
+           style="color:var(--ui-text-muted);font-size:12px;text-decoration:none;padding:5px 10px;border:1px solid var(--ui-border);border-radius:3px;">
             ← Voltar
         </a>
     </div>
@@ -119,9 +119,9 @@
             <div class="sb-title" id="sel-title">Seleção</div>
 
             <!-- Nenhuma seleção -->
-            <div id="no-selection" style="font-size:11px;color:#666;text-align:center;padding:8px;">
+            <div id="no-selection" style="font-size:11px;color:var(--ui-text-muted);text-align:center;padding:8px;">
                 Clique numa célula<br>
-                <span style="color:#555;">Ctrl+Clique para múltiplas</span>
+                <span style="color:var(--ui-text-muted);">Ctrl+Clique para múltiplas</span>
             </div>
 
             <!-- Seleção única -->
@@ -153,11 +153,11 @@
 
             <!-- Multi-seleção -->
             <div id="multi-editor" style="display:none;">
-                <div style="font-size:11px;color:#ffd54f;margin-bottom:10px;text-align:center;">
+                <div style="font-size:11px;color:var(--ui-warning);margin-bottom:10px;text-align:center;">
                     <span id="multi-count">0</span> células selecionadas
                 </div>
 
-                <div style="font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Definir tamanho igual</div>
+                <div style="font-size:10px;color:var(--ui-text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Definir tamanho igual</div>
                 <div class="coords-grid" style="margin-bottom:8px;">
                     <div class="coord-field">
                         <label for="multi-width">Width (px)</label>
@@ -170,7 +170,7 @@
                 </div>
                 <button class="btn-blue btn-sm" id="btn-multi-apply-size" style="width:100%;margin-bottom:8px;font-size:11px;">Aplicar tamanho</button>
 
-                <div style="font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Ajuste relativo</div>
+                <div style="font-size:10px;color:var(--ui-text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Ajuste relativo</div>
                 <div class="coords-grid" style="margin-bottom:8px;">
                     <div class="coord-field">
                         <label for="multi-dw">Δ Width</label>
@@ -201,11 +201,11 @@
         </button>
         <div id="log-body">
             <div>
-                <div style="font-size:10px;color:#666;margin-bottom:4px;">Coordenadas (px da imagem)</div>
+                <div style="font-size:10px;color:var(--ui-text-muted);margin-bottom:4px;">Coordenadas (px da imagem)</div>
                 <div id="log-positions">Nenhuma célula ainda...</div>
             </div>
             <div>
-                <div style="font-size:10px;color:#666;margin-bottom:4px;">Código HTML</div>
+                <div style="font-size:10px;color:var(--ui-text-muted);margin-bottom:4px;">Código HTML</div>
                 <div id="log-code">Nenhuma célula ainda...</div>
             </div>
         </div>
@@ -256,15 +256,15 @@
                 Usar número da coluna
             </label>
         </div>
-        <div style="padding:4px 0;font-size:10px;color:#555;">
-            Ambos: <span style="color:#b06be0;">pfx_col</span><span style="color:#888;">_</span><span style="color:#69f0ae;">pfx_lin</span><span style="color:#888;">_L_C</span>
-            &nbsp;·&nbsp; só coluna: <code style="color:#b06be0;">pfx_L</code>
-            &nbsp;·&nbsp; só linha: <code style="color:#69f0ae;">pfx_C</code>
+        <div style="padding:4px 0;font-size:10px;color:var(--ui-text-muted);">
+            Ambos: <span style="color:var(--product-primary);">pfx_col</span><span style="color:var(--ui-text-muted);">_</span><span style="color:var(--ui-success);">pfx_lin</span><span style="color:var(--ui-text-muted);">_L_C</span>
+            &nbsp;·&nbsp; só coluna: <code style="color:var(--product-primary);">pfx_L</code>
+            &nbsp;·&nbsp; só linha: <code style="color:var(--ui-success);">pfx_C</code>
         </div>
 
         <div id="grid-name-wrap">
             <div class="sb-title" style="margin-bottom:6px;">Nomes das células (linha × coluna)</div>
-            <div style="overflow:auto;max-height:320px;border:1px solid #3c3c3c;border-radius:3px;">
+            <div style="overflow:auto;max-height:320px;border:1px solid var(--ui-border);border-radius:3px;">
                 <table id="grid-name-table" style="border-collapse:collapse;width:100%;"></table>
             </div>
         </div>
@@ -275,7 +275,7 @@
         </div>
 
         <div class="modal-actions">
-            <button id="btn-grid-cancel" style="background:#3c3c3c;">Cancelar</button>
+            <button id="btn-grid-cancel" style="background:var(--ui-surface);color:var(--ui-text);">Cancelar</button>
             <button id="btn-grid-confirm" class="btn-green">✓ Criar Células</button>
         </div>
     </div>
@@ -297,7 +297,7 @@
         <div id="detect-results-list">
             <div class="detect-empty" id="detect-empty-msg">
                 Clique em <strong>▶ Detectar Campos</strong> para analisar o formulário.<br>
-                <span style="font-size:10px;color:#555;margin-top:6px;display:block;">
+                <span style="font-size:10px;color:var(--ui-text-muted);margin-top:6px;display:block;">
                     O sistema analisa os pixels da imagem para encontrar os campos em branco.
                 </span>
             </div>
@@ -305,12 +305,12 @@
         <div id="detect-modal-footer">
             <span id="detect-summary"></span>
             <div style="display:flex;gap:8px;align-items:center;">
-                <label style="font-size:11px;color:#888;display:flex;align-items:center;gap:5px;cursor:pointer;">
+                <label style="font-size:11px;color:var(--ui-text-muted);display:flex;align-items:center;gap:5px;cursor:pointer;">
                     <input type="checkbox" id="detect-with-ocr" style="width:auto;margin:0;">
                     Nomear com OCR (lento)
                 </label>
                 <button id="btn-detect-apply-all" class="btn-green" style="display:none;">✚ Criar Células Aceitas</button>
-                <button id="btn-detect-run" style="background:#4a1f6e;border-color:#7b3fa0;color:#fff;">▶ Detectar Campos</button>
+                <button id="btn-detect-run" style="background:var(--ui-surface);border-color:var(--ui-border);color:var(--ui-text);">▶ Detectar Campos</button>
             </div>
         </div>
     </div>
