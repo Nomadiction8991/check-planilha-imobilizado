@@ -13,7 +13,8 @@ class LoginDesignSystemViewTest extends TestCase
         $response->assertOk();
         $response->assertSee('#F7F4ED');
         $response->assertSee('#176DA9');
-        $response->assertSee('Um produto Anvy Softwares');
-        $response->assertSee('Check Planilha');
+        $response->assertSee('Um produto');
+        $response->assertSee('https://anvy.com.br');
+        $response->assertSee('Anvy Softwares');
     }
 }

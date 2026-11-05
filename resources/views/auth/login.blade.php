@@ -183,9 +183,21 @@
         .product-footer {
             margin-top: 4px;
             text-align: center;
-            font-size: 12px;
+            font-size: 13px;
             color: var(--ui-text-muted);
             letter-spacing: 0.02em;
+        }
+
+        .product-footer a {
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            font-weight: 500;
+            transition: color 0.15s ease;
+        }
+
+        .product-footer a:hover {
+            color: var(--product-primary);
         }
 
         .flash {
@@ -255,16 +267,78 @@
         }
     </style>
     @include('partials.theme-toggle-assets')
+    <style>
+        /* Alinhar o botão de alternância ao Design System Rustic Minimal */
+        .theme-toggle,
+        html[data-theme='light'] .theme-toggle {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 42px !important;
+            height: 42px !important;
+            border-radius: var(--radius-md) !important;
+            background: #FFFDF9 !important;
+            border: 1px solid var(--ui-border) !important;
+            color: var(--ui-text) !important;
+            box-shadow: 0 1px 3px rgba(39, 39, 39, 0.05) !important;
+            cursor: pointer !important;
+            backdrop-filter: none !important;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
+        }
+
+        .theme-toggle:hover,
+        html[data-theme='light'] .theme-toggle:hover {
+            background: #F0EBE3 !important;
+            border-color: #B8B2A8 !important;
+            color: var(--product-primary) !important;
+            transform: none !important;
+            box-shadow: 0 2px 6px rgba(39, 39, 39, 0.08) !important;
+        }
+
+        .theme-toggle:focus-visible,
+        html[data-theme='light'] .theme-toggle:focus-visible {
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(23, 109, 169, 0.2) !important;
+            border-color: var(--product-primary) !important;
+        }
+
+        .theme-toggle .theme-toggle-icon,
+        .theme-toggle .material-symbols-outlined,
+        html[data-theme='light'] .theme-toggle .material-symbols-outlined {
+            font-size: 20px !important;
+            color: inherit !important;
+        }
+
+        html[data-theme='dark'] .theme-toggle {
+            background: #27272A !important;
+            border-color: #3F3F46 !important;
+            color: #F4F4F5 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        html[data-theme='dark'] .theme-toggle:hover {
+            background: #3F3F46 !important;
+            border-color: #52525B !important;
+            color: #38BDF8 !important;
+        }
+
+        html[data-theme='dark'] .theme-toggle .material-symbols-outlined {
+            color: #F4F4F5 !important;
+        }
+
+        html[data-theme='dark'] .theme-toggle:hover .material-symbols-outlined {
+            color: #38BDF8 !important;
+        }
+    </style>
 </head>
 <body>
     <main class="login-card card">
         <div class="login-card-head">
-            <span class="eyebrow">Check Planilha</span>
+            <h1 class="login-title">Entrar</h1>
             @include('partials.theme-toggle')
         </div>
 
         <div class="login-title-group">
-            <h1 class="login-title">Entrar</h1>
             <p class="copy copy-restricted">Acesso restrito</p>
             <p class="copy">Use suas credenciais para acessar o sistema.</p>
         </div>
@@ -304,7 +378,7 @@
             </div>
         </form>
 
-        <p class="product-footer">Um produto Anvy Softwares</p>
+        <p class="product-footer">Um produto <a href="https://anvy.com.br" target="_blank" rel="noopener noreferrer">Anvy Softwares</a></p>
     </main>
     @include('partials.request-loading')
 </body>
