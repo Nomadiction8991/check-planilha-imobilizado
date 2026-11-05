@@ -32,12 +32,24 @@
 @endphp
 
 @section('content')
+    <style>
+        .spreadsheet-errors-guide { margin: 16px 0 0; color: var(--ink); line-height: 1.5; }
+        .spreadsheet-errors-status { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: inherit; cursor: pointer; }
+        .spreadsheet-errors-status input { width: 20px; height: 20px; accent-color: var(--accent); }
+        .spreadsheet-errors-status input:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 3px; }
+        @media (max-width: 860px) {
+            .spreadsheet-errors-list tbody tr { border-radius: var(--radius-md); box-shadow: none; }
+            .spreadsheet-errors-list td { overflow-wrap: anywhere; }
+            .spreadsheet-errors-list td::before { font-size: 14px; }
+        }
+    </style>
     <section class="hero">
         <span class="eyebrow">Importação assistida</span>
         <h1>Erros de importação podem ser tratados aqui.</h1>
         <p class="hero-copy">
             Esta tela concentra os itens pendentes, permite baixar um CSV de correção e marcar erros como resolvidos.
         </p>
+        <p class="spreadsheet-errors-guide">Corrija os dados indicados e acompanhe a situação de cada erro.</p>
         @if ($contextLabel !== 'Visão geral')
             <p class="table-note">{{ $contextLabel }}</p>
         @endif
@@ -76,7 +88,7 @@
                 </div>
             </div>
             <div class="table-shell">
-                <table>
+                <table class="spreadsheet-errors-list" aria-label="Lista de erros de importação">
                     <thead>
                         <tr>
                             <th>Código</th>
@@ -105,7 +117,7 @@
                                 </td>
                                 <td data-label="Situação">
                                     @if (!empty($legacyPermissions['spreadsheets.errors.resolve']))
-                                        <label style="display:flex;align-items:center;gap:8px;color:inherit;">
+                                        <label class="spreadsheet-errors-status">
                                             <input
                                                 class="js-resolve-error"
                                                 type="checkbox"

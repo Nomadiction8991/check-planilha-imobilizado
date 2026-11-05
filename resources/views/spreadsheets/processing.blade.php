@@ -4,85 +4,16 @@
 
 @section('content')
     <style>
-        .processing-shell {
-            display: grid;
-            gap: 14px;
-            padding: 24px;
-        }
-
-        .processing-status {
-            display: grid;
-            gap: 10px;
-        }
-
-        .processing-track {
-            overflow: hidden;
-            height: 22px;
-            border: 1px solid rgba(24, 21, 17, 0.16);
-            border-radius: 999px;
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.52)),
-                rgba(31, 111, 95, 0.06);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.32),
-                inset 0 -1px 0 rgba(24, 21, 17, 0.05);
-        }
-
-        .processing-fill {
-            width: 0;
-            height: 100%;
-            border-radius: inherit;
-            background: linear-gradient(90deg, var(--accent) 0%, #8fdacb 100%);
-            box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-                0 6px 18px rgba(31, 111, 95, 0.20);
-            transition: width 0.2s ease, background 0.2s ease;
-        }
-
-        .processing-shell.is-complete .processing-track {
-            border-color: rgba(31, 111, 95, 0.28);
-            background:
-                linear-gradient(180deg, rgba(31, 111, 95, 0.14), rgba(31, 111, 95, 0.08)),
-                rgba(31, 111, 95, 0.08);
-        }
-
-        .processing-shell.is-complete .processing-fill {
-            background: linear-gradient(90deg, #73d5c4 0%, #b4f0e4 100%);
-            box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-                0 8px 22px rgba(31, 111, 95, 0.28);
-        }
-
-        .processing-actions {
-            margin-top: 28px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .processing-success {
-            display: grid;
-            gap: 18px;
-        }
-
-        .processing-error {
-            display: grid;
-            gap: 28px;
-        }
-
-        html[data-theme='dark'] .processing-track {
-            border-color: rgba(145, 221, 209, 0.22);
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
-                rgba(145, 221, 209, 0.08);
-        }
-
-        html[data-theme='dark'] .processing-shell.is-complete .processing-track {
-            border-color: rgba(145, 221, 209, 0.32);
-            background:
-                linear-gradient(180deg, rgba(145, 221, 209, 0.14), rgba(145, 221, 209, 0.08)),
-                rgba(145, 221, 209, 0.1);
-        }
+        .processing-shell { display: grid; gap: 16px; padding: 16px; }
+        .processing-status { display: grid; gap: 12px; }
+        .processing-track { overflow: hidden; height: 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-soft); }
+        .processing-fill { width: 0; height: 100%; background: var(--accent); transition: width 0.2s ease; }
+        .processing-shell.is-complete .processing-fill { background: var(--ui-success); }
+        html[data-theme='dark'] .processing-track { border-color: var(--line); background: var(--surface-soft); }
+        html[data-theme='dark'] .processing-shell.is-complete .processing-track { border-color: var(--accent); background: var(--accent-soft); }
+        .processing-actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .processing-success, .processing-error { display: grid; gap: 16px; }
+        @media (prefers-reduced-motion: reduce) { .processing-fill { transition: none; } }
     </style>
 
     <section class="hero">
