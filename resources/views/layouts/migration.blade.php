@@ -98,7 +98,7 @@
         .topbar {
             display: grid;
             gap: 0;
-            padding: 4px 12px;
+            padding: 16px 20px;
             border: 0;
             border-radius: var(--radius-lg);
             backdrop-filter: blur(14px);
@@ -130,8 +130,9 @@
         }
 
         .brand {
-            display: grid;
-            gap: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .brand small,
@@ -1265,11 +1266,14 @@
             gap: 8px;
             width: 100%;
             min-height: 44px;
+            padding: 0 12px;
             color: var(--ui-text);
             background: var(--ui-surface);
             border: 1px solid var(--ui-border);
             border-radius: var(--radius-md);
             font: inherit;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
         }
 
@@ -1279,19 +1283,22 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
-            min-height: 52px;
-            padding: 14px 16px;
-            border: 1px solid var(--ui-border-strong);
-            border-radius: 16px;
+            min-height: 44px;
+            padding: 0 12px;
+            border: 1px solid var(--ui-border);
+            border-radius: var(--radius-md);
             background: var(--ui-surface);
             color: var(--ui-text);
             font: inherit;
-            font-weight: 700;
+            font-size: 15px;
+            font-weight: 600;
             letter-spacing: 0;
             cursor: pointer;
-            box-shadow: var(--shadow-card);
+            box-shadow: none;
             transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
         }
+
+        .mobile-menu-logout .material-symbols-outlined { color: var(--ui-danger); }
 
         .mobile-menu-logout:hover {
             transform: translateY(-1px);
@@ -1314,7 +1321,7 @@
             }
 
             .topbar {
-                padding: 5px 8px;
+                padding: 16px 20px;
                 margin-bottom: 0;
             }
 
@@ -1557,12 +1564,18 @@
         .filters-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
         .filters-dialog-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
         .filters-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+        .helper:empty { display: none; }
+        .toast-region { position: fixed; z-index: 10000; top: 16px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px)); display: grid; gap: 8px; pointer-events: none; }
+        .toast { padding: 12px 16px; border: 1px solid var(--ui-border); border-left: 4px solid var(--product-primary); border-radius: var(--radius-md); background: var(--ui-surface); color: var(--ui-text); box-shadow: var(--shadow-card); }
+        .toast[data-tipo="sucesso"] { border-left-color: var(--ui-success); }
+        .toast[data-tipo="erro"] { border-left-color: var(--ui-danger); }
         @media (max-width: 639px) {
             .filters-bar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .filters-search { grid-column: 1 / -1; }
             .filters-dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); padding: 16px; }
         }
         @media (min-width: 1024px) {
+            .toast-region { left: auto; right: 24px; transform: none; }
             .mobile-menu-user { display: none; }
             .filters-primary:has(.filters-query):has(.filters-principal) .filters-actions { grid-column: 3 / -1; }
             .shell, body.page-operational .shell {
@@ -1582,6 +1595,30 @@
         }
     </style>
     @php
+        $menuIcons = [
+            'migration.products.index' => 'inventory_2', 'migration.products.verification' => 'fact_check',
+            'migration.labels.*' => 'label', 'migration.churches.*' => 'church',
+            'migration.departments.*' => 'meeting_room', 'migration.asset-types.*' => 'category',
+            'migration.administrations.*' => 'corporate_fare', 'migration.users.*' => 'group',
+            'migration.reports.*' => 'summarize', 'migration.spreadsheets.*' => 'upload_file',
+            'migration.audits.*' => 'history', 'migration.configuracoes.*' => 'settings',
+        ];
+        $currentMenuItem = collect($legacyNavigation ?? [])->first(fn ($item) => request()->routeIs(...$item['active_patterns']));
+        if (! $currentMenuItem) {
+            $currentMenuItem = collect($legacyNavigation ?? [])->first(function ($item) {
+                $pattern = $item['active_patterns'][0] ?? '';
+                $prefix = preg_replace('/\.[^.]+$/', '.*', $pattern);
+                return $prefix && request()->routeIs($prefix);
+            });
+        }
+        $pageTitle = trim(explode('|', $__env->yieldContent('title'))[0]);
+        $menuPattern = $currentMenuItem['active_patterns'][0] ?? '';
+        $isMenuPage = $menuPattern && (str_contains($menuPattern, '*')
+            ? str_ends_with(request()->route()?->getName() ?? '', '.index')
+            : request()->routeIs($menuPattern));
+        $sectionTitle = $currentMenuItem && $isMenuPage
+            ? $currentMenuItem['label'] : ($pageTitle ?: ($currentMenuItem['label'] ?? 'Início'));
+        $sectionIcon = $menuIcons[$currentMenuItem['active_patterns'][0] ?? ''] ?? 'dashboard';
         $hideHeroOnOperationalRoutes = request()->routeIs(
             'migration.products.*',
             'migration.asset-types.*',
@@ -1604,14 +1641,15 @@
     data-route-name="{{ request()->route()?->getName() ?? '' }}"
     data-ui-user="{{ $legacySessionUser['email'] ?? $legacySessionUser['nome'] ?? '' }}"
 >
+    <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
     <a class="skip-link" href="#main-content">Ir para o conteúdo principal</a>
     <main class="shell" id="main-content" tabindex="-1">
         <div class="sticky-stack">
         <header class="topbar">
             <div class="topbar-main">
                 <div class="brand">
-                    <small>Área restrita</small>
-                    <strong>Check Planilha</strong>
+                    <span class="material-symbols-outlined" aria-hidden="true">{{ $sectionIcon }}</span>
+                    <strong>{{ $sectionTitle }}</strong>
                 </div>
                 <div class="topbar-tools">
                     @if (!empty($legacySessionUser) || session('public_acesso'))
@@ -1728,16 +1766,6 @@
                 @endif
                 @if (! session('public_acesso') && ! empty($legacyNavigation))
                     <nav class="mobile-menu-nav" aria-label="Navegação principal">
-                        @php
-                            $menuIcons = [
-                                'migration.products.index' => 'inventory_2', 'migration.products.verification' => 'fact_check',
-                                'migration.labels.*' => 'label', 'migration.churches.*' => 'church',
-                                'migration.departments.*' => 'meeting_room', 'migration.asset-types.*' => 'category',
-                                'migration.administrations.*' => 'corporate_fare', 'migration.users.*' => 'group',
-                                'migration.reports.*' => 'summarize', 'migration.spreadsheets.*' => 'upload_file',
-                                'migration.audits.*' => 'history', 'migration.configuracoes.*' => 'settings',
-                            ];
-                        @endphp
                         @foreach ($legacyNavigation as $item)
                             <a
                                 href="{{ $item['route'] }}"
@@ -1766,6 +1794,17 @@
             </aside>
         </div>
     <script>
+        window.showToast = (mensagem, { tipo = 'info', duracao = 4000 } = {}) => {
+            const region = document.getElementById('toast-region');
+            if (!region) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.dataset.tipo = tipo;
+            toast.textContent = mensagem;
+            region.appendChild(toast);
+            window.setTimeout(() => toast.remove(), duracao);
+        };
+
         document.addEventListener('click', (event) => {
             const opener = event.target.closest('[data-filter-open]');
             if (opener) {
