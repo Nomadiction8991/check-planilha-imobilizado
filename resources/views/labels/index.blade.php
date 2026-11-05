@@ -15,129 +15,21 @@
     @endphp
 
     <style>
-        .manual-tag-input {
-            display: grid;
-            grid-template-columns: auto minmax(0, 1fr) auto;
-            gap: 10px;
-            align-items: center;
-            padding: 14px 16px;
-            border: 1px solid rgba(148, 163, 184, 0.28);
-            border-radius: 18px;
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
-        }
-
-        .manual-tag-input__prefix {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 102px;
-            padding: 10px 12px;
-            border-radius: 999px;
-            background: rgba(96, 165, 250, 0.18);
-            color: #dbeafe;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            white-space: nowrap;
-        }
-
-        .manual-tag-input input {
-            min-width: 0;
-            background: rgba(15, 23, 42, 0.88);
-            border-color: rgba(148, 163, 184, 0.35);
-            color: #f8fafc;
-        }
-
-        .manual-tag-input__add {
-            white-space: nowrap;
-            background: #f8fafc;
-            color: #0f172a;
-            border-color: rgba(248, 250, 252, 0.8);
-        }
-
-        .manual-tag-input__add:hover {
-            background: #e2e8f0;
-            color: #0f172a;
-        }
-
-        .manual-tag-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        .manual-tag-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.88);
-            color: #f8fafc;
-            border: 1px solid rgba(148, 163, 184, 0.24);
-            font-weight: 600;
-        }
-
-        .manual-tag-chip button {
-            width: 26px;
-            height: 26px;
-            border: 0;
-            border-radius: 999px;
-            background: rgba(148, 163, 184, 0.2);
-            color: #f8fafc;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .manual-tag-chip button:hover {
-            background: rgba(239, 68, 68, 0.34);
-            color: #fff;
-        }
-
-        .manual-tag-input input::placeholder {
-            color: #94a3b8;
-        }
-
-        .manual-tag-empty {
-            color: #cbd5e1;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .label-output-grid {
-            display: grid;
-            gap: 16px;
-        }
-
-        .label-output-card {
-            display: grid;
-            gap: 10px;
-            padding: 16px;
-            border-radius: 18px;
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
-            border: 1px solid rgba(148, 163, 184, 0.24);
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
-        }
-
-        .label-output-card h3 {
-            margin: 0;
-            color: #f8fafc;
-            font-size: 16px;
-        }
-
-        .label-output-card p {
-            margin: 0;
-            color: #cbd5e1;
-        }
-
-        .label-output-card textarea {
-            min-height: 108px;
-            background: rgba(15, 23, 42, 0.88);
-            border-color: rgba(148, 163, 184, 0.35);
-            color: #f8fafc;
-            resize: vertical;
-        }
+        .manual-tag-input { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+        .manual-tag-input__prefix { color: var(--ink); font-weight: 700; }
+        .manual-tag-input input { min-width: 0; }
+        .manual-tag-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+        .manual-tag-chip { display: inline-flex; align-items: center; gap: 8px; padding-left: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font-weight: 600; }
+        .manual-tag-chip button { min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+        .manual-tag-chip button:hover { color: var(--ui-danger); }
+        .manual-tag-chip button:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        .manual-tag-empty { color: var(--muted); margin-top: 10px; }
+        .label-output-grid { display: grid; gap: 16px; }
+        .label-output-card { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-card); }
+        .label-output-card h3, .label-output-card p { margin: 0; }
+        .label-output-card p { color: var(--muted); }
+        .label-output-card textarea { min-height: 108px; resize: vertical; }
+        @media (min-width: 640px) { .manual-tag-input { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; } }
     </style>
 
     @if (session('status'))
@@ -431,7 +323,7 @@
             <div class="label-output-card">
                 <h3>Manuais</h3>
                 <p>Etiquetas adicionadas pelo usuário e salvas automaticamente.</p>
-                <textarea id="manualCodesField" rows="5" readonly onclick="this.select()">{{ implode(', ', $manualCodes) }}</textarea>
+                <textarea id="manualCodesField" aria-label="Etiquetas manuais" rows="5" readonly onclick="this.select()">{{ implode(', ', $manualCodes) }}</textarea>
                 <div class="actions">
                     <button class="btn" id="copyManualLabelsButton" type="button" @disabled($manualCodes === [])>Copiar manuais</button>
                 </div>
@@ -440,7 +332,7 @@
             <div class="label-output-card">
                 <h3>Verificados</h3>
                 <p>Códigos gerados pelos produtos marcados para etiqueta.</p>
-                <textarea id="verifiedCodesField" rows="6" readonly onclick="this.select()">{{ $verifiedCodes }}</textarea>
+                <textarea id="verifiedCodesField" aria-label="Etiquetas verificadas" rows="6" readonly onclick="this.select()">{{ $verifiedCodes }}</textarea>
                 <div class="actions">
                     <button class="btn primary" id="copyCodesButton" type="button">Copiar verificados</button>
                 </div>
@@ -449,7 +341,7 @@
             <div class="label-output-card">
                 <h3>Todos</h3>
                 <p>União dos códigos verificados com os manuais, sem duplicar.</p>
-                <textarea id="allCodesField" rows="7" readonly onclick="this.select()">{{ implode(', ', $allCodesList) }}</textarea>
+                <textarea id="allCodesField" aria-label="Todas as etiquetas" rows="7" readonly onclick="this.select()">{{ implode(', ', $allCodesList) }}</textarea>
                 <div class="actions">
                     <button class="btn" id="copyAllLabelsButton" type="button">Copiar todos</button>
                 </div>

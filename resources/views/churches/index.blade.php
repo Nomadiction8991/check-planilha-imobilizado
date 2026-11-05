@@ -3,17 +3,30 @@
 @section('title', 'Igrejas | ' . config('app.name'))
 
 @section('content')
+    <style>
+        .church-page-header h1 { font-size: 24px; line-height: 1.25; font-weight: 700; }
+        .church-page-header .hero-copy { font-size: 16px; }
+        .church-filters .filters { backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+        .church-filters label { font-size: 16px; }
+        .church-filters :is(input, select, .btn), .church-list .btn { min-height: 44px; font-size: 16px; }
+        .church-filters :is(input, select, button, a):focus-visible, .church-list :is(button, a):focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        .church-list .btn.danger { color: var(--ui-danger); border-color: var(--ui-danger); }
+        .church-list .empty-state p { margin: 8px 0 0; }
+        @media (max-width: 639px) {
+            .church-filters .filters-primary:has(.filters-query):has(.filters-principal) { grid-template-columns: minmax(0, 1fr); }
+            .church-filters .filters-primary:has(.filters-query) .filters-actions { justify-self: stretch; }
+            .church-list td::before { font-size: 14px; }
+        }
+        @media (min-width: 640px) { .church-page-header h1 { font-size: 32px; } }
+    </style>
     @php
         $isLegacyAdmin = !empty($legacySessionUser['is_admin'] ?? false) || (bool) session('is_admin', false);
     @endphp
 
-    <section class="hero">
+    <section class="hero church-page-header">
         <span class="eyebrow">Consulta e edição</span>
         <h1>Igrejas cadastradas no sistema.</h1>
-        <p class="hero-copy">
-            Esta tela permite filtrar, paginar, contar produtos ativos por igreja e acessar a área de produtos ou a
-            edição do cadastro com rapidez.
-        </p>
+        <p class="hero-copy">Consulte as igrejas e seus produtos ativos.</p>
     </section>
 
     @if (session('status') || $errors->any())
@@ -26,7 +39,7 @@
         </div>
     @endif
 
-    <section class="section">
+    <section class="section church-filters">
         <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.churches.index') }}" data-filter-autosubmit data-filter-message="Atualizando igrejas…">
                 <div class="filters-primary">
@@ -118,7 +131,7 @@
         </div>
     </section>
 
-    <section class="section">
+    <section class="section church-list">
         <div class="section-head">
             <div>
                 <h2>Lista de igrejas</h2>
@@ -128,7 +141,10 @@
 
         <div class="table-shell">
             @if ($churches->isEmpty())
-                <div class="empty-state">Nenhuma igreja encontrada para o filtro informado.</div>
+                <div class="empty-state">
+                    <strong>Nenhuma igreja encontrada para o filtro informado.</strong>
+                    <p>Ajuste os filtros ou limpe a busca para ver outras igrejas.</p>
+                </div>
             @else
                 <table>
                     <thead>

@@ -3,13 +3,19 @@
 @section('title', 'Editar Igreja | ' . config('app.name'))
 
 @section('content')
-    <section class="hero">
+    <style>
+        .church-page-header h1 { font-size: 24px; line-height: 1.25; font-weight: 700; }
+        .church-page-header .hero-copy { font-size: 16px; }
+        .church-field-error { color: var(--ui-danger); font-weight: 600; }
+        .church-edit input, .church-edit select, .church-edit .btn { min-height: 44px; font-size: 16px; }
+        .church-edit label { font-size: 16px; }
+        .church-edit :is(input, select, button, a):focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        @media (min-width: 640px) { .church-page-header h1 { font-size: 32px; } }
+    </style>
+    <section class="hero church-page-header">
         <span class="eyebrow">Cadastro de igrejas</span>
         <h1>Editar igreja.</h1>
-        <p class="hero-copy">
-            Atualize o cadastro principal da igreja. O código permanece imutável, o CNPJ continua validado antes de
-            gravar e a igreja precisa ficar vinculada a uma administração para funcionar na importação.
-        </p>
+        <p class="hero-copy">Atualize os dados da igreja e sua administração vinculada.</p>
     </section>
 
     @if (session('status') || $errors->any())
@@ -33,7 +39,7 @@
         </div>
     @endif
 
-    <section class="section">
+    <section class="section church-edit">
         <div class="table-shell">
             <form id="church-edit-form" method="POST" action="{{ route('migration.churches.update', ['church' => $church->id]) }}" class="form-shell">
                 @csrf
@@ -42,7 +48,7 @@
                 <div class="field-grid">
                     <label>
                         Administração vinculada
-                        <select name="administracao_id" required>
+                        <select name="administracao_id" required @error('administracao_id') aria-invalid="true" aria-describedby="church-administracao-error" @enderror>
                             <option value="">Selecione</option>
                             @foreach ($administrations as $administration)
                                 <option value="{{ $administration->id }}" @selected((int) old('administracao_id', $church->administracao_id ?? 0) === (int) $administration->id)>
@@ -50,6 +56,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('administracao_id')<span class="church-field-error" id="church-administracao-error">{{ $message }}</span>@enderror
                     </label>
 
                     <label>
@@ -69,7 +76,9 @@
                             inputmode="numeric"
                             placeholder="00.000.000/0000-00"
                             required
+                            @error('cnpj') aria-invalid="true" aria-describedby="church-cnpj-error" @enderror
                         >
+                        @error('cnpj')<span class="church-field-error" id="church-cnpj-error">{{ $message }}</span>@enderror
                     </label>
 
                     <label>
@@ -82,12 +91,14 @@
                             maxlength="255"
                             placeholder="Nome da igreja"
                             required
+                            @error('descricao') aria-invalid="true" aria-describedby="church-descricao-error" @enderror
                         >
+                        @error('descricao')<span class="church-field-error" id="church-descricao-error">{{ $message }}</span>@enderror
                     </label>
 
                     <label>
                         Estado da Igreja
-                        <select name="estado" required>
+                        <select name="estado" required @error('estado') aria-invalid="true" aria-describedby="church-estado-error" @enderror>
                             <option value="">Selecione</option>
                             @foreach ($states as $stateCode => $stateLabel)
                                 <option value="{{ $stateCode }}" @selected(old('estado', $church->estado) === $stateCode)>
@@ -95,6 +106,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('estado')<span class="church-field-error" id="church-estado-error">{{ $message }}</span>@enderror
                     </label>
 
                     <label>
@@ -105,9 +117,11 @@
                             required
                             disabled
                             data-selected-city="{{ old('cidade', $church->cidade) }}"
+                            @error('cidade') aria-invalid="true" aria-describedby="church-cidade-error" @enderror
                         >
                             <option value="">Selecione um estado primeiro</option>
                         </select>
+                        @error('cidade')<span class="church-field-error" id="church-cidade-error">{{ $message }}</span>@enderror
                     </label>
 
                     <label>
@@ -118,7 +132,9 @@
                             value="{{ old('setor', $church->setor) }}"
                             maxlength="255"
                             placeholder="Setor da igreja"
+                            @error('setor') aria-invalid="true" aria-describedby="church-setor-error" @enderror
                         >
+                        @error('setor')<span class="church-field-error" id="church-setor-error">{{ $message }}</span>@enderror
                     </label>
                 </div>
 
