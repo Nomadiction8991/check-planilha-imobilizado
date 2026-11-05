@@ -70,12 +70,8 @@
             gap: 0;
             padding: 26px;
             border: 1px solid var(--line);
-            border-radius: 28px;
-            background:
-                radial-gradient(circle at top right, color-mix(in srgb, var(--accent-soft) 84%, transparent), transparent 40%),
-                radial-gradient(circle at bottom left, color-mix(in srgb, var(--warn-soft) 70%, transparent), transparent 32%),
-                linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 92%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
-            box-shadow: var(--shadow-strong);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
         }
 
         .report-preview-hero::after {
@@ -86,7 +82,7 @@
             width: 180px;
             height: 180px;
             border-radius: 999px;
-            background: radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 72%);
+            background: transparent;
             pointer-events: none;
         }
 
@@ -220,7 +216,7 @@
         .report-a4-preview {
             border: 1px solid rgba(24, 21, 17, 0.12);
             background: rgba(255, 252, 247, 0.92);
-            box-shadow: 0 24px 70px rgba(38, 28, 12, 0.12);
+            box-shadow: var(--shadow-card);
         }
 
         .report-a4-card-header {
@@ -416,7 +412,7 @@
         }
     </style>
 
-    <section class="section report-a4-screen">
+    <section class="section report-a4-screen" aria-label="Pré-visualização do relatório">
         @foreach ($preview['paginas'] as $page)
             <article class="report-a4-card">
                 <div class="report-a4-card-header">

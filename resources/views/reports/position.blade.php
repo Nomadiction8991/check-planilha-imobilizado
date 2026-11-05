@@ -130,12 +130,8 @@
             overflow: hidden;
             padding: 26px 28px;
             border: 1px solid var(--line);
-            border-radius: 28px;
-            background:
-                radial-gradient(circle at top right, color-mix(in srgb, var(--accent-soft) 88%, transparent), transparent 42%),
-                radial-gradient(circle at bottom left, color-mix(in srgb, var(--warn-soft) 72%, transparent), transparent 36%),
-                linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 84%, transparent), var(--surface));
-            box-shadow: var(--shadow-soft);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
         }
 
         .position-hero::after {
@@ -145,7 +141,7 @@
             width: 210px;
             height: 210px;
             border-radius: 999px;
-            background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 70%);
+            background: transparent;
             pointer-events: none;
         }
 
@@ -183,9 +179,8 @@
             padding: 18px;
             border: 1px solid var(--line);
             border-radius: var(--radius-lg);
-            background:
-                linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 86%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
-            box-shadow: var(--shadow);
+            background: var(--surface);
+            box-shadow: var(--shadow-card);
         }
 
         .position-panel + .position-panel {
@@ -468,7 +463,7 @@
         </div>
     </section>
 
-    <section class="section">
+    <section class="section" aria-label="Itens da posição">
         <div class="position-panel">
             <div class="position-panel__head">
                 <strong>Itens da posição</strong>
@@ -522,8 +517,8 @@
                                     }
                                 @endphp
                                 <tr>
-                                    <td class="mono">{{ $item['codigo'] !== '' ? $item['codigo'] : '-' }}</td>
-                                    <td>
+                                    <td data-label="Código" class="mono">{{ $item['codigo'] !== '' ? $item['codigo'] : '-' }}</td>
+                                    <td data-label="Descrição">
                                         <div class="position-item">
                                             <strong>{{ $item['nome_atual'] !== '' ? $item['nome_atual'] : '-' }}</strong>
                                             @if ($item['nome_original'] !== '' && $item['nome_original'] !== $item['nome_atual'])
@@ -531,13 +526,13 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td>{{ $item['dependencia'] !== '' ? $item['dependencia'] : '-' }}</td>
-                                    <td>
+                                    <td data-label="Dependência">{{ $item['dependencia'] !== '' ? $item['dependencia'] : '-' }}</td>
+                                    <td data-label="Situação">
                                         <span class="position-status position-status--{{ $statusTone }}">
                                             {{ $item['status_label'] }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Sinais">
                                         <div class="position-tags">
                                             @if ($signals === [])
                                                 <span class="position-tag position-tag--muted">Sem sinais</span>
@@ -550,7 +545,7 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td>{{ $item['observacoes'] !== '' ? $item['observacoes'] : '-' }}</td>
+                                    <td data-label="Observação">{{ $item['observacoes'] !== '' ? $item['observacoes'] : '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
