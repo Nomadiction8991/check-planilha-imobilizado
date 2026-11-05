@@ -53,6 +53,29 @@ class DesignSystemPlanilhasTest extends TestCase
             ->assertSee('name="_token"', false);
     }
 
+    public function test_previa_nao_mostra_linha_lateral_no_painel_de_setores(): void
+    {
+        Route::middleware('web')->get('/teste-design-previa-borda', fn () => view('spreadsheets.preview', [
+            'analise' => [], 'importacao' => [], 'importacaoId' => 15,
+        ]));
+
+        $html = $this->get('/teste-design-previa-borda')->assertOk()->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('/\.dependency-panel\s*\{[^}]*border-left/', $html);
+    }
+
+    public function test_previa_nao_pinta_de_azul_a_linha_de_setores_ao_passar_o_mouse(): void
+    {
+        Route::middleware('web')->get('/teste-design-previa-hover', fn () => view('spreadsheets.preview', [
+            'analise' => [], 'importacao' => [], 'importacaoId' => 15,
+        ]));
+
+        $html = $this->get('/teste-design-previa-hover')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('tbody tr:hover td {', $html);
+        $this->assertStringContainsString('tbody tr:not(.dependency-row):hover td {', $html);
+    }
+
     public function test_erros_mostra_orientacao_e_lista_com_informacoes_para_celular(): void
     {
         Route::middleware('web')->get('/teste-design-erros', fn () => view('spreadsheets.errors', [
