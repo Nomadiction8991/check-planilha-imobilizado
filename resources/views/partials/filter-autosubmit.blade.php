@@ -60,10 +60,12 @@
             });
 
             serverFields.forEach((field) => {
-                field.addEventListener('change', () => scheduleSubmit(80));
+                field.addEventListener('change', () => {
+                    if (!field.closest('[data-filter-dialog]')) scheduleSubmit(80);
+                });
             });
 
-            if (searchInput) {
+            if (searchInput && !searchInput.closest('[data-filter-dialog]')) {
                 searchInput.addEventListener('input', () => scheduleSubmit(350));
                 searchInput.addEventListener('search', () => scheduleSubmit(0));
                 searchInput.addEventListener('change', () => scheduleSubmit(0));
