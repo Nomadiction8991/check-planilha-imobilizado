@@ -24,10 +24,28 @@
     @endif
 
     <section class="section">
-        <div class="filters filters--audit" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.audits.index') }}" data-audits-filter-form data-audits-filter-autosubmit>
-                <div class="filters-primary">
-                    <label for="audits-admin-search">
+        <div class="filters" data-sticky-filters>
+            <form method="GET" action="{{ route('migration.audits.index') }}" data-audits-filter-form data-audits-filter-autosubmit data-filter-autosubmit>
+                <div class="filters-bar">
+                    <div class="filters-search">
+
+                    <label class="filters-query">
+                        Busca geral
+                        <input
+                            id="audits-search" type="search"
+                            name="busca"
+                            value="{{ $filters['search'] }}"
+                            placeholder="Usuário, ação, descrição, rota ou método"
+                            data-audits-search data-filter-search data-filter-server
+                        >
+                    </label></div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-audits"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <dialog id="filtros-audits" class="filters-dialog" aria-labelledby="filtros-audits-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head"><h2 id="filtros-audits-titulo">Filtros</h2><button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></header>
+                    <div class="filters-dialog-fields">
+                        <label for="audits-admin-search">
                         Buscar administração
                         <input
                             id="audits-admin-search"
@@ -52,35 +70,6 @@
                     </label>
                     <p id="audits-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-audits-admin-status></p>
 
-                    <label class="filters-query">
-                        Busca geral
-                        <input
-                            type="text"
-                            name="busca"
-                            value="{{ $filters['search'] }}"
-                            placeholder="Usuário, ação, descrição, rota ou método"
-                            data-audits-search
-                        >
-                    </label>
-
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Filtrar</button>
-                        <a class="btn" href="{{ route('migration.audits.index') }}">Limpar</a>
-                        <a
-                            class="btn"
-                            href="{{ route('migration.audits.export', array_filter([
-                                'busca' => $filters['search'],
-                                'modulo' => $filters['module'],
-                                'data_inicio' => $filters['date_from'],
-                                'data_fim' => $filters['date_to'],
-                                'administracao_id' => $selectedAdministrationId !== null ? (string) $selectedAdministrationId : '',
-                            ], static fn (string $value): bool => $value !== '')) }}"
-                        >Exportar CSV</a>
-                        <span class="helper" role="status" aria-live="polite" data-audits-filter-status></span>
-                    </div>
-                </div>
-
-                <div class="filters-advanced">
                     <label>
                         Módulo
                         <select name="modulo" data-audits-server-filter>
@@ -100,8 +89,25 @@
                         Data final
                         <input type="date" name="data_fim" value="{{ $filters['date_to'] }}" data-audits-server-filter>
                     </label>
-                </div>
+
+                    </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.audits.index') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
+            <a
+                            class="btn"
+                            href="{{ route('migration.audits.export', array_filter([
+                                'busca' => $filters['search'],
+                                'modulo' => $filters['module'],
+                                'data_inicio' => $filters['date_from'],
+                                'data_fim' => $filters['date_to'],
+                                'administracao_id' => $selectedAdministrationId !== null ? (string) $selectedAdministrationId : '',
+                            ], static fn (string $value): bool => $value !== '')) }}"
+                        >Exportar CSV</a>
+            <span class="helper" role="status" aria-live="polite" data-audits-filter-status></span>
         </div>
     </section>
     <script>
@@ -161,14 +167,7 @@
                 form.dataset.auditsFilterSubmitting = 'true';
             });
 
-            serverFields.forEach((field) => {
-                field.addEventListener('change', () => scheduleSubmit(80));
-            });
 
-            if (searchInput) {
-                searchInput.addEventListener('input', () => scheduleSubmit(350));
-                searchInput.addEventListener('search', () => scheduleSubmit(0));
-            }
         })();
     </script>
     <script>
@@ -283,4 +282,5 @@
             @endif
         </div>
     </section>
+    @include('partials.filter-autosubmit')
 @endsection

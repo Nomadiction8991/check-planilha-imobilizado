@@ -79,4 +79,21 @@ class DesignSystemProdutosTest extends TestCase
             ->assertSee('Nenhum produto ativo encontrado')
             ->assertSee('product-listing', false);
     }
+
+    public function test_listagem_apresenta_filtros_em_popup_no_mesmo_formulario(): void
+    {
+        $service = $this->mock(LegacyProductBrowserServiceInterface::class);
+        $service->shouldReceive('paginate')->once()->andReturn(new LengthAwarePaginator([], 0, 20));
+        foreach (['churchOptions', 'administrationOptions', 'dependencyOptions', 'assetTypeOptions'] as $method) {
+            $service->shouldReceive($method)->once()->andReturn(collect());
+        }
+        $service->shouldReceive('statusOptions')->once()->andReturn([]);
+
+        $this->get(route('migration.products.index'))
+            ->assertOk()
+            ->assertSee('data-filter-open', false)
+            ->assertSee('<dialog id="filtros-produtos"', false)
+            ->assertSee('Aplicar filtros')
+            ->assertDontSee('class="product-filters-toggle"', false);
+    }
 }

@@ -40,7 +40,7 @@ final class DesignSystemUsuariosIgrejasTest extends TestCase
         $response->assertOk();
         $response->assertSee('Nenhuma igreja encontrada para o filtro informado.');
         $response->assertSee('Ajuste os filtros ou limpe a busca para ver outras igrejas.');
-        $response->assertSee('Filtrar');
+        $response->assertSee('Aplicar filtros');
     }
 
     public function test_etiquetas_apresenta_listas_identificadas_e_estado_vazio(): void

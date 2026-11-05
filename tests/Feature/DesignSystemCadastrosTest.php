@@ -58,10 +58,10 @@ final class DesignSystemCadastrosTest extends TestCase
             'mailConfiguration' => $mail, 'menuOrder' => new LegacyNavigationOrderData([]), 'menuItems' => [],
         ]);
 
-        $this->get('/teste-design/tipos')->assertOk()->assertSee('Novo tipo de bem')->assertSee('Nenhum tipo de bem encontrado');
+        $this->get('/teste-design/tipos')->assertOk()->assertSee('Novo tipo de bem')->assertSee('Nenhum tipo de bem encontrado')->assertSee('id="filtros-asset-types"', false)->assertSee('Aplicar filtros');
         $this->get('/teste-design/tipos/novo')->assertOk()->assertSee('Administração')->assertSee('Salvar tipo de bem');
         $this->get('/teste-design/tipos/editar')->assertOk()->assertSee('Descrição')->assertSee('Salvar alterações');
-        $this->get('/teste-design/dependencias')->assertOk()->assertSee('Nova dependência')->assertSee('Nenhuma dependência encontrada');
+        $this->get('/teste-design/dependencias')->assertOk()->assertSee('Nova dependência')->assertSee('Nenhuma dependência encontrada')->assertSee('id="filtros-departments"', false)->assertSee('Aplicar filtros');
         $this->get('/teste-design/dependencias/nova')->assertOk()->assertSee('Igreja')->assertSee('Salvar dependência');
         $this->get('/teste-design/dependencias/editar')->assertOk()->assertSee('Descrição')->assertSee('Salvar alterações');
         $this->get('/teste-design/configuracoes')->assertOk()->assertSee('Host SMTP')->assertSee('Salvar e-mail')->assertSee('Ordem dos menus');

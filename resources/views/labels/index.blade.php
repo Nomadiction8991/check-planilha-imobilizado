@@ -43,21 +43,28 @@
 
     <section class="section">
         <div class="filters" data-sticky-filters>
-            @php
-                $labelsActiveCount = 0;
-                if ((int) ($selectedAdministrationId ?? 0) > 0) $labelsActiveCount++;
-                if (($selectedState ?? '') !== '') $labelsActiveCount++;
-                if ((int) ($churchId ?? 0) > 0) $labelsActiveCount++;
-                if (($selectedDependencyId ?? '') !== '' && $selectedDependencyId !== null) $labelsActiveCount++;
-            @endphp
-            <button type="button" class="product-filters-toggle" data-product-filters-toggle data-active-count="{{ $labelsActiveCount }}" aria-expanded="false" aria-controls="labels-filters-panel">
-                <span data-product-filters-toggle-label>{{ $labelsActiveCount > 0 ? 'Filtros · ' . $labelsActiveCount . ' ' . ($labelsActiveCount === 1 ? 'ativo' : 'ativos') : 'Filtros' }}</span>
-                <span class="material-symbols-outlined product-filters-toggle__icon" aria-hidden="true">expand_more</span>
-            </button>
-            <div id="labels-filters-panel" data-product-filters-panel>
             <form method="GET" action="{{ route('migration.labels.index') }}" data-labels-filter-form data-labels-filter-autosubmit>
-                <div class="filters-primary">
-                    <label for="labels-admin-search">
+                <div class="filters-bar">
+                    <div class="filters-search">
+
+                    <label for="labels-church-search">
+                        Buscar igreja
+                        <input
+                            id="labels-church-search"
+                            type="search"
+                            placeholder="Digite para filtrar"
+                            autocomplete="off"
+                            aria-controls="labels-church-select"
+                            data-labels-church-search data-filter-search
+                        >
+                    </label></div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-labels"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <dialog id="filtros-labels" class="filters-dialog" aria-labelledby="filtros-labels-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head"><h2 id="filtros-labels-titulo">Filtros</h2><button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></header>
+                    <div class="filters-dialog-fields">
+                        <label for="labels-admin-search">
                         Buscar administração
                         <input
                             id="labels-admin-search"
@@ -92,18 +99,6 @@
                             @endforeach
                         </select>
                     </label>
-
-                    <label for="labels-church-search">
-                        Buscar igreja
-                        <input
-                            id="labels-church-search"
-                            type="search"
-                            placeholder="Digite para filtrar"
-                            autocomplete="off"
-                            aria-controls="labels-church-select"
-                            data-labels-church-search
-                        >
-                    </label>
                     <label class="filters-principal">
                         Igreja
                         <select id="labels-church-select" name="comum_id" data-labels-church-select data-labels-server-filter>
@@ -117,14 +112,6 @@
                     </label>
                     <p id="labels-church-search-status" class="helper" role="status" aria-live="polite" hidden data-labels-church-status></p>
 
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Filtrar</button>
-                        <a class="btn" href="{{ route('migration.labels.index') }}">Limpar</a>
-                        <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $churchId]) }}">Voltar aos produtos</a>
-                        <span class="helper" role="status" aria-live="polite" data-labels-filter-status></span>
-                    </div>
-                </div>
-                <div class="filters-advanced">
                     <label>
                         Dependência
                         <select name="dependencia" data-labels-server-filter @disabled($churchId === null)>
@@ -136,8 +123,16 @@
                             @endforeach
                         </select>
                     </label>
-                </div>
+
+                    </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.labels.index') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
+            <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $churchId]) }}">Voltar aos produtos</a>
+            <span class="helper" role="status" aria-live="polite" data-labels-filter-status></span>
             <script>
                 (() => {
                     const form = document.querySelector('[data-labels-filter-form][data-labels-filter-autosubmit]');
@@ -192,10 +187,6 @@
                     form.addEventListener('submit', () => {
                         window.clearTimeout(submitTimer);
                         form.dataset.labelsFilterSubmitting = 'true';
-                    });
-
-                    serverSelects.forEach((select) => {
-                        select.addEventListener('change', () => scheduleSubmit(80));
                     });
                 })();
             </script>
@@ -271,7 +262,6 @@
                     search.addEventListener('search', applyFilter);
                 })();
             </script>
-            </div>
         </div>
     </section>
 
@@ -592,4 +582,5 @@
             syncOutputs();
         })();
     </script>
+    @include('partials.filter-autosubmit')
 @endsection

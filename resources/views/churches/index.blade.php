@@ -40,9 +40,23 @@
     @endif
 
     <section class="section church-filters">
-        <div class="filters" data-sticky-filters>
-            <form method="GET" action="{{ route('migration.churches.index') }}" data-filter-autosubmit data-filter-message="Atualizando igrejas…">
-                <div class="filters-primary">
+        <div data-sticky-filters>
+            <form method="GET" action="{{ route('migration.churches.index') }}" class="filters" data-filter-autosubmit data-filter-message="Atualizando igrejas…">
+                <div class="filters-bar">
+                    <div class="filters-search">
+                        <label for="churches-search">Buscar por código ou descrição</label>
+                        <input id="churches-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="BR 12-3456 ou descrição" data-filter-search data-filter-server>
+                    </div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-churches"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <span class="helper" role="status" aria-live="polite" data-filter-status></span>
+                <dialog id="filtros-churches" class="filters-dialog" aria-labelledby="filtros-churches-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head">
+                        <h2 id="filtros-churches-titulo">Filtros</h2>
+                        <button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+                    </header>
+                    <div class="filters-dialog-fields">
                     <label for="churches-admin-search">
                         Buscar administração
                         <input
@@ -79,17 +93,13 @@
                         </select>
                     </label>
 
-                    <label class="filters-query">
-                        Buscar por código ou descrição
-                        <input type="text" name="busca" value="{{ $filters->search }}" placeholder="BR 12-3456 ou descrição" data-filter-search>
-                    </label>
 
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Filtrar</button>
-                        <a class="btn" href="{{ route('migration.churches.index') }}">Limpar</a>
-                        <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                     </div>
-                </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.churches.index') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
             @include('partials.filter-autosubmit')
             <script>

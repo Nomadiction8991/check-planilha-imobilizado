@@ -278,17 +278,22 @@
     @endif
 
     <section class="section">
-        <div class="filters" data-sticky-filters>
-            @php
-                $activeCount = $filters->activeCriteriaCount();
-            @endphp
-            <button type="button" class="product-filters-toggle" data-product-filters-toggle data-active-count="{{ $activeCount }}" aria-expanded="false" aria-controls="product-filters-panel-verification">
-                <span data-product-filters-toggle-label>{{ $activeCount > 0 ? 'Filtros · ' . $activeCount . ' ' . ($activeCount === 1 ? 'ativo' : 'ativos') : 'Filtros' }}</span>
-                <span class="material-symbols-outlined product-filters-toggle__icon" aria-hidden="true">expand_more</span>
-            </button>
-            <div id="product-filters-panel-verification" data-product-filters-panel>
-            <form method="GET" action="{{ route('migration.products.verification') }}" data-product-filter-form>
-                <div class="filters-primary">
+        <div data-sticky-filters>
+            <form method="GET" action="{{ route('migration.products.verification') }}" class="filters" data-filter-autosubmit data-filter-message="Atualizando resultados…">
+                <div class="filters-bar">
+                    <div class="filters-search">
+                        <label for="busca-verificacao">Busca geral</label>
+                        <input id="busca-verificacao" type="search" name="busca" value="{{ $filters->search }}" placeholder="Código, descrição, dependência, tipo ou status" data-filter-search data-filter-server>
+                    </div>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-verificacao"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                </div>
+                <dialog id="filtros-verificacao" class="filters-dialog" aria-labelledby="filtros-verificacao-titulo" data-filter-dialog>
+                    <header class="filters-dialog-head">
+                        <h2 id="filtros-verificacao-titulo">Filtros</h2>
+                        <button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+                    </header>
+                    <div class="filters-dialog-fields">
                     <label for="product-admin-search-verification">
                         Buscar administração
                         <input
@@ -355,24 +360,6 @@
                         </div>
                     </label>
 
-                    <label class="filters-query">
-                        Busca geral
-                        <input
-                            type="text"
-                            name="busca"
-                            value="{{ $filters->search }}"
-                            placeholder="Código, descrição, dependência, tipo ou status"
-                        >
-                    </label>
-
-                    <div class="actions filters-actions">
-                        <button class="btn primary" type="submit">Filtrar</button>
-                        <a class="btn" href="{{ route('migration.products.verification') }}">Limpar</a>
-                        <span class="helper" role="status" aria-live="polite" data-product-filter-status></span>
-                    </div>
-                </div>
-
-                <div class="filters-advanced">
                     <label>
                         Dependência
                         <select name="dependencia_id">
@@ -408,10 +395,14 @@
                             @endforeach
                         </select>
                     </label>
-                </div>
+                    </div>
+                    <footer class="filters-dialog-actions">
+                        <a class="btn" href="{{ route('migration.products.verification') }}"><span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>Limpar</a>
+                        <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">check</span>Aplicar filtros</button>
+                    </footer>
+                </dialog>
             </form>
             @include('products.partials.active-filter-chips')
-            </div>
         </div>
     </section>
 
@@ -728,74 +719,6 @@
     @endif
     <script>
         (() => {
-            document.querySelectorAll('[data-product-filter-form]').forEach((form) => {
-                if (form.dataset.productFilterAutosubmit === 'ready') {
-                    return;
-                }
-
-                form.dataset.productFilterAutosubmit = 'ready';
-                const submitButton = form.querySelector('button[type="submit"]');
-                const searchInput = form.querySelector('input[name="busca"]');
-                let submitTimer = 0;
-                let lastSignature = new URLSearchParams(new FormData(form)).toString();
-
-                const getSignature = () => new URLSearchParams(new FormData(form)).toString();
-                const status = form.querySelector('[data-product-filter-status]');
-                const resetPage = () => {
-                    ['page', 'pagina'].forEach((pageName) => {
-                        form.querySelectorAll(`[name="${pageName}"]`).forEach((field) => {
-                            field.value = '';
-                            field.disabled = true;
-                        });
-                    });
-                };
-                const submitIfChanged = () => {
-                    submitTimer = 0;
-                    const signature = getSignature();
-                    if (signature === lastSignature) {
-                        return;
-                    }
-
-                    lastSignature = signature;
-                    resetPage();
-                    form.dataset.productFilterSubmitting = 'true';
-                    if (status) {
-                        status.textContent = 'Atualizando resultados…';
-                    }
-                    if (submitButton) {
-                        submitButton.disabled = true;
-                        submitButton.setAttribute('aria-busy', 'true');
-                    }
-                    if (typeof form.requestSubmit === 'function') {
-                        form.requestSubmit();
-                    } else {
-                        form.submit();
-                    }
-                };
-                const scheduleSubmit = (delay) => {
-                    window.clearTimeout(submitTimer);
-                    submitTimer = window.setTimeout(submitIfChanged, delay);
-                };
-
-                form.addEventListener('submit', () => {
-                    window.clearTimeout(submitTimer);
-                    form.dataset.productFilterSubmitting = 'true';
-                });
-
-                form.querySelectorAll('select[name="administracao_id"], select[name="comum_id"], select[name="estado"], select[name="dependencia_id"], select[name="tipo_bem_id"], select[name="status"]').forEach((select) => {
-                    select.addEventListener('change', () => scheduleSubmit(80));
-                });
-
-                if (searchInput) {
-                    searchInput.addEventListener('input', () => scheduleSubmit(350));
-                    searchInput.addEventListener('search', () => scheduleSubmit(0));
-                    searchInput.addEventListener('change', () => scheduleSubmit(0));
-                }
-            });
-        })();
-    </script>
-    <script>
-        (() => {
             const adminSearch = document.querySelector('[data-product-admin-search]');
             const adminSelect = document.querySelector('[data-product-admin-select]');
             const adminStatus = document.querySelector('[data-product-admin-status]');
@@ -866,4 +789,5 @@
             search.addEventListener('search', applyFilter);
         })();
     </script>
+    @include('partials.filter-autosubmit')
 @endsection

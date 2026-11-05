@@ -935,18 +935,13 @@ final class LegacyProductManagementTest extends TestCase
         $response = $this->get(route('migration.products.index'));
 
         $response->assertOk();
-        $response->assertSee('data-product-filter-form', false);
-        $response->assertSee("form.dataset.productFilterAutosubmit = 'ready';", false);
-        $response->assertSee('input[name="busca"]', false);
-        $response->assertSee('searchInput.addEventListener(\'input\', () => scheduleSubmit(350))', false);
-        $response->assertSee('select[name="tipo_bem_id"]', false);
-        $response->assertSee('select.addEventListener(\'change\', () => scheduleSubmit(80))', false);
-        $response->assertSee('form.requestSubmit()', false);
-        $response->assertSee('data-product-filter-status', false);
+        $response->assertSee('data-filter-autosubmit', false);
+        $response->assertSee('data-filter-search', false);
+        $response->assertSee('<dialog id="filtros-produtos"', false);
+        $response->assertSee('name="tipo_bem_id"', false);
+        $response->assertSee('Aplicar filtros');
         $response->assertSee("adminSelect.dispatchEvent(new Event('change', { bubbles: true }))", false);
         $response->assertSee("select.dispatchEvent(new Event('change', { bubbles: true }))", false);
-        $response->assertDontSee('data-product-admin-search].addEventListener(\'input\', () => scheduleSubmit', false);
-        $response->assertDontSee('data-product-church-search].addEventListener(\'input\', () => scheduleSubmit', false);
     }
 
     public function testVerificationFilterFormAutosubmitsResultFilters(): void
@@ -961,10 +956,10 @@ final class LegacyProductManagementTest extends TestCase
         ])->get(route('migration.products.verification'));
 
         $response->assertOk();
-        $response->assertSee('data-product-filter-form', false);
-        $response->assertSee('searchInput.addEventListener(\'input\', () => scheduleSubmit(350))', false);
-        $response->assertSee('form.requestSubmit()', false);
-        $response->assertSee('data-product-filter-status', false);
+        $response->assertSee('data-filter-autosubmit', false);
+        $response->assertSee('data-filter-search', false);
+        $response->assertSee('<dialog id="filtros-verificacao"', false);
+        $response->assertSee('Aplicar filtros');
         $response->assertSee("adminSelect.dispatchEvent(new Event('change', { bubbles: true }))", false);
         $response->assertSee("select.dispatchEvent(new Event('change', { bubbles: true }))", false);
     }
