@@ -8,16 +8,14 @@
     @include('partials.pwa')
     <style>
         :root {
-            --bg: #f5f0e8;
-            --surface: rgba(255, 252, 247, 0.94);
-            --ink: #181511;
-            --muted: #6f6253;
-            --line: rgba(24, 21, 17, 0.12);
-            --accent: #1f6f5f;
-            --warn: #8b3d19;
-            --shadow: 0 16px 38px rgba(38, 28, 12, 0.08);
-            --shadow-strong: 0 24px 60px rgba(38, 28, 12, 0.12);
-            --radius: 22px;
+            --bg: #F7F4ED;
+            --surface: #FFFDF9;
+            --ink: #272727;
+            --muted: #60636A;
+            --line: #D1CDC6;
+            --accent: #176DA9;
+            --accent-hover: #105786;
+            --radius: 14px;
             --radius-sm: 12px;
         }
 
@@ -29,19 +27,16 @@
             display: grid;
             place-items: center;
             padding: 24px;
-            font-family: Georgia, "Times New Roman", serif;
+            font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
             color: var(--ink);
-            background:
-                radial-gradient(circle at top left, rgba(31, 111, 95, 0.14), transparent 30%),
-                radial-gradient(circle at right center, rgba(139, 61, 25, 0.14), transparent 24%),
-                linear-gradient(180deg, #f8f3ed 0%, var(--bg) 100%);
+            background: var(--bg);
         }
 
         .card {
             width: min(480px, 100%);
             border: 1px solid var(--line);
             background: var(--surface);
-            box-shadow: var(--shadow-strong);
+            box-shadow: 0 8px 24px rgba(39, 39, 39, 0.08);
             border-radius: var(--radius);
             padding: 32px;
             display: grid;
@@ -67,8 +62,10 @@
             width: fit-content;
             padding: 6px 10px;
             border-radius: 999px;
-            background: rgba(31, 111, 95, 0.12);
+            background: #DDECF7;
         }
+
+        h1 { font-size: 26px; font-weight: 600; }
 
         .copy {
             color: var(--muted);
@@ -92,8 +89,11 @@
         .forgot-link {
             color: var(--accent);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
         }
 
         .forgot-link:hover {
@@ -103,33 +103,35 @@
         label {
             display: grid;
             gap: 6px;
-            font-size: 13px;
-            color: var(--muted);
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--ink);
         }
 
         input {
             width: 100%;
-            min-height: 44px;
+            min-height: 48px;
             padding: 11px 12px;
             border: 1px solid var(--line);
             border-radius: var(--radius-sm);
             background: #fff;
             color: var(--ink);
+            font: inherit;
             transition: border-color 0.16s ease, box-shadow 0.16s ease;
         }
 
         input:focus {
             outline: none;
-            border-color: rgba(31, 111, 95, 0.55);
-            box-shadow: 0 0 0 3px rgba(31, 111, 95, 0.12);
+            border-color: var(--accent-hover);
+            box-shadow: 0 0 0 3px rgba(16, 87, 134, 0.15);
         }
 
-        button {
-            min-height: 44px;
+        button:not(.theme-toggle) {
+            min-height: 48px;
             padding: 12px 16px;
-            border: 1px solid var(--ink);
+            border: 1px solid var(--accent);
             border-radius: var(--radius-sm);
-            background: var(--ink);
+            background: var(--accent);
             color: #fffdf8;
             font: inherit;
             font-weight: 700;
@@ -138,22 +140,31 @@
         }
 
         button:not(.theme-toggle):hover {
-            transform: translateY(-1px);
-            background: #1f1a14;
-            box-shadow: 0 8px 20px rgba(38, 28, 12, 0.12);
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        button:not(.theme-toggle):focus-visible, .forgot-link:focus-visible {
+            outline: 3px solid var(--accent-hover);
+            outline-offset: 3px;
         }
 
         .flash {
             margin-top: 18px;
             padding: 14px 16px;
-            border: 1px solid var(--line);
+            border: 1px solid #B33A3A;
             border-radius: var(--radius-sm);
-            background: rgba(139, 61, 25, 0.08);
+            color: #B33A3A;
+            background: #FDF2F2;
         }
 
         .flash.success {
-            background: rgba(31, 111, 95, 0.08);
+            color: #267454;
+            border-color: #267454;
+            background: #F0FDF4;
         }
+
+        .product-footer { color: var(--muted); text-align: center; }
 
         ul {
             margin: 8px 0 0;
@@ -171,14 +182,34 @@
         }
     </style>
     @include('partials.theme-toggle-assets')
+    <style>
+        html[data-theme='light'] {
+            --bg: #F7F4ED;
+            --surface: #FFFDF9;
+            --ink: #272727;
+            --muted: #60636A;
+            --line: #D1CDC6;
+            --accent: #176DA9;
+        }
+        html[data-theme='light'] body { background: var(--bg); }
+        html[data-theme='light'] .card { background: var(--surface); box-shadow: 0 8px 24px rgba(39, 39, 39, 0.08); }
+        html[data-theme='light'] .eyebrow { color: var(--accent); background: #DDECF7; }
+        html[data-theme='light'] button[type='submit'] { background: var(--accent); border-color: var(--accent); box-shadow: none; }
+        html[data-theme='light'] button[type='submit']:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+        html[data-theme='light'] .flash { color: #B33A3A; border-color: #B33A3A; background: #FDF2F2; box-shadow: none; }
+        html[data-theme='light'] .flash.success { color: #267454; border-color: #267454; background: #F0FDF4; }
+        html[data-theme='dark'] .flash { color: #ffdada; border-color: #e78888; background: #542b2b; }
+        html[data-theme='dark'] .flash.success { color: #d3f5df; border-color: #79c99b; background: #224437; }
+    </style>
 </head>
 <body>
     <main class="card">
         <div class="card-head">
-            <span class="eyebrow">Acesso restrito</span>
+            <span class="eyebrow">Check Planilha</span>
             @include('partials.theme-toggle')
         </div>
         <h1>Entrar</h1>
+        <p class="copy">Acesso restrito</p>
         <p class="copy">Use suas credenciais para acessar o sistema.</p>
 
         @if (session('status'))
@@ -215,6 +246,7 @@
                 <a class="forgot-link" href="{{ route('migration.password.request') }}">Esqueci minha senha</a>
             </div>
         </form>
+        <p class="product-footer">Um produto Anvy Softwares</p>
     </main>
     @include('partials.request-loading')
 </body>
