@@ -99,8 +99,8 @@
             display: grid;
             gap: 0;
             padding: 4px 12px;
-            border-width: 0 0 1px;
-            border-radius: 0;
+            border: 0;
+            border-radius: var(--radius-lg);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             box-shadow: none;
@@ -203,6 +203,8 @@
             white-space: nowrap;
             order: 2;
         }
+
+        body:has(dialog[open]) .page-quick-actions { display: none; }
 
         .page-quick-actions {
             position: fixed;
@@ -517,6 +519,7 @@
             border-radius: 12px;
             text-decoration: none;
             background: var(--surface-strong);
+            color: var(--ui-text);
             transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
             box-shadow: var(--shadow-card);
             cursor: pointer;
@@ -1204,7 +1207,7 @@
         .mobile-menu-link {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             gap: 12px;
             width: 100%;
             min-height: 44px;
@@ -1239,7 +1242,7 @@
         .mobile-menu-link .material-symbols-outlined {
             font-size: 20px;
             line-height: 1;
-            color: var(--muted);
+            color: currentColor;
             transition: transform 0.16s ease, color 0.16s ease;
         }
 
@@ -1251,12 +1254,30 @@
         .mobile-menu-footer {
             margin-top: auto;
             padding-top: 6px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .mobile-menu-footer .sidebar-theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            min-height: 44px;
+            color: var(--ui-text);
+            background: var(--ui-surface);
+            border: 1px solid var(--ui-border);
+            border-radius: var(--radius-md);
+            font: inherit;
+            cursor: pointer;
         }
 
         .mobile-menu-logout {
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             width: 100%;
             min-height: 52px;
             padding: 14px 16px;
@@ -1529,6 +1550,18 @@
             backdrop-filter: none;
         }
         .mobile-menu-link.active { font-weight: 700; }
+        .filters-bar { display: flex; align-items: end; gap: 12px; }
+        .filters-search { flex: 1; min-width: 0; display: grid; gap: 4px; }
+        .filters-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border: 1px solid var(--ui-border); border-radius: var(--radius-lg); background: var(--ui-surface); color: var(--ui-text); box-shadow: var(--shadow-card); }
+        .filters-dialog::backdrop { background: var(--ui-overlay); }
+        .filters-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+        .filters-dialog-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+        .filters-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+        @media (max-width: 639px) {
+            .filters-bar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .filters-search { grid-column: 1 / -1; }
+            .filters-dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); padding: 16px; }
+        }
         @media (min-width: 1024px) {
             .mobile-menu-user { display: none; }
             .filters-primary:has(.filters-query):has(.filters-principal) .filters-actions { grid-column: 3 / -1; }
@@ -1601,23 +1634,6 @@
                                 >
                                     <span class="material-symbols-outlined theme-toggle-icon" aria-hidden="true">menu</span>
                                 </button>
-                                @if (session('public_acesso'))
-                                    <form method="POST" action="{{ route('public.access.logout') }}">
-                                        @csrf
-                                        <button class="session-logout session-logout--public" type="submit" aria-label="Sair do acesso público" title="Sair do acesso público">
-                                            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-                                            <span class="session-logout-label">Sair do acesso público</span>
-                                        </button>
-                                    </form>
-                                @else
-                                    <form method="POST" action="{{ route('migration.logout') }}">
-                                        @csrf
-                                        <button class="session-logout" type="submit" aria-label="Sair" title="Sair">
-                                            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-                                        </button>
-                                    </form>
-                                @endif
-                                @include('partials.theme-toggle')
                             </div>
                         </div>
                     @endif
@@ -1712,6 +1728,16 @@
                 @endif
                 @if (! session('public_acesso') && ! empty($legacyNavigation))
                     <nav class="mobile-menu-nav" aria-label="Navegação principal">
+                        @php
+                            $menuIcons = [
+                                'migration.products.index' => 'inventory_2', 'migration.products.verification' => 'fact_check',
+                                'migration.labels.*' => 'label', 'migration.churches.*' => 'church',
+                                'migration.departments.*' => 'meeting_room', 'migration.asset-types.*' => 'category',
+                                'migration.administrations.*' => 'corporate_fare', 'migration.users.*' => 'group',
+                                'migration.reports.*' => 'summarize', 'migration.spreadsheets.*' => 'upload_file',
+                                'migration.audits.*' => 'history', 'migration.configuracoes.*' => 'settings',
+                            ];
+                        @endphp
                         @foreach ($legacyNavigation as $item)
                             <a
                                 href="{{ $item['route'] }}"
@@ -1719,29 +1745,41 @@
                                 @if (request()->routeIs(...$item['active_patterns'])) aria-current="page" @endif
                                 data-mobile-menu-link
                             >
+                                <span class="material-symbols-outlined" aria-hidden="true">{{ $menuIcons[$item['active_patterns'][0] ?? ''] ?? 'circle' }}</span>
                                 <span class="mobile-menu-link-label">{{ $item['label'] }}</span>
                             </a>
                         @endforeach
                     </nav>
                 @endif
-                @if (session('public_acesso'))
+                @if (session('public_acesso') || !empty($legacySessionUser))
                     <div class="mobile-menu-footer">
-                        <form method="POST" action="{{ route('public.access.logout') }}">
+                        <button type="button" class="theme-toggle sidebar-theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Alternar tema">
+                            <span class="material-symbols-outlined theme-toggle-icon" data-theme-icon aria-hidden="true">dark_mode</span>
+                            <span>Tema</span>
+                        </button>
+                        <form method="POST" action="{{ session('public_acesso') ? route('public.access.logout') : route('migration.logout') }}">
                             @csrf
-                            <button class="mobile-menu-logout" type="submit">Sair do acesso público</button>
-                        </form>
-                    </div>
-                @elseif (!empty($legacySessionUser))
-                    <div class="mobile-menu-footer">
-                        <form method="POST" action="{{ route('migration.logout') }}">
-                            @csrf
-                            <button class="mobile-menu-logout" type="submit">Sair</button>
+                            <button class="mobile-menu-logout" type="submit"><span class="material-symbols-outlined" aria-hidden="true">logout</span>{{ session('public_acesso') ? 'Sair do acesso público' : 'Sair' }}</button>
                         </form>
                     </div>
                 @endif
             </aside>
         </div>
     <script>
+        document.addEventListener('click', (event) => {
+            const opener = event.target.closest('[data-filter-open]');
+            if (opener) {
+                const dialog = document.getElementById(opener.getAttribute('aria-controls'));
+                if (dialog instanceof HTMLDialogElement && !dialog.open) {
+                    dialog.addEventListener('close', () => opener.focus(), { once: true });
+                    dialog.showModal();
+                }
+                return;
+            }
+            const close = event.target.closest('[data-filter-close]');
+            if (close) close.closest('dialog')?.close();
+        });
+
         (() => {
             const menu = document.querySelector('[data-mobile-menu]');
             const toggle = document.querySelector('[data-mobile-menu-toggle]');

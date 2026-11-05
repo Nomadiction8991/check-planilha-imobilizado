@@ -12,6 +12,28 @@ use Mockery\MockInterface;
 
 final class AppShellDesignSystemTest extends TestCase
 {
+    public function test_atalhos_ficam_ocultos_quando_um_dialogo_esta_aberto(): void
+    {
+        $source = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+        $this->assertMatchesRegularExpression('/body:has\(dialog\[open\]\)\s+\.page-quick-actions\s*\{[^}]*display:\s*none/s', $source);
+        $this->assertStringContainsString('data-page-quick-actions', $source);
+    }
+
+    public function test_casca_organiza_sair_tema_e_dialogo_de_filtros(): void
+    {
+        $source = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+        preg_match('~<header class="topbar">(.*?)</header>~s', $source, $topbar);
+        preg_match('~<div class="mobile-menu-footer">(.*?)</div>~s', $source, $footer);
+        $this->assertStringNotContainsString('session-logout', $topbar[1]);
+        $this->assertStringNotContainsString('data-theme-toggle', $topbar[1]);
+        $this->assertStringContainsString('logout', $footer[1]);
+        $this->assertStringContainsString('data-theme-toggle', $footer[1]);
+        $this->assertStringContainsString('data-filter-open', $source);
+        $this->assertStringContainsString('showModal()', $source);
+        $autosubmit = file_get_contents(resource_path('views/partials/filter-autosubmit.blade.php'));
+        $this->assertStringContainsString("closest('[data-filter-dialog]')", $autosubmit);
+    }
+
     public function test_destaque_claro_nao_usa_sombra_pesada(): void
     {
         $html = view('layouts.migration')->render();
