@@ -412,7 +412,6 @@
         </div>
 
         <div class="hero-actions">
-            <a class="btn" href="{{ route('migration.reports.index', ['comum_id' => $selectedChurchId]) }}">Voltar para relatórios</a>
             <a class="btn primary" href="{{ $backupUrl }}">Baixar backup CSV</a>
         </div>
     </section>

@@ -15,9 +15,9 @@
     @endphp
 
     <style>
-        .manual-tag-input { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
-        .manual-tag-input__prefix { color: var(--ink); font-weight: 700; }
-        .manual-tag-input input { min-width: 0; }
+        .manual-label-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+        .manual-label-controls input { width: 12ch; max-width: 100%; min-height: 44px; }
+        #labels-church-select { min-height: 44px; }
         .manual-tag-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
         .manual-tag-chip { display: inline-flex; align-items: center; gap: 8px; padding-left: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font-weight: 600; }
         .manual-tag-chip button { min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
@@ -30,7 +30,6 @@
         .label-output-card p { color: var(--muted); }
         .label-output-card textarea { min-height: 108px; resize: vertical; }
         .label-output-card .btn:not(.primary) { color: var(--ui-text); }
-        @media (min-width: 640px) { .manual-tag-input { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; } }
     </style>
 
     @if (session('status'))
@@ -58,6 +57,17 @@
                             data-labels-church-search data-filter-search
                         >
                     </label></div>
+                    <label class="filters-principal">
+                        Igreja
+                        <select id="labels-church-select" name="comum_id" data-labels-church-select data-labels-server-filter>
+                            <option value="">Selecione uma igreja</option>
+                            @foreach ($churches as $church)
+                                <option value="{{ $church->id }}" @selected((int) $churchId === (int) $church->id)>
+                                    {{ $church->codigo }} - {{ $church->descricao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
                     <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
                     <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-labels"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
                 </div>
@@ -86,7 +96,6 @@
                             @endforeach
                         </select>
                     </label>
-                    <p id="labels-admin-search-status" class="helper" role="status" aria-live="polite" hidden data-labels-admin-status></p>
 
                     <label class="filters-principal">
                         Estado (UF)
@@ -99,18 +108,6 @@
                             @endforeach
                         </select>
                     </label>
-                    <label class="filters-principal">
-                        Igreja
-                        <select id="labels-church-select" name="comum_id" data-labels-church-select data-labels-server-filter>
-                            <option value="">Selecione uma igreja</option>
-                            @foreach ($churches as $church)
-                                <option value="{{ $church->id }}" @selected((int) $churchId === (int) $church->id)>
-                                    {{ $church->codigo }} - {{ $church->descricao }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </label>
-                    <p id="labels-church-search-status" class="helper" role="status" aria-live="polite" hidden data-labels-church-status></p>
 
                     <label>
                         Dependência
@@ -131,8 +128,6 @@
                     </footer>
                 </dialog>
             </form>
-            <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $churchId]) }}">Voltar aos produtos</a>
-            <span class="helper" role="status" aria-live="polite" data-labels-filter-status></span>
             <script>
                 (() => {
                     const form = document.querySelector('[data-labels-filter-form][data-labels-filter-autosubmit]');
@@ -141,7 +136,6 @@
                     }
 
                     const submitButton = form.querySelector('button[type="submit"]');
-                    const status = form.querySelector('[data-labels-filter-status]');
                     const serverSelects = form.querySelectorAll('[data-labels-server-filter]');
                     let submitTimer = 0;
                     let lastSignature = new URLSearchParams(new FormData(form)).toString();
@@ -165,9 +159,7 @@
                         lastSignature = signature;
                         resetPage();
                         form.dataset.labelsFilterSubmitting = 'true';
-                        if (status) {
-                            status.textContent = 'Atualizando etiquetas…';
-                        }
+                        window.showToast?.('Atualizando etiquetas…', { tipo: 'info' });
                         if (submitButton) {
                             submitButton.disabled = true;
                             submitButton.setAttribute('aria-busy', 'true');
@@ -184,6 +176,7 @@
                         submitTimer = window.setTimeout(submitLabelsIfChanged, delay);
                     };
 
+                    form.querySelector('[data-labels-church-select]')?.addEventListener('change', () => scheduleSubmit(0));
                     form.addEventListener('submit', () => {
                         window.clearTimeout(submitTimer);
                         form.dataset.labelsFilterSubmitting = 'true';
@@ -194,8 +187,7 @@
                 (() => {
                     const adminSearch = document.querySelector('[data-labels-admin-search]');
                     const adminSelect = document.querySelector('[data-labels-admin-select]');
-                    const adminStatus = document.querySelector('[data-labels-admin-status]');
-                    if (adminSearch && adminSelect && adminStatus) {
+                    if (adminSearch && adminSelect) {
                         const adminOptions = Array.from(adminSelect.options);
                         const adminPlaceholder = adminOptions.find((o) => o.value === '');
                         const realAdminOptions = adminOptions.filter((o) => o.value !== '');
@@ -213,12 +205,9 @@
                                 adminSelect.dispatchEvent(new Event('change', { bubbles: true }));
                             }
                             if (visible === 0 && term !== '') {
-                                adminStatus.textContent = 'Nenhuma administração encontrada para "' + adminSearch.value.trim() + '".';
-                                adminStatus.hidden = false;
+                                window.showToast?.('Nenhuma administração encontrada para "' + adminSearch.value.trim() + '".', { tipo: 'info' });
                                 adminSelect.disabled = true;
                             } else {
-                                adminStatus.textContent = '';
-                                adminStatus.hidden = true;
                                 adminSelect.disabled = false;
                                 if (adminPlaceholder) { adminPlaceholder.hidden = false; adminPlaceholder.disabled = false; }
                             }
@@ -229,8 +218,7 @@
 
                     const search = document.querySelector('[data-labels-church-search]');
                     const select = document.querySelector('[data-labels-church-select]');
-                    const status = document.querySelector('[data-labels-church-status]');
-                    if (!search || !select || !status) return;
+                    if (!search || !select) return;
                     const options = Array.from(select.options);
                     const placeholder = options.find((o) => o.value === '');
                     const churchOptions = options.filter((o) => o.value !== '');
@@ -248,12 +236,9 @@
                             select.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                         if (visible === 0 && term !== '') {
-                            status.textContent = 'Nenhuma igreja encontrada para "' + search.value.trim() + '".';
-                            status.hidden = false;
+                            window.showToast?.('Nenhuma igreja encontrada para "' + search.value.trim() + '".', { tipo: 'info' });
                             select.disabled = true;
                         } else {
-                            status.textContent = '';
-                            status.hidden = true;
                             select.disabled = false;
                             if (placeholder) { placeholder.hidden = false; placeholder.disabled = false; }
                         }
@@ -267,10 +252,9 @@
 
     <section class="section">
         <div class="filters">
-            <label style="grid-column: 1 / -1;">
-                Etiquetas manuais
+            <div style="grid-column: 1 / -1;">
                 <div
-                    class="manual-tag-input"
+                    class="manual-label-controls"
                     data-manual-labels-root
                     data-church-id="{{ $churchId ?? '' }}"
                     data-dependency-id="{{ $selectedDependencyId ?? '' }}"
@@ -279,7 +263,7 @@
                     data-csrf-token="{{ csrf_token() }}"
                     @disabled($churchId === null)
                 >
-                    <span class="manual-tag-input__prefix">{{ $churchCode !== '' ? $churchCode . '/' : 'Selecione uma igreja' }}</span>
+                    <label for="manualLabelNumberInput">Código
                     <input
                         id="manualLabelNumberInput"
                         type="text"
@@ -287,10 +271,10 @@
                         maxlength="6"
                         placeholder="233"
                         @disabled($churchId === null)
-                    >
-                    <button class="btn primary manual-tag-input__add" id="addManualLabelButton" type="button" @disabled($churchId === null)>Adicionar</button>
+                    ></label>
+                    <button class="btn primary" id="addManualLabelButton" type="button" @disabled($churchId === null)>Adicionar</button>
                 </div>
-            </label>
+            </div>
 
             <div id="manualLabelChipList" class="manual-tag-list" style="grid-column: 1 / -1;">
                 @forelse ($manualCodes as $manualCode)
@@ -304,7 +288,7 @@
             </div>
             <p class="product-edit-note" style="grid-column: 1 / -1; margin: 0;">
                 Digite só o número final. O sistema completa com a igreja atual, grava automaticamente e permite remover
-                cada etiqueta pelo `x`.
+                cada etiqueta pelo botão x.
             </p>
         </div>
     </section>
@@ -442,9 +426,9 @@
             const copyText = async (text, button, successText) => {
                 try {
                     await navigator.clipboard.writeText(text);
-                    button.textContent = successText;
+                    window.showToast?.(successText, { tipo: 'sucesso' });
                 } catch (error) {
-                    button.textContent = 'Falha ao copiar';
+                    window.showToast?.('Falha ao copiar', { tipo: 'erro' });
                 }
 
                 window.setTimeout(() => {
@@ -497,8 +481,10 @@
                 const data = await response.json().catch(() => ({}));
 
                 if (!response.ok || data.success !== true) {
+                    window.showToast?.(data.message || 'Não foi possível salvar a etiqueta.', { tipo: 'erro' });
                     return;
                 }
+                window.showToast?.(action === 'add' ? 'Etiqueta adicionada.' : 'Etiqueta removida.', { tipo: 'sucesso' });
 
                 manualCodes = Array.isArray(data.codes) ? data.codes : manualCodes;
                 renderChips();

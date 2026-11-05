@@ -52,7 +52,6 @@
 
                 <div class="actions">
                     <button class="btn primary" type="submit">Salvar observação</button>
-                    <a class="btn" href="{{ route('migration.products.index', $returnQuery) }}">Voltar</a>
                 </div>
             </form>
         </div>

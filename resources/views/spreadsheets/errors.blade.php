@@ -54,7 +54,9 @@
             <p class="table-note">{{ $contextLabel }}</p>
         @endif
         <div class="inline-actions">
-            <a class="btn" href="{{ $backUrl }}">{{ $backLabel }}</a>
+            @if ($backLabel === 'Nova importação')
+                <a class="btn" href="{{ $backUrl }}">Nova importação</a>
+            @endif
             @if ($resumo['pendentes'] > 0 && ($modo === 'comum' || $modo === 'administracao' || $modo === 'importacao'))
                 <a class="btn primary" href="{{ route('migration.spreadsheets.errors.download', $downloadParams) }}">
                     Baixar CSV de correção

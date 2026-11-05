@@ -90,11 +90,13 @@ final class LegacyProductUtilityCompatibilityTest extends TestCase
         $response->assertSee('data-labels-admin-search', false);
         $response->assertSee('data-labels-filter-form', false);
         $response->assertSee('data-labels-server-filter', false);
-        $response->assertSee('data-labels-filter-status', false);
+        $response->assertDontSee('data-labels-filter-status', false);
+        $response->assertSee('window.showToast', false);
+        $response->assertDontSee('Voltar aos produtos');
         $response->assertSee('data-labels-filter-autosubmit', false);
         $response->assertSee('data-filter-open', false);
         $response->assertSee('aria-controls="filtros-labels"', false);
-        $this->assertMatchesRegularExpression('/<div class="filters-bar">.*?data-filter-search.*?<\/div>.*?<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?name="comum_id".*?name="dependencia".*?<\/dialog>/s', $response->getContent());
+        $this->assertMatchesRegularExpression('/<div class="filters-bar">.*?data-filter-search.*?<select\b[^>]*name="comum_id".*?<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?name="dependencia".*?<\/dialog>/s', $response->getContent());
         $response->assertSee('submitLabelsIfChanged', false);
         $response->assertSee('Atualizando etiquetas…', false);
         $response->assertSee("form.querySelectorAll('[data-labels-server-filter]')", false);
