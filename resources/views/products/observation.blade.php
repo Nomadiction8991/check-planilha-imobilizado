@@ -33,7 +33,7 @@
     @endif
 
     <section class="section">
-        <div class="filters">
+        <div class="filters product-observation">
             <form method="POST" action="{{ route('migration.compat.products.observation.store') }}">
                 @csrf
                 <input type="hidden" name="produto_id" value="{{ $product->id_produto }}">
@@ -46,7 +46,8 @@
 
                 <label style="grid-column: 1 / -1;">
                     Observações
-                    <textarea name="observacoes" rows="8">{{ old('observacoes', $product->observacao ?? '') }}</textarea>
+                    <textarea name="observacoes" rows="8" @error('observacoes') aria-invalid="true" aria-describedby="observacoes-error" @enderror>{{ old('observacoes', $product->observacao ?? '') }}</textarea>
+                    @error('observacoes') <span id="observacoes-error" role="alert" style="color:var(--ui-danger);">{{ $message }}</span> @enderror
                 </label>
 
                 <div class="actions">
@@ -56,4 +57,9 @@
             </form>
         </div>
     </section>
+    <style>
+        .product-observation { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
+        .product-observation textarea, .product-observation .btn { min-height: 44px; font-size: 16px; }
+        .product-observation :focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+    </style>
 @endsection

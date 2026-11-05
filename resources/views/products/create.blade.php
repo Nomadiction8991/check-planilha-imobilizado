@@ -41,7 +41,7 @@
                 <div class="field-grid">
                     <label>
                         Igreja
-                        <select name="comum_id" id="comum_id" required>
+                        <select name="comum_id" id="comum_id" required @error('comum_id') aria-invalid="true" aria-describedby="comum_id-error" @enderror>
                             <option value="">Selecione</option>
                             @foreach ($churches as $church)
                                 <option value="{{ $church->id }}" @selected((int) old('comum_id', $selectedChurchId) === (int) $church->id)>
@@ -49,21 +49,26 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('comum_id') <span id="comum_id-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Código
-                        <input type="text" name="codigo" value="{{ old('codigo') }}" maxlength="50" placeholder="Código externo">
+                        <input @error('codigo') aria-invalid="true" aria-describedby="codigo-error" @enderror type="text" name="codigo" value="{{ old('codigo') }}" maxlength="50" placeholder="Código externo">
+
+                        @error('codigo') <span id="codigo-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Multiplicador
-                        <input type="number" name="multiplicador" min="1" value="{{ old('multiplicador', 1) }}" required>
+                        <input @error('multiplicador') aria-invalid="true" aria-describedby="multiplicador-error" @enderror type="number" name="multiplicador" min="1" value="{{ old('multiplicador', 1) }}" required>
+
+                        @error('multiplicador') <span id="multiplicador-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Tipo de bem
-                        <select name="id_tipo_ben" id="id_tipo_ben" required>
+                        <select @error('id_tipo_ben') aria-invalid="true" aria-describedby="id_tipo_ben-error" @enderror name="id_tipo_ben" id="id_tipo_ben" required>
                             <option value="">Selecione</option>
                             @foreach ($assetTypes as $assetType)
                                 <option value="{{ $assetType->id }}" @selected((int) old('id_tipo_ben') === (int) $assetType->id)>
@@ -71,84 +76,112 @@
                                 </option>
                             @endforeach
                         </select>
+
+                        @error('id_tipo_ben') <span id="id_tipo_ben-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Bem
-                        <select name="tipo_ben" id="tipo_ben" required></select>
+                        <select @error('tipo_ben') aria-invalid="true" aria-describedby="tipo_ben-error" @enderror name="tipo_ben" id="tipo_ben" required></select>
+
+                        @error('tipo_ben') <span id="tipo_ben-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Dependência
-                        <select name="id_dependencia" id="id_dependencia" required></select>
+                        <select @error('id_dependencia') aria-invalid="true" aria-describedby="id_dependencia-error" @enderror name="id_dependencia" id="id_dependencia" required></select>
+
+                        @error('id_dependencia') <span id="id_dependencia-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
                 </div>
 
                 <label>
                     Complemento
-                    <textarea name="complemento" rows="3" maxlength="255">{{ old('complemento') }}</textarea>
+                    <textarea @error('complemento') aria-invalid="true" aria-describedby="complemento-error" @enderror name="complemento" rows="3" maxlength="255">{{ old('complemento') }}</textarea>
+
+                    @error('complemento') <span id="complemento-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                 </label>
 
                 <label>
                     Marca
-                    <input type="text" name="marca" value="{{ old('marca') }}" maxlength="255" placeholder="Ex.: TRAMONTINA">
+                    <input @error('marca') aria-invalid="true" aria-describedby="marca-error" @enderror type="text" name="marca" value="{{ old('marca') }}" maxlength="255" placeholder="Ex.: TRAMONTINA">
+
+                    @error('marca') <span id="marca-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                 </label>
 
                 <div class="field-grid">
                     <label>
                         Altura (m)
-                        <input type="number" name="altura_m" value="{{ old('altura_m') }}" min="0" step="0.001" placeholder="Ex.: 1.200">
+                        <input @error('altura_m') aria-invalid="true" aria-describedby="altura_m-error" @enderror type="number" name="altura_m" value="{{ old('altura_m') }}" min="0" step="0.001" placeholder="Ex.: 1.200">
+
+                        @error('altura_m') <span id="altura_m-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Largura (m)
-                        <input type="number" name="largura_m" value="{{ old('largura_m') }}" min="0" step="0.001" placeholder="Ex.: 0.800">
+                        <input @error('largura_m') aria-invalid="true" aria-describedby="largura_m-error" @enderror type="number" name="largura_m" value="{{ old('largura_m') }}" min="0" step="0.001" placeholder="Ex.: 0.800">
+
+                        @error('largura_m') <span id="largura_m-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Comprimento (m)
-                        <input type="number" name="comprimento_m" value="{{ old('comprimento_m') }}" min="0" step="0.001" placeholder="Ex.: 2.500">
+                        <input @error('comprimento_m') aria-invalid="true" aria-describedby="comprimento_m-error" @enderror type="number" name="comprimento_m" value="{{ old('comprimento_m') }}" min="0" step="0.001" placeholder="Ex.: 2.500">
+
+                        @error('comprimento_m') <span id="comprimento_m-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
                 </div>
 
                 <div class="field-grid">
                     <label>
                         <span>Imprimir 14.1</span>
-                        <select name="imprimir_14_1">
+                        <select @error('imprimir_14_1') aria-invalid="true" aria-describedby="imprimir_14_1-error" @enderror name="imprimir_14_1">
                             <option value="0" @selected(!old('imprimir_14_1'))>Não</option>
                             <option value="1" @selected((int) old('imprimir_14_1') === 1)>Sim</option>
                         </select>
+
+                        @error('imprimir_14_1') <span id="imprimir_14_1-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Condição 14.1
-                        <select name="condicao_14_1" id="condicao_14_1" required>
+                        <select @error('condicao_14_1') aria-invalid="true" aria-describedby="condicao_14_1-error" @enderror name="condicao_14_1" id="condicao_14_1" required>
                             <option value="1" @selected(old('condicao_14_1', '2') === '1')>Mais de cinco anos com documento</option>
                             <option value="2" @selected(old('condicao_14_1', '2') === '2')>Mais de cinco anos sem documento</option>
                             <option value="3" @selected(old('condicao_14_1', '2') === '3')>Até cinco anos com documento</option>
                         </select>
+
+                        @error('condicao_14_1') <span id="condicao_14_1-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
                 </div>
 
                 <div id="invoice_fields" class="field-grid">
                     <label>
                         Número da nota
-                        <input type="number" name="nota_numero" value="{{ old('nota_numero') }}" min="1">
+                        <input @error('nota_numero') aria-invalid="true" aria-describedby="nota_numero-error" @enderror type="number" name="nota_numero" value="{{ old('nota_numero') }}" min="1">
+
+                        @error('nota_numero') <span id="nota_numero-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Data da nota
-                        <input type="date" name="nota_data" value="{{ old('nota_data') }}">
+                        <input @error('nota_data') aria-invalid="true" aria-describedby="nota_data-error" @enderror type="date" name="nota_data" value="{{ old('nota_data') }}">
+
+                        @error('nota_data') <span id="nota_data-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Valor da nota
-                        <input type="text" name="nota_valor" value="{{ old('nota_valor') }}" placeholder="0,00">
+                        <input @error('nota_valor') aria-invalid="true" aria-describedby="nota_valor-error" @enderror type="text" name="nota_valor" value="{{ old('nota_valor') }}" placeholder="0,00">
+
+                        @error('nota_valor') <span id="nota_valor-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Fornecedor
-                        <input type="text" name="nota_fornecedor" value="{{ old('nota_fornecedor') }}" maxlength="255">
+                        <input @error('nota_fornecedor') aria-invalid="true" aria-describedby="nota_fornecedor-error" @enderror type="text" name="nota_fornecedor" value="{{ old('nota_fornecedor') }}" maxlength="255">
+
+                        @error('nota_fornecedor') <span id="nota_fornecedor-error" class="product-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
                 </div>
 
@@ -159,6 +192,14 @@
             </form>
         </div>
     </section>
+
+    <style>
+        .form-shell { background: var(--surface); border-radius: var(--radius-md); }
+        .form-shell input, .form-shell select, .form-shell textarea { min-height: 44px; font-size: 16px; }
+        .form-shell .btn { min-height: 44px; }
+        .product-field-error { color: var(--ui-danger); font-size: 16px; }
+        .form-shell :focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+    </style>
 
     <script>
         (() => {

@@ -95,11 +95,11 @@
                class="chip chip--filter"
                aria-label="{{ $chip['aria'] }}: {{ $chip['label'] }}"
                title="Remover {{ $chip['label'] }}"
-               style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line, #e5e7eb);background:var(--surface, #fff);color:var(--ink, #111827);font-size:13px;line-height:1;text-decoration:none;box-shadow:var(--shadow-soft, 0 1px 2px rgba(0,0,0,.06));">
+               style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:16px;line-height:1.45;text-decoration:none;">
                 <span>{{ $chip['label'] }}</span>
-                <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:color-mix(in srgb, var(--accent, #0f766e) 12%, transparent);font-weight:700;">×</span>
+                <span aria-hidden="true" style="font-weight:700;">×</span>
             </a>
         @endforeach
-        <a href="{{ request()->url() }}" class="chip chip--clear" style="font-size:12px;color:var(--muted, #6b7280);text-decoration:underline;">Limpar todos</a>
+        <a href="{{ request()->url() }}" class="chip chip--clear" style="display:inline-flex;align-items:center;min-height:44px;padding:8px;color:var(--ink);font-size:16px;text-decoration:underline;">Limpar todos</a>
     </div>
 @endif

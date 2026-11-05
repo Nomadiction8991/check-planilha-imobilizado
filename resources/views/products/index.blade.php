@@ -14,6 +14,14 @@
         <p class="hero-copy">
             Esta tela consulta o inventário com busca geral por código, descrição, dependência, tipo e status.
         </p>
+        <div class="inline-actions product-header-actions">
+            @if ($isLegacyAdmin || !empty($legacyPermissions['products.edit'] ?? null))
+                <a class="btn" href="{{ route('migration.products.verification', array_filter(array_merge(['comum_id' => $filters->comumId], $filters->toQuery()))) }}">Verificação</a>
+            @endif
+            @if ($isLegacyAdmin || !empty($legacyPermissions['products.create'] ?? null))
+                <a class="btn primary" href="{{ route('migration.products.create', array_filter(['comum_id' => $filters->comumId])) }}">Novo produto</a>
+            @endif
+        </div>
     </section>
 
     @if (session('status') || $errors->any())
@@ -168,21 +176,13 @@
                         : 'Somente itens ativos aparecem aqui. Criação e edição principal estão disponíveis.' }}
                 </p>
             </div>
-            <div class="inline-actions">
-                @if ($isLegacyAdmin || !empty($legacyPermissions['products.edit'] ?? null))
-                    <a class="btn" href="{{ route('migration.products.verification', array_filter(array_merge(['comum_id' => $filters->comumId], $filters->toQuery()))) }}">Verificação</a>
-                @endif
-                @if ($isLegacyAdmin || !empty($legacyPermissions['products.create'] ?? null))
-                    <a class="btn primary" href="{{ route('migration.products.create', array_filter(['comum_id' => $filters->comumId])) }}">Novo produto</a>
-                @endif
-            </div>
         </div>
 
-        <div class="table-shell">
+        <div class="table-shell product-listing">
             @if ($products->isEmpty())
                 <div class="empty-state">Nenhum produto ativo encontrado para os filtros atuais.</div>
             @else
-                <table>
+                <table aria-label="Lista de produtos">
                     <thead>
                         <tr>
                             <th>Produto</th>
@@ -243,6 +243,27 @@
             @endif
         </div>
     </section>
+
+    <style>
+        .product-header-actions { margin-top: 20px; }
+        .product-header-actions .btn, .product-listing .btn, .filters .btn { min-height: 44px; }
+        .product-listing { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+        .product-listing table { background: var(--surface); }
+        .product-listing th { background: var(--surface-soft); }
+        .product-listing .capsule { font-size: 14px; background: var(--surface-soft); color: var(--ink); }
+        .product-listing .capsule.accent { background: var(--accent-soft); color: var(--accent); }
+        @media (max-width: 639px) {
+            .product-listing tbody tr { border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
+        }
+        @media (min-width: 640px) and (max-width: 860px) {
+            .product-listing table { display: table; }
+            .product-listing thead { display: table-header-group; }
+            .product-listing tbody { display: table-row-group; padding: 0; }
+            .product-listing tr { display: table-row; padding: 0; border: 0; background: none; box-shadow: none; }
+            .product-listing th, .product-listing td { display: table-cell; padding: 15px 18px; border-top: 1px solid var(--line); }
+            .product-listing td::before { display: none; }
+        }
+    </style>
 
     <script>
         (() => {
