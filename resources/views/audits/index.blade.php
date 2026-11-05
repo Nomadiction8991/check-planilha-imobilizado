@@ -39,8 +39,8 @@
                             data-audits-search data-filter-search data-filter-server
                         >
                     </label></div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-audits"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-audits"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <dialog id="filtros-audits" class="filters-dialog" aria-labelledby="filtros-audits-titulo" data-filter-dialog>
                     <header class="filters-dialog-head"><h2 id="filtros-audits-titulo">Filtros</h2><button type="button" class="btn ghost" data-filter-close aria-label="Fechar filtros"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></header>

@@ -92,6 +92,12 @@ final class CartaoListaMobileTest extends TestCase
 
         $this->withSession(['is_admin' => true])->get('/teste-cartao/tipos')->assertOk()
             ->assertSee('<table', false)->assertSee('Banco de madeira')->assertSee('Ver produtos')
-            ->assertSee('Editar')->assertSee('Excluir')->assertSee('data-label="Descrição" data-card-title', false);
+            ->assertSee('Editar')->assertSee('Excluir')->assertSee('data-label="Descrição" data-card-title', false)
+            ->assertSee('aria-label="Editar" title="Editar"', false)
+            ->assertSee('aria-label="Excluir" title="Excluir"', false)
+            ->assertSee('aria-label="Ver produtos" title="Ver produtos"', false)
+            ->assertSee('>edit</span>', false)->assertSee('>delete</span>', false)->assertSee('>visibility</span>', false)
+            ->assertSee('>search</span><span class="mobile-action-text">Buscar</span>', false)
+            ->assertSee('>tune</span><span class="mobile-action-text">Filtros</span>', false);
     }
 }

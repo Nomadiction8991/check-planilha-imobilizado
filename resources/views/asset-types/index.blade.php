@@ -56,8 +56,8 @@
                         <label for="asset-types-search">Buscar por código ou descrição</label>
                         <input id="asset-types-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="4 ou CADEIRA" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-asset-types"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-asset-types"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                 <dialog id="filtros-asset-types" class="filters-dialog" aria-labelledby="filtros-asset-types-titulo" data-filter-dialog>
@@ -186,18 +186,16 @@
                                 <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['products.view'] ?? null))
-                                            <a class="btn" href="{{ route('migration.products.index', ['tipo_bem_id' => $assetType->id]) }}">Ver produtos</a>
+                                            <a aria-label="Ver produtos" title="Ver produtos" class="btn" href="{{ route('migration.products.index', ['tipo_bem_id' => $assetType->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">visibility</span><span class="mobile-action-text">Ver produtos</span></a>
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['asset-types.edit'] ?? null))
-                                            <a class="btn" href="{{ route('migration.asset-types.edit', ['assetType' => $assetType->id]) }}">Editar</a>
+                                            <a aria-label="Editar" title="Editar" class="btn" href="{{ route('migration.asset-types.edit', ['assetType' => $assetType->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span><span class="mobile-action-text">Editar</span></a>
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['asset-types.delete'] ?? null))
                                             <form method="POST" action="{{ route('migration.asset-types.destroy', ['assetType' => $assetType->id]) }}" data-confirm="Excluir este tipo de bem?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn danger" type="submit">
-                                                    Excluir
-                                                </button>
+                                                <button aria-label="Excluir" title="Excluir" class="btn danger" type="submit"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">delete</span><span class="mobile-action-text">Excluir</span></button>
                                             </form>
                                         @endif
                                     </div>

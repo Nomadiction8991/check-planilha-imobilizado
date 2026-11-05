@@ -42,8 +42,8 @@
                         <label for="busca-produtos">Busca geral</label>
                         <input id="busca-produtos" type="search" name="busca" value="{{ $filters->search }}" placeholder="Código, descrição, dependência, tipo ou status" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-produtos"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-produtos"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <dialog id="filtros-produtos" class="filters-dialog" aria-labelledby="filtros-produtos-titulo" data-filter-dialog>
                     <header class="filters-dialog-head">
@@ -215,12 +215,10 @@
                                 <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($canEditProducts)
-                                            <a class="btn" href="{{ route('migration.products.edit', [
+                                            <a aria-label="Editar" title="Editar" class="btn" href="{{ route('migration.products.edit', [
                                                 'product' => $product->id_produto,
                                                 'return_url' => url()->full(),
-                                            ]) }}">
-                                                Editar
-                                            </a>
+                                            ]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span><span class="mobile-action-text">Editar</span></a>
                                         @else
                                             <span class="table-note" role="status">Somente consulta</span>
                                         @endif

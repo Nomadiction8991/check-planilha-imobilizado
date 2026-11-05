@@ -285,8 +285,8 @@
                         <label for="busca-verificacao">Busca geral</label>
                         <input id="busca-verificacao" type="search" name="busca" value="{{ $filters->search }}" placeholder="Código, descrição, dependência, tipo ou status" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-verificacao"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-verificacao"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <dialog id="filtros-verificacao" class="filters-dialog" aria-labelledby="filtros-verificacao-titulo" data-filter-dialog>
                     <header class="filters-dialog-head">

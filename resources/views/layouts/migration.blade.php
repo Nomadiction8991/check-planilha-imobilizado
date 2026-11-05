@@ -1500,8 +1500,21 @@
                 min-width: 0;
             }
 
+            .table-shell:has(> table:not(.dependency-table, .verification-table)) {
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
+                padding: 0;
+            }
+
             table:not(.dependency-table, .verification-table) {
                 display: block;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
+                padding: 0;
             }
 
             table:not(.dependency-table, .verification-table) > thead {
@@ -1510,15 +1523,19 @@
 
             table:not(.dependency-table, .verification-table) > tbody {
                 display: grid;
-                gap: 14px;
-                padding: 14px;
+                gap: 8px;
+                padding: 0;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
             }
 
             table:not(.dependency-table, .verification-table) > tbody > tr {
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 12px;
-                padding: 16px;
+                gap: 8px;
+                padding: 12px;
                 border: 1px solid var(--ui-border);
                 border-radius: var(--radius-md);
                 background: var(--ui-surface);
@@ -1537,7 +1554,7 @@
             table:not(.dependency-table, .verification-table) > tbody > tr > td::before {
                 content: attr(data-label);
                 display: block;
-                margin-bottom: 4px;
+                margin-bottom: 2px;
                 font-size: 14px;
                 color: var(--ui-text-muted);
             }
@@ -1601,6 +1618,7 @@
             backdrop-filter: none;
         }
         .mobile-menu-link.active { font-weight: 700; }
+        .mobile-action-icon { display: none; }
         .filters-bar { display: flex; align-items: end; gap: 12px; }
         .filters-search { flex: 1; min-width: 0; display: grid; gap: 4px; }
         .filters-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border: 1px solid var(--ui-border); border-radius: var(--radius-lg); background: var(--ui-surface); color: var(--ui-text); box-shadow: var(--shadow-card); }
@@ -1620,8 +1638,27 @@
             button.menu-toggle.theme-toggle .theme-toggle-icon { font-size: 24px; line-height: 1; }
             .filters-dialog-actions { flex-direction: column; }
             .filters-dialog-actions > .btn { width: 100%; min-height: 44px; height: 44px; padding: 0 12px; }
-            .filters-bar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .filters-search { grid-column: 1 / -1; }
+            .filters-bar { display: flex; gap: 8px; }
+            .filters-search input { min-width: 0; }
+            .mobile-action-text { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+            .mobile-action-icon { display: inline-block; }
+            .filters-bar > .btn,
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .btn:has(.mobile-action-icon) {
+                flex: 0 0 44px;
+                width: 44px;
+                min-width: 44px;
+                height: 44px;
+                min-height: 44px;
+                padding: 0;
+                justify-content: center;
+            }
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .inline-actions {
+                display: flex;
+                flex-wrap: wrap;
+            }
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .inline-actions > .btn:not(:has(.mobile-action-icon)) {
+                width: auto;
+            }
             .filters-dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); padding: 16px; }
         }
         @media (min-width: 1024px) {

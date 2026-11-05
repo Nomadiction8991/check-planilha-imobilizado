@@ -192,7 +192,7 @@
                                     <span class="table-note">{{ $dateLabel }}</span>
                                 </td>
                                 <td data-label="Ação" data-card-actions>
-                                    <a class="btn" href="{{ route('migration.spreadsheets.processing', ['importacao' => $import['id']]) }}">Ver</a>
+                                    <a aria-label="Ver" title="Ver" class="btn" href="{{ route('migration.spreadsheets.processing', ['importacao' => $import['id']]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">visibility</span><span class="mobile-action-text">Ver</span></a>
                                 </td>
                             </tr>
                         @endforeach

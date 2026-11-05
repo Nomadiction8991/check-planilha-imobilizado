@@ -47,8 +47,8 @@
                         <label for="churches-search">Buscar por código ou descrição</label>
                         <input id="churches-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="BR 12-3456 ou descrição" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-churches"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-churches"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                 <dialog id="filtros-churches" class="filters-dialog" aria-labelledby="filtros-churches-titulo" data-filter-dialog>
@@ -191,10 +191,10 @@
                                     <td data-label="Ações" data-card-actions>
                                         <div class="inline-actions">
                                             @if ($isLegacyAdmin || !empty($legacyPermissions['products.view'] ?? null))
-                                                <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $church->id]) }}">Produtos</a>
+                                                <a aria-label="Produtos" title="Produtos" class="btn" href="{{ route('migration.products.index', ['comum_id' => $church->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">visibility</span><span class="mobile-action-text">Produtos</span></a>
                                             @endif
                                             @if ($isLegacyAdmin || !empty($legacyPermissions['churches.edit'] ?? null))
-                                                <a class="btn" href="{{ route('migration.churches.edit', ['church' => $church->id]) }}">Editar</a>
+                                                <a aria-label="Editar" title="Editar" class="btn" href="{{ route('migration.churches.edit', ['church' => $church->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span><span class="mobile-action-text">Editar</span></a>
                                             @endif
                                             @if ($isLegacyAdmin || !empty($legacyPermissions['churches.delete'] ?? null))
                                                 <form method="POST" action="{{ route('migration.churches.delete-products') }}" data-confirm="Excluir todos os produtos desta igreja? Esta ação não pode ser desfeita.">
