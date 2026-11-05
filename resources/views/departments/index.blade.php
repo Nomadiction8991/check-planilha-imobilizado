@@ -56,8 +56,8 @@
                         <label for="departments-search">Descrição</label>
                         <input id="departments-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="Nome da dependência" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-departments"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-departments"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                 <dialog id="filtros-departments" class="filters-dialog" aria-labelledby="filtros-departments-titulo" data-filter-dialog>
@@ -209,20 +209,16 @@
                                 <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['products.view'] ?? null))
-                                            <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $department->comum_id, 'dependencia_id' => $department->id]) }}">
-                                                Ver produtos
-                                            </a>
+                                            <a aria-label="Ver produtos" title="Ver produtos" class="btn" href="{{ route('migration.products.index', ['comum_id' => $department->comum_id, 'dependencia_id' => $department->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">visibility</span><span class="mobile-action-text">Ver produtos</span></a>
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['departments.edit'] ?? null))
-                                            <a class="btn" href="{{ route('migration.departments.edit', ['department' => $department->id]) }}">Editar</a>
+                                            <a aria-label="Editar" title="Editar" class="btn" href="{{ route('migration.departments.edit', ['department' => $department->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span><span class="mobile-action-text">Editar</span></a>
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['departments.delete'] ?? null))
                                             <form method="POST" action="{{ route('migration.departments.destroy', ['department' => $department->id]) }}" data-confirm="Excluir esta dependência?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn danger" type="submit">
-                                                    Excluir
-                                                </button>
+                                                <button aria-label="Excluir" title="Excluir" class="btn danger" type="submit"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">delete</span><span class="mobile-action-text">Excluir</span></button>
                                             </form>
                                         @endif
                                     </div>

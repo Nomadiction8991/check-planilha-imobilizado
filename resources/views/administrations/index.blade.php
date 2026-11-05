@@ -56,8 +56,8 @@
                         <label for="administrations-search">Buscar por ID, descrição ou CNPJ</label>
                         <input id="administrations-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="1, Administração Central ou 12345678000190" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-administrations"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-administrations"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                 <dialog id="filtros-administrations" class="filters-dialog" aria-labelledby="filtros-administrations-titulo" data-filter-dialog>
@@ -124,15 +124,13 @@
                                 <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['administrations.edit'] ?? null))
-                                            <a class="btn" href="{{ route('migration.administrations.edit', ['administration' => $administration->id]) }}">Editar</a>
+                                            <a aria-label="Editar" title="Editar" class="btn" href="{{ route('migration.administrations.edit', ['administration' => $administration->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span><span class="mobile-action-text">Editar</span></a>
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['administrations.delete'] ?? null))
                                             <form method="POST" action="{{ route('migration.administrations.destroy', ['administration' => $administration->id]) }}" data-confirm="Excluir esta administração?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn danger" type="submit">
-                                                    Excluir
-                                                </button>
+                                                <button aria-label="Excluir" title="Excluir" class="btn danger" type="submit"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">delete</span><span class="mobile-action-text">Excluir</span></button>
                                             </form>
                                         @endif
                                     </div>

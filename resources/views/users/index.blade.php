@@ -50,8 +50,8 @@
                         <label for="users-search">Buscar por nome ou email</label>
                         <input id="users-search" type="search" name="busca" value="{{ $filters->search }}" placeholder="Nome ou email" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>Buscar</button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-users"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Filtros</button>
+                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
+                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-users"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
                 <span class="helper" role="status" aria-live="polite" data-filter-status></span>
                 <dialog id="filtros-users" class="filters-dialog" aria-labelledby="filtros-users-titulo" data-filter-dialog>
@@ -209,15 +209,13 @@
                                             @endunless
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['users.edit'] ?? null))
-                                            <a class="btn" href="{{ route('migration.users.edit', ['user' => $user->id]) }}">Editar</a>
+                                            <a aria-label="Editar" title="Editar" class="btn" href="{{ route('migration.users.edit', ['user' => $user->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span><span class="mobile-action-text">Editar</span></a>
                                         @endif
                                         @if (!$isProtectedAdministrator && ($isLegacyAdmin || !empty($legacyPermissions['users.delete'] ?? null)))
                                             <form method="POST" action="{{ route('migration.users.destroy', ['user' => $user->id]) }}" data-confirm="Excluir este usuário?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn danger" type="submit">
-                                                    Excluir
-                                                </button>
+                                                <button aria-label="Excluir" title="Excluir" class="btn danger" type="submit"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">delete</span><span class="mobile-action-text">Excluir</span></button>
                                             </form>
                                         @endif
                                     </div>
