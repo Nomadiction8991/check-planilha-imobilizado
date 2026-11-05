@@ -8,6 +8,16 @@ use Tests\TestCase;
 
 final class DesignSystemRelatoriosAuditoriaTest extends TestCase
 {
+    public function test_etiquetas_oferecem_selecao_de_igreja_sem_elementos_obsoletos(): void
+    {
+        $view = file_get_contents(resource_path('views/labels/index.blade.php'));
+
+        $this->assertMatchesRegularExpression('/<select\b[^>]*name="comum_id"/s', $view);
+        $this->assertStringNotContainsString('manual-tag-input', $view);
+        $this->assertDoesNotMatchRegularExpression('/<span\b[^>]*class="helper"[^>]*>\s*<\/span>/s', $view);
+        $this->assertStringNotContainsString('Voltar aos produtos', $view);
+    }
+
     public function test_filtros_das_listagens_ficam_em_dialogo_no_formulario(): void
     {
         foreach (['reports', 'audits', 'labels'] as $area) {
@@ -59,6 +69,7 @@ final class DesignSystemRelatoriosAuditoriaTest extends TestCase
         $response->assertSee('aria-label="Fechar documentos"', false);
         $response->assertSee('aria-label="Ajustar zoom à tela"', false);
         $response->assertSee('Salvar');
+        $response->assertDontSee('← Voltar');
     }
 
     public function test_telas_apresentam_regioes_identificadas(): void
@@ -98,6 +109,9 @@ final class DesignSystemRelatoriosAuditoriaTest extends TestCase
             $response = \Illuminate\Testing\TestResponse::fromBaseResponse(response()->view($view, $data));
             $response->assertOk();
             $response->assertSee('aria-label="'.$label.'"', false);
+            if (in_array($view, ['reports.position', 'reports.show'], true)) {
+                $response->assertDontSee('Voltar para relatórios');
+            }
         }
     }
 }

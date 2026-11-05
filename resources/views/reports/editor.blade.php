@@ -87,10 +87,6 @@
         <button class="btn-green" id="btn-copy">⬇ Copiar Código</button>
         <button class="btn-red"   id="btn-clear-all">✕ Limpar Tudo</button>
         <span id="save-indicator" style="font-size:10px;color:var(--ui-text-muted);"></span>
-        <a href="{{ $editorBackUrl }}"
-           style="color:var(--ui-text-muted);font-size:12px;text-decoration:none;padding:5px 10px;border:1px solid var(--ui-border);border-radius:3px;">
-            ← Voltar
-        </a>
     </div>
 
     <div class="sep"></div>

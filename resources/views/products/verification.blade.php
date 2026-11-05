@@ -415,7 +415,6 @@
                 </p>
             </div>
             <div class="inline-actions">
-                <a class="btn" href="{{ route('migration.products.index', array_filter(array_merge(['comum_id' => $selectedChurchId], $filters->toQuery()))) }}">Voltar aos produtos</a>
                 @if ($selectedChurchId)
                     <a class="btn primary" href="{{ route('migration.labels.index', $copyLabelsQuery) }}">Ver etiquetas</a>
                 @endif

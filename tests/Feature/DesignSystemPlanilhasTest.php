@@ -8,6 +8,22 @@ use Tests\TestCase;
 
 class DesignSystemPlanilhasTest extends TestCase
 {
+    public function test_erros_oferece_nova_importacao_sem_retorno_a_produtos(): void
+    {
+        Route::middleware('web')->get('/teste-erros-acao/{modo}', fn (string $modo) => view('spreadsheets.errors', [
+            'modo' => $modo, 'comum' => ['codigo' => '1', 'descricao' => 'Central'], 'comumId' => 7,
+            'importacao' => null, 'importacaoId' => null, 'resumo' => ['pendentes' => 0],
+            'erros' => new LengthAwarePaginator([], 0, 10),
+        ]));
+
+        $this->get('/teste-erros-acao/geral')->assertOk()
+            ->assertSee('<a class="btn" href="'.route('migration.spreadsheets.create').'">Nova importação</a>', false)
+            ->assertDontSee('Voltar para produtos');
+        $this->get('/teste-erros-acao/comum')->assertOk()
+            ->assertDontSee('Voltar para produtos')
+            ->assertDontSee('Nova importação');
+    }
+
     public function test_importacao_apresenta_aviso_e_acao_principal(): void
     {
         Route::middleware('web')->get('/teste-design-planilhas', fn () => view('spreadsheets.import', [
