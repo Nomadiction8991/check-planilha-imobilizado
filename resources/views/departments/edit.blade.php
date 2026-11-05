@@ -84,7 +84,7 @@
         .cadastro-primary-action { margin-top: 20px; }
         .cadastro-form, .filters, .table-shell { font-size: 16px; line-height: 1.5; }
         .cadastro-field-error { display: block; color: var(--ui-danger); margin-top: 4px; }
-        .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: var(--product-primary-text); }
         .btn.primary:hover { background: var(--product-primary-hover); border-color: var(--product-primary-hover); box-shadow: none; }
         .btn.danger { color: var(--ui-danger); }
         .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }

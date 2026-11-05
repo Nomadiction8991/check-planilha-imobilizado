@@ -10,7 +10,7 @@
     <style>
         .users-page { color: var(--ui-text); font-size: 16px; line-height: 1.5; }
         .users-page h1 { font-size: 24px; line-height: 1.2; }
-        .users-page .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .users-page .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: var(--product-primary-text); }
         .users-page .btn.primary:hover { background: var(--product-primary-hover); }
         .users-page .btn:focus-visible, .users-page input:focus-visible, .users-page select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
         .users-page .btn:active { transform: none; }
