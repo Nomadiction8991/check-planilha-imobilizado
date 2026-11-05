@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use Illuminate\Support\Facades\DB;
 use PDO;
 use PDOException;
 
@@ -26,13 +27,7 @@ class ConnectionManager
 
     public static function getConnection(): PDO
     {
-        if (self::$conexao instanceof PDO) {
-            return self::$conexao;
-        }
-
-        self::$conexao = self::buildConnection();
-
-        return self::$conexao;
+        return DB::connection()->getPdo();
     }
 
     public static function createNewConnection(): PDO
