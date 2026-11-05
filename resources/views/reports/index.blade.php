@@ -257,11 +257,11 @@
                     <tbody>
                         @foreach ($reports as $report)
                             <tr>
-                                <td data-label="Código" class="mono">{{ $report['codigo'] }}</td>
-                                <td data-label="Descrição">{{ $report['descricao'] }}</td>
+                                <td data-label="Código" data-card-title class="mono">{{ $report['codigo'] }}</td>
+                                <td data-label="Descrição" data-card-title>{{ $report['descricao'] }}</td>
                                 <td data-label="Título">{{ $report['titulo'] }}</td>
                                 <td data-label="Itens">{{ $report['quantidade'] }} item(ns)</td>
-                                <td data-label="Ação">
+                                <td data-label="Ação" data-card-actions>
                                     <a class="btn" href="{{ $report['rota'] }}">
                                         {{ $report['codigo'] === 'POS' ? 'Abrir posição' : 'Abrir prévia' }}
                                     </a>

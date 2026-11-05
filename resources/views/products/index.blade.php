@@ -190,7 +190,7 @@
                                 $dependency = \App\Support\LegacyProductClassificationSupport::currentDependencyDescription($product);
                             @endphp
                             <tr>
-                                <td data-label="Produto">
+                                <td data-label="Produto" data-card-title>
                                     <div class="mono">{{ $product->codigo ?: 'sem código' }}</div>
                                     <div>{{ $description !== '' ? $description : 'Sem descrição' }}</div>
                                     @if ($type !== '')
@@ -212,7 +212,7 @@
                                         <span class="capsule">Editado</span>
                                     @endif
                                 </td>
-                                <td data-label="Ações">
+                                <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($canEditProducts)
                                             <a class="btn" href="{{ route('migration.products.edit', [

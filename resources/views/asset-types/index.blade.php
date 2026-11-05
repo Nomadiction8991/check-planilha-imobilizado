@@ -181,9 +181,9 @@
                                     @endif
                                 </td>
                                 <td data-label="Código" class="mono">{{ $assetType->codigo }}</td>
-                                <td data-label="Descrição">{{ $assetType->descricao ?: 'Sem descrição' }}</td>
+                                <td data-label="Descrição" data-card-title>{{ $assetType->descricao ?: 'Sem descrição' }}</td>
                                 <td data-label="Produtos ativos">{{ $assetType->active_products_count }}</td>
-                                <td data-label="Ações">
+                                <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['products.view'] ?? null))
                                             <a class="btn" href="{{ route('migration.products.index', ['tipo_bem_id' => $assetType->id]) }}">Ver produtos</a>

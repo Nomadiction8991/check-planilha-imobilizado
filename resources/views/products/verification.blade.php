@@ -434,7 +434,7 @@
             >
                 @csrf
 
-                    <table>
+                    <table class="verification-table">
                         <thead>
                             <tr>
                                 <th>Verificado</th>

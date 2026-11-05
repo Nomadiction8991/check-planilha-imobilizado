@@ -173,8 +173,8 @@
                     <tbody>
                         @foreach ($churches as $church)
                             <tr>
-                                <td data-label="Código" class="mono">{{ $church->codigo ?: 'Nenhum' }}</td>
-                                <td data-label="Descrição">{{ $church->descricao ?: 'Sem descrição' }}</td>
+                                <td data-label="Código" data-card-title class="mono">{{ $church->codigo ?: 'Nenhum' }}</td>
+                                <td data-label="Descrição" data-card-title>{{ $church->descricao ?: 'Sem descrição' }}</td>
                                 <td data-label="Administração">
                                     @php
                                         $administracao = $church->administracao ?? null;
@@ -188,7 +188,7 @@
                                 <td data-label="Setor">{{ $church->setor ?: 'Nenhum' }}</td>
                                 <td data-label="Produtos ativos">{{ $church->active_products_count ?? 0 }}</td>
                                 @unless (session('public_acesso'))
-                                    <td data-label="Ações">
+                                    <td data-label="Ações" data-card-actions>
                                         <div class="inline-actions">
                                             @if ($isLegacyAdmin || !empty($legacyPermissions['products.view'] ?? null))
                                                 <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $church->id]) }}">Produtos</a>
