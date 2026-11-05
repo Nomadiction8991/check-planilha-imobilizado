@@ -97,11 +97,13 @@
 
         .topbar {
             display: grid;
-            gap: 14px;
-            padding: 18px 20px;
+            gap: 0;
+            padding: 4px 12px;
+            border-width: 0 0 1px;
+            border-radius: 0;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            box-shadow: var(--shadow-soft);
+            box-shadow: none;
         }
 
         .topbar-main {
@@ -458,7 +460,7 @@
         }
 
         body.page-operational .shell {
-            padding-top: 56px;
+            padding-top: 24px;
         }
 
         h1,
@@ -538,7 +540,7 @@
         }
 
         .section {
-            margin-top: 28px;
+            margin-top: 24px;
         }
 
         .section-head {
@@ -548,6 +550,8 @@
             gap: 12px;
             margin-bottom: 14px;
         }
+
+        .section-head h2, .section-head p { line-height: 1.15; }
 
         .metrics {
             display: grid;
@@ -721,7 +725,8 @@
         }
 
         .filters {
-            padding: 20px;
+            padding: 16px;
+            gap: 12px;
             z-index: 55;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
@@ -735,7 +740,7 @@
 
         .filters form {
             display: grid;
-            gap: 14px;
+            gap: 10px;
             grid-template-columns: 1fr;
             width: 100%;
         }
@@ -743,7 +748,7 @@
         .filters-primary,
         .filters-advanced {
             display: grid;
-            gap: 14px;
+            gap: 10px 12px;
             grid-column: 1 / -1;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         }
@@ -755,7 +760,7 @@
 
         .filters-principal {
             display: grid;
-            gap: 6px;
+            gap: 4px;
         }
 
         .filters-principal__controls {
@@ -770,7 +775,7 @@
         }
 
         .filters-primary:has(.filters-query):has(.filters-principal) {
-            grid-template-columns: minmax(220px, 320px) minmax(260px, 420px) auto;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
 
         .filters-primary:has(.filters-query):not(:has(.filters-principal)) {
@@ -794,6 +799,9 @@
         .filters-primary:has(.filters-query) .filters-actions {
             justify-self: end;
         }
+
+        .filters label { gap: 4px; }
+        .filters [data-product-filter-status]:empty { display: none; }
 
         label {
             display: grid;
@@ -1116,8 +1124,8 @@
             width: min(86vw, 340px);
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            padding: 18px;
+            gap: 8px;
+            padding: 12px;
             border: 1px solid var(--line);
             border-radius: 28px;
             background: var(--surface-strong);
@@ -1135,7 +1143,7 @@
 
         .mobile-menu-head {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: space-between;
             gap: 12px;
         }
@@ -1146,7 +1154,8 @@
         }
 
         .mobile-menu-copy strong {
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: 700;
             line-height: 1.08;
             letter-spacing: -0.01em;
         }
@@ -1158,12 +1167,12 @@
         }
 
         .mobile-menu-user {
-            display: grid;
-            gap: 4px;
-            padding: 14px 16px;
-            border: 1px solid var(--line);
-            border-radius: 20px;
-            background: var(--surface-soft);
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            min-width: 0;
+            padding: 4px 8px;
+            font-size: 13px;
         }
 
         .mobile-menu-user small {
@@ -1174,19 +1183,22 @@
         }
 
         .mobile-menu-user strong {
-            font-size: 15px;
+            font-size: 13px;
             letter-spacing: -0.01em;
+            flex-shrink: 0;
         }
 
         .mobile-menu-user span {
             color: var(--muted);
             line-height: 1.45;
-            overflow-wrap: anywhere;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .mobile-menu-nav {
             display: grid;
-            gap: 10px;
+            gap: 2px;
         }
 
         .mobile-menu-link {
@@ -1195,12 +1207,13 @@
             justify-content: space-between;
             gap: 12px;
             width: 100%;
-            min-height: 52px;
-            padding: 14px 16px;
+            min-height: 44px;
+            padding: 0 12px;
             text-decoration: none;
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            background: var(--surface-soft);
+            border: 0;
+            border-left: 3px solid transparent;
+            border-radius: var(--radius-sm);
+            background: transparent;
             color: var(--ink);
             transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
         }
@@ -1208,13 +1221,13 @@
         .mobile-menu-link:hover {
             transform: translateX(2px);
             border-color: var(--line);
-            background: var(--surface-strong);
+            background: var(--ui-surface-muted);
         }
 
         .mobile-menu-link.active {
             color: var(--ui-text);
-            border-color: var(--ui-border-strong);
-            background: var(--accent-soft);
+            border-left-color: var(--product-primary);
+            background: var(--product-primary-soft);
         }
 
         .mobile-menu-link-label {
@@ -1280,8 +1293,8 @@
             }
 
             .topbar {
-                padding: 16px;
-                margin-bottom: 12px;
+                padding: 5px 8px;
+                margin-bottom: 0;
             }
 
             .section-head,
@@ -1290,24 +1303,24 @@
             }
 
             .topbar-main {
-                align-items: flex-start;
-                justify-content: flex-start;
-                flex-wrap: wrap;
-                gap: 12px;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: nowrap;
+                gap: 8px;
             }
 
             .brand {
-                flex: 1 1 100%;
+                flex: 1 1 auto;
                 min-width: 0;
             }
 
             .topbar-tools {
-                width: 100%;
+                width: auto;
                 justify-content: flex-end;
             }
 
             .session-tools {
-                width: 100%;
+                width: auto;
                 align-items: center;
                 justify-content: flex-end;
                 gap: 8px;
@@ -1368,7 +1381,7 @@
             .helper,
             .empty-state,
             .form-shell {
-                padding: 18px;
+                padding: 16px;
             }
 
             .form-section {
@@ -1515,9 +1528,10 @@
             background: var(--surface-strong);
             backdrop-filter: none;
         }
-        .mobile-menu-link { border-radius: var(--radius-md); }
-        .mobile-menu-link.active { font-weight: 700; border-left: 4px solid currentColor; }
+        .mobile-menu-link.active { font-weight: 700; }
         @media (min-width: 1024px) {
+            .mobile-menu-user { display: none; }
+            .filters-primary:has(.filters-query):has(.filters-principal) .filters-actions { grid-column: 3 / -1; }
             .shell, body.page-operational .shell {
                 width: calc(100% - 288px);
                 max-width: 1440px;
@@ -1527,6 +1541,7 @@
             .mobile-menu { inset: 0 auto 0 0; width: 240px; opacity: 1; pointer-events: auto; }
             .mobile-menu-backdrop, .mobile-menu-close, button.menu-toggle.theme-toggle { display: none; }
             .mobile-menu-panel { position: fixed; width: 240px; transform: none; box-shadow: none; }
+            .mobile-menu-link { min-height: 40px; }
             body.mobile-menu-open { overflow: auto; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -1677,15 +1692,7 @@
             <aside class="mobile-menu-panel app-sidebar" aria-labelledby="mobile-menu-title">
                 <div class="mobile-menu-head">
                     <div class="mobile-menu-copy">
-                    @if (session('public_acesso'))
-                        <span class="eyebrow">Atendimento público</span>
                         <strong id="mobile-menu-title">Check Planilha</strong>
-                        <p>Encerre o atendimento antes de devolver este dispositivo.</p>
-                    @else
-                        <span class="eyebrow">Menu</span>
-                        <strong id="mobile-menu-title">Check Planilha</strong>
-                        <p>Acesse cadastros e rotinas administrativas.</p>
-                    @endif
                 </div>
                     <button
                         type="button"
@@ -1699,9 +1706,8 @@
                 </div>
                 @if (!empty($legacySessionUser))
                     <div class="mobile-menu-user">
-                        <small>Usuário</small>
                         <strong>{{ $legacySessionUser['nome'] }}</strong>
-                        <span>{{ $legacySessionUser['email'] }}</span>
+                        <span title="{{ $legacySessionUser['email'] }}">{{ $legacySessionUser['email'] }}</span>
                     </div>
                 @endif
                 @if (! session('public_acesso') && ! empty($legacyNavigation))
@@ -1714,7 +1720,6 @@
                                 data-mobile-menu-link
                             >
                                 <span class="mobile-menu-link-label">{{ $item['label'] }}</span>
-                                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
                             </a>
                         @endforeach
                     </nav>

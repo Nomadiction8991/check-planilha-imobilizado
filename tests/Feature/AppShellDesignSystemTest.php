@@ -41,6 +41,23 @@ final class AppShellDesignSystemTest extends TestCase
         }
     }
 
+    public function test_menu_lateral_apresenta_navegacao_compacta_sem_setas(): void
+    {
+        $source = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+        $this->assertStringNotContainsString('chevron_right', $source);
+        $this->assertStringNotContainsString('Acesse cadastros e rotinas administrativas.', $source);
+        $this->assertMatchesRegularExpression('/\.mobile-menu-nav\s*\{[^}]*gap:\s*2px/s', $source);
+        $this->assertMatchesRegularExpression('/\.mobile-menu-link\s*\{[^}]*min-height:\s*44px/s', $source);
+    }
+
+    public function test_filtros_de_produtos_mantem_acoes_e_campos_compactos(): void
+    {
+        $source = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+        $this->assertMatchesRegularExpression('/\.filters-primary:has\(\.filters-query\):has\(\.filters-principal\)\s*\{[^}]*repeat\(4,\s*minmax\(0,\s*1fr\)\)/s', $source);
+        $this->assertMatchesRegularExpression('/\.filters\s+label\s*\{[^}]*gap:\s*4px/s', $source);
+        $this->assertMatchesRegularExpression('/\.mobile-menu-user\s*\{[^}]*display:\s*none/s', $source);
+    }
+
     public function test_tema_escuro_disponibiliza_tokens_de_superficie(): void
     {
         $html = view('layouts.migration')->render();
