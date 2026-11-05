@@ -236,7 +236,7 @@
         </div>
     </section>
 
-    <section class="section">
+    <section class="section" aria-label="Relatórios disponíveis">
         <div class="section-head">
             <div>
                 <h2>Relatórios disponíveis</h2>
@@ -268,7 +268,7 @@
                                 <td data-label="Título">{{ $report['titulo'] }}</td>
                                 <td data-label="Itens">{{ $report['quantidade'] }} item(ns)</td>
                                 <td data-label="Ação">
-                                    <a class="btn primary" href="{{ $report['rota'] }}">
+                                    <a class="btn" href="{{ $report['rota'] }}">
                                         {{ $report['codigo'] === 'POS' ? 'Abrir posição' : 'Abrir prévia' }}
                                     </a>
                                 </td>

@@ -2,10 +2,46 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Editor de Células — {{ $formulario }}</title>
     @include('partials.pwa')
     <link rel="stylesheet" href="{{ asset('assets/reports/secao14-templates.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/reports/report-cell-editor.css') }}">
+    @include('partials.design-tokens')
+    <style>
+        body { font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; }
+        #topbar { background: var(--ui-surface); color: var(--ui-text); border-color: var(--ui-border); }
+        #topbar h1 { color: var(--ui-text); font-size: 24px; }
+        button, #topbar a, input[type="text"], input[type="number"] { min-height: 44px; font-size: 16px; }
+        button { border-radius: var(--radius-sm); }
+        button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        #topbar button, #topbar a { display: inline-flex; align-items: center; justify-content: center; }
+        #topbar a { color: var(--ui-text) !important; border: 1px solid var(--ui-border) !important; border-radius: var(--radius-sm) !important; font-size: 16px !important; }
+        #topbar a:hover { background: var(--ui-surface-muted); }
+        #topbar #btn-save { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        #topbar #btn-save:hover { background: var(--product-primary-hover); }
+        #topbar #btn-save:disabled, button:disabled { opacity: .6; cursor: not-allowed; }
+        #topbar .tb-label, #zoom-display, #mouse-display { color: var(--ui-text-muted); font-size: 16px; }
+        #sidebar, #log-panel, #log-header { background: var(--ui-surface); color: var(--ui-text); border-color: var(--ui-border); }
+        #canvas-wrapper { background: var(--ui-surface-muted); }
+        .sb-section { border-color: var(--ui-border); }
+        .sb-title, .coord-field label { color: var(--ui-text-muted); font-size: 16px; }
+        #sidebar input[type="text"] { background: var(--ui-surface); color: var(--ui-text); border-color: var(--ui-border); font-size: 16px; }
+        #no-selection, #no-selection span { color: var(--ui-text-muted) !important; font-size: 16px !important; }
+        #log-header { width: 100%; min-height: 44px; font-size: 16px; border: 0; border-bottom: 1px solid var(--ui-border); border-radius: 0; text-align: left; }
+        #log-header:hover { background: var(--ui-surface-muted); }
+        #log-positions, #log-code { color: var(--ui-text); }
+        @media (max-width: 639px) {
+            body { height: auto; min-height: 100vh; overflow: auto; }
+            #topbar { height: auto; flex-wrap: wrap; gap: 8px; }
+            #topbar h1 { white-space: normal; width: 100%; }
+            #topbar .tb-group { flex-wrap: wrap; }
+            #topbar .sep { display: none; }
+            #main { min-width: 0; display: flex; flex-direction: column; }
+            #canvas-wrapper { min-height: 55vh; }
+            #sidebar, #log-panel { width: 100%; max-height: none; }
+        }
+    </style>
 </head>
 <body>
 
@@ -23,7 +59,7 @@
     <div class="sep"></div>
 
     <div class="tb-group" id="cell-mode-controls">
-        <span class="tb-label">Nome:</span>
+        <label class="tb-label" for="cell-name-input">Nome:</label>
         <input type="text" id="cell-name-input" placeholder="ex: administracao">
         <span class="tb-label" style="font-size:10px;color:#666">(desenhe e pressione Enter)</span>
     </div>
@@ -35,11 +71,11 @@
     <div class="sep"></div>
 
     <div class="tb-group">
-        <button id="btn-zoom-out">−</button>
+        <button id="btn-zoom-out" aria-label="Diminuir zoom">−</button>
         <span id="zoom-display">100%</span>
-        <button id="btn-zoom-in">+</button>
-        <button id="btn-zoom-fit">Fit</button>
-        <button id="btn-zoom-100">1:1</button>
+        <button id="btn-zoom-in" aria-label="Aumentar zoom">+</button>
+        <button id="btn-zoom-fit" aria-label="Ajustar zoom à tela">Fit</button>
+        <button id="btn-zoom-100" aria-label="Zoom em tamanho real">1:1</button>
     </div>
 
     <div class="sep"></div>
@@ -92,24 +128,24 @@
             <div id="coord-editor" style="display:none;">
                 <div class="coords-grid" style="margin-bottom:8px;">
                     <div class="coord-field">
-                        <label>Left (px)</label>
+                        <label for="ed-left">Left (px)</label>
                         <input type="text" id="ed-left">
                     </div>
                     <div class="coord-field">
-                        <label>Top (px)</label>
+                        <label for="ed-top">Top (px)</label>
                         <input type="text" id="ed-top">
                     </div>
                     <div class="coord-field">
-                        <label>Width (px)</label>
+                        <label for="ed-width">Width (px)</label>
                         <input type="text" id="ed-width">
                     </div>
                     <div class="coord-field">
-                        <label>Height (px)</label>
+                        <label for="ed-height">Height (px)</label>
                         <input type="text" id="ed-height">
                     </div>
                 </div>
                 <div class="coord-field" style="margin-bottom:8px;">
-                    <label>Nome</label>
+                    <label for="ed-name">Nome</label>
                     <input type="text" id="ed-name">
                 </div>
                 <button class="btn-red btn-sm" id="btn-delete" style="width:100%;font-size:11px;">Deletar célula</button>
@@ -124,11 +160,11 @@
                 <div style="font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Definir tamanho igual</div>
                 <div class="coords-grid" style="margin-bottom:8px;">
                     <div class="coord-field">
-                        <label>Width (px)</label>
+                        <label for="multi-width">Width (px)</label>
                         <input type="text" id="multi-width" placeholder="—">
                     </div>
                     <div class="coord-field">
-                        <label>Height (px)</label>
+                        <label for="multi-height">Height (px)</label>
                         <input type="text" id="multi-height" placeholder="—">
                     </div>
                 </div>
@@ -137,11 +173,11 @@
                 <div style="font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;">Ajuste relativo</div>
                 <div class="coords-grid" style="margin-bottom:8px;">
                     <div class="coord-field">
-                        <label>Δ Width</label>
+                        <label for="multi-dw">Δ Width</label>
                         <input type="text" id="multi-dw" placeholder="ex: +10 ou -5">
                     </div>
                     <div class="coord-field">
-                        <label>Δ Height</label>
+                        <label for="multi-dh">Δ Height</label>
                         <input type="text" id="multi-dh" placeholder="ex: +10 ou -5">
                     </div>
                 </div>
@@ -159,10 +195,10 @@
 
     <!-- Log / Output -->
     <div id="log-panel">
-        <div id="log-header">
-            <span>📋 Log de Posições</span>
+        <button type="button" id="log-header" aria-expanded="true" aria-controls="log-body">
+            <span>📋 Registro de posições</span>
             <span id="log-toggle-btn">▼ recolher</span>
-        </div>
+        </button>
         <div id="log-body">
             <div>
                 <div style="font-size:10px;color:#666;margin-bottom:4px;">Coordenadas (px da imagem)</div>
@@ -182,7 +218,7 @@
     <div id="docs-modal">
         <div id="docs-modal-header">
             <h2>📂 Documentos Salvos</h2>
-            <button id="btn-docs-close">✕</button>
+            <button id="btn-docs-close" aria-label="Fechar documentos">✕</button>
         </div>
         <div id="docs-list">
             <div id="docs-empty">Nenhum documento salvo ainda.</div>
@@ -196,9 +232,9 @@
         <h2>⊞ Configurar Grade</h2>
 
         <div class="grid-controls">
-            <label>Linhas</label>
+            <label for="grid-rows">Linhas</label>
             <input type="number" id="grid-rows" value="2" min="1" max="100">
-            <label>Colunas</label>
+            <label for="grid-cols">Colunas</label>
             <input type="number" id="grid-cols" value="3" min="1" max="50">
             <button id="btn-grid-apply" class="btn-blue" style="padding:5px 12px;">Gerar Tabela</button>
         </div>
@@ -250,7 +286,7 @@
     <div id="detect-modal">
         <div id="detect-modal-header">
             <h2>🔍 Detectar Células Automaticamente</h2>
-            <button id="btn-detect-close">✕</button>
+            <button id="btn-detect-close" aria-label="Fechar detecção de células">✕</button>
         </div>
         <div id="detect-progress-area">
             <div id="detect-status-text">Pronto para iniciar.</div>
@@ -291,5 +327,15 @@
     };
 </script>
 <script src="{{ asset('assets/reports/report-cell-editor.js') }}"></script>
+<script>
+    const logHeader = document.getElementById('log-header');
+    const logBody = document.getElementById('log-body');
+    logHeader.addEventListener('click', () => {
+        logHeader.setAttribute('aria-expanded', String(logBody.style.display !== 'none'));
+        if (logBody.style.display === 'none') {
+            document.getElementById('log-panel').style.height = '44px';
+        }
+    });
+</script>
 </body>
 </html>

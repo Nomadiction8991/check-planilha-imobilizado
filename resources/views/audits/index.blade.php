@@ -3,6 +3,11 @@
 @section('title', 'Auditoria | ' . config('app.name'))
 
 @section('content')
+    <section class="hero">
+        <span class="eyebrow">Auditoria</span>
+        <h1>Auditoria do sistema</h1>
+        <p class="hero-copy">Consulte as ações concluídas com sucesso.</p>
+    </section>
     @if (session('status') || $errors->any())
         <div class="flash-stack">
             @if (session('status'))
@@ -204,7 +209,7 @@
         })();
     </script>
 
-    <section class="section">
+    <section class="section" aria-label="Eventos de auditoria">
         <div class="section-head">
             <div>
                 <h2>Auditoria do sistema</h2>

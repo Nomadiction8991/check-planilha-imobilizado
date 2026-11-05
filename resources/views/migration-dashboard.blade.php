@@ -14,7 +14,7 @@
 
     <section class="hero">
         <span class="eyebrow">Painel operacional</span>
-        <h1>Dashboard do sistema.</h1>
+        <h1>Painel do sistema</h1>
         <p class="hero-copy">
             As cores abaixo indicam o papel de cada módulo: estrutura, catálogo, inventário, acesso e fluxo.
         </p>
@@ -53,7 +53,7 @@
         </div>
     </section>
 
-    <section class="section">
+    <section class="section" aria-label="Indicadores rápidos">
         <div class="section-head">
             <div>
                 <h2>Indicadores rápidos</h2>
