@@ -930,7 +930,7 @@
             border-top: none;
         }
 
-        tbody tr:hover td {
+        tbody tr:not(.dependency-row):hover td {
             background: var(--product-primary-soft);
         }
 

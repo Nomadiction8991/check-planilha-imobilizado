@@ -14,7 +14,7 @@
         .spreadsheet-warning-banner { display: grid; gap: 8px; margin: 24px 0; padding: 16px; border: 1px solid var(--line); border-left: 4px solid var(--ui-warning); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); line-height: 1.5; }
         .spreadsheet-warning-banner__eyebrow { color: var(--muted); font-weight: 700; }
         .spreadsheet-warning-banner p { margin: 0; }
-        .dependency-panel { border-left: 2px solid var(--line); padding-left: 16px; }
+        .dependency-panel { padding-left: 16px; }
         .dependency-panel__title { color: var(--muted); font-weight: 700; }
         .dependency-table { width: 100%; }
         .dependency-new { color: var(--ui-success); }
