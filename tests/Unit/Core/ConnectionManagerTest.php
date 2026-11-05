@@ -175,12 +175,10 @@ final class ConnectionManagerTest extends TestCase
     // ═══════════════════════════════════════════════════════════════════════
 
     #[Test]
-    public function calling_get_connection_without_configure_throws_exception(): void
+    public function calling_get_connection_without_configure_returns_default_laravel_connection(): void
     {
-        // setUp() already called reset(), so no config/connection exists.
-        $this->expectException(\PDOException::class);
-
-        ConnectionManager::getConnection();
+        // setUp() already called reset(), so no legacy config/connection exists.
+        $this->assertSame(\Illuminate\Support\Facades\DB::connection()->getPdo(), ConnectionManager::getConnection());
     }
 
     #[Test]
