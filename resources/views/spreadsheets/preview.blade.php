@@ -27,6 +27,23 @@
         .import-errors-panel__head { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-bottom: 1px solid var(--line); }
         .import-errors-panel__badge { font-weight: 700; color: var(--ui-warning); }
         .import-errors-panel__head p { margin: 4px 0 0; color: var(--muted); }
+        @media (max-width: 860px) {
+            table:not(.dependency-table, .verification-table) > tbody > tr.dependency-row {
+                margin-top: -14px;
+                padding: 0 16px 16px;
+                border: 0;
+                background: transparent;
+                box-shadow: none;
+            }
+            table:not(.dependency-table, .verification-table) > tbody > tr.dependency-row > td::before { display: none; }
+            table:not(.dependency-table, .verification-table).import-errors-table > tbody > tr > td[data-card-title]::before {
+                display: inline;
+                margin-right: 6px;
+                font-size: inherit;
+                color: inherit;
+            }
+            table.import-errors-table > tbody > tr > td[data-label="Motivo"] { grid-column: 1 / -1; }
+        }
     </style>
 
     <section class="hero">
@@ -79,10 +96,10 @@
                     <tbody>
                         @foreach ($errosPreview as $erro)
                             <tr>
-                                <td>{{ (int) ($erro['linha'] ?? 0) }}</td>
-                                <td>{{ trim((string) ($erro['codigo'] ?? '')) !== '' ? $erro['codigo'] : '—' }}</td>
-                                <td>{{ trim((string) ($erro['nome'] ?? '')) !== '' ? $erro['nome'] : '—' }}</td>
-                                <td>{{ $erro['mensagem'] ?? '' }}</td>
+                                <td data-label="Linha" data-card-title>{{ (int) ($erro['linha'] ?? 0) }}</td>
+                                <td data-label="Código">{{ trim((string) ($erro['codigo'] ?? '')) !== '' ? $erro['codigo'] : '—' }}</td>
+                                <td data-label="Nome">{{ trim((string) ($erro['nome'] ?? '')) !== '' ? $erro['nome'] : '—' }}</td>
+                                <td data-label="Motivo">{{ $erro['mensagem'] ?? '' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -133,7 +150,7 @@
                             @endphp
                             <tr class="church-row" data-church-key="{{ $churchKey }}">
                                 <td data-label="Código">{{ $churchCode !== '' ? $churchCode : 'Nenhum' }}</td>
-                                <td data-label="Igreja">
+                                <td data-label="Igreja" data-card-title>
                                     <strong>{{ $churchDescription !== '' ? $churchDescription : 'Sem descrição' }}</strong>
                                 </td>
                                 <td data-label="Total">{{ number_format((int) ($igreja['total'] ?? 0), 0, ',', '.') }}</td>
@@ -150,7 +167,7 @@
                                 <td data-label="Alterações">{{ number_format((int) ($igreja['atualizar'] ?? 0), 0, ',', '.') }}</td>
                                 <td data-label="Exclusões">{{ number_format((int) ($igreja['exclusoes'] ?? 0), 0, ',', '.') }}</td>
                                 <td data-label="Erros">{{ number_format((int) ($igreja['erros'] ?? 0), 0, ',', '.') }}</td>
-                                <td data-label="Ação">
+                                <td data-label="Ação" data-card-actions>
                                     <select class="js-preview-church-action church-action-select" data-codigo="{{ $churchKey }}" aria-label="Ação da igreja {{ $churchCode !== '' ? $churchCode : 'sem código' }}">
                                         <option value="pular" @selected($churchAction === 'pular')>Não importar</option>
                                         <option value="importar" @selected($churchAction === 'importar')>Importar tudo</option>

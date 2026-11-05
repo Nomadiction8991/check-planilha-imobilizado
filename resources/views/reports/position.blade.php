@@ -516,8 +516,8 @@
                                     }
                                 @endphp
                                 <tr>
-                                    <td data-label="Código" class="mono">{{ $item['codigo'] !== '' ? $item['codigo'] : '-' }}</td>
-                                    <td data-label="Descrição">
+                                    <td data-label="Código" data-card-title class="mono">{{ $item['codigo'] !== '' ? $item['codigo'] : '-' }}</td>
+                                    <td data-label="Descrição" data-card-title>
                                         <div class="position-item">
                                             <strong>{{ $item['nome_atual'] !== '' ? $item['nome_atual'] : '-' }}</strong>
                                             @if ($item['nome_original'] !== '' && $item['nome_original'] !== $item['nome_atual'])

@@ -105,19 +105,19 @@
                                 $isResolved = (int) ($erro->resolvido ?? 0) === 1;
                             @endphp
                             <tr id="erro-row-{{ $erro->id }}">
-                                <td data-label="Código">
+                                <td data-label="Código" data-card-title>
                                     <strong class="mono">{{ $erro->codigo ?: 'Nenhum' }}</strong>
                                     @if (!empty($erro->linha_csv))
                                         <div class="table-note">Linha {{ $erro->linha_csv }}</div>
                                     @endif
                                 </td>
-                                <td data-label="Descrição CSV">
+                                <td data-label="Descrição CSV" data-card-title>
                                     {{ $erro->descricao_csv ?: trim(($erro->bem ?? '') . ' ' . ($erro->complemento ?? '')) }}
                                 </td>
                                 <td data-label="Erro">
                                     {{ $erro->mensagem_erro }}
                                 </td>
-                                <td data-label="Situação">
+                                <td data-label="Situação" data-card-actions>
                                     @if (!empty($legacyPermissions['spreadsheets.errors.resolve']))
                                         <label class="spreadsheet-errors-status">
                                             <input

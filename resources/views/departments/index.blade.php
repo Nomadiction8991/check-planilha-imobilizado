@@ -198,7 +198,7 @@
                     <tbody>
                         @foreach ($departments as $department)
                             <tr>
-                                <td data-label="Dependência">{{ $department->descricao ?: 'Sem descrição' }}</td>
+                                <td data-label="Dependência" data-card-title>{{ $department->descricao ?: 'Sem descrição' }}</td>
                                 <td data-label="Igreja">
                                     {{ data_get($department, 'comum.codigo') ?: 'Nenhum' }}
                                     @if (data_get($department, 'comum.descricao'))
@@ -206,7 +206,7 @@
                                     @endif
                                 </td>
                                 <td data-label="Produtos ativos">{{ $department->active_products_count }}</td>
-                                <td data-label="Ações">
+                                <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['products.view'] ?? null))
                                             <a class="btn" href="{{ route('migration.products.index', ['comum_id' => $department->comum_id, 'dependencia_id' => $department->id]) }}">

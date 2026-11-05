@@ -17,13 +17,6 @@
         .users-page .btn:disabled { opacity: .6; cursor: not-allowed; }
         .users-page .btn.danger { color: var(--ui-danger); }
         @media (min-width: 640px) { .users-page h1 { font-size: 30px; } }
-        @media (max-width: 639px) {
-            .users-page table, .users-page tbody, .users-page tr, .users-page td { display: block; width: 100%; }
-            .users-page thead { display: none; }
-            .users-page tr { padding: 16px; border-bottom: 1px solid var(--ui-border); }
-            .users-page td { padding: 8px 0; }
-            .users-page td::before { content: attr(data-label); display: block; font-weight: 700; }
-        }
     </style>
     <div class="users-page">
     <section class="hero">
@@ -191,7 +184,7 @@
                                     : false;
                             @endphp
                             <tr>
-                                <td data-label="Usuário">
+                                <td data-label="Usuário" data-card-title>
                                     <div>{{ $user->nome ?: 'Sem nome' }}</div>
                                     <div class="table-note">{{ $user->email ?: 'Sem email' }}</div>
                                 </td>
@@ -208,7 +201,7 @@
                                         <span class="capsule warn">Inativo</span>
                                     @endif
                                 </td>
-                                <td data-label="Ações">
+                                <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['users.permissions.manage'] ?? null))
                                             @unless ($isProtectedAdministrator)

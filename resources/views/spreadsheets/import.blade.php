@@ -174,7 +174,7 @@
                                 $responsibleEmail = trim((string) ($import['usuario_responsavel_email'] ?? ''));
                             @endphp
                             <tr>
-                                <td data-label="Igreja">{{ $churchLabel }}</td>
+                                <td data-label="Igreja" data-card-title>{{ $churchLabel }}</td>
                                 <td data-label="Administração">{{ $administrationLabel }}</td>
                                 <td data-label="Arquivo">
                                     <strong>{{ $import['arquivo_nome'] ?? 'Nenhum' }}</strong>
@@ -205,7 +205,7 @@
                                 <td data-label="Atualização">
                                     <span class="table-note">{{ $dateLabel }}</span>
                                 </td>
-                                <td data-label="Ação">
+                                <td data-label="Ação" data-card-actions>
                                     <a class="btn" href="{{ route('migration.spreadsheets.processing', ['importacao' => $import['id']]) }}">Ver</a>
                                 </td>
                             </tr>

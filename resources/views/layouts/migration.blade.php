@@ -1500,47 +1500,91 @@
                 min-width: 0;
             }
 
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
+            table:not(.dependency-table, .verification-table) {
                 display: block;
             }
 
-            thead {
+            table:not(.dependency-table, .verification-table) > thead {
                 display: none;
             }
 
-            tbody {
+            table:not(.dependency-table, .verification-table) > tbody {
                 display: grid;
                 gap: 14px;
                 padding: 14px;
             }
 
-            tbody tr {
-                padding: 14px;
-                border: 1px solid var(--line);
-                border-radius: 16px;
-                background: var(--surface);
+            table:not(.dependency-table, .verification-table) > tbody > tr {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                padding: 16px;
+                border: 1px solid var(--ui-border);
+                border-radius: var(--radius-md);
+                background: var(--ui-surface);
                 box-shadow: var(--shadow-soft);
             }
 
-            td {
+            table:not(.dependency-table, .verification-table) > tbody > tr > td {
+                display: block;
                 min-width: 0;
                 padding: 0;
                 border: 0;
+                font-size: 16px;
+                overflow-wrap: anywhere;
             }
 
-            td::before {
+            table:not(.dependency-table, .verification-table) > tbody > tr > td::before {
                 content: attr(data-label);
                 display: block;
-                margin-bottom: 6px;
-                font-size: 11px;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: var(--muted);
+                margin-bottom: 4px;
+                font-size: 14px;
+                color: var(--ui-text-muted);
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-title] {
+                grid-column: 1 / -1;
+                order: -1;
+                color: var(--ui-text);
+                font-size: 18px;
+                font-weight: 700;
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-title]::before,
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions]::before {
+                display: none;
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions],
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[colspan],
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-label="Descrição"],
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-label="Observação"],
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-label="Erro"],
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-label="Responsável"],
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-label="Arquivo"],
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-label="Localização"] {
+                grid-column: 1 / -1;
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] {
+                border-top: 1px solid var(--ui-border);
+                padding-top: 12px;
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .inline-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .inline-actions > :last-child:nth-child(odd) {
+                grid-column: 1 / -1;
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .btn,
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] select {
+                min-height: 44px;
+                width: 100%;
             }
         }
     </style>

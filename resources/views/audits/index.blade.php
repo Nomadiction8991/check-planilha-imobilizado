@@ -234,12 +234,12 @@
                     <tbody>
                         @foreach ($audits as $entry)
                             <tr>
-                                <td data-label="Data">
+                                <td data-label="Data" data-card-title>
                                     <div class="mono">
                                         {{ \Illuminate\Support\Carbon::createFromFormat('Y-m-d H:i:s', $entry->occurredAt)->format('d/m/Y H:i:s') }}
                                     </div>
                                 </td>
-                                <td data-label="Usuário">
+                                <td data-label="Usuário" data-card-title>
                                     <div>{{ $entry->userName }}</div>
                                     @if ($entry->userEmail)
                                         <div class="table-note">{{ $entry->userEmail }}</div>

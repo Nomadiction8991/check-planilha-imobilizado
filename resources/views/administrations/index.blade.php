@@ -116,12 +116,12 @@
                         @foreach ($administrations as $administration)
                             <tr>
                                 <td data-label="ID" class="mono">{{ $administration->id }}</td>
-                                <td data-label="Descrição">{{ $administration->descricao ?? 'Sem descrição' }}</td>
+                                <td data-label="Descrição" data-card-title>{{ $administration->descricao ?? 'Sem descrição' }}</td>
                                 <td data-label="CNPJ" class="mono">{{ $administration->cnpj ?? 'Sem CNPJ' }}</td>
                                 <td data-label="Localização">
                                     {{ trim(implode(' - ', array_filter([$administration->cidade ?? '', $administration->estado ?? '']))) ?: 'Sem localização' }}
                                 </td>
-                                <td data-label="Ações">
+                                <td data-label="Ações" data-card-actions>
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['administrations.edit'] ?? null))
                                             <a class="btn" href="{{ route('migration.administrations.edit', ['administration' => $administration->id]) }}">Editar</a>
