@@ -11,51 +11,19 @@
 
     <style>
         .spreadsheet-warning-banner {
-            position: relative;
-            overflow: hidden;
             display: grid;
-            gap: 10px;
-            padding: 20px 22px 20px 24px;
-            margin-top: 40px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(239, 68, 68, 0.38);
-            border-left: 8px solid #ef4444;
-            border-radius: 24px;
-            background: linear-gradient(135deg, #7f1d1d, #450a0a);
-            color: #fef2f2;
-            box-shadow: 0 20px 48px rgba(127, 29, 29, 0.38);
+            gap: 8px;
+            margin: 24px 0;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--ui-warning);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            color: var(--ink);
+            line-height: 1.5;
         }
-
-        .spreadsheet-warning-banner__eyebrow {
-            display: inline-flex;
-            align-self: start;
-            width: fit-content;
-            padding: 5px 12px;
-            border-radius: 999px;
-            background: rgba(254, 202, 202, 0.16);
-            color: #fca5a5;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .spreadsheet-warning-banner strong {
-            display: block;
-            font-size: 18px;
-            line-height: 1.35;
-            letter-spacing: -0.01em;
-        }
-
-        .spreadsheet-warning-banner p {
-            position: relative;
-            z-index: 1;
-            margin: 0;
-            max-width: 90ch;
-            font-size: 15px;
-            line-height: 1.65;
-            color: rgba(254, 242, 242, 0.95);
-        }
+        .spreadsheet-warning-banner__eyebrow { color: var(--muted); font-weight: 700; }
+        .spreadsheet-warning-banner p { margin: 0; }
     </style>
 
     <section class="hero">
@@ -67,7 +35,7 @@
     </section>
 
     <div class="spreadsheet-warning-banner" role="alert" aria-live="polite">
-        <span class="spreadsheet-warning-banner__eyebrow">Escopo da importação</span>
+        <span class="spreadsheet-warning-banner__eyebrow">Aviso importante · Escopo da importação</span>
         <strong>A importação processa a <strong>igreja inteira</strong> (todas as dependências), não apenas um setor.</strong>
         <p>
             Para análise mais leve, prefira planilha filtrada por igreja.

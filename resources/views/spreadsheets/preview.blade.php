@@ -11,287 +11,22 @@
     @endphp
 
     <style>
-        .hero {
-            margin-top: 40px;
-            margin-bottom: 32px;
-        }
-
-        .spreadsheet-warning-banner {
-            margin-top: 24px;
-            position: relative;
-            overflow: hidden;
-            display: grid;
-            gap: 12px;
-            padding: 24px 28px;
-            margin-bottom: 32px;
-            border: 1px solid rgba(239, 68, 68, 0.38);
-            border-left: 8px solid #ef4444;
-            border-radius: 24px;
-            background: linear-gradient(135deg, #7f1d1d, #450a0a);
-            color: #fef2f2;
-            box-shadow: 0 20px 48px rgba(127, 29, 29, 0.38);
-            transition: transform 0.3s ease;
-        }
-
-        .spreadsheet-warning-banner__eyebrow {
-            display: inline-flex;
-            align-self: start;
-            width: fit-content;
-            padding: 5px 12px;
-            border-radius: 999px;
-            background: rgba(254, 202, 202, 0.16);
-            color: #fca5a5;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .spreadsheet-warning-banner strong {
-            display: block;
-            font-size: 20px;
-            font-weight: 700;
-            line-height: 1.2;
-            letter-spacing: -0.02em;
-        }
-
-        .spreadsheet-warning-banner p {
-            margin: 0;
-            max-width: 80ch;
-            font-size: 15px;
-            line-height: 1.6;
-            color: rgba(254, 242, 242, 0.85);
-        }
-
-        /* UX Polish: Tabelas e Interações */
-        .table-shell {
-            border: 1px solid var(--line);
-            background: var(--surface);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-            transition: box-shadow 0.3s ease;
-        }
-
-        table {
-            border-spacing: 0;
-            width: 100%;
-        }
-
-        th {
-            font-weight: 700;
-            font-size: 11px;
-            letter-spacing: 0.05em;
-            padding: 16px 20px;
-            background: rgba(0, 0, 0, 0.02);
-            border-bottom: 2px solid var(--line);
-        }
-
-        td {
-            padding: 16px 20px;
-            vertical-align: middle;
-            transition: background-color 0.2s ease;
-        }
-
-        .table-shell tbody tr:hover td,
-        .dependency-table tbody tr:hover td {
-            background: transparent !important;
-        }
-
-        tr.dependency-header-row th {
-            background: rgba(31, 111, 95, 0.03);
-            border-top: 1px solid var(--line);
-            padding: 12px 20px;
-            font-size: 10px;
-            color: var(--muted);
-        }
-
-        .dependency-row td {
-            padding: 0 0 20px 40px;
-            background: transparent;
-            font-size: 13px;
-        }
-
-        .dependency-panel {
-            border-left: 2px solid var(--line);
-            padding-left: 20px;
-        }
-
-        .dependency-panel__title {
-            margin: 0 0 10px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .dependency-table {
-            width: 100%;
-            border: none;
-            border-collapse: collapse;
-            background: transparent;
-        }
-
-        .dependency-table thead tr {
-            border-bottom: 1px solid var(--line);
-        }
-
-        .dependency-table th {
-            padding: 8px;
-            font-size: 11px;
-            color: var(--muted);
-            background: transparent;
-            border-bottom: 0;
-        }
-
-        .dependency-table td {
-            padding: 6px 8px;
-            font-size: 12px;
-        }
-
-        .dependency-table .dependency-total,
-        .dependency-table .dependency-new,
-        .dependency-table .dependency-update,
-        .dependency-table .dependency-error {
-            font-variant-numeric: tabular-nums;
-            white-space: nowrap;
-        }
-
-        .dependency-table .dependency-new {
-            color: #4ade80;
-        }
-
-        .dependency-table .dependency-update {
-            color: #60a5fa;
-        }
-
-        .dependency-table .dependency-error {
-            color: #f87171;
-        }
-
-        /* Micro-interações em botões e selects */
-        select.church-action-select,
-        select.dependency-action-select {
-            cursor: pointer;
-            border-radius: 10px;
-            padding: 8px 12px;
-            font-weight: 600;
-            font-size: 13px;
-            border: 1px solid var(--line);
-            background: var(--surface-strong);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        select.church-action-select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-soft);
-        }
-
-        select.dependency-action-select {
-            font-size: 12px;
-            padding: 4px 8px;
-        }
-
-        select.dependency-action-select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-soft);
-        }
-
-        /* Animação de expansão */
-        .dependency-container {
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .spreadsheet-warning-banner {
-            animation: banner-entry 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
-        }
-
-        @keyframes banner-entry {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .is-hidden {
-            display: none !important;
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-
-        /* Estilização Premium das Capsules */
-        .capsule {
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            padding: 4px 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-            border: 1px solid transparent;
-        }
-
-        .capsule.accent {
-            background: rgba(31, 111, 95, 0.1);
-            border-color: rgba(31, 111, 95, 0.15);
-        }
-
-        .capsule.warn {
-            background: rgba(139, 61, 25, 0.08);
-            border-color: rgba(139, 61, 25, 0.12);
-        }
-
-        /* Painel de linhas com erro na análise */
-        .import-errors-panel {
-            display: grid;
-            gap: 0;
-            border-left: 6px solid #ffb703;
-            border-radius: 16px;
-        }
-
-        .import-errors-panel__head {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            padding: 18px 22px;
-            border-bottom: 1px solid var(--line);
-        }
-
-        .import-errors-panel__badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 34px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(255, 183, 3, 0.14);
-            color: #b26a00;
-            font-size: 15px;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .import-errors-panel__head strong {
-            display: block;
-            font-size: 16px;
-            line-height: 1.3;
-        }
-
-        .import-errors-panel__head p {
-            margin: 2px 0 0;
-            max-width: 80ch;
-            font-size: 13px;
-            line-height: 1.55;
-            color: var(--muted);
-        }
-
-        .import-errors-table th,
-        .import-errors-table td {
-            padding: 12px 22px;
-            font-size: 13px;
-        }
-
-        .import-errors-table td:first-child {
-            font-variant-numeric: tabular-nums;
-            white-space: nowrap;
-        }
+        .spreadsheet-warning-banner { display: grid; gap: 8px; margin: 24px 0; padding: 16px; border: 1px solid var(--line); border-left: 4px solid var(--ui-warning); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); line-height: 1.5; }
+        .spreadsheet-warning-banner__eyebrow { color: var(--muted); font-weight: 700; }
+        .spreadsheet-warning-banner p { margin: 0; }
+        .dependency-panel { border-left: 2px solid var(--line); padding-left: 16px; }
+        .dependency-panel__title { color: var(--muted); font-weight: 700; }
+        .dependency-table { width: 100%; }
+        .dependency-new { color: var(--ui-success); }
+        .dependency-update { color: var(--accent); }
+        .dependency-error { color: var(--ui-danger); }
+        select.church-action-select, select.dependency-action-select { min-height: 44px; font-size: 16px; }
+        select.church-action-select:focus-visible, select.dependency-action-select:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+        .is-hidden { display: none !important; }
+        .import-errors-panel { border-left: 4px solid var(--ui-warning); }
+        .import-errors-panel__head { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-bottom: 1px solid var(--line); }
+        .import-errors-panel__badge { font-weight: 700; color: var(--ui-warning); }
+        .import-errors-panel__head p { margin: 4px 0 0; color: var(--muted); }
     </style>
 
     <section class="hero">
@@ -397,12 +132,12 @@
                                 $churchAction = $savedChurches[$churchKey] ?? 'pular';
                             @endphp
                             <tr class="church-row" data-church-key="{{ $churchKey }}">
-                                <td>{{ $churchCode !== '' ? $churchCode : 'Nenhum' }}</td>
-                                <td>
+                                <td data-label="Código">{{ $churchCode !== '' ? $churchCode : 'Nenhum' }}</td>
+                                <td data-label="Igreja">
                                     <strong>{{ $churchDescription !== '' ? $churchDescription : 'Sem descrição' }}</strong>
                                 </td>
-                                <td>{{ number_format((int) ($igreja['total'] ?? 0), 0, ',', '.') }}</td>
-                                <td>
+                                <td data-label="Total">{{ number_format((int) ($igreja['total'] ?? 0), 0, ',', '.') }}</td>
+                                <td data-label="Status">
                                     @if ($churchStatus === 'com_erro')
                                         <span class="capsule warn">Com erros</span>
                                     @elseif ($churchStatus === 'com_alteracoes')
@@ -411,11 +146,11 @@
                                         <span class="capsule">Sem alterações</span>
                                     @endif
                                 </td>
-                                <td>{{ number_format((int) ($igreja['novos'] ?? 0), 0, ',', '.') }}</td>
-                                <td>{{ number_format((int) ($igreja['atualizar'] ?? 0), 0, ',', '.') }}</td>
-                                <td>{{ number_format((int) ($igreja['exclusoes'] ?? 0), 0, ',', '.') }}</td>
-                                <td>{{ number_format((int) ($igreja['erros'] ?? 0), 0, ',', '.') }}</td>
-                                <td>
+                                <td data-label="Novos">{{ number_format((int) ($igreja['novos'] ?? 0), 0, ',', '.') }}</td>
+                                <td data-label="Alterações">{{ number_format((int) ($igreja['atualizar'] ?? 0), 0, ',', '.') }}</td>
+                                <td data-label="Exclusões">{{ number_format((int) ($igreja['exclusoes'] ?? 0), 0, ',', '.') }}</td>
+                                <td data-label="Erros">{{ number_format((int) ($igreja['erros'] ?? 0), 0, ',', '.') }}</td>
+                                <td data-label="Ação">
                                     <select class="js-preview-church-action church-action-select" data-codigo="{{ $churchKey }}" aria-label="Ação da igreja {{ $churchCode !== '' ? $churchCode : 'sem código' }}">
                                         <option value="pular" @selected($churchAction === 'pular')>Não importar</option>
                                         <option value="importar" @selected($churchAction === 'importar')>Importar tudo</option>
@@ -447,12 +182,12 @@
                                                             $depAction = $savedDependencies[$depKey] ?? ($churchAction === 'importar' ? 'importar' : 'pular');
                                                         @endphp
                                                         <tr>
-                                                            <td>{{ $depName }}</td>
-                                                            <td class="dependency-total">{{ $depSummary['total'] }}</td>
-                                                            <td class="dependency-new">{{ $depSummary['novos'] }}</td>
-                                                            <td class="dependency-update">{{ $depSummary['atualizar'] }}</td>
-                                                            <td class="dependency-error">{{ $depSummary['erros'] }}</td>
-                                                            <td>
+                                                            <td data-label="Setor">{{ $depName }}</td>
+                                                            <td data-label="Total" class="dependency-total">{{ $depSummary['total'] }}</td>
+                                                            <td data-label="Novos" class="dependency-new">{{ $depSummary['novos'] }}</td>
+                                                            <td data-label="Alt." class="dependency-update">{{ $depSummary['atualizar'] }}</td>
+                                                            <td data-label="Erros" class="dependency-error">{{ $depSummary['erros'] }}</td>
+                                                            <td data-label="Ação">
                                                                 <select class="js-preview-dependency-action dependency-action-select" data-dep-key="{{ $depKey }}" aria-label="Ação da dependência {{ $depName }}">
                                                                     <option value="pular" @selected($depAction === 'pular')>Pular</option>
                                                                     <option value="importar" @selected($depAction === 'importar')>Importar</option>
