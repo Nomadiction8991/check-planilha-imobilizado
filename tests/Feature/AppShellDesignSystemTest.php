@@ -17,7 +17,7 @@ final class AppShellDesignSystemTest extends TestCase
         $html = view('layouts.migration')->render();
 
         $this->assertDoesNotMatchRegularExpression("/html\\[data-theme='light'\\]\\s+\\.topbar,\\s*html\\[data-theme='light'\\]\\s+\\.hero\\s*\\{[^}]*box-shadow:\\s*var\\(--shadow-strong\\)/", $html);
-        $this->assertMatchesRegularExpression("/html\\[data-theme='light'\\]\\s+\\.hero\\s*\\{[^}]*box-shadow:\\s*var\\(--shadow-card\\)/", $html);
+        $this->assertStringNotContainsString('html[data-theme=\'light\'] .hero', $html);
     }
 
     public function test_casca_clara_usa_cores_solidas_e_fonte_da_interface(): void
@@ -25,10 +25,20 @@ final class AppShellDesignSystemTest extends TestCase
         $html = view('layouts.migration')->render();
 
         $this->assertMatchesRegularExpression('/button,\s*input,\s*select,\s*textarea\s*\{\s*font:\s*inherit\s*;/', $html);
-        $this->assertMatchesRegularExpression("/html\\[data-theme='light'\\]\\s+\\.btn\\.primary\\s*\\{[^}]*background:\\s*var\\(--product-primary\\)/", $html);
-        $this->assertMatchesRegularExpression("/html\\[data-theme='light'\\]\\s+\\.page-quick-actions-toggle\\s*\\{[^}]*background:\\s*var\\(--product-primary\\)/", $html);
+        $this->assertMatchesRegularExpression('/\.btn\.primary\s*\{[^}]*background:\s*var\(--product-primary\)/', $html);
+        $this->assertMatchesRegularExpression('/\.page-quick-actions-toggle\s*\{[^}]*background:\s*var\(--product-primary\)/', $html);
         $this->assertDoesNotMatchRegularExpression('/(?:^|\})\s*body\s*\{[^}]*background:\s*[^;]*gradient/m', $html);
         $this->assertDoesNotMatchRegularExpression("/html\\[data-theme='light'\\]\\s+body\\s*\\{[^}]*background:\\s*[^;]*gradient/", $html);
+    }
+
+    public function test_casca_nao_define_cores_fixas_ou_regras_por_tema(): void
+    {
+        foreach (['layouts/migration', 'partials/quick-actions', 'partials/request-loading'] as $view) {
+            $source = file_get_contents(resource_path('views/'.$view.'.blade.php'));
+            preg_match_all('~<style>(.*?)</style>~s', $source, $styles);
+            $css = implode("\n", $styles[1]);
+            $this->assertDoesNotMatchRegularExpression('/#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\s*\(|(?:linear|radial|conic)-gradient\s*\(|html\[data-theme=/i', $css, $view);
+        }
     }
 
     public function test_tema_escuro_disponibiliza_tokens_de_superficie(): void

@@ -6,7 +6,7 @@
         display: grid;
         place-items: center;
         padding: 24px;
-        background: rgba(21, 18, 14, 0.46);
+        background: var(--ui-overlay);
         backdrop-filter: blur(10px);
         opacity: 0;
         visibility: hidden;
@@ -38,7 +38,7 @@
         width: 54px;
         height: 54px;
         border-radius: 999px;
-        border: 4px solid rgba(31, 111, 95, 0.14);
+        border: 4px solid var(--ui-border-strong);
         border-top-color: var(--accent);
         animation: request-loading-spin 0.8s linear infinite;
     }
@@ -53,17 +53,17 @@
         width: min(180px, 100%);
         height: 8px;
         overflow: hidden;
-        border: 1px solid rgba(31, 111, 95, 0.18);
+        border: 1px solid var(--ui-border-strong);
         border-radius: 999px;
-        background: rgba(31, 111, 95, 0.08);
+        background: var(--product-primary-soft);
     }
 
     .request-loading-overlay__bar {
         width: 42%;
         height: 100%;
         border-radius: inherit;
-        background: linear-gradient(90deg, rgba(31, 111, 95, 0.42), var(--accent));
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+        background: var(--product-primary);
+        box-shadow: var(--shadow-card);
         animation: request-loading-bar 1.25s ease-in-out infinite;
     }
 
@@ -86,30 +86,6 @@
 
     body.is-loading * {
         cursor: progress !important;
-    }
-
-    html[data-theme='dark'] .request-loading-overlay {
-        background: rgba(6, 8, 10, 0.6);
-    }
-
-    html[data-theme='dark'] .request-loading-overlay__panel {
-        background:
-            radial-gradient(circle at top, rgba(145, 221, 209, 0.08), transparent 42%),
-            linear-gradient(180deg, rgba(32, 30, 26, 0.98), rgba(24, 22, 19, 0.96));
-    }
-
-    html[data-theme='dark'] .request-loading-overlay__spinner {
-        border-color: rgba(145, 221, 209, 0.16);
-        border-top-color: var(--accent);
-    }
-
-    html[data-theme='dark'] .request-loading-overlay__track {
-        border-color: rgba(145, 221, 209, 0.18);
-        background: rgba(145, 221, 209, 0.08);
-    }
-
-    html[data-theme='dark'] .request-loading-overlay__bar {
-        background: linear-gradient(90deg, rgba(145, 221, 209, 0.42), var(--accent));
     }
 
     @keyframes request-loading-spin {
