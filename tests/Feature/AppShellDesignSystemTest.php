@@ -12,6 +12,14 @@ use Mockery\MockInterface;
 
 final class AppShellDesignSystemTest extends TestCase
 {
+    public function test_casca_organiza_conteudo_no_celular(): void
+    {
+        $source = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+        $this->assertMatchesRegularExpression('/@media\s*\(max-width:\s*639px\)\s*\{[^}]*\.section-head p\s*\{[^}]*display:\s*none/s', $source);
+        $this->assertMatchesRegularExpression('/\.filters-dialog-actions\s*>\s*\.btn\s*\{[^}]*width:\s*100%/s', $source);
+        $this->assertMatchesRegularExpression('/\.empty-state p\s*\{[^}]*font-size:\s*14px;[^}]*color:\s*var\(--ui-text-muted\)/s', $source);
+    }
+
     public function test_atalhos_ficam_ocultos_quando_um_dialogo_esta_aberto(): void
     {
         $source = file_get_contents(resource_path('views/layouts/migration.blade.php'));
