@@ -49,22 +49,13 @@
             overflow: hidden;
             padding: 24px 26px;
             border: 1px solid var(--line);
-            border-radius: 26px;
-            background:
-                radial-gradient(circle at top right, color-mix(in srgb, var(--accent-soft) 92%, transparent), transparent 42%),
-                linear-gradient(180deg, color-mix(in srgb, var(--surface-strong) 84%, transparent), var(--surface));
-            box-shadow: var(--shadow-soft);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            box-shadow: var(--shadow-card);
         }
 
         .verification-hero::after {
-            content: '';
-            position: absolute;
-            inset: auto -44px -52px auto;
-            width: 180px;
-            height: 180px;
-            border-radius: 999px;
-            background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 70%);
-            pointer-events: none;
+            content: none;
         }
 
         .verification-hero .hero-copy {
@@ -94,7 +85,7 @@
             color: var(--accent);
         }
 
-        @media (max-width: 860px) {
+        @media (max-width: 639px) {
             .verification-hero {
                 padding: 20px 20px 18px;
             }
@@ -176,23 +167,23 @@
                 padding: 10px 8px;
                 border: 1px solid var(--line);
                 border-radius: 14px;
-                background: rgba(255, 255, 255, 0.58);
+                background: var(--surface-soft);
             }
 
             html[data-theme='dark'] .verification-cell--verified .check-inline,
             html[data-theme='dark'] .verification-cell--label .check-inline {
-                background: linear-gradient(180deg, rgba(47, 43, 38, 0.98), rgba(33, 31, 27, 0.96));
-                border-color: rgba(255, 255, 255, 0.14);
+                background: var(--surface-soft);
+                border-color: var(--line);
             }
 
             html[data-theme='dark'] .verification-cell--verified .check-inline {
-                border-color: rgba(145, 221, 209, 0.22);
-                color: #d7fff7;
+                border-color: var(--line);
+                color: var(--ink);
             }
 
             html[data-theme='dark'] .verification-cell--label .check-inline {
-                border-color: rgba(239, 190, 130, 0.22);
-                color: #ffe4bf;
+                border-color: var(--line);
+                color: var(--ink);
             }
 
             .verification-mobile-icon {
@@ -221,9 +212,21 @@
             .identification-primary,
             .identification-secondary,
             .identification-tertiary {
-                font-size: 15px;
+                font-size: 16px;
             }
         }
+
+        @media (min-width: 640px) and (max-width: 860px) {
+            .verification-table-shell table { display: table; }
+            .verification-table-shell thead { display: table-header-group; }
+            .verification-table-shell tbody { display: table-row-group; padding: 0; }
+            .verification-table-shell tr { display: table-row; padding: 0; border: 0; background: none; box-shadow: none; }
+            .verification-table-shell th, .verification-table-shell td { display: table-cell; padding: 15px 18px; border-top: 1px solid var(--line); }
+            .verification-table-shell td::before { display: none; }
+        }
+
+        .verification-table-shell .btn, .verification-table-shell input[type='text'] { min-height: 44px; }
+        .verification-table-shell :focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
 
         @media (min-width: 861px) {
             .verification-hero {
