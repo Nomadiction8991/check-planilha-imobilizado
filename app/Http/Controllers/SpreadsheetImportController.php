@@ -144,8 +144,19 @@ class SpreadsheetImportController extends Controller
 
     public function confirm(Request $request, int $importacao): RedirectResponse
     {
+        $importAll = $request->boolean('importar_tudo');
+
+        try {
+            DB::table('importacao_acoes')->updateOrInsert(
+                ['importacao_id' => $importacao, 'tipo' => 'config', 'chave' => 'importar_tudo'],
+                ['acao' => $importAll ? '1' : '0', 'updated_at' => now(), 'created_at' => now()]
+            );
+        } catch (\Throwable $e) {
+            // Ignora se tabela não existir em ambiente de teste legado
+        }
+
         $confirmData = [
-            'importar_tudo' => $request->boolean('importar_tudo'),
+            'importar_tudo' => $importAll,
             'acoes' => (array) $request->input('acao', Session::get($this->imports->previewActionsKey($importacao), [])),
             'igrejas' => (array) $request->input('igrejas', Session::get($this->imports->previewChurchesKey($importacao), [])),
             'dependencias' => (array) $request->input('dependencias', Session::get($this->imports->previewDependenciesKey($importacao), [])),
@@ -188,16 +199,28 @@ class SpreadsheetImportController extends Controller
             return $ownership;
         }
 
-        $options = Session::get($this->confirmOptionsKey($importacao), [
-            'importar_tudo' => false,
-            'acoes' => [],
-            'igrejas' => [],
-        ]);
+        $options = Session::get($this->confirmOptionsKey($importacao), []);
+
+        $importAll = false;
+        if (isset($options['importar_tudo'])) {
+            $importAll = (bool) $options['importar_tudo'];
+        } else {
+            try {
+                $configVal = DB::table('importacao_acoes')
+                    ->where('importacao_id', $importacao)
+                    ->where('tipo', 'config')
+                    ->where('chave', 'importar_tudo')
+                    ->value('acao');
+                $importAll = $configVal === '1';
+            } catch (\Throwable $e) {
+                // Fallback padrão
+            }
+        }
 
         try {
             $resultado = $this->imports->confirmImport(
                 $importacao,
-                importAll: (bool) ($options['importar_tudo'] ?? false),
+                importAll: $importAll,
                 acoes: (array) ($options['acoes'] ?? []),
                 igrejas: (array) ($options['igrejas'] ?? []),
                 dependencias: (array) ($options['dependencias'] ?? []),

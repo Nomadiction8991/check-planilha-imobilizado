@@ -14,12 +14,14 @@ final class ImportacaoAcoesPersistenceTest extends TestCase
 {
     public function test_tabela_permite_persistir_acoes_e_exclui_linhas_em_cascata(): void
     {
-        Schema::create('importacoes', function (Blueprint $table): void {
-            $table->id();
-        });
+        if (! Schema::hasTable('importacoes')) {
+            Schema::create('importacoes', function (Blueprint $table): void {
+                $table->id();
+            });
+        }
 
         $caminho = database_path('migrations/20261104180000_create_importacao_acoes_table.php');
-        if (is_file($caminho)) {
+        if (is_file($caminho) && ! Schema::hasTable('importacao_acoes')) {
             (require $caminho)->up();
         }
 

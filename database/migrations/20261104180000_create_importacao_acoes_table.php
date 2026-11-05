@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('tipo');
             $table->string('acao');
             $table->timestamps();
+            $table->unique(['importacao_id', 'tipo', 'chave']);
             $table->index(['importacao_id', 'chave']);
         });
     }
