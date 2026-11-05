@@ -35,7 +35,7 @@
 
     <section class="section">
         <div class="table-shell">
-            <form method="POST" action="{{ route('migration.departments.store') }}" class="form-shell">
+            <form method="POST" action="{{ route('migration.departments.store') }}" class="form-shell cadastro-form">
                 @csrf
 
                 <div class="field-grid">
@@ -49,6 +49,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('comum_id') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
@@ -61,6 +62,7 @@
                             placeholder="Ex.: SALAO"
                             required
                         >
+                        @error('descricao') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
                 </div>
 
@@ -73,4 +75,16 @@
             </form>
         </div>
     </section>
+
+    <style>
+        .cadastro-primary-action { margin-top: 20px; }
+        .cadastro-form, .filters, .table-shell { font-size: 16px; line-height: 1.5; }
+        .cadastro-field-error { display: block; color: var(--ui-danger); margin-top: 4px; }
+        .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .btn.primary:hover { background: var(--product-primary-hover); border-color: var(--product-primary-hover); box-shadow: none; }
+        .btn.danger { color: var(--ui-danger); }
+        .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: .6; cursor: not-allowed; }
+    </style>
 @endsection

@@ -52,6 +52,7 @@
                                 placeholder="smtp.gmail.com"
                                 required
                             >
+                            @error('mail_host') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                         </label>
 
                         <label>
@@ -64,6 +65,7 @@
                                 max="65535"
                                 required
                             >
+                            @error('mail_port') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                         </label>
 
                         <label>
@@ -73,6 +75,7 @@
                                 <option value="ssl" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'ssl')>SSL</option>
                                 <option value="null" @selected(old('mail_scheme', $mailConfiguration->scheme ?: 'tls') === 'null')>Sem criptografia</option>
                             </select>
+                            @error('mail_scheme') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                         </label>
 
                         <label>
@@ -85,6 +88,7 @@
                                 placeholder="seuemail@gmail.com"
                                 required
                             >
+                            @error('mail_username') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                         </label>
 
                         <label>
@@ -96,6 +100,7 @@
                                 maxlength="255"
                                 placeholder="Digite a senha do aplicativo do Google"
                             >
+                            @error('mail_password') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                         </label>
 
                         <label>
@@ -108,6 +113,7 @@
                                 placeholder="seuemail@gmail.com"
                                 required
                             >
+                            @error('mail_from_address') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                         </label>
 
                         <label>
@@ -120,6 +126,7 @@
                                 placeholder="Check Planilha"
                                 required
                             >
+                            @error('mail_from_name') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                         </label>
                     </div>
 
@@ -201,9 +208,14 @@
     </section>
 
     <style>
+        .cadastro-field-error { display: block; color: var(--ui-danger); margin-top: 4px; }
+        .config-card { font-size: 16px; line-height: 1.5; }
+        .config-card .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .config-card .btn.primary:hover { background: var(--product-primary-hover); box-shadow: none; }
+        .config-card :focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
         .config-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: 1fr;
             gap: 20px;
             align-items: start;
         }
@@ -216,15 +228,29 @@
         .config-card::before {
             content: '';
             position: absolute;
-            inset: 0 auto auto 0;
-            width: 100%;
+            inset: 0 0 auto;
             height: 4px;
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.8), rgba(14, 165, 233, 0.2));
+            background: var(--accent);
         }
 
-        .config-card--menu::before {
-            background: linear-gradient(90deg, rgba(16, 185, 129, 0.8), rgba(45, 212, 191, 0.2));
+        html[data-theme='dark'] .config-card {
+            background: var(--surface-strong);
         }
+
+        html[data-theme='dark'] .config-card::before {
+            opacity: 0.95;
+        }
+
+        html[data-theme='dark'] .config-badge--mail {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        html[data-theme='dark'] .config-card--menu::before {
+            background: var(--accent);
+        }
+
 
         .section-head--stacked {
             display: flex;
@@ -245,46 +271,11 @@
             max-width: 60ch;
         }
 
-        .config-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            border: 1px solid transparent;
-            white-space: nowrap;
-        }
-
-        .config-badge--mail {
-            background: rgba(59, 130, 246, 0.12);
-            border-color: rgba(59, 130, 246, 0.28);
-            color: var(--accent);
-        }
 
         .inline-actions--end {
             justify-content: flex-end;
         }
 
-        html[data-theme='dark'] .config-card {
-            background: linear-gradient(180deg, rgba(22, 28, 39, 0.92), rgba(18, 23, 32, 0.98));
-        }
-
-        html[data-theme='dark'] .config-card::before {
-            opacity: 0.95;
-        }
-
-        html[data-theme='dark'] .config-badge--mail {
-            background: rgba(59, 130, 246, 0.18);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        html[data-theme='dark'] .config-card--menu::before {
-            background: linear-gradient(90deg, rgba(16, 185, 129, 0.9), rgba(45, 212, 191, 0.22));
-        }
 
         .menu-order-shell {
             display: grid;
@@ -312,19 +303,6 @@
             color: var(--muted);
         }
 
-        .menu-order-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.08);
-            color: var(--text);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
 
         .menu-order-list {
             display: grid;
@@ -337,9 +315,9 @@
             gap: 14px;
             padding: 14px 16px;
             border: 1px solid var(--line);
-            border-radius: 18px;
+            border-radius: var(--radius-md);
             background: var(--surface);
-            box-shadow: var(--shadow-soft);
+            box-shadow: none;
             cursor: grab;
             user-select: none;
         }
@@ -350,7 +328,7 @@
 
         .menu-order-item.is-over {
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+            outline: 2px solid var(--ui-focus);
         }
 
         .menu-order-handle {
@@ -360,7 +338,7 @@
             width: 38px;
             height: 38px;
             border-radius: 999px;
-            background: rgba(15, 23, 42, 0.06);
+            background: var(--surface-soft);
             font-family: 'Material Symbols Outlined';
             font-size: 20px;
             color: var(--muted);
@@ -379,6 +357,10 @@
 
         .menu-order-copy small {
             color: var(--muted);
+        }
+
+        @media (min-width: 1024px) {
+            .config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 720px) {
