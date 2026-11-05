@@ -90,22 +90,26 @@
 
                     <label>
                         Nome completo
-                        <input type="text" name="nome" value="{{ old('nome', $user->nome ?? '') }}" required maxlength="255">
+                        <input type="text" name="nome" value="{{ old('nome', $user->nome ?? '') }}" required maxlength="255" @error('nome') aria-invalid="true" aria-describedby="erro-nome" @enderror>
+                        @error('nome') <span class="field-error" id="erro-nome">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         E-mail
-                        <input type="email" name="email" value="{{ old('email', $user->email ?? '') }}" required maxlength="255">
+                        <input type="email" name="email" value="{{ old('email', $user->email ?? '') }}" required maxlength="255" @error('email') aria-invalid="true" aria-describedby="erro-email" @enderror>
+                        @error('email') <span class="field-error" id="erro-email">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         {{ $editing ? 'Nova senha' : 'Senha' }}
-                        <input type="password" name="senha" minlength="6">
+                        <input type="password" name="senha" minlength="6" @error('senha') aria-invalid="true" aria-describedby="erro-senha" @enderror>
+                        @error('senha') <span class="field-error" id="erro-senha">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         {{ $editing ? 'Confirmar nova senha' : 'Confirmar senha' }}
-                        <input type="password" name="confirmar_senha" minlength="6">
+                        <input type="password" name="confirmar_senha" minlength="6" @error('confirmar_senha') aria-invalid="true" aria-describedby="erro-confirmar_senha" @enderror>
+                        @error('confirmar_senha') <span class="field-error" id="erro-confirmar_senha">{{ $message }}</span> @enderror
                     </label>
                 </div>
 
@@ -129,17 +133,20 @@
                 <div class="field-grid">
                     <label>
                         CPF
-                        <input type="text" name="cpf" id="cpf" value="{{ old('cpf', $user->cpf ?? '') }}" required maxlength="14" data-mask="cpf" inputmode="numeric">
+                        <input type="text" name="cpf" id="cpf" value="{{ old('cpf', $user->cpf ?? '') }}" required maxlength="14" data-mask="cpf" inputmode="numeric" @error('cpf') aria-invalid="true" aria-describedby="erro-cpf" @enderror>
+                        @error('cpf') <span class="field-error" id="erro-cpf">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         RG
-                        <input type="text" name="rg" id="rg" value="{{ old('rg', $user->rg ?? '') }}" required maxlength="30">
+                        <input type="text" name="rg" id="rg" value="{{ old('rg', $user->rg ?? '') }}" required maxlength="30" @error('rg') aria-invalid="true" aria-describedby="erro-rg" @enderror>
+                        @error('rg') <span class="field-error" id="erro-rg">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Telefone
-                        <input type="text" name="telefone" id="telefone" value="{{ old('telefone', $user->telefone ?? '') }}" required maxlength="15" data-mask="phone" inputmode="numeric">
+                        <input type="tel" name="telefone" id="telefone" value="{{ old('telefone', $user->telefone ?? '') }}" required maxlength="15" data-mask="phone" inputmode="numeric" @error('telefone') aria-invalid="true" aria-describedby="erro-telefone" @enderror>
+                        @error('telefone') <span class="field-error" id="erro-telefone">{{ $message }}</span> @enderror
                     </label>
 
                     <label class="check-inline check-inline--block">
@@ -252,22 +259,26 @@
                 <div id="spouse_fields" class="field-grid" style="{{ $isMarried ? '' : 'display:none;' }}">
                     <label>
                         Nome do cônjuge
-                        <input type="text" name="nome_conjuge" id="nome_conjuge" value="{{ old('nome_conjuge', $user->nome_conjuge ?? '') }}" maxlength="255">
+                        <input type="text" name="nome_conjuge" id="nome_conjuge" value="{{ old('nome_conjuge', $user->nome_conjuge ?? '') }}" maxlength="255" @error('nome_conjuge') aria-invalid="true" aria-describedby="erro-nome_conjuge" @enderror>
+                        @error('nome_conjuge') <span class="field-error" id="erro-nome_conjuge">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         CPF do cônjuge
-                        <input type="text" name="cpf_conjuge" id="cpf_conjuge" value="{{ old('cpf_conjuge', $user->cpf_conjuge ?? '') }}" maxlength="14" data-mask="cpf" inputmode="numeric">
+                        <input type="text" name="cpf_conjuge" id="cpf_conjuge" value="{{ old('cpf_conjuge', $user->cpf_conjuge ?? '') }}" maxlength="14" data-mask="cpf" inputmode="numeric" @error('cpf_conjuge') aria-invalid="true" aria-describedby="erro-cpf_conjuge" @enderror>
+                        @error('cpf_conjuge') <span class="field-error" id="erro-cpf_conjuge">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         RG do cônjuge
-                        <input type="text" name="rg_conjuge" id="rg_conjuge" value="{{ old('rg_conjuge', $user->rg_conjuge ?? '') }}" maxlength="30">
+                        <input type="text" name="rg_conjuge" id="rg_conjuge" value="{{ old('rg_conjuge', $user->rg_conjuge ?? '') }}" maxlength="30" @error('rg_conjuge') aria-invalid="true" aria-describedby="erro-rg_conjuge" @enderror>
+                        @error('rg_conjuge') <span class="field-error" id="erro-rg_conjuge">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Telefone do cônjuge
-                        <input type="text" name="telefone_conjuge" id="telefone_conjuge" value="{{ old('telefone_conjuge', $user->telefone_conjuge ?? '') }}" maxlength="15" data-mask="phone" inputmode="numeric">
+                        <input type="tel" name="telefone_conjuge" id="telefone_conjuge" value="{{ old('telefone_conjuge', $user->telefone_conjuge ?? '') }}" maxlength="15" data-mask="phone" inputmode="numeric" @error('telefone_conjuge') aria-invalid="true" aria-describedby="erro-telefone_conjuge" @enderror>
+                        @error('telefone_conjuge') <span class="field-error" id="erro-telefone_conjuge">{{ $message }}</span> @enderror
                     </label>
 
                     <label class="check-inline check-inline--block">
@@ -288,27 +299,32 @@
                 <div class="field-grid">
                     <label>
                         CEP
-                        <input type="text" name="endereco_cep" id="endereco_cep" value="{{ old('endereco_cep', $user->endereco_cep ?? '') }}" maxlength="9" data-mask="cep" inputmode="numeric">
+                        <input type="text" name="endereco_cep" id="endereco_cep" value="{{ old('endereco_cep', $user->endereco_cep ?? '') }}" maxlength="9" data-mask="cep" inputmode="numeric" @error('endereco_cep') aria-invalid="true" aria-describedby="erro-endereco_cep" @enderror>
+                        @error('endereco_cep') <span class="field-error" id="erro-endereco_cep">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Logradouro
-                        <input type="text" name="endereco_logradouro" id="endereco_logradouro" value="{{ old('endereco_logradouro', $user->endereco_logradouro ?? '') }}" maxlength="255">
+                        <input type="text" name="endereco_logradouro" id="endereco_logradouro" value="{{ old('endereco_logradouro', $user->endereco_logradouro ?? '') }}" maxlength="255" @error('endereco_logradouro') aria-invalid="true" aria-describedby="erro-endereco_logradouro" @enderror>
+                        @error('endereco_logradouro') <span class="field-error" id="erro-endereco_logradouro">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Número
-                        <input type="text" name="endereco_numero" value="{{ old('endereco_numero', $user->endereco_numero ?? '') }}" maxlength="50">
+                        <input type="text" name="endereco_numero" value="{{ old('endereco_numero', $user->endereco_numero ?? '') }}" maxlength="50" @error('endereco_numero') aria-invalid="true" aria-describedby="erro-endereco_numero" @enderror>
+                        @error('endereco_numero') <span class="field-error" id="erro-endereco_numero">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Complemento
-                        <input type="text" name="endereco_complemento" value="{{ old('endereco_complemento', $user->endereco_complemento ?? '') }}" maxlength="255">
+                        <input type="text" name="endereco_complemento" value="{{ old('endereco_complemento', $user->endereco_complemento ?? '') }}" maxlength="255" @error('endereco_complemento') aria-invalid="true" aria-describedby="erro-endereco_complemento" @enderror>
+                        @error('endereco_complemento') <span class="field-error" id="erro-endereco_complemento">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
                         Bairro
-                        <input type="text" name="endereco_bairro" id="endereco_bairro" value="{{ old('endereco_bairro', $user->endereco_bairro ?? '') }}" maxlength="255">
+                        <input type="text" name="endereco_bairro" id="endereco_bairro" value="{{ old('endereco_bairro', $user->endereco_bairro ?? '') }}" maxlength="255" @error('endereco_bairro') aria-invalid="true" aria-describedby="erro-endereco_bairro" @enderror>
+                        @error('endereco_bairro') <span class="field-error" id="erro-endereco_bairro">{{ $message }}</span> @enderror
                     </label>
 
                     <label>

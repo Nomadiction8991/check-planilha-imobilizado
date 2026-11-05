@@ -38,21 +38,18 @@
                     </label>
                     <label>
                         Igreja
-                        <select id="comum_id" name="comum_id" required data-public-church-select>
+                        <select id="comum_id" name="comum_id" required data-public-church-select @error('comum_id') aria-invalid="true" aria-describedby="public-church-error" @enderror>
                             <option value="">Selecione</option>
                             @foreach ($churches as $church)
                                 <option value="{{ $church->id }}">{{ $church->descricao }}</option>
                             @endforeach
                         </select>
+                        @error('comum_id')
+                            <span id="public-church-error" role="alert" style="color: var(--ui-danger);">{{ $message }}</span>
+                        @enderror
                     </label>
                     <p id="public-church-search-status" class="helper" role="status" aria-live="polite" hidden data-public-church-status></p>
                 </div>
-
-                @error('comum_id')
-                    <div class="flash error">
-                        <strong>{{ $message }}</strong>
-                    </div>
-                @enderror
 
                 <div class="inline-actions">
                     <button type="submit" class="btn primary">Continuar</button>

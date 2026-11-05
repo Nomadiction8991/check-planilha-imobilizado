@@ -3,6 +3,16 @@
 @section('title', 'Permissões do Usuário | ' . config('app.name'))
 
 @section('content')
+    <style>
+        .users-permissions { color: var(--ui-text); font-size: 16px; line-height: 1.5; }
+        .users-permissions h1 { font-size: 24px; line-height: 1.2; }
+        .users-permissions .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .users-permissions .btn.primary:hover { background: var(--product-primary-hover); }
+        .users-permissions :is(input, button, a):focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        .users-permissions .form-actions { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 12px; }
+        @media (min-width: 640px) { .users-permissions h1 { font-size: 30px; } .users-permissions .form-actions { justify-content: flex-end; } }
+    </style>
+    <div class="users-permissions">
     <section class="hero">
         <span class="eyebrow">Segurança e Acesso</span>
         <h1>Controlar permissões de {{ $user->nome }}.</h1>
@@ -43,11 +53,12 @@
                     </div>
                 @endforeach
 
-                <div class="form-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
+                <div class="form-actions">
                     <a href="{{ route('migration.users.index') }}" class="btn">Cancelar</a>
                     <button type="submit" class="btn primary">Salvar Permissões</button>
                 </div>
             </div>
         </form>
+    </div>
     </div>
 @endsection

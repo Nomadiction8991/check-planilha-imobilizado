@@ -7,6 +7,25 @@
         $isLegacyAdmin = !empty($legacySessionUser['is_admin'] ?? false) || (bool) session('is_admin', false);
     @endphp
 
+    <style>
+        .users-page { color: var(--ui-text); font-size: 16px; line-height: 1.5; }
+        .users-page h1 { font-size: 24px; line-height: 1.2; }
+        .users-page .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .users-page .btn.primary:hover { background: var(--product-primary-hover); }
+        .users-page .btn:focus-visible, .users-page input:focus-visible, .users-page select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        .users-page .btn:active { transform: none; }
+        .users-page .btn:disabled { opacity: .6; cursor: not-allowed; }
+        .users-page .btn.danger { color: var(--ui-danger); }
+        @media (min-width: 640px) { .users-page h1 { font-size: 30px; } }
+        @media (max-width: 639px) {
+            .users-page table, .users-page tbody, .users-page tr, .users-page td { display: block; width: 100%; }
+            .users-page thead { display: none; }
+            .users-page tr { padding: 16px; border-bottom: 1px solid var(--ui-border); }
+            .users-page td { padding: 8px 0; }
+            .users-page td::before { content: attr(data-label); display: block; font-weight: 700; }
+        }
+    </style>
+    <div class="users-page">
     <section class="hero">
         <span class="eyebrow">Cadastro de usuários</span>
         <h1>Usuários vinculados a administrações.</h1>
@@ -15,6 +34,10 @@
             dados do cônjuge. Cada usuário fica associado a uma administração, não a uma igreja específica.
         </p>
     </section>
+
+    @if ($isLegacyAdmin || !empty($legacyPermissions['users.create'] ?? null))
+        <div class="section"><a class="btn primary" href="{{ route('migration.users.create') }}">Novo usuário</a></div>
+    @endif
 
     @if (session('status') || $errors->any())
         <div class="flash-stack">
@@ -138,11 +161,6 @@
                 <h2>Lista de usuários</h2>
                 <p>Aqui o sistema assume consulta, cadastro, edição e exclusão do módulo principal, com o usuário administrador protegido.</p>
             </div>
-            <div class="inline-actions">
-                @if ($isLegacyAdmin || !empty($legacyPermissions['users.create'] ?? null))
-                    <a class="btn primary" href="{{ route('migration.users.create') }}">Novo usuário</a>
-                @endif
-            </div>
         </div>
 
         <div class="table-shell">
@@ -197,7 +215,7 @@
                                             <form method="POST" action="{{ route('migration.users.destroy', ['user' => $user->id]) }}" data-confirm="Excluir este usuário?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn" type="submit">
+                                                <button class="btn danger" type="submit">
                                                     Excluir
                                                 </button>
                                             </form>
@@ -212,4 +230,5 @@
             @endif
         </div>
     </section>
+    </div>
 @endsection
