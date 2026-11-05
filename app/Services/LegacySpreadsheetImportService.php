@@ -10,6 +10,7 @@ use App\DTO\SpreadsheetImportUploadData;
 use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Models\Legacy\Usuario;
+use App\Services\AnalysisPersistenceService;
 use App\Support\LegacyCsvSanitizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -128,7 +129,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             );
 
             $analise = $csvParserService->analisar($destinationPath, $fallbackChurchId);
-            $csvParserService->salvarAnalise($importacaoId, $analise);
+            (new AnalysisPersistenceService())->salvarAnalise($importacaoId, $analise);
 
             return $importacaoId;
         } catch (Throwable $throwable) {
@@ -226,7 +227,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
             $csvParserService = new CsvParserService();
 
             $importacao = $importacaoService->buscarProgresso($importacaoId);
-            $analise = $csvParserService->carregarAnalise($importacaoId);
+            $analise = (new AnalysisPersistenceService())->carregarAnalise($importacaoId);
 
             if ($importacao === null || $analise === null) {
                 return null;
@@ -332,8 +333,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
         $this->ensureImportExists($importacaoId);
 
-        $csvParserService = new CsvParserService();
-        $analise = $csvParserService->carregarAnalise($importacaoId);
+        $analise = (new AnalysisPersistenceService())->carregarAnalise($importacaoId);
 
         if ($analise === null) {
             throw new RuntimeException('Análise da importação não encontrada.');
@@ -370,7 +370,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
         try {
             $importacao = $importacaoService->buscarProgresso($importacaoId);
-            $analise = $csvParserService->carregarAnalise($importacaoId);
+            $analise = (new AnalysisPersistenceService())->carregarAnalise($importacaoId);
 
             if ($importacao !== null && (string) ($importacao['status'] ?? '') === 'concluida') {
 
@@ -415,18 +415,18 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                     (array) ($analise['registros'] ?? []),
                     [],
                     [],
-                    [],
                     $fallbackChurchId,
                     true,
+                    [],
                 );
             } else {
                 $actions = $this->buildConfirmActionsByChurch(
                     (array) ($analise['registros'] ?? []),
-                    $lineActions,
                     $churchActions,
                     $dependencyActions,
                     $fallbackChurchId,
                     false,
+                    $lineActions,
                 );
             }
 
@@ -436,7 +436,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
 
             try {
-                $csvParserService->limparAnalise($importacaoId);
+                (new AnalysisPersistenceService())->limparAnalise($importacaoId);
                 $this->pruneStoredImportFiles($importacaoService, $csvParserService, 5);
             } catch (Throwable $cleanupThrowable) {
                 report($cleanupThrowable);
@@ -482,9 +482,10 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
                 return null;
             }
 
-
-
-
+            Session::forget($this->previewActionsKey($importacaoId));
+            Session::forget($this->previewChurchesKey($importacaoId));
+            Session::forget($this->previewDependenciesKey($importacaoId));
+            Session::forget($this->confirmOptionsKey($importacaoId));
 
             return [
                 'sucesso' => (int) ($importacao['linhas_sucesso'] ?? 0),
@@ -532,7 +533,7 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
         foreach ($oldImportIds as $importacaoId) {
             $importacaoService->limparArquivo($importacaoId);
-            $csvParserService->limparAnalise($importacaoId);
+            (new AnalysisPersistenceService())->limparAnalise($importacaoId);
             $removed++;
         }
 
@@ -712,12 +713,21 @@ class LegacySpreadsheetImportService implements LegacySpreadsheetImportServiceIn
 
     /**
      * @param array<int, array<string, mixed>> $registros
-     * @param array<string, string> $lineActions
      * @param array<string, string> $churchActions
      * @param array<string, string> $dependencyActions
+     * @param int $fallbackChurchId
+     * @param bool $importAll
+     * @param array<string, string> $lineActions
      * @return array<string, string>
      */
-    private function buildConfirmActionsByChurch(array $registros, array $lineActions, array $churchActions, array $dependencyActions, int $fallbackChurchId, bool $importAll): array
+    private function buildConfirmActionsByChurch(
+        array $registros,
+        array $churchActions,
+        array $dependencyActions = [],
+        int $fallbackChurchId = 0,
+        bool $importAll = true,
+        array $lineActions = []
+    ): array
     {
         $actions = [];
         $fallbackChurchCode = $this->resolveFallbackChurchCode($fallbackChurchId);

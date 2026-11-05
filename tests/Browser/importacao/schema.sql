@@ -8,6 +8,7 @@ CREATE TABLE produtos (id_produto BIGINT PRIMARY KEY AUTO_INCREMENT, comum_id BI
 CREATE TABLE import_erros (id BIGINT PRIMARY KEY AUTO_INCREMENT, importacao_id BIGINT, linha_csv TEXT, codigo TEXT, localidade TEXT, codigo_comum TEXT, descricao_csv TEXT, bem TEXT, complemento TEXT, dependencia TEXT, mensagem_erro TEXT);
 CREATE TABLE configuracoes (pulo_linhas INT, mapeamento_colunas VARCHAR(255));
 CREATE TABLE importacoes (id BIGINT PRIMARY KEY AUTO_INCREMENT, usuario_id BIGINT, comum_id BIGINT NULL, administracao_id BIGINT NULL, arquivo_nome VARCHAR(255), arquivo_caminho VARCHAR(255), total_linhas INT, status VARCHAR(255), iniciada_em TIMESTAMP NULL, concluida_em TIMESTAMP NULL, created_at TIMESTAMP NULL, linhas_processadas INT DEFAULT 0, linhas_sucesso INT DEFAULT 0, linhas_erro INT DEFAULT 0, porcentagem DECIMAL(5,2) DEFAULT 0, mensagem_erro TEXT NULL);
+CREATE TABLE importacao_acoes (id BIGINT PRIMARY KEY AUTO_INCREMENT, importacao_id BIGINT, chave VARCHAR(255), tipo VARCHAR(50), acao VARCHAR(50), created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL, UNIQUE KEY uk_importacao_tipo_chave (importacao_id, tipo, chave), KEY idx_importacao_chave (importacao_id, chave));
 INSERT INTO administracoes VALUES (1, 'Administração fictícia');
 INSERT INTO usuarios (id,nome,email,senha,administracao_id,tipo,ativo) VALUES (1,'Pessoa fictícia','TESTE@EXAMPLE.COM','$2y$12$hHbje5wiAq0J0Tgu.6G49.9iLe.Kx3bmE0zK7WLaHYhC8RYRt43wi',1,'admin',1);
 INSERT INTO comums (id,codigo,descricao,administracao_id) VALUES (1,'99-9999','Igreja fictícia',1);

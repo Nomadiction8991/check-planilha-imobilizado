@@ -27,6 +27,10 @@ class ConnectionManager
 
     public static function getConnection(): PDO
     {
+        if (self::$conexao instanceof PDO) {
+            return self::$conexao;
+        }
+
         return DB::connection()->getPdo();
     }
 
