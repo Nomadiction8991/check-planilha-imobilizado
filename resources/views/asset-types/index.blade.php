@@ -40,6 +40,14 @@
         </div>
     @endif
 
+    <div class="cadastro-primary-action">
+            <div class="inline-actions">
+                @if ($isLegacyAdmin || !empty($legacyPermissions['asset-types.create'] ?? null))
+                    <a class="btn primary" href="{{ route('migration.asset-types.create') }}">Novo tipo de bem</a>
+                @endif
+            </div>
+    </div>
+
     <section class="section">
         <div class="filters" data-sticky-filters>
             <form method="GET" action="{{ route('migration.asset-types.index') }}" data-filter-autosubmit data-filter-message="Atualizando tipos de bem…">
@@ -137,11 +145,6 @@
                 <h2>Lista de tipos de bem</h2>
                 <p>A contagem considera apenas produtos ativos vinculados a cada tipo.</p>
             </div>
-            <div class="inline-actions">
-                @if ($isLegacyAdmin || !empty($legacyPermissions['asset-types.create'] ?? null))
-                    <a class="btn primary" href="{{ route('migration.asset-types.create') }}">Novo tipo de bem</a>
-                @endif
-            </div>
         </div>
 
         <div class="table-shell">
@@ -182,7 +185,7 @@
                                             <form method="POST" action="{{ route('migration.asset-types.destroy', ['assetType' => $assetType->id]) }}" data-confirm="Excluir este tipo de bem?">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn" type="submit">
+                                                <button class="btn danger" type="submit">
                                                     Excluir
                                                 </button>
                                             </form>
@@ -197,4 +200,16 @@
             @endif
         </div>
     </section>
+
+    <style>
+        .cadastro-primary-action { margin-top: 20px; }
+        .cadastro-form, .filters, .table-shell { font-size: 16px; line-height: 1.5; }
+        .cadastro-field-error { display: block; color: var(--ui-danger); margin-top: 4px; }
+        .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .btn.primary:hover { background: var(--product-primary-hover); border-color: var(--product-primary-hover); box-shadow: none; }
+        .btn.danger { color: var(--ui-danger); }
+        .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: .6; cursor: not-allowed; }
+    </style>
 @endsection

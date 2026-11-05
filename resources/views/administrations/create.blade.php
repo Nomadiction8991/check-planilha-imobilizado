@@ -35,7 +35,7 @@
 
     <section class="section">
         <div class="table-shell">
-            <form method="POST" action="{{ route('migration.administrations.store') }}" class="form-shell">
+            <form method="POST" action="{{ route('migration.administrations.store') }}" class="form-shell cadastro-form">
                 @csrf
 
                 <div class="field-grid">
@@ -49,6 +49,7 @@
                             placeholder="Ex.: Administração Central"
                             required
                         >
+                        @error('descricao') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
@@ -63,6 +64,7 @@
                             placeholder="00.000.000/0000-00"
                             required
                         >
+                        @error('cnpj') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
@@ -75,6 +77,7 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('estado') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
 
                     <label>
@@ -82,6 +85,7 @@
                         <select name="cidade" id="administration-cidade" required disabled data-selected-city="{{ old('cidade') }}">
                             <option value="">Selecione um estado primeiro</option>
                         </select>
+                        @error('cidade') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
                     </label>
                 </div>
 
@@ -95,4 +99,16 @@
         </div>
     </section>
 
+
+    <style>
+        .cadastro-primary-action { margin-top: 20px; }
+        .cadastro-form, .filters, .table-shell { font-size: 16px; line-height: 1.5; }
+        .cadastro-field-error { display: block; color: var(--ui-danger); margin-top: 4px; }
+        .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: white; }
+        .btn.primary:hover { background: var(--product-primary-hover); border-color: var(--product-primary-hover); box-shadow: none; }
+        .btn.danger { color: var(--ui-danger); }
+        .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: 2px; }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: .6; cursor: not-allowed; }
+    </style>
 @endsection
