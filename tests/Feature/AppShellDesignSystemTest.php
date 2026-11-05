@@ -110,5 +110,10 @@ final class AppShellDesignSystemTest extends TestCase
         $this->assertStringContainsString('aria-label="Navegação principal"', $html);
         $this->assertStringContainsString('aria-current="page"', $html);
         $this->assertStringContainsString('href="#main-content"', $html);
+        $this->assertStringContainsString('<div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>', $html);
+        $this->assertStringContainsString('window.showToast', $html);
+        $this->assertStringNotContainsString('<small>Área restrita</small>', $html);
+        $this->assertMatchesRegularExpression('~<div class="brand">.*?Produtos.*?</div>~s', $html);
+        $this->assertMatchesRegularExpression('~class="mobile-menu-logout"[^>]*>.*?logout~s', $html);
     }
 }
