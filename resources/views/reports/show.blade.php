@@ -214,8 +214,8 @@
 
         .report-a4-card,
         .report-a4-preview {
-            border: 1px solid rgba(24, 21, 17, 0.12);
-            background: rgba(255, 252, 247, 0.92);
+            border: 1px solid var(--ui-border);
+            background: var(--ui-surface);
             box-shadow: var(--shadow-card);
         }
 
@@ -227,8 +227,8 @@
             font-size: 12px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #6f6253;
-            border-bottom: 1px solid rgba(24, 21, 17, 0.12);
+            color: var(--ui-text-muted);
+            border-bottom: 1px solid var(--ui-border);
         }
 
         .report-a4-preview {
@@ -241,7 +241,7 @@
             width: 794px;
             height: 1123px;
             overflow: hidden;
-            background: #fff;
+            background: var(--ui-surface);
             margin: 0 auto;
             --report-source-width: 1654px;
             --report-source-height: 2339px;
@@ -303,20 +303,20 @@
             max-width: calc(100% - 8px);
             padding: 1px 4px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.72);
-            color: #c62828;
+            background: var(--ui-surface);
+            color: var(--ui-danger);
             font-size: 10px;
             line-height: 1.1;
             letter-spacing: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            box-shadow: 0 0 0 1px rgba(198, 40, 40, 0.14);
+            box-shadow: 0 0 0 1px var(--ui-danger);
         }
 
         body.report-preview-debug-fields .report-a4-page textarea.field {
-            border-color: rgba(198, 40, 40, 0.95) !important;
-            box-shadow: inset 0 0 0 1px rgba(198, 40, 40, 0.16);
+            border-color: var(--ui-danger) !important;
+            box-shadow: inset 0 0 0 1px var(--ui-danger);
         }
 
         body.report-preview-debug-fields .report-a4-debug-overlay {

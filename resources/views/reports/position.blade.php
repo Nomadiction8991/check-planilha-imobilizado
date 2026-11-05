@@ -296,7 +296,7 @@
         }
 
         .position-status--success {
-            background: color-mix(in srgb, rgba(145, 221, 209, 0.18) 82%, transparent);
+            background: var(--ui-success-bg);
             border-color: color-mix(in srgb, var(--accent) 22%, var(--line));
         }
 
@@ -335,7 +335,7 @@
         }
 
         .position-tag--success {
-            background: color-mix(in srgb, rgba(145, 221, 209, 0.14) 82%, transparent);
+            background: var(--ui-success-bg);
             border-color: color-mix(in srgb, var(--accent) 18%, var(--line));
         }
 
@@ -386,8 +386,8 @@
             .table-shell,
             .position-panel {
                 box-shadow: none !important;
-                background: #fff !important;
-                border-color: #d1d5db !important;
+                background: var(--ui-surface) !important;
+                border-color: var(--ui-border) !important;
             }
         }
     </style>

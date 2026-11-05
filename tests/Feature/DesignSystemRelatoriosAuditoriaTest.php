@@ -8,6 +8,21 @@ use Tests\TestCase;
 
 final class DesignSystemRelatoriosAuditoriaTest extends TestCase
 {
+    public function test_editor_usa_texto_do_tema_no_botao_salvar(): void
+    {
+        $response = \Illuminate\Testing\TestResponse::fromBaseResponse(response()->view('reports.editor', [
+            'formulario' => '14.1',
+            'editorBackUrl' => '/reports',
+            'bgUrl' => '/formulario.png',
+            'cellEditorBaseUrl' => '/cell-reports',
+            'cellEditorQuerySuffix' => '',
+        ]));
+
+        $response->assertSee('#topbar #btn-save { background: var(--product-primary); border-color: var(--product-primary); color: var(--product-primary-text); }', false);
+        $response->assertDontSee('color: white', false);
+        $response->assertSee('id="btn-detect-run" style="background:var(--ui-surface);border-color:var(--ui-border);color:var(--ui-text);"', false);
+    }
+
     public function test_editor_permite_recolher_registro_com_botao_acessivel(): void
     {
         $this->withoutMiddleware();
