@@ -22,6 +22,7 @@ use App\Http\Controllers\CnpjLookupController;
 use App\Http\Controllers\PublicAccessController;
 use App\Http\Controllers\SpreadsheetImportController;
 use Illuminate\Support\Facades\Route;
+use App\Support\Modo\EstadoModo;
 
 Route::get('/assinatura-publica', [PublicAccessController::class, 'create'])->name('public.access.create');
 Route::post('/assinatura-publica', [PublicAccessController::class, 'store'])->name('public.access.store');
@@ -37,6 +38,13 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
         ->name('migration.password.store');
 
     Route::middleware('legacy.auth')->group(function (): void {
+        Route::get('/modo-igreja/estado', function (EstadoModo $estado) {
+            abort_unless(config('modo_igreja.ativo'), 404);
+            $url = (string) config('modo_igreja.servidor_url');
+            $url = preg_replace('~^(https?://)[^/@]*@~i', '$1', $url) ?? '';
+
+            return response()->json(['modo' => $estado->estaOnline() ? 'online' : 'offline', 'servidor' => $url, 'desde' => $estado->desde()]);
+        })->name('migration.modo_igreja.estado');
         // Instaladores do modo igreja: qualquer usuário logado baixa. A URL aceita só os dois nomes conhecidos.
         Route::get('/instaladores/{sistema}', [InstaladorController::class, 'baixar'])
             ->where('sistema', 'windows|linux')
