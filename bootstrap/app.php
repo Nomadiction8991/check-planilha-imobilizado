@@ -8,6 +8,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'legacy.admin' => \App\Http\Middleware\RequireLegacyAdmin::class,
             'legacy.audit' => \App\Http\Middleware\RecordLegacyAudit::class,
             'legacy.permission' => \App\Http\Middleware\RequireLegacyPermission::class,
+            'sincronizacao.aparelho' => \App\Http\Middleware\AuthenticateSyncDevice::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
