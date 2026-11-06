@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Sync;
 
+use Generator;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -42,6 +43,37 @@ final class HttpSyncTransport implements SyncTransport
             ->json();
 
         return $dados;
+    }
+
+    /**
+     * Baixa a cópia completa em fluxo (uma linha JSON por registro), sem carregar tudo na memória.
+     *
+     * @return Generator<int, string>
+     */
+    public function copia(): Generator
+    {
+        $corpo = Http::withToken($this->token)
+            ->timeout(600)
+            ->withOptions(['stream' => true])
+            ->get($this->url('copia'))
+            ->throw()
+            ->toPsrResponse()
+            ->getBody();
+
+        $pendente = '';
+
+        while (! $corpo->eof()) {
+            $pendente .= $corpo->read(65536);
+
+            while (($posicao = strpos($pendente, "\n")) !== false) {
+                yield substr($pendente, 0, $posicao);
+                $pendente = (string) substr($pendente, $posicao + 1);
+            }
+        }
+
+        if (trim($pendente) !== '') {
+            yield $pendente;
+        }
     }
 
     private function url(string $rota): string

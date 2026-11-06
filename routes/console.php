@@ -14,3 +14,11 @@ Artisan::command('inspire', function () {
 Schedule::command('analyses:cleanup-orphans')->dailyAt('03:00')->withoutOverlapping();
 Schedule::command('system:storage-cleanup --days=7')->dailyAt('03:30')->withoutOverlapping();
 Schedule::command('system:health-check')->hourly();
+
+// Sincronização do notebook da igreja. No servidor (modo igreja desligado) ela não roda.
+Schedule::command('sincronizacao:executar')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->when(fn (): bool => (bool) config('modo_igreja.ativo')
+        && filled(config('modo_igreja.servidor_url'))
+        && filled(config('modo_igreja.aparelho_token')));

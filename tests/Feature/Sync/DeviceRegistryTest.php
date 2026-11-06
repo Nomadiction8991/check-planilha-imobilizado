@@ -50,6 +50,17 @@ class DeviceRegistryTest extends SincronizacaoTestCase
         $this->assertNull($aparelhos->autenticar(null));
     }
 
+    public function test_comando_revoga_aparelho_pelo_numero(): void
+    {
+        $registro = app(DeviceRegistry::class)->registrar('Notebook da igreja', 7);
+
+        $this->artisan('sincronizacao:revogar', ['aparelho' => $registro['aparelho']->id])
+            ->expectsOutputToContain('revogado')
+            ->assertSuccessful();
+
+        $this->assertNull(app(DeviceRegistry::class)->autenticar($registro['token']));
+    }
+
     public function test_comando_cadastra_aparelho_e_mostra_o_codigo_uma_vez(): void
     {
         $this->artisan('sincronizacao:aparelho', ['nome' => 'Notebook da igreja', 'usuario' => 7])

@@ -23,6 +23,14 @@ final class SyncState
         return (int) ($valor ?? 0);
     }
 
+    /**
+     * Diz se o cursor já foi gravado alguma vez (mesmo com valor zero).
+     */
+    public function definido(string $chave): bool
+    {
+        return DB::table('sincronizacao_estado')->where('chave', $chave)->exists();
+    }
+
     public function definir(string $chave, int $valor): void
     {
         DB::table('sincronizacao_estado')->updateOrInsert(
