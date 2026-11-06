@@ -225,8 +225,8 @@ sql_de notebook_a "SELECT id, tabela, chave, operacao, origem FROM sincronizacao
 echo "registro de alterações do notebook B:"
 sql_de notebook_b "SELECT id, tabela, chave, operacao, origem FROM sincronizacao_alteracoes ORDER BY id;" | sed 's/^/    /'
 echo "envios já recebidos pelo servidor: $(sql_de servidor "SELECT COUNT(*) FROM sincronizacao_envios;")"
-echo "log de erros do servidor (últimas linhas):"
-tail -25 "$(app_de servidor)/storage/logs/laravel.log" 2>/dev/null | cut -c1-300 | sed 's/^/    /' || echo "    (sem log)"
+echo "erros registrados no log do servidor (primeiras linhas de cada erro):"
+grep -a 'local.ERROR' "$(app_de servidor)/storage/logs/laravel.log" 2>/dev/null | head -4 | cut -c1-700 | sed 's/^/    /' || echo "    (sem erros)"
 
 passo "9. o conflito de P-1 aparece no servidor"
 echo "conflitos registrados no servidor:"
