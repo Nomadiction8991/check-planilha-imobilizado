@@ -95,10 +95,13 @@ final class TrackedEnvBackupFilesTest extends TestCase
 
     private function trackedFiles(): array
     {
-        $output = trim((string) shell_exec(sprintf('git -C %s ls-files', escapeshellarg(base_path()))));
+        // safe.directory libera só este comando quando o dono do diretório é outro usuário (ex.: container).
+        $root = escapeshellarg(base_path());
+        $output = trim((string) shell_exec(sprintf('git -c safe.directory=%s -C %s ls-files 2>/dev/null', $root, $root)));
 
         if ($output === '') {
-            $this->markTestSkipped('Não foi possível listar arquivos rastreados pelo git.');
+            // Não pode pular: sem a lista, a proteção contra segredos commitados deixaria de valer em silêncio.
+            self::fail('Não foi possível listar os arquivos rastreados pelo git. Verifique se o git está instalado e se o diretório é um repositório.');
         }
 
         return preg_split('/\R/', $output) ?: [];

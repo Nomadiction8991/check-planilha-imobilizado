@@ -709,19 +709,8 @@ final class LegacyProductControllerTest extends TestCase
     }
 
     // ─── Destroy (not implemented in controller) ─────────────────────────────
-    // Note: LegacyProductController does NOT have a destroy() method and there
-    // is no delete/destroy route defined for products. The management service
-    // interface (LegacyProductManagementServiceInterface) only exposes
-    // createMany() and update() — no delete method exists.
-    // These placeholder tests document the expected flow if destroy were added.
-
-    public function testDestroyNotImplemented(): void
-    {
-        $this->markTestSkipped(
-            'LegacyProductController has no destroy() method. '
-            . 'No route or service method exists for product deletion.'
-        );
-    }
+    // Exclusão individual de produto não existe neste controlador.
+    // A exclusão em massa por igreja é testada em LegacyChurchControllerTest.
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
