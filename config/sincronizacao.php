@@ -41,6 +41,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Planilhas e histórico de auditoria
+    |--------------------------------------------------------------------------
+    |
+    | Planilhas enviadas (conferidas pelo SHA-256) e o arquivo de auditoria (uma linha por evento).
+    | Os dois sincronizam nos dois sentidos, sem duplicar.
+    |
+    */
+
+    'pasta_planilhas' => storage_path('importacao'),
+
+    'arquivo_auditoria' => storage_path('app/private/audits/audit-log.jsonl'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Campos cifrados
     |--------------------------------------------------------------------------
     |
