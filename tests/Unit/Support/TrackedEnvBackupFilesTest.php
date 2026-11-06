@@ -55,6 +55,16 @@ final class TrackedEnvBackupFilesTest extends TestCase
         );
     }
 
+    public function test_arquivo_de_ambiente_de_testes_com_senha_nao_fica_no_git(): void
+    {
+        // O .env.testing é só do computador de quem desenvolve. O que vai para o Git é o modelo sem senha.
+        $this->assertNotContains(
+            '.env.testing',
+            $this->trackedFiles(),
+            'O .env.testing não pode ser versionado: o modelo sem senha é o .env.testing.example.',
+        );
+    }
+
     public function test_tracked_env_templates_use_safe_placeholders(): void
     {
         $expectedValues = [
@@ -63,10 +73,11 @@ final class TrackedEnvBackupFilesTest extends TestCase
                 'DB_PASSWORD' => 'change-me',
                 'DB_ROOT_PASSWORD' => 'change-me',
             ],
-            '.env.testing' => [
+            '.env.testing.example' => [
                 'APP_KEY' => '',
                 'DB_PASSWORD' => '',
                 'DB_ROOT_PASSWORD' => '',
+                'MAIL_PASSWORD' => '',
             ],
         ];
 

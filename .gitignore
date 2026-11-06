@@ -4,6 +4,7 @@
 
 # Environment / secrets
 .env
+.env.testing
 
 # IDE / editor
 .vscode/
