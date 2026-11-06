@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Sync\CopyExporter;
 use App\Sync\Device;
 use App\Sync\SyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Endpoints da sincronização entre o notebook e o servidor.
@@ -38,6 +40,21 @@ final class SyncController extends Controller
         $aparelho = $request->attributes->get('aparelho');
 
         return response()->json($this->sincronizacao->enviar($aparelho, $dados['alteracoes']));
+    }
+
+    /**
+     * Cópia completa para o primeiro download do notebook (NDJSON, em fluxo).
+     */
+    public function copia(): StreamedResponse
+    {
+        $exportador = app(CopyExporter::class);
+
+        return response()->stream(function () use ($exportador): void {
+            foreach ($exportador->linhas() as $linha) {
+                echo $linha;
+                flush();
+            }
+        }, 200, ['Content-Type' => 'application/x-ndjson; charset=UTF-8']);
     }
 
     public function receber(Request $request): JsonResponse

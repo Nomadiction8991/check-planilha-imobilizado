@@ -21,6 +21,7 @@ abstract class SincronizacaoTestCase extends TestCase
         $migrations = [
             'database/migrations/20261105120000_create_sincronizacao_alteracoes_table.php',
             'database/migrations/20261105120200_create_sincronizacao_servidor_tables.php',
+            'database/migrations/20261105120300_create_sincronizacao_estado_table.php',
         ];
 
         foreach ($migrations as $migration) {

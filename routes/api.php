@@ -11,4 +11,5 @@ Route::prefix('sincronizacao')
     ->group(function (): void {
         Route::post('/enviar', [SyncController::class, 'enviar'])->name('api.sincronizacao.enviar');
         Route::get('/receber', [SyncController::class, 'receber'])->name('api.sincronizacao.receber');
+        Route::get('/copia', [SyncController::class, 'copia'])->name('api.sincronizacao.copia');
     });

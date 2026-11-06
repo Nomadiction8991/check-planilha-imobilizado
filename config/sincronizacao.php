@@ -49,6 +49,30 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Ordem da cópia inicial
+    |--------------------------------------------------------------------------
+    |
+    | Pai antes de filho, para o notebook gravar sem violar chaves estrangeiras.
+    | Na hora de esvaziar, a ordem é a inversa.
+    |
+    */
+
+    'ordem_da_copia' => [
+        'administracoes',
+        'comums',
+        'usuarios',
+        'configuracoes',
+        'tipos_bens',
+        'dependencias',
+        'importacoes',
+        'importacao_acoes',
+        'import_erros',
+        'import_job_processed',
+        'produtos',
+    ],
+
     'servidor_vence' => [
         'usuarios',
         'administracoes',
