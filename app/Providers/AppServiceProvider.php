@@ -48,6 +48,7 @@ use App\Services\LegacyReportService;
 use App\Services\LegacySpreadsheetImportService;
 use App\Services\LegacyUserBrowserService;
 use App\Services\LegacyUserManagementService;
+use App\Support\Modo\EstadoModo;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
@@ -166,6 +167,9 @@ class AppServiceProvider extends ServiceProvider
             /** @var LegacyNavigationServiceInterface $navigation */
             $navigation = $this->app->make(LegacyNavigationServiceInterface::class);
             $currentUser = $auth->currentUser();
+            if ($currentUser !== null && config('modo_igreja.ativo')) {
+                $view->with('modoIgrejaOnline', $this->app->make(EstadoModo::class)->estaOnline());
+            }
             $legacyPermissions = $currentUser !== null
                 ? $permissions->currentPermissions()
                 : (is_array(Session::get('legacy_permissions', [])) ? Session::get('legacy_permissions', []) : []);

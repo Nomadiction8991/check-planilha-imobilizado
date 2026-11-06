@@ -1614,6 +1614,7 @@
             color: var(--ui-text);
             font-size: 16px;
             line-height: 1.5;
+            overflow-wrap: anywhere;
         }
 
         .conexao, .conflitos { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
@@ -1809,8 +1810,12 @@
         </header>
         </div>
 
-        @if (config('modo_igreja.ativo'))
-            <p class="modo-igreja-aviso" role="status">Cópia local: este computador funciona sem internet.</p>
+        @if (!empty($legacySessionUser) && isset($modoIgrejaOnline))
+            <div class="modo-igreja-aviso" role="status">
+                <strong><span aria-hidden="true">●</span> Cópia local · {{ $modoIgrejaOnline ? 'Modo online' : 'Modo offline' }}</strong>
+                <span>{{ $modoIgrejaOnline ? 'Você está trabalhando com o servidor online.' : 'Você está trabalhando na cópia deste computador.' }}</span>
+                <span>Endereço para os celulares: {{ request()->getSchemeAndHttpHost() }}</span>
+            </div>
         @endif
 
         @yield('content')
