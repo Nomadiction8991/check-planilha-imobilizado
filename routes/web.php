@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\LegacyAssetTypeController;
 use App\Http\Controllers\LegacyAuditController;
 use App\Http\Controllers\ConexaoController;
+use App\Http\Controllers\ConflitosController;
 use App\Http\Controllers\LegacyConfigurationController;
 use App\Http\Controllers\LegacyAdministrationController;
 use App\Http\Controllers\LegacyAuthController;
@@ -223,6 +224,14 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
             ->name('migration.conexao.ligar');
         Route::post('/conexao/desligar', [ConexaoController::class, 'desligar'])
             ->name('migration.conexao.desligar');
+        Route::get('/conflitos', [ConflitosController::class, 'index'])
+            ->name('migration.conflitos.index');
+        Route::post('/conflitos/{conflito}/notebook', [ConflitosController::class, 'manterNotebook'])
+            ->whereNumber('conflito')
+            ->name('migration.conflitos.notebook');
+        Route::post('/conflitos/{conflito}/servidor', [ConflitosController::class, 'manterServidor'])
+            ->whereNumber('conflito')
+            ->name('migration.conflitos.servidor');
         Route::get('/churches/products-count', [LegacyChurchController::class, 'productsCount'])
             ->middleware('legacy.permission:churches.delete')
             ->name('migration.churches.products-count');
