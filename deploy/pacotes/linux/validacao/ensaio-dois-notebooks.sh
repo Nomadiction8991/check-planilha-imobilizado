@@ -138,7 +138,12 @@ artisan_de() {
 sincroniza() {
     local nome="$1" saida tentativa
     for tentativa in $(seq 1 60); do
-        saida="$(artisan_de "$nome" sincronizacao:executar)"
+        # Uma sincronização que termina com erro para o ensaio e mostra a saída, em vez de sair em silêncio.
+        saida="$(artisan_de "$nome" sincronizacao:executar 2>&1)" || {
+            printf '%s\n' "$saida" >&2
+            echo "FALHA  $nome: a sincronização terminou com erro" >&2
+            exit 1
+        }
         if ! grep -q 'já está rodando' <<<"$saida"; then
             printf '%s\n' "$saida"
             return 0
@@ -217,17 +222,6 @@ passo "8. sincronização: primeiro o notebook A, depois o B"
 sincroniza notebook_a
 sincroniza notebook_b
 
-passo "8b. diagnóstico: quem registrou o quê depois da primeira rodada"
-echo "registro de alterações do servidor (id, tabela, chave, operação, origem):"
-sql_de servidor "SELECT id, tabela, chave, operacao, origem FROM sincronizacao_alteracoes ORDER BY id;" | sed 's/^/    /'
-echo "registro de alterações do notebook A:"
-sql_de notebook_a "SELECT id, tabela, chave, operacao, origem FROM sincronizacao_alteracoes ORDER BY id;" | sed 's/^/    /'
-echo "registro de alterações do notebook B:"
-sql_de notebook_b "SELECT id, tabela, chave, operacao, origem FROM sincronizacao_alteracoes ORDER BY id;" | sed 's/^/    /'
-echo "envios já recebidos pelo servidor: $(sql_de servidor "SELECT COUNT(*) FROM sincronizacao_envios;")"
-echo "erros registrados no log do servidor (primeiras linhas de cada erro):"
-grep -a 'local.ERROR' "$(app_de servidor)/storage/logs/laravel.log" 2>/dev/null | head -4 | cut -c1-700 | sed 's/^/    /' || echo "    (sem erros)"
-
 passo "9. o conflito de P-1 aparece no servidor"
 echo "conflitos registrados no servidor:"
 sql_de servidor "SELECT tabela, chave, operacao, motivo, status FROM sincronizacao_conflitos;" | sed 's/^/    /'
@@ -251,6 +245,9 @@ echo "produtos no servidor:"
 sed 's/^/    /' "$RAIZ/produtos-servidor.txt"
 afirmar "produtos iguais no servidor e no notebook A" cmp -s "$RAIZ/produtos-servidor.txt" "$RAIZ/produtos-notebook_a.txt"
 afirmar "produtos iguais no servidor e no notebook B" cmp -s "$RAIZ/produtos-servidor.txt" "$RAIZ/produtos-notebook_b.txt"
+# Regressão: texto vazio chega ao servidor como texto vazio (antes virava nulo e recusava o registro).
+afirmar_igual "observação vazia de P-A chegou ao servidor como texto vazio, não nulo" "" \
+    "$(sql_de servidor "SELECT IFNULL(observacao,'<NULL>') FROM produtos WHERE codigo='P-A';")"
 afirmar_igual "produtos finais: P-1 Mesa, P-A Armário, P-B Estante" \
     "$(printf 'P-1\tMesa\nP-A\tArmário\nP-B\tEstante')" "$(cat "$RAIZ/produtos-servidor.txt")"
 
