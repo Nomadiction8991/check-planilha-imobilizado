@@ -50,6 +50,7 @@ final class LocalEnvWriter
             'QUEUE_CONNECTION=database',
             'MODO_IGREJA_ATIVO=true',
             'MODO_IGREJA_PORTA=' . $porta,
+            'MODO_IGREJA_SERVIDOR_URL=' . $this->valor((string) config('modo_igreja.servidor_padrao')),
         ];
 
         // Com o socket informado, o sistema conecta só por ele: o banco não abre porta de rede.

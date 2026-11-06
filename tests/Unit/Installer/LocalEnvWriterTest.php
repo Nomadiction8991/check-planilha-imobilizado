@@ -6,8 +6,8 @@ namespace Tests\Unit\Installer;
 
 use App\Support\Installer\LocalEnvWriter;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Tests\TestCase;
 
 class LocalEnvWriterTest extends TestCase
 {
@@ -54,6 +54,23 @@ class LocalEnvWriterTest extends TestCase
         $conteudo = (new LocalEnvWriter())->render($this->valores());
 
         $this->assertStringContainsString('MODO_IGREJA_ATIVO=true', $conteudo);
+    }
+
+    public function test_grava_o_endereco_padrao_do_servidor_sem_token(): void
+    {
+        $conteudo = (new LocalEnvWriter())->render($this->valores());
+
+        $this->assertStringContainsString('MODO_IGREJA_SERVIDOR_URL=https://checkplanilha.anvy.com.br', $conteudo);
+        $this->assertStringNotContainsString('MODO_IGREJA_APARELHO_TOKEN', $conteudo);
+    }
+
+    public function test_grava_o_endereco_do_servidor_configurado(): void
+    {
+        config(['modo_igreja.servidor_padrao' => 'https://servidor.exemplo.com.br']);
+
+        $conteudo = (new LocalEnvWriter())->render($this->valores());
+
+        $this->assertStringContainsString('MODO_IGREJA_SERVIDOR_URL=https://servidor.exemplo.com.br', $conteudo);
     }
 
     public function test_valor_com_espaco_fica_entre_aspas_simples(): void

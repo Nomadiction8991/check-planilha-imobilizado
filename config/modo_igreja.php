@@ -30,6 +30,9 @@ return [
     */
     'servidor_url' => env('MODO_IGREJA_SERVIDOR_URL'),
 
+    // Endereço gravado na configuração do notebook quando nenhum outro for informado.
+    'servidor_padrao' => env('MODO_IGREJA_SERVIDOR_PADRAO', 'https://checkplanilha.anvy.com.br'),
+
     // Endereço usado nos links do servidor; se estiver vazio, usa o endereço de acesso.
     'servidor_publico' => env('MODO_IGREJA_SERVIDOR_PUBLICO') ?: env('MODO_IGREJA_SERVIDOR_URL'),
 
