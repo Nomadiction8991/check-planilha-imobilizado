@@ -78,7 +78,10 @@ final class ChangeApplier
 
         try {
             DB::table($tabela)->insert($this->camposCifrados->cifrar($tabela, $depois));
-        } catch (QueryException) {
+        } catch (QueryException $erro) {
+            // O motivo para a pessoa é simples; o erro técnico completo vai para o log do servidor.
+            report($erro);
+
             return ['status' => self::CONFLITO, 'motivo' => 'o servidor já tem um registro com o mesmo valor único'];
         }
 
