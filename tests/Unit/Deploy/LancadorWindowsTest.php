@@ -121,6 +121,25 @@ class LancadorWindowsTest extends TestCase
         $this->assertLessThan($configurar, $pasta, 'A pasta precisa existir antes de configurar.');
     }
 
+    public function test_inicializacao_do_banco_tem_limite_de_tempo_e_encerra_o_processo_travado(): void
+    {
+        // Sem limite, uma inicialização travada deixaria a primeira execução parada para sempre.
+        $this->assertStringContainsString('WaitForExit($Limite * 1000)', $this->conteudo);
+        $this->assertStringContainsString('Stop-Process -Id $processo.Id -Force', $this->conteudo);
+        $this->assertStringContainsString('não terminou em $Limite segundos', $this->conteudo);
+    }
+
+    public function test_inicializacao_do_banco_trata_codigo_de_erro_do_programa(): void
+    {
+        $this->assertStringContainsString('ExitCode -ne 0', $this->conteudo);
+        $this->assertStringContainsString('falhou (código', $this->conteudo);
+    }
+
+    public function test_limite_da_inicializacao_pode_ser_ajustado_pela_linha_de_comando(): void
+    {
+        $this->assertStringContainsString('[int]$LimiteInicializacaoSegundos = 300', $this->conteudo);
+    }
+
     public function test_avisa_que_ainda_nao_foi_testado_no_windows(): void
     {
         $this->assertStringContainsString('SEM TESTE REAL NO WINDOWS', $this->conteudo, 'O aviso de pendência precisa estar no arquivo.');

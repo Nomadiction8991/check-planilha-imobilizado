@@ -16,6 +16,10 @@
 .PARAMETER Simular
   Mostra os comandos que rodaria, sem iniciar nada. Usado nos testes.
 
+.PARAMETER LimiteInicializacaoSegundos
+  Tempo máximo, em segundos, para criar o banco na primeira vez (padrão: 300). Passou disso, o
+  lançador encerra o processo e mostra um aviso.
+
 .NOTES
   SEM TESTE REAL NO WINDOWS. Foi validado em PowerShell 7 no Linux, com programas falsos
   (deploy/pacotes/windows/validacao/validar-powershell.sh). A troca de senha do MySQL 8.4 foi
@@ -23,7 +27,9 @@
 #>
 [CmdletBinding()]
 param(
-    [switch]$Simular
+    [switch]$Simular,
+    # Tempo máximo, em segundos, para a inicialização do banco. Passou disso, o lançador encerra o processo.
+    [int]$LimiteInicializacaoSegundos = 300
 )
 
 Set-StrictMode -Version Latest
@@ -149,6 +155,30 @@ function Iniciar-Em-Segundo-Plano {
         $parametros['WindowStyle'] = 'Hidden'
     }
     return Start-Process @parametros
+}
+
+# Cria o banco na primeira vez, com limite de tempo. Se passar do limite ou falhar, encerra o
+# processo e apaga a pasta do banco pela metade. Essa pasta estava vazia antes desta execução
+# (a checagem da primeira vez garante isso), então só tem o que esta execução criou.
+function Inicializar-Banco {
+    param([string[]]$Argumentos, [int]$Limite)
+
+    if ($Simular) {
+        Mostrar-Comando (@($mysqld) + $Argumentos)
+        return
+    }
+    # Apaga o registro de uma tentativa anterior: a senha inicial tem que vir desta criação.
+    Remove-Item -LiteralPath $logInicializacao -Force -ErrorAction SilentlyContinue
+    $processo = Iniciar-Em-Segundo-Plano $mysqld $Argumentos $base
+    if (-not $processo.WaitForExit($Limite * 1000)) {
+        Stop-Process -Id $processo.Id -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $pastaBanco -Recurse -Force -ErrorAction SilentlyContinue
+        throw "A criação do banco não terminou em $Limite segundos, e o lançador encerrou o processo. Abra o programa de novo. Se o aviso voltar, fale com o suporte."
+    }
+    if ($processo.ExitCode -ne 0) {
+        Remove-Item -LiteralPath $pastaBanco -Recurse -Force -ErrorAction SilentlyContinue
+        throw "A criação do banco falhou (código $($processo.ExitCode)). O registro está em: $logInicializacao"
+    }
 }
 
 # Lê o arquivo de configuração (NOME=valor, com ou sem aspas) para o ambiente deste processo.
@@ -304,7 +334,7 @@ try {
     $senhaAdmin = $null
     if ($primeiraVez) {
         $senhaAdmin = Gerar-Senha
-        Executar-Comando $mysqld @('--initialize', "--basedir=$mysqlBase", "--datadir=$pastaBanco", "--log-error=$logInicializacao")
+        Inicializar-Banco @('--initialize', "--basedir=$mysqlBase", "--datadir=$pastaBanco", "--log-error=$logInicializacao") $LimiteInicializacaoSegundos
         if (-not $Simular) {
             Restringir-Arquivo $logInicializacao
             $senhaInicial = Ler-Senha-Inicial $logInicializacao

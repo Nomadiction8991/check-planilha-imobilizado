@@ -114,6 +114,17 @@ case " $* " in
                 --log-error=*) registro="${argumento#--log-error=}" ;;
             esac
         done
+        # Modos de falha para o teste do lançador: "trava" não termina; "erro" sai com código 3.
+        # Os dois deixam a pasta do banco pela metade, como uma inicialização interrompida.
+        case "${FAKE_MODO_INICIALIZACAO:-normal}" in
+            trava)
+                mkdir -p "$datadir/mysql"
+                printf 'INIT_PID\t%s\n' "$$" >>"$FAKE_LOG"
+                exec sleep 600 ;;
+            erro)
+                mkdir -p "$datadir/mysql"
+                exit 3 ;;
+        esac
         mkdir -p "$datadir/mysql" "$(dirname "$registro")"
         printf '%s' 'TesteInicial#77' >"$FAKE_ESTADO/senha-root"
         printf '%s\n' '2026-11-06T00:00:00.000000Z 5 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: TesteInicial#77' >"$registro"
@@ -195,10 +206,11 @@ SH
 cat >"$trabalho/driver.ps1" <<'PS'
 # Roda o lançador como o instalador faz, com a preferência que transforma texto de erro de programa
 # em erro do script (comportamento do Windows PowerShell 5.1).
-param([Parameter(Mandatory)][string]$Lancador, [switch]$Simular)
+param([Parameter(Mandatory)][string]$Lancador, [switch]$Simular, [int]$Limite = 0)
 $PSNativeCommandUseErrorActionPreference = $true
 $opcoes = @{}
 if ($Simular) { $opcoes['Simular'] = $true }
+if ($Limite -gt 0) { $opcoes['LimiteInicializacaoSegundos'] = $Limite }
 & $Lancador @opcoes
 PS
 
@@ -230,6 +242,24 @@ echo "codigo_execucao=$?"
 echo EXECUCAO >>"$FAKE_LOG"
 timeout 40 pwsh -NoProfile -File /work/driver.ps1 -Lancador "$BASE/lancador.ps1" >/work/saida/execucao2.txt 2>&1
 echo "codigo_execucao2=$?"
+# Cópia da pasta de dados depois das duas execuções normais: as conferências olham essa cópia.
+cp -a "$CP_DADOS" /work/saida/dados-apos-execucao2
+# Inicialização travada: a pasta de dados é apagada antes, para o lançador chamar a inicialização de novo.
+rm -rf "$CP_DADOS"
+echo EXECUCAO >>"$FAKE_LOG"
+FAKE_MODO_INICIALIZACAO=trava timeout 60 pwsh -NoProfile -File /work/driver.ps1 -Lancador "$BASE/lancador.ps1" -Limite 5 >/work/saida/travada.txt 2>&1
+echo "codigo_travada=$?"
+pid="$(awk -F'\t' '$1 == "INIT_PID" { p = $2 } END { print p }' "$FAKE_LOG")"
+echo "processo_travado_pid=${pid:-nenhum}"
+estado="$(awk '/^State/ { print $2 }' "/proc/$pid/status" 2>/dev/null || echo X)"
+if [ -n "$pid" ] && [ -e "/proc/$pid" ] && [ "$estado" != "Z" ]; then echo "processo_travado_vivo=sim"; else echo "processo_travado_vivo=nao"; fi
+if [ -e "$CP_DADOS/mysql" ]; then echo "banco_parcial_travada=sim"; else echo "banco_parcial_travada=nao"; fi
+# Inicialização com erro do programa: código de saída 3.
+rm -rf "$CP_DADOS"
+echo EXECUCAO >>"$FAKE_LOG"
+FAKE_MODO_INICIALIZACAO=erro timeout 60 pwsh -NoProfile -File /work/driver.ps1 -Lancador "$BASE/lancador.ps1" -Limite 5 >/work/saida/erro.txt 2>&1
+echo "codigo_erro=$?"
+if [ -e "$CP_DADOS/mysql" ]; then echo "banco_parcial_erro=sim"; else echo "banco_parcial_erro=nao"; fi
 SH
 chmod +x "$trabalho/fake/"* "$trabalho/roteiro.sh"
 
@@ -239,7 +269,7 @@ cat "$trabalho/saida/roteiro.txt"
 
 echo
 log="$trabalho/saida/programas.txt"
-dados_no_host="$trabalho/instalacao/Dados Locais/CheckPlanilha"
+dados_no_host="$trabalho/saida/dados-apos-execucao2"
 acesso_admin="$dados_no_host/mysql-administrador.cnf"
 estado="$trabalho/saida/estado/senha-root"
 
@@ -254,8 +284,8 @@ conferir "pasta de dados com espaço chega inteira ao MySQL (inicialização)" \
 conferir "MySQL sobe com os 7 argumentos inteiros (caminho com espaço)" \
     awk -F'\t' '$1 == "MYSQLD" && $2 ~ /^--basedir=/ && NF == 8 { found = 1 } END { exit !found }' "$log"
 conferir "a configuração do sistema é criada na primeira execução" test -f "$dados_no_host/modo-igreja.env"
-conferir "o banco é inicializado uma vez só, mesmo com duas execuções" \
-    awk -F'\t' '$1 == "MYSQLD" && $2 == "--initialize" { n++ } END { exit !(n == 1) }' "$log"
+conferir "o banco é criado uma vez só nas duas primeiras execuções" \
+    awk -F'\t' '/^EXECUCAO/ { m++ } $1 == "MYSQLD" && $2 == "--initialize" && m >= 1 && m <= 2 { n++ } END { exit !(n == 1) }' "$log"
 conferir "a inicialização não usa mais o modo sem senha" \
     awk -F'\t' '$1 == "MYSQLD" && $2 == "--initialize-insecure" { bad = 1 } END { exit bad }' "$log"
 conferir "a senha inicial é trocada pela senha do administrador (ALTER USER)" \
@@ -288,6 +318,14 @@ conferir "primeira execução segue até o laço do agendador (encerrada pelo te
     grep -q 'codigo_execucao=124' "$trabalho/saida/roteiro.txt"
 conferir "segunda execução segue até o laço do agendador (encerrada pelo tempo do teste)" \
     grep -q 'codigo_execucao2=124' "$trabalho/saida/roteiro.txt"
+conferir "inicialização travada é encerrada e o lançador para com erro claro" \
+    bash -c "grep -q 'codigo_travada=1' '$trabalho/saida/roteiro.txt' && grep -q 'não terminou em 5 segundos' '$trabalho/saida/travada.txt'"
+conferir "o processo da inicialização travada é encontrado e não fica vivo depois do erro" \
+    bash -c "grep -q 'processo_travado_pid=[0-9]' '$trabalho/saida/roteiro.txt' && grep -q 'processo_travado_vivo=nao' '$trabalho/saida/roteiro.txt'"
+conferir "a pasta do banco pela metade é apagada quando a inicialização trava" grep -q 'banco_parcial_travada=nao' "$trabalho/saida/roteiro.txt"
+conferir "inicialização com erro do programa informa o código de saída" \
+    bash -c "grep -q 'codigo_erro=1' '$trabalho/saida/roteiro.txt' && grep -q 'falhou (código 3)' '$trabalho/saida/erro.txt'"
+conferir "a pasta do banco pela metade é apagada quando a inicialização falha" grep -q 'banco_parcial_erro=nao' "$trabalho/saida/roteiro.txt"
 
 echo
 if [ "${VER_REGISTRO:-0}" = "1" ]; then
