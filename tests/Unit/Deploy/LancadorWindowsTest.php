@@ -55,6 +55,72 @@ class LancadorWindowsTest extends TestCase
         $this->assertStringContainsString('$env:SSL_CERT_FILE', $this->conteudo);
     }
 
+    public function test_inicializa_o_banco_com_senha_inicial_e_nunca_sem_senha(): void
+    {
+        // Sem senha, qualquer usuário do computador entra como administrador do banco.
+        $this->assertStringContainsString("'--initialize'", $this->conteudo);
+        $this->assertStringNotContainsString('--initialize-insecure', $this->conteudo);
+        $this->assertStringContainsString('temporary password is generated for root@localhost', $this->conteudo, 'A senha inicial é lida do registro do MySQL.');
+    }
+
+    public function test_troca_a_senha_inicial_por_uma_senha_gerada_com_gerador_seguro(): void
+    {
+        $this->assertStringContainsString('function Gerar-Senha', $this->conteudo);
+        $this->assertStringContainsString('RandomNumberGenerator', $this->conteudo);
+        $this->assertStringContainsString("ALTER USER 'root'@'localhost' IDENTIFIED BY", $this->conteudo);
+        // A senha inicial vem expirada: sem essa opção, o cliente recusa qualquer comando.
+        $this->assertStringContainsString("'--connect-expired-password'", $this->conteudo);
+    }
+
+    public function test_senhas_nao_vao_para_a_linha_de_comando(): void
+    {
+        $this->assertStringNotContainsString("'-uroot'", $this->conteudo);
+        $this->assertStringNotContainsString("'-e'", $this->conteudo, 'O SQL, com as senhas, entra pela entrada padrão.');
+        $this->assertStringContainsString('$Sql | & $Programa @Argumentos', $this->conteudo);
+        $this->assertStringContainsString('--defaults-extra-file=$Acesso', $this->conteudo);
+    }
+
+    public function test_arquivos_de_acesso_ficam_protegidos_antes_de_receber_a_senha(): void
+    {
+        $this->assertStringContainsString('icacls.exe', $this->conteudo);
+        $this->assertStringContainsString('/inheritance:r', $this->conteudo);
+        $this->assertStringContainsString('/grant:r', $this->conteudo);
+        $this->assertLessThan(
+            strpos($this->conteudo, 'WriteAllText'),
+            strpos($this->conteudo, 'Restringir-Arquivo $Caminho'),
+            'A proteção precisa vir antes da escrita da senha.',
+        );
+    }
+
+    public function test_aplicacao_e_encerramento_usam_o_acesso_do_administrador(): void
+    {
+        $this->assertStringContainsString('Executar-Sql $mysql (Argumentos-Banco $arquivoAdmin $dbPorta)', $this->conteudo);
+        $this->assertStringContainsString("Argumentos-Banco \$arquivoAdmin \$dbPorta @('shutdown')", $this->conteudo);
+    }
+
+    public function test_arquivos_temporarios_da_primeira_configuracao_somem_ao_fim(): void
+    {
+        $this->assertStringContainsString('Remove-Item -LiteralPath $arquivoInicial', $this->conteudo);
+        $this->assertStringContainsString('Remove-Item -LiteralPath $logInicializacao', $this->conteudo);
+    }
+
+    public function test_nao_reinicializa_o_banco_quando_o_acesso_do_administrador_existe(): void
+    {
+        $this->assertStringContainsString('$primeiraVez = -not (Test-Path -LiteralPath $arquivoAdmin)', $this->conteudo);
+        // Sem o acesso, uma pasta de banco com dados não pode ser recriada: a pessoa precisa de suporte.
+        $this->assertStringContainsString('Não apague a pasta do banco', $this->conteudo);
+    }
+
+    public function test_cria_a_pasta_de_dados_antes_de_gerar_a_configuracao(): void
+    {
+        // O gerador da configuração exige a pasta pronta: sem ela, a primeira execução falha.
+        $pasta = strpos($this->conteudo, 'New-Item -ItemType Directory -Path $dados');
+        $configurar = strpos($this->conteudo, "'modo-igreja:configurar'");
+
+        $this->assertNotFalse($pasta, 'O lançador precisa criar a pasta de dados.');
+        $this->assertLessThan($configurar, $pasta, 'A pasta precisa existir antes de configurar.');
+    }
+
     public function test_avisa_que_ainda_nao_foi_testado_no_windows(): void
     {
         $this->assertStringContainsString('SEM TESTE REAL NO WINDOWS', $this->conteudo, 'O aviso de pendência precisa estar no arquivo.');
