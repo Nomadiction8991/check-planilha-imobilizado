@@ -9,6 +9,9 @@
 #   check-planilha-igreja --simular   mostra os comandos, sem iniciar nada (usado nos testes)
 set -euo pipefail
 
+# Arquivos criados pelo lançador (socket, logs, dados) só podem ser lidos pelo dono.
+umask 077
+
 CP_HOME="${CP_HOME:-/usr/lib/check-planilha}"
 CP_APP="${CP_APP:-$CP_HOME/app}"
 CP_DADOS="${CP_DADOS:-$HOME/.local/share/check-planilha}"
@@ -31,7 +34,6 @@ fi
 DB_DATABASE="${DB_DATABASE:-check_planilha}"
 DB_USERNAME="${DB_USERNAME:-check_planilha}"
 DB_PASSWORD="${DB_PASSWORD:-senha-da-simulacao}"
-DB_PORT="${DB_PORT:-3307}"
 MODO_IGREJA_PORTA="${MODO_IGREJA_PORTA:-8080}"
 
 erro() {
@@ -65,19 +67,23 @@ if (( ! simular )); then
 fi
 
 rodar mkdir -p "$CP_DADOS"
+# A pasta de dados (banco, socket e ambiente) só pode ser lida pelo dono.
+rodar chmod 700 "$CP_DADOS"
 
 # 1) Configuração: criada só na primeira vez. As variáveis entram no ambiente deste processo.
 if [[ ! -f "$CP_AMBIENTE" ]]; then
-    rodar "$CP_PHP" "$CP_APP/artisan" modo-igreja:configurar --arquivo="$CP_AMBIENTE"
+    rodar "$CP_PHP" "$CP_APP/artisan" modo-igreja:configurar --arquivo="$CP_AMBIENTE" --socket="$CP_SOCKET"
 fi
 if (( ! simular )); then
     set -a
     # shellcheck disable=SC1090
     . "$CP_AMBIENTE"
     set +a
+    # O socket é do lançador: o sistema conecta por ele, mesmo que o arquivo de ambiente seja antigo.
+    export DB_SOCKET="$CP_SOCKET"
 fi
 
-# 2) Banco local: só na rede deste computador (127.0.0.1), com o socket dentro da pasta de dados.
+# 2) Banco local: sem porta de rede. Só fala pelo socket, dentro da pasta de dados (0700).
 if [[ ! -d "$CP_DADOS/mysql/mysql" ]]; then
     rodar "$CP_MYSQLD" --initialize-insecure --basedir="$CP_HOME/mysql" --datadir="$CP_DADOS/mysql" --user="$(id -un)"
 fi
@@ -85,8 +91,7 @@ rodar_em_segundo_plano "$CP_MYSQLD" \
     --datadir="$CP_DADOS/mysql" \
     --basedir="$CP_HOME/mysql" \
     --skip-log-bin \
-    --port="$DB_PORT" \
-    --bind-address=127.0.0.1 \
+    --skip-networking \
     --socket="$CP_SOCKET" \
     --pid-file="$CP_DADOS/mysql.pid" \
     --log-error="$CP_DADOS/mysql.log" \
@@ -99,12 +104,18 @@ if (( ! simular )); then
     done
 fi
 
+# O socket deve aceitar só o dono: o MySQL o cria com permissão aberta.
+if (( ! simular )) && [[ -S "$CP_SOCKET" ]]; then
+    chmod 600 "$CP_SOCKET"
+fi
+
 # Usuário e banco do sistema. Repetir é seguro: o comando é idempotente.
+# A conexão pelo socket chega ao MySQL como "localhost" (não 127.0.0.1), então o usuário é criado para esse host.
 rodar "$CP_MYSQL" --socket="$CP_SOCKET" -uroot -e "
 CREATE DATABASE IF NOT EXISTS \`$DB_DATABASE\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS '$DB_USERNAME'@'127.0.0.1' IDENTIFIED BY '$DB_PASSWORD';
-ALTER USER '$DB_USERNAME'@'127.0.0.1' IDENTIFIED BY '$DB_PASSWORD';
-GRANT ALL PRIVILEGES ON \`$DB_DATABASE\`.* TO '$DB_USERNAME'@'127.0.0.1';"
+CREATE USER IF NOT EXISTS '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
+ALTER USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL PRIVILEGES ON \`$DB_DATABASE\`.* TO '$DB_USERNAME'@'localhost';"
 
 # 3) Sistema: tabelas e gatilhos de captura das alterações.
 if (( ! simular )); then

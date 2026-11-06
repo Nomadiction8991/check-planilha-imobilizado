@@ -59,7 +59,7 @@ preparar() {
     (
         cd "$(app_de "$nome")"
         MODO_IGREJA_PORTA="${PORTA_WEB[$nome]}" "$(php_de "$nome")" artisan modo-igreja:configurar \
-            --arquivo="$(ambiente "$nome")" >/dev/null
+            --arquivo="$(ambiente "$nome")" --socket="$(dados "$nome")/mysql.sock" >/dev/null
     )
     sed -i -e "s/^DB_PORT=.*/DB_PORT=${PORTA_BANCO[$nome]}/" \
         -e "s/^MODO_IGREJA_ATIVO=.*/MODO_IGREJA_ATIVO=${MODO_IGREJA[$nome]}/" "$(ambiente "$nome")"

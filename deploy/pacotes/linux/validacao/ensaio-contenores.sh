@@ -68,7 +68,7 @@ no() {
 # Configuração inicial de um contêiner (o mesmo comando que o lançador usaria na primeira vez).
 configurar() {
     local contenor="$1" ativo="$2"
-    no "$contenor" bash -c 'mkdir -p /home/cp/.local/share/check-planilha && cd /usr/lib/check-planilha/app && /usr/lib/check-planilha/php/bin/php artisan modo-igreja:configurar --arquivo=/home/cp/.local/share/check-planilha/modo-igreja.env >/dev/null && sed -i "s/^MODO_IGREJA_ATIVO=.*/MODO_IGREJA_ATIVO=$1/" /home/cp/.local/share/check-planilha/modo-igreja.env' bash "$ativo"
+    no "$contenor" bash -c 'mkdir -p /home/cp/.local/share/check-planilha && cd /usr/lib/check-planilha/app && /usr/lib/check-planilha/php/bin/php artisan modo-igreja:configurar --arquivo=/home/cp/.local/share/check-planilha/modo-igreja.env --socket=/home/cp/.local/share/check-planilha/mysql.sock >/dev/null && sed -i "s/^MODO_IGREJA_ATIVO=.*/MODO_IGREJA_ATIVO=$1/" /home/cp/.local/share/check-planilha/modo-igreja.env' bash "$ativo"
 }
 
 # Liga o sistema do contêiner como o atalho do menu faria, em segundo plano.
