@@ -58,6 +58,17 @@ class PrepararBinariosTest extends TestCase
         $this->assertDirectoryDoesNotExist($this->pasta . '/destino/php', 'Nada pode ser montado com arquivo não conferido.');
     }
 
+    public function test_poda_do_mysql_mantem_o_componente_que_o_servidor_carrega_na_inicializacao(): void
+    {
+        // Sem esse componente, o MySQL avisa "Can't open shared library" a cada inicialização.
+        $conteudo = (string) file_get_contents(self::SCRIPT);
+
+        $this->assertMatchesRegularExpression(
+            '/find "\$destino\/mysql\/lib\/plugin" -type f ! -name auth_socket\.so ! -name component_reference_cache\.so -delete/',
+            $conteudo,
+        );
+    }
+
     public function test_somas_fixadas_no_script_tem_formato_sha256(): void
     {
         $conteudo = (string) file_get_contents(self::SCRIPT);

@@ -93,7 +93,8 @@ mkdir -p "$destino/mysql"
 cp -a "$trabalho/$MYSQL_NOME/bin" "$trabalho/$MYSQL_NOME/lib" "$trabalho/$MYSQL_NOME/share" "$destino/mysql/"
 
 # Só o necessário para o servidor. O restante (depuração, componentes extras, clientes de
-# replicação) só deixaria o pacote maior. Fica o plugin auth_socket, que o root usa no primeiro acesso.
+# replicação) só deixaria o pacote maior. Ficam o plugin auth_socket, que o root usa no primeiro acesso,
+# e o componente component_reference_cache, que o servidor carrega ao iniciar (sem ele, avisa a cada início).
 for programa in "$destino"/mysql/bin/*; do
     case "$(basename "$programa")" in
         mysqld | mysql | mysqladmin | mysqldump) ;;
@@ -101,7 +102,7 @@ for programa in "$destino"/mysql/bin/*; do
     esac
 done
 rm -rf "$destino/mysql/lib/mecab" "$destino/mysql/lib/libmysqlclient.a"
-find "$destino/mysql/lib/plugin" -type f ! -name auth_socket.so -delete
+find "$destino/mysql/lib/plugin" -type f ! -name auth_socket.so ! -name component_reference_cache.so -delete
 
 # Os símbolos de depuração ocupam quase metade do mysqld e não são usados em produção.
 if command -v strip >/dev/null 2>&1; then
