@@ -21,6 +21,11 @@ return [
     'porta' => (int) env('MODO_IGREJA_PORTA', 8080),
 
     /*
+    | Nome da rede Wi-Fi que o notebook cria para os celulares.
+    */
+    'rede_nome' => env('MODO_IGREJA_REDE_NOME', 'CheckPlanilha'),
+
+    /*
     | Endereço do servidor online. Usado pela sincronização.
     */
     'servidor_url' => env('MODO_IGREJA_SERVIDOR_URL'),

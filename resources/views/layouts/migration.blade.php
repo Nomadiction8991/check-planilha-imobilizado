@@ -1767,6 +1767,10 @@
         </header>
         </div>
 
+        @if (config('modo_igreja.ativo'))
+            <p class="modo-igreja-aviso" role="status">Cópia local: este computador funciona sem internet.</p>
+        @endif
+
         @yield('content')
     </main>
     <div class="page-quick-actions" data-page-quick-actions hidden>

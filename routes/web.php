@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\LegacyAssetTypeController;
 use App\Http\Controllers\LegacyAuditController;
+use App\Http\Controllers\ConexaoController;
 use App\Http\Controllers\LegacyConfigurationController;
 use App\Http\Controllers\LegacyAdministrationController;
 use App\Http\Controllers\LegacyAuthController;
@@ -216,6 +217,12 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
             ->name('migration.configuracoes.index');
         Route::post('/configuracoes', [LegacyConfigurationController::class, 'update'])
             ->name('migration.configuracoes.update');
+        Route::get('/conexao', [ConexaoController::class, 'index'])
+            ->name('migration.conexao.index');
+        Route::post('/conexao/ligar', [ConexaoController::class, 'ligar'])
+            ->name('migration.conexao.ligar');
+        Route::post('/conexao/desligar', [ConexaoController::class, 'desligar'])
+            ->name('migration.conexao.desligar');
         Route::get('/churches/products-count', [LegacyChurchController::class, 'productsCount'])
             ->middleware('legacy.permission:churches.delete')
             ->name('migration.churches.products-count');
