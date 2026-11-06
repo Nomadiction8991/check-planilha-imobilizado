@@ -106,7 +106,7 @@ iniciar() {
 encerrar() {
     local nome="$1" pid pid_banco tentativa
     pid="$(cat "$RAIZ/$nome/lancador.pid" 2>/dev/null || echo 0)"
-    "$(mysqladmin_de "$nome")" --socket="$(dados "$nome")/mysql.sock" -uroot shutdown >/dev/null 2>&1 || true
+    "$(mysqladmin_de "$nome")" --defaults-extra-file="$(dados "$nome")/mysql-administrador.cnf" --socket="$(dados "$nome")/mysql.sock" shutdown >/dev/null 2>&1 || true
     for tentativa in $(seq 1 60); do
         pid_banco="$(cat "$(dados "$nome")/mysql.pid" 2>/dev/null || echo 0)"
         if [[ "$pid_banco" -eq 0 ]] || ! kill -0 "$pid_banco" 2>/dev/null; then
@@ -157,7 +157,7 @@ sincroniza() {
 # Consulta SQL no banco do computador simulado (saída em colunas separadas por tab).
 sql_de() {
     local nome="$1"
-    "$(mysql_de "$nome")" --socket="$(dados "$nome")/mysql.sock" -uroot -N -B --default-character-set=utf8mb4 \
+    "$(mysql_de "$nome")" --defaults-extra-file="$(dados "$nome")/mysql-administrador.cnf" --socket="$(dados "$nome")/mysql.sock" -N -B --default-character-set=utf8mb4 \
         check_planilha -e "$2"
 }
 

@@ -98,7 +98,7 @@ artisan_de() {
 # Consulta SQL no banco do contêiner (colunas separadas por tab).
 sql_de() {
     local contenor="$1" sql="$2"
-    no "$contenor" bash -c 'exec /usr/lib/check-planilha/mysql/bin/mysql --socket=/home/cp/.local/share/check-planilha/mysql.sock -uroot -N -B --default-character-set=utf8mb4 check_planilha -e "$1"' sql "$sql"
+    no "$contenor" bash -c 'exec /usr/lib/check-planilha/mysql/bin/mysql --defaults-extra-file=/home/cp/.local/share/check-planilha/mysql-administrador.cnf --socket=/home/cp/.local/share/check-planilha/mysql.sock -N -B --default-character-set=utf8mb4 check_planilha -e "$1"' sql "$sql"
 }
 
 # Grava um arquivo dentro do contêiner, criando as pastas que faltarem.

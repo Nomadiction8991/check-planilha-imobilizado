@@ -54,8 +54,8 @@ if [[ "$pronto" -ne 1 ]]; then
 fi
 echo "OK    banco pronto e acessível pelo dono (cp) pelo socket"
 
-dono="$(docker exec -u cp -e HOME=/home/cp "$contenor" "$mysql" --socket="$dados/mysql.sock" -uroot -N -e 'select current_user();')"
-echo "OK    dono (cp) entra no banco pelo socket: $dono"
+dono="$(docker exec -u cp -e HOME=/home/cp "$contenor" "$mysql" --defaults-extra-file="$dados/mysql-administrador.cnf" --socket="$dados/mysql.sock" -N -e 'select current_user();')"
+echo "OK    dono (cp) entra no banco pelo socket com o acesso do administrador: $dono"
 
 # O sistema precisa responder na tela de login. Sem isso, o teste não prova nada.
 no_ar=0
@@ -97,6 +97,13 @@ if tentar "outro usuário (intruso) pela porta 127.0.0.1:3307, como root sem sen
     acessos=$((acessos + 1))
 fi
 
+# O arquivo com a senha do administrador também não pode ser lido pelo outro usuário (só o teste, sem mostrar o conteúdo).
+if docker exec -u intruso "$contenor" test -r "$dados/mysql-administrador.cnf" 2>/dev/null; then
+    echo "ACESSO CONCEDIDO: outro usuário (intruso) consegue ler o arquivo de acesso do administrador"
+    acessos=$((acessos + 1))
+else
+    echo "negado: outro usuário (intruso) não consegue ler o arquivo de acesso do administrador"
+fi
 echo "--- o que existe no contêiner (visto como root):"
 if docker exec "$contenor" bash -c 'exec 3<>/dev/tcp/127.0.0.1/3307' 2>/dev/null; then
     echo "porta 127.0.0.1:3307 ABERTA"

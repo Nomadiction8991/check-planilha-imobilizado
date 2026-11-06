@@ -60,6 +60,60 @@ class LancadorLinuxTest extends TestCase
         $this->assertStringNotContainsString("'\$DB_USERNAME'@'127.0.0.1'", $conteudo);
     }
 
+    public function test_inicializa_o_banco_com_senha_inicial_e_nunca_sem_senha(): void
+    {
+        $conteudo = (string) file_get_contents(self::LANCADOR);
+
+        // Sem senha, qualquer usuário do computador entra como administrador do banco.
+        $this->assertStringNotContainsString('--initialize-insecure', $conteudo);
+        $this->assertStringContainsString('--initialize --basedir=', $conteudo);
+        $this->assertStringContainsString('temporary password is generated for root@localhost: ', $conteudo, 'A senha inicial é lida do registro do MySQL.');
+    }
+
+    public function test_troca_a_senha_inicial_por_uma_senha_gerada(): void
+    {
+        $conteudo = (string) file_get_contents(self::LANCADOR);
+
+        $this->assertStringContainsString('gerar_senha()', $conteudo);
+        $this->assertStringContainsString('/dev/urandom', $conteudo, 'A senha precisa vir de um gerador seguro.');
+        $this->assertStringContainsString("ALTER USER 'root'@'localhost' IDENTIFIED BY '\$senha_admin';", $conteudo);
+        // A senha inicial vem expirada: sem essa opção, o cliente recusa qualquer comando.
+        $this->assertStringContainsString('--connect-expired-password', $conteudo);
+    }
+
+    public function test_senhas_nao_vao_para_a_linha_de_comando(): void
+    {
+        $conteudo = (string) file_get_contents(self::LANCADOR);
+
+        $this->assertStringNotContainsString('-uroot', $conteudo);
+        $this->assertStringNotContainsString(' -e "', $conteudo, 'O SQL, com as senhas, entra pela entrada padrão.');
+        $this->assertStringContainsString('printf \'%s\n\' "$sql" | "$@"', $conteudo);
+    }
+
+    public function test_acesso_do_administrador_fica_guardado_e_o_temporario_some(): void
+    {
+        $conteudo = (string) file_get_contents(self::LANCADOR);
+
+        $this->assertStringContainsString('CP_ADMIN="$CP_DADOS/mysql-administrador.cnf"', $conteudo);
+        $this->assertStringContainsString('rm -f "$CP_INICIAL"', $conteudo);
+        $this->assertStringContainsString('rm -f "$CP_LOG_INICIALIZACAO"', $conteudo);
+        $this->assertStringContainsString('chmod 600 "$arquivo"', $conteudo, 'O arquivo de acesso só pode ser lido pelo dono.');
+    }
+
+    public function test_nao_reinicializa_o_banco_quando_o_acesso_do_administrador_existe(): void
+    {
+        $conteudo = (string) file_get_contents(self::LANCADOR);
+
+        $this->assertStringContainsString('if [[ ! -f "$CP_ADMIN" ]]; then', $conteudo);
+        // Sem o acesso, uma pasta de banco com dados não pode ser recriada: a pessoa precisa de suporte.
+        $this->assertStringContainsString('Não apague a pasta do banco', $conteudo);
+    }
+
+    public function test_simulacao_nao_mostra_senhas(): void
+    {
+        $this->assertStringNotContainsString('IDENTIFIED', $this->simular());
+    }
+
     private function simular(): string
     {
         $processo = new Process(['bash', self::LANCADOR, '--simular'], null, [
