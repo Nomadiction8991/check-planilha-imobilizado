@@ -117,7 +117,7 @@ function AguardarResultado($operacao, $tipo) {
 }
 $perfil = [Windows.Networking.Connectivity.NetworkInformation]::GetInternetConnectionProfile()
 $tetheramento = [Windows.Networking.NetworkOperators.NetworkOperatorTetheringManager]::CreateFromConnectionProfile($perfil)
-PS;
+PS . "\n";
     }
 
     /**

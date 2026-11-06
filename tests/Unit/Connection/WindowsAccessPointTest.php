@@ -53,6 +53,28 @@ class WindowsAccessPointTest extends TestCase
         }
     }
 
+    /**
+     * O cabeçalho e o corpo de cada script precisam ficar em linhas separadas. Sem essa quebra,
+     * o PowerShell lê a primeira linha do corpo grudada na última do cabeçalho e não roda o script.
+     */
+    public function test_cabecalho_termina_em_quebra_de_linha_antes_do_corpo_de_cada_script(): void
+    {
+        $ponto = new WindowsAccessPoint(new FakeCommandRunner(), sys_get_temp_dir());
+        $fimDoCabecalho = 'CreateFromConnectionProfile($perfil)' . "\n";
+
+        $this->assertStringContainsString($fimDoCabecalho . '$configuracao = ', $ponto->scriptLigar());
+        $this->assertStringContainsString($fimDoCabecalho . '$resultado = ', $this->scriptPrivado('scriptDesligar'));
+        $this->assertStringContainsString($fimDoCabecalho . 'if (', $this->scriptPrivado('scriptEstado'));
+    }
+
+    private function scriptPrivado(string $metodo): string
+    {
+        $ponto = new WindowsAccessPoint(new FakeCommandRunner(), sys_get_temp_dir());
+        $reflexao = new \ReflectionMethod($ponto, $metodo);
+
+        return (string) $reflexao->invoke($ponto);
+    }
+
     private function semComentarios(string $script): string
     {
         return preg_replace('/^\s*#.*$/m', '', $script) ?? $script;
