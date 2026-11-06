@@ -1,8 +1,11 @@
 ; Instalador do Check Planilha para o notebook da igreja (Windows).
 ;
-; ESQUELETO: ainda não foi compilado nem testado. Falta o lançador do Windows
-; (lancador.ps1) e a pasta build\windows com o PHP 8.4 e o MySQL 8.4.
-; Compilar com o Inno Setup 6 numa máquina Windows.
+; Antes de compilar, monte a pasta build\windows no Linux:
+;   deploy/pacotes/windows/preparar-binarios-windows.sh --vendor <pasta vendor sem dev>
+; Ela traz o PHP 8.4, o MySQL 8.4, o php.ini, os certificados e o sistema.
+;
+; ESQUELETO: ainda não foi compilado nem testado. Falta compilar com o Inno Setup 6 numa
+; máquina Windows e testar a instalação e o lancador.ps1 de verdade.
 
 #define NomeDoApp "Check Planilha Igreja"
 #define VersaoDoApp "0.1.0"

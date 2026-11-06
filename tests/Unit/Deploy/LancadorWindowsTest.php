@@ -49,6 +49,12 @@ class LancadorWindowsTest extends TestCase
         $this->assertStringContainsString('$env:DB_PASSWORD', $this->conteudo, 'A senha vem da configuração do notebook.');
     }
 
+    public function test_aponta_os_certificados_do_pacote_para_o_https(): void
+    {
+        $this->assertStringContainsString("'php\\cacert.pem'", $this->conteudo);
+        $this->assertStringContainsString('$env:SSL_CERT_FILE', $this->conteudo);
+    }
+
     public function test_avisa_que_ainda_nao_foi_testado_no_windows(): void
     {
         $this->assertStringContainsString('SEM TESTE REAL NO WINDOWS', $this->conteudo, 'O aviso de pendência precisa estar no arquivo.');

@@ -31,6 +31,9 @@ $mysql = Join-Path $base 'mysql\bin\mysql.exe'
 $mysqladmin = Join-Path $base 'mysql\bin\mysqladmin.exe'
 $app = Join-Path $base 'app'
 
+# Certificados do pacote, para o HTTPS da sincronização (o PHP não acha os do Windows sozinho).
+$env:SSL_CERT_FILE = Join-Path $base 'php\cacert.pem'
+
 $dados = if ($env:CP_DADOS) {
     $env:CP_DADOS
 } elseif ($env:LOCALAPPDATA) {
