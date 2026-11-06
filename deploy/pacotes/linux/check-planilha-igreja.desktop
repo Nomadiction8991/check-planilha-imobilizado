@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Check Planilha (igreja)
+Comment=Abre o sistema da igreja, mesmo sem internet
+Exec=/usr/bin/check-planilha-igreja
+Terminal=false
+Categories=Office;
