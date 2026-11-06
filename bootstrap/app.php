@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,6 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+
+        // A sincronização grava exatamente o que o notebook gravou: texto vazio continua vazio e
+        // espaços nas pontas não são removidos. Por isso só as rotas de sincronização ficam isentas
+        // desses dois ajustes globais (senão um campo vazio chegava ao servidor como nulo).
+        $ehRotaDeSincronizacao = fn (Request $request): bool => $request->is('api/sincronizacao/*');
+        $middleware->convertEmptyStringsToNull(except: [$ehRotaDeSincronizacao]);
+        $middleware->trimStrings(except: [$ehRotaDeSincronizacao]);
 
         // Substituição dentro do grupo 'web': replace() global não afeta o grupo,
         // e as isenções de rota do middleware híbrido precisam valer nas requests reais.

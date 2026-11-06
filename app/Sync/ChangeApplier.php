@@ -46,6 +46,32 @@ final class ChangeApplier
             return ['status' => self::ERRO, 'motivo' => "A tabela {$tabela} não sincroniza."];
         }
 
+        try {
+            return $this->aplicarNoBanco($alteracao, $tabela, $operacao);
+        } catch (QueryException $erro) {
+            // O erro técnico completo vai para o log do servidor. Para a pessoa, o motivo é simples.
+            report($erro);
+
+            // Regra de dados recusada pelo banco vira conflito: a pessoa vê e a fila segue.
+            // Outras falhas (ex.: banco fora do ar) não viram conflito: a alteração fica sem marca
+            // de recebida e é enviada de novo na próxima sincronização.
+            if (! $this->ehRegraDeDados($erro)) {
+                throw $erro;
+            }
+
+            return [
+                'status' => self::CONFLITO,
+                'motivo' => 'o servidor não aceitou este registro (dado inválido, repetido ou obrigatório faltando)',
+            ];
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $alteracao
+     * @return array{status: string, motivo?: string, campos?: list<string>}
+     */
+    private function aplicarNoBanco(array $alteracao, string $tabela, string $operacao): array
+    {
         $antes = (array) ($alteracao['antes'] ?? []);
         $depois = (array) ($alteracao['depois'] ?? []);
         $chavePrimaria = TableKeys::primaryKey($tabela);
@@ -63,6 +89,16 @@ final class ChangeApplier
     }
 
     /**
+     * SQLSTATE 22 (dado inválido) e 23 (regra do banco: valor repetido ou campo obrigatório vazio).
+     */
+    private function ehRegraDeDados(QueryException $erro): bool
+    {
+        $codigo = (string) $erro->getCode();
+
+        return str_starts_with($codigo, '22') || str_starts_with($codigo, '23');
+    }
+
+    /**
      * @param  list<string>  $chavePrimaria
      * @param  array<string, mixed>|null  $atual
      * @param  array<string, mixed>  $depois
@@ -76,14 +112,8 @@ final class ChangeApplier
                 : ['status' => self::CONFLITO, 'motivo' => 'o servidor já tem um registro com esta chave'];
         }
 
-        try {
-            DB::table($tabela)->insert($this->camposCifrados->cifrar($tabela, $depois));
-        } catch (QueryException $erro) {
-            // O motivo para a pessoa é simples; o erro técnico completo vai para o log do servidor.
-            report($erro);
-
-            return ['status' => self::CONFLITO, 'motivo' => 'o servidor já tem um registro com o mesmo valor único'];
-        }
+        // Se o banco recusar a gravação, aplicar() transforma a recusa em conflito.
+        DB::table($tabela)->insert($this->camposCifrados->cifrar($tabela, $depois));
 
         return ['status' => self::APLICADA];
     }

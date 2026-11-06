@@ -99,6 +99,30 @@ class SyncPushTest extends SincronizacaoTestCase
         $this->assertSame(1, DB::table('produtos')->where('id_produto', 6)->count());
     }
 
+    public function test_texto_vazio_e_espacos_chegam_exatamente_como_foram_gravados_no_notebook(): void
+    {
+        $this->enviar([
+            $this->alteracao('12121212-1212-4121-8121-121212121212', 'produtos', '9', 'insert', null, [
+                'id_produto' => 9,
+                'codigo' => 'P-9',
+                'comum_id' => 1,
+                'bem' => '',
+                'checado' => false,
+            ]),
+            $this->alteracao('34343434-3434-4343-8343-343434343434', 'produtos', '10', 'insert', null, [
+                'id_produto' => 10,
+                'codigo' => 'P-10',
+                'comum_id' => 1,
+                'bem' => '  Mesa  ',
+                'checado' => false,
+            ]),
+        ])->assertJsonPath('aplicadas', 2);
+
+        // O servidor não pode trocar texto vazio por nulo nem apagar espaços: o notebook gravou assim.
+        $this->assertSame('', DB::table('produtos')->where('id_produto', 9)->value('bem'));
+        $this->assertSame('  Mesa  ', DB::table('produtos')->where('id_produto', 10)->value('bem'));
+    }
+
     public function test_alteracao_muda_so_os_campos_que_o_notebook_mudou(): void
     {
         DB::table('produtos')->insert(['id_produto' => 7, 'codigo' => 'P-7', 'comum_id' => 1, 'bem' => 'Cadeira', 'checado' => 1]);
@@ -180,6 +204,61 @@ class SyncPushTest extends SincronizacaoTestCase
      * @param  array<string, mixed>|null  $depois
      * @return array<string, mixed>
      */
+    public function test_registro_que_o_servidor_nao_aceita_vira_conflito_e_nao_trava_a_fila(): void
+    {
+        $this->enviar([
+            // Sem código, que é obrigatório: o servidor recusa esta inclusão.
+            $this->alteracao('55555555-5555-4555-8555-555555555555', 'produtos', '20', 'insert', null, [
+                'id_produto' => 20,
+                'codigo' => null,
+                'bem' => 'Mesa',
+            ]),
+            $this->alteracao('66666666-6666-4666-8666-666666666666', 'produtos', '21', 'insert', null, [
+                'id_produto' => 21,
+                'codigo' => 'P-21',
+                'bem' => 'Armário',
+            ]),
+        ])
+            ->assertJsonPath('conflitos.0.uuid', '55555555-5555-4555-8555-555555555555')
+            ->assertJsonPath('conflitos.0.motivo', 'o servidor não aceitou este registro (dado inválido, repetido ou obrigatório faltando)')
+            ->assertJsonPath('aplicadas', 1)
+            ->assertJsonPath('erros', []);
+
+        $this->assertSame('Armário', DB::table('produtos')->where('id_produto', 21)->value('bem'));
+    }
+
+    public function test_atualizacao_recusada_por_regra_de_dados_vira_conflito(): void
+    {
+        DB::table('produtos')->insert(['id_produto' => 30, 'codigo' => 'P-30', 'bem' => 'Mesa']);
+
+        $this->enviar([
+            $this->alteracao('abababab-abab-4bab-8bab-abababababab', 'produtos', '30', 'update',
+                ['id_produto' => 30, 'codigo' => 'P-30', 'bem' => 'Mesa'],
+                ['id_produto' => 30, 'codigo' => null, 'bem' => 'Mesa'],
+            ),
+        ])
+            ->assertJsonPath('conflitos.0.uuid', 'abababab-abab-4bab-8bab-abababababab')
+            ->assertJsonPath('erros', []);
+
+        $this->assertSame('P-30', DB::table('produtos')->where('id_produto', 30)->value('codigo'));
+    }
+
+    public function test_erro_do_banco_que_nao_e_regra_de_dados_nao_vira_conflito_e_volta_depois(): void
+    {
+        // A tabela sincroniza, mas não existe neste banco. É uma falha que não é regra de dados
+        // (ex.: banco fora do ar): não pode virar conflito, e a alteração não pode ser marcada como recebida.
+        $uuid = '99999999-aaaa-4aaa-8aaa-999999999999';
+
+        $this->enviar([
+            $this->alteracao($uuid, 'comums', '5', 'insert', null, ['id' => 5, 'codigo' => 'C-5']),
+        ])
+            ->assertJsonPath('aplicadas', 0)
+            ->assertJsonPath('conflitos', [])
+            ->assertJsonPath('erros.0.uuid', $uuid);
+
+        $this->assertFalse(DB::table('sincronizacao_envios')->where('uuid', $uuid)->exists());
+    }
+
     private function alteracao(string $uuid, string $tabela, string $chave, string $operacao, ?array $antes, ?array $depois): array
     {
         return [
