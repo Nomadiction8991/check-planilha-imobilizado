@@ -23,6 +23,9 @@ class RunSyncCommandTest extends SincronizacaoTestCase
 
     public function test_sem_conexao_avisa_e_nao_perde_nada(): void
     {
+        // Já baixou a cópia inicial: a sincronização só roda depois disso.
+        \Illuminate\Support\Facades\DB::table('sincronizacao_estado')->insert(['chave' => 'ultimo_recebido', 'valor' => '0']);
+
         config([
             'modo_igreja.servidor_url' => 'https://servidor.teste',
             'modo_igreja.aparelho_token' => 'codigo-de-teste',

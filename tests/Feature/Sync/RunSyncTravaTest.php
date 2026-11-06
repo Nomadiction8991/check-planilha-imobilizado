@@ -19,6 +19,7 @@ class RunSyncTravaTest extends SincronizacaoTestCase
             'modo_igreja.aparelho_token' => 'codigo-de-teste',
         ]);
         Http::fake();
+        \Illuminate\Support\Facades\DB::table('sincronizacao_estado')->insert(['chave' => 'ultimo_recebido', 'valor' => '0']);
 
         $trava = Cache::lock('sincronizacao:executar', 60);
         $this->assertTrue($trava->get());

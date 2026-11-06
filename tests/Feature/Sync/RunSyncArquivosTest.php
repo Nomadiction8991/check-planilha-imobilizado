@@ -21,6 +21,7 @@ class RunSyncArquivosTest extends SincronizacaoTestCase
         $this->pasta = sys_get_temp_dir() . '/cp-run-arquivos-' . uniqid();
         mkdir($this->pasta . '/planilhas', 0775, true);
         file_put_contents($this->pasta . '/planilhas/local.csv', 'do notebook');
+        \Illuminate\Support\Facades\DB::table('sincronizacao_estado')->insert(['chave' => 'ultimo_recebido', 'valor' => '0']);
 
         config([
             'modo_igreja.servidor_url' => 'https://servidor.teste',

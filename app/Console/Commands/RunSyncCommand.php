@@ -14,6 +14,7 @@ use App\Sync\NotebookAgent;
 use App\Sync\SensitiveFieldException;
 use App\Sync\SpreadsheetStore;
 use App\Sync\SpreadsheetSync;
+use App\Sync\SyncState;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -29,8 +30,12 @@ class RunSyncCommand extends Command
 
     protected $description = 'Envia e recebe as alterações, as planilhas e a auditoria deste notebook';
 
-    public function handle(NotebookAgent $agente, SpreadsheetSync $planilhas, AuditLogSync $auditoria): int
-    {
+    public function handle(
+        NotebookAgent $agente,
+        SpreadsheetSync $planilhas,
+        AuditLogSync $auditoria,
+        SyncState $estado,
+    ): int {
         $url = config('modo_igreja.servidor_url');
         $token = config('modo_igreja.aparelho_token');
 
@@ -38,6 +43,14 @@ class RunSyncCommand extends Command
             $this->error('Configure MODO_IGREJA_SERVIDOR_URL e MODO_IGREJA_APARELHO_TOKEN antes de sincronizar.');
 
             return self::FAILURE;
+        }
+
+        // Antes da cópia inicial, a sincronização incremental não roda: os dados que já existiam no
+        // servidor só chegam pela cópia. Sem isso, a primeira rodada agendada impediria a cópia.
+        if (! $estado->definido(SyncState::ULTIMO_RECEBIDO)) {
+            $this->warn('Este computador ainda não baixou a cópia do servidor. Rode sincronizacao:copia primeiro.');
+
+            return self::SUCCESS;
         }
 
         // Só uma sincronização por vez: a agendada e a manual não podem rodar juntas.
