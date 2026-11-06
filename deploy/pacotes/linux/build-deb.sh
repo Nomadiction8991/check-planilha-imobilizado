@@ -55,7 +55,8 @@ mkdir -p "$raiz_pacote/DEBIAN" "$instalacao/app" "$instalacao/php" "$instalacao/
     "$raiz_pacote/usr/bin" "$raiz_pacote/usr/share/applications" "$saida"
 
 # Código do sistema a partir do último commit, sem os arquivos de desenvolvimento.
-git -C "$raiz" archive HEAD -- . ':(exclude)tests' ':(exclude)docs' ':(exclude).github' ':(exclude)deploy' ':(exclude).env.testing' \
+# A pasta storage sai toda: ela guarda dados de execução, e um arquivo de teste versionado não pode ir para a instalação.
+git -C "$raiz" archive HEAD -- . ':(exclude)tests' ':(exclude)docs' ':(exclude).github' ':(exclude)deploy' ':(exclude).env.testing' ':(exclude)storage' \
     | tar -x -C "$instalacao/app"
 
 cp -a "$vendor_dir" "$instalacao/app/vendor"
@@ -63,7 +64,7 @@ cp -a "$vendor_dir" "$instalacao/app/vendor"
 # Pastas que o Laravel escreve. O pacote cria a estrutura; o postinst libera a escrita.
 mkdir -p "$instalacao/app/storage/app" "$instalacao/app/storage/framework/cache" \
     "$instalacao/app/storage/framework/sessions" "$instalacao/app/storage/framework/views" \
-    "$instalacao/app/storage/logs" "$instalacao/app/bootstrap/cache"
+    "$instalacao/app/storage/logs" "$instalacao/app/storage/importacao" "$instalacao/app/bootstrap/cache"
 
 cp -a "$php_dir/." "$instalacao/php/"
 cp -a "$mysql_dir/." "$instalacao/mysql/"
@@ -78,6 +79,8 @@ mysqld_pacote="$instalacao/mysql/bin/mysqld"
 "$php_pacote" -v >/dev/null || erro "o PHP do pacote não roda"
 "$mysqld_pacote" --version >/dev/null || erro "o MySQL do pacote não roda"
 [[ -f "$instalacao/php/cacert.pem" ]] || erro "faltam os certificados (php/cacert.pem)"
+# A pasta de planilhas tem de sair vazia: nenhum arquivo de teste ou de uso entra no pacote.
+[[ -z "$(find "$instalacao/app/storage/importacao" -type f)" ]] || erro "a pasta storage/importacao não pode ter arquivos dentro do pacote"
 
 modulos="$("$php_pacote" -m)"
 for extensao in pdo_mysql mbstring openssl tokenizer ctype fileinfo curl dom xml session json; do

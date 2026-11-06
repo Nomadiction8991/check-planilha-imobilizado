@@ -131,12 +131,13 @@ find "$saida/mysql/lib" -name '*.lib' -delete
 rm -rf "$saida/mysql/lib/mecab"
 
 # 3) Sistema: o mesmo código do Linux (último commit), com as dependências de produção.
-git -C "$raiz" archive HEAD -- . ':(exclude)tests' ':(exclude)docs' ':(exclude).github' ':(exclude)deploy' ':(exclude).env.testing' \
+# A pasta storage sai toda: ela guarda dados de execução, e um arquivo de teste versionado não pode ir para a instalação.
+git -C "$raiz" archive HEAD -- . ':(exclude)tests' ':(exclude)docs' ':(exclude).github' ':(exclude)deploy' ':(exclude).env.testing' ':(exclude)storage' \
     | tar -x -C "$saida/app"
 cp -a "$vendor_dir" "$saida/app/vendor"
 mkdir -p "$saida/app/storage/app" "$saida/app/storage/framework/cache" \
     "$saida/app/storage/framework/sessions" "$saida/app/storage/framework/views" \
-    "$saida/app/storage/logs" "$saida/app/bootstrap/cache"
+    "$saida/app/storage/logs" "$saida/app/storage/importacao" "$saida/app/bootstrap/cache"
 
 # 4) Conferência do que foi montado (os .exe só rodam numa máquina Windows)
 for arquivo in php/php.exe php/php.ini php/cacert.pem mysql/bin/mysqld.exe mysql/bin/mysql.exe app/artisan app/vendor/autoload.php; do
