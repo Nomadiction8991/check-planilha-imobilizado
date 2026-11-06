@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RepassarParaServidor;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(RepassarParaServidor::class);
         $middleware->trustProxies(at: '*');
 
         // A sincronização grava exatamente o que o notebook gravou: texto vazio continua vazio e

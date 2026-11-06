@@ -30,6 +30,9 @@ return [
     */
     'servidor_url' => env('MODO_IGREJA_SERVIDOR_URL'),
 
+    // Sincronização, saúde e rotas locais nunca são repassadas ao servidor.
+    'sem_repasse' => ['api/*', 'up', 'modo-igreja/*'],
+
     /*
     | Código de acesso deste notebook no servidor. É um segredo: não versionar.
     */
