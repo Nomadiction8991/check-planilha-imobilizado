@@ -20,7 +20,7 @@ class ConfigureLocalModeCommand extends Command
 {
     private const PORTA_DO_BANCO_LOCAL = 3307;
 
-    protected $signature = 'modo-igreja:configurar {--arquivo= : Caminho do arquivo de configuração a criar}';
+    protected $signature = 'modo-igreja:configurar {--arquivo= : Caminho do arquivo de configuração a criar} {--socket= : Caminho do socket do MySQL; quando informado, o sistema conecta só por ele}';
 
     protected $description = 'Cria a configuração do modo igreja neste computador (só na primeira vez)';
 
@@ -48,6 +48,7 @@ class ConfigureLocalModeCommand extends Command
                 'usuario' => 'check_planilha',
                 'senha' => Str::random(24),
                 'banco_porta' => self::PORTA_DO_BANCO_LOCAL,
+                'socket' => (string) $this->option('socket'),
             ]);
         } catch (InvalidArgumentException | RuntimeException $erro) {
             $this->error($erro->getMessage());

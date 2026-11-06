@@ -69,6 +69,23 @@ class ConfigureLocalModeCommandTest extends TestCase
             ->assertFailed();
     }
 
+    public function test_com_socket_grava_o_caminho_do_socket_para_o_sistema_nao_precisar_de_porta(): void
+    {
+        $socket = $this->pasta . '/mysql.sock';
+
+        $this->artisan('modo-igreja:configurar', ['--arquivo' => $this->arquivo(), '--socket' => $socket])
+            ->assertSuccessful();
+
+        $this->assertStringContainsString('DB_SOCKET=' . $socket, (string) file_get_contents($this->arquivo()));
+    }
+
+    public function test_sem_socket_nao_grava_a_variavel_do_socket(): void
+    {
+        $this->artisan('modo-igreja:configurar', ['--arquivo' => $this->arquivo()])->assertSuccessful();
+
+        $this->assertStringNotContainsString('DB_SOCKET', (string) file_get_contents($this->arquivo()));
+    }
+
     private function arquivo(): string
     {
         return $this->pasta . '/modo-igreja.env';

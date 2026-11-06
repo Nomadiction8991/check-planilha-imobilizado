@@ -52,6 +52,11 @@ final class LocalEnvWriter
             'MODO_IGREJA_PORTA=' . $porta,
         ];
 
+        // Com o socket informado, o sistema conecta só por ele: o banco não abre porta de rede.
+        if (($valores['socket'] ?? '') !== '') {
+            $linhas[] = 'DB_SOCKET=' . $this->valor((string) $valores['socket']);
+        }
+
         return implode("\n", $linhas) . "\n";
     }
 
