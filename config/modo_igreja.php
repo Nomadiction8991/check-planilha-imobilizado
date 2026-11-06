@@ -30,6 +30,9 @@ return [
     */
     'servidor_url' => env('MODO_IGREJA_SERVIDOR_URL'),
 
+    // Endereço usado nos links do servidor; se estiver vazio, usa o endereço de acesso.
+    'servidor_publico' => env('MODO_IGREJA_SERVIDOR_PUBLICO') ?: env('MODO_IGREJA_SERVIDOR_URL'),
+
     // Sincronização, saúde e rotas locais nunca são repassadas ao servidor.
     'sem_repasse' => ['api/*', 'up', 'modo-igreja/*'],
 

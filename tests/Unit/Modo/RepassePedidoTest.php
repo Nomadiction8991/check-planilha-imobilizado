@@ -13,6 +13,22 @@ use Tests\TestCase;
 
 class RepassePedidoTest extends TestCase
 {
+    public function test_encaminha_origin_para_origem_publica_sem_mudar_destino(): void
+    {
+        Http::fake();
+        $pedido = Request::create('http://local.test/', 'GET', [], [], [], ['HTTP_ORIGIN' => 'http://local.test', 'HTTP_REFERER' => 'http://local.test/pagina']);
+        (new RepassePedido('http://servidor.test:8080', 'https://publico.test/'))->enviar($pedido);
+        Http::assertSent(fn ($r) => $r->url() === 'http://servidor.test:8080/' && $r->hasHeader('Origin', 'https://publico.test') && $r->hasHeader('Referer', 'https://publico.test/pagina'));
+    }
+
+    public function test_sem_origem_publica_usa_origem_de_acesso(): void
+    {
+        Http::fake();
+        $pedido = Request::create('http://local.test/', 'GET', [], [], [], ['HTTP_ORIGIN' => 'http://local.test']);
+        (new RepassePedido('https://servidor.test', ''))->enviar($pedido);
+        Http::assertSent(fn ($r) => $r->hasHeader('Origin', 'https://servidor.test'));
+    }
+
     public function test_fecha_arquivo_multipart_apos_envio(): void
     {
         $arquivo = UploadedFile::fake()->createWithContent('planilha.csv', 'conteudo');

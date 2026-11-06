@@ -26,7 +26,7 @@ final class RepassarParaServidor
         }
 
         try {
-            return (new RepassePedido((string) $url))->enviar($request);
+            return (new RepassePedido((string) $url, (string) (config('modo_igreja.servidor_publico') ?: $url)))->enviar($request);
         } catch (ServidorIndisponivelException) {
             $estado->registrarResultado(false);
             if ($request->isMethodSafe()) {

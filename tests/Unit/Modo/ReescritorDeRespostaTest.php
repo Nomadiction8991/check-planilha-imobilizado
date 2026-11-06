@@ -7,6 +7,30 @@ use PHPUnit\Framework\TestCase;
 
 class ReescritorDeRespostaTest extends TestCase
 {
+    public function test_reescreve_location_da_origem_publica(): void
+    {
+        $r = new ReescritorDeResposta('http://servidor.test:8080', 'http://local.test', 'https://publico.test');
+        self::assertSame(['http://local.test/login'], $r->cabecalhos(['Location' => ['https://publico.test/login']])['Location']);
+    }
+
+    public function test_reescreve_html_da_origem_publica(): void
+    {
+        $r = new ReescritorDeResposta('http://servidor.test:8080', 'http://local.test', 'https://publico.test');
+        self::assertSame('<a href="http://local.test/manifest.json">', $r->corpo('<a href="https://publico.test/manifest.json">', 'text/html'));
+    }
+
+    public function test_reescreve_json_escapado_da_origem_publica(): void
+    {
+        $r = new ReescritorDeResposta('http://servidor.test:8080', 'http://local.test', 'https://publico.test');
+        self::assertSame('{"url":"http:\/\/local.test\/a"}', $r->corpo('{"url":"https:\/\/publico.test\/a"}', 'application/json'));
+    }
+
+    public function test_reescreve_origem_de_acesso_quando_publica_igual(): void
+    {
+        $r = new ReescritorDeResposta('https://servidor.test/', 'http://local.test/', 'https://servidor.test/');
+        self::assertSame('http://local.test/a', $r->corpo('https://servidor.test/a', 'text/html'));
+    }
+
     public function test_remove_domain_e_secure_do_cookie(): void
     {
         $h = (new ReescritorDeResposta('https://servidor.test', 'http://local.test'))->cabecalhos(['Set-Cookie' => ['a=b; Domain=servidor.test; Secure; Path=/']]);

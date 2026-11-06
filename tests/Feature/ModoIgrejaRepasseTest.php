@@ -11,6 +11,14 @@ use Tests\TestCase;
 
 class ModoIgrejaRepasseTest extends TestCase
 {
+    public function test_redirecionamento_da_origem_publica_aponta_para_local(): void
+    {
+        config(['modo_igreja.servidor_url' => 'http://servidor.test:8080', 'modo_igreja.servidor_publico' => 'https://publico.test']);
+        Http::fake(['*' => Http::response('', 302, ['Location' => 'https://publico.test/login'])]);
+        $this->get('http://localhost/teste-local')->assertRedirect('http://localhost/login');
+        Http::assertSent(fn ($pedido) => $pedido->url() === 'http://servidor.test:8080/teste-local');
+    }
+
     private string $arquivo;
 
     protected function setUp(): void

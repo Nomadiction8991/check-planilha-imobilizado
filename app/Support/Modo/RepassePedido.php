@@ -10,19 +10,20 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class RepassePedido
 {
-    public function __construct(private string $servidorUrl) {}
+    public function __construct(private string $servidorUrl, private ?string $servidorPublico = null) {}
 
     public function enviar(Request $pedido): Response
     {
         $servidor = rtrim($this->servidorUrl, '/');
+        $publico = rtrim($this->servidorPublico ?: $servidor, '/');
         $local = $pedido->getSchemeAndHttpHost();
-        $reescritor = new ReescritorDeResposta($servidor, $local);
+        $reescritor = new ReescritorDeResposta($servidor, $local, $publico);
         $cabecalhos = $pedido->headers->all();
         foreach ($cabecalhos as $nome => $valores) {
             if (in_array(strtolower($nome), ['host', 'connection', 'keep-alive', 'proxy-authorization', 'proxy-connection', 'te', 'trailer', 'transfer-encoding', 'upgrade', 'content-length', 'accept-encoding', 'x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto'], true)) {
                 unset($cabecalhos[$nome]);
             } elseif (in_array(strtolower($nome), ['origin', 'referer'], true)) {
-                $cabecalhos[$nome] = array_map(static fn (string $v): string => str_starts_with($v, $local) && in_array(substr($v, strlen($local), 1), ['', '/', '?', '#'], true) ? $servidor.substr($v, strlen($local)) : $v, $valores);
+                $cabecalhos[$nome] = array_map(static fn (string $v): string => str_starts_with($v, $local) && in_array(substr($v, strlen($local), 1), ['', '/', '?', '#'], true) ? $publico.substr($v, strlen($local)) : $v, $valores);
             }
         }
         $cabecalhos['Accept-Encoding'] = ['identity'];

@@ -8,10 +8,13 @@ final class ReescritorDeResposta
 
     private string $origemLocal;
 
-    public function __construct(string $origemServidor, string $origemLocal)
+    private string $origemPublica;
+
+    public function __construct(string $origemServidor, string $origemLocal, ?string $origemPublica = null)
     {
         $this->origemServidor = rtrim($origemServidor, '/');
         $this->origemLocal = rtrim($origemLocal, '/');
+        $this->origemPublica = rtrim($origemPublica ?: $origemServidor, '/');
     }
 
     /** @param array<string, list<string>> $cabecalhos
@@ -31,7 +34,15 @@ final class ReescritorDeResposta
                     return implode(';', array_map(static fn (string $parte): string => preg_replace('/^(\s*samesite\s*=\s*)none\s*$/i', '$1Lax', $parte) ?? $parte, $partes));
                 }, $valores);
             } elseif ($chave === 'location') {
-                $cabecalhos[$nome] = array_map(fn (string $valor): string => str_starts_with($valor, $this->origemServidor) && in_array(substr($valor, strlen($this->origemServidor), 1), ['', '/', '?', '#'], true) ? $this->origemLocal.substr($valor, strlen($this->origemServidor)) : $valor, $valores);
+                $cabecalhos[$nome] = array_map(function (string $valor): string {
+                    foreach ([$this->origemServidor, $this->origemPublica] as $origem) {
+                        if (str_starts_with($valor, $origem) && in_array(substr($valor, strlen($origem), 1), ['', '/', '?', '#'], true)) {
+                            return $this->origemLocal.substr($valor, strlen($origem));
+                        }
+                    }
+
+                    return $valor;
+                }, $valores);
             } elseif (in_array($chave, ['content-security-policy', 'content-security-policy-report-only'], true)) {
                 $politicas = [];
                 foreach ($valores as $valor) {
@@ -53,7 +64,12 @@ final class ReescritorDeResposta
 
     public function corpo(string $corpo, string $contentType): string
     {
-        return self::ehTexto($contentType) ? str_replace([$this->origemServidor, str_replace('/', '\/', $this->origemServidor)], [$this->origemLocal, str_replace('/', '\/', $this->origemLocal)], $corpo) : $corpo;
+        return self::ehTexto($contentType) ? strtr($corpo, [
+            $this->origemServidor => $this->origemLocal,
+            $this->origemPublica => $this->origemLocal,
+            str_replace('/', '\/', $this->origemServidor) => str_replace('/', '\/', $this->origemLocal),
+            str_replace('/', '\/', $this->origemPublica) => str_replace('/', '\/', $this->origemLocal),
+        ]) : $corpo;
     }
 
     public static function ehTexto(string $contentType): bool
