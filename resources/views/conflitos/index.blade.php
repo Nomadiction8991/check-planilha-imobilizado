@@ -11,6 +11,16 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="flash-stack">
+            @foreach ($errors->all() as $erro)
+                <div class="flash error">
+                    <strong>{{ $erro }}</strong>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     <section aria-labelledby="conflitos-titulo">
         <h1 id="conflitos-titulo">Conflitos de sincronização</h1>
 

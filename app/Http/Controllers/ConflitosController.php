@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Sync\ConflictResolver;
+use App\Sync\ConflitoNaoAplicavelException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -25,7 +26,13 @@ final class ConflitosController extends Controller
 
     public function manterNotebook(int $conflito): RedirectResponse
     {
-        abort_unless($this->conflitos->manterDoNotebook($conflito), 404);
+        try {
+            abort_unless($this->conflitos->manterDoNotebook($conflito), 404);
+        } catch (ConflitoNaoAplicavelException $erro) {
+            return redirect()
+                ->route('migration.conflitos.index')
+                ->withErrors(['conflito' => $erro->getMessage()]);
+        }
 
         return redirect()
             ->route('migration.conflitos.index')

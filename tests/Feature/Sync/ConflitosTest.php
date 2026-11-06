@@ -106,6 +106,52 @@ class ConflitosTest extends SincronizacaoTestCase
         $this->assertSame('Sofá', DB::table('produtos')->where('id_produto', 8)->value('bem'));
     }
 
+    public function test_manter_o_valor_do_notebook_de_inclusao_valida_aplica_a_inclusao(): void
+    {
+        $conflitoId = $this->criarConflitoDeInclusao(9, ['id_produto' => 9, 'codigo' => 'P-9', 'bem' => 'Mesa']);
+
+        $this->comoAdministrador()->post("/conflitos/{$conflitoId}/notebook")
+            ->assertRedirect(route('migration.conflitos.index'));
+
+        $this->assertSame('Mesa', DB::table('produtos')->where('id_produto', 9)->value('bem'));
+        $this->assertSame(
+            'mantido_notebook',
+            DB::table('sincronizacao_conflitos')->where('id', $conflitoId)->value('status'),
+        );
+    }
+
+    public function test_manter_o_valor_do_notebook_de_inclusao_recusada_mostra_o_motivo_e_nao_resolve(): void
+    {
+        $conflitoId = $this->criarConflitoDeInclusao(9, ['id_produto' => 9, 'codigo' => null, 'bem' => 'Mesa']);
+
+        $this->comoAdministrador()->followingRedirects()
+            ->post("/conflitos/{$conflitoId}/notebook")
+            ->assertOk()
+            ->assertSee('O servidor não aceitou este valor', false);
+
+        $this->assertFalse(DB::table('produtos')->where('id_produto', 9)->exists());
+        $this->assertSame('pendente', DB::table('sincronizacao_conflitos')->where('id', $conflitoId)->value('status'));
+    }
+
+    /**
+     * @param  array<string, mixed>  $depois
+     */
+    private function criarConflitoDeInclusao(int $id, array $depois): int
+    {
+        return (int) DB::table('sincronizacao_conflitos')->insertGetId([
+            'aparelho_id' => null,
+            'tabela' => 'produtos',
+            'chave' => (string) $id,
+            'operacao' => 'insert',
+            'antes' => null,
+            'depois' => json_encode($depois),
+            'motivo' => 'o servidor não aceitou este registro (dado inválido, repetido ou obrigatório faltando)',
+            'status' => 'pendente',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
     private function mockarAdministrador(): void
     {
         $this->mock(LegacyAuthSessionServiceInterface::class, function (MockInterface $mock): void {

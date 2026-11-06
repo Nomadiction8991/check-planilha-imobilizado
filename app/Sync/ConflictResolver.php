@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Sync;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +46,8 @@ final class ConflictResolver
 
     /**
      * Aplica no servidor o valor do notebook. Devolve false se o conflito não existe ou já foi resolvido.
+     *
+     * @throws ConflitoNaoAplicavelException quando o servidor recusa a inclusão de um registro novo
      */
     public function manterDoNotebook(int $conflitoId): bool
     {
@@ -61,6 +64,9 @@ final class ConflictResolver
 
             if ($conflito->operacao === 'delete') {
                 $consulta->delete();
+            } elseif ($conflito->operacao === 'insert') {
+                // O servidor recusou a inclusão. Manter o valor do notebook é tentar incluir de novo.
+                $this->incluirDoNotebook($tabela, $this->decodificar($conflito->depois) ?? []);
             } else {
                 $antes = $this->decodificar($conflito->antes) ?? [];
                 $depois = $this->decodificar($conflito->depois) ?? [];
@@ -91,6 +97,26 @@ final class ConflictResolver
 
             return true;
         });
+    }
+
+    /**
+     * Tenta incluir o registro do notebook. Se o servidor continuar recusando, o conflito fica pendente.
+     *
+     * @param  array<string, mixed>  $depois
+     *
+     * @throws ConflitoNaoAplicavelException quando o servidor recusa a inclusão
+     */
+    private function incluirDoNotebook(string $tabela, array $depois): void
+    {
+        try {
+            DB::table($tabela)->insert($this->camposCifrados->cifrar($tabela, $depois));
+        } catch (QueryException $erro) {
+            report($erro);
+
+            throw new ConflitoNaoAplicavelException(
+                'O servidor não aceitou este valor. Mantenha o valor do servidor; para incluir o item de novo, cadastre-o outra vez no sistema.',
+            );
+        }
     }
 
     private function pendente(int $conflitoId): ?object
