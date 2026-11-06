@@ -71,7 +71,8 @@ final class PublicAccessNavigationTest extends TestCase
         self::assertStringContainsString('Sair do acesso público', $html);
         self::assertStringContainsString('action="' . route('public.access.logout') . '"', $html);
         self::assertStringNotContainsString('action="' . route('migration.logout') . '"', $html);
-        self::assertSame(2, substr_count($html, 'action="' . route('public.access.logout') . '"'));
+        // Uma única saída: o painel lateral (computador) e o menu (celular) são o mesmo elemento.
+        self::assertSame(1, substr_count($html, 'action="' . route('public.access.logout') . '"'));
     }
 
     public function testAdministrativeSessionKeepsAdministrativeExitWithoutPublicExit(): void
