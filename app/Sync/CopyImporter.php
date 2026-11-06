@@ -65,6 +65,31 @@ final class CopyImporter
         $this->estado->definir(SyncState::ULTIMO_ENVIADO, 0);
     }
 
+    /**
+     * Antes da cópia, cada tabela com número automático passa a contar a partir da faixa deste
+     * notebook. Assim, o que este notebook criar nunca usa um número de outro notebook.
+     *
+     * No MySQL, alterar a estrutura de uma tabela confirma a transação aberta. Por isso esta função
+     * roda fora da transação da importação.
+     */
+    public function prepararNumeracao(int $faixaInicial): void
+    {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
+        foreach ((array) config('sincronizacao.ordem_da_copia') as $tabela) {
+            // Confere a coluna pelo campo Extra em PHP, sem comparar texto no SQL (collations diferentes).
+            foreach (DB::select("SHOW COLUMNS FROM `{$tabela}`") as $coluna) {
+                if (str_contains((string) $coluna->Extra, 'auto_increment')) {
+                    DB::statement("ALTER TABLE `{$tabela}` AUTO_INCREMENT = {$faixaInicial}");
+
+                    break;
+                }
+            }
+        }
+    }
+
     private function esvaziarTabelas(): void
     {
         foreach (array_reverse((array) config('sincronizacao.ordem_da_copia')) as $tabela) {

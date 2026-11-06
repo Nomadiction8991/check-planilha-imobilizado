@@ -28,11 +28,25 @@ class CopyCommandTest extends TestCase
             'modo_igreja.servidor_url' => 'https://servidor.teste',
             'modo_igreja.aparelho_token' => 'codigo-de-teste',
         ]);
+
+        // Cada teste começa limpo. Primeiro as tabelas de dados (a exclusão gera registros de alteração),
+        // depois o registro e o cursor, para o próximo teste não herdar nada.
+        DB::table('comums')->delete();
+        DB::table('sincronizacao_alteracoes')->delete();
+        DB::table('sincronizacao_estado')->delete();
+    }
+
+    /**
+     * Sem transação de teste: a preparação da numeração faz uma alteração de estrutura, que
+     * confirma transações abertas. Assim o teste roda do mesmo jeito que em produção.
+     */
+    public function beginDatabaseTransaction(): void
+    {
     }
 
     public function test_baixa_a_copia_do_servidor_e_grava_neste_computador(): void
     {
-        Http::fake(['*' => Http::response($this->copiaCompleta())]);
+        Http::fake($this->respostasDoServidor($this->copiaCompleta()));
 
         $this->artisan('sincronizacao:copia')
             ->expectsOutputToContain('Cópia baixada')
@@ -42,10 +56,21 @@ class CopyCommandTest extends TestCase
         Http::assertSent(fn ($pedido): bool => $pedido->hasHeader('Authorization', 'Bearer codigo-de-teste'));
     }
 
+    public function test_numeracao_do_notebook_comeca_na_faixa_do_aparelho(): void
+    {
+        Http::fake($this->respostasDoServidor($this->copiaCompleta(), 300000000));
+
+        $this->artisan('sincronizacao:copia')->assertSuccessful();
+
+        // Itens criados depois da cópia começam em 300 milhões, longe dos números do servidor e de outros notebooks.
+        $proximo = (int) DB::selectOne("SHOW TABLE STATUS LIKE 'comums'")->Auto_increment;
+        $this->assertSame(300000000, $proximo);
+    }
+
     public function test_recusa_baixar_de_novo_quando_ja_existe_copia(): void
     {
         DB::table('sincronizacao_estado')->insert(['chave' => 'ultimo_recebido', 'valor' => '0']);
-        Http::fake(['*' => Http::response($this->copiaCompleta())]);
+        Http::fake($this->respostasDoServidor($this->copiaCompleta()));
 
         $this->artisan('sincronizacao:copia')
             ->expectsOutputToContain('já tem a cópia')
@@ -64,7 +89,7 @@ class CopyCommandTest extends TestCase
             'origem' => 'local',
             'criado_em' => now(),
         ]);
-        Http::fake(['*' => Http::response($this->copiaCompleta())]);
+        Http::fake($this->respostasDoServidor($this->copiaCompleta()));
 
         $this->artisan('sincronizacao:copia')
             ->expectsOutputToContain('ainda não foram enviadas')
@@ -79,9 +104,10 @@ class CopyCommandTest extends TestCase
         DB::statement('SET @sincronizacao_aplicando = 1');
         DB::table('comums')->insert(['codigo' => 'C-LOCAL']);
         DB::statement('SET @sincronizacao_aplicando = NULL');
+
         $linhas = $this->linhasDaCopia();
         $cortada = implode("\n", array_slice($linhas, 0, -1)) . "\n";
-        Http::fake(['*' => Http::response($cortada)]);
+        Http::fake($this->respostasDoServidor($cortada));
 
         $this->artisan('sincronizacao:copia')
             ->expectsOutputToContain('incompleta')
@@ -89,6 +115,17 @@ class CopyCommandTest extends TestCase
 
         $this->assertSame('C-LOCAL', DB::table('comums')->value('codigo'));
         $this->assertFalse(DB::table('sincronizacao_estado')->where('chave', 'ultimo_recebido')->exists());
+    }
+
+    /**
+     * @return array<string, \Illuminate\Http\Client\ResponseSequence|\GuzzleHttp\Promise\PromiseInterface|array>
+     */
+    private function respostasDoServidor(string $copia, int $faixa = 100000000): array
+    {
+        return [
+            '*/api/sincronizacao/faixa' => Http::response(['faixa_inicial' => $faixa]),
+            '*/api/sincronizacao/copia' => Http::response($copia),
+        ];
     }
 
     private function copiaCompleta(): string

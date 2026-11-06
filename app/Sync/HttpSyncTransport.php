@@ -76,6 +76,22 @@ final class HttpSyncTransport implements SyncTransport
         }
     }
 
+    /**
+     * Número a partir do qual este notebook cria itens novos (faixa própria do aparelho).
+     */
+    public function faixaInicial(): int
+    {
+        /** @var array{faixa_inicial: int} $dados */
+        $dados = Http::withToken($this->token)
+            ->acceptJson()
+            ->timeout(60)
+            ->get($this->url('faixa'))
+            ->throw()
+            ->json();
+
+        return (int) $dados['faixa_inicial'];
+    }
+
     private function url(string $rota): string
     {
         return rtrim($this->urlBase, '/') . '/api/sincronizacao/' . $rota;

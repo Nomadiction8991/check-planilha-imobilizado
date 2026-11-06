@@ -57,6 +57,19 @@ final class SyncController extends Controller
         }, 200, ['Content-Type' => 'application/x-ndjson; charset=UTF-8']);
     }
 
+    /**
+     * Faixa de números deste aparelho: o id do aparelho vezes o tamanho da faixa (ver config).
+     */
+    public function faixa(Request $request): JsonResponse
+    {
+        /** @var Device $aparelho */
+        $aparelho = $request->attributes->get('aparelho');
+
+        return response()->json([
+            'faixa_inicial' => (int) $aparelho->id * (int) config('sincronizacao.faixa_por_aparelho'),
+        ]);
+    }
+
     public function receber(Request $request): JsonResponse
     {
         $dados = $request->validate([

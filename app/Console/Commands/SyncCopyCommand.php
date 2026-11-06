@@ -52,7 +52,10 @@ class SyncCopyCommand extends Command
         }
 
         try {
-            $importador->importar((new HttpSyncTransport($url, $token))->copia());
+            $transporte = new HttpSyncTransport($url, $token);
+            // Primeiro a faixa de números deste notebook, depois a cópia: os itens copiados não mudam a faixa.
+            $importador->prepararNumeracao($transporte->faixaInicial());
+            $importador->importar($transporte->copia());
         } catch (ConnectionException) {
             $this->warn('Sem conexão com o servidor agora. Tente de novo quando a internet voltar.');
 

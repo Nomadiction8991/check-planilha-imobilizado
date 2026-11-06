@@ -13,6 +13,7 @@ Route::prefix('sincronizacao')
         Route::post('/enviar', [SyncController::class, 'enviar'])->name('api.sincronizacao.enviar');
         Route::get('/receber', [SyncController::class, 'receber'])->name('api.sincronizacao.receber');
         Route::get('/copia', [SyncController::class, 'copia'])->name('api.sincronizacao.copia');
+        Route::get('/faixa', [SyncController::class, 'faixa'])->name('api.sincronizacao.faixa');
 
         // Planilhas e auditoria. O nome da planilha aceita só letras, números, ponto, traço e sublinhado.
         Route::get('/planilhas', [SincronizacaoArquivosController::class, 'listarPlanilhas'])

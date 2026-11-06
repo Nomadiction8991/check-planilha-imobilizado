@@ -17,6 +17,7 @@ use App\Sync\SpreadsheetSync;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Sincroniza este notebook com o servidor: registros, planilhas e histórico de auditoria.
@@ -39,6 +40,29 @@ class RunSyncCommand extends Command
             return self::FAILURE;
         }
 
+        // Só uma sincronização por vez: a agendada e a manual não podem rodar juntas.
+        $trava = Cache::lock('sincronizacao:executar', 900);
+
+        if (! $trava->get()) {
+            $this->warn('Outra sincronização deste computador já está rodando. Esta rodada foi pulada.');
+
+            return self::SUCCESS;
+        }
+
+        try {
+            return $this->sincronizar($agente, $planilhas, $auditoria, $url, $token);
+        } finally {
+            $trava->release();
+        }
+    }
+
+    private function sincronizar(
+        NotebookAgent $agente,
+        SpreadsheetSync $planilhas,
+        AuditLogSync $auditoria,
+        string $url,
+        string $token,
+    ): int {
         try {
             $resumo = $agente->executar(new HttpSyncTransport($url, $token));
             $arquivos = $planilhas->executar(

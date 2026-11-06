@@ -41,6 +41,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Faixa de números por notebook
+    |--------------------------------------------------------------------------
+    |
+    | Cada notebook começa a criar itens a partir de (id do aparelho × esta faixa). Assim dois
+    | notebooks nunca usam o mesmo número. Supõe que o servidor fica abaixo de 100 milhões em
+    | cada tabela.
+    |
+    */
+
+    'faixa_por_aparelho' => 100000000,
+
+    /*
+    |--------------------------------------------------------------------------
     | Planilhas e histórico de auditoria
     |--------------------------------------------------------------------------
     |
