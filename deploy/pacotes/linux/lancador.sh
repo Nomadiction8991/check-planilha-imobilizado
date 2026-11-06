@@ -19,6 +19,9 @@ CP_MYSQLADMIN="$CP_HOME/mysql/bin/mysqladmin"
 CP_AMBIENTE="$CP_DADOS/modo-igreja.env"
 CP_SOCKET="$CP_DADOS/mysql.sock"
 
+# Certificados do pacote, para o HTTPS da sincronização (o PHP estático não acha os do sistema).
+export SSL_CERT_FILE="$CP_HOME/php/cacert.pem"
+
 simular=0
 if [[ "${1:-}" == "--simular" ]]; then
     simular=1
@@ -76,10 +79,12 @@ fi
 
 # 2) Banco local: só na rede deste computador (127.0.0.1), com o socket dentro da pasta de dados.
 if [[ ! -d "$CP_DADOS/mysql/mysql" ]]; then
-    rodar "$CP_MYSQLD" --initialize-insecure --datadir="$CP_DADOS/mysql" --user="$(id -un)"
+    rodar "$CP_MYSQLD" --initialize-insecure --basedir="$CP_HOME/mysql" --datadir="$CP_DADOS/mysql" --user="$(id -un)"
 fi
 rodar_em_segundo_plano "$CP_MYSQLD" \
     --datadir="$CP_DADOS/mysql" \
+    --basedir="$CP_HOME/mysql" \
+    --skip-log-bin \
     --port="$DB_PORT" \
     --bind-address=127.0.0.1 \
     --socket="$CP_SOCKET" \

@@ -27,6 +27,8 @@ class LancadorLinuxTest extends TestCase
         $saida = $this->simular();
 
         $this->assertStringContainsString('--bind-address=127.0.0.1', $saida, 'O banco precisa ficar só no computador.');
+        $this->assertStringContainsString('--basedir=/opt/cp-inexistente/mysql', $saida, 'Sem o basedir, o MySQL procura os arquivos no caminho de compilação.');
+        $this->assertStringContainsString('--skip-log-bin', $saida, 'Sem o log binário, os gatilhos não pedem o privilégio SUPER (erro 1419).');
         $this->assertStringContainsString('migrate --force', $saida);
         $this->assertStringContainsString('sincronizacao:gatilhos', $saida);
         $this->assertStringContainsString('-S 0.0.0.0:8080 -t public public/index.php', $saida);

@@ -46,3 +46,6 @@ napkin.md
 # Local tooling (nao commitar)
 .codegraph/
 .serena/
+
+# Pacotes e binários montados pelos scripts de deploy
+/build/

@@ -72,6 +72,24 @@ install -m 0755 "$pasta_deploy/lancador.sh" "$raiz_pacote/usr/bin/check-planilha
 install -m 0644 "$pasta_deploy/check-planilha-igreja.desktop" \
     "$raiz_pacote/usr/share/applications/check-planilha-igreja.desktop"
 
+# Conferência do que foi montado: o pacote só sai se o PHP, o MySQL e o sistema rodarem.
+php_pacote="$instalacao/php/bin/php"
+mysqld_pacote="$instalacao/mysql/bin/mysqld"
+"$php_pacote" -v >/dev/null || erro "o PHP do pacote não roda"
+"$mysqld_pacote" --version >/dev/null || erro "o MySQL do pacote não roda"
+[[ -f "$instalacao/php/cacert.pem" ]] || erro "faltam os certificados (php/cacert.pem)"
+
+modulos="$("$php_pacote" -m)"
+for extensao in pdo_mysql mbstring openssl tokenizer ctype fileinfo curl dom xml session json; do
+    grep -qix "$extensao" <<<"$modulos" || erro "o PHP do pacote não tem a extensão $extensao"
+done
+
+# Descobre os pacotes do Laravel com o PHP do próprio pacote. Se isso falhar, o sistema não sobe.
+"$php_pacote" "$instalacao/app/artisan" package:discover --ansi >/dev/null \
+    || erro "o sistema não sobe com o PHP do pacote"
+"$php_pacote" "$instalacao/app/artisan" --version >/dev/null \
+    || erro "o artisan não roda com o PHP do pacote"
+
 cat > "$raiz_pacote/DEBIAN/postinst" <<'EOF'
 #!/bin/sh
 set -e
@@ -99,6 +117,7 @@ Section: office
 Priority: optional
 Architecture: amd64
 Installed-Size: $tamanho_kb
+Depends: libc6 (>= 2.28), libstdc++6
 Maintainer: Ello Tecnologia
 Description: Check Planilha para o notebook da igreja (modo offline)
  Cópia local do sistema, com banco de dados e PHP inclusos. Funciona sem
