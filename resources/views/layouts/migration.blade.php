@@ -1912,6 +1912,19 @@
                         @endforeach
                     </nav>
                 @endif
+                @if (! session('public_acesso') && ! empty($legacySessionUser))
+                    <nav class="mobile-menu-nav" aria-label="Instalador do modo igreja">
+                        <strong>Instalador do modo igreja</strong>
+                        <a href="{{ route('migration.instaladores.baixar', 'windows') }}" class="mobile-menu-link" data-mobile-menu-link>
+                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                            <span class="mobile-menu-link-label">Windows (.exe)</span>
+                        </a>
+                        <a href="{{ route('migration.instaladores.baixar', 'linux') }}" class="mobile-menu-link" data-mobile-menu-link>
+                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                            <span class="mobile-menu-link-label">Linux (.deb)</span>
+                        </a>
+                    </nav>
+                @endif
                 @if (session('public_acesso') || !empty($legacySessionUser))
                     <div class="mobile-menu-footer">
                         <button type="button" class="theme-toggle sidebar-theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Alternar tema">

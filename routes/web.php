@@ -6,6 +6,7 @@ use App\Http\Controllers\LegacyAssetTypeController;
 use App\Http\Controllers\LegacyAuditController;
 use App\Http\Controllers\ConexaoController;
 use App\Http\Controllers\ConflitosController;
+use App\Http\Controllers\InstaladorController;
 use App\Http\Controllers\LegacyConfigurationController;
 use App\Http\Controllers\LegacyAdministrationController;
 use App\Http\Controllers\LegacyAuthController;
@@ -36,6 +37,11 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
         ->name('migration.password.store');
 
     Route::middleware('legacy.auth')->group(function (): void {
+        // Instaladores do modo igreja: qualquer usuário logado baixa. A URL aceita só os dois nomes conhecidos.
+        Route::get('/instaladores/{sistema}', [InstaladorController::class, 'baixar'])
+            ->where('sistema', 'windows|linux')
+            ->name('migration.instaladores.baixar');
+
         Route::post('/logout', [LegacyAuthController::class, 'logout'])->name('migration.logout');
         Route::post('/session/church', [LegacyAuthController::class, 'switchChurch'])->name('migration.session.church');
         Route::post('/session/filters-pin', [LegacyAuthController::class, 'storeFilterPin'])
