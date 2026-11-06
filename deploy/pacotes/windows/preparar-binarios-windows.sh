@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Prepara a pasta que o instalador do Windows (Inno Setup) empacota: PHP 8.4 (NTS, x64),
-# MySQL 8.4 (x64), o php.ini do sistema, os certificados e o próprio sistema.
+# MySQL 8.4 (x64), Visual C++ 2022 (x64), o php.ini do sistema, os certificados e o próprio sistema.
 #
 # Cada download é conferido antes de usar: o PHP pela soma SHA-256 publicada em
-# windows.php.net, e o MySQL pelo MD5 publicado pela MySQL. Os .exe não podem rodar neste
-# Linux. A execução real só acontece numa máquina Windows.
+# windows.php.net, o MySQL pelo MD5 publicado pela MySQL e o Visual C++ pela soma SHA-256 fixada
+# no script. Os .exe não podem rodar neste Linux. A execução real só acontece numa máquina Windows.
 #
 # Uso: deploy/pacotes/windows/preparar-binarios-windows.sh --vendor <pasta vendor sem dev> [--saida <pasta>]
 #   padrão de saída: <raiz do projeto>/build/windows
@@ -46,14 +46,21 @@ MYSQL_PASTA="mysql-8.4.13-winx64"
 MYSQL_URL="${CP_MYSQL_WIN_URL:-https://cdn.mysql.com/Downloads/MySQL-8.4/${MYSQL_PASTA}.zip}"
 MYSQL_MD5="${CP_MYSQL_WIN_MD5:-7b94489d5524dea9b27097068bea25a8}"
 
+# Visual C++ 2022 (redistribuível x64 oficial da Microsoft). O PHP e o MySQL precisam dele.
+# A soma foi calculada do arquivo deste endereço; o caminho do endereço traz a mesma soma em
+# maiúsculas. O instalador só roda o arquivo se o computador não tiver a versão 14.44 ou mais nova.
+VC_REDIST_URL="${CP_VC_REDIST_URL:-https://download.visualstudio.microsoft.com/download/pr/990c720a-46ce-4dc7-87b9-c2eb615d34b9/CC0FF0EB1DC3F5188AE6300FAEF32BF5BEEBA4BDD6E8E445A9184072096B713B/VC_redist.x64.exe}"
+VC_REDIST_SHA256="${CP_VC_REDIST_SHA256:-cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b}"
+
 # Baixa para o cache (se preciso) e confere a soma antes de devolver o caminho.
+# A mensagem de progresso vai para o erro: o caminho devolvido é capturado em variável.
 baixar_conferido() {
     local url="$1" algoritmo="$2" esperado="$3" arquivo caminho obtido
     arquivo="$(basename "$url")"
     caminho="$cache/$arquivo"
 
     if [[ ! -f "$caminho" ]]; then
-        echo "Baixando $arquivo..."
+        echo "Baixando $arquivo..." >&2
         curl -fsSL --retry 2 -o "$caminho.parcial" "$url" || erro "não consegui baixar $url"
         mv "$caminho.parcial" "$caminho"
     fi
@@ -74,12 +81,14 @@ baixar_conferido() {
 
 php_zip="$(baixar_conferido "$PHP_URL" sha256 "$PHP_SHA256")"
 mysql_zip="$(baixar_conferido "$MYSQL_URL" md5 "$MYSQL_MD5")"
+vc_redist="$(baixar_conferido "$VC_REDIST_URL" sha256 "$VC_REDIST_SHA256")"
 
 trabalho="$(mktemp -d)"
 trap 'rm -rf "$trabalho"' EXIT
 
 rm -rf "$saida"
 mkdir -p "$saida/php" "$saida/mysql" "$saida/app"
+cp "$vc_redist" "$saida/vc_redist.x64.exe"
 
 # 1) PHP: programa, extensões e php.ini próprio
 unzip -q "$php_zip" -d "$saida/php"
@@ -140,13 +149,14 @@ mkdir -p "$saida/app/storage/app" "$saida/app/storage/framework/cache" \
     "$saida/app/storage/logs" "$saida/app/storage/importacao" "$saida/app/bootstrap/cache"
 
 # 4) Conferência do que foi montado (os .exe só rodam numa máquina Windows)
-for arquivo in php/php.exe php/php.ini php/cacert.pem mysql/bin/mysqld.exe mysql/bin/mysql.exe app/artisan app/vendor/autoload.php; do
+for arquivo in php/php.exe php/php.ini php/cacert.pem mysql/bin/mysqld.exe mysql/bin/mysql.exe vc_redist.x64.exe app/artisan app/vendor/autoload.php; do
     [[ -e "$saida/$arquivo" ]] || erro "faltou $arquivo na pasta do Windows"
 done
 
-(cd "$saida" && sha256sum php/php.exe mysql/bin/mysqld.exe > SHA256SUMS)
+(cd "$saida" && sha256sum php/php.exe mysql/bin/mysqld.exe vc_redist.x64.exe > SHA256SUMS)
 
 echo "Pasta do Windows pronta em $saida"
 echo "  PHP   : 8.4.27 (NTS x64), extensões conferidas pelos arquivos DLL"
 echo "  MySQL : 8.4.13 (x64)"
+echo "  VC++  : 2022 (14.44.35211, conferido por SHA-256)"
 echo "  Os .exe ainda não foram executados: falta o teste numa máquina Windows."
