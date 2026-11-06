@@ -117,7 +117,7 @@ Section: office
 Priority: optional
 Architecture: amd64
 Installed-Size: $tamanho_kb
-Depends: libc6 (>= 2.28), libstdc++6
+Depends: libc6 (>= 2.28), libstdc++6, libnuma1, libncurses6
 Maintainer: Ello Tecnologia
 Description: Check Planilha para o notebook da igreja (modo offline)
  Cópia local do sistema, com banco de dados e PHP inclusos. Funciona sem

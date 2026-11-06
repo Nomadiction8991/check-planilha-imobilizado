@@ -8,8 +8,8 @@
 # Uso: deploy/pacotes/linux/preparar-binarios.sh [pasta-de-destino]
 #   padrão de destino: <raiz do projeto>/build/binarios
 #
-# Requisitos no computador que monta o pacote: curl, tar, xz, sha256sum, ldconfig e as
-# bibliotecas libaio e libnuma (pacotes libaio1t64 e libnuma1 no Ubuntu e no Debian).
+# Requisitos no computador que monta o pacote: curl, tar, xz, sha256sum, ldconfig, objdump
+# (binutils) e a biblioteca libaio (pacote libaio1t64 no Ubuntu e no Debian).
 set -euo pipefail
 
 raiz="$(cd "$(dirname "$0")/../../.." && pwd)"
@@ -109,10 +109,11 @@ if command -v strip >/dev/null 2>&1; then
         "$destino/mysql/bin/mysqladmin" "$destino/mysql/bin/mysqldump"
 fi
 
-# O mysqld pede libaio.so.1 e libnuma.so.1. Versões novas do Ubuntu e do Debian trazem
-# libaio.so.1t64, então a biblioteca instalada entra com o nome que o mysqld espera.
+# O mysqld pede libaio.so.1. Versões novas do Ubuntu e do Debian trazem libaio.so.1t64, então a
+# biblioteca instalada entra com o nome que o mysqld espera. A libnuma NÃO entra no pacote: ela
+# vem do sistema (pacote libnuma1, declarado como dependência do .deb), porque a cópia deste
+# computador pode exigir uma glibc mais nova que a do Debian 12 (testado: exigia GLIBC_2.38).
 cp -L "$(biblioteca_do_sistema libaio.so.1t64)" "$destino/mysql/lib/private/libaio.so.1"
-cp -L "$(biblioteca_do_sistema libnuma.so.1)" "$destino/mysql/lib/private/libnuma.so.1"
 
 # 3) Conferência: os dois programas precisam rodar aqui, antes de entrar no pacote.
 "$destino/mysql/bin/mysqld" --version >/dev/null || erro "o mysqld não roda neste computador"
@@ -128,6 +129,15 @@ done
 modulos="$("$destino/php/bin/php" -m)"
 for extensao in $EXTENSOES_OBRIGATORIAS; do
     grep -qix "$extensao" <<<"$modulos" || erro "o PHP estático não tem a extensão $extensao"
+done
+
+# Tudo o que vai dentro do pacote tem de rodar em glibc 2.28, o mínimo declarado no .deb.
+for arquivo in "$destino"/mysql/bin/* "$destino"/mysql/lib/private/* "$destino"/mysql/lib/plugin/*.so; do
+    [[ -f "$arquivo" ]] || continue
+    exigida="$(objdump -T "$arquivo" 2>/dev/null | grep -oE 'GLIBC_[0-9.]+' | sort -uV | tail -1 || true)"
+    if [[ -n "$exigida" ]] && [[ "$(printf '%s\n%s\n' "${exigida#GLIBC_}" 2.28 | sort -V | tail -1)" != "2.28" ]]; then
+        erro "$(basename "$arquivo") exige $exigida, mais novo que o mínimo do pacote (GLIBC_2.28)"
+    fi
 done
 
 sha256sum "$destino/php/bin/php" "$destino/mysql/bin/mysqld" > "$destino/SHA256SUMS"
