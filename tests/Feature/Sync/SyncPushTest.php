@@ -6,6 +6,7 @@ namespace Tests\Feature\Sync;
 
 use App\Sync\DeviceRegistry;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -38,7 +39,29 @@ class SyncPushTest extends SincronizacaoTestCase
             $table->boolean('ativo')->default(true);
         });
 
+        Schema::create('configuracoes', function (Blueprint $table): void {
+            $table->string('mail_host')->nullable();
+            $table->text('mail_password')->nullable();
+        });
+
         $this->token = app(DeviceRegistry::class)->registrar('Notebook da igreja', 7)['token'];
+    }
+
+    public function test_senha_do_email_chega_em_texto_puro_e_e_gravada_cifrada_no_servidor(): void
+    {
+        DB::table('configuracoes')->insert([
+            'mail_host' => 'smtp.teste.local',
+            'mail_password' => Crypt::encryptString('senha-1'),
+        ]);
+
+        $this->enviar([
+            $this->alteracao('88888888-8888-4888-8888-888888888888', 'configuracoes', '*', 'update',
+                ['mail_host' => 'smtp.teste.local', 'mail_password' => 'senha-1'],
+                ['mail_host' => 'smtp.teste.local', 'mail_password' => 'senha-2'],
+            ),
+        ])->assertJsonPath('aplicadas', 1);
+
+        $this->assertSame('senha-2', Crypt::decryptString((string) DB::table('configuracoes')->value('mail_password')));
     }
 
     public function test_envio_aplica_insercao_no_servidor(): void

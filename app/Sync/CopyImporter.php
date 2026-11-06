@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace App\Sync;
 
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
  * Importa a cópia do servidor no notebook. Substitui os dados de negócio do notebook.
  *
  * Esvazia as tabelas (filhos primeiro) e grava tudo sem registrar alterações, porque
- * o que chega do servidor não é uma alteração do notebook. Ao final, o cursor de
- * recebimento começa no ponto em que a cópia foi tirada.
+ * o que chega do servidor não é uma alteração do notebook. Tudo acontece em uma única
+ * transação: sem a marca de fim, a cópia foi cortada e nada é gravado. Ao final, o cursor
+ * de recebimento começa no ponto em que a cópia foi tirada.
  */
 final class CopyImporter
 {
     public function __construct(
         private readonly SyncState $estado,
+        private readonly SensitiveFields $camposCifrados,
     ) {
     }
 
@@ -33,6 +35,7 @@ final class CopyImporter
 
             try {
                 $this->esvaziarTabelas();
+                $terminou = false;
 
                 foreach ($linhas as $linha) {
                     $registro = json_decode(trim($linha), true);
@@ -43,13 +46,15 @@ final class CopyImporter
 
                     if (($registro['tipo'] ?? null) === 'cabecalho') {
                         $cursor = (int) ($registro['cursor'] ?? 0);
-
-                        continue;
-                    }
-
-                    if (($registro['tipo'] ?? null) === 'linha') {
+                    } elseif (($registro['tipo'] ?? null) === 'linha') {
                         $this->gravar((string) $registro['tabela'], (array) $registro['dados']);
+                    } elseif (($registro['tipo'] ?? null) === 'fim') {
+                        $terminou = true;
                     }
+                }
+
+                if (! $terminou) {
+                    throw new RuntimeException('A cópia chegou incompleta. Nada foi alterado neste computador.');
                 }
             } finally {
                 $this->suprimirRegistro(false);
@@ -76,12 +81,7 @@ final class CopyImporter
             return;
         }
 
-        if ($tabela === 'configuracoes' && isset($dados['mail_password'])) {
-            // Guarda a senha de novo com a chave deste notebook.
-            $dados['mail_password'] = Crypt::encryptString((string) $dados['mail_password']);
-        }
-
-        DB::table($tabela)->insert($dados);
+        DB::table($tabela)->insert($this->camposCifrados->cifrar($tabela, $dados));
     }
 
     private function suprimirRegistro(bool $ligar): void

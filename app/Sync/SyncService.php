@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Sync;
 
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
  * Orquestra o envio e o recebimento entre o notebook e o servidor.
@@ -21,6 +21,7 @@ final class SyncService
 
     public function __construct(
         private readonly ChangeApplier $aplicador,
+        private readonly SensitiveFields $camposCifrados,
     ) {
     }
 
@@ -52,7 +53,8 @@ final class SyncService
 
                 try {
                     $resultado = DB::transaction(fn (): array => $this->aplicador->aplicar($alteracao));
-                } catch (QueryException $erro) {
+                } catch (RuntimeException) {
+                    // Inclui falha de banco e campo cifrado que não abre. A mensagem técnica não sai daqui.
                     $resumo['erros'][] = ['uuid' => $uuid, 'motivo' => 'Falha ao gravar no servidor.'];
 
                     continue;
@@ -109,21 +111,35 @@ final class SyncService
 
         $alteracoes = $linhas
             ->filter(fn (object $linha): bool => $linha->origem !== $propria)
-            ->map(fn (object $linha): array => [
-                'id' => (int) $linha->id,
-                'uuid' => (string) $linha->uuid,
-                'tabela' => (string) $linha->tabela,
-                'chave' => (string) $linha->chave,
-                'operacao' => (string) $linha->operacao,
-                'antes' => $this->decodificar($linha->antes),
-                'depois' => $this->decodificar($linha->depois),
-                'origem' => (string) $linha->origem,
-                'criado_em' => (string) $linha->criado_em,
-            ])
+            ->map(fn (object $linha): array => $this->paraNotebook($linha))
             ->values()
             ->all();
 
         return ['alteracoes' => $alteracoes, 'cursor' => $cursor, 'mais' => $mais];
+    }
+
+    /**
+     * Campos cifrados saem em texto puro: o notebook os cifra de novo com a própria chave.
+     *
+     * @return array<string, mixed>
+     */
+    private function paraNotebook(object $linha): array
+    {
+        $tabela = (string) $linha->tabela;
+        $antes = $this->decodificar($linha->antes);
+        $depois = $this->decodificar($linha->depois);
+
+        return [
+            'id' => (int) $linha->id,
+            'uuid' => (string) $linha->uuid,
+            'tabela' => $tabela,
+            'chave' => (string) $linha->chave,
+            'operacao' => (string) $linha->operacao,
+            'antes' => $antes === null ? null : $this->camposCifrados->decifrar($tabela, $antes),
+            'depois' => $depois === null ? null : $this->camposCifrados->decifrar($tabela, $depois),
+            'origem' => (string) $linha->origem,
+            'criado_em' => (string) $linha->criado_em,
+        ];
     }
 
     private function jaRecebida(string $uuid): bool
@@ -177,6 +193,9 @@ final class SyncService
         }
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     private function decodificar(mixed $valor): ?array
     {
         if ($valor === null) {

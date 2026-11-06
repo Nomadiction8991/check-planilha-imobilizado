@@ -11,10 +11,16 @@ use Illuminate\Support\Facades\DB;
  *
  * Com a variável @sincronizacao_aplicando ligada, os gatilhos não registram nada,
  * então a mudança recebida não volta ao servidor como se tivesse sido feita aqui.
- * O servidor já decidiu os conflitos, então aqui o valor recebido é o que vale.
+ * O servidor já decidiu os conflitos, então o valor recebido é o que vale.
+ * Campos cifrados chegam em texto puro e são cifrados com a chave deste notebook.
  */
 final class NotebookChangeApplier
 {
+    public function __construct(
+        private readonly SensitiveFields $camposCifrados,
+    ) {
+    }
+
     /**
      * @param  list<array<string, mixed>>  $alteracoes
      */
@@ -63,7 +69,7 @@ final class NotebookChangeApplier
         $atual = (clone $consulta)->first();
 
         if ($atual === null) {
-            DB::table($tabela)->insert($depois);
+            DB::table($tabela)->insert($this->camposCifrados->cifrar($tabela, $depois));
 
             return;
         }
@@ -78,7 +84,7 @@ final class NotebookChangeApplier
             return;
         }
 
-        $consulta->update(array_intersect_key($depois, array_flip($campos)));
+        $consulta->update($this->camposCifrados->cifrar($tabela, array_intersect_key($depois, array_flip($campos))));
     }
 
     /**

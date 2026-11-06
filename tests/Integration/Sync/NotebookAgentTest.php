@@ -7,7 +7,9 @@ namespace Tests\Integration\Sync;
 use App\Sync\Device;
 use App\Sync\DeviceRegistry;
 use App\Sync\NotebookAgent;
+use App\Sync\SyncState;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\Support\LocalSyncTransport;
 use Tests\TestCase;
 
@@ -113,6 +115,32 @@ class NotebookAgentTest extends TestCase
             DB::connection('notebook_a')->table('sincronizacao_alteracoes')->where('tabela', 'produtos')->count(),
             'Só a inserção original do notebook pode estar no registro local.',
         );
+    }
+
+    public function test_alteracao_recusada_pelo_servidor_nao_avanca_o_cursor_de_envio(): void
+    {
+        $dispositivoA = $this->cadastrarNoServidor('Notebook A');
+
+        // Tabela que não sincroniza: o servidor sempre recusa esta alteração.
+        $this->noNotebook('notebook_a', fn () => DB::table('sincronizacao_alteracoes')->insert([
+            'uuid' => (string) Str::uuid(),
+            'tabela' => 'sessions',
+            'chave' => 'abc',
+            'operacao' => 'insert',
+            'antes' => null,
+            'depois' => json_encode(['id' => 'abc']),
+            'origem' => 'local',
+            'criado_em' => now(),
+        ]));
+
+        $primeiro = $this->sincronizar('notebook_a', $dispositivoA);
+        $this->assertCount(1, $primeiro['erros']);
+        $this->assertSame(0, (int) DB::connection('notebook_a')->table('sincronizacao_estado')
+            ->where('chave', SyncState::ULTIMO_ENVIADO)
+            ->value('valor'));
+
+        $segundo = $this->sincronizar('notebook_a', $dispositivoA);
+        $this->assertCount(1, $segundo['erros'], 'A alteração recusada precisa ser enviada de novo na próxima vez.');
     }
 
     private function cadastrarNoServidor(string $nome): Device

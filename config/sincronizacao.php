@@ -41,6 +41,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Campos cifrados
+    |--------------------------------------------------------------------------
+    |
+    | Campos guardados cifrados com a chave de cada instalação (ex.: senha do e-mail).
+    | Na sincronização eles viajam em texto puro: quem envia decifra, e quem recebe
+    | cifra de novo com a própria chave. Uma chave nunca sai da máquina dela.
+    |
+    */
+
+    'campos_cifrados' => [
+        'configuracoes' => ['mail_password'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Tabelas em que o servidor vence
     |--------------------------------------------------------------------------
     |
@@ -48,6 +63,12 @@ return [
     | nos dois lados, a mudança do notebook é descartada e não vira conflito.
     |
     */
+
+    'servidor_vence' => [
+        'usuarios',
+        'administracoes',
+        'configuracoes',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -71,12 +92,6 @@ return [
         'import_erros',
         'import_job_processed',
         'produtos',
-    ],
-
-    'servidor_vence' => [
-        'usuarios',
-        'administracoes',
-        'configuracoes',
     ],
 
 ];

@@ -9,13 +9,14 @@ use App\Sync\CopyImporter;
 use App\Sync\SyncState;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
  * Cópia inicial: o servidor gera a cópia de todas as tabelas, o notebook importa.
  *
- * A senha do e-mail é criptografada com a chave de cada instalação, então ela viaja
- * em texto (dentro do HTTPS) e o notebook a guarda de novo com a própria chave.
+ * A senha do e-mail é cifrada com a chave de cada instalação, então ela viaja
+ * em texto puro (dentro do HTTPS) e o notebook a guarda de novo com a própria chave.
  */
 class CopyTest extends TestCase
 {
@@ -90,9 +91,31 @@ class CopyTest extends TestCase
         $cursorDoServidor = (int) DB::connection('servidor')->table('sincronizacao_alteracoes')->max('id');
         $this->assertSame(
             $cursorDoServidor,
-            DB::connection('notebook_a')->table('sincronizacao_estado')
+            (int) DB::connection('notebook_a')->table('sincronizacao_estado')
                 ->where('chave', SyncState::ULTIMO_RECEBIDO)
-                ->value('valor') + 0,
+                ->value('valor'),
+        );
+    }
+
+    public function test_copia_cortada_no_meio_nao_altera_o_notebook(): void
+    {
+        $linhas = DB::usingConnection('servidor', fn (): array => iterator_to_array(app(CopyExporter::class)->linhas()));
+        DB::usingConnection('notebook_a', fn () => DB::table('comums')->insert(['codigo' => 'C-LOCAL']));
+
+        // Sem a última linha, que é a marca de fim da cópia.
+        $cortada = array_slice($linhas, 0, -1);
+
+        try {
+            DB::usingConnection('notebook_a', fn () => app(CopyImporter::class)->importar($cortada));
+            $this->fail('A cópia cortada precisava ser recusada.');
+        } catch (RuntimeException $erro) {
+            $this->assertStringContainsString('incompleta', $erro->getMessage());
+        }
+
+        $this->assertSame(
+            1,
+            DB::connection('notebook_a')->table('comums')->where('codigo', 'C-LOCAL')->count(),
+            'Uma cópia recusada não pode apagar os dados do notebook.',
         );
     }
 }

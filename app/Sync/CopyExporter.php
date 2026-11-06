@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace App\Sync;
 
 use Generator;
-use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Gera a cópia completa do servidor: uma linha JSON por registro (formato NDJSON).
  *
- * A primeira linha diz até onde a cópia vai (cursor do registro de alterações).
- * Assim o notebook continua a sincronização dali, sem perder nem repetir nada.
- * A senha do e-mail sai em texto dentro do HTTPS, porque cada instalação tem a própria chave.
+ * A primeira linha diz até onde a cópia vai (cursor do registro de alterações), e a última
+ * marca o fim. Se a conexão cair no meio, o notebook não recebe a marca de fim e desfaz tudo.
+ * Campos cifrados saem em texto puro, dentro do HTTPS, e o notebook os cifra com a própria chave.
  */
 final class CopyExporter
 {
+    public function __construct(
+        private readonly SensitiveFields $camposCifrados,
+    ) {
+    }
+
     /**
      * @return Generator<int, string>
      */
@@ -27,6 +30,8 @@ final class CopyExporter
 
         yield $this->linha(['tipo' => 'cabecalho', 'versao' => 1, 'cursor' => $cursor]);
 
+        $total = 0;
+
         foreach ((array) config('sincronizacao.ordem_da_copia') as $tabela) {
             $consulta = DB::table((string) $tabela);
 
@@ -35,15 +40,14 @@ final class CopyExporter
             }
 
             foreach ($consulta->cursor() as $registro) {
-                $dados = (array) $registro;
-
-                if ($tabela === 'configuracoes' && isset($dados['mail_password'])) {
-                    $dados['mail_password'] = $this->decifrar((string) $dados['mail_password']);
-                }
+                $dados = $this->camposCifrados->decifrar((string) $tabela, (array) $registro);
 
                 yield $this->linha(['tipo' => 'linha', 'tabela' => $tabela, 'dados' => $dados]);
+                $total++;
             }
         }
+
+        yield $this->linha(['tipo' => 'fim', 'linhas' => $total]);
     }
 
     /**
@@ -52,15 +56,5 @@ final class CopyExporter
     private function linha(array $registro): string
     {
         return json_encode($registro, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
-    }
-
-    private function decifrar(string $valor): ?string
-    {
-        try {
-            return Crypt::decryptString($valor);
-        } catch (DecryptException) {
-            // Valor que não abre com a chave do servidor não deve sair da cópia.
-            return null;
-        }
     }
 }

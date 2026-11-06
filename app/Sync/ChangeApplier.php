@@ -7,18 +7,16 @@ namespace App\Sync;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
- * Aplica uma alteração vinda de um notebook no banco do servidor.
+ * Aplica no servidor uma alteração vinda de um notebook.
  *
  * Regras:
  * - só aplica tabelas que sincronizam (config sincronizacao.tabelas);
  * - só mexe nos campos que o notebook mudou, e só se o servidor não mudou esses campos;
  * - se o servidor mudou o mesmo campo, vira conflito. Nas tabelas de servidor_vence,
  *   a mudança do notebook é descartada;
- * - a conexão precisa estar marcada com a origem do aparelho (feito por quem chama),
- *   para o pull não devolver a mudança ao próprio notebook.
+ * - campos cifrados chegam em texto puro: são comparados e gravados com a chave do servidor.
  */
 final class ChangeApplier
 {
@@ -30,6 +28,11 @@ final class ChangeApplier
 
     public const ERRO = 'erro';
 
+    public function __construct(
+        private readonly SensitiveFields $camposCifrados,
+    ) {
+    }
+
     /**
      * @param  array<string, mixed>  $alteracao
      * @return array{status: string, motivo?: string, campos?: list<string>}
@@ -38,7 +41,6 @@ final class ChangeApplier
     {
         $tabela = (string) $alteracao['tabela'];
         $operacao = (string) $alteracao['operacao'];
-        $chave = (string) $alteracao['chave'];
 
         if (! in_array($tabela, (array) config('sincronizacao.tabelas'), true)) {
             return ['status' => self::ERRO, 'motivo' => "A tabela {$tabela} não sincroniza."];
@@ -46,9 +48,10 @@ final class ChangeApplier
 
         $antes = (array) ($alteracao['antes'] ?? []);
         $depois = (array) ($alteracao['depois'] ?? []);
-        $chavePrimaria = $this->chavePrimaria($tabela);
-        $consulta = $this->consultaDaLinha($tabela, $chavePrimaria, $chave);
-        $atual = (clone $consulta)->first();
+        $chavePrimaria = TableKeys::primaryKey($tabela);
+        $consulta = TableKeys::query($tabela, $chavePrimaria, (string) $alteracao['chave']);
+        $linha = (clone $consulta)->first();
+        $atual = $linha === null ? null : $this->camposCifrados->decifrar($tabela, (array) $linha);
         $servidorVence = in_array($tabela, (array) config('sincronizacao.servidor_vence'), true);
 
         return match ($operacao) {
@@ -65,14 +68,16 @@ final class ChangeApplier
      * @param  array<string, mixed>  $depois
      * @return array{status: string, motivo?: string}
      */
-    private function inserir(string $tabela, array $chavePrimaria, ?object $atual, array $depois): array
+    private function inserir(string $tabela, array $chavePrimaria, ?array $atual, array $depois): array
     {
-        if ($chavePrimaria !== [] && $atual !== null) {
-            return ['status' => self::CONFLITO, 'motivo' => 'o servidor já tem um registro com esta chave'];
+        if ($atual !== null) {
+            return $chavePrimaria === []
+                ? ['status' => self::IGNORADA, 'motivo' => 'a tabela já tem o seu registro único no servidor']
+                : ['status' => self::CONFLITO, 'motivo' => 'o servidor já tem um registro com esta chave'];
         }
 
         try {
-            DB::table($tabela)->insert($depois);
+            DB::table($tabela)->insert($this->camposCifrados->cifrar($tabela, $depois));
         } catch (QueryException) {
             return ['status' => self::CONFLITO, 'motivo' => 'o servidor já tem um registro com o mesmo valor único'];
         }
@@ -82,6 +87,7 @@ final class ChangeApplier
 
     /**
      * @param  list<string>  $chavePrimaria
+     * @param  array<string, mixed>|null  $atual
      * @param  array<string, mixed>  $antes
      * @param  array<string, mixed>  $depois
      * @return array{status: string, motivo?: string, campos?: list<string>}
@@ -90,7 +96,7 @@ final class ChangeApplier
         string $tabela,
         Builder $consulta,
         array $chavePrimaria,
-        ?object $atual,
+        ?array $atual,
         array $antes,
         array $depois,
         bool $servidorVence,
@@ -107,7 +113,7 @@ final class ChangeApplier
 
         $conflitos = array_values(array_filter(
             $campos,
-            fn (string $campo): bool => $this->normalizar($atual->{$campo} ?? null) !== $this->normalizar($antes[$campo] ?? null),
+            fn (string $campo): bool => $this->normalizar($atual[$campo] ?? null) !== $this->normalizar($antes[$campo] ?? null),
         ));
 
         if ($conflitos !== []) {
@@ -115,14 +121,10 @@ final class ChangeApplier
                 return ['status' => self::IGNORADA, 'motivo' => 'o servidor vence nesta tabela'];
             }
 
-            return [
-                'status' => self::CONFLITO,
-                'motivo' => 'o servidor mudou os mesmos campos',
-                'campos' => $conflitos,
-            ];
+            return ['status' => self::CONFLITO, 'motivo' => 'o servidor mudou os mesmos campos', 'campos' => $conflitos];
         }
 
-        $consulta->update(array_intersect_key($depois, array_flip($campos)));
+        $consulta->update($this->camposCifrados->cifrar($tabela, array_intersect_key($depois, array_flip($campos))));
 
         return ['status' => self::APLICADA, 'campos' => $campos];
     }
@@ -132,7 +134,7 @@ final class ChangeApplier
      * @param  array<string, mixed>|null  $atual
      * @return array{status: string, motivo?: string, campos?: list<string>}
      */
-    private function apagar(Builder $consulta, ?object $atual, array $antes, bool $servidorVence): array
+    private function apagar(Builder $consulta, ?array $atual, array $antes, bool $servidorVence): array
     {
         if ($atual === null) {
             return ['status' => self::IGNORADA, 'motivo' => 'o registro já foi apagado no servidor'];
@@ -140,7 +142,7 @@ final class ChangeApplier
 
         $mudou = array_values(array_filter(
             array_keys($antes),
-            fn (string $campo): bool => $this->normalizar($atual->{$campo} ?? null) !== $this->normalizar($antes[$campo]),
+            fn (string $campo): bool => $this->normalizar($atual[$campo] ?? null) !== $this->normalizar($antes[$campo]),
         ));
 
         if ($mudou !== []) {
@@ -148,11 +150,7 @@ final class ChangeApplier
                 return ['status' => self::IGNORADA, 'motivo' => 'o servidor vence nesta tabela'];
             }
 
-            return [
-                'status' => self::CONFLITO,
-                'motivo' => 'o servidor mudou o registro antes da exclusão',
-                'campos' => $mudou,
-            ];
+            return ['status' => self::CONFLITO, 'motivo' => 'o servidor mudou o registro antes da exclusão', 'campos' => $mudou];
         }
 
         $consulta->delete();
@@ -179,7 +177,7 @@ final class ChangeApplier
     }
 
     /**
-     * Compara valores sem depender do tipo que o JSON trouxe (true, 1 e "1" são iguais).
+     * Compara valores sem depender do tipo que o JSON trouxe (true, 1 e \"1\" são iguais).
      */
     private function normalizar(mixed $valor): string
     {
@@ -192,45 +190,5 @@ final class ChangeApplier
         }
 
         return (string) $valor;
-    }
-
-    /**
-     * @param  list<string>  $chavePrimaria
-     */
-    private function consultaDaLinha(string $tabela, array $chavePrimaria, string $chave): Builder
-    {
-        $consulta = DB::table($tabela);
-
-        // Tabela sem chave primária (configuracoes) é um registro único: "*" casa a linha dela.
-        if ($chavePrimaria === [] || $chave === '*') {
-            return $consulta;
-        }
-
-        if (count($chavePrimaria) === 1) {
-            return $consulta->where($chavePrimaria[0], $chave);
-        }
-
-        $valores = json_decode($chave, true);
-        $valores = is_array($valores) ? $valores : [];
-
-        foreach ($chavePrimaria as $coluna) {
-            $consulta->where($coluna, $valores[$coluna] ?? null);
-        }
-
-        return $consulta;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function chavePrimaria(string $tabela): array
-    {
-        foreach (Schema::getIndexes($tabela) as $indice) {
-            if (($indice['primary'] ?? false) === true) {
-                return array_values($indice['columns']);
-            }
-        }
-
-        return [];
     }
 }
