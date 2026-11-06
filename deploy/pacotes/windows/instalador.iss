@@ -4,8 +4,9 @@
 ;   deploy/pacotes/windows/preparar-binarios-windows.sh --vendor <pasta vendor sem dev>
 ; Ela traz o PHP 8.4, o MySQL 8.4, o php.ini, os certificados e o sistema.
 ;
-; ESQUELETO: ainda não foi compilado nem testado. Falta compilar com o Inno Setup 6 numa
-; máquina Windows e testar a instalação e o lancador.ps1 de verdade.
+; AINDA NÃO COMPILADO. O lancador.ps1 foi validado só em PowerShell 7 no Linux (ver
+; deploy/pacotes/windows/validacao/validar-powershell.sh). Falta compilar com o Inno Setup 6 numa
+; máquina Windows e testar a instalação e o lançador de verdade.
 
 #define NomeDoApp "Check Planilha Igreja"
 #define VersaoDoApp "0.1.0"
@@ -27,6 +28,12 @@ ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
+
+[Dirs]
+; O programa fica em Program Files, onde o usuário comum só lê. O Laravel grava logs, cache e sessões
+; nestas pastas, então elas precisam liberar a escrita para os usuários do computador.
+Name: "{app}\app\storage"; Permissions: users-modify
+Name: "{app}\app\bootstrap\cache"; Permissions: users-modify
 
 [Files]
 Source: "{#PastaDeBuild}\app\*"; DestDir: "{app}\app"; Flags: recursesubdirs createallsubdirs ignoreversion
