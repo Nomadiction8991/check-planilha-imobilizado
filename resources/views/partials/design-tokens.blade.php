@@ -3,6 +3,7 @@
         --ui-bg: #F7F4ED;
         --ui-surface: #FFFDF9;
         --ui-surface-muted: #F0EBE3;
+        --qr-fundo: #FFFFFF;
         --ui-text: #272727;
         --ui-text-muted: #60636A;
         --ui-border: #D1CDC6;

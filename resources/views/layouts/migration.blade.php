@@ -1604,6 +1604,48 @@
                 width: 100%;
             }
         }
+        .modo-igreja-aviso {
+            margin: 0 0 20px;
+            padding: 12px 16px;
+            border: 1px solid var(--ui-border);
+            border-left: 4px solid var(--product-primary);
+            border-radius: var(--radius-md);
+            background: var(--ui-surface);
+            color: var(--ui-text);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .conexao, .conflitos { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+        .conexao .btn, .conflito .btn { min-height: 44px; }
+        .conexao-qr { display: grid; gap: 16px; margin: 24px 0; }
+        .conexao-qr figure {
+            margin: 0;
+            padding: 16px;
+            border: 1px solid var(--ui-border);
+            border-radius: var(--radius-md);
+            background: var(--ui-surface);
+        }
+        .conexao-qr svg { display: block; width: min(100%, 220px); height: auto; background: var(--qr-fundo); }
+        .conexao-qr figcaption { margin-top: 12px; font-weight: 700; }
+        .conflito {
+            margin: 24px 0;
+            padding: 16px;
+            border: 1px solid var(--ui-border);
+            border-radius: var(--radius-md);
+            background: var(--ui-surface);
+        }
+        .conflito h2 { margin-top: 0; font-size: 18px; }
+        .conflito table { width: 100%; table-layout: fixed; overflow-wrap: anywhere; }
+        .conflito-acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+        .conflito-acoes form { margin: 0; }
+        @media (max-width: 639px) {
+            .conflito-acoes, .conflito-acoes form, .conflito-acoes .btn { width: 100%; }
+            .conflito table > tbody > tr > td:first-child { grid-column: 1 / -1; }
+        }
+        @media (min-width: 640px) {
+            .conexao-qr { grid-template-columns: repeat(2, minmax(0, 260px)); }
+        }
     </style>
     @include('partials.theme-toggle-assets')
     @include('partials.design-tokens')

@@ -21,7 +21,7 @@
         </div>
     @endif
 
-    <section aria-labelledby="conflitos-titulo">
+    <section class="conflitos" aria-labelledby="conflitos-titulo">
         <h1 id="conflitos-titulo">Conflitos de sincronização</h1>
 
         @if ($conflitos->isEmpty())
@@ -30,7 +30,7 @@
             <p>Estes dados foram mudados no servidor e no notebook ao mesmo tempo. Escolha qual valor deve ficar.</p>
 
             @foreach ($conflitos as $conflito)
-                <article>
+                <article class="conflito">
                     <h2>{{ $conflito['tabela'] }} · registro {{ $conflito['chave'] }}</h2>
                     <p>{{ $conflito['motivo'] }}</p>
 
@@ -45,23 +45,25 @@
                         <tbody>
                             @foreach ($conflito['campos'] as $campo)
                                 <tr>
-                                    <td>{{ $campo['campo'] }}</td>
-                                    <td>{{ $campo['servidor'] ?? '—' }}</td>
-                                    <td>{{ $campo['notebook'] ?? '—' }}</td>
+                                    <td data-label="Campo">{{ $campo['campo'] }}</td>
+                                    <td data-label="No servidor">{{ $campo['servidor'] ?? '—' }}</td>
+                                    <td data-label="No notebook">{{ $campo['notebook'] ?? '—' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
 
-                    <form method="POST" action="{{ route('migration.conflitos.notebook', $conflito['id']) }}">
-                        @csrf
-                        <button class="btn primary" type="submit">Manter o valor do notebook</button>
-                    </form>
+                    <div class="conflito-acoes">
+                        <form method="POST" action="{{ route('migration.conflitos.notebook', $conflito['id']) }}">
+                            @csrf
+                            <button class="btn primary" type="submit">Manter o valor do notebook</button>
+                        </form>
 
-                    <form method="POST" action="{{ route('migration.conflitos.servidor', $conflito['id']) }}">
-                        @csrf
-                        <button class="btn" type="submit">Manter o valor do servidor</button>
-                    </form>
+                        <form method="POST" action="{{ route('migration.conflitos.servidor', $conflito['id']) }}">
+                            @csrf
+                            <button class="btn" type="submit">Manter o valor do servidor</button>
+                        </form>
+                    </div>
                 </article>
             @endforeach
         @endif
