@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use App\Support\Modo\EstadoModo;
+use App\Support\Modo\RedeAutomatica;
 use App\Support\Modo\VerificadorDeServidor;
 
 Artisan::command('inspire', function () {
@@ -18,8 +19,17 @@ Artisan::command('modo-igreja:verificar-rede', function (EstadoModo $estado, Ver
     }
 });
 
+Artisan::command('modo-igreja:rede-propria', function (RedeAutomatica $rede): void {
+    if (config('modo_igreja.ativo') && PHP_OS_FAMILY === 'Linux') {
+        $this->info($rede->verificar());
+    }
+});
+
 if (config('modo_igreja.ativo')) {
     Schedule::command('modo-igreja:verificar-rede')->everyMinute()->withoutOverlapping();
+    if (PHP_OS_FAMILY === 'Linux') {
+        Schedule::command('modo-igreja:rede-propria')->everyMinute()->withoutOverlapping();
+    }
 }
 
 // Rotinas agendadas de manutenção preventiva do sistema
