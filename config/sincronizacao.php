@@ -39,4 +39,20 @@ return [
 
     'tabela_registro' => 'sincronizacao_alteracoes',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Tabelas em que o servidor vence
+    |--------------------------------------------------------------------------
+    |
+    | Usuários, permissões, administrações e configurações. Se o mesmo campo mudar
+    | nos dois lados, a mudança do notebook é descartada e não vira conflito.
+    |
+    */
+
+    'servidor_vence' => [
+        'usuarios',
+        'administracoes',
+        'configuracoes',
+    ],
+
 ];
