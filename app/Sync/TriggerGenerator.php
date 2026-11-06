@@ -135,8 +135,8 @@ final class TriggerGenerator
         return "CREATE TRIGGER `{$name}` {$timing} ON `{$table}` FOR EACH ROW\n"
             . "BEGIN\n"
             . "  IF {$suppression} IS NULL THEN\n"
-            . "    INSERT INTO `{$registry}` (`tabela`, `chave`, `operacao`, `antes`, `depois`)\n"
-            . "    VALUES ('{$table}', CAST({$key} AS CHAR(255)), '{$operation}', {$before}, {$after});\n"
+            . "    INSERT INTO `{$registry}` (`uuid`, `tabela`, `chave`, `operacao`, `antes`, `depois`, `origem`)\n"
+            . "    VALUES (UUID(), '{$table}', CAST({$key} AS CHAR(255)), '{$operation}', {$before}, {$after}, COALESCE(@sincronizacao_origem, 'local'));\n"
             . "  END IF;\n"
             . 'END';
     }
@@ -197,8 +197,9 @@ final class TriggerGenerator
                 $after = $this->rowExpression($childColumns, $childPrefix, [$childColumn => 'NULL']);
             }
 
-            $statements[] = "INSERT INTO `{$this->registryTable}` (`tabela`, `chave`, `operacao`, `antes`, `depois`) "
-                . "SELECT '{$child}', CAST({$childKey} AS CHAR(255)), '{$operation}', {$before}, {$after} "
+            $statements[] = "INSERT INTO `{$this->registryTable}` (`uuid`, `tabela`, `chave`, `operacao`, `antes`, `depois`, `origem`) "
+                . "SELECT UUID(), '{$child}', CAST({$childKey} AS CHAR(255)), '{$operation}', {$before}, {$after}, "
+                . "COALESCE(@sincronizacao_origem, 'local') "
                 . "FROM `{$child}` WHERE {$condition};";
 
             if ($regra === 'CASCADE') {

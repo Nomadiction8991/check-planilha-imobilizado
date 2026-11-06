@@ -286,6 +286,34 @@ class ChangeTriggersTest extends TestCase
         }
     }
 
+    public function test_cada_registro_recebe_um_uuid_unico(): void
+    {
+        $comum = $this->criarComum();
+        DB::table('produtos')->insert(['codigo' => 'P-' . uniqid(), 'comum_id' => $comum, 'bem' => 'Mesa']);
+        DB::table('produtos')->insert(['codigo' => 'P-' . uniqid(), 'comum_id' => $comum, 'bem' => 'Cadeira']);
+
+        $registros = $this->alteracoes('produtos');
+
+        $this->assertCount(2, $registros);
+        $this->assertNotEmpty($registros[0]->uuid);
+        $this->assertNotSame($registros[0]->uuid, $registros[1]->uuid);
+    }
+
+    public function test_origem_vem_da_variavel_da_conexao(): void
+    {
+        $comum = $this->criarComum();
+
+        DB::statement("SET @sincronizacao_origem = 'aparelho:7'");
+        DB::table('produtos')->insert(['codigo' => 'P-' . uniqid(), 'comum_id' => $comum, 'bem' => 'Mesa']);
+        DB::statement('SET @sincronizacao_origem = NULL');
+        DB::table('produtos')->insert(['codigo' => 'P-' . uniqid(), 'comum_id' => $comum, 'bem' => 'Cadeira']);
+
+        $registros = $this->alteracoes('produtos');
+
+        $this->assertSame('aparelho:7', $registros[0]->origem);
+        $this->assertSame('local', $registros[1]->origem);
+    }
+
     private function criarUsuario(int $comum): int
     {
         return (int) DB::table('usuarios')->insertGetId([

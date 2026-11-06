@@ -14,6 +14,8 @@ return new class extends Migration
     {
         Schema::create('sincronizacao_alteracoes', function (Blueprint $table): void {
             $table->id();
+            // Identificador único de cada registro: o notebook e o servidor usam para não aplicar duas vezes.
+            $table->char('uuid', 36)->unique();
             $table->string('tabela', 64);
             $table->string('chave', 255);
             $table->string('operacao', 10);
