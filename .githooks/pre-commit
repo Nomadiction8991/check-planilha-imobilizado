@@ -1,0 +1,51 @@
+#!/bin/sh
+# Verificador de segredos antes do commit.
+# Bloqueia arquivo de ambiente com valores, chave de aplicação com valor, chave privada e token.
+# Para ativar em cada clone: git config core.hooksPath .githooks
+
+falhas=0
+
+for arquivo in $(git diff --cached --name-only --diff-filter=ACM); do
+  base=$(basename "$arquivo")
+  case "$base" in
+    .env|.env.*)
+      case "$base" in
+        *.example) ;;
+        *)
+          echo "Commit bloqueado: '$arquivo' é um arquivo de ambiente. Só modelos (.env.example) podem ir para o Git."
+          falhas=1
+          ;;
+      esac
+      ;;
+  esac
+
+  # Só as linhas novas: as linhas removidas não vão para o repositório.
+  linhas=$(git diff --cached -U0 --no-color -- "$arquivo" | grep -E '^\+[^+]')
+
+  if printf '%s\n' "$linhas" | grep -qE -- '-----BEGIN [A-Z ]*PRIVATE KEY-----'; then
+    echo "Commit bloqueado: chave privada em '$arquivo'."
+    falhas=1
+  fi
+
+  if printf '%s\n' "$linhas" | grep -qE 'AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}'; then
+    echo "Commit bloqueado: token de acesso em '$arquivo'."
+    falhas=1
+  fi
+
+  # Chave de ambiente com nome de segredo e valor preenchido. "null" e valor vazio são aceitos.
+  chaves=$(printf '%s\n' "$linhas" \
+    | grep -E '^\+[A-Z][A-Z0-9_]*(PASSWORD|PASS|SECRET|TOKEN|KEY)[A-Z0-9_]*=[^[:space:]]' \
+    | grep -vE '=(null|NULL|changeme|"null"|"")$' \
+    | sed -E 's/^\+//; s/=.*//')
+  for chave in $chaves; do
+    echo "Commit bloqueado: valor de segredo em '$arquivo' (chave $chave)."
+    falhas=1
+  done
+done
+
+if [ "$falhas" -ne 0 ]; then
+  echo "Deixe o valor real só no .env local ou no servidor. No Git, use um modelo (.env.example) com o valor vazio."
+  exit 1
+fi
+
+exit 0
