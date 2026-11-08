@@ -39,6 +39,9 @@ Pasta principal de fluxos por tela.
 - [Auditoria](passo-a-passo/audits.md)
 - [Etiquetas](passo-a-passo/labels.md)
 
+## Modo igreja
+- [Modo igreja](passo-a-passo/modo-igreja.md)
+
 ## Base
 - [Visual por tela](visual/telas.md)
 - [Estrutura e processos](estrutura.md)
