@@ -94,8 +94,9 @@ final class LegacyUserManagementServiceTest extends TestCase
 
     private function makeService(bool $canManageOtherAdministrations, array $allAdministrationIds = [7, 8]): LegacyUserManagementService
     {
-        $auth = $this->createMock(LegacyAuthSessionServiceInterface::class);
-        $permissions = $this->createMock(LegacyPermissionServiceInterface::class);
+        // Dependências só fornecem respostas: stub, e não mock, porque nenhum comportamento é conferido aqui.
+        $auth = $this->createStub(LegacyAuthSessionServiceInterface::class);
+        $permissions = $this->createStub(LegacyPermissionServiceInterface::class);
 
         $auth->method('currentUser')->willReturn([
             'id' => 19,
