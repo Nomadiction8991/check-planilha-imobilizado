@@ -1664,6 +1664,7 @@
         .mobile-action-icon { display: none; }
         .filters-bar { display: flex; align-items: end; gap: 12px; }
         .filters-search { flex: 1; min-width: 0; display: grid; gap: 4px; }
+        .filters-search select { width: 100%; min-width: 0; }
         .filters-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border: 1px solid var(--ui-border); border-radius: var(--radius-lg); background: var(--ui-surface); color: var(--ui-text); box-shadow: var(--shadow-card); }
         .filters-dialog::backdrop { background: var(--ui-overlay); }
         .filters-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
