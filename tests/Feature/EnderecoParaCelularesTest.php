@@ -63,4 +63,15 @@ final class EnderecoParaCelularesTest extends TestCase
         $this->assertNull($this->servico('Windows')->endereco());
         $this->assertSame(0, $this->comandos->chamadas);
     }
+
+    public function test_consulta_a_rota_so_uma_vez_enquanto_o_cache_vale(): void
+    {
+        $this->comandos->saida = 'default via 10.0.0.1 dev wlan0 src 10.0.0.229 uid 33';
+        $servico = $this->servico();
+
+        $servico->endereco();
+        $servico->endereco();
+
+        $this->assertSame(1, $this->comandos->chamadas);
+    }
 }
