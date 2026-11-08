@@ -31,7 +31,7 @@ class WindowsAccessPointTest extends TestCase
     {
         $executor = new FakeCommandRunner();
 
-        (new WindowsAccessPoint($executor, sys_get_temp_dir()))->ligar('CheckPlanilha', self::SENHA);
+        (new WindowsAccessPoint($executor, sys_get_temp_dir(), liberado: true))->ligar('CheckPlanilha', self::SENHA);
 
         $chamada = $executor->chamadas[0];
         $this->assertSame(self::SENHA, $chamada['ambiente']['CP_REDE_SENHA']);
@@ -46,7 +46,7 @@ class WindowsAccessPointTest extends TestCase
         ]);
 
         try {
-            (new WindowsAccessPoint($executor, sys_get_temp_dir()))->ligar('CheckPlanilha', self::SENHA);
+            (new WindowsAccessPoint($executor, sys_get_temp_dir(), liberado: true))->ligar('CheckPlanilha', self::SENHA);
             $this->fail('Precisava falhar quando o script falha.');
         } catch (RuntimeException $erro) {
             $this->assertStringNotContainsString(self::SENHA, $erro->getMessage());

@@ -23,11 +23,15 @@ final class WindowsAccessPoint implements AccessPointInterface
     public function __construct(
         private readonly CommandRunnerInterface $comandos,
         private readonly string $pastaDeTrabalho,
+        // Sem liberação, a rede dos celulares fica desligada no Windows, porque ainda não foi testada.
+        private readonly bool $liberado = false,
     ) {
     }
 
     public function ligar(string $nomeDaRede, string $senha): void
     {
+        $this->exigirLiberacao();
+
         $resultado = $this->rodar($this->scriptLigar(), [
             'CP_REDE_NOME' => $nomeDaRede,
             'CP_REDE_SENHA' => $senha,
@@ -42,6 +46,10 @@ final class WindowsAccessPoint implements AccessPointInterface
 
     public function desligar(): void
     {
+        if (! $this->liberado) {
+            return;
+        }
+
         $resultado = $this->rodar($this->scriptDesligar());
 
         if ($resultado['codigo'] !== 0) {
@@ -51,6 +59,10 @@ final class WindowsAccessPoint implements AccessPointInterface
 
     public function estaLigado(): bool
     {
+        if (! $this->liberado) {
+            return false;
+        }
+
         $resultado = $this->rodar($this->scriptEstado());
 
         return $resultado['codigo'] === 0 && str_contains($resultado['saida'], 'LIGADO');
@@ -59,6 +71,19 @@ final class WindowsAccessPoint implements AccessPointInterface
     public function enderecoDaRede(): ?string
     {
         return $this->estaLigado() ? self::IP_PADRAO_DO_WINDOWS : null;
+    }
+
+    /**
+     * Recusa a ligação enquanto o Windows não tiver sido testado. Assim, a mensagem aparece na tela
+     * Conexão, e nenhum comando é executado no computador da igreja.
+     */
+    private function exigirLiberacao(): void
+    {
+        if (! $this->liberado) {
+            throw new RuntimeException(
+                'O modo offline no Windows ainda não foi testado neste sistema, então a rede dos celulares fica desligada.',
+            );
+        }
     }
 
     /**

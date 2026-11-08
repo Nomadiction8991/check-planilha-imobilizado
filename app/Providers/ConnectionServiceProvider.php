@@ -25,7 +25,7 @@ final class ConnectionServiceProvider extends ServiceProvider
             $comandos = $app->make(CommandRunnerInterface::class);
 
             return PHP_OS_FAMILY === 'Windows'
-                ? new WindowsAccessPoint($comandos, sys_get_temp_dir())
+                ? new WindowsAccessPoint($comandos, sys_get_temp_dir(), (bool) config('modo_igreja.windows_liberado'))
                 : new NetworkManagerAccessPoint($comandos);
         });
 

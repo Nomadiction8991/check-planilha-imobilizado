@@ -40,6 +40,12 @@ return [
     'sem_repasse' => ['api/*', 'up', 'modo-igreja/*'],
 
     /*
+    | Windows: a rede dos celulares só liga depois de testada numa máquina Windows.
+    | Enquanto isso, fica desligada e a tela Conexão mostra o motivo.
+    */
+    'windows_liberado' => (bool) env('MODO_IGREJA_WINDOWS_LIBERADO', false),
+
+    /*
     | Código de acesso deste notebook no servidor. É um segredo: não versionar.
     */
     'aparelho_token' => env('MODO_IGREJA_APARELHO_TOKEN'),
