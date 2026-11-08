@@ -20,6 +20,9 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      - name: Criar as pastas que o Laravel escreve
+        run: mkdir -p bootstrap/cache storage/app storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs
+
       - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
