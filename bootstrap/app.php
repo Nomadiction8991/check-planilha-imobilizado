@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\RepassarParaServidor;
+use App\Http\Middleware\RestringirARedeLocal;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(RepassarParaServidor::class);
+
+        // Vem depois do repasse na lista, então roda antes: pedido de fora da rede local nem é repassado.
+        $middleware->prepend(RestringirARedeLocal::class);
         $middleware->trustProxies(at: '*');
 
         // A sincronização grava exatamente o que o notebook gravou: texto vazio continua vazio e
