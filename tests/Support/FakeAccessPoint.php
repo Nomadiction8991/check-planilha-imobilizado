@@ -18,6 +18,9 @@ final class FakeAccessPoint implements AccessPointInterface
 
     public ?string $enderecoDaRede = '10.42.0.1';
 
+    /** Quantas vezes o sistema perguntou se o ponto está ligado. */
+    public int $consultas = 0;
+
     public function ligar(string $nomeDaRede, string $senha): void
     {
         if ($this->erroAoLigar !== null) {
@@ -34,6 +37,8 @@ final class FakeAccessPoint implements AccessPointInterface
 
     public function estaLigado(): bool
     {
+        $this->consultas++;
+
         return $this->ligado;
     }
 
