@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature\Sync;
 
 use App\Sync\DeviceRegistry;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -206,6 +208,9 @@ class SyncPushTest extends SincronizacaoTestCase
      */
     public function test_registro_que_o_servidor_nao_aceita_vira_conflito_e_nao_trava_a_fila(): void
     {
+        // O erro técnico completo precisa ir para o log do servidor; a pessoa vê só o motivo simples.
+        Exceptions::fake();
+
         $this->enviar([
             // Sem código, que é obrigatório: o servidor recusa esta inclusão.
             $this->alteracao('55555555-5555-4555-8555-555555555555', 'produtos', '20', 'insert', null, [
@@ -225,6 +230,7 @@ class SyncPushTest extends SincronizacaoTestCase
             ->assertJsonPath('erros', []);
 
         $this->assertSame('Armário', DB::table('produtos')->where('id_produto', 21)->value('bem'));
+        Exceptions::assertReported(QueryException::class);
     }
 
     public function test_atualizacao_recusada_por_regra_de_dados_vira_conflito(): void
