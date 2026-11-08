@@ -4,4 +4,7 @@
 .git
 node_modules
 vendor
+vendor.*
+vendor-*
+vendor_*
 storage
