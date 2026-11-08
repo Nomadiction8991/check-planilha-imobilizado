@@ -9,35 +9,61 @@ concurrency:
   group: checkplanilha-production
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
-    runs-on: [self-hosted, checkplanilha]
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, check-planilha-imobilizado]
+    timeout-minutes: 45
     steps:
       - name: Atualizar aplicacao
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          APP_DIR="/var/www/checkplanilha"
+          APP_DIR="/home/weverton/projetos/check-planilha-imobilizado"
           cd "$APP_DIR"
 
-          git fetch --prune origin main
-          git reset --hard origin/main
+          AUTH_B64="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          GIT_TERMINAL_PROMPT=0 git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch --prune origin main
+          git reset --hard "$GITHUB_SHA"
 
-          mkdir -p bootstrap/cache \
-            storage/app \
-            storage/framework/cache/data \
-            storage/framework/sessions \
-            storage/framework/views \
-            storage/logs
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp \
+            --env npm_config_cache=/tmp/.npm \
+            --volume "$APP_DIR:/app" \
+            --workdir /app \
+            node:22-bookworm-slim \
+            sh -euc 'npm ci && npm run build'
 
-          composer install --no-dev --optimize-autoloader --no-interaction
-          npm ci
-          npm run build
+          docker compose --project-name check-planilha-imobilizado -f docker-compose.yml up -d --build --force-recreate --remove-orphans
 
-          php artisan migrate --force
-          php artisan optimize:clear
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
+          HOST_PORT="$(docker compose --project-name check-planilha-imobilizado -f docker-compose.yml port web 80 | awk -F: 'NR == 1 { print $NF }')"
+          ready=false
+          for attempt in $(seq 1 30); do
+            if curl -fsS "http://127.0.0.1:${HOST_PORT}/" >/dev/null; then
+              ready=true
+              break
+            fi
 
-          chmod -R u+rwX,go+rX bootstrap/cache storage
+            echo "Aguardando aplicacao responder, tentativa ${attempt}/30..."
+            sleep 2
+          done
+
+          if [ "$ready" != true ]; then
+            docker compose --project-name check-planilha-imobilizado -f docker-compose.yml ps
+            docker compose --project-name check-planilha-imobilizado -f docker-compose.yml logs --tail=120 web
+            exit 1
+          fi
+
+          docker compose --project-name check-planilha-imobilizado -f docker-compose.yml exec -T web php artisan migrate --force
+          docker compose --project-name check-planilha-imobilizado -f docker-compose.yml exec -T web php artisan optimize:clear
+          docker compose --project-name check-planilha-imobilizado -f docker-compose.yml exec -T web php artisan config:cache
+          docker compose --project-name check-planilha-imobilizado -f docker-compose.yml exec -T web php artisan route:cache
+          docker compose --project-name check-planilha-imobilizado -f docker-compose.yml exec -T web php artisan view:cache
+
+          curl -fsS "http://127.0.0.1:${HOST_PORT}/" >/dev/null
