@@ -19,6 +19,7 @@ As configurações ficam no arquivo `modo-igreja.env`, dentro da pasta de dados 
 - `MODO_IGREJA_PORTA`: porta do sistema. Padrão: `8080`.
 - `MODO_IGREJA_REDE_NOME`: nome da rede dos celulares. Padrão: `CheckPlanilha`.
 - `MODO_IGREJA_SERVIDOR_URL`: endereço do servidor online, usado no repasse e na sincronização.
+- `MODO_IGREJA_WINDOWS_LIBERADO`: libera a rede dos celulares no Windows. Padrão: `false`. Use `true` só depois de testar numa máquina Windows.
 - `MODO_IGREJA_APARELHO_TOKEN`: código deste notebook para a sincronização. Não compartilhe este valor.
 
 ## Como ligar no Linux
@@ -27,19 +28,23 @@ As configurações ficam no arquivo `modo-igreja.env`, dentro da pasta de dados 
 3. Depois de subir o servidor, o lançador espera até 10 segundos. Se o servidor não iniciar, ele mostra uma mensagem de erro.
 
 ## Como ligar no Windows
-Use o instalador do Windows. Antes de usar a rede dos celulares no Windows, leia a seção "Limitações conhecidas".
+A rede dos celulares no Windows fica desligada por padrão, porque ainda não foi testada numa máquina Windows. A tela Conexão mostra o motivo. Depois do teste, defina `MODO_IGREJA_WINDOWS_LIBERADO=true`.
 
 ## Como o notebook decide se está online
 - A cada minuto, o notebook pergunta ao servidor se ele responde.
 - Depois de 2 falhas seguidas, o notebook passa para offline.
 - Depois de 2 respostas seguidas, ele volta para online.
 
+## Quem pode acessar
+Só quem está na rede local da igreja, ou no próprio notebook, consegue abrir o sistema. Acesso de fora da rede, pela internet ou por um túnel, recebe erro 403.
+
 ## Problemas comuns
 - **Aparece "Sem endereço de rede para os celulares":** ligue o modo offline na tela Conexão. No Linux, o endereço só aparece quando o notebook tem uma rede principal.
 - **O lançador diz que a porta está em uso:** feche o programa que usa a porta, ou troque `MODO_IGREJA_PORTA`.
 - **O lançador diz que o servidor não iniciou:** leia a mensagem completa do lançador e confira a porta.
+- **Página com erro 403:** o acesso veio de fora da rede local ou por um túnel. Conecte o aparelho à rede do notebook ou à rede da igreja.
 
 ## Limitações conhecidas
-- **Windows:** a rede dos celulares ainda não foi testada num Windows real. Sem internet, a ligação pode ser recusada. No Windows, a rede não liga sozinha: é preciso ligar pela tela Conexão.
-- **Segurança da rede:** o servidor usado é o do próprio PHP, feito para testes e redes controladas. Ele aceita conexões de qualquer rede do notebook. Use o notebook só em rede de confiança e, se possível, bloqueie as outras redes no firewall.
-- **Atraso na tela:** a situação da rede dos celulares fica guardada por até 15 segundos. Por isso, a tela pode demorar um pouco para mostrar uma mudança.
+- **Windows:** fica desligado até ser testado. Mesmo depois de liberado, sem internet a ligação pode ser recusada.
+- **Segurança da rede:** o servidor usado é o do próprio PHP, feito para testes e redes controladas. Quem está na mesma rede local ainda vê a tela de login. Para reduzir isso, use uma regra de firewall que deixe entrar só a rede local, ou troque por um servidor de verdade.
+- **Atraso na tela:** a situação da rede dos celulares e o endereço ficam guardados por até 15 segundos.
