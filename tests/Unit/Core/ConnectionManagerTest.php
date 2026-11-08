@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Core;
 
 use App\Core\ConnectionManager;
+use App\Core\LerEnv;
 use PDO;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -184,8 +185,18 @@ final class ConnectionManagerTest extends TestCase
     #[Test]
     public function calling_create_new_connection_without_configure_throws_exception(): void
     {
-        $this->expectException(\PDOException::class);
+        // Sem isto, o teste lê o .env deste computador, e o banco que ele aponta pode existir.
+        // Aponta o padrão para uma porta fechada: a conexão precisa falhar em qualquer máquina.
+        $variaveis = new ReflectionProperty(LerEnv::class, 'variaveis');
+        $variaveis->setAccessible(true);
+        $variaveis->setValue(null, ['DB_HOST' => '127.0.0.1', 'DB_PORT' => '1']);
 
-        ConnectionManager::createNewConnection();
+        try {
+            $this->expectException(\PDOException::class);
+
+            ConnectionManager::createNewConnection();
+        } finally {
+            $variaveis->setValue(null, null);
+        }
     }
 }
