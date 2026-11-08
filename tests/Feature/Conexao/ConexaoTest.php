@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature\Conexao;
 
 use App\Contracts\AccessPointInterface;
+use App\Contracts\CommandRunnerInterface;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyNavigationServiceInterface;
 use App\Contracts\LegacyPermissionServiceInterface;
 use App\Support\Connection\HotspotCredentials;
 use Mockery\MockInterface;
 use Tests\Support\FakeAccessPoint;
+use Tests\Support\FakeNetworkCommandRunner;
 use Tests\TestCase;
 
 /**
@@ -19,6 +21,7 @@ use Tests\TestCase;
 class ConexaoTest extends TestCase
 {
     private FakeAccessPoint $pontoDeAcesso;
+    private FakeNetworkCommandRunner $comandos;
 
     protected function setUp(): void
     {
@@ -31,6 +34,8 @@ class ConexaoTest extends TestCase
         ]);
 
         $this->pontoDeAcesso = new FakeAccessPoint();
+        $this->comandos = new FakeNetworkCommandRunner();
+        $this->app->instance(CommandRunnerInterface::class, $this->comandos);
         $this->app->instance(AccessPointInterface::class, $this->pontoDeAcesso);
         $this->app->instance(HotspotCredentials::class, new HotspotCredentials(
             sys_get_temp_dir() . '/cp-conexao-' . uniqid() . '/rede.senha',
@@ -92,6 +97,14 @@ class ConexaoTest extends TestCase
             ->assertSee('Desligar modo offline');
 
         $this->assertSame(2, substr_count($this->comoAdministrador()->get('/conexao')->getContent(), '<svg'));
+    }
+
+    public function test_desligado_mostra_endereco_da_rede_existente(): void
+    {
+        $this->comandos->saida = 'src 10.0.0.229';
+        $this->comoAdministrador()->get('/conexao')->assertOk()
+            ->assertSee('Endereço para digitar no navegador do celular:')
+            ->assertSee('http://10.0.0.229:8080');
     }
 
     public function test_ativar_liga_o_ponto_de_acesso_e_volta_com_aviso(): void

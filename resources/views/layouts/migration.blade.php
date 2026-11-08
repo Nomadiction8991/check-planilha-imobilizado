@@ -1814,7 +1814,11 @@
             <div class="modo-igreja-aviso" role="status">
                 <strong><span aria-hidden="true">●</span> Cópia local · {{ $modoIgrejaOnline ? 'Modo online' : 'Modo offline' }}</strong>
                 <span>{{ $modoIgrejaOnline ? 'Você está trabalhando com o servidor online.' : 'Você está trabalhando na cópia deste computador.' }}</span>
-                <span>Endereço para os celulares: {{ request()->getSchemeAndHttpHost() }}</span>
+                @if ($modoIgrejaEndereco !== null)
+                    <span>Endereço para os celulares: {{ $modoIgrejaEndereco }}</span>
+                @else
+                    <span>Sem endereço de rede para os celulares. Ligue o modo offline na página Conexão para criar a rede dos celulares.</span>
+                @endif
             </div>
         @endif
 

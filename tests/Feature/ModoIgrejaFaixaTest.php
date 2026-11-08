@@ -5,20 +5,30 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Contracts\LegacyAuthSessionServiceInterface;
+use App\Contracts\AccessPointInterface;
+use App\Contracts\CommandRunnerInterface;
 use App\Contracts\LegacyNavigationServiceInterface;
 use App\Contracts\LegacyPermissionServiceInterface;
 use App\Support\Modo\EstadoModo;
 use Illuminate\Support\Facades\Route;
 use Mockery\MockInterface;
 use Tests\TestCase;
+use Tests\Support\FakeAccessPoint;
+use Tests\Support\FakeNetworkCommandRunner;
 
 final class ModoIgrejaFaixaTest extends TestCase
 {
     private string $arquivo;
+    private FakeNetworkCommandRunner $comandos;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->comandos = new FakeNetworkCommandRunner();
+        $this->app->instance(CommandRunnerInterface::class, $this->comandos);
+        $this->app->instance(AccessPointInterface::class, new FakeAccessPoint());
+        config(['modo_igreja.porta' => 8080]);
+        config(['app.url' => 'http://notebook.test']);
         $this->arquivo = sys_get_temp_dir().'/estado-faixa-'.uniqid().'/estado.json';
         $this->app->instance(EstadoModo::class, new EstadoModo($this->arquivo));
         config(['modo_igreja.ativo' => true, 'modo_igreja.servidor_url' => 'https://servidor-secreto.test']);
@@ -62,9 +72,15 @@ final class ModoIgrejaFaixaTest extends TestCase
         $this->pagina()->assertOk()->assertDontSee('Modo online')->assertDontSee('Modo offline');
     }
 
-    public function test_mostra_origem_atual_sem_url_do_servidor(): void
+    public function test_mostra_endereco_da_rede_sem_localhost(): void
     {
-        $this->pagina()->assertOk()->assertSee('http://localhost')->assertDontSee('https://servidor-secreto.test');
+        $this->comandos->saida = 'src 10.0.0.229';
+        $this->pagina()->assertOk()->assertSee('http://10.0.0.229:8080')->assertDontSee('localhost')->assertDontSee('https://servidor-secreto.test');
+    }
+
+    public function test_sem_endereco_mostra_orientacao(): void
+    {
+        $this->pagina()->assertOk()->assertSee('Sem endereço de rede para os celulares. Ligue o modo offline na página Conexão para criar a rede dos celulares.')->assertDontSee('localhost');
     }
 
     private function pagina(): \Illuminate\Testing\TestResponse
@@ -76,6 +92,6 @@ final class ModoIgrejaFaixaTest extends TestCase
             'usuario_email' => 'MARIA@EXEMPLO.COM',
             'comum_id' => 7,
             'is_admin' => false,
-        ])->get('http://localhost/teste-faixa-modo');
+        ])->get('http://notebook.test/teste-faixa-modo');
     }
 }

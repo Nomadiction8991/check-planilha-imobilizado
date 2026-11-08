@@ -39,6 +39,15 @@ class LancadorLinuxTest extends TestCase
         $this->assertStringContainsString('schedule:run', $saida);
     }
 
+    public function test_servidor_local_atende_mais_de_um_pedido_ao_mesmo_tempo(): void
+    {
+        // Com um processo só, um pedido lento trava todos os celulares enquanto ele espera.
+        $this->assertMatchesRegularExpression(
+            '/PHP_CLI_SERVER_WORKERS=\d+ \S+ -S 0\.0\.0\.0:8080 /',
+            $this->simular(),
+        );
+    }
+
     public function test_simulacao_cria_a_configuracao_quando_ela_nao_existe(): void
     {
         $this->assertStringContainsString('modo-igreja:configurar', $this->simular());
@@ -112,6 +121,84 @@ class LancadorLinuxTest extends TestCase
     public function test_simulacao_nao_mostra_senhas(): void
     {
         $this->assertStringNotContainsString('IDENTIFIED', $this->simular());
+    }
+
+    public function test_porta_ocupada_impede_abertura_do_navegador(): void
+    {
+        [$codigo, $saida, $abertura] = $this->executarComProgramasFalsos('ocupada');
+
+        $this->assertNotSame(0, $codigo);
+        $this->assertStringContainsString('8081', $saida);
+        $this->assertStringContainsString('porta', $saida);
+        $this->assertSame('', $abertura);
+    }
+
+    public function test_servidor_iniciado_abre_o_navegador(): void
+    {
+        [$codigo, $saida, $abertura] = $this->executarComProgramasFalsos('inicia');
+
+        $this->assertSame(0, $codigo, $saida);
+        $this->assertSame("http://localhost:8081\n", $abertura);
+    }
+
+    public function test_servidor_que_nao_inicia_impede_abertura_do_navegador(): void
+    {
+        [$codigo, $saida, $abertura] = $this->executarComProgramasFalsos('falha');
+
+        $this->assertNotSame(0, $codigo);
+        $this->assertStringContainsString('servidor', $saida);
+        $this->assertSame('', $abertura);
+    }
+
+    private function executarComProgramasFalsos(string $cenario): array
+    {
+        $diretorio = sys_get_temp_dir() . '/lancador-' . bin2hex(random_bytes(8));
+        mkdir("$diretorio/bin", 0700, true);
+        mkdir("$diretorio/pacote/php/bin", 0700, true);
+        mkdir("$diretorio/pacote/mysql/bin", 0700, true);
+        mkdir("$diretorio/app", 0700, true);
+        mkdir("$diretorio/dados", 0700, true);
+        file_put_contents("$diretorio/dados/modo-igreja.env", "MODO_IGREJA_PORTA=8081\n");
+        file_put_contents("$diretorio/dados/mysql-administrador.cnf", '');
+        file_put_contents("$diretorio/ambiente.sh", "kill() { :; }\n");
+        $programas = [
+            'bin/ss' => 'if [ "$CENARIO" = ocupada ] || [ -f "$TEMP_TESTE/subiu" ]; then echo "LISTEN 0 128 0.0.0.0:8081 0.0.0.0:*"; fi',
+            'bin/xdg-open' => 'printf "%s\n" "$1" > "$TEMP_TESTE/abertura"',
+            'bin/sleep' => 'if [ "$1" = 60 ]; then exit 1; fi; /bin/sleep 0.01',
+            'pacote/php/bin/php' => 'if [ "$1" = -S ] && [ "$CENARIO" = inicia ]; then touch "$TEMP_TESTE/subiu"; fi',
+            'pacote/mysql/bin/mysqld' => ':',
+            'pacote/mysql/bin/mysql' => ':',
+            'pacote/mysql/bin/mysqladmin' => ':',
+        ];
+        foreach ($programas as $caminho => $conteudo) {
+            file_put_contents("$diretorio/$caminho", "#!/bin/bash\n$conteudo\n");
+            chmod("$diretorio/$caminho", 0700);
+        }
+
+        try {
+            $processo = new Process(['bash', self::LANCADOR], null, [
+                'PATH' => "$diretorio/bin:" . getenv('PATH'),
+                'CP_HOME' => "$diretorio/pacote",
+                'CP_APP' => "$diretorio/app",
+                'CP_DADOS' => "$diretorio/dados",
+                'TEMP_TESTE' => $diretorio,
+                'CENARIO' => $cenario,
+                'BASH_ENV' => "$diretorio/ambiente.sh",
+            ]);
+            $processo->run();
+
+            return [$processo->getExitCode(), $processo->getOutput() . $processo->getErrorOutput(),
+                is_file("$diretorio/abertura") ? file_get_contents("$diretorio/abertura") : ''];
+        } finally {
+            $arquivos = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($diretorio, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST,
+            );
+            foreach ($arquivos as $arquivo) {
+                $arquivo->isDir() ? rmdir($arquivo->getPathname()) : unlink($arquivo->getPathname());
+            }
+            rmdir($diretorio);
+        }
     }
 
     private function simular(): string

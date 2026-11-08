@@ -169,6 +169,7 @@ class AppServiceProvider extends ServiceProvider
             $currentUser = $auth->currentUser();
             if ($currentUser !== null && config('modo_igreja.ativo')) {
                 $view->with('modoIgrejaOnline', $this->app->make(EstadoModo::class)->estaOnline());
+                $view->with('modoIgrejaEndereco', $this->app->make(\App\Support\Connection\EnderecoParaCelulares::class)->endereco());
             }
             $legacyPermissions = $currentUser !== null
                 ? $permissions->currentPermissions()

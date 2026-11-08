@@ -222,7 +222,25 @@ rodar "$CP_PHP" "$CP_APP/artisan" migrate --force
 rodar "$CP_PHP" "$CP_APP/artisan" sincronizacao:gatilhos
 
 # 5) Servidor embutido do PHP. "php -S" usa as variáveis deste processo (artisan serve não usa).
-rodar_em_segundo_plano "$CP_PHP" -S "0.0.0.0:$MODO_IGREJA_PORTA" -t public public/index.php
+if (( ! simular )); then
+    command -v ss >/dev/null 2>&1 || erro "não foi possível verificar a porta: o programa ss não foi encontrado"
+    if ss -ltn | grep -qE ":${MODO_IGREJA_PORTA}[[:space:]]"; then
+        erro "outro programa está usando a porta $MODO_IGREJA_PORTA, como o sistema de teste do Docker. Feche esse programa ou defina MODO_IGREJA_PORTA com outra porta, por exemplo 8081."
+    fi
+fi
+# Quatro processos: um pedido lento não trava os outros celulares. A variável é lida pelo próprio PHP.
+rodar_em_segundo_plano env PHP_CLI_SERVER_WORKERS=4 "$CP_PHP" -S "0.0.0.0:$MODO_IGREJA_PORTA" -t public public/index.php
+if (( ! simular )); then
+    servidor_iniciado=0
+    for tentativa in {1..20}; do
+        if ss -ltn | grep -qE ":${MODO_IGREJA_PORTA}[[:space:]]"; then
+            servidor_iniciado=1
+            break
+        fi
+        sleep 0.5
+    done
+    (( servidor_iniciado )) || erro "o servidor não iniciou na porta $MODO_IGREJA_PORTA. Veja o registro de erros, se houver."
+fi
 
 # 6) Sincronização: o agendador do Laravel roda a cada minuto; a tarefa decide quando sincronizar.
 if (( simular )); then

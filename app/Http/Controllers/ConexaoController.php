@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Support\Connection\OfflineModeService;
+use App\Support\Connection\EnderecoParaCelulares;
 use App\Support\Connection\QrCodeSvg;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,7 @@ final class ConexaoController extends Controller
 {
     public function __construct(
         private readonly OfflineModeService $modoOffline,
+        private readonly EnderecoParaCelulares $enderecoParaCelulares,
     ) {
     }
 
@@ -29,6 +31,7 @@ final class ConexaoController extends Controller
 
         return view('conexao.index', [
             'status' => $status,
+            'enderecoParaCelulares' => $status['ligado'] ? null : $this->enderecoParaCelulares->endereco(),
             'qrRede' => $status['texto_rede'] === null ? null : QrCodeSvg::de($status['texto_rede']),
             'qrEndereco' => $status['endereco_sistema'] === null ? null : QrCodeSvg::de($status['endereco_sistema']),
         ]);

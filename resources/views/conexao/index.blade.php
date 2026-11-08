@@ -54,6 +54,9 @@
 
         @else
             <p>O modo offline está desligado. Ative para que os celulares se conectem a este computador, mesmo sem internet.</p>
+            @if ($enderecoParaCelulares !== null)
+                <p>Endereço para digitar no navegador do celular: <strong>{{ $enderecoParaCelulares }}</strong></p>
+            @endif
 
             <form method="POST" action="{{ route('migration.conexao.ligar') }}">
                 @csrf
