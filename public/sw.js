@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'check-planilha-pwa-v1';
+const CACHE_NAME = 'check-planilha-pwa-v2';
 const PRECACHE_URLS = [
   '/',
   '/login',
