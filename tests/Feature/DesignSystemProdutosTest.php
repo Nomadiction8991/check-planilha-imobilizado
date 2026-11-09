@@ -92,6 +92,10 @@ class DesignSystemProdutosTest extends TestCase
         $this->get(route('migration.products.index'))
             ->assertOk()
             ->assertSee('data-filter-open', false)
+            ->assertSee('aria-label="Buscar produtos"', false)
+            ->assertSee('aria-label="Filtros"', false)
+            ->assertDontSee('<span class="mobile-action-text">Buscar</span>', false)
+            ->assertDontSee('<span class="mobile-action-text">Filtros</span>', false)
             ->assertSee('<dialog id="filtros-produtos"', false)
             ->assertSee('Aplicar filtros')
             ->assertDontSee('class="product-filters-toggle"', false);

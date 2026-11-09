@@ -76,10 +76,20 @@ final class ControlesMobileTest extends TestCase
         self::assertStringContainsString('clip-path: inset(50%);', $css);
     }
 
-    public function test_barras_de_filtro_tem_icones_e_texto_acessivel(): void
+    public function test_barras_de_filtro_tem_icones_e_nomes_acessiveis(): void
     {
         foreach (['administrations/index', 'asset-types/index', 'audits/index', 'churches/index', 'departments/index', 'labels/index', 'products/index', 'products/verification', 'reports/index', 'users/index'] as $view) {
             $html = file_get_contents(resource_path('views/'.$view.'.blade.php'));
+            if ($view === 'products/index') {
+                self::assertStringContainsString('aria-label="Buscar produtos"', $html);
+                self::assertStringContainsString('aria-label="Filtros"', $html);
+                self::assertStringContainsString('>search</span></button>', $html);
+                self::assertStringContainsString('>tune</span></button>', $html);
+                self::assertStringNotContainsString('>search</span><span class="mobile-action-text">Buscar</span>', $html);
+                self::assertStringNotContainsString('>tune</span><span class="mobile-action-text">Filtros</span>', $html);
+                continue;
+            }
+
             foreach (['Buscar' => 'search', 'Filtros' => 'tune'] as $texto => $icone) {
                 self::assertStringContainsString('>'.$icone.'</span><span class="mobile-action-text">'.$texto.'</span>', $html, "Controle {$texto} em {$view}");
             }
