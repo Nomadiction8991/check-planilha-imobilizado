@@ -40,6 +40,14 @@ final class CartaoListaMobileTest extends TestCase
         self::assertDoesNotMatchRegularExpression('/\.inline-actions\s*>\s*:last-child:nth-child\(odd\)/', $layout, 'A última ação não deve se expandir pela linha.');
     }
 
+    public function test_acoes_da_lista_de_produtos_ficam_na_mesma_linha(): void
+    {
+        $layout = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+
+        self::assertSame(1, preg_match('/\.table-shell\.product-listing td\[data-card-actions\] \.inline-actions\s*\{[^}]*flex-wrap:\s*nowrap;/s', $layout), 'As ações do produto não devem quebrar para outra linha.');
+        self::assertSame(1, preg_match('/@media\s*\(min-width:\s*640px\)\s*\{[^}]*\.product-listing th:last-child,[^}]*\.product-listing td\[data-card-actions\]\s*\{[^}]*min-width:\s*136px;/s', $layout), 'A coluna precisa comportar os dois ícones lado a lado.');
+    }
+
     public function test_textos_longos_da_importacao_ocupam_a_linha_inteira(): void
     {
         $layout = file_get_contents(resource_path('views/layouts/migration.blade.php'));

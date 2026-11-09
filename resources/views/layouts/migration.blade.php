@@ -1694,6 +1694,14 @@
             padding: 0;
             justify-content: center;
         }
+        .table-shell.product-listing td[data-card-actions] .inline-actions { flex-wrap: nowrap; }
+        @media (min-width: 640px) {
+            .table-shell.product-listing th:last-child,
+            .table-shell.product-listing td[data-card-actions] {
+                width: 136px;
+                min-width: 136px;
+            }
+        }
         .conflito-acoes form:has(.mobile-action-icon) { width: auto; }
         .filters-bar { display: flex; align-items: end; gap: 12px; }
         .filters-search { flex: 1; min-width: 0; display: grid; gap: 4px; }
