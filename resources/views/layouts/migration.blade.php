@@ -1600,18 +1600,17 @@
             }
 
             table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .inline-actions {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                display: flex;
+                flex-wrap: wrap;
                 gap: 8px;
-            }
-
-            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .inline-actions > :last-child:nth-child(odd) {
-                grid-column: 1 / -1;
             }
 
             table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] .btn,
             table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] select {
                 min-height: 44px;
+            }
+
+            table:not(.dependency-table, .verification-table) > tbody > tr > td[data-card-actions] select {
                 width: 100%;
             }
         }

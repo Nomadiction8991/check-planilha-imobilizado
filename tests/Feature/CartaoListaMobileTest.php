@@ -36,7 +36,8 @@ final class CartaoListaMobileTest extends TestCase
         self::assertStringContainsString('data-card-title', $layout, 'O título deve receber destaque.');
         self::assertStringContainsString('data-card-actions', $layout, 'As ações devem ficar separadas.');
         self::assertStringContainsString('min-height: 44px', $layout, 'As ações devem ter altura suficiente para toque.');
-        self::assertMatchesRegularExpression('/\.inline-actions\s*>\s*:last-child:nth-child\(odd\)\s*\{\s*grid-column:\s*1\s*\/\s*-1/s', $layout, 'A última ação de uma quantidade ímpar deve ocupar a linha inteira.');
+        self::assertMatchesRegularExpression('/td\[data-card-actions\] \.inline-actions\s*\{\s*display:\s*flex;[^}]*gap:\s*8px;/s', $layout, 'As ações devem ficar lado a lado e compactas.');
+        self::assertDoesNotMatchRegularExpression('/\.inline-actions\s*>\s*:last-child:nth-child\(odd\)/', $layout, 'A última ação não deve se expandir pela linha.');
     }
 
     public function test_textos_longos_da_importacao_ocupam_a_linha_inteira(): void
