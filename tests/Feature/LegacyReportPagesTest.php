@@ -50,7 +50,7 @@ final class LegacyReportPagesTest extends TestCase
                         [
                             'codigo' => '14.1',
                             'titulo' => 'Relatório 14.1',
-                            'descricao' => 'Formulário de doação e aquisição de bens',
+                            'descricao' => 'Declaração de doação de bem móvel',
                             'rota' => '/reports/14.1?comum_id=7',
                             'quantidade' => 3,
                         ],
@@ -210,7 +210,7 @@ final class LegacyReportPagesTest extends TestCase
                     [
                         'codigo' => '14.1',
                         'titulo' => 'Relatório 14.1',
-                        'descricao' => 'Formulário de doação e aquisição de bens',
+                        'descricao' => 'Declaração de doação de bem móvel',
                         'rota' => '/reports/14.1?comum_id=7',
                         'quantidade' => 3,
                     ],
@@ -293,6 +293,16 @@ final class LegacyReportPagesTest extends TestCase
             strpos($html, '<dialog id="filtros-reports"'),
             strpos($html, 'id="reports-church-select"'),
         );
+    }
+
+    public function testReportsIndexGivesChurchSelectTheSameHeightAsButtons(): void
+    {
+        $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        // O seletor de igreja acompanha a altura dos botões da barra: 50 px no computador e 44 px no celular.
+        $response->assertSee('.filters-search select { width: 100%; min-width: 0; height: 50px; font-size: 16px; }', escape: false);
+        $response->assertSee('.filters-search select { height: 44px; }', escape: false);
     }
 
     public function testReportsIndexKeepsAdministrationAndStateFiltersInDialog(): void
