@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyReportServiceInterface;
+use App\Contracts\LegacyTransferServiceInterface;
 use App\Models\Legacy\Administracao;
 use App\Models\Legacy\Comum;
 use App\Support\LegacyCsvSanitizer;
@@ -246,6 +247,7 @@ class LegacyReportService implements LegacyReportServiceInterface
             'total_editados_checados_observacao' => 0,
             'total_editados_checados_observacao_etiqueta' => 0,
             'total_backup' => 0,
+            'total_transferidos' => 0,
         ];
 
         foreach ($rawProducts as $rawProduct) {
@@ -323,6 +325,9 @@ class LegacyReportService implements LegacyReportServiceInterface
             }
         }
 
+        // Transferências que a igreja enviou ou recebeu entram no relatório de alterações.
+        $transferencias = app(LegacyTransferServiceInterface::class)->historicoDaIgreja($churchId);
+        $summary['total_transferidos'] = count($transferencias);
         $summary['total_backup'] = count($items);
 
         return [
@@ -330,6 +335,7 @@ class LegacyReportService implements LegacyReportServiceInterface
             'itens' => $items,
             'resumo' => $summary,
             'backup' => $this->buildVerificationPositionCsv($churchData, $items),
+            'transferencias' => $transferencias,
         ];
     }
 

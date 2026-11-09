@@ -21,6 +21,7 @@ use App\Contracts\LegacyProductManagementServiceInterface;
 use App\Contracts\LegacyProductUtilityServiceInterface;
 use App\Contracts\LegacyProductBrowserServiceInterface;
 use App\Contracts\LegacyReportServiceInterface;
+use App\Contracts\LegacyTransferServiceInterface;
 use App\Contracts\LegacyPasswordRecoveryServiceInterface;
 use App\Contracts\LegacyNavigationServiceInterface;
 use App\Contracts\LegacySpreadsheetImportServiceInterface;
@@ -45,6 +46,7 @@ use App\Services\LegacyProductBrowserService;
 use App\Services\LegacyPasswordRecoveryService;
 use App\Services\LegacyNavigationService;
 use App\Services\LegacyReportService;
+use App\Services\LegacyTransferService;
 use App\Services\LegacySpreadsheetImportService;
 use App\Services\LegacyUserBrowserService;
 use App\Services\LegacyUserManagementService;
@@ -147,6 +149,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(
             LegacyReportServiceInterface::class,
             LegacyReportService::class
+        );
+        $this->app->singleton(
+            LegacyTransferServiceInterface::class,
+            LegacyTransferService::class
         );
     }
 

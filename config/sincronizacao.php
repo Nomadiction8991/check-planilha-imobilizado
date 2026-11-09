@@ -25,6 +25,8 @@ return [
         'import_job_processed',
         'produtos',
         'tipos_bens',
+        'transferencias',
+        'transferencia_itens',
         'usuarios',
     ],
 
@@ -119,6 +121,8 @@ return [
         'import_erros',
         'import_job_processed',
         'produtos',
+        'transferencias',
+        'transferencia_itens',
     ],
 
 ];

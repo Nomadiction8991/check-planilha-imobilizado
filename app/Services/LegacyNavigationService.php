@@ -53,6 +53,13 @@ final class LegacyNavigationService implements LegacyNavigationServiceInterface
                 'permission' => 'products.edit',
                 'admin_only' => false,
             ],
+            'transfers' => [
+                'label' => 'Transferências',
+                'route' => 'migration.transfers.index',
+                'active_patterns' => ['migration.transfers.*'],
+                'permission' => 'products.edit',
+                'admin_only' => false,
+            ],
             'labels' => [
                 'label' => 'Etiquetas',
                 'route' => 'migration.labels.index',
