@@ -42,8 +42,8 @@
                         <label for="busca-produtos">Busca geral</label>
                         <input id="busca-produtos" type="search" name="busca" value="{{ $filters->search }}" placeholder="Código, descrição, dependência, tipo ou status" data-filter-search data-filter-server>
                     </div>
-                    <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
-                    <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-produtos"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
+                    <button type="submit" class="btn primary" aria-label="Buscar produtos" title="Buscar produtos"><span class="material-symbols-outlined" aria-hidden="true">search</span></button>
+                    <button type="button" class="btn" data-filter-open aria-label="Filtros" title="Filtros" aria-haspopup="dialog" aria-controls="filtros-produtos"><span class="material-symbols-outlined" aria-hidden="true">tune</span></button>
                 </div>
                 <dialog id="filtros-produtos" class="filters-dialog" aria-labelledby="filtros-produtos-titulo" data-filter-dialog>
                     <header class="filters-dialog-head">
@@ -236,6 +236,7 @@
     <style>
         .product-header-actions { margin-top: 20px; }
         .product-header-actions .btn, .product-listing .btn, .filters .btn { min-height: 44px; }
+        .filters-bar > .btn { width: 44px; min-width: 44px; padding-inline: 0; justify-content: center; }
         .product-listing { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
         .product-listing table { background: var(--surface); }
         .product-listing th { background: var(--surface-soft); }
