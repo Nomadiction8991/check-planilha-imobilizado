@@ -47,6 +47,13 @@ class PreCommitTest extends TestCase
         $this->assertPermitido($this->executarHook());
     }
 
+    public function test_permite_placeholder_de_senha_sem_segredo_em_modelo(): void
+    {
+        $this->adicionar('.env.example', "DB_PASSWORD=change-me\nDB_ROOT_PASSWORD=change-me\n");
+
+        $this->assertPermitido($this->executarHook());
+    }
+
     public function test_bloqueia_chave_de_aplicacao_com_valor_em_qualquer_arquivo(): void
     {
         $this->adicionar('notas.md', "APP_KEY=base64:Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MGFiY2RlZmdoaWpr\n");
