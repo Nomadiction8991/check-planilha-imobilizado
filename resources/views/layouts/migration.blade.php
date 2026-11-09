@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name'))</title>
+    <title>@yield('title', $marcaNome)</title>
     @include('partials.theme-init')
     @include('partials.pwa')
     <style>
@@ -1150,18 +1150,29 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--ui-border);
         }
 
         .mobile-menu-copy {
-            display: grid;
-            gap: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
         }
+
+        .mobile-menu-copy img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+        .mobile-menu-close { width: 44px; height: 44px; flex-shrink: 0; }
 
         .mobile-menu-copy strong {
             font-size: 16px;
             font-weight: 700;
             line-height: 1.08;
             letter-spacing: -0.01em;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .mobile-menu-copy p {
@@ -1888,7 +1899,8 @@
             <aside class="mobile-menu-panel app-sidebar" aria-labelledby="mobile-menu-title">
                 <div class="mobile-menu-head">
                     <div class="mobile-menu-copy">
-                        <strong id="mobile-menu-title">Check Planilha</strong>
+                        <img src="{{ $marcaLogoUrl }}" alt="">
+                        <strong id="mobile-menu-title">{{ $marcaNome }}</strong>
                 </div>
                     <button
                         type="button"

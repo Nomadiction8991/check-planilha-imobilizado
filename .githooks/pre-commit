@@ -35,7 +35,7 @@ for arquivo in $(git diff --cached --name-only --diff-filter=ACM); do
   # Chave de ambiente com nome de segredo e valor preenchido. "null" e valor vazio são aceitos.
   chaves=$(printf '%s\n' "$linhas" \
     | grep -E '^\+[A-Z][A-Z0-9_]*(PASSWORD|PASS|SECRET|TOKEN|KEY)[A-Z0-9_]*=[^[:space:]]' \
-    | grep -vE '=(null|NULL|changeme|"null"|"")$' \
+    | grep -vE '=(null|NULL|changeme|change-me|"null"|"")$' \
     | sed -E 's/^\+//; s/=.*//')
   for chave in $chaves; do
     echo "Commit bloqueado: valor de segredo em '$arquivo' (chave $chave)."

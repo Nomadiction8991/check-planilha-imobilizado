@@ -1,6 +1,6 @@
 @extends('layouts.migration')
 
-@section('title', 'Configurações | ' . config('app.name'))
+@section('title', 'Configurações | ' . $marcaNome)
 
 @section('content')
     @if (session('status') || $errors->any())
@@ -26,6 +26,29 @@
 
     <section class="section">
         <div class="config-grid">
+            <div class="table-shell config-card config-card--marca">
+                <form method="POST" enctype="multipart/form-data" action="{{ route('migration.configuracoes.marca.update') }}" class="form-shell" onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').textContent = 'Salvando...';">
+                    @csrf
+                    <div class="section-head section-head--stacked">
+                        <div><h2>Nome e logo</h2><p>Escolha como o sistema aparece no menu e na aba do navegador.</p></div>
+                    </div>
+                    <img class="config-marca-logo" src="{{ $marcaLogoUrl }}" alt="Logo atual">
+                    <div class="field-grid">
+                        <label>
+                            Nome do sistema
+                            <input type="text" name="app_name" value="{{ old('app_name', $marcaNome) }}" maxlength="40" required>
+                            @error('app_name') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
+                        </label>
+                        <label>
+                            Trocar logo
+                            <input type="file" name="app_logo" accept="image/png,image/jpeg,image/webp" aria-describedby="marca-logo-dica">
+                            @error('app_logo') <span class="cadastro-field-error" role="alert">{{ $message }}</span> @enderror
+                            <span class="field-note" id="marca-logo-dica">PNG, JPG ou WEBP, até 512 KB. Prefira imagem quadrada.</span>
+                        </label>
+                    </div>
+                    <div class="inline-actions inline-actions--end"><button class="btn primary" type="submit">Salvar nome e logo</button></div>
+                </form>
+            </div>
             <div class="table-shell config-card config-card--mail">
                 <form method="POST" action="{{ route('migration.configuracoes.update') }}" class="form-shell">
                     @csrf
@@ -209,6 +232,7 @@
 
     <style>
         .cadastro-field-error { display: block; color: var(--ui-danger); margin-top: 4px; }
+        .config-marca-logo { width: 64px; height: 64px; object-fit: contain; }
         .config-card { font-size: 16px; line-height: 1.5; }
         .config-card .btn.primary { background: var(--product-primary); border-color: var(--product-primary); color: var(--product-primary-text); }
         .config-card .btn.primary:hover { background: var(--product-primary-hover); box-shadow: none; }
@@ -361,6 +385,7 @@
 
         @media (min-width: 1024px) {
             .config-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .config-card--marca { grid-column: 1 / -1; }
         }
 
         @media (max-width: 720px) {

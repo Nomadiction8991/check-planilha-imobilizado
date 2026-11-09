@@ -1,6 +1,6 @@
 # Hooks do Git
 
-- `pre-commit`: bloqueia o commit quando há arquivo de ambiente (`.env`) com valores, chave de aplicação com valor, chave privada ou token de acesso. Modelos (`.env.example`) com valor vazio e o texto `null` passam.
+- `pre-commit`: bloqueia o commit quando há arquivo de ambiente (`.env`) com valores, chave de aplicação com valor, chave privada ou token de acesso. Modelos (`.env.example`) com valor vazio, `null` ou `change-me` passam.
 
 Ative uma vez em cada clone do projeto:
 

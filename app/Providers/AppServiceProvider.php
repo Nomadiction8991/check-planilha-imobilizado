@@ -10,6 +10,7 @@ use App\Contracts\LegacyAdministrationManagementServiceInterface;
 use App\Contracts\LegacyAuthSessionServiceInterface;
 use App\Contracts\LegacyAssetTypeManagementServiceInterface;
 use App\Contracts\LegacyMailConfigurationServiceInterface;
+use App\Contracts\LegacyBrandingServiceInterface;
 use App\Contracts\LegacyChurchBrowserServiceInterface;
 use App\Contracts\LegacyChurchManagementServiceInterface;
 use App\Contracts\LegacyAuditTrailServiceInterface;
@@ -33,6 +34,7 @@ use App\Services\LegacyAdministrationManagementService;
 use App\Services\LegacyAuthSessionService;
 use App\Services\LegacyAssetTypeManagementService;
 use App\Services\LegacyMailConfigurationService;
+use App\Services\LegacyBrandingService;
 use App\Services\LegacyChurchBrowserService;
 use App\Services\LegacyChurchManagementService;
 use App\Services\LegacyAuditTrailService;
@@ -62,6 +64,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(LegacyBrandingServiceInterface::class, LegacyBrandingService::class);
         $this->app->singleton(
             LegacyInventoryServiceInterface::class,
             LegacyInventoryService::class
@@ -161,6 +164,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('*', function ($view): void {
+            $marca = $this->app->make(LegacyBrandingServiceInterface::class);
+            $view->with('marcaNome', $marca->nome());
+            $view->with('marcaLogoUrl', route('marca.logo', ['v' => $marca->versao()]));
+        });
         if (str_starts_with((string) config('app.url'), 'https://')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
