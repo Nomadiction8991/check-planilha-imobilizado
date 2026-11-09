@@ -195,6 +195,7 @@ final class LegacyTransferService implements LegacyTransferServiceInterface
 
             foreach ($transferencia->itens as $item) {
                 $linhas[] = [
+                    'transferencia_id' => (int) $transferencia->id,
                     'tipo' => $saida ? 'saida' : 'entrada',
                     'numero' => $saida ? $transferencia->numero_saida : $transferencia->numero_entrada,
                     'data' => $transferencia->created_at?->format('d/m/Y H:i') ?? '',

@@ -15,6 +15,7 @@ use App\Http\Controllers\LegacyDepartmentController;
 use App\Http\Controllers\LegacyMigrationDashboardController;
 use App\Http\Controllers\LegacyProductController;
 use App\Http\Controllers\LegacyReportController;
+use App\Http\Controllers\LegacyTransferController;
 use App\Http\Controllers\LegacyRouteCompatibilityController;
 use App\Http\Controllers\LegacyUserController;
 use App\Http\Controllers\BrazilLocalityController;
@@ -91,6 +92,25 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::post('/products/verificacao', [LegacyProductController::class, 'storeVerification'])
         ->middleware('legacy.permission:products.edit')
         ->name('migration.products.verification.store');
+    Route::get('/transferencias', [LegacyTransferController::class, 'index'])
+        ->middleware('legacy.permission:products.edit')
+        ->name('migration.transfers.index');
+    Route::get('/transferencias/nova', [LegacyTransferController::class, 'create'])
+        ->middleware('legacy.permission:products.edit')
+        ->name('migration.transfers.create');
+    Route::post('/transferencias', [LegacyTransferController::class, 'store'])
+        ->middleware('legacy.permission:products.edit')
+        ->name('migration.transfers.store');
+    Route::post('/transferencias/codigo', [LegacyTransferController::class, 'storeCodigo'])
+        ->middleware('legacy.permission:products.edit')
+        ->name('migration.transfers.code');
+    Route::get('/transferencias/{transferencia}', [LegacyTransferController::class, 'show'])
+        ->middleware('legacy.permission:products.edit')
+        ->name('migration.transfers.show');
+    Route::get('/transferencias/{transferencia}/formulario/{tipo}', [LegacyTransferController::class, 'formulario'])
+        ->where('tipo', 'saida|entrada')
+        ->middleware('legacy.permission:products.edit')
+        ->name('migration.transfers.form');
     Route::get('/products/observation', [LegacyRouteCompatibilityController::class, 'productsObservation'])
         ->middleware('legacy.permission:products.edit')
         ->name('migration.compat.products.observation');

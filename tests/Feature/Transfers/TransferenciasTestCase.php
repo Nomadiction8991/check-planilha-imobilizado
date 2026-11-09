@@ -20,9 +20,22 @@ abstract class TransferenciasTestCase extends TestCase
     {
         parent::setUp();
 
-        foreach (['transferencia_itens', 'transferencias', 'produtos', 'dependencias', 'comums', 'administracoes', 'tipos_bens'] as $tabela) {
+        foreach (['transferencia_itens', 'transferencias', 'produtos', 'dependencias', 'comums', 'administracoes', 'tipos_bens', 'usuarios', 'configuracoes'] as $tabela) {
             Schema::dropIfExists($tabela);
         }
+
+        Schema::create('usuarios', function ($table): void {
+            $table->integer('id')->primary();
+            $table->string('nome')->nullable();
+            $table->string('email')->nullable();
+        });
+
+        // Vazia de propósito: sem configurações gravadas, o layout usa os valores padrão.
+        Schema::create('configuracoes', function ($table): void {
+            $table->integer('id')->primary();
+            $table->string('chave')->nullable();
+            $table->text('valor')->nullable();
+        });
 
         Schema::create('administracoes', function ($table): void {
             $table->integer('id')->primary();
