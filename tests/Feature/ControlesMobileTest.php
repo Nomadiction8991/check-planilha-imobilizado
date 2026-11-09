@@ -86,6 +86,20 @@ final class ControlesMobileTest extends TestCase
         }
     }
 
+    public function test_barras_de_busca_alinham_botoes_com_a_altura_do_campo(): void
+    {
+        $css = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+
+        self::assertSame(1, preg_match('/\.filters-search input\[type="search"\]\s*\{[^}]*height:\s*44px;[^}]*min-height:\s*44px;/s', $css), 'O campo de busca deve ter altura padronizada.');
+        self::assertSame(1, preg_match('/\.filters-bar > \.btn\s*\{[^}]*height:\s*44px;[^}]*min-height:\s*44px;[^}]*padding-block:\s*0;/s', $css), 'Os botões devem alinhar com o campo de busca.');
+
+        foreach (['administrations/index', 'asset-types/index', 'audits/index', 'churches/index', 'departments/index', 'labels/index', 'products/index', 'products/verification', 'reports/index', 'users/index'] as $view) {
+            $html = file_get_contents(resource_path('views/'.$view.'.blade.php'));
+            self::assertStringContainsString('class="filters-bar"', $html, "A busca de {$view} deve usar a barra compartilhada.");
+            self::assertStringContainsString('class="filters-search"', $html, "A busca de {$view} deve usar o campo alinhado.");
+        }
+    }
+
     public function test_layout_compacta_cartoes_e_filtros_no_celular(): void
     {
         $css = file_get_contents(resource_path('views/layouts/migration.blade.php'));
