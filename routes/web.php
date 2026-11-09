@@ -8,6 +8,7 @@ use App\Http\Controllers\ConexaoController;
 use App\Http\Controllers\ConflitosController;
 use App\Http\Controllers\InstaladorController;
 use App\Http\Controllers\LegacyConfigurationController;
+use App\Http\Controllers\LegacyBrandingController;
 use App\Http\Controllers\LegacyAdministrationController;
 use App\Http\Controllers\LegacyAuthController;
 use App\Http\Controllers\LegacyChurchController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\SpreadsheetImportController;
 use Illuminate\Support\Facades\Route;
 use App\Support\Modo\EstadoModo;
 
+Route::get('/marca/logo', [LegacyBrandingController::class, 'logo'])->name('marca.logo');
 Route::get('/assinatura-publica', [PublicAccessController::class, 'create'])->name('public.access.create');
 Route::post('/assinatura-publica', [PublicAccessController::class, 'store'])->name('public.access.store');
 Route::post('/logout-publico', [PublicAccessController::class, 'logout'])->name('public.access.logout');
@@ -252,6 +254,8 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
             ->name('migration.configuracoes.index');
         Route::post('/configuracoes', [LegacyConfigurationController::class, 'update'])
             ->name('migration.configuracoes.update');
+        Route::post('/configuracoes/marca', [LegacyConfigurationController::class, 'updateBranding'])
+            ->name('migration.configuracoes.marca.update');
         Route::get('/conexao', [ConexaoController::class, 'index'])
             ->name('migration.conexao.index');
         Route::post('/conexao/ligar', [ConexaoController::class, 'ligar'])

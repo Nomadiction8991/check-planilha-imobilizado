@@ -6,10 +6,10 @@
 <meta name="theme-color" content="{{ $pwaThemeColor }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="{{ config('app.name') }}">
-<meta name="application-name" content="{{ config('app.name') }}">
-<link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-<link rel="apple-touch-icon" href="{{ asset('icons/pwa-180.png') }}">
+<meta name="apple-mobile-web-app-title" content="{{ $marcaNome }}">
+<meta name="application-name" content="{{ $marcaNome }}">
+<link rel="icon" href="{{ $marcaLogoUrl }}" sizes="any">
+<link rel="apple-touch-icon" href="{{ $marcaLogoUrl }}">
 <script>
     (() => {
         if (!('serviceWorker' in navigator)) {

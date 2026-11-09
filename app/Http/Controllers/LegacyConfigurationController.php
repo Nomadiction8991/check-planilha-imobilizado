@@ -5,14 +5,29 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\LegacyMailConfigurationServiceInterface;
+use App\Contracts\LegacyBrandingServiceInterface;
 use App\Contracts\LegacyNavigationServiceInterface;
 use App\Http\Requests\UpdateLegacyConfigurationRequest;
+use App\Http\Requests\UpdateLegacyBrandingRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use RuntimeException;
 
 final class LegacyConfigurationController extends Controller
 {
+    public function updateBranding(UpdateLegacyBrandingRequest $request, LegacyBrandingServiceInterface $branding): RedirectResponse
+    {
+        try {
+            $branding->salvar($request->toDto());
+        } catch (RuntimeException $exception) {
+            return back()->withInput($request->except('app_logo'))
+                ->with('status', $exception->getMessage())->with('status_type', 'error');
+        }
+
+        return redirect()->route('migration.configuracoes.index')
+            ->with('status', 'Configurações salvas com sucesso.')->with('status_type', 'success');
+    }
+
     public function index(
         LegacyMailConfigurationServiceInterface $mailConfiguration,
         LegacyNavigationServiceInterface $navigation
