@@ -1,7 +1,7 @@
 services:
   web:
-    image: "${APP_NAME}-web:${APP_ENV}"
-    container_name: "${APP_NAME}-web"
+    image: "${APP_SLUG:-check-planilha}-web:${APP_ENV}"
+    container_name: "${APP_SLUG:-check-planilha}-web"
     environment:
       DB_HOST: "${DB_HOST}"
       DB_PORT: "${DB_PORT}"
@@ -22,11 +22,11 @@ services:
     networks:
       - app_network
     extra_hosts:
-      - "host.${APP_NAME}.internal:host-gateway"
+      - "host.${APP_SLUG:-check-planilha}.internal:host-gateway"
 
   db:
-    image: "${APP_NAME}-db:${APP_ENV}"
-    container_name: "${APP_NAME}-db"
+    image: "${APP_SLUG:-check-planilha}-db:${APP_ENV}"
+    container_name: "${APP_SLUG:-check-planilha}-db"
     build:
       context: .
       dockerfile: Dockerfiles/db/Dockerfile
@@ -44,9 +44,9 @@ services:
 
 volumes:
   db:
-    name: "${APP_NAME}-volumes-db"
+    name: "${APP_SLUG:-check-planilha}-volumes-db"
 
 networks:
   app_network:
-    name: "${APP_NAME}-network"
+    name: "${APP_SLUG:-check-planilha}-network"
     driver: bridge
