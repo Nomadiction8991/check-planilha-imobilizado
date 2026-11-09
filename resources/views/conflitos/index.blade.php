@@ -56,12 +56,12 @@
                     <div class="conflito-acoes">
                         <form method="POST" action="{{ route('migration.conflitos.notebook', $conflito['id']) }}">
                             @csrf
-                            <button class="btn primary" type="submit">Manter o valor do notebook</button>
+                            <button aria-label="Manter o valor do notebook" title="Manter o valor do notebook" class="btn primary" type="submit"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">laptop_mac</span><span class="mobile-action-text">Manter o valor do notebook</span></button>
                         </form>
 
                         <form method="POST" action="{{ route('migration.conflitos.servidor', $conflito['id']) }}">
                             @csrf
-                            <button class="btn" type="submit">Manter o valor do servidor</button>
+                            <button aria-label="Manter o valor do servidor" title="Manter o valor do servidor" class="btn" type="submit"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">dns</span><span class="mobile-action-text">Manter o valor do servidor</span></button>
                         </form>
                     </div>
                 </article>

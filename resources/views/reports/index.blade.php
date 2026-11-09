@@ -262,8 +262,9 @@
                                 <td data-label="Título">{{ $report['titulo'] }}</td>
                                 <td data-label="Itens">{{ $report['quantidade'] }} item(ns)</td>
                                 <td data-label="Ação" data-card-actions>
-                                    <a class="btn" href="{{ $report['rota'] }}">
-                                        {{ $report['codigo'] === 'POS' ? 'Abrir posição' : 'Abrir prévia' }}
+                                    <a aria-label="{{ $report['codigo'] === 'POS' ? 'Abrir posição' : 'Abrir prévia' }}" title="{{ $report['codigo'] === 'POS' ? 'Abrir posição' : 'Abrir prévia' }}" class="btn" href="{{ $report['rota'] }}">
+                                        <span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">{{ $report['codigo'] === 'POS' ? 'assessment' : 'visibility' }}</span>
+                                        <span class="mobile-action-text">{{ $report['codigo'] === 'POS' ? 'Abrir posição' : 'Abrir prévia' }}</span>
                                     </a>
                                 </td>
                             </tr>

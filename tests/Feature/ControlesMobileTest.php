@@ -29,6 +29,53 @@ final class ControlesMobileTest extends TestCase
         }
     }
 
+    public function test_acoes_das_listas_usam_botoes_apenas_com_icone_e_nome_acessivel(): void
+    {
+        foreach ([
+            'administrations/index',
+            'asset-types/index',
+            'churches/index',
+            'departments/index',
+            'products/index',
+            'products/verification',
+            'reports/index',
+            'spreadsheets/import',
+            'transfers/index',
+            'users/index',
+        ] as $view) {
+            $html = file_get_contents(resource_path('views/'.$view.'.blade.php'));
+            preg_match_all('/<tbody\\b[^>]*>(.*?)<\\/tbody>/s', $html, $bodies);
+
+            foreach ($bodies[1] as $body) {
+                preg_match_all('/<(a|button)\\b((?:=>|->|[^>])*)>(.*?)<\\/\\1>/s', $body, $actions, PREG_SET_ORDER);
+
+                foreach ($actions as [, $tag, $attributes, $content]) {
+                    if (preg_match('/\\bclass="[^"]*\\bbtn\\b/', $attributes) !== 1) {
+                        continue;
+                    }
+
+                    self::assertMatchesRegularExpression('/\\baria-label="[^"]+"/', $attributes, "Ação sem nome acessível em {$view}");
+                    self::assertMatchesRegularExpression('/\\btitle="[^"]+"/', $attributes, "Ação sem dica visual em {$view}");
+                    self::assertStringContainsString('mobile-action-icon', $content, "Ação sem ícone em {$view}");
+                    self::assertStringContainsString('mobile-action-text', $content, "Ação sem nome para leitor de tela em {$view}");
+                }
+            }
+        }
+
+        $html = file_get_contents(resource_path('views/conflitos/index.blade.php'));
+        preg_match_all('/<button\\b((?:=>|->|[^>])*)>(.*?)<\\/button>/s', $html, $actions, PREG_SET_ORDER);
+        foreach ($actions as [, $attributes, $content]) {
+            self::assertMatchesRegularExpression('/\\baria-label="[^"]+"/', $attributes, 'Ação de conflito sem nome acessível.');
+            self::assertMatchesRegularExpression('/\\btitle="[^"]+"/', $attributes, 'Ação de conflito sem dica visual.');
+            self::assertStringContainsString('mobile-action-icon', $content, 'Ação de conflito sem ícone.');
+            self::assertStringContainsString('mobile-action-text', $content, 'Ação de conflito sem nome para leitor de tela.');
+        }
+
+        $css = file_get_contents(resource_path('views/layouts/migration.blade.php'));
+        self::assertStringContainsString('.table-shell table tbody td .mobile-action-text,', $css);
+        self::assertStringContainsString('clip-path: inset(50%);', $css);
+    }
+
     public function test_barras_de_filtro_tem_icones_e_texto_acessivel(): void
     {
         foreach (['administrations/index', 'asset-types/index', 'audits/index', 'churches/index', 'departments/index', 'labels/index', 'products/index', 'products/verification', 'reports/index', 'users/index'] as $view) {

@@ -1672,7 +1672,30 @@
             backdrop-filter: none;
         }
         .mobile-menu-link.active { font-weight: 700; }
-        .mobile-action-icon { display: none; }
+        .mobile-action-icon { display: inline-block; }
+        .table-shell table tbody td .mobile-action-text,
+        .conflito-acoes .mobile-action-text {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
+        }
+        .table-shell table tbody td .btn:has(.mobile-action-icon),
+        .conflito-acoes .btn:has(.mobile-action-icon) {
+            flex: 0 0 44px;
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            min-height: 44px;
+            padding: 0;
+            justify-content: center;
+        }
+        .conflito-acoes form:has(.mobile-action-icon) { width: auto; }
         .filters-bar { display: flex; align-items: end; gap: 12px; }
         .filters-search { flex: 1; min-width: 0; display: grid; gap: 4px; }
         .filters-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 20px; border: 1px solid var(--ui-border); border-radius: var(--radius-lg); background: var(--ui-surface); color: var(--ui-text); box-shadow: var(--shadow-card); }

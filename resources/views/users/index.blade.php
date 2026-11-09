@@ -205,7 +205,7 @@
                                     <div class="inline-actions">
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['users.permissions.manage'] ?? null))
                                             @unless ($isProtectedAdministrator)
-                                                <a class="btn" href="{{ route('migration.users.permissions', ['user' => $user->id]) }}">Permissões</a>
+                                                <a aria-label="Permissões" title="Permissões" class="btn" href="{{ route('migration.users.permissions', ['user' => $user->id]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">manage_accounts</span><span class="mobile-action-text">Permissões</span></a>
                                             @endunless
                                         @endif
                                         @if ($isLegacyAdmin || !empty($legacyPermissions['users.edit'] ?? null))

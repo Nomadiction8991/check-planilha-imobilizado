@@ -523,7 +523,8 @@
                                                 aria-label="Editar cadastro do produto {{ $code !== '' ? $code : 'selecionado' }}"
                                                 title="Editar cadastro"
                                             >
-                                                <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                                <span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span>
+                                                <span class="mobile-action-text">Editar cadastro</span>
                                             </a>
                                         @else
                                             <span class="table-note" role="status">Somente consulta</span>

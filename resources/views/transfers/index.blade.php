@@ -60,7 +60,7 @@
                                             Código
                                             <input type="text" name="codigo" maxlength="50" required>
                                         </label>
-                                        <button type="submit" class="btn primary">Salvar código</button>
+                                        <button aria-label="Salvar código" title="Salvar código" type="submit" class="btn primary"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">save</span><span class="mobile-action-text">Salvar código</span></button>
                                     </form>
                                 </td>
                             </tr>

@@ -200,7 +200,7 @@
                                                 <form method="POST" action="{{ route('migration.churches.delete-products') }}" data-confirm="Excluir todos os produtos desta igreja? Esta ação não pode ser desfeita.">
                                                     @csrf
                                                     <input type="hidden" name="comum_id" value="{{ $church->id }}">
-                                                    <button class="btn danger" type="submit">Excluir produtos</button>
+                                                    <button aria-label="Excluir produtos" title="Excluir produtos" class="btn danger" type="submit"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">delete</span><span class="mobile-action-text">Excluir produtos</span></button>
                                                 </form>
                                             @endif
                                         </div>
