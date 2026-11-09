@@ -35,4 +35,11 @@ interface LegacyTransferServiceInterface
      * @return Collection<int, Produto>
      */
     public function pendentesDeCodigo(int $comumId): Collection;
+
+    /**
+     * Bens que a igreja enviou (saída) ou recebeu (entrada), do mais recente para o mais antigo.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function historicoDaIgreja(int $comumId): array;
 }

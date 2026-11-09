@@ -166,6 +166,59 @@ final class LegacyTransferService implements LegacyTransferServiceInterface
             ->get();
     }
 
+    public function historicoDaIgreja(int $comumId): array
+    {
+        $transferencias = Transferencia::query()
+            ->where('comum_origem_id', $comumId)
+            ->orWhere('comum_destino_id', $comumId)
+            ->with('itens')
+            ->orderByDesc('id')
+            ->get();
+
+        $idsDasIgrejas = $transferencias
+            ->flatMap(static fn (Transferencia $transferencia): array => [
+                (int) $transferencia->comum_origem_id,
+                (int) $transferencia->comum_destino_id,
+            ])
+            ->unique()
+            ->values()
+            ->all();
+
+        $igrejas = Comum::query()->whereIn('id', $idsDasIgrejas)->get()->keyBy('id');
+
+        $linhas = [];
+
+        foreach ($transferencias as $transferencia) {
+            $saida = (int) $transferencia->comum_origem_id === $comumId;
+            $origem = $igrejas->get((int) $transferencia->comum_origem_id);
+            $destino = $igrejas->get((int) $transferencia->comum_destino_id);
+
+            foreach ($transferencia->itens as $item) {
+                $linhas[] = [
+                    'tipo' => $saida ? 'saida' : 'entrada',
+                    'numero' => $saida ? $transferencia->numero_saida : $transferencia->numero_entrada,
+                    'data' => $transferencia->created_at?->format('d/m/Y H:i') ?? '',
+                    'produto_id' => (int) $item->produto_id,
+                    'codigo_anterior' => $item->codigo_anterior,
+                    'codigo_novo' => $item->codigo_novo,
+                    'descricao' => (string) $item->descricao,
+                    'origem' => $origem instanceof Comum ? $this->rotuloDaIgreja($origem) : '',
+                    'destino' => $destino instanceof Comum ? $this->rotuloDaIgreja($destino) : '',
+                ];
+            }
+        }
+
+        return $linhas;
+    }
+
+    private function rotuloDaIgreja(Comum $igreja): string
+    {
+        $codigo = trim((string) $igreja->codigo);
+        $descricao = trim((string) $igreja->descricao);
+
+        return $codigo !== '' ? $codigo . ' - ' . $descricao : $descricao;
+    }
+
     private function proximoNumero(string $colunaIgreja, int $comumId, string $colunaNumero): int
     {
         $maior = (int) Transferencia::query()

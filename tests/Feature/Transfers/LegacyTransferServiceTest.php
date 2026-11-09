@@ -197,4 +197,24 @@ final class LegacyTransferServiceTest extends TransferenciasTestCase
         $this->servico->informarCodigo(1001, 8, 'B-200');
         $this->assertCount(0, $this->servico->pendentesDeCodigo(8));
     }
+
+    public function testHistoricoDaIgrejaTraazSaidasEEntradas(): void
+    {
+        $this->servico->transferir(7, 8, 80, [1001], 9);
+
+        $saidas = $this->servico->historicoDaIgreja(7);
+        $entradas = $this->servico->historicoDaIgreja(8);
+
+        $this->assertCount(1, $saidas);
+        $this->assertSame('saida', $saidas[0]['tipo']);
+        $this->assertSame('A-100', $saidas[0]['codigo_anterior']);
+        $this->assertSame(1, $saidas[0]['numero']);
+
+        $this->assertCount(1, $entradas);
+        $this->assertSame('entrada', $entradas[0]['tipo']);
+        $this->assertNull($entradas[0]['codigo_novo']);
+        $this->assertSame(1, $entradas[0]['numero']);
+        $this->assertSame('12-3456 - Central Cuiabá', $entradas[0]['origem']);
+        $this->assertSame('35-0001 - Central São Paulo', $entradas[0]['destino']);
+    }
 }

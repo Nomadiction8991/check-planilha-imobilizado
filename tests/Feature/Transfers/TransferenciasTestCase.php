@@ -41,6 +41,8 @@ abstract class TransferenciasTestCase extends TestCase
             $table->string('cidade')->nullable();
             $table->string('setor')->nullable();
             $table->string('cnpj')->nullable();
+            $table->string('estado_administracao')->nullable();
+            $table->string('cidade_administracao')->nullable();
         });
 
         Schema::create('dependencias', function ($table): void {
@@ -81,6 +83,13 @@ abstract class TransferenciasTestCase extends TestCase
             $table->string('nota_fornecedor')->nullable();
             $table->integer('administrador_acessor_id')->nullable();
             $table->integer('ativo')->default(1);
+            $table->decimal('altura_m', 10, 3)->nullable();
+            $table->decimal('largura_m', 10, 3)->nullable();
+            $table->decimal('comprimento_m', 10, 3)->nullable();
+            $table->decimal('editado_altura_m', 10, 3)->nullable();
+            $table->decimal('editado_largura_m', 10, 3)->nullable();
+            $table->decimal('editado_comprimento_m', 10, 3)->nullable();
+            $table->string('editado_marca')->nullable();
         });
 
         (require base_path('database/migrations/20261108120000_create_transferencias_tables.php'))->up();

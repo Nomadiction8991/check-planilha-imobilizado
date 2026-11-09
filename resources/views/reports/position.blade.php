@@ -462,6 +462,50 @@
         </div>
     </section>
 
+    <section class="section" aria-label="Transferências">
+        <div class="position-panel">
+            <div class="position-panel__head">
+                <strong>Transferências</strong>
+                <p>Bens que saíram desta igreja ou chegaram a ela. Quando o bem chega, o código novo fica pendente até ser informado.</p>
+            </div>
+
+            @if (($report['transferencias'] ?? []) === [])
+                <div class="position-helper">
+                    Nenhuma transferência nesta igreja.
+                </div>
+            @else
+                <div class="table-shell position-table-shell">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Nº</th>
+                                <th>Código antigo</th>
+                                <th>Código novo</th>
+                                <th>Descrição</th>
+                                <th>Origem → destino</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($report['transferencias'] ?? [] as $linha)
+                                <tr>
+                                    <td data-label="Data">{{ $linha['data'] }}</td>
+                                    <td data-label="Tipo">{{ $linha['tipo'] === 'saida' ? 'Saída' : 'Entrada' }}</td>
+                                    <td data-label="Nº">{{ $linha['numero'] }}</td>
+                                    <td data-label="Código antigo" class="mono">{{ $linha['codigo_anterior'] ?? '—' }}</td>
+                                    <td data-label="Código novo" class="mono">{{ $linha['codigo_novo'] ?? 'Pendente' }}</td>
+                                    <td data-label="Descrição">{{ $linha['descricao'] }}</td>
+                                    <td data-label="Origem → destino">{{ $linha['origem'] }} → {{ $linha['destino'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </section>
+
     <section class="section" aria-label="Itens da posição">
         <div class="position-panel">
             <div class="position-panel__head">
