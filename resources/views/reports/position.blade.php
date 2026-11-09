@@ -22,6 +22,12 @@
             'tone' => 'muted',
         ],
         [
+            'label' => 'Transferidos',
+            'value' => $summary['total_transferidos'] ?? 0,
+            'hint' => 'Bens que saíram ou chegaram por transferência.',
+            'tone' => 'accent',
+        ],
+        [
             'label' => 'Checados',
             'value' => $summary['total_checados'],
             'hint' => 'Itens marcados como conferidos.',
