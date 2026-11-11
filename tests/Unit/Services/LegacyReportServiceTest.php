@@ -159,6 +159,38 @@ final class LegacyReportServiceTest extends TestCase
         $this->assertSame(0, $posReport[0]['quantidade']); // empty products table
     }
 
+    public function testListAvailableReportsUsesOfficialFormTitles(): void
+    {
+        $this->mockProductsTableReturnsEmpty();
+        Session::shouldReceive('all')
+            ->once()
+            ->andReturn([]);
+        Session::shouldReceive('get')
+            ->with('legacy_permissions', [])
+            ->once()
+            ->andReturn([]);
+
+        $result = $this->service->listAvailableReports(1);
+        $descricoes = array_column($result, 'descricao', 'codigo');
+
+        // Os nomes seguem os títulos oficiais impressos nas imagens da seção 14.
+        $this->assertSame('Ocorrência de entrada de bens móveis (folha em branco)', $descricoes['14.2']);
+        $this->assertSame('Declaração de saída de bens móveis (folha em branco)', $descricoes['14.3']);
+        $this->assertSame('Declaração de retirada de bem (folha em branco)', $descricoes['14.4']);
+        $this->assertSame('Ata de inventário de bens móveis (folha em branco)', $descricoes['14.5']);
+        $this->assertSame('Movimentação interna de bem (folha em branco)', $descricoes['14.7']);
+        $this->assertSame('Movimento mensal de bem (folha em branco)', $descricoes['14.8']);
+    }
+
+    public function testFormsWithItemsUseOfficialFormTitles(): void
+    {
+        $formularios = (new \ReflectionClassConstant(LegacyReportService::class, 'REPORTS'))->getValue();
+
+        // 14.1 e 14.6 só aparecem na lista quando têm itens, então o nome é conferido na tabela de formulários.
+        $this->assertSame('Declaração de doação de bem móvel', $formularios['14.1']['descricao']);
+        $this->assertSame('Alteração de cadastro de bem', $formularios['14.6']['descricao']);
+    }
+
     #[RunInSeparateProcess]
     public function testChurchOptionsReturnsCollection(): void
     {

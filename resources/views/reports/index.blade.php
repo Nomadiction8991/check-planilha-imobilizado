@@ -25,17 +25,18 @@
                 <div class="filters-bar">
                     <div class="filters-search">
 
-                    <label for="reports-church-search">
-                        Buscar igreja
-                        <input
-                            id="reports-church-search"
-                            type="search"
-                            placeholder="Digite para filtrar"
-                            autocomplete="off"
-                            aria-controls="reports-church-select"
-                            data-reports-church-search data-filter-search
-                        >
-                    </label></div>
+                        <label for="reports-church-select">
+                            Igreja
+                            <select id="reports-church-select" name="comum_id" data-reports-church-select data-reports-server-filter>
+                                <option value="">Selecione uma igreja</option>
+                                @foreach ($churches as $church)
+                                    <option value="{{ $church->id }}" @selected((int) $selectedChurchId === (int) $church->id)>
+                                        {{ $church->codigo }} - {{ $church->descricao }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </label>
+                    </div>
                     <button type="submit" class="btn primary"><span class="material-symbols-outlined" aria-hidden="true">search</span><span class="mobile-action-text">Buscar</span></button>
                     <button type="button" class="btn" data-filter-open aria-haspopup="dialog" aria-controls="filtros-reports"><span class="material-symbols-outlined" aria-hidden="true">tune</span><span class="mobile-action-text">Filtros</span></button>
                 </div>
@@ -77,18 +78,6 @@
                             @endforeach
                         </select>
                     </label>
-                    <label class="filters-principal">
-                        Igreja
-                        <select id="reports-church-select" name="comum_id" data-reports-church-select data-reports-server-filter>
-                            <option value="">Selecione</option>
-                            @foreach ($churches as $church)
-                                <option value="{{ $church->id }}" @selected((int) $selectedChurchId === (int) $church->id)>
-                                    {{ $church->codigo }} - {{ $church->descricao }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </label>
-                    <p id="reports-church-search-status" class="helper" role="status" aria-live="polite" hidden data-reports-church-status></p>
 
                     
                     </div>
@@ -193,38 +182,6 @@
                         adminSearch.addEventListener('search', applyAdminFilter);
                     }
 
-                    const search = document.querySelector('[data-reports-church-search]');
-                    const select = document.querySelector('[data-reports-church-select]');
-                    const status = document.querySelector('[data-reports-church-status]');
-                    if (!search || !select || !status) return;
-                    const options = Array.from(select.options);
-                    const placeholder = options.find((o) => o.value === '');
-                    const churchOptions = options.filter((o) => o.value !== '');
-                    const applyFilter = () => {
-                        const term = search.value.trim().toLowerCase();
-                        let visible = 0;
-                        churchOptions.forEach((opt) => {
-                            const match = term === '' || opt.textContent.toLowerCase().includes(term);
-                            opt.hidden = !match;
-                            opt.disabled = !match;
-                            if (match) visible += 1;
-                        });
-                        if (select.value !== '' && select.options[select.selectedIndex]?.hidden) {
-                            select.value = '';
-                        }
-                        if (visible === 0 && term !== '') {
-                            status.textContent = 'Nenhuma igreja encontrada para "' + search.value.trim() + '".';
-                            status.hidden = false;
-                            select.disabled = true;
-                        } else {
-                            status.textContent = '';
-                            status.hidden = true;
-                            select.disabled = false;
-                            if (placeholder) { placeholder.hidden = false; placeholder.disabled = false; }
-                        }
-                    };
-                    search.addEventListener('input', applyFilter);
-                    search.addEventListener('search', applyFilter);
                 })();
             </script>
         </div>

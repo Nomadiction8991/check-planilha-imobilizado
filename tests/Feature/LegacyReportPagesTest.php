@@ -50,7 +50,7 @@ final class LegacyReportPagesTest extends TestCase
                         [
                             'codigo' => '14.1',
                             'titulo' => 'Relatório 14.1',
-                            'descricao' => 'Formulário de doação e aquisição de bens',
+                            'descricao' => 'Declaração de doação de bem móvel',
                             'rota' => '/reports/14.1?comum_id=7',
                             'quantidade' => 3,
                         ],
@@ -210,7 +210,7 @@ final class LegacyReportPagesTest extends TestCase
                     [
                         'codigo' => '14.1',
                         'titulo' => 'Relatório 14.1',
-                        'descricao' => 'Formulário de doação e aquisição de bens',
+                        'descricao' => 'Declaração de doação de bem móvel',
                         'rota' => '/reports/14.1?comum_id=7',
                         'quantidade' => 3,
                     ],
@@ -271,7 +271,7 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('2 item(ns)');
     }
 
-    public function testReportsIndexShowsChurchSearchField(): void
+    public function testReportsIndexShowsChurchSelectInFilterBar(): void
     {
         $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
 
@@ -281,14 +281,31 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('data-reports-admin-select', escape: false);
         $response->assertSee('data-reports-admin-status', escape: false);
         $response->assertSee('Cuiabá');
-        $response->assertSee('Buscar igreja');
-        $response->assertSee('data-reports-church-search', escape: false);
         $response->assertSee('data-reports-church-select', escape: false);
-        $response->assertSee('data-reports-church-status', escape: false);
+        $response->assertDontSee('Buscar igreja');
+        $response->assertDontSee('data-reports-church-search', escape: false);
+        $response->assertDontSee('data-reports-church-status', escape: false);
         $response->assertSee('Digite para filtrar');
+
+        // A igreja precisa aparecer na barra principal, antes do popup de Filtros.
+        $html = $response->getContent();
+        $this->assertLessThan(
+            strpos($html, '<dialog id="filtros-reports"'),
+            strpos($html, 'id="reports-church-select"'),
+        );
     }
 
-    public function testReportsIndexKeepsServerFiltersInDialog(): void
+    public function testReportsIndexGivesChurchSelectTheSameHeightAsButtons(): void
+    {
+        $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
+
+        $response->assertOk();
+        // O seletor de igreja acompanha a altura dos botões da barra: 50 px no computador e 44 px no celular.
+        $response->assertSee('.filters-search select { width: 100%; min-width: 0; height: 50px; font-size: 16px; }', escape: false);
+        $response->assertSee('.filters-search select { height: 44px; }', escape: false);
+    }
+
+    public function testReportsIndexKeepsAdministrationAndStateFiltersInDialog(): void
     {
         $response = $this->get(route('migration.reports.index', ['comum_id' => 7]));
 
@@ -301,11 +318,12 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertSee('Atualizando relatórios…', escape: false);
         $response->assertSee("form.querySelectorAll('[data-reports-server-filter]')", escape: false);
         $response->assertDontSee("select.addEventListener('change'", escape: false);
-        $this->assertMatchesRegularExpression('/<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?name="comum_id".*?<\/dialog>/s', $response->getContent());
+        $html = $response->getContent();
+        $this->assertMatchesRegularExpression('/<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?<\/dialog>/s', $html);
+        $this->assertDoesNotMatchRegularExpression('/<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="comum_id".*?<\/dialog>/s', $html);
         $response->assertSee('resetPage', escape: false);
         $response->assertSee('field.disabled = true', escape: false);
         $response->assertSee('data-reports-admin-search', escape: false);
-        $response->assertSee('data-reports-church-search', escape: false);
     }
 
     public function testReportsIndexKeepsLocalSearchesOutsideAutomaticSubmission(): void
@@ -492,7 +510,7 @@ final class LegacyReportPagesTest extends TestCase
         $response->assertOk();
         $response->assertSee('data-filter-open', escape: false);
         $response->assertSee('aria-controls="filtros-reports"', escape: false);
-        $this->assertMatchesRegularExpression('/<div class="filters-bar">.*?data-filter-search.*?<\/div>.*?<dialog\b[^>]*data-filter-dialog/s', $response->getContent());
+        $this->assertMatchesRegularExpression('/<div class="filters-bar">.*?data-reports-church-select.*?<\/div>.*?<dialog\b[^>]*data-filter-dialog/s', $response->getContent());
         $response->assertSee('Filtros', escape: false);
     }
 
@@ -504,7 +522,9 @@ final class LegacyReportPagesTest extends TestCase
 
         $response = $this->get(route('migration.reports.index', ['administracao_id' => 4, 'estado' => 'MT', 'comum_id' => 7]));
         $response->assertOk();
-        $this->assertMatchesRegularExpression('/<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?name="comum_id".*?<\/dialog>/s', $response->getContent());
+        $html = $response->getContent();
+        $this->assertMatchesRegularExpression('/<dialog\b[^>]*data-filter-dialog[^>]*>.*?name="administracao_id".*?name="estado".*?<\/dialog>/s', $html);
+        $this->assertMatchesRegularExpression('/<select id="reports-church-select"[^>]*>.*?<option value="7"\s+selected\b/s', $html);
         $response->assertSee('Aplicar filtros');
     }
 }

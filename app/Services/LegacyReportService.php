@@ -21,35 +21,35 @@ class LegacyReportService implements LegacyReportServiceInterface
     private const REPORTS = [
         '14.1' => [
             'titulo' => 'Relatório 14.1',
-            'descricao' => 'Formulário de doação e aquisição de bens',
+            'descricao' => 'Declaração de doação de bem móvel',
         ],
         '14.2' => [
             'titulo' => 'Relatório 14.2',
-            'descricao' => 'Formulário de alteração de bem',
+            'descricao' => 'Ocorrência de entrada de bens móveis',
         ],
         '14.3' => [
             'titulo' => 'Relatório 14.3',
-            'descricao' => 'Formulário de exclusão de bem',
+            'descricao' => 'Declaração de saída de bens móveis',
         ],
         '14.4' => [
             'titulo' => 'Relatório 14.4',
-            'descricao' => 'Formulário de transferência de bem',
+            'descricao' => 'Declaração de retirada de bem',
         ],
         '14.5' => [
             'titulo' => 'Relatório 14.5',
-            'descricao' => 'Formulário de manutenção de bem',
+            'descricao' => 'Ata de inventário de bens móveis',
         ],
         '14.6' => [
             'titulo' => 'Relatório 14.6',
-            'descricao' => 'Formulário de reparo de bem',
+            'descricao' => 'Alteração de cadastro de bem',
         ],
         '14.7' => [
             'titulo' => 'Relatório 14.7',
-            'descricao' => 'Formulário de empréstimo/manutenção/troca',
+            'descricao' => 'Movimentação interna de bem',
         ],
         '14.8' => [
             'titulo' => 'Relatório 14.8',
-            'descricao' => 'Formulário de inventário da casa de oração',
+            'descricao' => 'Movimento mensal de bem',
         ],
     ];
 
