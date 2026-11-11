@@ -43,41 +43,41 @@ class LegacyTransferController extends Controller
         ]);
     }
 
-    public function create(Request $request): View|RedirectResponse
+    /**
+     * Página de transferência a partir do próprio bem: a igreja atual é a do bem.
+     */
+    public function produto(Request $request, Produto $product): View|RedirectResponse
     {
-        $comumId = $this->igrejaAtual();
-
-        if ($comumId <= 0) {
-            return $this->semIgreja();
+        if (! $this->igrejaEstaNoEscopo((int) $product->comum_id)) {
+            return redirect()
+                ->route('migration.products.index')
+                ->with('status', 'Este bem está fora do seu escopo de igrejas.')
+                ->with('status_type', 'error');
         }
 
-        $destinoId = $request->integer('comum_destino_id');
+        $igrejasDeDestino = $this->reports->churchOptions()
+            ->reject(static fn (object $igreja): bool => (int) $igreja->id === (int) $product->comum_id)
+            ->values();
 
-        return view('transfers.create', [
-            'igreja' => Comum::query()->find($comumId),
-            'igrejasDeDestino' => $this->reports->churchOptions()
-                ->reject(static fn (object $igreja): bool => (int) $igreja->id === $comumId)
-                ->values(),
-            'destino' => $destinoId > 0 ? Comum::query()->find($destinoId) : null,
-            'dependencias' => $destinoId > 0
-                ? Dependencia::query()->where('comum_id', $destinoId)->orderBy('descricao')->get()
+        // Só aceita como destino uma igreja da lista, para não mostrar os locais de igreja fora do escopo.
+        $destino = $igrejasDeDestino->firstWhere('id', $request->integer('comum_destino_id'));
+
+        return view('transfers.produto', [
+            'bem' => $product,
+            'origem' => Comum::query()->find((int) $product->comum_id),
+            'igrejasDeDestino' => $igrejasDeDestino,
+            'destino' => $destino,
+            'dependencias' => $destino !== null
+                ? Dependencia::query()->where('comum_id', $destino->id)->orderBy('descricao')->get()
                 : collect(),
-            'bens' => Produto::query()
-                ->where('comum_id', $comumId)
-                ->where('ativo', 1)
-                ->orderBy('codigo')
-                ->orderBy('id_produto')
-                ->get(),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function storeProduto(Request $request, Produto $product): RedirectResponse
     {
         $dados = $request->validate([
             'comum_destino_id' => ['required', 'integer', 'min:1'],
             'dependencia_destino_id' => ['required', 'integer', 'min:1'],
-            'produto_ids' => ['required', 'array', 'min:1'],
-            'produto_ids.*' => ['integer', 'min:1'],
         ]);
 
         if ($this->servidorIndisponivel()) {
@@ -86,22 +86,21 @@ class LegacyTransferController extends Controller
 
         try {
             $transferencia = $this->transferencias->transferir(
-                $this->igrejaAtual(),
+                (int) $product->comum_id,
                 (int) $dados['comum_destino_id'],
                 (int) $dados['dependencia_destino_id'],
-                array_map('intval', $dados['produto_ids']),
+                [(int) $product->id_produto],
                 (int) Session::get('usuario_id', 0),
             );
         } catch (RuntimeException $erro) {
             return back()
-                ->withInput()
                 ->with('status', $erro->getMessage())
                 ->with('status_type', 'error');
         }
 
         return redirect()
             ->route('migration.transfers.show', $transferencia)
-            ->with('status', 'Transferência registrada. Os formulários já estão prontos.')
+            ->with('status', 'Bem transferido. Ele ficou sem código até a igreja de destino informar o código novo.')
             ->with('status_type', 'success');
     }
 
@@ -178,6 +177,13 @@ class LegacyTransferController extends Controller
     private function igrejaAtual(): int
     {
         return (int) Session::get('comum_id', 0);
+    }
+
+    private function igrejaEstaNoEscopo(int $comumId): bool
+    {
+        return $this->reports->churchOptions()->contains(
+            static fn (object $igreja): bool => (int) $igreja->id === $comumId,
+        );
     }
 
     private function servidorIndisponivel(): bool

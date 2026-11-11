@@ -97,12 +97,12 @@ Route::middleware(['legacy.bridge', 'legacy.audit'])->group(function (): void {
     Route::get('/transferencias', [LegacyTransferController::class, 'index'])
         ->middleware('legacy.permission:products.edit')
         ->name('migration.transfers.index');
-    Route::get('/transferencias/nova', [LegacyTransferController::class, 'create'])
+    Route::get('/products/{product}/transferir', [LegacyTransferController::class, 'produto'])
         ->middleware('legacy.permission:products.edit')
-        ->name('migration.transfers.create');
-    Route::post('/transferencias', [LegacyTransferController::class, 'store'])
+        ->name('migration.products.transfer');
+    Route::post('/products/{product}/transferir', [LegacyTransferController::class, 'storeProduto'])
         ->middleware('legacy.permission:products.edit')
-        ->name('migration.transfers.store');
+        ->name('migration.products.transfer.store');
     Route::post('/transferencias/codigo', [LegacyTransferController::class, 'storeCodigo'])
         ->middleware('legacy.permission:products.edit')
         ->name('migration.transfers.code');

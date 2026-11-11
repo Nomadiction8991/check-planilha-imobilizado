@@ -17,6 +17,10 @@
         <div class="inline-actions product-header-actions">
             @if ($isLegacyAdmin || !empty($legacyPermissions['products.edit'] ?? null))
                 <a class="btn" href="{{ route('migration.products.verification', array_filter(array_merge(['comum_id' => $filters->comumId], $filters->toQuery()))) }}">Verificação</a>
+                {{-- Os pendentes de código são da igreja atual; sem ela, a tela de transferências pediria para escolher uma igreja. --}}
+                @if ((int) session('comum_id', 0) > 0)
+                    <a class="btn" href="{{ route('migration.transfers.index') }}">Transferências</a>
+                @endif
             @endif
             @if ($isLegacyAdmin || !empty($legacyPermissions['products.create'] ?? null))
                 <a class="btn primary" href="{{ route('migration.products.create', array_filter(['comum_id' => $filters->comumId])) }}">Novo produto</a>
@@ -219,6 +223,7 @@
                                                 'product' => $product->id_produto,
                                                 'return_url' => url()->full(),
                                             ]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">edit</span><span class="mobile-action-text">Editar</span></a>
+                                            <a aria-label="Transferir" title="Transferir" class="btn" href="{{ route('migration.products.transfer', ['product' => $product->id_produto]) }}"><span class="material-symbols-outlined mobile-action-icon" aria-hidden="true">swap_horiz</span><span class="mobile-action-text">Transferir</span></a>
                                         @else
                                             <span class="table-note" role="status">Somente consulta</span>
                                         @endif

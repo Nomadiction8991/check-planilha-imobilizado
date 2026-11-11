@@ -42,7 +42,7 @@ final class LegacyNavigationService implements LegacyNavigationServiceInterface
             'products' => [
                 'label' => 'Produtos',
                 'route' => 'migration.products.index',
-                'active_patterns' => ['migration.products.index', 'migration.products.create', 'migration.products.edit', 'migration.compat.products.*'],
+                'active_patterns' => ['migration.products.index', 'migration.products.create', 'migration.products.edit', 'migration.products.transfer*', 'migration.transfers.*', 'migration.compat.products.*'],
                 'permission' => 'products.view',
                 'admin_only' => false,
             ],
@@ -50,13 +50,6 @@ final class LegacyNavigationService implements LegacyNavigationServiceInterface
                 'label' => 'Verificação',
                 'route' => 'migration.products.verification',
                 'active_patterns' => ['migration.products.verification'],
-                'permission' => 'products.edit',
-                'admin_only' => false,
-            ],
-            'transfers' => [
-                'label' => 'Transferências',
-                'route' => 'migration.transfers.index',
-                'active_patterns' => ['migration.transfers.*'],
                 'permission' => 'products.edit',
                 'admin_only' => false,
             ],

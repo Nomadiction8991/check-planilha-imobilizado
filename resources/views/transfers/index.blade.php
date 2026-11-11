@@ -21,10 +21,8 @@
     @endif
 
     <section class="section">
-        <a class="btn primary" href="{{ route('migration.transfers.create') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">add</span>
-            Nova transferência
-        </a>
+        <p>Para transferir um bem, abra a lista de produtos e use o botão Transferir.</p>
+        <a class="btn" href="{{ route('migration.products.index') }}">Ir para a lista de produtos</a>
     </section>
 
     <section class="section" aria-label="Bens pendentes de código">
